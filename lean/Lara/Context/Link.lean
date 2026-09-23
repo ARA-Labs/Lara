@@ -263,7 +263,7 @@ the conflict cache, because `conclusionOf_eq_some_iff` makes the inferred
 conclusion the derivable one and every checked node carries its derivation.
 Nothing in the saturation proofs consumes this — they use the two inverses
 above — so it is a statement about the calculus rather than about any one
-proof (issue #226). -/
+proof. -/
 
 /-- The inferred cache over the terms of checked nodes is those nodes'
 `(term, conclusion)` pairs. -/
@@ -533,7 +533,7 @@ generic: `Support.hasSupport_mono_gamma` and `Attack.hasAttack_mono_gamma`
 carry derivations across a Γ extension, `Support.hasSupport_unique`
 (`Support.lean`) is the uniqueness fact several proofs below consume, and the
 `Admission.buildGamma_*` facts say how the linked environment extends each
-side's own. All of them are public at their owning modules (issue #220);
+side's own. All of them are public at their owning modules;
 nothing here re-proves them. -/
 
 /-- The linked Γ extends the context's own environment. -/

@@ -208,7 +208,7 @@ data AssuranceReason
   | CertifierUnallowlisted BackendId TheoryDigest
   deriving (Eq, Show)
 
--- | What fills one premise slot, as the __checked term__ says (#130).
+-- | What fills one premise slot, as the __checked term__ says.
 --
 -- This is the structural reading, available on both doors: it names what the
 -- 'Unit' actually put in the slot the certificate cites, never a surface name.
@@ -235,8 +235,8 @@ slotSourceOf w = case w of
 
 -- | R13 backend failures (Lean @BackendReason@).
 --
--- 'ReplayRejected' carries the backend adapter's own reason string and, since
--- #130, the slot → source mapping of the instance whose certificate was
+-- 'ReplayRejected' carries the backend adapter's own reason string and
+-- the slot → source mapping of the instance whose certificate was
 -- refused. Both are diagnostic payload only: 'Lara.Diagnostics.rejectionOf'
 -- maps every constructor here to the same wire class @R13@, so neither reaches
 -- @stdout@ and the wire verdict is unchanged. The Lean @BackendReason@
@@ -362,7 +362,7 @@ dedupQuestions (q : qs) =
 -- driver decodes @holes@ straight to 'QuestionId', collapsing the two).
 --
 -- The surface does /not/ name the two independently: since @lara-syntax\@0.7@
--- (#133, grammar App. F.3) a hole is spelled @open q@ and carries one
+-- (grammar App. F.3) a hole is spelled @open q@ and carries one
 -- identifier, so @open q → 'ObligationId' q → 'QuestionId' q@ is the single
 -- presentation-to-executable bridge, and this function is the one sanctioned
 -- cast that performs it. (The retired @open q as o@ form let an author write a

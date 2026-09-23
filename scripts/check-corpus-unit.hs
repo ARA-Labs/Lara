@@ -1,4 +1,4 @@
--- | Single corpus-unit validator (M5 tracker #48, T2 authoring aid).
+-- | Single corpus-unit validator (T2 authoring aid).
 --
 -- Parses one @unit.lara@ against the shared corpus policy, elaborates it, and
 -- prints the computed claim statuses and argument labels — the authoring

@@ -536,11 +536,11 @@ prop_S5 = once $ ioProperty $
                     ]
           ]
 
--- | S6 (#105, @lara-syntax\@0.6@): the named-certificate-slot demonstrator. The
+-- | S6 (@lara-syntax\@0.6@): the named-certificate-slot demonstrator. The
 -- authored assurance cites its premises by source name — @(ordcmp (prem
 -- base_cell) (prem new_cell))@, the same identifiers the @from […]@ list
 -- resolves — and elaboration lowers them to the numeric slots before the wire.
--- The committed golden is the standing byte-identity witness for #105: it
+-- The committed golden is the standing byte-identity witness: it
 -- carries only @(ordcmp (prem 0) (prem 1))@, so 'prop_freshness' re-proves on
 -- every run that the symbolic spelling produces the numeric spelling's bytes.
 -- Here the typed pin is the verdict: the lowered certificate must still be a
@@ -560,7 +560,7 @@ prop_S6 = once $ ioProperty $
                 === [(numRelP "num_lt" "0.71" "0.74", Published Justified)]
           ]
 
--- | S7 (#131, @lara-syntax\@0.8@): the premise-label demonstrator. Where S6
+-- | S7 (@lara-syntax\@0.8@): the premise-label demonstrator. Where S6
 -- cites a slot by the source name of the /term/ filling it, S7 cites the
 -- __label the rule declares for the slot__ — @(ordcmp (prem base) (prem new))@
 -- and @(ordcmp (prem left) (prem right))@ — and elaboration lowers both to the
@@ -568,9 +568,10 @@ prop_S6 = once $ ioProperty $
 -- @(ordcmp (prem 0) (prem 1))@ twice, so 'prop_freshness' re-proves on every
 -- run that the label spelling produces the numeric spelling's bytes.
 --
--- @a2@ is the argument #131 exists for: one leaf, @base_cell@, fills /both/ of
--- @le_reflex@'s premise slots, so the @\@0.6@ leaf name is 'CertSlotMultiSlot'
--- there and only the labels resolve. The typed pin is the verdict — the
+-- @a2@ is the argument the premise labels exist for: one leaf, @base_cell@,
+-- fills /both/ of @le_reflex@'s premise slots, so the @\@0.6@ leaf name is
+-- 'CertSlotMultiSlot' there and only the labels resolve. The typed pin is the
+-- verdict — the
 -- lowered certificate must still be a certificate, so @ord\@1@ replays both
 -- steps, including the tie @0.71 <= 0.71@, and both are @in@.
 prop_S7 :: Property
@@ -651,7 +652,7 @@ prop_S8 = once $ ioProperty $ do
       , semantic
       ]
 
--- | agreement-map (D3, issue #64): a cross-paper agreement map at real-corpus
+-- | agreement-map (D3): a cross-paper agreement map at real-corpus
 -- grain. The genuine-disagreement pair (P1) shares the SAME (S,B,Q,D) atoms, so
 -- @better@/@not_better@ form a contrary instance ⇒ a rebut 2-cycle ⇒ both
 -- @contested@. The setting-mismatch pair (P2) differs ONLY in the setting index
@@ -677,7 +678,7 @@ prop_agreementMap = once $ ioProperty $
           ]
 
 -- ---------------------------------------------------------------------------
--- D1 rebuttal replay — the paper+reviews trajectory (issue #62)
+-- D1 rebuttal replay — the paper+reviews trajectory
 -- ---------------------------------------------------------------------------
 
 -- | The co-located rebuttal-v1 policy basename (in each round's dir).

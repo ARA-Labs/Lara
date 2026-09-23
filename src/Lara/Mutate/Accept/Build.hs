@@ -1,5 +1,5 @@
 -- | Mutant assembly and the justified-unit invariants the accept-verdict
--- constructions build on (#143, split out of "Lara.Mutate.Accept").
+-- constructions build on (split out of "Lara.Mutate.Accept").
 --
 -- Two things live here, both /below/ the operators in
 -- "Lara.Mutate.Accept.Ops" so that module can call them:
@@ -63,7 +63,7 @@ acceptMutant :: String -> CheckInput -> MutationOp -> Status -> Unit -> [Mutant]
 acceptMutant base input op status = acceptMutantWith base input op (ExpectPrimaryStatus status)
 
 -- | 'acceptMutant' for the conservative-reporting class: the mutant accepts, but
--- the queried claim's public status is @evidence-blocked@ (spec §4.3, #76).
+-- the queried claim's public status is @evidence-blocked@ (spec §4.3).
 acceptMutantBlocked :: String -> CheckInput -> MutationOp -> Unit -> [Mutant]
 acceptMutantBlocked base input op = acceptMutantWith base input op ExpectEvidenceBlocked
 

@@ -2,9 +2,8 @@
 
 ## Result
 
-Issue #191 (with follow-up #224), tracker #189. PR #223 (branch
-`theory/191-pw-t6-structural-transport`, commit 13ae1d7) established the
-transport; PR #230 (branch `theory/224-cert-ok-witness`, witness commit
+Branch `theory/191-pw-t6-structural-transport` (commit 13ae1d7) established the
+transport; the follow-up branch `theory/224-cert-ok-witness` (witness commit
 48187b0) added the strict-certificate witness. Three new modules that only
 import — `Lara.PW.Translation`, `Lara.PW.Structural`,
 `Lara.Examples.PWStructural` — over the unchanged local checker and the
@@ -55,7 +54,7 @@ All three contract clauses are discharged non-vacuously off the identity:
 `rule_ok` by the translated policy, `leaf_ok` by the renamed leaf admitted at
 the translated atom (`ren_leaf_translated`, with `ren_support_renamed`
 pinning that the transported term is not the source term), and — closing
-#224 — `cert_ok` by the strict-certificate renaming bridge (`bridgeCert`):
+the strict-certificate follow-up — `cert_ok` by the strict-certificate renaming bridge (`bridgeCert`):
 a strict rule with a live certifier allowlist and `allowTrusted` off, a
 `CertOk` pair holding exactly at the fixture's encoded step on each side,
 `cert_accept_translated` pinning that source acceptance at `([e], p)`
@@ -68,7 +67,7 @@ examples are the conformance evidence that the frozen contract is
 inhabitable off the identity.
 
 Two mutations of the strict fixture would leave `cert_transport` green while
-making its prose false; #231 closes both.
+making its prose false; the drift-guard follow-up closes both.
 `cert_reject_mismatched_certifier` pins that each of the three frozen
 components is load-bearing on each side — with the side's own encoded step
 held fixed, mismatching exactly one of `β`, `hd`, `κ` is refused — so
@@ -80,7 +79,7 @@ so the certificate arm is the only reachable assurance;
 `cert_target_rule` ties the target half down by stating the translated rule
 independently of `ruleCert` and holding by `rfl`.
 
-## Verification (2026-09-06, with the #231 drift guards)
+## Verification (2026-09-06, with the drift guards)
 
 ```
 $ cd lean && lake build
@@ -99,12 +98,14 @@ reports the whole dependency set, and the repo-wide convention is that
 example fixtures are gated through their theorems rather than registered
 separately. No `sorryAx`, no `ofReduceBool`, no `nativeDecide`, nothing
 outside `propext` / `Classical.choice` / `Quot.sound`.
-The original landing's `git diff main` (PR #223, verified 2026-09-02 at 1707
+The original landing's `git diff main` (verified 2026-09-02 at 1707
 declarations, 78 PW-T6) was pure insertion, 2142 lines over 7 files, the only
 Lean files touched outside the three new modules being the two roots
-`Lara.lean` and `AxCheck.lean`; the #224 follow-up added the
+`Lara.lean` and `AxCheck.lean`; the cert-witness
+follow-up added the
 strict-certificate fixtures to `Lara/Examples/PWStructural.lean` and their
-six audit rows (verified 2026-09-03 at 1713 declarations, 84 PW-T6); the #231
+six audit rows (verified 2026-09-03 at 1713 declarations, 84 PW-T6); the
+drift-guard
 follow-up adds three drift guards to the same fixture module and their three
 audit rows. Neither follow-up touches a semantics module.
 
@@ -121,8 +122,8 @@ audit re-run green.
 The theorem neither assumes nor concludes grounded status preservation: no
 attack structure appears in the contract, and `t7_t6_boundary` exhibits the
 gap at the live T7 fixtures through the T6 machinery itself. Status
-preservation must quantify over the target's attackers — T8 (#193); exact
-structural-path composition is T9 (#190).
+preservation must quantify over the target's attackers — T8; exact
+structural-path composition is T9.
 
 Frozen limitations (each with a named home): bridge-global functional
 translation (edge-indexed `Translate` relation remains the documented

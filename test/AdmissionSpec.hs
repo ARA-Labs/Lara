@@ -119,7 +119,7 @@ policy admission groupMode =
     { policyId = PolicyId "p"
     , policySigma =
         -- One authored fixture signature over this file's whole nullary-atom
-        -- vocabulary (@lara-core\@0.2@, #89 D8): every admission fixture is
+        -- vocabulary (@lara-core\@0.2@, D8): every admission fixture is
         -- propositional, so no sort or constructor is needed.
         sigmaOf
           []

@@ -12,7 +12,7 @@ calculus recorded in `claim-support-calculus-decision.md` and the backend-parame
 interface recorded in `strict-backend-decision.md`: every argument is a term, strict/defeasible
 is a rule mode, strict certificates are opaque backend payloads, and attacks are positional._
 
-> **M0-frozen (2026-07-22, PR #9).** The following decisions are fixed by the semantic corpus
+> **M0-frozen (2026-07-22).** The following decisions are fixed by the semantic corpus
 > study (claims C13–C17, `m0/annotation-summary.md`) and are not to be re-litigated
 > without new corpus evidence triggering their recorded flip criteria: the §3 default leaf grain
 > (per-result-cell), the §4.3 duplicate-report-group quarantine rule, the §4.5 nine-family
@@ -33,34 +33,35 @@ is a rule mode, strict certificates are opaque backend payloads, and attacks are
 > `policy-admission-calculus-decision.md`. It fixes total default-admit lookup, source invalidity,
 > R8/R13/R9/core precedence, one combined policy-plus-group prune, and its canonical audit without
 > changing `lara-core@0.2`, raw `.sexp` checking, replay identity, the frozen corpus, or four-state
-> semantics. Byte-level `lara-evidence@0.1` verification remains gated under issue #78.
+> semantics. Byte-level `lara-evidence@0.1` verification remains gated.
 
-> **Portfolio completion (2026-09-07, issue #260).** The §5.2 portfolio is now shipped in full:
+> **Portfolio completion (2026-09-07).** The §5.2 portfolio is now shipped in full:
 > `insp@1` (static code inspection, `Lara.Strict.Insp`; §9 result 10 discharged in
 > `lean/Lara/Insp.lean`) joins `ra@1` and `ord@1` as the third optional adapter, closing the
-> designed-but-unshipped clause the #256 amendment below recorded. LP remains non-shipping — the
+> designed-but-unshipped clause the portfolio amendment below recorded. LP remains non-shipping — the
 > C14 flip criterion is unchanged and unmet. What an accepted `insp@1` step certifies, and why its
 > family needs a declared contrary pair where `ord@1`'s does not, is recorded in
 > `insp1-code-inspection-decision.md`. No corpus regeneration or freeze-tag bump is owed: the
 > adapter is additive at the registry, no existing unit selects it, and no corpus, wire, or
 > replay-identity bytes change. A mutation base for `S9` is deliberately **not** included: it would
 > grow the seeded suite 541 → 568, and `fixtures/mutants/` is frozen input row 1 of
-> `m5-freeze-checklist.md`, so it costs a v5 → v6 re-cut plus a full axis-(c) re-run that #260 did
-> not budget. Tracked in issue #266; the mutant bytes are unchanged here.
+> `m5-freeze-checklist.md`, so it costs a v5 → v6 re-cut plus a full axis-(c) re-run that this
+> amendment did not budget. Tracked in the `m5-freeze-checklist.md` post-v5 addendum; the mutant
+> bytes are unchanged here.
 
-> **Portfolio and wire amendment (2026-09-07, issue #256).** Two stale claims are corrected. (1) The
+> **Portfolio and wire amendment (2026-09-07).** Two stale claims are corrected. (1) The
 > §5.2 shipped-adapter clause of the M0-frozen blockquote above is amended: v0.1 ships `ra@1`
-> (rational-arithmetic/table-recheck) and `ord@1` (ordered comparison, PR #83) as the optional
+> (rational-arithmetic/table-recheck) and `ord@1` (ordered comparison) as the optional
 > adapters beside the §5.1 reference backend `nd@1`; the static code-inspection checker stays in the
-> portfolio as designed-but-unshipped (issue #260 — since **shipped**, see the amendment above).
+> portfolio as designed-but-unshipped (since **shipped**, see the amendment above).
 > LP remains non-shipping. (2) The wire encoding is
 > the S-expression codec of `Lara.Wire` (§1.1 TCB row 1, §10.1 R14) — there is deliberately no JSON
-> checker-input codec in the TCB; `Lara.Json` is the future untrusted LLM-producer surface (issue
-> #30). See §5.2 and `m1-freeze-checklist.md` for the row updates. No corpus regeneration or
+> checker-input codec in the TCB; `Lara.Json` is the future untrusted LLM-producer surface.
+> See §5.2 and `m1-freeze-checklist.md` for the row updates. No corpus regeneration or
 > freeze-tag bump is owed: prose-only, with no byte change to the corpus, the wire, or replay
 > identity.
 
-> **Multi-artifact composition (2026-09-10, issue #303).** A new versioned layer sits *above* the
+> **Multi-artifact composition (2026-09-10).** A new versioned layer sits *above* the
 > frozen core: `lara-map@1` declares a flat map of independently checkable `.lara` members under one
 > shared policy, and `map-verdict@1` reports the composite result (§12). It is **additive and
 > versioned separately**: it changes no §2.1 replay identity, no `lara-core@0.2` unit or verdict
@@ -145,7 +146,7 @@ The producer/checker wire encoding is the canonical S-expression codec of `Lara.
 row 1, §10.1 R14) — there is deliberately no JSON checker-input codec in the TCB. The syntax below
 is the canonical presentation syntax for the paper, examples, debugging, and reports. Both map to
 one abstract syntax. A JSON surface (`Lara.Json`) is planned only as an untrusted LLM-producer front
-end (issue #30), never as a trusted codec. LARA does not need
+end, never as a trusted codec. LARA does not need
 a tactic DSL, IDE, package manager, or standard library for the initial contribution.
 
 ### 1.1 Trusted computing base and mechanization host
@@ -579,7 +580,7 @@ escalate the outcome from `quarantine` (the default) to `reject`, making any det
 whole-program well-formedness error; the default keeps one corrupted cell from rendering the rest of
 the artifact uncheckable.
 
-**Quarantine does not publish the smaller graph's label (v0.1, issue #76).** Removing arguments is
+**Quarantine does not publish the smaller graph's label (v0.1).** Removing arguments is
 not a weakening operation: grounded status is non-monotonic across graph changes, so if the
 quarantined leaf backed an *attacker*, its target loses a defeater and its label can move
 `contested`/`defeated` → `justified`. Checking the pruned program and reporting its labels as claim
@@ -601,7 +602,7 @@ function, its input wire schema, and its rejection classes are unchanged — thi
 reporting layer over the same core verdict. The *verdict* grammar does gain the `evidence-blocked`
 status and the optional `conditional` section (the verdict grammar below), so a consumer that has never heard of
 `evidence-blocked` fails to decode rather than misreading an inflated status; a program with nothing
-quarantined produces exactly the pre-#76 bytes.
+quarantined produces exactly the bytes from before the conservative-reporting change.
 
 #### Verdict grammar (v0.1)
 
@@ -633,7 +634,7 @@ obligations for the declared-index frameworks and seed the drivers compute; and
 `checked_production_justified_nonpromotion_of_not_blocked`, which maps the compact
 `Compile.checkedAF`, `completeClaimFor` support, and public unblocked decision through the
 retained-index embedding and obtains its AF lists from the successful `checkUnit` call, instantiating
-non-promotion for the shipped accept path (issue #80). The cross-driver differential suite carries
+non-promotion for the shipped accept path. The cross-driver differential suite carries
 conformance evidence that Haskell mirrors these proved definitions.
 
 **Admission as source pruning (v0.1-frozen).** Policy lookup is a total function that supplies the
@@ -828,12 +829,12 @@ The corpus study (M0, C14, `m0/annotation-summary.md`) measured which strict ste
 actually demand: of 60 sampled claims, 35 identified a domain-checker call, 21 none, 3 LP, 1
 reference-nd. The 35 domain-checker calls are **overwhelmingly arithmetic re-checks of reported
 tables** — deltas, ratios, aggregations, inequalities — plus a few code inspectors. The v0.1 optional
-adapter portfolio is therefore sized to that demand, and as of issue #260 it ships **all three**
-members: the rational-arithmetic half — the table-recheck checker and, added beside it under PR
-#83, the ordered-comparison checker `ord@1` whose beats-claim shape is the most common in the
+adapter portfolio is therefore sized to that demand, and as of 2026-09-07 it ships **all three**
+members: the rational-arithmetic half — the table-recheck checker and, added beside it, the
+ordered-comparison checker `ord@1` whose beats-claim shape is the most common in the
 ML-methodology literature — and the static code-inspection checker `insp@1` the study also counted
-(shipped 2026-09-07, issue #260; header note. It was portfolio-designed but unshipped between the
-#256 amendment and #260):
+(shipped 2026-09-07; header note. It was portfolio-designed but unshipped between the portfolio
+amendment and its completion):
 
 1. a **rational-arithmetic / table-recheck checker** — certifies that a reported cell stands in a
    declared arithmetic relation to other cells (delta, ratio, aggregation, inequality). This
@@ -851,7 +852,7 @@ ML-methodology literature — and the static code-inspection checker `insp@1` th
    numeric literals by exact rational arithmetic. Its slots are premise-only: each cited numeral
    must trace to a consulted premise slot, so a certificate can never cite a self-supplied theory
    entry as measured evidence (`docs/ord1-corpus-extension-decision.md`). Shipped as **`ord@1`**
-   (PR #83; `Lara.Strict.Ord`; §9 result 10 discharged in `lean/Lara/Ord.lean`). No corpus unit
+   (`Lara.Strict.Ord`; §9 result 10 discharged in `lean/Lara/Ord.lean`). No corpus unit
    exercises it — a corpus extension is deferred to `corpus-v2`; the worked examples S2–S4 carry
    the demonstration.
 3. a **static code-inspection checker** — certifies structural facts about referenced source
@@ -869,7 +870,7 @@ ML-methodology literature — and the static code-inspection checker `insp@1` th
    shared ground truth, so `code_absent` / `code_present` are co-acceptable
    (`inspModels_absent_present_sat`); by §8.1 Path B that conflict must be carried on a defeasible
    bridge's conclusions, since a strict-reachable pattern may not overlap a `contrary` side.
-   Shipped as **`insp@1`** (issue #260; `Lara.Strict.Insp`; §9 result 10 discharged in
+   Shipped as **`insp@1`** (`Lara.Strict.Insp`; §9 result 10 discharged in
    `lean/Lara/Insp.lean`; `docs/insp1-code-inspection-decision.md`). No corpus unit exercises it —
    a corpus extension is deferred to `corpus-v2` with the `ord@1` units; the worked example S9
    carries the demonstration against C09's shape.
@@ -948,9 +949,9 @@ hidden.
 `O` is the set of unresolved mandatory obligations, collected across the term (an open hole in a
 subterm propagates). A complete graph node requires `O = empty`.
 
-**How the report is surfaced (#204).** `certDeps(w)` is mechanized in
+**How the report is surfaced.** `certDeps(w)` is mechanized in
 `lean/Lara/Support.lean` (`cert_steps_accounted`, `certDeps_eq_union`) and mirrored in
-`Lara.Strict.Deps`. Since #204 the shipped checker hands it to a consumer: the driver runs the
+`Lara.Strict.Deps`. The shipped checker hands it to a consumer: the driver runs the
 collector over each argument of the *accepted, checked* unit (`Lara.Driver.unitCertDeps`, reached
 through `runCheckDeps` and `Lara.Elaborate.sourceResultCertDeps`), and the `lara deps <file>`
 subcommand prints it. Three decisions are frozen with it, and the reasons are on the definitions
@@ -1253,7 +1254,7 @@ source judgment alone). The edge oracle these levels take (`Faithful`) is no lon
 gap: the checker-built closure decider `edgeB` (built from `containsB` and
 `attackClosureB`) constructively supplies it via `Compile.edgeB_faithful`, so §9 result
 6's source-vs-compiled half now holds with no oracle hypothesis (specialized as
-`checkedAF` / `srcIn_iff_checkedGrounded` / `srcStatus_iff_checked`; issue #17 closed).
+`checkedAF` / `srcIn_iff_checkedGrounded` / `srcStatus_iff_checked`).
 Executable support, positional-attack, and proof-bearing raw-program checking
 are complete. The closure's strict-superset behavior — one attack edging both the
 declared target and a distinct wrapper argument containing the occurrence, with the grounded
@@ -1350,7 +1351,7 @@ public Lean reference-PL boundary `Lara.Check.Unit.checkUnit` rejects duplicate 
 and then R12 violations before beginning program checking. It canonically constructs
 `Unit.CheckedUnit`, which carries both policy invariants and exact attack completeness. Manual
 proof-level construction of that structure remains possible only by supplying every invariant.
-Issue #18 closes this accepted-unit premise and the §9 result-7/C09 consistency theorem._
+The reference-PL implementation closes this accepted-unit premise and the §9 result-7/C09 consistency theorem._
 
 **Flip criterion.** If the corpus shows strict rules genuinely feeding contested claims, switch to
 Path A — require the contrary relation to be a total, involutive contradictory map (`−φ`, `−−φ = φ`)
@@ -1403,10 +1404,10 @@ side condition supplied by the checker's `hasSupport_disNodup`). The specialized
 `checkedAF`, `srcIn_iff_checkedGrounded`, `srcStatus_checked`, and `srcStatus_iff_checked` therefore
 state result 6's source-vs-compiled half over an accepted program with **no oracle hypothesis**;
 `lean/Lara/Examples.lean` pins the checker-built decider and its grounded verdict on concrete
-fixtures. This closes issue #17. It does **not** relate an independent source calculus to the AF —
+fixtures. This closes the result-6 oracle. It does **not** relate an independent source calculus to the AF —
 `SrcIn`/`SrcOut` are the Prop-level shadow of the compiled edge closure that `edgeB` executes — and
 it does not by itself establish grounded consistency. That downstream theorem now lives in
-`Lara.Consistency`: issue #18 supplies attack completeness at the accepted-unit boundary and closes
+`Lara.Consistency`: attack completeness is supplied at the accepted-unit boundary, closing
 result 7/C09 for the Lean reference PL.
 The development is `sorry`-free within the standard axiom trio.
 
@@ -1480,9 +1481,8 @@ the two implementations are cross-checked byte-for-byte through the `Lara.Wire` 
    `srcIn_iff_checkedGrounded`, `srcStatus_checked`, and `srcStatus_iff_checked` connect source
    judgments over the subargument-closed `Edge` closure to executable grounded status over an
    accepted program with **no `Faithful` hypothesis** — the checker-built `edgeB`/`edgeB_faithful`
-   discharge it constructively; `lean/Lara/Examples.lean` pins the decider on fixtures. Issue #17
-   closed. Issue #18 separately closes the accepted-unit attack-completeness premise for result 7;
-   see §8.2.)*
+   discharge it constructively; `lean/Lara/Examples.lean` pins the decider on fixtures. The
+   accepted-unit attack-completeness premise for result 7 is separately closed; see §8.2.)*
 7. Rationality postulates: sub-argument closure holds unconditionally; under the Section 8.1
    restriction, closure under strict rules and direct/indirect consistency hold under grounded
    semantics, so two contrary claims are never jointly `justified`. *(Partially mechanized for the
@@ -1518,7 +1518,7 @@ Additional adapter soundness may be imported from a separately verified checker 
 explicit theorem and encoding correspondence. Tests of executable checkers are conformance evidence,
 not substitutes for these theorems.
 
-For issue #18, the Lean evidence is 70 traceability IDs and six author flows,
+For the Lean reference-PL implementation, the evidence is 70 traceability IDs and six author flows,
 `lake build` (25 jobs), and 430 AxCheck reports with no `sorryAx` and only
 `propext`, `Classical.choice`, and `Quot.sound`; the multiline CI axiom parser is
 also repaired and negative-tested. Passing `cabal build`/`cabal test` (one
@@ -1559,7 +1559,7 @@ artifacts built against this frozen spec (`engineering-plan.md` §5).
 
 ### 10.1 Rejection classes (v0.1-frozen)
 
-**AMENDMENT (`lara-core@0.2`, issue #89): R2 is widened, not replaced.** The class is frozen, and
+**AMENDMENT (`lara-core@0.2`): R2 is widened, not replaced.** The class is frozen, and
 this is the one change to it. Three things moved:
 
 1. **Sorts entered the class.** `Sigma` is now a declared, many-sorted signature (§3.4) carried by
@@ -1617,15 +1617,15 @@ code to map and which a differential harness would misread as a checker
 rejection. The two readers therefore share the bound, the message and the
 column; `scripts/differential.sh`, `scripts/check-map-conformance.sh` and
 `scripts/check-pw-conformance.py` each carry a case on either side of it, and
-each reads the constant out of both sources so a one-sided change fails loudly
-(issue #331). The bound sits far above the deepest committed artifact — no
+each reads the constant out of both sources so a one-sided change fails loudly. The bound
+sits far above the deepest committed artifact — no
 `.sexp`, `.laramap` or `.lara` tree in the repository nests more than 20 levels,
 which `scripts/differential.sh` measures on every run rather than assuming — so
 it bounds no expressible program: it is a refusal boundary, not a grammar
 restriction, and raising it is a reader change on both sides at once rather than
 a wire-version change.
 
-**On the Lean side the bound is proved, not only differentialled (issue #335).**
+**On the Lean side the bound is proved, not only differentialled.**
 `Lara.Driver`'s reader was a `partial def` mutual block, and Lean's kernel has no
 reduction behaviour for a `partial def`, so nothing about its results was
 provable — the enforcement was real but the only evidence was the gates above. It

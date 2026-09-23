@@ -1,8 +1,8 @@
 import Lara.Grounded
 
 /-
-Conservative public reporting for quarantine-affected claims (spec §4.3, issue
-#76).
+Conservative public reporting for quarantine-affected claims (spec §4.3).
+
 
 **The hazard.** §4.3 quarantine removes a leaf, every argument whose support
 term uses it, and every attack with a removed endpoint, and then checks the
@@ -181,7 +181,7 @@ theorem any_congr {l : List Arg} {p q : Arg → Bool} (h : ∀ a, a ∈ l → p 
     have ih' := ih (fun a ha => h a (List.mem_cons_of_mem x ha))
     simp [List.any_cons, hx, ih']
 
-/-- **The safety result (issue #76).** If every complete-support argument of the
+/-- **The safety result.** If every complete-support argument of the
 checked claim is unblocked, then a `justified` verdict on the *checked* (pruned)
 framework is also `justified` on the *declared* framework — with the quarantined
 arguments and attacks reinstated.

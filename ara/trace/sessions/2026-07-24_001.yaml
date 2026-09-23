@@ -2,13 +2,13 @@ session:
   id: "2026-07-24_001"
   timestamp: "2026-07-24T08:14"
   ended: "2026-07-24T08:14"
-  summary: "PR #14 review remediation rebased the freeze onto #10, mechanized §8.1 wf(Pi), repaired append-only ARA history, and passed the full Lean/Haskell validation suite."
+  summary: "Review remediation rebased the freeze onto the reviewed main, mechanized §8.1 wf(Pi), repaired append-only ARA history, and passed the full Lean/Haskell validation suite."
 
 events_logged:
   - type: experiment
     id: N44
     provenance: ai-executed
-    summary: "PR #14 review findings were verified and addressed; rebase, validator, docs, ARA history, and all checks completed."
+    summary: "Review findings were verified and addressed; rebase, validator, docs, ARA history, and all checks completed."
   - type: observation
     id: O09
     provenance: ai-suggested
@@ -19,7 +19,7 @@ events_logged:
     summary: "Result 7 consistency needs attack completeness in addition to the exact Path-B validator."
 
 ai_actions:
-  - action: "Rebased m1-freeze onto origin/main at the post-#10 squash while preserving a local recovery branch and dropping stale pre-newtype Lean commits."
+  - action: "Rebased m1-freeze onto origin/main at the post-merge squash while preserving a local recovery branch and dropping stale pre-newtype Lean commits."
     provenance: ai-executed
     files_changed: ["branch history"]
   - action: "Implemented Lara.Policy with strict reachability, executable wfB, wfB_iff, decidable well-formedness, and located R12 diagnostics; added imports and AxCheck coverage."

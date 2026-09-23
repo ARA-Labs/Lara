@@ -1,7 +1,7 @@
 # External registration-receipt contract (documentation only)
 
-_Status: frozen documentation contract, 2026-08-06, per the scope decision in
-issue #78 (plan Task 6, reduced). This document defines a backend-neutral
+_Status: frozen documentation contract, 2026-08-06, per the evidence-admission
+scope decision (plan Task 6, reduced). This document defines a backend-neutral
 seam for citing externally witnessed registrations. It adds no schema, no
 validator, no Git backend, no network dependency, and no Haskell or Lean
 code. Registration receipts are process metadata: they never enter `Gamma`,

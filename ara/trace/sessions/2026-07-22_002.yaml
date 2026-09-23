@@ -1,7 +1,7 @@
 session:
   id: "2026-07-22_002"
   timestamp: "2026-07-22T22:08"
-  summary: "PR #10 review hardening completed across the support, attack, compile, audit, and conformance layers."
+  summary: "Review hardening completed across the support, attack, compile, audit, and conformance layers."
 
 events_logged:
   - type: experiment

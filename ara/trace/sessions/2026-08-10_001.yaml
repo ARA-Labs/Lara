@@ -7,7 +7,7 @@ session:
   summary: >
     Implemented and review-hardened lara-core@0.2, closed its v4 fixture and
     measurement debt, repaired the benchmark harness, and published the
-    annotated m5-freeze-v4 tag on f4327b4. PRs #100 and #101 are merged and
+    annotated m5-freeze-v4 tag on f4327b4. The PRs are merged and
     main CI is green. The researcher has now approved the bounded result-12
     Lean Presentation parity closure; branch plan/result-12-presentation-parity
     carries the source-grounded implementation plan and mechanical guard design.
@@ -18,7 +18,7 @@ events_logged:
     id: "N150"
     routing: direct
     provenance: user
-    summary: "Opened lara-core@0.2; D-4 (timing vs #60) decided in favour of implementing now."
+    summary: "Opened lara-core@0.2; D-4 (timing vs the benchmark-repair item) decided in favour of implementing now."
   - turn: 1
     type: experiment
     id: "N151"
@@ -85,7 +85,7 @@ events_logged:
     id: "N156"
     routing: direct
     provenance: ai-executed
-    summary: "PR #97 review repair closed nine threads; full local and hosted Haskell/Lean gates passed."
+    summary: "Review repair closed nine threads; full local and hosted Haskell/Lean gates passed."
   - turn: 2
     type: decision
     id: "N157"
@@ -97,7 +97,7 @@ events_logged:
     id: "N158"
     routing: direct
     provenance: user
-    summary: "Asked whether proof mechanization should follow merged PR #99."
+    summary: "Asked whether proof mechanization should follow the merged PR."
   - turn: 3
     type: experiment
     id: "N159"
@@ -115,7 +115,7 @@ events_logged:
     id: "N160"
     routing: direct
     provenance: user
-    summary: "Selected issue #98's manifest-derived benchmark repair as the immediate post-freeze task."
+    summary: "Selected the issue's manifest-derived benchmark repair as the immediate post-freeze task."
   - turn: 4
     type: experiment
     id: "N161"
@@ -127,7 +127,7 @@ events_logged:
     id: "N162"
     routing: direct
     provenance: ai-executed
-    summary: "PR #100 merged at d43e6a1; main push CI 31463095876 passed Lean and Haskell differential gates."
+    summary: "The PR merged at d43e6a1; main push CI 31463095876 passed Lean and Haskell differential gates."
   - turn: 6
     type: decision
     id: "N163"
@@ -139,7 +139,7 @@ events_logged:
     id: "N164"
     routing: direct
     provenance: ai-executed
-    summary: "Published m5-freeze-v4 on f4327b4 and opened housekeeping PR #101 from an isolated branch."
+    summary: "Published m5-freeze-v4 on f4327b4 and opened the housekeeping PR from an isolated branch."
   - turn: 7
     type: decision
     id: "N165"
@@ -217,7 +217,7 @@ ai_actions:
 
   - turn: 2
     action: >
-      Repaired every PR #97 finding: proved the executable theta-to-rule bridge,
+      Repaired every review finding: proved the executable theta-to-rule bridge,
       narrowed result 13, corrected R2/R12/result-12 docs, consolidated base-sort
       and Sigma helpers, removed warnings, and added targeted fault matrices.
     provenance: ai-executed
@@ -237,16 +237,16 @@ ai_actions:
     files_changed: []
   - turn: 3
     action: >
-      Audited merged PR #99 and the live roadmap, ran the current AxCheck gate,
-      reproduced issue #98 through make bench, and isolated the remaining
+      Audited the merged PR and the live roadmap, ran the current AxCheck gate,
+      reproduced the issue through make bench, and isolated the remaining
       mechanization claim gap in Lean Presentation.
     provenance: ai-executed
     files_changed: ["ara/**"]
   - turn: 4
     action: >
-      Implemented issue #98, added the independent manifest raw-row census and
+      Implemented the issue, added the independent manifest raw-row census and
       parser-totality coverage, regenerated the 564-record paper performance
-      table, completed focused re-review, and opened PR #100.
+      table, completed focused re-review, and opened the PR.
     provenance: ai-executed
     files_changed:
       - "scripts/bench.hs"
@@ -266,7 +266,7 @@ ai_actions:
     action: >
       Created the isolated chore/m5-freeze-v4-housekeeping branch, published
       the annotated m5-freeze-v4 tag on f4327b4, updated the freeze checklist
-      and backlog, verified the patch, committed 816cdf7, and opened PR #101.
+      and backlog, verified the patch, committed 816cdf7, and opened the PR.
     provenance: ai-executed
     files_changed:
       - "TODOS.md"
@@ -275,7 +275,7 @@ ai_actions:
   - turn: 7
     action: >
       Created isolated branch plan/result-12-presentation-parity from the
-      post-PR #101 main commit, audited the live Haskell and Lean presentation
+      post-merge main commit, audited the live Haskell and Lean presentation
       shapes, and wrote a source-grounded three-commit implementation plan with
       Lean round-trip, compiler-witness, mutation-negative, CI, documentation,
       ARA, and frozen-byte gates.
@@ -373,7 +373,7 @@ key_context:
     excerpt: >
       User directive: "@plans/2026-08-10-sorts-in-checker.md implement, commit,
       and record ara, mechinize all the theory, pr". This settles D-4, the
-      plan's one open sign-off (whether the pass lands inside the #60
+      plan's one open sign-off (whether the pass lands inside the
       submission window).
   - turn: 1
     excerpt: >
@@ -399,13 +399,13 @@ key_context:
       invariant and narrows every public claim to the resulting scope.
   - turn: 3
     excerpt: >
-      PR #99 merged the lara-core@0.2 freeze closeout, but hosted Haskell CI was
+      The PR merged the lara-core@0.2 freeze closeout, but hosted Haskell CI was
       still in progress. Local AxCheck passed; make bench failed because the
       script still pins 429 rows while v4 contains 564. The core semantic proofs
       are already mechanized; result 12 remains explicitly partial.
   - turn: 4
     excerpt: >
-      The researcher chose issue #98 as the immediate post-freeze task. Commit
+      The researcher chose the issue as the immediate post-freeze task. Commit
       9a3aab3 derives the harness size from both manifests, rejects silent
       parser drops through an independent raw-row census, renames the timing
       field to sweep_ns, and regenerates the paper table for 564 records. Full
@@ -413,20 +413,20 @@ key_context:
       manifest-integrity finding.
   - turn: 5
     excerpt: >
-      PR #100 is merged at d43e6a1 and main push CI is green. The immediate
+      The PR is merged at d43e6a1 and main push CI is green. The immediate
       release action is now the annotated m5-freeze-v4 tag on f4327b4. The
       pending code recommendation remains O64: close the explicit
       policySigma/optional-polarity gap in Lean Presentation and add the parity
-      guard before implementing #88b's new surface AST.
+      guard before implementing the issue's new surface AST.
   - turn: 6
     excerpt: >
       The researcher directed the release housekeeping onto a new branch.
-      Remote m5-freeze-v4 now dereferences to f4327b4, and PR #101 records the
+      Remote m5-freeze-v4 now dereferences to f4327b4, and the PR records the
       tag and tag-based reproduction path. This closes release housekeeping
       without deciding O64's result-12 recommendation.
   - turn: 7
     excerpt: >
-      The researcher approved the bounded result-12 closure before #88b.
+      The researcher approved the bounded result-12 closure before the value-bindings milestone.
       plans/2026-08-10-result-12-presentation-parity.md reuses Lara.Sigma in
       Lean Presentation, ports policySigma and optional polarity, and specifies
       compiler-checked exact inventories plus mutation-negative and full gates.
@@ -438,12 +438,12 @@ open_threads:
   - "lean/Lara/Presentation.lean is still two features stale and does not carry signature blocks, so result 12's round-trip does not cover them; the Haskell parse-print property does."
   - "The curated sort-naming pass for corpus-v1 remains gated on the possible-worlds design (corpus ships opaque S1-S27; examples/ policies are named)."
   - "A new m5 freeze tag has not been cut for lara-core@0.2."
-  - "PR for #89 not yet opened at the time this record was written."
-  - "Update: PR #97 is open at dd7560f; all nine inline threads are resolved and hosted CI is green. Formal reviewer reapproval remains external."
-  - "Update: issue #98 is repaired on branch bugfix/98-bench-manifest-size at commit 9a3aab3; the delivery PR is pending."
-  - "Update: PR #100 merged at d43e6a1 and main push CI 31463095876 passed; issue #98 is closed."
+  - "The many-sorted-Σ PR is not yet opened at the time this record was written."
+  - "Update: the PR is open at dd7560f; all nine inline threads are resolved and hosted CI is green. Formal reviewer reapproval remains external."
+  - "Update: The issue is repaired on branch bugfix/98-bench-manifest-size at commit 9a3aab3; the delivery PR is pending."
+  - "Update: the PR merged at d43e6a1 and main push CI 31463095876 passed; the issue is closed."
   - "Update: m5-freeze-v4 is now unblocked but remains uncut on the required v4 re-freeze merge commit f4327b4."
-  - "Update: annotated tag m5-freeze-v4 is published on f4327b4; housekeeping PR #101 is open."
+  - "Update: annotated tag m5-freeze-v4 is published on f4327b4; the housekeeping PR is open."
   - "Update: the researcher approved the bounded result-12 parity closure; implementation remains pending on feature/result-12-presentation-parity after this plan is reviewed."
 
 ai_suggestions_pending:

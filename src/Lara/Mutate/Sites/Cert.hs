@@ -1,4 +1,4 @@
--- | The certificate-family site enumerators (#125, split out of
+-- | The certificate-family site enumerators (split out of
 -- "Lara.Mutate.Sites" once the family had its own vocabulary; see
 -- @docs\/mutate-module-ownership-decision.md@).
 --

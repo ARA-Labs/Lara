@@ -4,17 +4,17 @@ session:
   started: 2026-09-12T01:38+00:00
   last_turn: 2026-09-12T07:10+00:00
   turn_count: 4
-  summary: '#326 and #327 addressed together in one PR: a PW world with agreeing
+  summary: 'Addressed together in one PR: a PW world with agreeing
     duplicate-report groups is checked as declared (Lean: empty quarantine is the
     identity, addWorld_checks_declared), a conflicting group is refused by name; .lara
     world sources are elaborated by lara pw and reach the Lean reference through the
     lara pw-input derivation door. Gate at 7 fixtures / 99 cases / 112 runs plus the
     .lara family at 1 fixture / 16 cases / 20 runs, raised to 17 / 21 in turn 2 by
-    the review fix below. Turn 3 settled #334, the asymmetry turn 2 deferred: the
+    the review fix below. Turn 3 settled, the asymmetry turn 2 deferred: the
     text boundary became the whole CLI''s, so check, deps, map-input and both PW
     doors read one .lara file as one program under every locale, and the solo door
     got its first locale gate (five cases, each rerun under LC_ALL=C). Turn 4
-    settled #335: the Lean reader''s nesting bound was enforced but unprovable,
+    settled The Lean reader''s nesting bound was enforced but unprovable,
     parseForm/parseList/parseQuoted being a partial def mutual block, so the reader
     was made total — well-founded on the remaining input, with the consumption fact
     parseList''s element loop needs carried in the result type rather than proved
@@ -55,7 +55,7 @@ events_logged:
     world from a file lara check refuses to read, so lara pw accepted what the solo
     door rejects. The three boundaries that must round-trip bytes (stdout, the
     run-file argument, the file-system encoding) keep //ROUNDTRIP. Making the solo
-    door locale-independent is deferred with its cost stated (#334), because the
+    door locale-independent is deferred with its cost stated, because the
     binding cost there is on the output side, not the read.
 - turn: 2
   type: experiment
@@ -123,7 +123,7 @@ events_logged:
   provenance: ai-executed
   summary: >-
     Totalize the wire reader rather than defer the bound's metatheory. A partial def has no
-    kernel reduction behaviour, so the #331 enforcement had no theorem attachable to it;
+    kernel reduction behaviour, so the enforcement had no theorem attachable to it;
     the element loop's missing consumption fact is carried in the result type (Parsed)
     because proving it afterwards is circular, and parseWire re-exports Except String Sx so
     no consumer sees the subtype. Fuel and a token-stream stack machine were rejected for
@@ -199,7 +199,7 @@ ai_actions:
   - docs/theory-pw-outer-runtime.md
   - ara/evidence/proofs/pw_groups_lara_sources_326_327.md
 - turn: 2
-  action: 'Review resolution on PR #332 (reviewer fenfenai, two rounds). setLocaleEncoding
+  action: 'Review resolution on the PR (reviewer fenfenai, two rounds). SetLocaleEncoding
     utf8 in pwTextBoundary (strict, replacing the //ROUNDTRIP variant); quarantineDetail
     so the policy-quarantine refusal says why an audit refuses; gate case "lara: program
     is not UTF-8"; the seven pre-envelope .lara refusals pinned to the step that stopped
@@ -211,7 +211,7 @@ ai_actions:
     quarantineDetail rationale corrected (Lara.Map.Load also turns an audit into a
     refusal; preparedCheckInput renders nothing), two dangling Haddock links replaced by
     code spans, and the base-owned IOError pins trimmed to the operation and reason.
-    Issue #334 opened for the solo door; docs/theory-pw-outer-runtime.md §2 records the
+    The issue opened for the solo door; docs/theory-pw-outer-runtime.md §2 records the
     decision; the evidence record and its README row carry the new gate numbers.'
   provenance: ai-executed
   files_changed:
@@ -223,8 +223,8 @@ ai_actions:
   - ara/evidence/proofs/pw_groups_lara_sources_326_327.md
   - ara/evidence/README.md
 - turn: 3
-  action: 'Branched fix/cli-utf8-text-boundary from main 3fcdbc2 and opened PR #342
-    for #334. app/Main.hs: pwTextBoundary becomes textBoundary, called once in main
+  action: 'Branched fix/cli-utf8-text-boundary from main 3fcdbc2 and opened the PR
+    for. App/Main.hs: pwTextBoundary becomes textBoundary, called once in main
     over getArgs, additionally retargeting stderr; pwRun/pwInput lose their own call.
     test/CliSpec.hs: runLaraIn / runCapturingUtf8 (child environment + UTF-8 pipe
     decoding), cLocale, writeUtf8File / writeLatin1File, withTempLaraDir fixtures
@@ -244,7 +244,7 @@ ai_actions:
   - docs/lara-surface-grammar.md
   - docs/theory-pw-outer-runtime.md
 - turn: 4
-  action: 'Branched fix/335-lean-reader-nesting-bound-proved from main 32c1628 for #335.
+  action: 'Branched fix/335-lean-reader-nesting-bound-proved from main 32c1628.
     lean/Lara/Driver.lean: PState.locate split out of PState.err; step_input and the two
     step length lemmas; skipComment and skipSpace made total (well-founded on
     p.input.length) with skipComment_length_le / skipSpace_length_le; spanBare_length,
@@ -258,7 +258,7 @@ ai_actions:
     parseWire_nested_error. lean/AxCheck.lean: 20 pins appended, which shifted the AxCheck
     line citations by 33 (repointed by name, including
     scripts/check-lean-citations.py''s own quoted example). docs/spec.md and
-    docs/rejection-surface.md record the proof-backed half of the #331 contract.'
+    docs/rejection-surface.md record the proof-backed half of the contract.'
   provenance: ai-executed
   files_changed:
   - lean/Lara/Driver.lean
@@ -278,10 +278,10 @@ logic_revisions:
   field: Conditions
   before: >-
     ... but that it fails earlier and by name, and that it catches the constant being
-    renamed, reformatted or deleted, which a generated case cannot. [end of the #331
+    renamed, reformatted or deleted, which a generated case cannot. [end of the
     paragraph; the Conditions said nothing about the Lean side's evidence being gate-only]
   after: >-
-    ... which a generated case cannot. Since #335 that remedy is no longer symmetric in
+    ... Which a generated case cannot. Since that remedy is no longer symmetric in
     kind: the Lean half of the boundary is proved, not only differentialled. The reader was
     a `partial def`, which the kernel cannot reduce, so no statement about it was
     dischargeable; it is now total, and `parseForm_of_maxDepth_lt` plus
@@ -296,14 +296,14 @@ logic_revisions:
   provenance: ai-suggested
   note: >-
     The clause revised is C12's own recorded bound on what the differential framing can
-    see. #335 narrows it for exactly one property, so the addition states the narrowing and
+    see. Narrows it for exactly one property, so the addition states the narrowing and
     its two limits rather than weakening the bound generally. Status untouched — nothing
     this turn bears on the N+1-localization statement itself.
 - turn: 4
   entry: C12
   field: Sources
   before: >-
-    [four entries, the last being the #331 differential numbers from trace
+    [four entries, the last being the differential numbers from trace
     N331_gate_controls:result]
   after: >-
     [five entries; the added one grounds the same 673/66/3 after the totalization, quoted
@@ -322,32 +322,32 @@ logic_revisions:
   provenance: ai-suggested
 key_context:
 - turn: 1
-  excerpt: 'User: now its time to address #326 and #327, let''s address them together,
+  excerpt: 'User: now its time to address [redacted] and [redacted], let''s address them together,
     direct do it and submit pr.'
 - turn: 2
   excerpt: 'User: /receiving-code-review addrss all, push and reply, stop the loop
     after the pr is approved.'
 - turn: 3
-  excerpt: 'User: can we fix https://github.com/ARA-Labs/lara/issues/334? — the issue
+  excerpt: 'User: can we fix [redacted]? — the issue
     already stated the work (one locale encoding for the whole CLI, plus the output
     side) and its cost (no corpus regeneration, no freeze-tag bump, a new gate axis
     on a door with no locale coverage); the implementation shape was the agent''s.'
 - turn: 4
-  excerpt: 'User: directly fix https://github.com/ARA-Labs/lara/issues/335 and pr. — the
+  excerpt: 'User: directly fix [redacted] and pr. — the
     issue stated the work, the blocker (a partial def has no kernel reduction behaviour)
     and the cost (a reader rewrite plus a re-audit of proofs consuming parseWire; no corpus
     regeneration, no freeze-tag bump). The redesign that made totality reachable — carrying
     the consumption proof in the result type — was the agent''s.'
 open_threads:
-- 'PR #332 for #326/#327 on feat/pw-groups-and-lara-sources: two review rounds
+- 'For on feat/pw-groups-and-lara-sources: two review rounds
   addressed, awaiting approval and merge.'
-- '#331 is closed on both sides and, since turn 4 (#335), the Lean half is proved
+- ' is closed on both sides, since turn 4, the Lean half is proved
   rather than only differentialled. What remains unproved there: the Haskell reader
   carries no mechanization, printSx is still a partial def, and the theorems are
   refusal statements — accepting behaviour at or under the bound is gate evidence
   only.'
-- 'PR for #335 on fix/335-lean-reader-nesting-bound-proved: awaiting review.'
-- 'PR #342 for #334 on fix/cli-utf8-text-boundary: awaiting review. It closes the
+- 'PR for on fix/335-lean-reader-nesting-bound-proved: awaiting review.'
+- 'For on fix/cli-utf8-text-boundary: awaiting review. It closes the
   asymmetry this session opened — every door now reads .lara text as strict UTF-8
   under every locale, and the decision is recorded as a language property in
   docs/lara-surface-grammar.md §1.'

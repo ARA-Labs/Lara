@@ -5,7 +5,7 @@ session:
   last_turn: "2026-09-03T04:53"
   turn_count: 1
   summary: >
-    PR #218 review remediation replaced partial contextual observation with a detailed closed
+    Review remediation replaced partial contextual observation with a detailed closed
     outcome, enriched every LinkFault with side/value evidence, added rejection/composition/
     admissibility witnesses, and mechanized AxCheck roster coverage. Full Lean build passed 138
     jobs; 218 M4 public declarations were coverage-checked inside a 1925-entry passing axiom audit.
@@ -108,6 +108,6 @@ key_context:
     excerpt: "Researcher selected ‘Use broader redesign’: change obs itself to a closed sum and enrich every LinkFault payload."
 
 open_threads:
-  - "PR #218 review follow-up and approval remain pending after the fixes are pushed and inline replies are posted."
+  - "Review follow-up and approval remain pending after the fixes are pushed and inline replies are posted."
 
 ai_suggestions_pending: []

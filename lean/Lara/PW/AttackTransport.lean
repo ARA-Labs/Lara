@@ -1,5 +1,5 @@
 /-
-Declared-attack transport (issue #238, tracker #189).
+Declared-attack transport.
 
 T8's `StatusBridge.forth`/`back` are index-level clauses on the compiled edge
 decider `Compile.edgeB`. This module derives them from a correspondence
@@ -36,7 +36,7 @@ of limitation 1 still stands.
 introduced: `Lara/PW/Status.lean` is frozen T8 record under empty-diff
 discipline. The duplication is forced, not chosen.
 
-`trAttackList`'s cons step goes through the #234 seam (`zipOpt` /
+`trAttackList`'s cons step goes through the shared traversal seam (`zipOpt` /
 `trAttackList_cons`) — the seam's first use outside the eight traversals it
 was extracted from.
 -/
@@ -75,7 +75,7 @@ def trAttackList (m : SymMap) (lm : LeafId → LeafId) :
       | some k', some ks' => some (k' :: ks')
       | _, _ => none
 
-/-- The cons step of `trAttackList` as `zipOpt` (issue #234's seam, reused
+/-- The cons step of `trAttackList` as `zipOpt` (the shared traversal seam, reused
 per eng review decision 3A). -/
 theorem trAttackList_cons (m : SymMap) (lm : LeafId → LeafId)
     (k : Lara.Attack.Attack) (ks : List Lara.Attack.Attack) :
@@ -547,7 +547,7 @@ theorem coveredB_trAttack {m : SymMap} {lm : LeafId → LeafId}
           decide_eq_decide.mpr
             (trSupport_eq_iff hsym hlm (trAttack_source hk) hs)]
 
-/-! ### Prop-level corollaries (the faces #238 names) -/
+/-! ### Prop-level corollaries (the faces the bridge contract names) -/
 
 /-- `Contains` commutes with translation. The `DisNodup` side conditions
 come from the checked programs' `complete` field via `hasSupport_disNodup`
@@ -579,7 +579,7 @@ variable {κ lam : Instance.Context}
 
 /-- T8's attack hypotheses restated on the source language: the target's
 declared attacks are exactly the transports of the source's. This is the
-bridge-contract-level `AttackBridge` of T8 limitation 1 (#238): its clauses
+bridge-contract-level `AttackBridge` of T8 limitation 1: its clauses
 mention programs' `args`/`atts`, never compiled edge indices. -/
 structure AttackBridge (m : SymMap) (lm : LeafId → LeafId)
     (w : World κ) (v : World lam) : Prop where

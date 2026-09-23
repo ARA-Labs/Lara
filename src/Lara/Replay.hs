@@ -29,7 +29,7 @@ import qualified Lara.Strict.Ord as Ord
 import qualified Lara.Strict.RA as RA
 
 -- | The core-format version embedded in every replay identity. __Hard
--- cutover__: @lara-core\@0.1@ is retired, not carried alongside (#91 decision
+-- cutover__: @lara-core\@0.1@ is retired, not carried alongside (decision
 -- 5). Nothing is released, so there is no external compatibility burden, and a
 -- dual-version decoder would have to answer what a @0.1@ unit's absent
 -- signature means under strict mode — the answer being "nothing legal", since

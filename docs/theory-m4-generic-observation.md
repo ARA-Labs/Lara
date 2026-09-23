@@ -1,4 +1,4 @@
-# Generic-`ExtensionSemantics` Contextual Observation (issue #216)
+# Generic-`ExtensionSemantics` Contextual Observation
 
 **Landed 2026-09-07.** Lean-only, purely additive. No corpus regeneration, no
 freeze-tag bump, no Haskell change — the runtime evaluator stays grounded, per
@@ -16,12 +16,12 @@ grounded instance — this issue restates them over an arbitrary
 
 ## 1. What this closes
 
-M2a (#185, `docs/theory-m2a-observation.md`) made the choice of argumentation
+M2a (`docs/theory-m2a-observation.md`) made the choice of argumentation
 semantics an object rather than a hardcoded assumption: `ExtensionSemantics`,
 five instances, ten pairwise separations, and a claim-level observation
 `Semantics.observe : ExtensionSemantics → AF → Grounded.Claim → ClaimObservation`.
 
-M4 Part A (#187, `docs/theory-m4-contextual-adequacy.md`) then built the context
+M4 Part A (`docs/theory-m4-contextual-adequacy.md`) then built the context
 calculus on top of the **grounded** status and nothing else. `Lara.Context.obs`
 reads `Invariants.status`, which is `Grounded.statusC` of the erased carrier;
 `Lara.Context.CtxEquiv` quantifies over contexts at that one reading. So the
@@ -253,7 +253,7 @@ counterexample requires two fragments grounded-equivalent in *every* context,
 not just one grounded-indistinguishable fixture. The unbounded context quantifier
 prevents the fixture-style `decide` proof; it is not an undecidability theorem.
 
-Follow-up **#268** supplies the missing universal argument in
+A follow-up supplies the missing universal argument in
 `Lara.Examples.ContextualSeparation`. The two fragments share every field except
 the single exported atom. Both own leaf support, and the fixed policy permits no
 attacks. Their link guards and checker inputs are identical, so every incompatible
@@ -286,13 +286,13 @@ evidence: an empty context distinguishes
 `fullCycleFrag` from `singletonCycleFrag` under the same cyclic policy, with
 identical exports `[pA]`. Both links pass the guard and whole-unit checker
 (`semantic_negative_link_ok`, `semantic_negative_accepted`). The former reuses
-#270's complete directed cycle; the latter supplies one unattacked argument.
+the earlier complete directed cycle; the latter supplies one unattacked argument.
 `obsSem_semantic_negative` pins both outer constructors to `.observed`, with
 payloads `noExtension` and `observed justified`, and proves their disequality.
 `obsSem_semantic_negative_grounded` also pins the cycle's grounded payload to
 `observed contested`, so the semantics choice matters at this witness. This
-closes #273; the separate all-context argument above resolves the unrestricted
-implication from #268.
+closes the semantic-negative strengthening; the separate all-context argument above resolves the unrestricted
+implication.
 
 The requested certificate-bearing instantiations
 are now proved as
@@ -307,7 +307,7 @@ limitation.
 ## 5. Non-triviality: what the fixtures had to establish, and how
 
 If the milestone had shipped only generic definitions plus a grounded regression,
-a reviewer could ask the question that motivated #216 one level up: you
+a reviewer could ask the question that motivated this record one level up: you
 generalized the observation, but did you show the generalization observes
 anything new?
 
@@ -401,7 +401,7 @@ uniqueness reduces attack completeness to the four pairs of fragment arguments.
 This is the same carrier where `obsSem_cycle_stable_ne_grounded` separates the
 observations: grounded reports `observed contested`, while stable reports
 `noExtension`. Thus the congruence holds uniformly in `sem` at a carrier where
-the choice of semantics changes the observed value. This closes #270.
+the choice of semantics changes the observed value. This closes the three-cycle witness obligation.
 
 `registry_swap_witness_sem` still uses the two-node `ctxEx`/`fragEx` chain,
 where all five semantics agree. Its semantics quantifier remains inert.
@@ -426,7 +426,7 @@ and the same `certAdmissible`. This is the D6 form: the certificate stays
 unchanged while the registry accepts strictly more.
 
 Both theorems quantify over arbitrary `sem : ExtensionSemantics` and are pinned
-in `AxCheck.lean`. This closes #269's certificate-bearing witness gap. It does
+in `AxCheck.lean`. This closes the certificate-bearing witness gap. It does
 not establish that the semantics quantifier is non-inert at this certified
 carrier; the three-cycle supplies semantics separation separately.
 
@@ -460,7 +460,7 @@ carrier; the three-cycle supplies semantics separation separately.
 
 - **Not parametricity over arbitrary relations.** All four functional
   congruences now have relational companions in
-  `lean/Lara/Context/Parametricity.lean` (#215, #277):
+  `lean/Lara/Context/Parametricity.lean` (relational parametricity plus its composed and whole-program companions):
 
   | Functional theorem | Relational companion |
   |---|---|
@@ -478,12 +478,12 @@ carrier; the three-cycle supplies semantics separation separately.
   `RelPreserving`, preserving the original whole-program contract; the composed
   and closed-link companions factor through `obsGen_parametricity`.
   See `docs/theory-m4-relational-parametricity.md` §8 for this distinction.
-  Remaining work: **#275** (observational `RelInj` witness) and **#279**
-  (the total-injective-extension step).
+  Remaining work: the observational `RelInj` witness and
+  the total-injective-extension step.
 - **Not full abstraction.** No logical relation. M4 Part B was descoped on
   2026-09-03 (`docs/theory-m4-contextual-adequacy.md` §7), so the issue's `LogRel`
   conjunct is vacuous and was not attempted.
-- **The relation counterexample has an explicit scope.** #268 refutes grounded
+- **The relation counterexample has an explicit scope.** It refutes grounded
   equivalence implying equivalence at *every* `ExtensionSemantics`, using the
   adequate singleton-selector family and an all-context grounded proof (§4).
   It makes no separation claim for the four standard non-grounded semantics.
@@ -509,8 +509,8 @@ python3 scripts/check-axcheck-coverage.py lean/AxCheck.lean \
 Results on the landing commit:
 
 * `lake build` — 154 jobs, exit 0. All three new modules produce oleans under
-  `lean/.lake/build/lib/lean/`, which is the #259 failure mode checked by hand
-  until that issue lands.
+  `lean/.lake/build/lib/lean/`, which is the known olean-closure failure mode checked by hand
+  until that gate lands.
 * Coverage — passed, **37 declarations** pinned in `AxCheck.lean` (3 in
   `Invariants.Observation`, 15 in `Context.Observation`, 19 in
   `Examples.ContextSemantics`).

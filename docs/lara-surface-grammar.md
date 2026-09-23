@@ -1,6 +1,6 @@
 # LARA surface grammar — frozen (`lara-syntax@0.10`)
 
-_Task **A0.5** of M4a (GitHub #31; tracker `docs/m4a-checklist.md`).
+_Task **A0.5** of M4a (tracker `docs/m4a-checklist.md`).
 This document **freezes** the concrete `.lara` grammar so that Task A1's parser +
 printer (`Lara.Syntax`) and the `Program → Unit` elaborator (`Lara.Elaborate`)
 implement a fixed contract instead of inventing language semantics. It is grounded
@@ -59,8 +59,8 @@ That byte-identity is the executable form of a standing policy: this surface
 gets *more readable*, never *natural*, and every convenience must remove
 transcription rather than checking. The boundary — including where natural
 language **is** admitted (the untrusted producer) and where it is free
-(rejection prose and reports) — is recorded in `docs/naturalness-boundary.md`
-(#109); read it before proposing a surface addition.
+(rejection prose and reports) — is recorded in `docs/naturalness-boundary.md`;
+read it before proposing a surface addition.
 
 Versioning: the presentation surface is versioned **separately** from the core
 (`docs/spec.md` §2.1). This document defines `lara-syntax@0.10`; it decodes to
@@ -88,7 +88,7 @@ positions remain assertions. The guard documents two representation exemptions
 
 The runtime semantics of the existing `admission` and `duplicate-reports`
 constructs are frozen separately in `docs/policy-admission-calculus-decision.md`.
-Byte-level `lara-evidence@0.1` syntax and verification remain gated under issue #78.
+Byte-level `lara-evidence@0.1` syntax and verification remain gated (`docs/evidence-admission-decision.md`).
 
 ---
 
@@ -112,7 +112,7 @@ otherwise disjoint.
 
 ## 1. Lexical grammar (tokenizer)
 
-**Source text is UTF-8, by definition and not by environment** (#334). A `.lara`
+**Source text is UTF-8, by definition and not by environment**. A `.lara`
 or `.policy.lara` file is a sequence of UTF-8 bytes; the character stream the
 rules below run over is that byte sequence decoded as UTF-8, and bytes that are
 not valid UTF-8 are not a program. Nothing about what a file means depends on
@@ -575,7 +575,7 @@ Worked from Example A:
 > way.
 >
 > **Sign-off.** Signed off 2026-08-08; this was the sole open item of the
-> `lara-syntax@0.3` design pass (PR #92), now resolved. The surface rules are
+> `lara-syntax@0.3` design pass, now resolved. The surface rules are
 > Appendix B.4 and B.5 below.
 
 ---
@@ -760,9 +760,10 @@ result 12 (`parse ∘ print == id`) is stated on the presentation AST, and
 macro-expanding at parse time would lose round-tripping for exactly these forms.
 A `comparison` round-trips as a `comparison`, never as its expansion.
 
-**`@0.3` is where #88 splits.** `#88a` — `nl` interpolation (B.6) — lands here.
-`#88b` — `let` value bindings and named premise-slot references `(prem e1)` —
-waits on #89 (the many-sorted Σ) and is **not** part of `@0.3`: a mistyped bare
+**`@0.3` is where the split lands.** The `nl`-interpolation half — B.6's `nl`
+interpolation — lands here. The `let`-bindings/named-premise-slot half — `let`
+value bindings and named premise-slot references `(prem e1)` — waits on the
+many-sorted Σ and is **not** part of `@0.3`: a mistyped bare
 binding name is indistinguishable from a nullary constant until a declared
 signature can reject it, and App. A declares the `cert(…)` payload opaque, so a
 surface `(prem e1)` needs its own layering decision (made at `lara-syntax@0.6`;
@@ -798,7 +799,7 @@ measurand perplexity : Num  where lower-is-better
 - Declaring the same measurand twice in one policy is a **parse error** (the same
   rule, and the same reason, as A.2's duplicate digest: a silent first-wins lookup
   would pick a polarity the author did not intend).
-- **#89 landed here, as designed.** The `: Num` slot was always a **sort
+- **The many-sorted Σ landed here, as designed.** The `: Num` slot was always a **sort
   position**, not decoration, so `lara-core@0.2`'s many-sorted Σ extends *this*
   declaration rather than introducing a parallel one: the slot now admits any
   sort §4 declares, over the same vocabulary the `sort` block names. The two
@@ -1049,7 +1050,7 @@ half of.
   human-facing error text (`resolvePremises` zips `[1..]` today) and are converted
   at the message boundary — never in a generated certificate or a resolved `Step`.
 
-### B.6 `nl` interpolation (#88a)
+### B.6 `nl` interpolation
 
 ```
 nlString  ::= '"' { nlChar | directive | "{{" | "}}" } '"'
@@ -1080,12 +1081,12 @@ claim c1
   kill.
 - `{cell e2}` resolves via `premiseCell` on leaf `e2` — the same helper `ord@1`
   and the `comparison` form use — and is rendered back through `renderDecimal`.
-  **No binding is required, so #88a stands alone** and does not wait on #88b.
+  **No binding is required, so the `nl`-interpolation half stands alone** and does not wait on the `let`-bindings/named-premise-slot half.
 - Interpolating a **cell** is the *stronger* form for the prose↔formal binding
   audit: a number quoted in prose is then guaranteed to equal the number the cited
   evidence leaf actually carries, sourced from the leaf itself. Interpolating a
   `let` would only guarantee agreement with a parallel declaration, which could
-  itself be wrong. When #88b lands, `{acc_new}` becomes an **additional**
+  itself be wrong. When the `let`-bindings/named-premise-slot half lands, `{acc_new}` becomes an **additional**
   interpolation source; it does not replace `{cell e2}`.
 - **Preconditions and errors:** the named leaf must exist and must satisfy the
   premise-cell obligation (exactly one numeric literal); failure is a **located
@@ -1406,7 +1407,7 @@ rule, named references, discharges, opens, and assurance.
 
 On a bare `leaf(…)` support term there is nothing to retain. At `@0.5` and
 `@0.6` the parser accepted `discharge` and `open` lines there and then dropped
-them entirely, id and all (issue #135) — the opposite of A.1's ruling for
+them entirely, id and all — the opposite of A.1's ruling for
 `assurance`, which is a parse error in the same position precisely so the author
 is not misled. `@0.7` extends A.1's ruling to both siblings: all three lines are
 located parse errors on a bare leaf (Appendix F.2).
@@ -1418,7 +1419,7 @@ id names the question actually in force. Under the retired `@0.5`/`@0.6`
 spelling every committed `open` line already spelled the two identically, which
 is why `@0.7`'s migration is textual only (Appendix F.5).
 An earlier revision of this paragraph said the printer "intentionally omits
-`open` lines"; that omission was issue #127 — it broke result 12
+`open` lines"; that omission broke result 12
 (`parse ∘ print = id`) on any term with a non-empty hole set.
 
 At argument `a`, each reference is resolved in this fixed scope. A name that
@@ -1535,7 +1536,7 @@ sees (Appendix D.1): "prior" means already elaborated earlier in declaration
 order, and a later argument is never a valid reference. A name that matches both namespaces is a **hard error**,
 never silently one of them — deliberately aligned with the inferred-reference
 resolver, not with the discharge resolver's silent leaf preference (that
-inconsistency is tracked separately as issue #129, untouched here).
+inconsistency is tracked separately, untouched here).
 *Resolved at `@0.7`:* Appendix F.4 gives the discharge resolver this same
 collision policy, so the carve-out named in this paragraph no longer exists —
 all three argument-body reference positions now agree.
@@ -1636,7 +1637,7 @@ behavior at the AST level through the real elaborator entry point.
 ### E.7 The nd@1 exclusion and future work (D1, D3)
 
 > **Resolved at `lara-syntax@0.9`:** Appendix H lands the first bullet's named
-> kernel/surface split (#132). This section remains as the historical record of
+> kernel/surface split. This section remains as the historical record of
 > why `nd@1` was excluded at `@0.6`; Appendix H is normative for current
 > `nd@1` authoring.
 
@@ -1674,7 +1675,7 @@ Two future-work notes were recorded here so the next design could start from the
   policy against leaves and priors, growing the resolution surface that this
   feature was supposed to keep predictable. Premise-label citation remained a
   natural future `lara-syntax@0.x` extension.
-  *Resolved at `@0.8`:* Appendix G lands premise-label citation (#131). The
+  *Resolved at `@0.8`:* Appendix G lands premise-label citation. The
   collision policy this bullet asks for is G.3 — cross-class collision is a
   hard error, with no carve-out for agreeing referents — and the optionality
   concern is answered by keeping labels a *third* class beside the other two
@@ -1691,12 +1692,12 @@ authored surface token must affect the semantic object or trigger an explicit
 error.** A token the parser reads and then discards is a lie to the author, who
 reasonably concludes the checker saw what they wrote.
 
-- **F.2 (#135)** — `discharge` and `open` under a bare `leaf(…)` support term
+- **F.2** — `discharge` and `open` under a bare `leaf(…)` support term
   are parse errors, not silently dropped lines.
-- **F.3 (#133)** — a hole is spelled `open q`. The two-identifier
+- **F.3** — a hole is spelled `open q`. The two-identifier
   `open q as o` form is a located parse error carrying its repair, and `as`
   leaves the §1.4 vocabulary.
-- **F.4 (#129)** — a `discharge q with x` whose `x` names both a declared leaf
+- **F.4** — a `discharge q with x` whose `x` names both a declared leaf
   and a prior argument is a hard elaboration error, not a silent preference for
   the leaf.
 
@@ -1729,7 +1730,7 @@ buys nothing and permanently doubles the spellings a reader must know. The
 window for this trade closes when the surface is published; that is an argument
 for making the surface strict *now*, not for deferring.
 
-### F.2 `discharge`/`open` on a bare leaf are parse errors (#135)
+### F.2 `discharge`/`open` on a bare leaf are parse errors
 
 Appendix A.1 already rules that `assurance` on a bare `leaf(…)` support term is
 a parse error, "the checker has no rule to check it against, and silently
@@ -1774,7 +1775,7 @@ the grammar gives no meaning) past the decode boundary, contradicting §1's
 placement of surface well-formedness in `Lara.Syntax`, and would leave the
 presentation AST able to represent a state the surface cannot mean.
 
-### F.3 The sole hole spelling is `open q` (#133)
+### F.3 The sole hole spelling is `open q`
 
 ```text
 openLine ::= "open" ident                 -- open q   (explicit hole)
@@ -1833,7 +1834,7 @@ Appendix E's premise-slot names, and F.4's discharge targets all shrink the
 number of independently-authorable names in an argument body; this moves the
 same way.
 
-### F.4 Discharge collision policy unified with D and E.2 (#129)
+### F.4 Discharge collision policy unified with D and E.2
 
 `discharge q with x` resolves `x` in the `lara-syntax@0.5` reference namespace:
 declared leaves ∪ prior arguments (Appendix D.1). Before `@0.7`, when `x` named
@@ -1882,7 +1883,7 @@ other reference diagnostic in this family already works.
 **This closes E.2's carve-out.** Appendix E.2 records the `@0.6` decision to
 align the certificate premise-slot resolver "with the inferred-reference
 resolver, not with the discharge resolver's silent leaf preference (that
-inconsistency is tracked separately as issue #129, untouched here)". At `@0.7`
+inconsistency is tracked separately, untouched here)". At `@0.7`
 there is no discharge exception left to name: all three argument-body reference
 positions resolve in one namespace under one collision policy, each keeping only
 its own error *family* because each names a different surface position.
@@ -1956,7 +1957,7 @@ structurally cannot express: when one leaf feeds two premises, the leaf name
 occupies both slots and the author is pushed back to numerals (E.3's third
 bullet). A label does not name the term — it names the **slot**, in the rule
 that declares it — so it stays unambiguous however the instance is filled.
-That is the gap #131 closes, and it is closed with an existing, tested
+That is the gap Appendix G closes, and it is closed with an existing, tested
 mechanism (`premiseLabelIndex`) rather than new machinery.
 
 ### G.2 The three-class namespace and resolution rule
@@ -2011,7 +2012,7 @@ convenience here, and relaxing the rule later is additive while tightening it
 later would be breaking.
 
 The rejected alternatives, for the record: *label wins* and *leaf wins* both
-reintroduce the silent preference #129 removed from the discharge resolver;
+reintroduce the silent preference removed from the discharge resolver;
 *agreeing referents are fine* is the conditional rule above.
 
 ### G.4 What labels resolve that names could not
@@ -2182,8 +2183,8 @@ regeneration or freeze-tag bump is owed.
 `@0.9` is the **substrate** for named formula authoring, not a complete
 deep-`nd@1` authoring solution. It closes silent index-misbinding by giving
 binders, premises, and theory offsets one explicit lowering discipline, while
-formula annotations remain opaque `(atom KEY)` values at this version; #144
-landed the source-authored spelling at `@0.10` (Appendix I).
+formula annotations remain opaque `(atom KEY)` values at this version; the
+source-authored spelling landed at `@0.10` (Appendix I).
 
 ### H.2 Namespaces and binder discipline
 
@@ -2331,7 +2332,7 @@ proves the lowering mathematics over abstract classifier and resolver
 parameters; it does **not** prove that the Haskell implementation executed that
 function, nor verify the Haskell classifier or resolver. `@0.9` removes silent
 index-misbinding from named premise/binder authoring; the remaining formula
-tooling gap was closed by #144 at `@0.10` (Appendix I).
+tooling gap was closed at `@0.10` (Appendix I).
 
 ## Appendix I — `lara-syntax@0.10` (source-authored `nd@1` formula annotations, 2026-08-23)
 

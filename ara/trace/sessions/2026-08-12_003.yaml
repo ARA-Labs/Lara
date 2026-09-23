@@ -5,10 +5,10 @@ session:
   last_turn: "2026-08-12T17:02"
   turn_count: 1
   summary: >
-    Re-verified the implementation contract for #104, corrected the
+    Re-verified the implementation contract, corrected the
     intermediate ARA result with 73-row parity, and recorded hosted run
     31653193555 on ARA-append head c9c59a6 before this metadata correction
-    commit was created; PR #106 remains open pending reviewer re-review.
+    commit was created; the PR remains open pending reviewer re-review.
 
 events_logged:
   - turn: 1
@@ -29,7 +29,7 @@ events_logged:
     summary: >
       The verification state is 73 parity rows; hosted run 31653193555 passed
       both Haskell and Lean jobs on ARA-append head c9c59a6 before this
-      metadata correction commit was created, while PR #106 remains
+      metadata correction commit was created, while the PR remains
       merge-clean with a CHANGES_REQUESTED review decision.
 
 ai_actions:
@@ -54,10 +54,10 @@ logic_revisions: []
 key_context:
   - turn: 1
     excerpt: >
-      PR #106 hosted verification passed on ARA-append head c9c59a6 before
+      The PR's hosted verification passed on ARA-append head c9c59a6 before
       this metadata correction commit; merge state was CLEAN and GitHub review
       decision CHANGES_REQUESTED. Reviewer re-review was requested after the
-      final fixes. Issue #105 remains separate and concerns opaque
+      final fixes. The issue remains separate and concerns opaque
       certificate-layer design, not this implementation.
   - turn: 1
     excerpt: >
@@ -66,8 +66,8 @@ key_context:
       the targeted ARA records for this session.
 
 open_threads:
-  - "Obtain reviewer re-review and merge PR #106; implementation and hosted CI verification are complete."
-  - "Design named certificate premise slots and opaque Cert layering for #105; no implementation is implied here."
+  - "Obtain reviewer re-review and merge the PR; implementation and hosted CI verification are complete."
+  - "Design named certificate premise slots and opaque Cert layering; no implementation is implied here."
   - "Repair the pre-existing N131 scalar so repository-wide strict ARA validation can pass."
   - "O65-O67 still await closure signals."
 

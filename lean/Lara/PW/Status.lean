@@ -1,6 +1,6 @@
 /-
 # PW-T8 — conditional status preservation at structural bridges
-(issue #193, tracker #189)
+
 
 Instantiates `Lara.PW.AFBisim` at the compiled frameworks of two Lara worlds
 related by a structural bridge (`Lara.PW.Structural`). Four sections:
@@ -34,7 +34,7 @@ Neither T6 nor T9 is strengthened: every theorem here takes `StatusBridge`
 (or an explicit `SupportCorr`) as an extra hypothesis, and `t7_t6_boundary`
 (`Lara.Examples.PWStructural`) remains the proof that `Admits` alone cannot
 give any of these conclusions. The executable checker is one module up, in
-`Lara.PW.StatusCheck` (issue #239). This module only imports.
+`Lara.PW.StatusCheck`. This module only imports.
 -/
 
 import Lara.PW.Structural

@@ -1,6 +1,6 @@
 # D2 — mechanical reviewer
 
-*Demo for the M7 paper package (#60 T1); sub-issue #63 of the demos tracker (#61).*
+*Demo for the M7 paper package (T1); part of the demos series.*
 
 _A demo write-up (2026-08-02). The "frozen 60-unit corpus" it renders from is
 the evaluation corpus of `../m5-freeze-checklist.md`: 60 checked programs
@@ -136,7 +136,7 @@ implemented and fires whenever a unit ships an incomplete candidate alternative
 ## Demo figure — a `defeated` review
 
 The richest shape is `defeated`, which names the attacking argument exactly as
-issue #63 specifies. Reproduced verbatim from the golden
+the demo's specification requires. Reproduced verbatim from the golden
 (`measurements/frozen/mechanical-reviews.md`), unit `fre/C04`:
 
 > ## fre.C04 — defeated
@@ -173,4 +173,4 @@ cabal test                                        # includes the freshness test
 This demo shows that LARA verdicts *are expressible as* review comments. Whether
 they *predict* human reviewer complaints (a correlation study against real
 OpenReview reviews) is an axis-(d) study deferred to future work
-(out of scope per #63).
+(out of scope for this demo).

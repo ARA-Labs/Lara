@@ -1,4 +1,4 @@
-# Evidence: Theory M4 Part A — contextual representation independence (#187, PR #218)
+# Evidence: Theory M4 Part A — contextual representation independence
 
 Gates run at commit `c61c91f` on branch `plan/m4-context-calculus`, from the
 repository root. Verbatim outputs.
@@ -108,7 +108,7 @@ every `f`.
 ### Debt clearance (2026-09-04)
 
 Gates run at commit `14b9e34` on branch `claude/m4-debts-clearance-af1b56`
-after closing #219, #220, #226, #228, #229 (and #222 as moot). Verbatim
+after the M4 debt clearance (five debts closed, one moot). Verbatim
 outputs.
 
 ```
@@ -161,13 +161,13 @@ deletions are the private lemma copies in `Lara/Update.lean`,
 block in `Lara/Context/Fragment.lean`. No Haskell, CLI, wire, or corpus
 surface is touched, and no freeze tag moves.
 
-## The surface corollary, witnessed (#227, 2026-09-07)
+## The surface corollary, witnessed (2026-09-07)
 
 `Lara.Context.surface_directAF_relabel` shipped with documented hypotheses and
 no instance, because every accepted surface fixture in
 `lean/Lara/Examples/Surface.lean` is proved by `native_decide` and D9 bans
 `Lean.ofReduceBool` from the audit. `lean/Lara/Examples/SurfaceTransport.lean`
-(PR #257) closes that gap with a purpose-built pair.
+closes that gap with a purpose-built pair.
 
 The headline is `surfaceTransport_directAF_eq`: two accepted surface programs
 differing only in one `nd@1` certificate related by
@@ -184,14 +184,14 @@ Non-vacuity, in the same spirit as `cert_relabel_moves` above:
 - `transport_relabel_moves_cert` / `transport_payloads_differ` — the
   certificate and the payload each genuinely move.
 
-**Scope limit (issue #258).** The witnessed pair declares no attacks:
+**Scope limit.** The witnessed pair declares no attacks:
 `transportElaborated` sets `resolvedAttacks := []`, so `checkedAF_map`'s edge
 half — `coveredB_relabel` at `lean/Lara/Erase.lean:198`, called from
 `lean/Lara/Context/Surface.lean:53` — is exercised on an empty attack list.
 Nothing is unsound and every hypothesis is discharged, but the AF equality is
 witnessed only in its degenerate one-node no-edge case. An attack-bearing
-witness is #258; `surface_directAF_link`, the other half of the §4 gap, remains
-#255.
+witness is open follow-up work; `surface_directAF_link`, the other half of
+the §4 gap, also remains open follow-up work.
 
 ### Gates (2026-09-07, commit `ae5b408`)
 

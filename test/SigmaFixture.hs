@@ -1,5 +1,5 @@
 -- | The shared Σ helper for hand-constructed test fixtures (@lara-core\@0.2@,
--- #89 D8).
+-- D8).
 --
 -- Strict mode makes every 'Unit' carry a signature and 'Lara.Check.checkUnit'
 -- stage 2 enforce it, so a fixture built in memory needs one too. Without a

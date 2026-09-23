@@ -20,7 +20,7 @@ already-frozen core checker. It is not an alternative support calculus, it does
 not turn quarantine into falsity, and it does not change the raw core `.sexp`
 interface, replay identity, frozen corpus, or the four core statuses.
 
-The byte-level `lara-evidence@0.1` work tracked by issue #78 remains gated and
+The byte-level `lara-evidence@0.1` work (`docs/evidence-admission-decision.md`) remains gated and
 out of scope. In particular, this decision does not make source references
 byte-checked and does not add a leaf-certificate format or evidence-checker
 registry.
@@ -149,9 +149,9 @@ mechanized metatheory. It does not change:
   semantics;
 - raw `.sexp` checking relative to a caller-supplied `Gamma`;
 - replay identity or the frozen corpus; or
-- byte-level evidence verification, which remains gated under #78.
+- byte-level evidence verification, which remains gated (`docs/evidence-admission-decision.md`).
 
-This contract landed with PR #81 (issue #77). The runtime lives in
+This contract has landed. The runtime lives in
 `src/Lara/Admission.hs` and `src/Lara/Admission/`, threaded through
 `src/Lara/Driver.hs`; the mechanized side is `lean/Lara/Admission.lean` with the
 executable reference driver `lean/Lara/AdmissionDriver.lean`, and the two are

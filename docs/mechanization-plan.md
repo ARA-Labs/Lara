@@ -49,17 +49,17 @@ it; "test-only" = conformance evidence, no theorem.
 | --- | --- | --- | --- |
 | 1 | Decidability of program + attack checking | **mechanized (checker portion)** | Legacy `inferSupport`, `checkAttack`, and `checkProgram` remain generic and unchanged; `checkUnit` adds the detailed accepted-unit path. |
 | 2 | Strict-backend isolation | **mechanized** | Structural isolation plus the concrete non-factivity witness (`no_truth_projection`, `nd_nonfactive_witness`, `nd_relative_not_absolute`). |
-| 3 | Dependency accountability (`leaves(w)`, `certDeps`) | **mechanized** | `leaves_declared` proves the source-leaf half; `Backend.uses` under obligation 4's coverage/validity/accounting laws and the support-level `certDeps` layer (typed premise/theory `CertDep` report, `cert_steps_accounted`, collection in both directions, `certDeps_resolved`, `certDeps_theory_valid`) close the certificate half (#46). |
+| 3 | Dependency accountability (`leaves(w)`, `certDeps`) | **mechanized** | `leaves_declared` proves the source-leaf half; `Backend.uses` under obligation 4's coverage/validity/accounting laws and the support-level `certDeps` layer (typed premise/theory `CertDep` report, `cert_steps_accounted`, collection in both directions, `certDeps_resolved`, `certDeps_theory_valid`) close the certificate half. |
 | 4 | Compilation soundness (no untyped node/attack; subargument closure) | **mechanized (relational)** | `compile_nodes_checked`, `edge_iff`, and `closure_includes_direct`; closed examples exercise direct and strict-superset closure. |
 | 5 | Termination + determinism of grounded evaluation | **mechanized** | Bounded characteristic-operator iteration reaches the least fixed point within `\|Args\|`. |
-| 6 | **Status preservation: direct source semantics ≡ compiled-AF semantics** | **source-vs-compiled half done (#17 closed)** | Direct semantics and the source-vs-compiled bridge are proved; the checker-built `edgeB`/`edgeB_faithful` discharges `Faithful` constructively. Issue #18 separately closes the attack-completeness premise used by result 7. |
-| 7 | Rationality postulates (sub-argument closure unconditional; consistency under §8.1) | **mechanized for the Lean reference PL (#18 implementation; C09)** | `checkUnit` enforces Path B and exact conflict coverage; `Lara.Consistency` proves the computed-`completeClaimFor` headline, including self-conflict. |
+| 6 | **Status preservation: direct source semantics ≡ compiled-AF semantics** | **source-vs-compiled half done** | Direct semantics and the source-vs-compiled bridge are proved; the checker-built `edgeB`/`edgeB_faithful` discharges `Faithful` constructively. The reference-PL implementation separately closes the attack-completeness premise used by result 7. |
+| 7 | Rationality postulates (sub-argument closure unconditional; consistency under §8.1) | **mechanized for the Lean reference PL (C09)** | `checkUnit` enforces Path B and exact conflict coverage; `Lara.Consistency` proves the computed-`completeClaimFor` headline, including self-conflict. |
 | 8 | Strict-certificate soundness (excludes `trusted-policy`) | **mechanized** | `strict_step_sound` is the backend obligation projection; `ndBackend` discharges it via `nd_sound`. |
 | 9 | Backend replacement | **mechanized (Model A)** | `Erase.backend_replacement` proves status invariance under a uniform injective assurance relabel; `EraseTransport.backend_replacement_transport` constructs the relabeled well-checked program under acceptance preservation. |
 | 10 | Reference natural-deduction adapter soundness + exact dependencies | **mechanized and executable** | `nd_sound`, `nd_relevance`, `fv_in_range`, the sound/complete `infer` bridge, and the concrete `ndBackend` replay boundary. |
 | 11 | Support adequacy (`w supports c` = normalized identity) | **mechanized** | `nf`/`≡` frozen (`spec.md` §3.2); property-tested in Haskell AND machine-checked in Lean 4 (`../lean/Lara/Prop.lean`: equivalence laws, decidability, idempotence, no-reorder; no `sorry`, axioms `propext` only). The completed warm-up. |
 | 12 | Codec round-trip to α-equivalent AST | **mechanized structured presentation codec** (+ current Haskell conformance) | Lean mechanizes `parse ∘ print = id` for the complete live structured `Program`/`Policy` AST at `lara-syntax@0.10`, including value bindings, inferred argument instantiations, `policySigma`, and optional measurand polarity (`../lean/Lara/Presentation.lean`). The theorem was proved against the `@0.6` AST and holds verbatim through `@0.10`: `@0.7` restricts the concrete `.lara` surface, `@0.8` widens a certificate premise-reference namespace, and `@0.9`/`@0.10` lower named atoms inside the existing opaque certificate payload, so none changes a `Lara.AST` type. Haskell QuickCheck separately covers the concrete `.lara` parser/printer. The Lean theorem is an AST-shape anchor, **not** a correctness proof for the Haskell concrete parser. `../scripts/check-presentation-parity.sh` compares normalized shape inventories between the two models. Exact compiler witnesses pin record fields, sum payloads, aliases, and anonymous entry types; the tripwires compare named record selectors in order. Positional constructors have no source selector names: exact signatures pin their arity and positional type sequence, but semantic labels and swaps among same-typed positions remain assertions. Two representation exemptions are documented (`SortName` erasure; `Cert`'s native payload). Named-slot lowering is mechanized separately (`../lean/Lara/CertSlots.lean`: `lower_id_of_no_symbolic`, `lower_eq_numeric_subst`), and named `nd@1` proof-term lowering is mechanized in `../lean/Lara/NDNamed.lean`: `lowerNamed_id_of_kernel`, `lowerFormula_eq_translation` (`@0.10` source-authored formula annotations over an abstract proposition encoder), and `lowerNamed_eq_translation`, plus 19 executable guards. Both mirrors prove the mathematics over abstract resolvers/classifiers/encoders; the Haskell classifier, resolver, proposition parser/encoder composition, traversal, and error taxonomy remain validated-not-verified. |
-| 13 | Well-sortedness is decidable and preserved by rule instantiation (`lara-core@0.2`, issue #89) | **mechanized** | `../lean/Lara/Sigma.lean`. (a) `wellSorted_decidable` — the executable check *is* the relation, so decidability is definitional and needs no classical input. (b) `wellSorted_subst` (+ `_list`, `_mem`, `_rule`) — the substitution lemma: a rule whose premises, conclusion, and answers are well-sorted under Σ extended with its derived parameter sorts, instantiated by a sort-respecting θ, yields well-sorted atoms; the same lemma applies to checked exception patterns. (c) `thetaWellSorted_ruleSortRespecting` combines stage 2's θ-range check with accepted support's R3 exact-domain invariant. (d) `checkUnit_wellSorted` (`../lean/Lara/Check/Unit.lean`) closes over every actual rule instance recursively reachable through an accepted support term, plus the environment's ground atoms (Γ, the theory table, and queries). |
+| 13 | Well-sortedness is decidable and preserved by rule instantiation (`lara-core@0.2`) | **mechanized** | `../lean/Lara/Sigma.lean`. (a) `wellSorted_decidable` — the executable check *is* the relation, so decidability is definitional and needs no classical input. (b) `wellSorted_subst` (+ `_list`, `_mem`, `_rule`) — the substitution lemma: a rule whose premises, conclusion, and answers are well-sorted under Σ extended with its derived parameter sorts, instantiated by a sort-respecting θ, yields well-sorted atoms; the same lemma applies to checked exception patterns. (c) `thetaWellSorted_ruleSortRespecting` combines stage 2's θ-range check with accepted support's R3 exact-domain invariant. (d) `checkUnit_wellSorted` (`../lean/Lara/Check/Unit.lea…
 | 14 | Supported surface calculus and full-AST elaboration | **mechanized model + cross-language conformance** | `../lean/Lara/Surface/`. `supportedB_iff` fixes the structural supported fragment; independent raw-endpoint, role, requested-status, and group judgments reproduce the production-ordered post-expansion guards. The staged checker validates endpoints before groups, groups before the argument fold, certificate lowering before a same-argument role, roles before attack paths, and duplicate groups by first repeated occurrence. `check_sound`/`check_complete`/`checks_deterministic` connect the syntax-directed surface judgment to its executable checker, while `CoreObligations.checkUnit_complete` derives actual core acceptance from declarative signature, support/certificate, and attack premises. `elaborate_preserves` and `elaborate_reflects` prove preservation and supported-fragment reflection; `global_renaming_equivariant` separates typed global renaming from binder alpha-equivalence; and optional independently reconstructed `directClaim` agrees with `coreClaim?`, yielding `observe_coherent` for extension semantics satisfying `Observation.AttackExtensional sem.spec` plus five named corollaries. Missing claims remain `none`. The theorem input is an already-constructed `Presentation.Program`/`Policy`. The concrete parser is excluded, arbitrary accepted core units need not have a source preimage, and source recovery is not unique. The 25-row Lean/Haskell table is complete for its closed manifest feature vocabulary and includes accepted `gap`, `defeated`, `contested`, and stable-`noExtension` observations; its obligations column reports retained post-admission holes and includes the nonempty `arg-open:cq` witness. It supplies representative conformance evidence, not exhaustive parser/AST coverage or a proof of Haskell correctness. See `theory-m5-surface-calculus.md`. |
 
 Results 12 and 14 are intentionally separate. Result 12 says that the
@@ -117,8 +117,8 @@ differential-testing anchor.
   `Backend` structure, the ND adapter as an instance, `compile`, and grounded labelling as a bounded
   lfp. Plus the results in §1.
 - **Haskell = the production-checker target** (`engineering-plan.md` §3 layers 1–8). The current
-  Haskell commands provide regression compatibility; issue #18 adds no production Haskell checker
-  or new Haskell acceptance flow.
+  Haskell commands provide regression compatibility; the Lean reference-PL work adds no
+  production Haskell checker or new Haskell acceptance flow.
 - **Shared = the serialized core.** The same S-expression programs and their expected four-state
   verdicts run through both. Because the Lean definitions are executable (result 1/5/11 are decidable),
   the Lean side *runs*, not just *proves* — so the differential test is model-vs-implementation, not
@@ -200,7 +200,7 @@ right precedent:
   (`spec.md` §8.1): least set closed under strict rules' premises→conclusion; reject policies whose
   `contrary` sides may overlap it at the ground-instance level. Then direct = indirect consistency
   by construction. Do *not* mechanize Path A (transposition + involutive contradictories) unless the
-  corpus forces the flip. **Issue #18 closes this scope for the Lean reference PL:**
+  corpus forces the flip. **This scope is closed for the Lean reference PL:**
   `Lara.Policy.strictReachable_iff_mem`, `aPatMayOverlap_of_instances`, and `wfB_iff`, plus the
   instantiated-contrary boundary theorems and located R12 payload feed the public
   `Lara.Check.Unit.checkUnit` boundary. `Unit.CheckedUnit` carries rule-ID uniqueness, Path-B
@@ -231,12 +231,12 @@ right precedent:
   scope of the Lean proof; the existing production Haskell checker is separate
   conformance evidence, not part of that proof.
 
-## 5. Result 6: source-vs-compiled half complete — oracle eliminated (#17 closed) ◐
+## 5. Result 6: source-vs-compiled half complete — oracle eliminated ◐
 
 Result 6 ("status preservation between a direct source semantics and the compiled-AF semantics") was
 **unprovable as originally stated** because `spec.md` §8 defined only the compiled route — no
 independent direct semantics, so the theorem had nothing to preserve (exploration tree N16). The
-**abstract core is mechanized** (2026-07-21, issue #4), and the M1 lock pass now composes it with
+**abstract core is mechanized** (2026-07-21), and the M1 lock pass now composes it with
 the frozen source compile relation.
 
 **Done — abstract AF layer.** `spec.md` §8.2 defines a direct big-step claim-status judgment
@@ -264,7 +264,7 @@ the specialized wrappers `checkedAF`, `srcIn_iff_checkedGrounded`, `srcStatus_ch
 `srcStatus_iff_checked` state source-vs-compiled agreement over an accepted program with **no oracle
 hypothesis**. `Lara.Examples` pins the decider (`checked_edge_fixture_faithful`,
 `checked_closure_status`) on concrete fixtures. Executable replay and proof-bearing raw-source
-`checkProgram` are in place. This closes issue #17. Issue #18 separately closes the
+`checkProgram` are in place. This closes the result-6 oracle. The reference-PL implementation separately closes the
 accepted-unit attack-completeness premise and result 7/C09 for the Lean reference PL.
 
 The two definitional holes that made the status function partial (N17) are addressed in `spec.md` §8:
@@ -275,11 +275,11 @@ four-state status is total and deterministic by construction.
 
 For result 7, `completeClaimFor` is only a complete-support projection with empty
 holes. No implementation of full `holes(P,p)` or `incompleteAlternative` is
-claimed. Nor does issue #18 claim Path A, NL-to-structure validation, the
+claimed. Nor does the reference-PL implementation claim Path A, NL-to-structure validation, the
 production Haskell checker, or an optimized grounded evaluator:
 `Lara.Grounded` remains the proof-oriented reference implementation.
 
-**Issue-#18 verification.** All 70 traceability IDs and six author flows pass;
+**Reference-PL verification.** All 70 traceability IDs and six author flows pass;
 `lake build` completes 25 jobs; AxCheck emits 430 reports with no `sorryAx` and
 only `propext`, `Classical.choice`, and `Quot.sound`; and the multiline CI axiom
 parser is repaired and negative-tested. `cabal build` and `cabal test` pass (one
@@ -309,11 +309,11 @@ regression-compatibility evidence only, not new Lean acceptance-flow evidence.
 
 1. **Result 9** — done under Model A (uniform injective assurance relabel);
    `EraseTransport` adds constructive well-checkedness transport.
-2. **General executable edge decider (#17)** — done:
+2. **General executable edge decider** — done:
    `Compile.edgeB`/`edgeB_faithful` construct `Compile.Faithful`.
-3. **Attack completeness (#18)** — done for the Lean reference PL:
+3. **Attack completeness** — done for the Lean reference PL:
    `checkUnit` constructs the exact accepted-unit invariant used by result 7.
-4. **Dependency accountability (result 3)** — done (#46): `Backend.uses`
+4. **Dependency accountability (result 3)** — done: `Backend.uses`
    carries obligation 4 as three laws over the explicit full consulted
    context `Δ ++ T`, for one fixed backend core per registered identity
    with digests resolving only to theory data — coverage (`uses_covers`:
@@ -333,11 +333,11 @@ regression-compatibility evidence only, not new Lean acceptance-flow evidence.
 
 ---
 
-## 8. PW0: the possible-world outer-model gate (#192, tracker #189)
+## 8. PW0: the possible-world outer-model gate
 
 An outer *comparison* layer over unchanged local judgments — the first
 mechanized piece of the possible-world semantics wrapper. It is a spike, not a
-milestone: its exit decision (whether to proceed to T6, #191) is taken on #192.
+milestone: its exit decision (whether to proceed to T6) is taken as part of the spike.
 
 Mechanized in five modules that **only import** — no existing semantics module
 changed, which is the wrapper's first gate:

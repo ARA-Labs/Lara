@@ -5,7 +5,7 @@ session:
   last_turn: "2026-09-07T22:10"
   turn_count: 5
   summary: >
-    Turn 1 — issue #227 closed by PR #257: Lara/Examples/SurfaceTransport.lean
+    Turn 1 — the issue closed by the PR: Lara/Examples/SurfaceTransport.lean
     witnesses Lara.Context.surface_directAF_relabel unconditionally
     (surfaceTransport_directAF_eq) on two accepted surface programs differing in
     one nd@1 certificate related by certSwap, with 34 theorems all inside the
@@ -16,28 +16,28 @@ session:
     Lara.lean import and re-runs all four gates from a wiped .lake: 149 jobs (up
     from 148), coverage 2375 declarations, both self-tests green, axiom audit
     green with 34 SurfaceTransport rows. Three citation corrections landed with
-    it. Two follow-ups filed: #258 (the witnessed pair is edge-free, so
-    coveredB_relabel runs on an empty attack set) and #259 (a CI closure check;
-    this was the second occurrence of the #242 failure mode).
+    it. Two follow-ups filed: one noting the witnessed pair is edge-free, so
+    coveredB_relabel runs on an empty attack set, and one adding a CI closure check;
+    this was the second occurrence of the failure mode.
 
-    Turn 2 — issue #260 closed by PR #267: the §5.2 optional adapter portfolio
+    Turn 2 — the adapter-portfolio issue closed by a PR. The §5.2 optional adapter portfolio
     is complete. insp@1 (Lara.Strict.Insp, lean/Lara/Insp.lean) ships the static
     code-inspection checker as a closed four-predicate family over declared
     exhaustive inventories, certifying the CLOSED-WORLD STEP — a negative
     existential over code follows deductively from an exhaustive enumeration —
     and never the enumeration's faithfulness to bytes, which stays a defeasible
-    leaf under the gated evidence-admission work (#78). §9 result 10 discharged
+    leaf under the gated evidence-admission work. §9 result 10 discharged
     in Lean (17 theorems, trio-clean); evidence is 23 property groups, four wire
     anchors, and worked example S9 built as corpus unit C09's shape plus the one
     leaf C09 lacks. Two theorems fix the contrary question in both directions
     and crystallized C51; C27 gained its third and sharpest instance. The
     requested mutation leg was built, fully verified, and REVERTED on finding it
     collides with frozen input row 1 of the evaluation-corpus freeze — that cost
-    is measured and filed as #266 rather than discovered downstream. differential
+    is measured and filed as a budgeted follow-up rather than discovered downstream. Differential
     620 → 625 with 0 fail; every other local gate green, and the ARA span checker
     went from 5 pre-existing failures to PASS.
 
-    Turn 3 — issue #216 closed by PR #271, lifting M4 Part A's contextual
+    Turn 3 — the issue closed by the PR, lifting M4 Part A's contextual
     observation from the grounded labelling to an arbitrary
     Semantics.ExtensionSemantics. What is parameterized is the PROJECTION read
     off the linked carrier, not the semantics: Lara.Context.obsGen takes an
@@ -57,7 +57,7 @@ session:
     collapse is a build failure. Lean-only and purely additive: 154 jobs exit 0,
     coverage 37 declarations, axiom audit trio-clean, no frozen module touched.
     C49's "generic extension semantics" untested boundary discharged and C52
-    crystallized; follow-ups #268, #269, #270.
+    crystallized; three follow-ups filed.
 
 events_logged:
   - turn: 1
@@ -65,13 +65,13 @@ events_logged:
     id: "N318"
     routing: direct
     provenance: ai-executed
-    summary: "#227 closed with a purpose-built pair; supersedes N300's 'milestone-sized' sizing, whose blocker half was wrong — the one kernel-opaque function is NDNamed.lowerFormula, not reconstructExplicitTerm."
+    summary: "Closed with a purpose-built pair; supersedes N300's 'milestone-sized' sizing, whose blocker half was wrong — the one kernel-opaque function is NDNamed.lowerFormula, not reconstructExplicitTerm."
   - turn: 1
     type: dead_end
     id: "N319"
     routing: direct
     provenance: ai-executed
-    summary: "First gate run was contaminated: module outside the lake build closure, audit consumed a hand-built olean. Second occurrence of the #242 failure mode."
+    summary: "First gate run was contaminated: module outside the lake build closure, audit consumed a hand-built olean. Second occurrence of the failure mode."
   - turn: 1
     type: experiment
     id: "N320"
@@ -83,7 +83,7 @@ events_logged:
     id: "N321"
     routing: direct
     provenance: ai-suggested
-    summary: "Witnessed pair is edge-free; checkedAF_map's edge half exercised on an empty attack list. Open, filed as #258."
+    summary: "Witnessed pair is edge-free; checkedAF_map's edge half exercised on an empty attack list. Open, filed."
   - turn: 1
     type: observation
     id: "O147"
@@ -108,7 +108,7 @@ events_logged:
     id: "N322"
     routing: direct
     provenance: ai-executed
-    summary: "insp@1 ships certifying the closed-world step over declared inventories; byte-faithfulness stays a defeasible leaf (that is evidence-admission #78, not a backend)."
+    summary: "insp@1 ships certifying the closed-world step over declared inventories; byte-faithfulness stays a defeasible leaf (that is evidence-admission, not a backend)."
   - turn: 2
     type: decision
     id: "N323"
@@ -126,7 +126,7 @@ events_logged:
     id: "N325"
     routing: direct
     provenance: ai-executed
-    summary: "S9 mutation base built and fully verified (568 mutants, 27 new), then reverted: fixtures/mutants/ is frozen input row 1, so it costs a v5->v6 re-cut plus an axis-(c) re-run. Budgeted into #266."
+    summary: "S9 mutation base built and fully verified (568 mutants, 27 new), then reverted: fixtures/mutants/ is frozen input row 1, so it costs a v5->v6 re-cut plus an axis-(c) re-run. Budgeted into."
   - turn: 2
     type: experiment
     id: "N326"
@@ -167,14 +167,14 @@ ai_actions:
       - "ara/evidence/proofs/m4_contextual_adequacy.md"
   - turn: 1
     action: >
-      Filed issues #258 and #259 and referenced both from the PR body; corrected
+      Filed the issues and referenced both from the PR body; corrected
       the PR's theorem count (35 -> 34) and job count (148 -> 149).
     provenance: ai-executed
     files_changed: []
 
   - turn: 2
     action: >
-      Read #260, then the ord@1 shipped-backend pattern end to end (adapter,
+      Read the tracker item, then the ord@1 shipped-backend pattern end to end (adapter,
       Lean r10 module, wire fixtures, worked example, registry wiring) before
       designing anything, and read the two corpus annotations the issue names
       (rebench-triton_cumsum C05, rebench-rust_codecontests C09) so the goal
@@ -233,7 +233,7 @@ ai_actions:
   - turn: 2
     action: >
       Added and fully verified the S9 mutation base (27 mutants), then reverted
-      it on finding the collision with frozen input row 1, filed #266 with the
+      it on finding the collision with frozen input row 1, filed a follow-up with the
       measured cost, and recorded the deferral in three documents rather than
       leaving it for review to find.
     provenance: ai-executed
@@ -244,7 +244,7 @@ ai_actions:
   - turn: 2
     action: >
       Wrote the design record, amended the specification and both freeze
-      checklists, and opened PR #267 against #260. Repaired seven stale
+      checklists, and opened the PR. Repaired seven stale
       docs/spec.md line citations in ara/logic/claims.md — five were already
       failing check_ara_source_spans.py before this branch and the §5.2 edits
       shifted two more, so the gate now passes at 58 quotations.
@@ -282,7 +282,7 @@ logic_revisions:
     note: >
       Consistency pass only — the quotation was intact but the code had drifted
       27 lines, so scripts/check_ara_source_spans.py failed on a stale span.
-      Pre-existing on this branch and unrelated to #227; found because this turn
+      Pre-existing on this branch and unrelated; found because this turn
       ran the checker over the ara/ edits. Statement, Conditions, and Status
       untouched; the cited line still reads verbatim as quoted.
   - turn: 1
@@ -294,11 +294,11 @@ logic_revisions:
       escape is a purpose-built pair; what made it cheap was narrowing the
       opaque surface (NDNamed.lowerFormula, not reconstructExplicitTerm), which
       refutes N300's sizing; and a witness discharging every hypothesis can
-      still be degenerate (#258).
+      still be degenerate.
     signal: artifact-commitment
     provenance: ai-suggested
     note: >
-      PR #257 merged code that depends on exactly this constraint — the fixture
+      The PR merged code that depends on exactly this constraint — the fixture
       exists in the shape it does because native_decide is banned from the audit.
 
   - turn: 2
@@ -385,7 +385,7 @@ key_context:
   - turn: 2
     excerpt: >
       User: "let's resolve it. do it directly and open the pr" — full delegation
-      on #260, so every design choice this turn is ai-executed with no
+      on, so every design choice this turn is ai-executed with no
       affirmation signal available. That is why C51 crystallized at testing
       rather than supported, and why the S9 mutation deferral was written up as
       a measured cost in three documents plus an issue rather than raised as a
@@ -401,18 +401,18 @@ key_context:
       gap. S9 is C09 plus the one leaf C09 lacks.
 
 open_threads:
-  - "#258 — an attack-bearing witness so coveredB_relabel is exercised on a non-empty attack set."
-  - "#259 — CI check that every Lara/**/*.lean is inside the lake build closure; third occurrence otherwise likely."
-  - "#255 — surface_directAF_link, the other half of the §4 gap, still uninstantiated."
-  - "PR #257 awaiting re-review; approval not yet given."
+  - "An attack-bearing witness so coveredB_relabel is exercised on a non-empty attack set."
+  - "CI check that every Lara/**/*.lean is inside the lake build closure; third occurrence otherwise likely."
+  - "Surface_directAF_link, the other half of the §4 gap, still uninstantiated."
+  - "The PR awaits re-review; approval not yet given."
   - "Cross-model pass on the Lean proofs never happened — codex exec was at its usage limit until Sep 8."
-  - "#266 — S9 (and S2) as mutation bases at the next evaluation-corpus freeze re-cut; the work is done and reverted, the cost is measured."
-  - "PR #267 awaiting review."
+  - "S9 (and S2) as mutation bases at the next evaluation-corpus freeze re-cut; the work is done and reverted, the cost is measured."
+  - "The PR awaits review."
   - "No corpus unit exercises insp@1, exactly as none exercises ord@1; both wait on the deferred corpus-v2 extension."
 
 ai_suggestions_pending:
   - "O147 — the wiped-cache rule for build-dependent gates. Staged; would become a heuristic if a second instance shows the rule catching something."
-  - "O148 — guards on an input relabel vs non-degeneracy of the witnessed conclusion. Staged pending #258."
+  - "O148 — guards on an input relabel vs non-degeneracy of the witnessed conclusion. Staged pending."
   - "O149 — check which evidence surfaces are frozen inputs before building the evidence. Staged; one instance."
   - "C51 at testing — would reach supported on a third backend instance, or on the user affirming the criterion."
 
@@ -431,7 +431,7 @@ turn_3:
       id: "N328"
       routing: direct
       provenance: ai-executed
-      summary: "obsGen_congr takes exactly backend_replacement_congruence's hypotheses — no AttackExtensional — because compileUnit_link_relabel concludes a carrier *equality*. #216's cost estimate expected otherwise. Gates at 225cac8: 154 jobs, coverage 37, audit passed, zero sorryAx/ofReduceBool."
+      summary: "obsGen_congr takes exactly backend_replacement_congruence's hypotheses — no AttackExtensional — because compileUnit_link_relabel concludes a carrier *equality*. The issue's cost estimate expected otherwise. Gates at 225cac8: 154 jobs, coverage 37, audit passed, zero sorryAx/ofReduceBool."
     - turn: 3
       type: decision
       id: "N329"
@@ -443,13 +443,13 @@ turn_3:
       id: "N330"
       routing: direct
       provenance: ai-suggested
-      summary: "The observation *functions* separate; the equivalence *relations* are untouched. CtxEquiv -> CtxEquivSem sem is neither proved nor refuted. Open, filed as #268."
+      summary: "The observation *functions* separate; the equivalence *relations* are untouched. CtxEquiv -> CtxEquivSem sem is neither proved nor refuted. Open, filed."
     - turn: 3
       type: question
       id: "N331"
       routing: direct
       provenance: ai-suggested
-      summary: "The congruence witnesses sit at ctxEx/fragEx, where the sem quantifier is inert, and on a certificate-free fragment. Open, filed as #270 and #269."
+      summary: "The congruence witnesses sit at ctxEx/fragEx, where the sem quantifier is inert, and on a certificate-free fragment. Open, filed."
     - turn: 3
       type: observation
       id: "O151"
@@ -511,7 +511,7 @@ turn_3:
         with 37 declarations; lake env lean AxCheck.lean piped to
         check-axioms.sh passed. Scanned the full audit output for sorryAx and
         ofReduceBool — zero of each. Verified by hand that all three modules
-        produce oleans under lean/.lake/build/lib/lean/ (the #259 failure mode).
+        produce oleans under lean/.lake/build/lib/lean/ (the failure mode).
         Verified the branch diff against main touches none of the six frozen
         modules.
       provenance: ai-executed
@@ -519,9 +519,9 @@ turn_3:
         - "ara/evidence/proofs/m4_generic_observation.md"
     - turn: 3
       action: >
-        Opened PR #271 (closes #216) and filed three follow-ups: #268 (relations
-        vs functions), #269 (certificate-bearing instantiation), #270
-        (Admissible for a disagreeing carrier). Deleted the executed plan per
+        Opened the PR and filed three follow-ups: relations
+        vs functions, certificate-bearing instantiation, and
+        Admissible for a disagreeing carrier. Deleted the executed plan per
         CLAUDE.md after moving everything durable into
         docs/theory-m4-generic-observation.md.
       provenance: ai-executed
@@ -553,7 +553,7 @@ turn_3:
         related backends.
       after: >
         Holds over the frozen compilation carrier at **any** extension semantics — originally
-        proved for grounded only, and generalized in #216 with no additional hypothesis, because
+        proved for grounded only, and later generalized with no additional hypothesis, because
         what the profile-preservation argument concludes is an *equality* of compiled carriers
         and every reader of a carrier inherits it (`obsGen_congr`,
         `backend_replacement_congruence_sem`). Requires admissible contexts — the link guard
@@ -565,11 +565,11 @@ turn_3:
         outcomes need not agree. Openness is leaf-name openness only: term-level holes are
         unrepresentable because the compile boundary forces an empty obligation set on every
         declared argument. Untested boundary: contexts carrying assurances moved by the relabel,
-        two-way acceptance, relational quantification over related backends (#215), how the
-        *equivalence relations* at different semantics compare (#268 — the observation functions
+        two-way acceptance, relational quantification over related backends, how the
+        *equivalence relations* at different semantics compare (the observation functions
         are separated, the relations are not), and a semantics-parametric congruence witness at a
-        carrier where the semantics parameter is not inert (#270) or on a certificate-bearing
-        fragment (#269).
+        carrier where the semantics parameter is not inert or on a certificate-bearing
+        fragment.
       signal: empirical-resolution
       provenance: ai-suggested
       note: >
@@ -580,8 +580,8 @@ turn_3:
     - turn: 3
       entry: C49
       field: Proof
-      before: "[... PR #218, commits 78493f5, 776e50c, 0dc676c, 4c308c2, c61c91f]"
-      after: "[... PR #218, commits 78493f5, 776e50c, 0dc676c, 4c308c2, c61c91f. Generic instance (#216): `Lara.Context.obsGen_congr`, `backend_replacement_congruence_sem`, `registry_swap_congruence_sem`, `backend_replacement_congruence_composed_sem`, `whole_program_replacement_sem`; `ara/evidence/proofs/m4_generic_observation.md`; `docs/theory-m4-generic-observation.md`; PR #271, commits 3bc0e65, 40202bc, 02a64fd, 4dc223e]"
+      before: "[... The PR, commits 78493f5, 776e50c, 0dc676c, 4c308c2, c61c91f]"
+      after: "[... The PR, commits 78493f5, 776e50c, 0dc676c, 4c308c2, c61c91f. Generic instance: `Lara.Context.obsGen_congr`, `backend_replacement_congruence_sem`, `registry_swap_congruence_sem`, `backend_replacement_congruence_composed_sem`, `whole_program_replacement_sem`; `ara/evidence/proofs/m4_generic_observation.md`; `docs/theory-m4-generic-observation.md`; the PR, commits 3bc0e65, 40202bc, 02a64fd, 4dc223e]"
       signal: empirical-resolution
       provenance: ai-suggested
     - turn: 3
@@ -610,11 +610,11 @@ turn_3:
         attacks — that asymmetry is what the separation needs.
 
   open_threads:
-    - "#268 — does grounded CtxEquiv imply CtxEquivSem at other semantics? Needs an argument over the unbounded context quantifier; plausibly milestone-sized."
-    - "#270 — prove Admissible for cycleCtx/cycleFrag so a congruence witness sits where the sem quantifier is not inert. Mirrors Linking.admissible_split; the cyclic policy has three contrary pairs rather than one, so the SideOk obligations are larger."
-    - "#269 — instantiate the generic congruence on certCtx/certFrag, the only fixture where the relabel is a real backend swap."
-    - "#259 — CI closure check still open; the build-closure verification for these three modules was done by hand again."
-    - "PR #271 is open and unreviewed."
+    - "Does grounded CtxEquiv imply CtxEquivSem at other semantics? Needs an argument over the unbounded context quantifier; plausibly milestone-sized."
+    - "Prove Admissible for cycleCtx/cycleFrag so a congruence witness sits where the sem quantifier is not inert. Mirrors Linking.admissible_split; the cyclic policy has three contrary pairs rather than one, so the SideOk obligations are larger."
+    - "Instantiate the generic congruence on certCtx/certFrag, the only fixture where the relabel is a real backend swap."
+    - "CI closure check still open; the build-closure verification for these three modules was done by hand again."
+    - "The PR is open and unreviewed."
 
   ai_suggestions_pending:
     - "O152 — parameterize the projection rather than the concept (heuristic; one instance so far)."
@@ -630,7 +630,7 @@ turn_4:
       id: "N332"
       routing: direct
       provenance: user
-      summary: "#216 found already merged (PR #271 = this session's turn 3); plan rescoped to its one unexecuted part, the §2A refactor"
+      summary: "Found already merged (landed in this session's turn 3); plan rescoped to its one unexecuted part, the §2A refactor"
     - turn: 4
       type: decision
       id: "N333"
@@ -722,7 +722,7 @@ turn_4:
       signal: empirical-resolution
       provenance: ai-suggested
       note: >
-        PR #271 parameterized the reader and still left the premise as prose, because
+        The PR parameterized the reader and still left the premise as prose, because
         `obs : Observation` and `obsGen g : Outcome α` are not comparable. Commit eb6e955
         unified the types and the same equation closes by `rfl`. The sufficiency gap is what
         this turn measured, so the corollary is sharpened rather than merely restated.
@@ -730,7 +730,7 @@ turn_4:
       entry: C52
       field: Conditions
       before: "Untested boundary: this is one instance in one development, and no claim is made that the equality/pointwise dichotomy exhausts the transport forms a shared lemma can take, nor that the equality case is always reachable by design rather than by luck."
-      after: "The sufficiency refinement was established separately, by landing both forms: the reader-parameterized family was first shipped with the generic type sitting *beside* the frozen one (PR #271), where `obs = obsGen (Invariants.status canon)` does not typecheck across the two types and the premise is prose; replacing the frozen inductive with an abbreviation of the generic one (commit eb6e955) makes the same equation close by `rfl`, and cost no `decide`-closed fixture because `abbrev` is definitionally transparent. Untested boundary: [as before] ...; the replace-vs-sit-beside refinement likewise rests on this single pair of landed designs, in a language where `abbrev` is definitionally transparent."
+      after: "The sufficiency refinement was established separately, by landing both forms: the reader-parameterized family was first shipped with the generic type sitting *beside* the frozen one, where `obs = obsGen (Invariants.status canon)` does not typecheck across the two types and the premise is prose; replacing the frozen inductive with an abbreviation of the generic one (commit eb6e955) makes the same equation close by `rfl`, and cost no `decide`-closed fixture because `abbrev` is definitionally transparent. Untested boundary: [as before]...; the replace-vs-sit-beside refinement likewise rests on this single pair of landed designs, in a language where `abbrev` is definitionally transparent."
       signal: empirical-resolution
       provenance: ai-suggested
     - turn: 4
@@ -743,16 +743,16 @@ turn_4:
     - turn: 4
       entry: C52
       field: Proof
-      before: "[`Lara.Context.obsGen_congr` and its four instantiations, `lean/Lara/Context/Observation.lean`; `Lara.Context.compileUnit_link_relabel`, `lean/Lara/Context/Equivalence.lean:586`; ... PR #271; trace N327, N328]"
-      after: "[`Lara.Context.obsGen_congr` and its four instantiations, `lean/Lara/Context/Equivalence.lean:801` (the instantiations in `lean/Lara/Context/Observation.lean`); `Lara.Context.obs_eq_obsGen`, `lean/Lara/Context/Equivalence.lean:682` (the collapse, by `rfl`); `Lara.Context.compileUnit_link_relabel`, `lean/Lara/Context/Equivalence.lean:729`; ... PR #271, commit eb6e955; trace N327, N328, N333, N334]"
+      before: "[`Lara.Context.obsGen_congr` and its four instantiations, `lean/Lara/Context/Observation.lean`; `Lara.Context.compileUnit_link_relabel`, `lean/Lara/Context/Equivalence.lean:586`;... The PR; trace N327, N328]"
+      after: "[`Lara.Context.obsGen_congr` and its four instantiations, `lean/Lara/Context/Equivalence.lean:801` (the instantiations in `lean/Lara/Context/Observation.lean`); `Lara.Context.obs_eq_obsGen`, `lean/Lara/Context/Equivalence.lean:682` (the collapse, by `rfl`); `Lara.Context.compileUnit_link_relabel`, `lean/Lara/Context/Equivalence.lean:729`;... The PR, commit eb6e955; trace N327, N328, N333, N334]"
       signal: dependency-change
       provenance: ai-suggested
       note: "obsGen_congr changed module and compileUnit_link_relabel's line moved. Refs repointed; content unchanged."
     - turn: 4
       entry: C49
       field: Proof
-      before: "[... PR #271, commits 3bc0e65, 40202bc, 02a64fd, 4dc223e]"
-      after: "[... PR #271, commits 3bc0e65, 40202bc, 02a64fd, 4dc223e; unified onto one observation type in commit eb6e955, which preserved every statement]"
+      before: "[... The PR, commits 3bc0e65, 40202bc, 02a64fd, 4dc223e]"
+      after: "[... The PR, commits 3bc0e65, 40202bc, 02a64fd, 4dc223e; unified onto one observation type in commit eb6e955, which preserved every statement]"
       signal: dependency-change
       provenance: ai-suggested
       note: >
@@ -764,7 +764,7 @@ turn_4:
     - turn: 4
       excerpt: >
         The plan's coordination note had pre-registered exactly this contingency: "An
-        implementation of #216 already exists on another machine, unpushed ... If that branch
+        implementation of the generic instance already exists on another machine, unpushed... If that branch
         is pushed first, this plan becomes a review checklist against it — in particular, check
         whether it also generalized the congruence to an arbitrary reader." It had. The note is
         why the discovery cost one issue-status check rather than a duplicated milestone, and
@@ -875,8 +875,8 @@ turn_5:
         citations describe the tree as it was, and repointing them would falsify the record.
 
   open_threads:
-    - "PR #274 open, carrying the §2A refactor plus this follow-up."
-    - "check-lean-citations.py is not wired into CI (#225 is broken anyway) and is not run by any script other than by hand; it should join the local gate list in CONTRIBUTING or the PR template."
+    - "The PR is open, carrying the §2A refactor plus this follow-up."
+    - "check-lean-citations.py is not wired into CI (CI is broken anyway) and is not run by any script other than by hand; it should join the local gate list in CONTRIBUTING or the PR template."
     - "The 9 ALLOWLIST entries are line-pinned, so they will themselves rot when their files move; the gate reports an unused entry, which surfaces it, but does not repair it."
 
   ai_suggestions_pending:

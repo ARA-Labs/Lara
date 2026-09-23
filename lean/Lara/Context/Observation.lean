@@ -312,7 +312,7 @@ labelling, and this makes that visible rather than asserting it. Read
 why admissibility cannot be dropped.
 
 Like its grounded ancestor this is **not** parametricity (no relational
-quantification over related backends — issue #215) and not full abstraction (no
+quantification over related backends) and not full abstraction (no
 logical relation — Part B). -/
 theorem backend_replacement_congruence_sem (sem : ExtensionSemantics)
     (hf : Function.Injective f)

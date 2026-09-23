@@ -1,5 +1,5 @@
 -- | The paper's running example (fig:example) as a standing freshness test
--- (P6, issue #70): the committed golden
+-- (P6): the committed golden
 -- @measurements\/frozen\/running-example.txt@ must reproduce byte-for-byte
 -- from re-checking the two run programs through the pure
 -- "Lara.RunningExample" pipeline — the same module

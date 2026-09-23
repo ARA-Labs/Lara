@@ -5,7 +5,7 @@ session:
   last_turn: "2026-08-26T21:22"
   turn_count: 5
   summary: >
-    Closed and merged theory M0 after review, then corrected M1 issue #184's
+    Closed and merged theory M0 after review, then corrected the M1 issue's
     false universal fixed-context iff. M1 now mechanizes all-Nat
     structured-framework isomorphism, executable realizability,
     frozen-invariant necessity, retained-node sortedness, and an accepted
@@ -21,7 +21,7 @@ events_logged:
     id: "N220"
     routing: direct
     provenance: user
-    summary: "Theory spine opens: core mechanization, tracker #180, B0 + M0-M5. Backfilled -- had no trace record."
+    summary: "Theory spine opens: core mechanization, the tracker, B0 + M0-M5. Backfilled -- had no trace record."
   - turn: 1
     type: decision
     id: "N221"
@@ -45,7 +45,7 @@ events_logged:
     id: "N224"
     routing: direct
     provenance: user-revised
-    summary: "#183's counterexample criterion scoped to carrier-level invariants; source-level row 7 witness owned by #182; conclusion well-sortedness added to #184's Work list."
+    summary: "The issue's counterexample criterion scoped to carrier-level invariants; source-level row 7 witness owned; conclusion well-sortedness added to the issue's Work list."
   - turn: 1
     type: observation
     id: "O90"
@@ -145,7 +145,7 @@ ai_actions:
       CheckedProgram.nodup recited at its field line 478 rather than the
       structure line 471; the canonical-scope pointer changed from a bare
       relative path that does not resolve in this repo to the full
-      URL #180-#184 already use; lean/README.md's verification snapshot
+      URL the tracker issues already use; lean/README.md's verification snapshot
       updated from 76 jobs / 760 reports to the measured 78 / 780.
     provenance: ai-executed
     files_changed:
@@ -154,16 +154,16 @@ ai_actions:
   - turn: 1
     action: >
       Issue tracker updates: added conclusion well-sortedness as a Work item on
-      #184; narrowed #183's second acceptance bullet to carrier-level
-      invariants and posted the reasoning as a comment on #183, including the
-      offer to reopen and confirm row 7 after #182 lands if the narrowing reads
-      as fitting the criterion to the delivery.
+      the M1 issue; narrowed its predecessor's second acceptance bullet to
+      carrier-level invariants and posted the reasoning as a comment,
+      including the offer to reopen and confirm row 7 after the B0 delivery
+      lands if the narrowing reads as fitting the criterion to the delivery.
     provenance: ai-executed
     files_changed: []
   - turn: 2
     action: >
-      Inspected live issue #184, parent tracker #180, predecessor #183, merged
-      PR #194, the canonical theory-depth M1 scope, the frozen invariant
+      Inspected the live M1 issue, its parent tracker, its predecessor, the merged
+      theory-M0 PR, the canonical theory-depth M1 scope, the frozen invariant
       record, and the Lean checker/compiler/attack/sortedness paths. Created
       branch theory/m1-compilation-image from main at 153bc63.
     provenance: ai-executed
@@ -179,7 +179,7 @@ ai_actions:
     files_changed: []
   - turn: 3
     action: >
-      Revised the issue #184 implementation plan to replace the absolute M0
+      Revised the issue implementation plan to replace the absolute M0
       preservation rule with a post-Task-4 evidence gate. The gate permits an
       exact-iff carrier revision only when the new field is carrier-observable,
       does not quantify over realizability witnesses, has an independent
@@ -279,7 +279,7 @@ key_context:
       actioned this turn was non-vacuity, doc precision, or tracking.
   - turn: 2
     excerpt: >
-      Source-level obstruction to #184 as written: CompilerInvariant has only
+      Source-level obstruction to the M1 statement as written: CompilerInvariant has only
       ranged and conflictComplete. With empty contraries and exceptions every
       HasAttack constructor is impossible, so compiled frameworks are
       edgeless; a one-node self-edge remains ranged and conflictComplete is
@@ -313,13 +313,13 @@ key_context:
       failures; replay tampering and all 4 freeze rollback tests passed.
 
 open_threads:
-  - "PR #194 not yet merged; the review response is pushed but the PR body still cites the pre-rename doc path and needs updating before merge."
-  - "M1 (#184) is next and now carries three obligations: the realize construction, conclusion well-sortedness under Sigma, and the O91 problem -- sufficiency must construct undercut/undermine attacks that a conclusion labelling cannot see."
-  - "Row 7 of the M0 invariant table (strict-chain well-formedness) still has no rejecting witness; it lands with B0 (#182)."
+  - "Not yet merged; the review response is pushed but the PR body still cites the pre-rename doc path and needs updating before merge."
+  - "M1 is next and now carries three obligations: the realize construction, conclusion well-sortedness under Sigma, and the O91 problem -- sufficiency must construct undercut/undermine attacks that a conclusion labelling cannot see."
+  - "Row 7 of the M0 invariant table (strict-chain well-formedness) still has no rejecting witness; it lands with B0."
   - "The staging buffer has ~30 unpromoted, unstale observations, many idle since well before the N219 pivot. The stale sweep is overdue and was deliberately not run this turn -- see pm_reasoning_log."
-  - "#121's dependency is a person and it remains the one open issue whose resolution changes what the paper may claim (carried from 2026-08-25_001)."
-  - "The first open thread above is historical: PR #194 merged as commit 153bc63 and #183 closed before turn 2 began."
-  - "N226 is an unapproved scope recommendation. The researcher must review the draft plan before implementation or edits to issue #184 and the paper theory plan."
+  - "The issue's dependency is a person and it remains the one open issue whose resolution changes what the paper may claim (carried from 2026-08-25_001)."
+  - "The first open thread above is historical: the PR merged as commit 153bc63 and closed before turn 2 began."
+  - "N226 is an unapproved scope recommendation. The researcher must review the draft plan before implementation or edits to the issue and the paper theory plan."
   - "The M1 counterexample is source-derived but not yet mechanized; O93 remains staged until implementation evidence or researcher affirmation supplies a closure signal."
   - "The N226 approval thread is closed by N227. M0 is editable, but the post-Task-4 gate must identify an independently necessary and constructively sufficient carrier field before any rewrite."
   - "O93 remains staged. The researcher approved the scope recommendation, not the counterexample as mechanized evidence; the planned Lean theorem remains its closure path."
@@ -328,6 +328,6 @@ open_threads:
 ai_suggestions_pending:
   - "O90 and O91: the two properties of the compilation image handed to M1. Recorded in the M0 document but not researcher-evaluated; both are consequences read off the frozen record rather than results."
   - "O92: the general lesson about conditional counterexamples witnessed only at a degenerate instance. One instance."
-  - "O93/N226: proposed correction of #184 from an unconditional iff and realize operation to necessity plus a mechanized non-sufficiency boundary; awaiting researcher review."
+  - "O93/N226: proposed correction of from an unconditional iff and realize operation to necessity plus a mechanized non-sufficiency boundary; awaiting researcher review."
   - "Supersedes the prior O93/N226 pending line only for N226: N227 records approval of the evidence-gated scope decision; O93 remains staged pending the planned Lean counterexample or explicit claim-level affirmation."
   - "The O93/N226 pending lines are closed: N228 supplies the mechanized counterexample and complete gates, N229 records carrier retention, and O93 is now C34."

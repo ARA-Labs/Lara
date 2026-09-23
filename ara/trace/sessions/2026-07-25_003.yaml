@@ -2,12 +2,12 @@ session:
   id: "2026-07-25_003"
   timestamp: "2026-07-25T04:53"
   ended: "2026-07-25T04:53"
-  summary: "Resolved PR #21 against the latest main while preserving both ARA histories and globally unique identifiers."
+  summary: "Resolved the PR against the latest main while preserving both ARA histories and globally unique identifiers."
 
 events_logged: []
 
 ai_actions:
-  - action: "Merged origin/main through comparison PRs #22–#24 without altering their landed documentation or session record."
+  - action: "Merged origin/main through the comparison PRs without altering their landed documentation or session record."
     provenance: ai-executed
     files_changed:
       - "docs/novelty-and-related-work.md"

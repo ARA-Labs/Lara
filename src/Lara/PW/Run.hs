@@ -1,4 +1,4 @@
--- | The possible-world outer runtime (#322): load declared worlds, check the
+-- | The possible-world outer runtime: load declared worlds, check the
 -- bridge registry, resolve candidate edges, then answer modal queries and
 -- source-claim comparisons. The Haskell side of the @pw-run 1@ contract, whose
 -- Lean reference is @lean\/Lara\/PW\/Run.lean@ and whose byte-level agreement
@@ -23,7 +23,7 @@
 -- @addWorld_checks_declared@); a world with a conflicting group is refused,
 -- because quarantine would make a public status conditional.
 --
--- __Sources (#327).__ A world's envelope is inline, in a file, or elaborated
+-- __Sources.__ A world's envelope is inline, in a file, or elaborated
 -- from a @.lara@ presentation program through the same steps @lara check@
 -- takes on that file alone. The Lean reference has no surface parser, so
 -- 'deriveRunFile' produces the equivalent document with every source inline;
@@ -574,7 +574,7 @@ quarantineDetail audit =
 -- which is not UTF-8 is the read failure @lara check@ reports and not a
 -- surrogate-escaped decode. The @lara@ CLI does this once for every door
 -- (@textBoundary@ in @app\/Main.hs@), which is what makes a @(lara PATH)@
--- world and @lara check@ on the same file agree (\#334). A @(file PATH)@
+-- world and @lara check@ on the same file agree. A @(file PATH)@
 -- world needs no such setting: 'readUtf8' reads its bytes and decodes them
 -- here.
 readRunFile :: FilePath -> IO (Either PWError (RunDoc, [WorldInput]))
@@ -596,7 +596,7 @@ runPWFile :: FilePath -> IO (Either PWError Outcome)
 runPWFile file = fmap (>>= uncurry runPW) (readRunFile file)
 
 -- | The self-contained run document equivalent to a run file: every world
--- source replaced by the envelope tree it yielded, in place (#327). The
+-- source replaced by the envelope tree it yielded, in place. The
 -- derivation door of @lara pw-input@, in the style of @lara map-input@.
 --
 -- A world whose source yields no envelope is the first fault, in declaration

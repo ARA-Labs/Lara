@@ -63,7 +63,7 @@ runLara args = readProcessWithExitCode laraBin args ""
 -- set the child's environment, and it decodes the pipes with the test
 -- process's own locale encoding — so a suite run under @LC_ALL=C@ would fail
 -- to read a child that correctly printed a non-ASCII name, which is precisely
--- the run the #334 cases exist to make.
+-- the run these cases exist to make.
 runLaraIn :: [(String, String)] -> [String] -> IO (ExitCode, String, String)
 runLaraIn overrides args = runCapturingUtf8 overrides (proc laraBin args)
 
@@ -111,7 +111,7 @@ runCapturingUtf8 overrides spawn = do
 
 -- | The POSIX locale, whose encoding is ASCII. It is the one locale present on
 -- every machine, and the one under which a non-ASCII @.lara@ file used to be
--- unreadable to @lara check@ (#334).
+-- unreadable to @lara check@.
 cLocale :: [(String, String)]
 cLocale = [("LC_ALL", "C"), ("LC_CTYPE", "C"), ("LANG", "C")]
 
@@ -213,7 +213,7 @@ prop_cliReject = once $ ioProperty $ do
 -- pinned — the reason text (so the channel cannot regress to silence) and the
 -- stdout bytes (so the diagnostic cannot leak onto the wire).
 --
--- Since #130 the reason is followed by the slot → source mapping: the reason
+-- The reason is followed by the slot → source mapping: the reason
 -- names a @(prem i)@ and this is what says what @i@ is. On the raw door the
 -- mapping is __structural__ — leaf ids read off the checked 'Lara.AST.Unit' —
 -- because a wire program has no authored names to recover.
@@ -260,7 +260,7 @@ prop_cliBackendRejectionValues = once $ ioProperty $ do
 -- @stdout@ verdict is again the bare class atom, so the reason cannot leak onto
 -- the wire on this door either.
 --
--- The slot mapping beneath the reason (#130) is the __authored__ one here: this
+-- The slot mapping beneath the reason is the __authored__ one here: this
 -- artifact's two premises resolve to the leaves @e1@ and @e2@ the source
 -- declares, and 'Lara.Elaborate.SlotNames' recovers those names rather than
 -- reporting the structural reading the raw door gets. The two coincide for a
@@ -302,7 +302,7 @@ prop_cliLaraBackendRejectionReason = once $ ioProperty $ do
 --     'prop_cliLaraBackendRejectionReason' pins for the hand-written @0.2@
 --     spelling of the same artifact — D5 adds context, it does not reword the
 --     backend;
---   * the slot mapping under the kernel line (#130) names the leaves the author
+--   * the slot mapping under the kernel line names the leaves the author
 --     wrote in the block's @result@ and @baseline@ fields, which is the whole
 --     point on this form: the author never wrote a slot index, so a rejection
 --     phrased over @(prem i)@ is unreadable without it;
@@ -502,7 +502,7 @@ ltTiePolicy =
     ]
 
 -- ---------------------------------------------------------------------------
--- The text boundary: one program means one thing under every locale (#334)
+-- The text boundary: one program means one thing under every locale
 -- ---------------------------------------------------------------------------
 
 -- | 'cmpTieProgram' with three names respelled outside ASCII and the result
@@ -604,9 +604,9 @@ unicodeReplayId =
     ++ " (artifact sha256:5353535353535353535353535353535353535353535353535353535353535353))"
 
 -- | @lara check@ on a non-ASCII @.lara@ program: the same accepted verdict
--- bytes under the POSIX locale as under the suite's own (#334).
+-- bytes under the POSIX locale as under the suite's own.
 --
--- This is the direction the PW doors were given in \#327\/\#332 and the solo
+-- This is the direction the PW doors were given and the solo
 -- door was not. Before 'textBoundary' covered the whole CLI, this run under
 -- @LC_ALL=C@ printed nothing and exited @2@ with a
 -- @cannot decode byte sequence@ read failure — a program that /means/
@@ -642,7 +642,7 @@ prop_cliLaraLocaleAccept = once $ ioProperty $
 
 -- | The rejecting spelling of the same program: the diagnostics that echo the
 -- author's own non-ASCII names must be __printable__ under the POSIX locale,
--- not merely producible (#334).
+-- not merely producible.
 --
 -- This is the consequence the fix has to carry. Making the program readable
 -- under @LC_ALL=C@ moves the risk downstream: @checkLara@ echoes
@@ -675,7 +675,7 @@ prop_cliLaraLocaleRejectDiagnostics = once $ ioProperty $
 
 -- | @lara deps@ reads through the same seam, so it gets the same boundary: the
 -- report names the resolved atoms, and one of the constants in them is not
--- ASCII (#334).
+-- ASCII.
 prop_cliDepsLocaleAccept :: Property
 prop_cliDepsLocaleAccept = once $ ioProperty $
   withTempLaraDir (unicodeProgram "0.74") [("p.policy.lara", unicodePolicy)] $ \path -> do
@@ -701,7 +701,7 @@ nonUtf8Program :: String
 nonUtf8Program = "# une note résumée\n" ++ minimalProgram
 
 -- | Program text that is not UTF-8 is a __read failure__ under every locale,
--- not a decode that happens to differ (#334).
+-- not a decode that happens to differ.
 --
 -- This is the half strictness buys, and it is why the locale encoding is set
 -- to plain 'utf8' rather than the @\/\/ROUNDTRIP@ variant the output handles
@@ -736,13 +736,13 @@ prop_cliLaraNonUtf8Program = once $ ioProperty $
         ]
 
 -- | A path argument that is not UTF-8 reaches the boundary line rather than
--- the encoder (#334).
+-- the encoder.
 --
 -- This is why @stdout@ and @stderr@ are set @\/\/ROUNDTRIP@ rather than
 -- strict UTF-8. The argument is decoded @\/\/ROUNDTRIP@ too, so the stray
 -- byte becomes a lone surrogate, travels back through @openFile@ as the byte
 -- it was, and leaves through @stderr@ unchanged inside the driver's own
--- exit-@2@ refusal. Before #334 the same run died inside @stderr@'s encoder —
+-- exit-@2@ refusal. Before the boundary fix the same run died inside @stderr@'s encoder —
 -- exit @1@ and a GHC encoding exception where the boundary line should have
 -- been — because the argument had been decoded into a surrogate that the
 -- handle's strict encoder could not write.
@@ -954,7 +954,7 @@ admissionProgram declarations =
     ]
     ++ concat declarations
 
--- | @lara-syntax\@0.7@ (#129) on the __production CLI__: a @discharge@ target
+-- | @lara-syntax\@0.7@ on the __production CLI__: a @discharge@ target
 -- that names both a declared leaf and a prior argument is an /elaboration/
 -- error, not a silent preference for the leaf. It surfaces on the same
 -- source-invalidity channel every other pre-check rejection uses — exit 2,
@@ -1026,7 +1026,7 @@ ambiguousDischargePolicy =
     , "  question audit : audited(X) (optional)"
     ]
 
--- | @lara-syntax\@0.8@ (#131) on the __production CLI__: the two certificate
+-- | @lara-syntax\@0.8@ on the __production CLI__: the two certificate
 -- premise-slot diagnostics that speak about the /name classes/ now name the
 -- citing rule, because \"a premise label\" is only meaningful once the author
 -- knows whose labels were consulted. Both surface on the source-invalidity
@@ -1252,7 +1252,7 @@ prop_cliAdmissionPrecedenceMatrix = once $ ioProperty $ do
 
     -- The replay-preflight (R13) and group-conflict (R9) paths report no slot
     -- sources at all -- "Lara.Driver.Internal".@runCheckReported@ returns @[]@
-    -- for both -- so the #130 slot mapping must not appear under either.  The
+    -- for both -- so the slot mapping must not appear under either.  The
     -- marker assertions above are substring matches and would pass unchanged if
     -- a regression appended a slot block to these two classes' stderr.
     noSlotBlock name (_, _, err) =
@@ -1310,7 +1310,7 @@ prop_cliLaraParseError = once $ ioProperty $
         , counterexample "stdout empty" (out === "")
         ]
 
--- | @lara-syntax\@0.7@ (#135) on the __production CLI__: a @discharge@ under a
+-- | @lara-syntax\@0.7@ on the __production CLI__: a @discharge@ under a
 -- bare @leaf(…)@ has no rule to attach to, so the front door exits 2 with the
 -- located parse message on stderr and nothing on stdout — the same shape the
 -- codec error already uses. Pinned here, not only in "SyntaxSpec", because the
@@ -1328,7 +1328,7 @@ prop_cliLaraDischargeOnBareLeaf = once $ ioProperty $
               ("discharge requires a rule application, not a bare leaf" `isInfixOf` err)
         ]
 
--- | @lara-syntax\@0.7@ (#135) on the production CLI, @open@ half.
+-- | @lara-syntax\@0.7@ on the production CLI, @open@ half.
 prop_cliLaraOpenOnBareLeaf :: Property
 prop_cliLaraOpenOnBareLeaf = once $ ioProperty $
   withTempLaraDir (bareLeafArg "  open q\n") [] $ \path -> do
@@ -1342,7 +1342,7 @@ prop_cliLaraOpenOnBareLeaf = once $ ioProperty $
               ("open requires a rule application, not a bare leaf" `isInfixOf` err)
         ]
 
--- | @lara-syntax\@0.7@ (#133) on the production CLI: the retired @open q as o@
+-- | @lara-syntax\@0.7@ on the production CLI: the retired @open q as o@
 -- spelling exits 2 carrying its repair, so an author migrating a @0.6 source
 -- is told what to write instead.
 prop_cliLaraLegacyOpenAs :: Property
@@ -1453,12 +1453,12 @@ prop_cliLaraDanglingAttack = once $ ioProperty $
         ]
 
 -- ---------------------------------------------------------------------------
--- @lara deps@: the certificate dependency report (#204)
+-- @lara deps@: the certificate dependency report
 -- ---------------------------------------------------------------------------
 
 -- | The report of an accepted @ord\@1@ comparison program, exactly.
 --
--- This is the property \#204 was opened for: before it, @certDeps@ was proved
+-- This is the property @lara deps@ exists for: before it, @certDeps@ was proved
 -- in Lean and mirrored in Haskell but no shipped consumer could reach a report,
 -- so nothing at this level could be asserted at all. S5's two arguments each
 -- compare the same pair of reported cells, and the report names the cells —

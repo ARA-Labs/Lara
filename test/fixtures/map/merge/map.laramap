@@ -1,4 +1,4 @@
-; The structural merge, reached through a real map (issue #316).
+; The structural merge, reached through a real map.
 ;
 ; paper_adopt and paper_critic both declare an argument `conv` built by the
 ; premise-less rule `community_convention(accuracy, glue)`. A leaf-free term has

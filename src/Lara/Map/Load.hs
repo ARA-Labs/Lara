@@ -10,10 +10,10 @@
 --                -> load and recheck each member  ("Lara.Source.Load")
 --                -> compare each member to the manifest's shared contract   <- here
 --                -> qualify + link  ("Lara.Map.Qualify" \/ "Lara.Map.Link")
---                -> composite verdict  (\@Lara.Map.Driver\@, issue #303)
+--                -> composite verdict  (\@Lara.Map.Driver\@)
 -- @
 --
--- Every stage above has landed (issue #303): qualification and linking consume
+-- Every stage above has landed: qualification and linking consume
 -- this module through 'Lara.Map.Link.linkMap', and the @.laramap@ driver
 -- consumes both through 'Lara.Map.Driver.runMap', which is what @lara check
 -- \<file.laramap\>@ runs. 'loadMap' is this module's whole public surface, and
@@ -61,7 +61,7 @@
 -- 'MBCoordinateOutOfRange', and a question's 'MBMixedSelector' — is /not/ here,
 -- and it is not in "Lara.Map.Link" either. It needs each member's claim list,
 -- which is exactly what 'cmClaims' hands onward, and it belongs beside the
--- alignment evaluation that consumes the same coordinates (issue #303).
+-- alignment evaluation that consumes the same coordinates.
 -- Nothing in this module reads
 -- 'Lara.Map.Types.mapAlignments' or 'Lara.Map.Types.mapQuestions'; both travel
 -- through unread on 'checkedManifest'.
@@ -334,7 +334,7 @@ loadMap manifestPath = do
 -- cache through 'loadMap', and nothing in the production path shares one across
 -- invocations, which is what keeps a map a recheck of current bytes (D1). It
 -- exists for the one caller that needs the opposite: the map mode of
--- @scripts\/bench.hs@ (issue #319) warms a cache with one untimed pass, so that
+-- @scripts\/bench.hs@ warms a cache with one untimed pass, so that
 -- its timed passes measure loading, checking and linking rather than disk
 -- reads. A cache handed in here must not outlive the files it read; a caller
 -- reusing one across edits would be reading stale bytes by construction.

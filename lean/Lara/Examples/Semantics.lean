@@ -1,5 +1,5 @@
 /-
-Concrete witnesses for the semantics parameter (theory M2a, issue #185): what
+Concrete witnesses for the semantics parameter (theory M2a): what
 the parametric layer of `Lara.Semantics` actually buys.
 
 No theorem in `Lara.Semantics` compares two instances: each names at most one, or

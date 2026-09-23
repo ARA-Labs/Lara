@@ -74,7 +74,7 @@ Do not update `ara/` or run `/research-manager` for routine next-step guidance,
 PR reviews, or review/request-change resolution unless that work crosses one of
 the thresholds above.
 
-A corollary (settled on #333's review): a session record's `logic_revisions:`
+A corollary (settled in review): a session record's `logic_revisions:`
 `before`/`after` is what a Stage 4 edit wrote *on that turn* — a historical
 snapshot, not a live mirror of `ara/logic/`. When review-round fixes correct
 `ara/logic/` wording without crossing a threshold above, the earlier turn's

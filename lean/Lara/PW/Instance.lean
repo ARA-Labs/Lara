@@ -1,5 +1,5 @@
 /-
-PW0 — the Lara instantiation of the outer model (issue #192).
+PW0 — the Lara instantiation of the outer model.
 
 A scientific context fixes the stable local checking environment
 (Σ, Policy, Registry) — here the checker parameters `canon`/`Gamma`/`CertOk`

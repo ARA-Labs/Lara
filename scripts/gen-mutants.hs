@@ -1,4 +1,4 @@
--- | Seeded mutation-suite generator (M5 tracker #48, T1).
+-- | Seeded mutation-suite generator (T1).
 --
 -- Reads the accept-verdict worked-example anchors @examples\/<NAME>\/example.core.sexp@,
 -- derives every mutant the @Lara.Mutate.*@ generators propose for them
@@ -31,10 +31,10 @@
 -- >  cabal exec -- runghc scripts/gen-mutants.hs --check    -- assert it is fresh
 --
 -- @--check@ regenerates to a scratch tree and diffs it against the committed
--- one, exiting non-zero on any difference (issue #160). CI runs it beside
+-- one, exiting non-zero on any difference. CI runs it beside
 -- @scripts/differential.sh@, so a generated artifact can no longer drift from
 -- its generator unnoticed — the failure that shipped a stale
--- @fixtures\/mutants\/README.md@ in #158.
+-- @fixtures\/mutants\/README.md@.
 module Main (main) where
 
 import Control.Monad (forM, forM_, unless, when)
@@ -138,14 +138,14 @@ generate root = do
   writeFile (root </> "README.md") (readmeFor corpusBases mutants)
   pure (length mutants)
 
--- | @--check@ (issue #160): regenerate into a scratch tree and assert the
+-- | @--check@: regenerate into a scratch tree and assert the
 -- committed suite is byte-identical to it, naming every file that is missing,
 -- unexpected, or differing.
 --
 -- This covers what @test\/MutationSpec.hs@ structurally cannot.
 -- @prop_seededReproducibility@ re-derives the mutant bytes and @MANIFEST.tsv@
 -- from the library, but @README.md@ is rendered by 'readmeFor' /in this
--- script/, so no test can import it — which is why it shipped stale in #158.
+-- script/, so no test can import it — which is why it shipped stale.
 -- Comparing whole trees additionally catches a file the generator has stopped
 -- emitting, which no per-file property ever sees.
 check :: IO ()
@@ -349,7 +349,7 @@ verify m = case mutantExpected m of
         bad
           ( "accept-family structural check failed: expected an accept whose "
               ++ "queried claim is evidence-blocked with conditional status "
-              ++ "justified (spec §4.3, issue #76), got "
+              ++ "justified (spec §4.3), got "
               ++ describe (verdictOutcome verdict)
           )
   ExpectPrimaryStatus status -> withInputVerdict $ \input verdict ->

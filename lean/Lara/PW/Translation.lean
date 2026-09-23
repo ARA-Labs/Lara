@@ -1,5 +1,5 @@
 /-
-# PW-T6 — the partial symbol translation (issue #191, tracker #189)
+# PW-T6 — the partial symbol translation
 
 The bridge-global typed partial claim translation of the possible-world design (its structural bridge),
 realized at the level the checker actually types: a partial map on predicate

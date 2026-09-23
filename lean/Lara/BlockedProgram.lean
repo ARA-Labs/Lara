@@ -4,7 +4,7 @@ import Lara.RawAttack
 
 /-
 The program-level instance of conservative reporting for quarantine-affected
-claims (spec §4.3, issue #76).
+claims (spec §4.3).
 
 `Lara.Blocked` proves the metatheory over an arbitrary pair of frameworks. This
 module builds a declared-index pair matching the drivers' seed computation —
@@ -525,7 +525,7 @@ theorem claimSupportFor_mem_checkedAF
     simpa using congrArg List.length accepted.nodes_terms
   exact hlen ▸ hinodes
 
-/-- **Production non-promotion (issue #80).** For the exact compact AF and
+/-- **Production non-promotion.** For the exact compact AF and
 `completeClaimFor` that `Driver.buildAccept` labels, an unblocked `justified`
 status remains `justified` in the declared framework after all quarantined
 arguments and attacks are reinstated.

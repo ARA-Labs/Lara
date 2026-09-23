@@ -5,7 +5,7 @@ session:
   last_turn: "2026-07-31T21:30"
   turn_count: 2
   summary: >
-    PR #45 (#38 duplicate-report groups) review remediation, two rounds. Round 1
+    The PR (duplicate-report groups) review remediation, two rounds. Round 1
     (N87): fixed the reviewer-reproduced .lara-door R9-evasion hole (R14 parity),
     added the byte-identical R9 stderr diagnostic + differential anchor, made
     rejectionClass total over R9, hardened coverage, corrected provenance docs.
@@ -23,7 +23,7 @@ events_logged:
     routing: direct
     provenance: ai-executed
     summary: >
-      Addressed all PR #45 review findings; R9-evasion hole fixed (.lara R14
+      Addressed all review findings; R9-evasion hole fixed (.lara R14
       validation parity), R9 stderr diagnostic in both drivers + differential
       anchor, rejectionClass total over R9, coverage + doc fixes; all gates green.
   - turn: 1
@@ -126,8 +126,8 @@ logic_revisions:
   - turn: 1
     entry: C21
     field: Proof
-    before: "[trace N86 (both-drivers differential 41/41 incl. group-consistent-accept/group-conflict-quarantine/reject-r9; AxCheck 6 Lara.Groups theorems trio-only), lean/Lara/Groups.lean, PR #45]"
-    after: "[trace N86 (both-drivers differential 41/41 incl. group-consistent-accept/group-conflict-quarantine/reject-r9; AxCheck 6 Lara.Groups theorems trio-only), trace N87 (PR #45 review remediation: R9 stderr byte-compared across both drivers; .lara front-door R14 parity closes a silent-R9-evasion hole; R13→R9 precedence + multi-group independence pinned), lean/Lara/Groups.lean, PR #45]"
+    before: "[trace N86 (both-drivers differential 41/41 incl. Group-consistent-accept/group-conflict-quarantine/reject-r9; AxCheck 6 Lara.Groups theorems trio-only), lean/Lara/Groups.lean, the PR]"
+    after: "[trace N86 (both-drivers differential 41/41 incl. Group-consistent-accept/group-conflict-quarantine/reject-r9; AxCheck 6 Lara.Groups theorems trio-only), trace N87 (review remediation: R9 stderr byte-compared across both drivers; .lara front-door R14 parity closes a silent-R9-evasion hole; R13→R9 precedence + multi-group independence pinned), lean/Lara/Groups.lean, the PR]"
     signal: empirical-resolution
     provenance: ai-suggested
     note: >
@@ -138,8 +138,8 @@ logic_revisions:
   - turn: 2
     entry: C21
     field: Proof
-    before: "[trace N86 (both-drivers differential 41/41 incl. group-consistent-accept/group-conflict-quarantine/reject-r9; AxCheck 6 Lara.Groups theorems trio-only), trace N87 (PR #45 review remediation: R9 stderr byte-compared across both drivers; .lara front-door R14 parity closes a silent-R9-evasion hole; R13→R9 precedence + multi-group independence pinned), lean/Lara/Groups.lean, PR #45]"
-    after: "[trace N86 (both-drivers differential 41/41 incl. group-consistent-accept/group-conflict-quarantine/reject-r9; AxCheck 6 Lara.Groups theorems trio-only), trace N87 (PR #45 review remediation: R9 stderr byte-compared across both drivers; .lara front-door R14 parity closes a silent-R9-evasion hole; R13→R9 precedence + multi-group independence pinned), trace N88 (Lean twin re-synced: consistentB matches Haskell groupConsistent on dangling members, consistentB_iff re-proved; all four malformed group shapes differential-pinned, negatives 9/9), lean/Lara/Groups.lean, PR #45]"
+    before: "[trace N86 (both-drivers differential 41/41 incl. Group-consistent-accept/group-conflict-quarantine/reject-r9; AxCheck 6 Lara.Groups theorems trio-only), trace N87 (review remediation: R9 stderr byte-compared across both drivers; .lara front-door R14 parity closes a silent-R9-evasion hole; R13→R9 precedence + multi-group independence pinned), lean/Lara/Groups.lean, the PR]"
+    after: "[trace N86 (both-drivers differential 41/41 incl. Group-consistent-accept/group-conflict-quarantine/reject-r9; AxCheck 6 Lara.Groups theorems trio-only), trace N87 (review remediation: R9 stderr byte-compared across both drivers; .lara front-door R14 parity closes a silent-R9-evasion hole; R13→R9 precedence + multi-group independence pinned), trace N88 (Lean twin re-synced: consistentB matches Haskell groupConsistent on dangling members, consistentB_iff re-proved; all four malformed group shapes differential-pinned, negatives 9/9), lean/Lara/Groups.lean, the PR]"
     signal: empirical-resolution
     provenance: ai-suggested
     note: >
@@ -165,7 +165,7 @@ key_context:
       gating." Fixed by mirroring, not by documenting the divergence.
 
 open_threads:
-  - "PR #45 unmerged: C21 evidence + N87/N88 rest on the branch; second-round follow-ups addressed (9c85c3d, 4 threads replied) — awaiting re-review/merge."
+  - "The PR unmerged: C21 evidence + N87/N88 rest on the branch; second-round follow-ups addressed (9c85c3d, 4 threads replied) — awaiting re-review/merge."
   - "O20 (three-tier rejection architecture), O21 (front-door invariant parity), O22 (frozen-twin definitional parity) staged, unpromoted — await reuse/affirmation or merge."
   - "C21 untested boundary unchanged: groups spanning non-leaf occurrences, and interaction with strict-certificate leaves."
 

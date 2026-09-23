@@ -1,5 +1,5 @@
 /-
-Named certificate premise slots (`lara-syntax@0.6`, #105) — the Lean mirror of
+Named certificate premise slots (`lara-syntax@0.6`) — the Lean mirror of
 the payload-rewrite math in the presentation-layer lowering pass
 (`Lara.Elaborate.CertSlots.lowerCertPayload`, `src/Lara/Elaborate/CertSlots.hs`).
 
@@ -30,7 +30,7 @@ over an abstract source-identifier classifier
     the Haskell error taxonomy remain validated-not-verified elaborator logic
     (`test/CertSlotsSpec.hs`).
 
-The two theorems are the #105 mechanization targets: `lower_id_of_no_symbolic`
+The two theorems are the mechanization targets: `lower_id_of_no_symbolic`
 (the pass is byte-identical on payloads satisfying `NoSymbolicRef` — no
 symbolic reference at a matched schema's reference positions, and none
 anywhere under a failed match of a schema'd backend) and

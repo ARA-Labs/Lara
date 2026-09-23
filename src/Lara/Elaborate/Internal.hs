@@ -72,7 +72,7 @@ import Lara.Strict.ND (ndBackendId)
 -- ---------------------------------------------------------------------------
 
 -- The proposition signature @Σ@ is __no longer a caller-supplied input__
--- (@lara-core\@0.2@, #89). It is declared by the policy ('policySigma') and
+-- (@lara-core\@0.2@). It is declared by the policy ('policySigma') and
 -- copied verbatim into 'unitSigma' below, so there is exactly one place it can
 -- come from and no caller can hand the elaborator a signature the policy does
 -- not declare. The object itself lives in "Lara.Sigma".
@@ -425,9 +425,9 @@ elabInstantiation env priors aid inst = case inst of
     rule <- lookupRule env aid r
     (theta, prems) <- inferTheta env priors aid rule refs
     disch <- resolveArgDischarges env priors aid shallowDisch
-    -- lara-syntax@0.6 (#105): named certificate premise slots lower here,
+    -- lara-syntax@0.6: named certificate premise slots lower here,
     -- after premise resolution, because a slot is an index into @prems@. The
-    -- rule rides along from @0.8 (#131): its declared premise labels are the
+    -- rule rides along from @0.8: its declared premise labels are the
     -- third class a name resolves in.
     assurance' <- lowerArgCert env rule priors aid prems assurance
     pure (SRule r theta prems disch holes assurance')
@@ -463,24 +463,24 @@ elabTerm env priors aid term = case term of
     disch <- resolveDischarges env priors aid shallowDisch
     -- lara-syntax@0.2: lower assurance verbatim. Legality (strict mode,
     -- allow-trusted, certifier allowlist, replay) belongs to R7/R13.
-    -- lara-syntax@0.6 (#105) adds exactly one rewrite above that: symbolic
+    -- lara-syntax@0.6 adds exactly one rewrite above that: symbolic
     -- premise references become the numeric slots the backend already decodes.
     -- 'elabTerm' recurses, so a nested instance's certificate lowers against
-    -- its own premise list — and, from @0.8 (#131), against its own rule's
+    -- its own premise list — and, from @0.8, against its own rule's
     -- premise labels — not the enclosing one's (D8).
     assurance' <- lowerArgCert env rule priors aid prems assurance
     pure (SRule r theta prems disch holes assurance')
 
 -- | The one namespace lookup shared by every argument-body source reference:
 -- the @lara-syntax\@0.5@ θ references ('resolveArgRef'), the @\@0.6@
--- certificate premise-slot references ('certSlotResolver', #105), and the
--- @\@0.7@ discharge targets ('resolveDischargeRef', #129). It answers which
+-- certificate premise-slot references ('certSlotResolver'), and the
+-- @\@0.7@ discharge targets ('resolveDischargeRef'). It answers which
 -- declared leaves and which prior arguments carry this source name, matched on
 -- the bare source name, in declaration order.
 --
 -- All three callers now share one collision policy on top of that lookup: a
 -- name carried by both a declared leaf and a prior argument is ambiguous and
--- is rejected, never silently resolved to either. #129 closed the last
+-- is rejected, never silently resolved to either. The last
 -- carve-out (discharge targets used to prefer the leaf); grammar Appendix F.4
 -- records the unified rule. Callers still keep their own error /family/, since
 -- each names a different surface position.
@@ -500,11 +500,11 @@ refMatches env priors name =
     ]
   )
 
--- | Resolve one symbolic certificate premise reference (#105) to the 0-based
+-- | Resolve one symbolic certificate premise reference to the 0-based
 -- slot it occupies in @prems@, the citing instance's __already resolved__
 -- premise list.
 --
--- A name resolves in __three__ classes (@lara-syntax\@0.8@, #131): the citing
+-- A name resolves in __three__ classes (@lara-syntax\@0.8@): the citing
 -- rule's declared premise labels, the declared leaves, and the prior
 -- arguments. The last two are 'refMatches' — exactly the scope a θ reference
 -- sees — and carry its collision policy: a name that is both a declared leaf
@@ -515,7 +515,7 @@ refMatches env priors name =
 -- A __label is different in kind__: it names the slot itself, not the term
 -- that fills it, so it needs no locating step and it keeps working where the
 -- other two classes cannot — when one leaf feeds two premises, the leaf name
--- is 'SlotNameMultiSlot' but each label still names its own slot (#131's
+-- is 'SlotNameMultiSlot' but each label still names its own slot (the
 -- headline). The one guard is that the label's slot must exist in this
 -- instance's premise list, which an authored premise list shorter than the
 -- rule's can violate. That case reuses 'SlotNameNotAPremise', whose rendered
@@ -572,7 +572,7 @@ certSlotResolver env rule priors prems name =
             _ -> False
 
 -- | Lower the symbolic premise references of one rule instance's assurance
--- (#105), against that instance's own resolved premises. Every other assurance
+-- against that instance's own resolved premises. Every other assurance
 -- passes through. Flat certificate grammars are lowered only through a
 -- declared 'Lara.Strict.Cell.SlotSchema'; the registered @nd\@1@ identity
 -- instead takes the marker-selected named-proof-term pass, whose marker-free
@@ -613,7 +613,7 @@ isNdCert cert =
 -- | Translate one resolver\/lowering verdict into its located 'ElabError'.
 --
 -- The two verdicts that mention the name /classes/ carry the citing 'RuleId'
--- too (@lara-syntax\@0.8@, #131), because \"a premise label\" is only
+-- too (@lara-syntax\@0.8@), because \"a premise label\" is only
 -- meaningful once the author knows which rule's labels were consulted.
 certSlotError :: ArgId -> RuleId -> Cert -> String -> SlotRefError -> ElabError
 certSlotError aid rid cert name err = case err of
@@ -793,8 +793,9 @@ resolveArgDischarges env priors aid = mapM one
 --
 -- The name scope and the collision policy both come from 'refMatches' — the
 -- same ones a θ reference ('resolveArgRef') and a certificate premise slot
--- ('certSlotResolver') see. Before #129 this position silently preferred the
--- declared leaf when a name carried both; it is now an 'AmbiguousDischarge'.
+-- ('certSlotResolver') see. Before the unification this position silently
+-- preferred the declared leaf when a name carried both; it is now an
+-- 'AmbiguousDischarge'.
 -- "Prior" is whatever 'elabOne' has accumulated, i.e. strictly earlier in
 -- declaration order, so a discharge naming a /later/ argument is unresolved,
 -- not a forward reference.

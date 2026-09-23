@@ -146,7 +146,7 @@ agreementManifest :: FilePath
 agreementManifest = agreementDir </> "map.laramap"
 
 -- | The map whose members share a leaf-free argument, so that the structural
--- merge fires (issue #316). Its goldens are pinned beside the agreement map's.
+-- merge fires. Its goldens are pinned beside the agreement map's.
 mergeDir :: FilePath
 mergeDir = "test/fixtures/map/merge"
 
@@ -866,7 +866,7 @@ prop_envelopeMalformedMatrix = once $ ioProperty $ do
             ]
       )
 
--- | The shared reader's nesting bound at the map's envelope door (issue #331).
+-- | The shared reader's nesting bound at the map's envelope door.
 --
 -- The Haskell half of the two cases @scripts\/check-map-conformance.sh@ runs
 -- against the Lean map driver. The envelope goes through the same reader as the

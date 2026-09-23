@@ -1,5 +1,5 @@
 /-
-Conformance cells for the executable StatusBridge checker (issue #239).
+Conformance cells for the executable StatusBridge checker.
 Each positive T8 bridge is re-established by one `decide`; the T7 negative
 goes through completeness: a `false` decider refutes the Prop.
 `native_decide` is not used.

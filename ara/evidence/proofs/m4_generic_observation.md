@@ -1,7 +1,6 @@
-# M4 — contextual observation at an arbitrary ExtensionSemantics (#216)
+# M4 — contextual observation at an arbitrary ExtensionSemantics
 
-Branch `theory/m4-generic-ctxequiv`, PR
-[#271](https://github.com/ARA-Labs/lara/pull/271). Landing commits 3bc0e65,
+Branch `theory/m4-generic-ctxequiv`. Landing commits 3bc0e65,
 40202bc, 02a64fd, 4dc223e, 2f1d28d, 225cac8.
 
 Decision record: `docs/theory-m4-generic-observation.md`.
@@ -46,7 +45,7 @@ Baseline before the branch: `Build completed successfully (151 jobs).`
 (151 → 152 after `Invariants/Observation`, → 153 after `Context/Observation`,
 → 154 after `Examples/ContextSemantics`.)
 
-Build-closure check (the #259 failure mode, checked by hand until that issue
+Build-closure check (the known failure mode, checked by hand until a gate
 lands) — all three modules produce oleans under `lean/.lake/build/lib/lean/`:
 
 ```
@@ -233,14 +232,14 @@ Line 427 is `ctxEquivSem_grounded_negative` and line 440 is
 the theorem cannot be weakened in either direction without a build failure, and
 neither consumer is redundant.
 
-## Open, filed
+## Open
 
-- [#268](https://github.com/ARA-Labs/lara/issues/268) — the equivalence
+- The equivalence
   *relations* are not separated; `CtxEquiv → CtxEquivSem sem` is neither proved
   nor refuted.
-- [#269](https://github.com/ARA-Labs/lara/issues/269) — instantiate the generic
+- Instantiate the generic
   congruence on the certificate-bearing `certCtx`/`certFrag` pair.
-- [#270](https://github.com/ARA-Labs/lara/issues/270) — prove `Admissible` for a
+- Prove `Admissible` for a
   disagreeing carrier, so a congruence witness sits where the `sem` quantifier is
   not inert.
 
@@ -248,14 +247,14 @@ neither consumer is redundant.
 
 ## Follow-up: the unified type (commit eb6e955)
 
-Everything above records PR #271 as it merged, and is left as it stands. A later
+Everything above records the original landing as it merged, and is left as it stands. A later
 commit on the same branch, `eb6e955`, replaced the two-type design that section
 describes. What follows is the delta; where the two disagree, this section is the
 landed state.
 
 ### What changed
 
-| Before (#271) | After (eb6e955) |
+| Before (as merged) | After (eb6e955) |
 |---|---|
 | `Observation` (frozen inductive) **and** `Outcome α` beside it | one `ObservationOf α`; `abbrev Observation := ObservationOf Grounded.Status`; `Outcome` deleted |
 | `obsGen`, `obsGen_*`, `obsGen_congr` in `Context/Observation.lean` | in `Context/Equivalence.lean`, beside the theorems they generalize |
@@ -336,18 +335,19 @@ The job count differs from the 154 recorded above because that run was from a co
 `.lake` in a worktree carrying `AxCheck.lean`'s dependencies; this one is `lake build
 Lara` against the library root on a warm cache. Both are full builds of their target.
 
-## Follow-up: admissible three-cycle (#270, 2026-09-08)
+## Follow-up: admissible three-cycle (2026-09-08)
 
-The historical open-work list above records #271 as it merged. #270 is now
+The historical open-work list above records the landing as it merged. The admissible
+three-cycle is now
 resolved by `cycle_admissible`, and `congruence_witness_sem` uses that cycle.
 The same carrier separates grounded and stable observations. The leaf-only
-limitation and #269 remain. See `m4_cycle_admissibility.md` for the proof and
+limitation and the certificate-bearing instance remain. See `m4_cycle_admissibility.md` for the proof and
 verification record.
 
-## Follow-up: accepted semantic negative (#273, 2026-09-09)
+## Follow-up: accepted semantic negative (2026-09-09)
 
 `ctxEquivSem_semantic_negative` separates two fragments with identical exports
 whose links both pass the checker: stable reads the complete cycle as
 `noExtension` and a singleton as `observed justified`. The cycle also disagrees
 with its grounded reading in this empty context. See `m4_semantic_negative.md`.
-The equivalence-relation implication in #268 remains open.
+The equivalence-relation implication in the open list remains open.

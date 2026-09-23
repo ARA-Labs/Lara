@@ -1,5 +1,5 @@
 /-
-# A collapsing certificate relation changes a grounded observation (#275)
+# A collapsing certificate relation changes a grounded observation
 
 Two defeasible wrappers differ only in their nested certificate payload. An
 explicit undercut defeats one wrapper. Collapsing the payloads identifies the

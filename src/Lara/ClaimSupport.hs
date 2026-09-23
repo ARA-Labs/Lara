@@ -1,4 +1,4 @@
--- | Corpus claim-support aggregation (#56): the pure metrics behind
+-- | Corpus claim-support aggregation: the pure metrics behind
 -- @scripts\/claim-support.hs@, a deterministic descriptive pass over the frozen
 -- 60 corpus units that emits the four numbers the paper's /Claim-support
 -- outcomes/ paragraph cites and derives a role-aware binding-audit projection.
@@ -29,7 +29,7 @@
 --      exploration-trace ref (the corpus-native dead-end undercuts), separated
 --      from CQ-driven paper-evidence undercuts.
 --   4. Fraction of LOAD-BEARING STRICT STEPS carrying a checked certificate.
---      Computed from real rule modes; since #57 the corpus exercises the
+--      Computed from real rule modes; the corpus now exercises the
 --      certificate path (adaptive-pruning\/C04's @rational_drop_recheck@ arg
 --      under an @ra\@1@ certificate), so this is 1 \/ 1. The documented
 --      @strict_certifier@ population is reported alongside as context.
@@ -234,7 +234,7 @@ computeUnit
 computeUnit ruleModeOf flavored name ci surfaceDerivedArgs (Verdict _ outcome) prog =
   case outcome of
     Reject _ -> error ("claim-support: non-accept corpus unit " ++ name)
-    -- A conditional label is not a claim status (spec §4.3, issue #76). No
+    -- A conditional label is not a claim status (spec §4.3). No
     -- frozen corpus unit quarantines, so refuse rather than let an
     -- @evidence-blocked@ query enter the aggregate under its conditional label.
     Accept _ _ statuses

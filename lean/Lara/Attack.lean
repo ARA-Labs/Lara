@@ -661,7 +661,7 @@ theorem rebut_concl_coherent {canon Pi Gamma CertOk dp}
 /-- **Γ-weakening.** An attack typing survives any extension of the leaf
 environment, because each of the three rules reads Γ only through a support
 derivation (`Support.hasSupport_mono_gamma`) or a single leaf lookup. Public at
-the judgment's module so that no downstream module re-proves it (issue #220). -/
+the judgment's module so that no downstream module re-proves it. -/
 theorem hasAttack_mono_gamma {canon : String → String}
     {Pi : RuleId → Option Rule} {Gamma Gamma' : LeafId → Option Atom}
     {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}

@@ -282,7 +282,7 @@ prop_raStrictCheckSeals ds =
 -- passing @\"ord\"@ from "Lara.Strict.RA", or dropping the parameter outright
 -- left the whole suite and the differential harness green. The slot-range
 -- message is pinned alongside it because it is the other string the move put
--- at risk (PR #83 review).
+-- at risk (review).
 prop_raRejectionMessages :: Bool
 prop_raRejectionMessages =
   and
@@ -512,7 +512,7 @@ prop_checkDropMatrix =
     , -- witness agrees with the claimed drop but not the recomputation, and
       -- clears the threshold: the recomputation guard is the only branch that
       -- can reject here. Without this case that guard is deletable with the
-      -- whole suite green (#125) — and deleting it would let a certificate
+      -- whole suite green — and deleting it would let a certificate
       -- certify a relative drop its own premise cells contradict, since every
       -- other branch consults only the goal's self-declared @C@.
       isLeft (checkDrop (RAGoal 50 (381 % 10) (1 % 4) (1 % 20)) (1 % 4))

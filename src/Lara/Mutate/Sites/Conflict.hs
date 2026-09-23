@@ -1,4 +1,4 @@
--- | The attack-completeness site enumerator (#124): the one operator whose
+-- | The attack-completeness site enumerator: the one operator whose
 -- specified outcome is @reject-MissingConflict@.
 --
 -- Every other attack-family operator corrupts a /declared/ attack and is caught
@@ -17,7 +17,7 @@
 -- __What the mirror reads.__ The checker does not run on the declared unit: it
 -- runs on the §4.3 quarantine of it (@Lara.Driver.Internal@ checks
 -- @pruneChecked pruned@, and 'Lara.Blocked.pruneWithPolicySeed' filters leaves,
--- arguments, /and/ attacks). So the mirror reads the checked unit too (#159):
+-- arguments, /and/ attacks). So the mirror reads the checked unit too:
 -- the scan cache, the coverage decider, and the published @si@\/@ti@ are all in
 -- checked index space, which is the space the verdict names. Only the
 -- /deletion/ is mapped back through the prune

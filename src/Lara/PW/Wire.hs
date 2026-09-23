@@ -1,5 +1,5 @@
--- | The @pw-surface 1@ authoring codec (#314) and the @pw-run 1@ execution
--- codec (#322): the Haskell mirror of @lean\/Lara\/PW\/Wire.lean@ and the codec
+-- | The @pw-surface 1@ authoring codec and the @pw-run 1@ execution
+-- codec: the Haskell mirror of @lean\/Lara\/PW\/Wire.lean@ and the codec
 -- half of @lean\/Lara\/PW\/Run.lean@.
 --
 -- Text reading and printing reuse "Lara.Wire"'s reader and printer, so quoting,
@@ -291,7 +291,7 @@ acceptanceText a = case a of
 -- | Where a world's check-input envelope comes from; @file@ and @lara@ paths
 -- are relative to the run file's directory. A @file@ holds the envelope's
 -- bytes; a @lara@ path names a presentation program the runtime elaborates to
--- one (#327). Both are untyped here: the loader decides what the bytes mean.
+-- one. Both are untyped here: the loader decides what the bytes mean.
 data WorldSource
   = SourceInline SExpr
   | SourceFile String

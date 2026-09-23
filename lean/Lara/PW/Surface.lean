@@ -1,12 +1,12 @@
 /-
-# PW — surface syntax for the outer language (issue #307)
+# PW — surface syntax for the outer language
 
 Before this module the outer language was Lean-side only: a bridge was a record
 with three `Prop` fields, and a modal query was an intrinsically typed
 `PW.Form`, which nothing outside Lean could author.
 `docs/theory-pw-closeout.md` §3 recorded that as a boundary with no scheduling
 condition; the condition it was really waiting on — M5's sorting machinery
-(#188) — has since landed, so the `Query_κ` refinement (`Lara.PW.Sorted`) makes
+— has since landed, so the `Query_κ` refinement (`Lara.PW.Sorted`) makes
 a surface possible and this module supplies one.
 
 **Two authoring forms.**
@@ -33,8 +33,8 @@ sound/complete carry content on both sides.
 
 **Joining the authoring forms.** `Lara.PW.Declared` builds a sorted frame and
 its `Naming` from checked declarations. Its `elabPosed_declared` theorem links
-every nested modal name to the original declaration and its symbol map (#313).
-`Lara.PW.Wire` supplies concrete input and structured round trips (#314).
+every nested modal name to the original declaration and its symbol map.
+`Lara.PW.Wire` supplies concrete input and structured round trips.
 
 **What the elaborator can and cannot check.** T6's contract has three clauses,
 and they are not alike:
@@ -319,7 +319,7 @@ Resolution itself is the caller's: this environment is what a resolver
 loader in `Lara.PW.Declared` constructs this environment from resolved contexts
 and derives `Naming.bridgeOf` from its registry of checked declarations.
 Its `elabPosed_declared` theorem joins the two authoring forms at every modal
-occurrence (#313). Low-level callers may still use `BridgeEnv` directly. -/
+occurrence. Low-level callers may still use `BridgeEnv` directly. -/
 structure BridgeEnv where
   /-- the name this environment is the bridge for -/
   name : BridgeId
@@ -583,7 +583,7 @@ theorem elabBridge_of_no_rules (E : BridgeEnv) (d : BridgeDecl)
 `SForm` is untyped: its claims are raw `Atom`s and its modalities name a bridge
 by identifier. `PW.Form` is intrinsically typed by its context index, and its
 status atoms carry `Sorted.Query`s. Elaboration is therefore a genuine typing
-pass, and it is where the two halves of #307 meet: **posing a status atom is
+pass, and it is where the two halves meet: **posing a status atom is
 `Sorted.pose`**, so a surface query whose claim is out of vocabulary or
 ill-sorted is an elaboration error naming the fault, not a `gap` at some world.
 

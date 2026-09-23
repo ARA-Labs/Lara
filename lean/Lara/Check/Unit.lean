@@ -287,7 +287,7 @@ theorem checkUnit_complete {canon : String → String}
             subst found
             exact ⟨_, rfl⟩
 
-/-! ### Naming a successful check's accepted output (issue #211)
+/-! ### Naming a successful check's accepted output
 
 The generated families and closed fixtures all follow one assembly: prove a
 checker call succeeds, name the accepted payload, and export the `.ok`

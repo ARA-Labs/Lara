@@ -12,7 +12,7 @@ connect the Lean reference to `PW.Sat`.
 cabal run -v0 exe:lara -- pw fixtures/pw/run/fields.sexp   # the Haskell runtime
 (cd lean && lake build pw-run)
 lean/.lake/build/bin/pw-run fixtures/pw/run/fields.sexp    # the Lean reference
-cabal run -v0 exe:lara -- pw-input fixtures/pw/source/lara.sexp   # the derivation door (#327)
+cabal run -v0 exe:lara -- pw-input fixtures/pw/source/lara.sexp   # the derivation door
 make pw-conformance                                         # the differential gate
 ```
 
@@ -33,7 +33,7 @@ A run file contains exactly one S-expression:
   DOCUMENT)
 SOURCE     ::= (inline CHECK_INPUT) | (file PATH) | (lara PATH)
 ACCEPTANCE ::= accepted | rejected
-DOCUMENT   ::= (pw-surface 1 ...)    ; the #314 contract, unchanged
+DOCUMENT   ::= (pw-surface 1 ...)    ; the wire contract, unchanged
 ```
 
 Stars mark repetition. The four sections occur once each, in this order, and
@@ -42,7 +42,7 @@ exact, and the version is read before the layout, as for `pw-surface`.
 Sections decode in order, and each section finishes before the next header is
 read. The reader, quoting and error categories (`syntax`, `malformed`,
 `unsupported-version`) are those of `pw-surface 1`. The embedded document goes
-through the #314 decoder unchanged, so its bridge declarations and posed
+through the wire-contract decoder unchanged, so its bridge declarations and posed
 queries keep their contract exactly.
 
 A world's `CHECK_INPUT` is the frozen local checker envelope
@@ -52,7 +52,7 @@ bytes. The run codec carries an envelope as an untyped tree. The envelope is
 decoded when its world loads, so a malformed envelope is a world failure, not
 a run-codec failure.
 
-A `lara` path (#327), also relative to the run file's directory, names a
+A `lara` path, also relative to the run file's directory, names a
 `.lara` presentation program with its co-located policy. `lara pw` elaborates
 it through the steps `lara check` takes on that file alone
 (`Lara.Source.Load`, `Lara.Elaborate.prepareSource`) and uses the envelope
@@ -67,7 +67,7 @@ drivers on the derived document, and requires one output.
 **The version stays `1`.** The `lara` form is an addition to the `SOURCE`
 production and nothing else moves: every `pw-run 1` document written before it
 means what it meant, `pw-result 1` and `pw-error 1` are unchanged, and a
-reader from before #327 refuses a `lara` source as `malformed world-source`,
+reader from before the extension refuses a `lara` source as `malformed world-source`,
 which says precisely what it cannot read. A bump would have forced every
 existing document and consumer to change for a production they need not use.
 The version is reserved for a change that alters the meaning of a document an
@@ -149,10 +149,10 @@ forbids. Because both PW doors share the boundary, they would agree with each
 other while both disagreeing with the solo door, so only a direct gate case —
 not the cross-driver comparison — can see this; the gate has one.
 
-**The boundary is the whole CLI's, not these two doors'** (#334). It began here,
+**The boundary is the whole CLI's, not these two doors'**. It began here,
 which left `lara check` reading `.lara` text through the locale: under
 `LC_ALL=C` it refused a non-ASCII program these doors accepted, and under an
-8-bit locale it decoded the same bytes into a *different* unit. Since #334
+8-bit locale it decoded the same bytes into a *different* unit. Since then
 `textBoundary` runs once in `main`, so `check`, `deps`, `map-input` and both PW
 doors read one file as one program under every `LC_ALL`. The output half came
 with it: once the program is readable under `LC_ALL=C`, the diagnostics that
@@ -187,7 +187,7 @@ The runtime evaluates one specific frame: the frame the file declares.
 * A world is identified by its checked program. This is why a context may not
   hold two worlds with the same program. Otherwise one world value would name
   two declarations, and the frame could not tell their edges apart.
-* A duplicate-report group whose members disagree refuses its world (#326).
+* A duplicate-report group whose members disagree refuses its world.
   §4.3 quarantine would make a public status conditional
   (`evidence-blocked`), and a Boolean status atom cannot say "conditionally
   justified"; under the `reject` conflict mode the local checker would refuse
@@ -222,7 +222,7 @@ axioms only):
 | `Model.candidates_named`, `Model.accepts_named`, `loadModel_spec`, `load_candidates_named`, `load_accepts_named` | For a loaded run, the frame's candidates at a declared world are the worlds named as targets by exactly the file's edges along that bridge from that world's identifier, in declaration order. Acceptance between two declared worlds is the declared flag of such an edge. |
 | `distinct_append`, `Hosted.find_isSome`, `Hosted.entry_mem` | The loader's invariant and host naming lemmas. The host's context bijection holds by construction: context indices are declared names. |
 | `ResultTag.parse_text`, `ResultTag.text_injective` | Every keyword of the result protocol has exactly one spelling. |
-| `addWorld_decoded`, `addWorld_quarantine_empty`, `addWorld_checks_declared` (with `Groups.quarantined_eq_nil`, `Groups.quarantineLeaves_nil`, `Groups.quarantineArgs_nil`) | A world the loader accepts has no conflicting group, hence an empty §4.3 quarantine set, hence the leaf table and argument list it hands `checkUnit` are the declared ones — the unit the local driver checks (#326). |
+| `addWorld_decoded`, `addWorld_quarantine_empty`, `addWorld_checks_declared` (with `Groups.quarantined_eq_nil`, `Groups.quarantineLeaves_nil`, `Groups.quarantineArgs_nil`) | A world the loader accepts has no conflicting group, hence an empty §4.3 quarantine set, hence the leaf table and argument list it hands `checkUnit` are the declared ones — the unit the local driver checks. |
 
 The existing results then apply unchanged to a loaded run: `elabPosed_declared`
 (every modal occurrence resolves to a declaration from the file, with that
@@ -289,7 +289,7 @@ atom, and compares the rest atom for atom.
 fixture directories, and for the derived document of each — and to the
 mirrored laws of the Lean development, including the group rule on the inline
 fixture. The byte reader and printer remain the tested boundary they were in
-#314, and so does the world pipeline's use of `decodeCheckInput`. Edge
+the wire contract, and so does the world pipeline's use of `decodeCheckInput`. Edge
 resolution's step from names to positions is proved (`resolveEdges_declared`,
 `load_candidates_named`). The reader's nesting bound is Haskell-only; that
 divergence is a known open item.
@@ -308,12 +308,12 @@ satisfy them. `rule-ok` is decided by the loader (`ruleOkB_iff`).
 Unchanged: the local checker wire and its drivers, `pw-surface 1`,
 `PW.Frame`, `PW.Sat`, `crossCompare`, the T6 contract, the corpus, and every
 freeze tag. No corpus regeneration was needed. The `pw-example` executable
-from #314 is kept; it remains the fixed-host example.
+from the earlier wire contract is kept; it remains the fixed-host example.
 
-Out of scope, as #322 states: approximation bridges, epistemic, dynamic and
+Out of scope: approximation bridges, epistemic, dynamic and
 hybrid operators, global scenarios, and T10. A `lara` world source is
 elaborated by the Haskell runtime only; the Lean reference reads envelopes, and
 `lara pw-input` is the door that turns a run with `.lara` worlds into one the
-reference reads (#327). A `.lara` world whose policy quarantines source
+reference reads. A `.lara` world whose policy quarantines source
 material has no envelope and is refused as `world-input`, exactly as a map
 refuses such a member: the frozen envelope cannot express the pruned unit.

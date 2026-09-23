@@ -4,7 +4,7 @@ session:
   started: 2026-09-20T08:02+00:00
   last_turn: 2026-09-20T08:40+00:00
   turn_count: 2
-  summary: 'Issues #349 and #350: P1 philosophy debate followed by D5, a separately mechanized axiom-withdrawal
+  summary: 'P1 philosophy debate followed by D5, a separately mechanized axiom-withdrawal
     witness with runnable source controls and passing full gates.'
 events_logged:
 - turn: 1
@@ -73,7 +73,7 @@ ai_actions:
 claims_touched: []
 logic_revisions: []
 open_threads:
-- issue: https://github.com/ARA-Labs/Lara/issues/350
+- issue: removed
   description: Review and merge the submitted axiom-withdrawal demo PR; implementation and local gates
     complete.
   resolution: N350_witness

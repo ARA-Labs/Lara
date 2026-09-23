@@ -4,7 +4,7 @@ session:
   started: "2026-08-18T23:40"
   last_turn: "2026-08-19T01:05"
   turn_count: 2
-  summary: "Implemented issue #115's ByteString wire parser with code-point columns, probed the invalid-UTF-8 boundary on main first, measured a 45.5% same-session median parse reduction with every correctness gate green, withheld the regenerated table because the machine was loaded, and opened PR #118; a follow-up turn measured a same-code noise floor and confirmed the untouched check + render movement is ambient drift, not codegen."
+  summary: "Implemented the issue's ByteString wire parser with code-point columns, probed the invalid-UTF-8 boundary on main first, measured a 45.5% same-session median parse reduction with every correctness gate green, withheld the regenerated table because the machine was loaded, and opened the PR; a follow-up turn measured a same-code noise floor and confirmed the untouched check + render movement is ambient drift, not codegen."
 
 events_logged:
   - turn: 1
@@ -12,7 +12,7 @@ events_logged:
     id: "N190"
     routing: direct
     provenance: user
-    summary: "The researcher invoked the review-revised #115 plan end to end: probe, implement, gate, commit, record in ARA, and open the PR."
+    summary: "The researcher invoked the review-revised plan end to end: probe, implement, gate, commit, record in ARA, and open the PR."
   - turn: 1
     type: experiment
     id: "N191"
@@ -36,7 +36,7 @@ events_logged:
     id: "N194"
     routing: direct
     provenance: ai-executed
-    summary: "PR #118 hosted CI run 32226016340 passed both the Haskell and Lean jobs at head commit 37781e9."
+    summary: "Hosted CI run 32226016340 passed both the Haskell and Lean jobs at head commit 37781e9."
   - turn: 2
     type: experiment
     id: "N195"
@@ -69,7 +69,7 @@ ai_actions:
     action: "Ran the full correctness matrix before any timing (test suite, two-driver differential, replay, presentation parity, both frozen measurement hashes), then a settled same-session baseline/after benchmark pair, and committed a2904d7"
     provenance: ai-executed
   - turn: 1
-    action: "Pushed perf/115-bytestring-wire-parser and opened ARA-Labs/lara PR #118, stating the withheld table as an explicit deviation from the plan's T8"
+    action: "Pushed perf/115-bytestring-wire-parser and opened the ARA-Labs/lara PR, stating the withheld table as an explicit deviation from the plan's T8"
     provenance: ai-executed
     files_changed:
       - ara/evidence/results/bytestring_wire_parser.md
@@ -122,8 +122,8 @@ key_context:
 
 open_threads:
   - "Regenerate tables/performance.tex with one make bench on an idle machine; the committed table is now stale in the conservative direction and the PR states the deviation."
-  - "Issue #116 closes as option A: rewrite the src/evaluation.tex decoding-dominates paragraph around measured numbers rather than qualifying it. Gated on the idle-machine table, not on PR #118."
-  - "PR #118 is green on hosted CI (run 32226016340) and awaits reviewer response; the noise-floor analysis was posted as a PR comment."
+  - "Closes as option A: rewrite the src/evaluation.tex decoding-dominates paragraph around measured numbers rather than qualifying it. Gated on the idle-machine table, not on the PR."
+  - "The PR is green on hosted CI (run 32226016340) and awaits reviewer response; the noise-floor analysis was posted as a PR comment."
 
 ai_suggestions_pending:
-  - "The prototype's byte-backed SExpr atom variant (a further ~85 microseconds on the isolated measurement) remains untaken and out of scope; revisit only if #116 still does not close after the table is regenerated."
+  - "The prototype's byte-backed SExpr atom variant (a further ~85 microseconds on the isolated measurement) remains untaken and out of scope; revisit only if still does not close after the table is regenerated."

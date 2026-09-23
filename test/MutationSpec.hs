@@ -1,4 +1,4 @@
--- | The seeded mutation suite (M5 tracker #48, T1) as a standing test.
+-- | The seeded mutation suite (M5, T1) as a standing test.
 --
 -- Three properties hold the committed @fixtures\/mutants\/@ suite:
 --
@@ -19,7 +19,7 @@
 --     (R1\/R3\/R4\/R5\/R6\/R7\/R9\/R10\/R11\/R12\/R13) is exercised by at
 --     least one generated mutant, plus the codec negatives and the
 --     specified-status cycle family — the rejection-class half of the T1
---     exit criterion (tracker #48), measured from the manifest rather than
+--     exit criterion, measured from the manifest rather than
 --     asserted in prose. The other half — generators over T2 corpus units,
 --     and generated mutants exercising every status\/attack kind — stays
 --     open until the corpus units exist.
@@ -178,8 +178,8 @@ actualOutcome bytes = case decodeCheckInputFile bytes of
   Right input -> case verdictOutcome (runCheck input) of
     Reject (RejectClass c) -> expectedText (ExpectClass c)
     Reject other -> "reject-" ++ show other
-    -- An @evidence-blocked@ query has no four-state public status (spec §4.3,
-    -- issue #76), so the accept is its own manifest class.
+    -- An @evidence-blocked@ query has no four-state public status — spec §4.3 —
+    -- so the accept is its own manifest class.
     Accept labels _ statuses
       | any (not . isPublished . snd) statuses -> expectedText ExpectEvidenceBlocked
       | not (null labels)
@@ -278,7 +278,7 @@ prop_seededReproducibility = once $ ioProperty $ do
 -- column and is therefore gated by nothing, and it would enter committed bytes
 -- on its first real use. Two constructors sharing a spelling would silently
 -- merge two families in column 3, which is the exact confusion a single
--- spelling table exists to prevent (#169 review).
+-- spelling table exists to prevent (review).
 prop_familyVocabulary :: Property
 prop_familyVocabulary =
   once $
@@ -309,7 +309,7 @@ prop_mutationCoverage = once $ ioProperty $ do
           -- operator specified to `reject-IncompleteArgument`, so requiring the
           -- outcome here requires the operator to produce mutants of its class.
           : ExpectIncompleteArgument
-          -- The attack-completeness witness (#124), the same way:
+          -- The attack-completeness witness, the same way:
           -- `drop-covering-attack` is the one operator specified to
           -- `reject-MissingConflict`.
           : ExpectMissingConflict
@@ -324,7 +324,7 @@ prop_mutationCoverage = once $ ioProperty $ do
         -- drifted to 10 of 12 — 'localization' and 'signature' (the largest
         -- family, 113 mutants) had no coverage assertion at all. Enumerating
         -- 'OpFamily' also means a renamed spelling fails HERE, as missing
-        -- coverage, rather than only as a stale-fixture diff (#169 review).
+        -- coverage, rather than only as a stale-fixture diff (review).
         counterexample
           ("family coverage incomplete — witnessed " ++ show families)
           (all (`elem` families) (map familyText [minBound .. maxBound]))
@@ -424,12 +424,12 @@ prop_expectedLocationColumn = once $ ioProperty $ do
 
 -- | An operator's proposed sites, with each published ground truth as a plain
 -- list. The enumerators return 'Lara.Diagnostics.SeededSites', which is
--- non-empty by construction (#169); these properties inspect the /shape/ of
+-- non-empty by construction; these properties inspect the /shape/ of
 -- what was published — singleton versus composite — so they read the list.
 publishedSites :: SiteOp -> Unit -> [(Expected, [Constituent], Unit -> Unit)]
 publishedSites op u = [(e, seededSitesList ss, m) | (e, ss, m) <- siteSites op u]
 
--- | The whole answer key is pinned to the checker (#165), the way
+-- | The whole answer key is pinned to the checker, the way
 -- 'prop_conflictSiteMatchesChecker' pins the completeness mirror: for every
 -- site every rejection-site enumerator ('Lara.Mutate.Suite.siteOps') proposes
 -- — not just the seeded subset the committed suite carries — on the worked
@@ -457,7 +457,7 @@ prop_siteMatchesChecker = once $ ioProperty $ do
         [(b, i) | (b, Just i) <- anchors]
           ++ corpusBases
           ++ [("quarantining-conflict-fixture", testCheckInput quarantiningConflictBase)]
-      -- Every base again with both index spaces skewed (#166 review), so the
+      -- Every base again with both index spaces skewed (review), so the
       -- rule-rooted enumerators — which the one committed quarantining base
       -- cannot reach, having no rules — are gated off the diagonal too.
       --
@@ -528,7 +528,7 @@ prop_siteMatchesChecker = once $ ioProperty $ do
 -- is not the identity, and it carries no rules and no rule-rooted argument —
 -- so every @ruleSites@-based enumerator was exercised only where checked and
 -- declared indices coincide, and a per-operator transposition would have
--- failed open (#166 review). This derivation gives every base a skewed
+-- failed open (review). This derivation gives every base a skewed
 -- sibling: it prepends an inconsistent duplicate-report group, a leaf-rooted
 -- argument on one of its members, and an attack /targeting/ that argument, all
 -- declared first.
@@ -586,9 +586,9 @@ atIx xs i
   | i >= 0, i < length xs = Just (xs !! i)
   | otherwise = Nothing
 
--- | The __direction__ of #165's index mapping, pinned for every enumerator
+-- | The __direction__ of the index mapping, pinned for every enumerator
 -- that publishes an indexed constituent, on bases where the two spaces
--- actually differ (#166 review).
+-- actually differ (review).
 --
 -- 'prop_siteMatchesChecker' pins that the published constituent is the one the
 -- checker reports, but an enumerator that transposes /both/ maps — publishing
@@ -703,7 +703,7 @@ prop_siteDirectionSkewed = once $ ioProperty $ do
                         (retainedAttackIndices (prune u') `atIx` ci === Just di)
             _ -> property True
 
--- | #165's fixture pins, the argument\/attack siblings of
+-- | The fixture pins, the argument\/attack siblings of
 -- 'prop_conflictSiteQuarantiningBase': on 'quarantiningConflictBase' the
 -- enumerators read the checked unit and publish checked indices, mapping only
 -- the rewrite back to declared space. @undeclared-leaf@ yields exactly the two
@@ -743,7 +743,7 @@ prop_sitesQuarantiningBase =
     argsAfter m = unitArgs (m u)
     mutLeaf = SLeaf (LeafId "mut_undeclared")
 
--- | The localization family's own gate (#123), the composite-list sibling of
+-- | The localization family's own gate, the composite-list sibling of
 -- 'prop_siteMatchesChecker' (which pins every list's /head/ to the checker but
 -- cannot see a tail — the checker is fail-fast). Every published element is
 -- gated against the /mutant/, on every base the answer key is generated from
@@ -758,7 +758,7 @@ prop_sitesQuarantiningBase =
 --     applies only the head rewrite reverts to a clean unit and fails here;
 --     one that applies only the tail rewrite fails the sibling arm requiring
 --     the head rewrite to have edited that declared argument (and
---     'prop_siteMatchesChecker' besides). This is the #167 review's finding:
+--     'prop_siteMatchesChecker' besides). This is the review's finding:
 --     the previous construction-only clauses re-derived the published lists
 --     from the very component enumerators the implementation calls, so
 --     dropping the second rewrite left the whole suite green.
@@ -785,7 +785,7 @@ prop_sitesQuarantiningBase =
 -- diagonal, not only where the two index spaces coincide. Since this property
 -- is the only gate covering the composite tails, an anchor that fails to
 -- decode fails the property outright rather than silently narrowing its
--- coverage (#167 review).
+-- coverage (review).
 prop_localizationSites :: Property
 prop_localizationSites = once $ ioProperty $ do
   corpusBases <- readCorpusBases
@@ -971,7 +971,7 @@ prop_localizationSites = once $ ioProperty $ do
 -- located-vs-seeded but flows into @measurements\/report.{json,tsv}@ and is
 -- measured, never gated. Without this, a wrong @si@\/@ti@ leaves the whole
 -- suite green and silently corrupts the answer key that the localization
--- benchmark (#123) consumes — the mutant still rejects with the right class,
+-- benchmark consumes — the mutant still rejects with the right class,
 -- so nothing else can see it.
 prop_conflictSiteMatchesChecker :: Property
 prop_conflictSiteMatchesChecker = once $ ioProperty $ do
@@ -1015,14 +1015,14 @@ prop_conflictSiteMatchesChecker = once $ ioProperty $ do
                     fmap lrConstituent located === Just predicted
                 ]
 
--- | The @RejectOnConflict@ sibling of 'quarantiningConflictBase' (#159). Same
+-- | The @RejectOnConflict@ sibling of 'quarantiningConflictBase'. Same
 -- graph, same inconsistent group — only the mode differs, so the driver
 -- escalates the group conflict to R9 and rejects before the completeness scan
 -- ever runs. Nothing else in the enumerator reads 'unitGroupMode' and the prune
 -- is mode-independent, so without the @groupConflictReject@ gate this unit
 -- would yield exactly the site its quarantining twin yields, and the mutant
 -- would reject R9 rather than @MissingConflict@ — a corrupted answer key for
--- the localization benchmark (#123).
+-- the localization benchmark.
 quarantiningConflictRejectBase :: Unit
 quarantiningConflictRejectBase =
   quarantiningConflictBase {unitGroupMode = RejectOnConflict}
@@ -1035,7 +1035,7 @@ prunedAttackDeletedBase :: Unit
 prunedAttackDeletedBase =
   quarantiningConflictBase {unitAttacks = [Undermine (ArgId "aS") (ArgId "aK") []]}
 
--- | #159: on a quarantining base the enumerator reads the checked unit and maps
+-- | On a quarantining base the enumerator reads the checked unit and maps
 -- the deletion back through the prune. Under the fixture's index skew a mirror
 -- over the declared unit would publish @(1, 2)@ where the checker reports
 -- @(0, 1)@, and a deletion applied in checked index space would remove the
@@ -1082,7 +1082,7 @@ prop_conflictSiteQuarantiningBase =
       Accept{} -> True
       Reject{} -> False
 
--- | The corpus half of the T1 coverage criterion (tracker #48): every
+-- | The corpus half of the T1 coverage criterion: every
 -- executable rejection class is witnessed by ≥1 corpus-based mutant. All eleven
 -- 'RejectClass' values have corpus sites, so all eleven are required (the "where
 -- corpus sites exist" hedge is vacuous for this corpus).
@@ -1148,7 +1148,7 @@ primaryStatus bytes = case decodeCheckInputFile bytes of
     _ -> Nothing
   Left _ -> Nothing
 
--- | The status/attack-kind half of the T1 exit criterion (tracker #48): the
+-- | The status/attack-kind half of the T1 exit criterion: the
 -- accept family witnesses every claim status {gap, justified, contested,
 -- defeated} and every attack kind {rebut, undercut, undermine} over corpus
 -- units. Statuses are read from the @accept-\<status\>@ rows; attack kinds are
@@ -1219,7 +1219,7 @@ nubOrd = foldr (\x acc -> if x `elem` acc then acc else x : acc) []
 -- emits @(frac 120 500)@, and every other property still passes — 'decodeFrac'
 -- rejects it as "not in lowest terms", the outcome is still @reject-R13@, and
 -- @prop_seededReproducibility@ simply re-pins the new bytes. The corpus would
--- lose its only witness for the value recheck with nothing turning red (#125).
+-- lose its only witness for the value recheck with nothing turning red.
 prop_certWrongFractionDecodes :: Property
 prop_certWrongFractionDecodes = once $ ioProperty $ do
   rows <- readManifest
@@ -1280,7 +1280,7 @@ prop_certWrongFractionDecodes = once $ ioProperty $ do
     isLeftE = either (const True) (const False)
 
 -- | Missing a backend's worked-example base used to leave every mutation
--- property green while its certificate rejection paths were absent (#266).
+-- property green while its certificate rejection paths were absent.
 -- Read the measured manifest and replay its actual files, requiring a corrupt
 -- certificate for each backend/operator pair rather than just a base name.
 prop_backendCertificateCoverage :: Property

@@ -1,7 +1,7 @@
 # Decision: module ownership in the `Lara.Mutate` namespace
 
 _Records the settled ownership contract for the seeded mutation generators
-after the seven-module split (issue #122, PR #142). The implementation plan that
+after the seven-module split. The implementation plan that
 produced the split was deleted when the work landed, per the `plans/` rule; this
 record carries its durable decisions — which module owns what, what the root may
 and may not re-export, and which alternatives were rejected. Companion
@@ -37,8 +37,8 @@ Lara.Mutate                 core; imports only Outcome
 └── Sorts ────────────────→ core
 ```
 
-The graph is acyclic **because nothing the root imports imports it back**. Since
-#157 the root has exactly one sibling import, `Outcome`, which imports no sibling
+The graph is acyclic **because nothing the root imports imports it back**.
+Since the `Outcome` split the root has exactly one sibling import, `Outcome`, which imports no sibling
 in turn and so is the new bottom of the namespace. That is the load-bearing
 property of the whole arrangement, and it is what D1 below protects.
 
@@ -64,7 +64,7 @@ and `Sites.Nav` are in `other-modules`: their names had to become
 module-visible so `Suite`, `Cycle`, `Sites`, and the root could consume them,
 but keeping them out of `exposed-modules` means the package's public surface
 does not grow — with one deliberate exception. The
-#158 review added a property (`prop_conflictSiteMatchesChecker`) that has to
+A review added a property (`prop_conflictSiteMatchesChecker`) that has to
 compare the enumerator's *predicted* conflict pair against the checker's, which
 means calling `dropCoveringAttackSites` directly; going through `mutantsForBase`
 sees only the seeded subset and the rendered bytes. Since `Sites.Conflict` is an
@@ -107,21 +107,21 @@ shape of the graph. Every generator sibling imports the root for the operator
 vocabulary and the `Mutant`/`Expected` core, so a root that imported them back
 would close a cycle. Restoring the old surface would therefore require
 interposing a new `Lara.Mutate.Core` module: extra public surface bought purely
-for source compatibility, and a different goal from #122.
+for source compatibility, and a different goal from the split.
 
 The resulting source-API break was bounded *before* it was accepted, and is
 small in-repo. Exactly two files import `Lara.Mutate` wholesale
-(`test/MutationSpec.hs`, `scripts/gen-mutants.hs`); both were updated in #142.
+(`test/MutationSpec.hs`, `scripts/gen-mutants.hs`); both were updated in the split.
 The four selective importers — `Lara.Measure`, `test/AblationSpec.hs`,
 `scripts/bench.hs`, `scripts/measure.hs` — take only
 `Expected`/`parseExpected`/`statusText`, which stay in the root, so they did not
 change at all. Neither did the accept family, whose four imported names also
-stay in the root. Since the #143 split those four are spread across its three
+stay in the root. Since the `Accept` split those four are spread across its three
 modules rather than imported by one: the facade takes `Expected`/`Mutant`/
 `MutationOp`, `Lara.Mutate.Accept.Ops` takes `Mutant`/`MutationOp`, and
 `Lara.Mutate.Accept.Build` takes all four, `mutantFileName` included.
 
-### The `Outcome` re-export is the one exception, and it is not a façade (#157)
+### The `Outcome` re-export is the one exception, and it is not a façade
 
 `Lara.Mutate.Outcome` sits *below* the root, not above it: it imports no sibling,
 and in particular does not import `Lara.Mutate`. The direction is forced by the
@@ -144,7 +144,7 @@ in the graph. Everything above it stays a hard split.
 
 ## D2 — Seven ownership modules, six of them new
 
-Issue #122 sketches `Sites` / `Codec` / `Corpus` plus core. Measured against the
+The original plan sketches `Sites` / `Codec` / `Corpus` plus core. Measured against the
 line counts at the time, that three-way split leaves **core at ~460 and `Sites`
 at ~465** — both still over the guideline it was meant to satisfy. Three further
 cuts along seams already present in the file fix that: `Seed` (the SplitMix64
@@ -156,7 +156,7 @@ The frozen public `mutationSeed` constant and the operator metadata function
 root small enough to read in one sitting.
 
 `codecDiagnostics` also *cannot* move to `Outcome`, which is worth stating
-because #157 proposed it and costed the split on the assumption that it would
+because it was proposed and costed on the assumption that it would
 (predicting a ~250-line root). Its type is `MutationOp -> Maybe (String, String)`,
 so an `Outcome` that owned it would import the root for `MutationOp` — and the
 root already imports `Outcome` for `Expected`, because `Mutant` has an `Expected`
@@ -185,7 +185,7 @@ its wording and this record disagree, this record is the one that shipped.
 There is **no numeric line bound in this namespace**, and CI does not measure
 one. The rule this section used to carry — every module at or below 300 code
 lines, warning from 250, enforced by `scripts/check-module-size.sh` against a
-table of per-module counts kept here (#161) — is **retired**. The guard, its
+table of per-module counts kept here — is **retired**. The guard, its
 self-test, the CI step that ran them, and the table are gone.
 
 The bound measured the wrong quantity. Every split recorded in this document was
@@ -211,26 +211,26 @@ module that is long because it is well documented is not a module to split.
 
 The splits recorded below explain the current graph.
 
-`Lara.Mutate.Sites.Cert` and `Lara.Mutate.Sites.Nav` are the #125 split. Adding
+`Lara.Mutate.Sites.Cert` and `Lara.Mutate.Sites.Nav` are the later split. Adding
 the `cert-wrong-fraction` operator took `Sites` to 428 lines and, more to the
 point, gave the certificate family enough of its own vocabulary to be read
 alone, so the certificate-family enumerators moved to `Sites.Cert` and the
 navigation helpers they share with `Sites` moved to `Sites.Nav`. The shape
-mirrors the #143 `Accept` split: a facade that keeps the single import site, one
+mirrors the `Accept` split: a facade that keeps the single import site, one
 module of shared helpers, one of family operators. `Sites` re-exports the three
 cert enumerators, so `Lara.Mutate.Suite` was unchanged. Both new modules are
 `other-modules`, so this added no public surface, and the split is byte-neutral:
 regeneration reproduces `fixtures/mutants` exactly, since enumerator order is
 what fixes the seeded picks and no list order moved.
 
-`Lara.Mutate.Sites.Conflict` is the #124 addition. It is a new module rather
+`Lara.Mutate.Sites.Conflict` is the conflict-family addition. It is a new module rather
 than a sixteenth enumerator in `Sites` because this enumerator is the only one
 that imports the checker (`Lara.Check` / `Lara.Compile` / `Lara.Policy`) — it
 mirrors the completeness scan's search order so it can publish the *located*
 ground truth, and that dependency deserves its own module rather than being
 smuggled into the shared one.
 
-Since **#159** it also imports `Lara.Driver`, a strictly higher layer than the
+Since the D4 index-space contract it also imports `Lara.Driver`, a strictly higher layer than the
 checker modules above. It reaches for exactly one name, `groupConflictReject`:
 the enumerator must know whether the driver will escalate a group conflict to
 R9 *before* the completeness scan runs, because on such a base no deletion can
@@ -241,7 +241,7 @@ enumerator whose correctness depends on the pipeline stage order, and confining
 that dependency to one module is the point. There is no cycle: `Lara.Driver`
 does not depend on `Lara.Mutate`.
 
-`Lara.Mutate.Sites.Localize` is the **#123** addition. The localization
+`Lara.Mutate.Sites.Localize` is the localization addition. The localization
 family's composite enumerators consume `Sites`' single-site enumerators as
 components, so the module inverts the facade's usual direction: it imports
 `Sites`, and a re-export through the facade would cycle. It therefore follows
@@ -252,9 +252,9 @@ the `Sorts` precedent, not the `Cert` one — no re-export, imported directly by
 policy clean through the stages ahead of support, and those gates are checker
 components, not navigation.
 
-`Lara.Mutate.Outcome` is the **#157** split, and it is the reason the root landed
+`Lara.Mutate.Outcome` is the `Outcome` extraction, and it is the reason the root landed
 at 328 lines rather than 400 (past tense on purpose: later operator additions
-move the number — it reads 340 after #123's three, at this document's own stated
+move the number — it reads 340 after the localization family's three, at this document's own stated
 cost of 3 root lines each). The root's growth had concentrated in one place:
 `drop-covering-attack` cost it thirteen lines (a `MutationOp` constructor with
 its `opName` / `opFamily` rows, plus a new `Expected` constructor with its
@@ -286,14 +286,14 @@ split it prompted is not._
 
 `Lara.Mutate.Accept` landed at **445** lines, the one module over the bound of
 the day.
-It predates the #122 split — it was extracted as new material in M5 T1, so it
+It predates the seven-module split — it was extracted as new material in M5 T1, so it
 never went through the re-partitioning pass the rest of the namespace had — and
-splitting it was explicitly outside #122's scope. This record originally carried
+splitting it was explicitly outside the split's scope. This record originally carried
 it as a single documented exception, explicitly not precedent, with the deferral
-tracked as issue #143 so the exception had a home in the tracker rather than
+tracked for follow-up so the exception had a home rather than
 only in a sentence here.
 
-**#143 closed it by splitting along the seam this record predicted** — the
+**The follow-up closed it by splitting along the seam this record predicted** — the
 constructed accept-verdict family versus its site/assembly helpers — into three
 modules under a facade:
 
@@ -313,7 +313,7 @@ assembly would close an import cycle.
 **The public API did not change.** `Lara.Mutate.Accept` stays the only exposed
 module of the three, still exporting exactly `acceptMutants` and
 `acceptStructureOk`; `Ops` and `Build` are `other-modules`, like
-`Lara.Mutate.Seed` and `Lara.Mutate.Sites`. The source-API break #143 warned
+`Lara.Mutate.Seed` and `Lara.Mutate.Sites`. The source-API break this record warned
 about — `Accept` being in `exposed-modules`, so a split that moved exported
 names would break importers — never materialized, because the facade kept both
 names. `scripts/gen-mutants.hs` and `test/MutationSpec.hs`, the only two
@@ -326,12 +326,12 @@ line of the original file is present in the union of the three new files with
 none lost. The `error` messages still name `Lara.Mutate.Accept`, the public
 entry point, rather than the module they now live in.
 
-## D4 — The index-space contract the site enumerators publish (#159, #165)
+## D4 — The index-space contract the site enumerators publish
 
 The checker does not run on the declared unit; it runs on the §4.3 quarantine of
-it. Before #159, `dropCoveringAttackSites` handled that by refusing to emit any
+it. Before the index-space change, `dropCoveringAttackSites` handled that by refusing to emit any
 site when the quarantine was not the identity (`quarantineIsIdentity`) — a
-fail-closed gate. #159 replaced the gate with a mapping. The contract that
+fail-closed gate. The change replaced the gate with a mapping. The contract that
 replaced it is frozen here because it is split across three modules and is not
 reconstructable from any one of them:
 
@@ -383,16 +383,16 @@ gapped retained list `[1]` that makes it non-vacuous), and `test/MutationSpec.hs
 `prop_conflictSiteQuarantiningBase` / `prop_conflictSiteMatchesChecker` (the
 published pair is the one the checker reports). No corpus base declares a
 `groups` form, so on every committed mutant `retainedAttackIndices == [0..n-1]`
-and the emitted sites are byte-identical to the pre-#159 ones — which is why the
+and the emitted sites are byte-identical to the ones emitted before the change — which is why the
 change needed no corpus regeneration and no freeze-tag bump, and equally why the
 quarantining path is reachable only from the in-memory fixtures.
 
-### Generalized to every enumerator (#165)
+### Generalized to every enumerator
 
 **Scope.** The contract above bound `Sites.Conflict` alone, and the sibling
 enumerators in `Lara.Mutate.Sites` and `Sites.Cert` still published `CArgument`
 in *declared* index space — latent for the same reason (no corpus base
-quarantines). #165 closed that asymmetry, and the contract now binds **every
+quarantines). The generalization closed that asymmetry, and the contract now binds **every
 site enumerator**:
 
 - **Sites are drawn from the checked unit.** `Sites.Nav`'s `argSites` /
@@ -409,9 +409,9 @@ site enumerator**:
 - **Only the rewrite maps back to declared space**, and the three retained-index
   lists are the **sole bridges**: `Lara.Blocked.retainedIndices` (arguments),
   `retainedAttackIndices` (attacks), and `retainedLeafIndices` (leaves, added by
-  #165). Nothing else may map between the two spaces.
+  the generalization). Nothing else may map between the two spaces.
 
-**The two spaces are types, not a naming convention (#166 review).** `Sites.Nav`
+**The two spaces are types, not a naming convention.** `Sites.Nav`
 exports `CheckedIx` and `DeclaredIx` newtypes, and the site tuples pair them;
 `rewriteArg` / `setAttackAt` / `dropAttackAt` take a `DeclaredIx`. A transposed
 pair is a compile error rather than a silently corrupted answer key — the repo's
@@ -440,14 +440,14 @@ path is exercised only from in-memory fixtures (`CheckSpec.quarantiningConflictB
 and the derived skew below), so no committed mutant file walks it. Adding a
 corpus base whose §4.3 quarantine is non-trivial was considered and rejected on
 cost: it forces a full corpus regeneration and a freeze-tag bump, which must be
-budgeted rather than discovered. It rides with **#156** if ever wanted.
+budgeted rather than discovered. It rides with the next freeze cycle if ever wanted.
 
 **Known boundary, and it fails closed.** A leaf-mutating operator striking a
 member of a *consistent* group would flip that group inconsistent, turning the
 mutant's outcome into R9/quarantine instead of R2. No base carries a consistent
 group today. If one enters the corpus, `scripts/gen-mutants.hs`'s per-mutant
 `verify` and `prop_siteMatchesChecker` both fail loudly at that point — unlike
-the index skew #165 closed, which failed *open*.
+the index skew the generalization closed, which failed *open*.
 
 **Guarded by.** `test/MutationSpec.hs` `prop_siteMatchesChecker` (every site of
 every enumerator, over the worked examples, all corpus units, the quarantining
@@ -456,7 +456,7 @@ exactly the predicted `Constituent` — this is what turns `expected-location`
 from a measured column into a gated one), `prop_sitesQuarantiningBase` (the
 hand-checked absolute pins on the fixture), and `prop_siteDirectionSkewed`.
 
-That last one is the answer to the coverage gap the #166 review found: the one
+That last one is the answer to the coverage gap a review found: the one
 committed quarantining base has no rules, so every `ruleSites`-based enumerator
 was exercised only where checked and declared indices coincide, and a
 per-operator transposition would have failed open. `quarantineSkewed` gives
@@ -470,7 +470,7 @@ publishing an indexed constituent must have at least one site where the two
 spaces actually differ.
 
 **Why no Lean entry is owed for `retainedLeafIndices`.** The same strong-form
-argument #159 made for `retainedAttackIndices`. `Admission.buildPrune` proves
+argument D4 made for `retainedAttackIndices`. `Admission.buildPrune` proves
 `p.removedLeaves = leaves.filterMap …` and
 `p.checkedLeaves = Groups.quarantineLeaves qs leaves`
 (`lean/Lara/Admission.lean:764-765`), and the argument-side `retainedIndices`
@@ -480,7 +480,7 @@ index list for the generator.
 
 **Cost.** No corpus regeneration and no freeze-tag bump: every committed base
 prunes to itself, so regeneration is byte-identical and `fixtures/mutants/` is
-untouched. #156's scope is unchanged.
+untouched. The freeze batch's scope is unchanged.
 
 ## What the split deliberately did not change
 

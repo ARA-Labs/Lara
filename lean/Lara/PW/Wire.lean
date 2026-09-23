@@ -1,5 +1,5 @@
 /-
-Versioned outer-surface S-expression codec (#314).
+Versioned outer-surface S-expression codec.
 
 Structured decoding is total and its round trips are proved below. Text reading
 and printing reuse Lara.Driver's existing executable boundary; their byte-level

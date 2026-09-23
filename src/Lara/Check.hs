@@ -17,7 +17,7 @@
 -- The first three stages run before program checking; the remaining four are
 -- the detailed program checker's fixed order.
 --
--- __Why the sort stage is at position 2__ (@lara-core\@0.2@, #89). Σ conformance
+-- __Why the sort stage is at position 2__ (@lara-core\@0.2@). Σ conformance
 -- is a precondition for reading the policy as patterns at all: both the R12
 -- Path-B validator and support inference instantiate patterns, and both should
 -- be entitled to assume well-sortedness rather than re-derive it. Running it
@@ -211,7 +211,7 @@ data CheckConfig = CheckConfig
     -- ^ Enforce the 'firstMissingConflictInfo' completeness scan. Off, an
     -- attackable contrary pair between complete arguments may go undeclared.
     --
-    -- Separate from 'ccTypedAttacks' (#124) because the two answer different
+    -- Separate from 'ccTypedAttacks' because the two answer different
     -- questions: typing asks whether a /declared/ edge is licensed, the scan
     -- asks whether every /required/ edge is declared. Folded together, no
     -- ablation cell isolated the scan, which is the executable witness of the
@@ -229,13 +229,13 @@ noCQConfig = fullConfig{ccObligationGate = False}
 
 -- | Ablation: no typed-attack bundle — the paper's \"nodes and arbitrary attack
 -- edges\" baseline, which neither types a declared edge nor requires a needed
--- one. It drops BOTH flags of the bundle: splitting 'ccConflictScan' out (#124)
+-- one. It drops BOTH flags of the bundle: splitting 'ccConflictScan' out
 -- added a way to switch the scan alone, and deliberately did not redefine this
 -- baseline, whose measured cells are published.
 noTypedConfig :: CheckConfig
 noTypedConfig = fullConfig{ccTypedAttacks = False, ccConflictScan = False}
 
--- | Ablation: typed attacks still checked, completeness not required (#124).
+-- | Ablation: typed attacks still checked, completeness not required.
 -- The isolating cell for attack completeness: the only difference from
 -- 'fullConfig' is the scan, so a row that flips under it and under nothing else
 -- is evidence the scan alone is load-bearing.

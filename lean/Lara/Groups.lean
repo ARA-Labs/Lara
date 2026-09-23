@@ -287,7 +287,7 @@ theorem conflictReject_iff (canon : String → String) (mode : GroupConflictMode
 When every declared group is `≡`-consistent, quarantine has nothing to remove:
 the quarantine set is empty and both quarantine operations are the identity.
 This is what lets a reader that cannot report a conditional status — the PW
-outer runtime (`Lara.PW.Run`, #326) — accept a world that declares groups
+outer runtime (`Lara.PW.Run`) — accept a world that declares groups
 whenever none of them conflicts: the unit it checks is the declared unit, and
 the local driver would have checked the same one. -/
 

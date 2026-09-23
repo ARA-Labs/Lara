@@ -1,4 +1,4 @@
--- | The rational-arithmetic domain-checker backend: @ra\@1@ (issue #57;
+-- | The rational-arithmetic domain-checker backend: @ra\@1@ (
 -- @docs/strict-backend-decision.md@ §2 obligations).
 --
 -- This adapter certifies exactly one goal shape — a relative-drop inequality

@@ -1,5 +1,5 @@
 /-
-# An attack-bearing surface transport fixture (#258)
+# An attack-bearing surface transport fixture
 
 `Lara.Examples.SurfaceTransport.surfaceTransport_directAF_eq` witnesses
 `Lara.Context.surface_directAF_relabel` on a pair of programs that declare no
@@ -25,7 +25,7 @@ The fixture routes around this by making the certificate a **premise** of both
 endpoints rather than an endpoint:
 
 * `r-cert` is strict, `p ⊢ q`, certified by `nd@1` at `digestA` — the same rule
-  the `#227` fixture uses, reused verbatim as `SurfaceTransport.transportRule`;
+  the `SurfaceTransport` fixture uses, reused verbatim as `SurfaceTransport.transportRule`;
 * `r-s` and `r-t` are plain defeasible rules `q ⊢ s` and `q ⊢ t`, with `.none`
   assurance and no certifiers, so neither adds a certificate-lowering
   obligation;
@@ -109,7 +109,7 @@ def attackPolicy : Policy :=
 /-! ### The program
 
 Three arguments and one attack. The certified argument is parameterised by its
-assurance, exactly as in `#227`, so the two programs differ in the certificate
+assurance, exactly as in `SurfaceTransport`, so the two programs differ in the certificate
 and nothing else. -/
 
 def attackArgCert (assurance : Assurance) : Arg :=
@@ -207,7 +207,7 @@ theorem attack_freshness_wrapped :
 
 /-! ### The three argument derivations
 
-The certified one repeats `#227`'s: `ChecksArgument.inferred`, with `hlower`
+The certified one repeats `SurfaceTransport`'s: `ChecksArgument.inferred`, with `hlower`
 the single obligation on the kernel-opaque path. The two defeasible ones
 resolve their premise against the *prior argument* `a-cert` and carry
 `ChecksAssurance.none`, so they add no lowering obligation at all. -/
@@ -338,7 +338,7 @@ theorem attack_checksAttacks (certificate : Cert)
 
 /-! ### The elaborated carrier
 
-As in `#227`, every field is *defined* as the expression the corresponding
+As in `SurfaceTransport`, every field is *defined* as the expression the corresponding
 `Checks` field compares against. The two attack-carrying fields are the
 literal one-element lists, which is what makes `unitAttacks` `rfl` and the
 `selectResolvedAttacks` equation a computation. -/
@@ -402,7 +402,7 @@ theorem attack_ruleLookup_t (certificate : Cert)
     (attackElaborated certificate coreAssur).unit.policy.ruleLookup ⟨"r-t"⟩
       = some (toCoreRule tRule) := rfl
 
-/-- **The certified argument is supported**, exactly as in `#227`. -/
+/-- **The certified argument is supported**, exactly as in `SurfaceTransport`. -/
 theorem attack_hasSupport_cert
     {reg : Lara.Support.BackendRegistry (fun source => source)}
     (certificate : Cert) (coreAssur : Lara.Support.Assurance)
@@ -546,7 +546,7 @@ theorem attack_concl_of_inst
 
 /-! ### The core obligations
 
-Unlike `#227`, the four attack-side fields are real: there is one declared
+Unlike `SurfaceTransport`, the four attack-side fields are real: there is one declared
 attack, it must type, both endpoints must be declared arguments, and
 `AttackComplete` must account for all nine ordered pairs. -/
 
@@ -937,12 +937,12 @@ theorem surfaceTransportAttack_directAF_eq :
 
 /-! ### Non-vacuity
 
-The first three guards are the ones `#258` asks for: the attack set is not
+The first three guards are the ones the attack-bearing brief asks for: the attack set is not
 empty, the relabel moves it, and the witnessed framework really has an edge.
-The last two are `#227`'s, restated for this fixture. -/
+The last two are `SurfaceTransport`'s, restated for this fixture. -/
 
 /-- **The attack set is non-empty**, on both sides. Without this the fixture
-could silently regress to `#227`'s degenerate case, where `coveredB_relabel` is
+could silently regress to `SurfaceTransport`'s degenerate case, where `coveredB_relabel` is
 applied to `[]`. -/
 theorem surfaceTransportAttack_atts_nonempty :
     (attackElaborated kernelCert kernelCoreAssur).unit.atts ≠ [] ∧

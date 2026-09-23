@@ -1,6 +1,6 @@
 /-
 # PW-T8 — grounded status is invariant under total attack bisimulation
-(issue #193, tracker #189)
+
 
 Generic layer: nothing here mentions a support term, a bridge, or a world.
 Two finite frameworks `F G : Grounded.AF` and a relation `Z` on argument ids.

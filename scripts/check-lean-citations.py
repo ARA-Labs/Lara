@@ -163,7 +163,7 @@ ALLOWLIST: dict[str, str] = {
     "lean/Lara/Check/Unit.lean:151": "cites the `sigma := unit.sigma` retention line quoted verbatim beside it",
     "lean/Lara/Check/Unit.lean:243": "cites `checkUnit_complete`'s `Nodup` premise, not the theorem",
     "lean/Lara/Compile.lean:407": "cites `ConflictAttackable`'s `.leaf` arm, which is the arm being quoted",
-    "lean/Lara/Compile.lean:606": "quotes issue #68's stale reference verbatim, as the reference being corrected",
+    "lean/Lara/Compile.lean:606": "the stale scope-note pointer being corrected named this continuation line",
     "lean/Lara/Attack.lean:85": "cites the `ContraryMatch` docstring's quantified-variable sentence",
     "lean/Lara/Attack.lean:550": "cites `HasAttack.rebut`'s `r.mode = .defeasible` hypothesis, not the inductive",
     # Range starts. A range is resolved at its first line only, so what is

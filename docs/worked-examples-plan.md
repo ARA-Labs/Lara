@@ -60,9 +60,9 @@ Attack coverage: rebut, undercut, undermine (E3) — all three; plus the *illega
 Rejection coverage spans three distinct classes; the full mutation suite (`engineering-plan.md` §5)
 covers the rest, but these three are the human-readable representatives.
 
-## 1.5 M5 additions — E4 and E5 (landed in PR #49)
+## 1.5 M5 additions — E4 and E5 (landed)
 
-M6 pulled forward (issue #48, T4) added two further worked cases to close
+M6 pulled forward (T4) added two further worked cases to close
 coverage cells the six-example matrix cannot reach, both on policy
 `empirical-v2` (= `empirical-v1` + the rules/exceptions/contrary below) with
 golden verdicts through both drivers (`examples/{E4,E5}/`):

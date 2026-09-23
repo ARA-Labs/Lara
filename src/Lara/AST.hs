@@ -405,8 +405,8 @@ data Relation = StrictlyBetter | AtLeastAsGood
 -- > measurand imagenet_val : Dataset
 --
 -- The @:@ slot is a __sort position__ over the /same/ 'Lara.Sigma.Sort'
--- vocabulary the policy's signature declares, never a parallel spelling (#89
--- D-1): one declaration surface, two consumers — the elaborator reads polarity
+-- vocabulary the policy's signature declares, never a parallel spelling (D-1):
+-- one declaration surface, two consumers — the elaborator reads polarity
 -- and drops it, the wire codec reads sorts and carries them into 'Unit'.
 --
 -- __Polarity is @Num@-gated.__ A @where higher-is-better@ \/ @lower-is-better@
@@ -496,7 +496,7 @@ newtype TheoryDigest = TheoryDigest String deriving (Eq, Ord, Show)
 -- it as a proof.
 --
 -- The one sanctioned exception is /presentation lowering/. @lara-syntax\@0.6@
--- (#105) lets an author cite a premise by its source name — @(prem e4)@ for
+-- lets an author cite a premise by its source name — @(prem e4)@ for
 -- @(prem 0)@ — and "Lara.Elaborate.CertSlots" rewrites exactly those
 -- references before the payload reaches the wire. That pass consults only a
 -- backend's declared flat 'Lara.Strict.Cell.SlotSchema' (head keyword, arity,
@@ -905,7 +905,7 @@ data Label = LIn | LOut | LUndec
 -- preflight. R8 (admission) remains outside the executable core; R14 (codec) is
 -- reported at the decode boundary, never as a verdict.
 --
--- __R2 entered the executable core at @lara-core\@0.2@__ (#89): the declared
+-- __R2 entered the executable core at @lara-core\@0.2@__: the declared
 -- signature is now a 'Unit' field and 'Lara.Check.checkUnit' stage 2 decides
 -- well-sortedness against it ("Lara.Sigma.WellSorted").
 data RejectClass = R1 | R2 | R3 | R4 | R5 | R6 | R7 | R9 | R10 | R11 | R12 | R13

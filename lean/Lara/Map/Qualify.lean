@@ -1,7 +1,7 @@
 /-
 # Multi-artifact maps, part 1 — member-alias qualification
 
-The mechanized half of `Lara.Map.Qualify` (issue #303). A *map* links several
+The mechanized half of `Lara.Map.Qualify`. A *map* links several
 independently checked artifacts, and two of them may each declare a leaf called
 `e1`. Linking is therefore preceded by a **rename**: every member's local leaf
 identifiers are replaced by alias-qualified ones, and nothing else about the

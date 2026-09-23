@@ -1,6 +1,6 @@
 # Theory PW-T8: conditional status preservation
 
-_Status: mechanized on 2026-09-04 (issue #193, tracker #189). This document
+_Status: mechanized on 2026-09-04 for T8 of the possible-world spike. This document
 records the status-preservation hypotheses frozen by T8, the consequences it
 proves, and the boundary it leaves to later work._
 
@@ -8,8 +8,8 @@ _Part of the possible-world spike (comparing artifacts across differing
 contexts); start from `theory-pw-closeout.md` for the subseries index — T8
 layers over T6 and T9._
 
-The intended readers are the paper author, whoever takes decisions on tracker
-#189, and anyone extending or citing structural bridges to status. They should
+The intended readers are the paper author, whoever takes decisions on the
+spike, and anyone extending or citing structural bridges to status. They should
 cite the declarations below rather than reconstructing the hypotheses from
 implementation details.
 
@@ -155,7 +155,7 @@ Instantiation at structural bridges, `Lara/PW/Status.lean`:
 | The `Contains`/`AttackOcc` Prop faces | `PW.Contains_trSupport`, `PW.AttackOcc_trSupport` | `Lara/PW/AttackTransport.lean` |
 | T8's attack hypotheses on the source language, and the index-level clauses derived | `PW.AttackBridge`; `PW.AttackBridge.toStatusBridge` | `Lara/PW/AttackTransport.lean` |
 
-Executable decider, `Lara/PW/StatusCheck.lean` (issue #239):
+Executable decider, `Lara/PW/StatusCheck.lean`:
 
 | Result | Declaration | File |
 |---|---|---|
@@ -165,7 +165,7 @@ Executable decider, `Lara/PW/StatusCheck.lean` (issue #239):
 | The `StatusBridge` decider (a four-way `&&` of the scans) | `PW.statusBridgeB` | `Lara/PW/StatusCheck.lean` |
 | The decider decides `StatusBridge` exactly | `PW.statusBridgeB_sound`, `PW.statusBridgeB_complete`, `PW.statusBridgeB_iff` | `Lara/PW/StatusCheck.lean` |
 
-Two shape decisions, recorded from the executed checker plan (#239). A
+Two shape decisions, recorded from the executed checker plan. A
 `Decidable (StatusBridge …)` instance was rejected: `StatusBridge`
 quantifies unboundedly over `Nat`, so it is not decidable as stated — a
 `Bool` checker with a sound/complete pair is the correct shape, matching
@@ -203,7 +203,7 @@ Executable witnesses, `Lara/Examples/PWStatus.lean` (namespace
 | The `[b]` cell at `defeated`, and its inhabitation | `Examples.PW.Status.t8_box_defeated_r`, `t8_box_defeated_r_holds` | `Lara/Examples/PWStatus.lean` |
 
 Decider conformance cells, `Lara/Examples/PWStatusCheck.lean` (namespace
-`Lara.Examples.PW.StatusCheck`, issue #239):
+`Lara.Examples.PW.StatusCheck`):
 
 | Witness | Declaration | File |
 |---|---|---|
@@ -333,7 +333,7 @@ composite `StatusBridge.comp h₁ h₂` is stated over `m₂.comp m₁` and
 
 ## 7. Acceptance mapping
 
-Issue #193's four bullets, each with the declaration that discharges it.
+T8's four acceptance bullets, each with the declaration that discharges it.
 
 1. *Lean proves status preservation from explicit structural correspondence.*
    `PW.status_transport` (T8), with `PW.statusC_of_bisim` and
@@ -406,15 +406,15 @@ Those mechanisms, rather than an example's reducibility or a property test,
 carry the audit contract. Every decidable cell in `Lara/Examples/PWStatus.lean`
 closes by `decide`; `native_decide` is not used.
 
-### Re-verification after merging #237 (2026-09-04, merge commit 84c51b6)
+### Re-verification after a concurrent merge (2026-09-04, merge commit 84c51b6)
 
 `origin/main` moved `Support.lean`, `Consistency.lean`, `Attack.lean`, and
 `AxCheck.lean` after this branch's base, so the gates were re-run on the merged
 tree: `Build completed successfully (143 jobs).`; `AxCheck coverage passed (60
 declarations).`; `Axiom audit passed.` with 2073 reports (the 2058 above plus
-#237's 15), the 60 PW-T8 rows unchanged and still within the standard trio; the
+the concurrent merge's 15), the 60 PW-T8 rows unchanged and still within the standard trio; the
 wrapper-discipline diff against `origin/main` remains empty. The ARA journey
-identifiers this work allocated were renumbered past #237's (`N302`–`N306`,
+identifiers this work allocated were renumbered past the concurrent merge's (`N302`–`N306`,
 `O132`–`O136`, session `2026-09-04_004`); no Lean or docs content changed.
 
 ## 9. Known limitations of the frozen contract
@@ -430,9 +430,9 @@ These are design commitments with named homes, not oversights.
    a partial map. T8's statement per the design is the AF-level
    correspondence, so the clauses are stated where the design states them; a
    reader should not mistake them for structural conditions on the source
-   language. Follow-up: #238.
+   language. Follow-up: the `AttackBridge` contract.
 
-   **Narrowed by #238.** `AttackBridge` (`Lara/PW/AttackTransport.lean`)
+   **Narrowed by that follow-up.** `AttackBridge` (`Lara/PW/AttackTransport.lean`)
    states the attack hypotheses on declared `atts` via `trAttack`, and
    `AttackBridge.toStatusBridge` derives the index-level `forth`/`back`
    clauses from them; the commutation ladder mirrors `Erase.lean` over the
@@ -442,7 +442,7 @@ These are design commitments with named homes, not oversights.
    `decide (v = t)` (`Lara/Compile.lean:120-123`), so a collapsing leaf map
    makes two distinct source subterms translate equal. The general,
    injectivity-free index-level statement of limitation 1 therefore still
-   stands; #238 supplies a bridge-contract-level sufficient condition for
+   stands; `AttackBridge` supplies a bridge-contract-level sufficient condition for
    it, witnessed at `Examples.PW.Attack.*`.
 2. **`status_transport` needs an injective translation.** A merging
    translation breaks the reflection half of `claimSupport_corr` (§4).
@@ -452,7 +452,7 @@ These are design commitments with named homes, not oversights.
    `StatusBridge` by hand, index by index; a `Bool` decider over the finite
    index ranges with a soundness theorem, in the `Presents`/`crossCompare`
    style of the comparison layer, would make each new cell one `decide`.
-   Follow-up: #239. Discharged by #239: `statusBridgeB` with
+   Follow-up: the executable decider. Discharged by it: `statusBridgeB` with
    `statusBridgeB_sound`/`statusBridgeB_complete`
    (`Lara/PW/StatusCheck.lean`); each conformance cell is now one `decide`
    (`Lara/Examples/PWStatusCheck.lean`), and the T7 negative is refuted

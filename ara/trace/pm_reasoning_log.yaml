@@ -60,8 +60,8 @@ entries:
     of the research.'
 - turn: 2026-07-22_001#11-18
   notes:
-  - 'Reconciled after PR #14 rebase under fresh IDs N38-N43/O07-O08 because main already used N34-N37/O06
-    for later PR #10 sessions.'
+  - 'Reconciled after the rebase under fresh IDs N38-N43/O07-O08 because main already used N34-N37/O06
+    for later formal-model sessions.'
   - Restored the original turn-1 blocks byte-for-structure and appended the M1 material under *_turns11_18
     keys; the deleted rebut/undermine open thread is present again.
   - C02 advanced hypothesis→testing from the sorry-free Attack theorems; C07/C08 advances remain recorded
@@ -159,7 +159,7 @@ entries:
     the numbers/file:line are journey facts, not interpretation.
   - 'Crystallized O13 -> C19 same-turn via empirical-resolution + artifact-commitment, mirroring the C18
     precedent (user hypothesis, source-verified, committed to doc/PR). Signal is the source audit result
-    + the §11.5 commit (ba6c45e) on PR #22.'
+    + the §11.5 commit (ba6c45e).'
   - 'C19 provenance user-revised, not ai-suggested: the core methodological principle (''describe rit
     by what its gate enforces, not its write-up'') was a first-person user directive this turn, without
     exact claim wording — the user-revised case. Empirical-resolution/artifact-commitment do not themselves
@@ -179,7 +179,7 @@ entries:
   notes:
   - Packaging/consistency turn — no new claim or experiment crystallized. Logged as ai_actions + an open-thread
     update only; the nitpick edited docs/, not ara/logic/, so no logic_revisions entry.
-  - 'Discovered PR #22''s squash (29c7570) captured only d192047+5307671; ba6c45e (§11.5) + 3692817 (C19
+  - 'Discovered the PR''s squash (29c7570) captured only d192047+5307671; ba6c45e (§11.5) + 3692817 (C19
     capture) were stranded on the old branch. Recovered by cherry-picking both onto a fresh main-based
     branch — clean apply because main already holds the squashed base content.'
   - 'Nitpick was a doc-internal-consistency fix: §4 asserted rit''s K-tier as fact, which §11.5 #3 refutes.
@@ -204,10 +204,10 @@ entries:
     still no code/milestone depends on the rit<->lara integration; O12 stays staged.'
 - turn: 2026-07-25_001#7
   notes:
-  - 'Packaging/recovery turn — no new claim/experiment. Same partial-squash pattern recurred: PR #23 squash
+  - 'Packaging/recovery turn — no new claim/experiment. Same partial-squash pattern recurred: the PR squash
     (a5328b5) stranded its final commit 0427cf7 (§11.6 + C20). Recovered by cherry-pick onto a fresh main-based
-    branch; opened PR #24.'
-  - 'Flagged the recurrence explicitly in open_threads (twice now: #22 and #23) — root cause is squash-merging
+    branch; opened a follow-up PR.'
+  - 'Flagged the recurrence explicitly in open_threads (twice now) — root cause is squash-merging
     before the branch''s last push lands. Added a merge-completeness note to the PR body.'
   - 'No logic/ edit: §11.6 + C20 content already correct from turn 6; this turn only relocates it to a
     landable PR.'
@@ -285,17 +285,17 @@ entries:
     revertible.'
 - turn: 2026-07-30_001#2
   notes:
-  - 'PR-#41 review item 1: verified mapAssurAtt_target/mapAssurDis_eq are referenced ONLY by their AxCheck
+  - 'Review item 1: verified mapAssurAtt_target/mapAssurDis_eq are referenced ONLY by their AxCheck
     lines (grep, source-only) before removing — a real dead-export check, not taking the reviewer''s word.
     Recorded as decision N79 (provenance user: ''keep them removed'').'
   - 'Pushed back mildly on ''might we need them later'': named the one concrete future consumer (CheckedProgram-relabel
     transport) but still recommended removal (trivially re-derivable, no-dead-code rule) — user agreed.
     The transport landed next turn and DID re-add both, vindicating the add-when-used call.'
-  - 'Item 2 routed to issue #42 rather than staged as an observation — it is a concrete work proposal,
+  - 'Item 2 routed to the tracker rather than staged as an observation — it is a concrete work proposal,
     not an interpretive claim; the trace already carries the non-vacuity concern via N81.'
 - turn: 2026-07-30_001#3
   notes:
-  - 'N80 (do #42 over Haskell port) provenance user (''do 42 first''); N81 (transport) ai-executed and
+  - 'N80 (do the transport lemma over the Haskell port) provenance user (''do [redacted] first''); N81 (transport) ai-executed and
     independently verified (build + AxCheck), not trusting the fork''s report.'
   - 'Updated C04 Evidence basis (not Statement/Conditions/Status): the transport is new confirming evidence
     + constructive non-vacuity, not a scope change; status stays supported. Second logic_revision on C04
@@ -309,7 +309,7 @@ entries:
   notes:
   - Routed the explicit user sequencing choice ('do house keeping first') as decision N82; it closes status
     drift before M5 rather than asserting a new research claim.
-  - 'Updated current-state status documents and presentation/source comments; closed #31/#37 from merged
+  - 'Updated current-state status documents and presentation/source comments; closed the M4a and strict-certificate trackers from merged
     PR evidence. No code behavior changed, so verification was document re-read + stale-phrase scan +
     GitHub issue-state reads, not a test run.'
   - 'Did NOT revise logic claims or promote O19: this turn changed project bookkeeping, not the backend-replacement
@@ -317,14 +317,14 @@ entries:
 - turn: 2026-07-30_001#5
   notes:
   - 'Crystallized C21 (data-conflict → gap/R9) on TWO signals: artifact-commitment (code committed + PR
-    #45 depends on the routing) AND empirical-resolution (differential 41/41 + AxCheck-clean this turn).
+    PR depends on the routing) AND empirical-resolution (differential 41/41 + AxCheck-clean this turn).
     Provenance ai-suggested, NOT user: the routing is frozen spec §4.3 but the user never verbally affirmed
     C21-as-claim; reversible on review. Flagged in open_threads that the PR is unmerged, so revisit if
     review changes it.'
   - 'C21 Dependencies [C01, C16]: C01 (≡ decides identity) is the real premise — the group check IS decidable
     because ≡ is; C16 is the sibling gap-not-defeat principle (spec explicitly says ''same gap-not-defeat
     routing''), included as the conceptual parent it generalizes alongside, not a logical premise.'
-  - 'Did NOT revise C16: #38 extends the gap-not-defeat family to data conflicts but C16''s scope (unmet
+  - 'Did NOT revise C16: the duplicate-report work extends the gap-not-defeat family to data conflicts but C16''s scope (unmet
     critical questions) is unchanged — no signal to touch it; near-miss noted.'
   - 'Staged O20 (three-tier rejection architecture) rather than crystallizing a concept: the ''driver-boundary
     tier'' framing is my synthesis this turn with no reuse/affirmation yet — default to non-promotion.'
@@ -335,7 +335,7 @@ entries:
     left clean), not research-significant — no trace node.'
 - turn: 2026-07-31_001#1
   notes:
-  - 'Routed the review-remediation work as ONE experiment node N87 (not a dead_end): the original #38
+  - 'Routed the review-remediation work as ONE experiment node N87 (not a dead_end): the original duplicate-report
     design was incomplete-then-completed, not tried-and-abandoned — no failed hypothesis with a reusable
     lesson of its own. The reusable lesson (front-door parity) went to staging as O21.'
   - 'Finding 1 was a genuine correctness hole (reviewer-reproduced): via .lara a dangling group member
@@ -349,7 +349,7 @@ entries:
     one front door is not a demotion of a supported semantic claim — it is an evidence event that the
     routing now holds at BOTH doors. Near-miss considered and rejected.'
   - 'Staged O21 (front-door invariant parity) rather than crystallizing: sibling of O20 (rejection tiers),
-    no reuse/affirmation yet and PR #45 unmerged — default to non-promotion.'
+    no reuse/affirmation yet and the PR unmerged — default to non-promotion.'
   - The doc/grammar/haddock fixes (findings 2,5,6,7,8,10) are provenance-record corrections, not new research
     content — folded into N87's action list, no separate nodes/observations.
 - turn: 2026-07-31_001#2
@@ -359,7 +359,7 @@ entries:
     to staging as O22.'
   - 'Staged O22 as potential_type: heuristic (twin-parity discipline is a ''how''), sibling of O21 (per-door
     parity) but distinct axis: per-TWIN definitional parity vs per-DOOR invariant parity. Default non-promotion:
-    single instance, PR #45 unmerged, no user affirmation.'
+    single instance, PR unmerged, no user affirmation.'
   - 'Considered artifact-commitment crystallization for O21 (this turn''s ElaborateSpec negatives + 3
     fixtures follow its ''exercise every door on the same malformed input'' rule) — rejected: PR still
     unmerged and prior turn deliberately deferred on the same ground. Near-miss logged.'
@@ -375,7 +375,7 @@ entries:
     the two workstreams as separate experiment nodes N90 (T4) / N91 (T1) — one node each, not per-file,
     since each has a single verifiable outcome (matrix closed; suite verified).'
   - 'Staged O23 (completeness-scope lever) as potential claim rather than crystallizing on artifact commitment:
-    PR #49 is unmerged — same precedent as O21/O22 deferral on PR #45. Near-miss logged; revisit on merge.'
+    the PR is unmerged — same precedent as the O21/O22 deferral. Near-miss logged; revisit on merge.'
   - Staged O24 as concept (a boundary/definition, not a falsifiable mechanism) and O25 as heuristic (a
     'how').
   - 'Extended C21 Proof only (empirical-resolution: 7 generated R9 mutants byte-identical across drivers).
@@ -386,7 +386,7 @@ entries:
     instead.'
 - turn: 2026-08-01_001#2
   notes:
-  - 'Crystallized O23/O24/O25 via artifact-commitment: PR #49 merged this turn (user statement), matching
+  - 'Crystallized O23/O24/O25 via artifact-commitment: the PR merged this turn (user statement), matching
     last turn''s anticipation; provenance stays ai-suggested (commitment does not upgrade).'
   - 'C22 created at supported (not hypothesis): mechanically pinned by committed E4/E5 goldens + both-driver
     byte parity — same precedent as C21.'
@@ -403,17 +403,17 @@ entries:
     notes:
       - "Turn 3 was /implement execution of the already-eng-reviewed T1-corpus+T3 plan: routed the two deliverables as experiment nodes N95 (generation) + N96 (measurement) DIRECT to trace; the user directive was execution, not a new research decision, so no new pivot/decision node."
       - "Appended corpus-scale evidence to C22.Proof (empirical-resolution, evidence-only) rather than authoring a new claim: the accept-verdict family (symmetric->contested, one-directional->defeat, voluntary undercut->reinstatement) IS C22's completeness-scan mechanism instantiated at corpus scale — exact precedent of the turn-1 C21 R9-mutant Proof append. Statement/Conditions/Status untouched; added Last revised."
-      - "Did NOT crystallize O29/O30/O31 despite strong committed evidence: PR #51 is OPEN not MERGED (last turn's crystallizations fired on PR #49 MERGED), and these are interpretive framings of fresh smoke-run numbers. Conservative precedent (O27 staged last turn) — let merge / user reaction / T5 freeze close them."
+      - "Did NOT crystallize O29/O30/O31 despite strong committed evidence: the PR is OPEN not MERGED (last turn's crystallizations fired on a MERGED PR), and these are interpretive framings of fresh smoke-run numbers. Conservative precedent (O27 staged last turn) — let merge / user reaction / T5 freeze close them."
       - "O30 flagged potential_type claim not constraint: it asserts a size-distribution relationship (payload is the signal) with a concrete downstream implication (policy-by-reference), which is a what, not a design rule."
       - "No stale flags: O26/O27/O28 staged 2026-08-01 (same day), under the 3-session-day threshold."
       - "Reviewer git-clean/policyBytes-bug recorded inside N96 result + turn-3 key_context, not as dead_end nodes: both found+fixed within the turn, below node granularity (same treatment as the turn-2 differential.sh dual-site bug)."
   - turn: "2026-08-01_001#4"
     notes:
       - "Turn 4 was /implement of the eng-cleared T6 plan: one experiment node N97 DIRECT (same one-node-per-implement precedent as N95/N96); execution decisions (checkUnitWith wrapper, fd-strictness fix) recorded inside N97.result, below node granularity."
-      - "Crystallized O29 -> C23 via artifact-commitment: PR #51 (its bound experiment) is now MERGED into main (1d91bdb), and three committed artifacts depend on the observation (T6 plan D10 scoping, TODOS localization entry, T6 execution record). Status testing not supported: 246/246 is consistent-with, and the discriminating-suite boundary is untested."
+      - "Crystallized O29 -> C23 via artifact-commitment: the bound experiment is now MERGED into main (1d91bdb), and three committed artifacts depend on the observation (T6 plan D10 scoping, TODOS localization entry, T6 execution record). Status testing not supported: 246/246 is consistent-with, and the discriminating-suite boundary is untested."
       - "Crystallized O31 -> constraints.md bullet via the same merge commitment: the merged harness code labels hs_check/lean_wall as separate protocols — code depends on the constraint. Constraint, not claim: it is a measurement design rule."
       - "Did NOT crystallize O30 despite the same merge: merged code computes both size numbers; which one the paper leads with is a framing choice with no committed artifact yet."
-      - "Staged O32/O33/O34 (surgical-ablation claim, accept-justified miss class, gate-coverage heuristic) rather than crystallizing: pre-freeze smoke numbers on an OPEN PR #53 — exact O29-precedent; let merge / T5 freeze / paper adoption close them."
+      - "Staged O32/O33/O34 (surgical-ablation claim, accept-justified miss class, gate-coverage heuristic) rather than crystallizing: pre-freeze smoke numbers on an OPEN PR — exact O29-precedent; let merge / T5 freeze / paper adoption close them."
       - "Near-miss: considered appending T6 ablation evidence to C11 (rejection adversarially validated) — rejected: the ablation validates rule necessity, not the producer/checker split; no signal named C11."
       - "No stale flags: all unpromoted observations (O26-O28, O30, O32-O34) staged 2026-08-01, under the 3-session-day threshold."
   - turn: "2026-08-02_001#1"
@@ -421,9 +421,9 @@ entries:
       - "Turn 1 (status Q&A) produced no node: it restated existing records (M5 milestone status, the two-paper scope split) as decision-support; captured in key_context only, and its framing feeds N98's context rather than standing alone."
   - turn: "2026-08-02_001#2"
     notes:
-      - "N98 provenance user-revised, not user: the user's FIRST answer was 'land #52 first'; they reversed to 'freeze now, defer #52' only after the manager surfaced #52's deferred label + absent natural-defect corpus. The final call is the user's, reached via AI evidence — the exact user-revised case."
+      - "N98 provenance user-revised, not user: the user's FIRST answer was 'land [redacted] first'; they reversed to 'freeze now, defer [redacted]' only after the manager surfaced the item's deferred label + absent natural-defect corpus. The final call is the user's, reached via AI evidence — the exact user-revised case."
       - "Routed the freeze as a decision node (N99) not an experiment: the post-freeze measure.hs run is real measurement, but the node's character is the freeze-mechanism design (what to hash, where to store the snapshot); the run + gates live in N99.evidence. One node for the whole T5 execution, consistent with the one-node-per-milestone-action precedent (N95/N96/N97)."
-      - "Crystallized O32→C24 and O34→H07 via artifact-commitment: both were explicitly deferred last turn pending 'merge / T5 freeze'; #53 is now MERGED (cfe7607) AND the post-freeze run reproduced O32's partition exactly (empirical resolution too). Grounded C24's numbers from measurements/frozen/ablation.json aggregate (verbatim missed-rejects 18 / 30, per-class 18/18, 11/19)."
+      - "Crystallized O32→C24 and O34→H07 via artifact-commitment: both were explicitly deferred last turn pending 'merge / T5 freeze'; the PR is now MERGED (cfe7607) AND the post-freeze run reproduced O32's partition exactly (empirical resolution too). Grounded C24's numbers from measurements/frozen/ablation.json aggregate (verbatim missed-rejects 18 / 30, per-class 18/18, 11/19)."
       - "C24 status supported (not testing like its sibling C23): AblationSpec MECHANICALLY proves surgical+monotone (10 pure properties), stronger than C23's single-number consistency; provenance stays ai-suggested (artifact-commitment does not upgrade; no first-person affirmation of the wording)."
       - "Did NOT crystallize O33 (accept-justified = the alarming case) despite the merge: the frozen aggregate partially CONTRADICTS its 'dominant for both columns' wording — no-cq reject-IncompleteArgument accept-justified is the plurality (10/18), but no-typed R10 accept-justified is 3/11 where accept-other (6) is larger. Kept staged, flagged in open_threads for the researcher to narrow before paper adoption; too weak a contradiction (staged framing, not a crystallized entry) for a full CONFLICT node."
       - "Staged O35 (freeze reproducibility-anchor: hash the deterministic projection, not timing) rather than crystallizing a third entry this turn: genuinely committed by the freeze manifest (artifact-commitment present) but new-this-turn and distinct from the existing timing constraint (constraints.md:146 no-ratio rule); conservatism — let it mature. It is a how (heuristic), not the no-ratio what."
@@ -431,19 +431,19 @@ entries:
       - "No stale flags: O33 re-touched this turn (still 2026-08-01 origin); O26-O28/O30 under the 3-session-day threshold (2 days)."
   - turn: "2026-08-02_001#3"
     notes:
-      - "This conversation is only the PR #59 review-response; the intervening #55/#56/#57/re-freeze work has no ara/ record (epilogues not run in those conversations). Recorded the gap explicitly in open_threads rather than reconstructing unobserved turns — never fabricate."
+      - "This conversation is only the PR review-response; the intervening certifier/re-freeze work has no ara/ record (epilogues not run in those conversations). Recorded the gap explicitly in open_threads rather than reconstructing unobserved turns — never fabricate."
       - "Routed the review response as one experiment node N101 DIRECT (one-node-per-action precedent, N95-N97): the conformance suite ran and passed, which is the node's result; the review finding itself is external input recorded in N101.description, not a decision node."
-      - "Staged O36 (differential parity by construction) rather than crystallizing: it is the external reviewer's interpretive analysis (provenance ai-suggested), and no closure signal fired — PR #59 is OPEN, no user affirmation. Same OPEN-PR conservatism as O29/O32 precedents."
+      - "Staged O36 (differential parity by construction) rather than crystallizing: it is the external reviewer's interpretive analysis (provenance ai-suggested), and no closure signal fired — the PR is OPEN, no user affirmation. Same OPEN-PR conservatism as O29/O32 precedents."
       - "Did NOT create a claim for 'RA conformance evidence' itself: per CLAUDE.md, Haskell property tests are conformance evidence, not soundness — the suite is Proof-grade material for a future strict-path claim, not a claim of its own."
-      - "No Stage-4 edits: no crystallized logic entry references the ra@1 backend (the #57 turn that would have created one is part of the unrecorded gap); nothing to reconcile. Near-miss considered: appending RASpec to C11's adversarial-validation Proof — rejected, C11 is about producer/checker rejection, not backend conformance."
+      - "No Stage-4 edits: no crystallized logic entry references the ra@1 backend (the ra@1 turn that would have created one is part of the unrecorded gap); nothing to reconcile. Near-miss considered: appending RASpec to C11's adversarial-validation Proof — rejected, C11 is about producer/checker rejection, not backend conformance."
       - "No stale flags: O26-O28/O30/O33 origin 2026-08-01 (1 session-day), O35/O36 today."
 - turn: "2026-08-03_001#1-2"
   notes:
-    - "Routed both the #68 audit (N102) and the paper validation (N103) as experiment nodes with results — they are verification acts with observable outcomes, not decisions."
+    - "Routed both the name-map audit (N102) and the paper validation (N103) as experiment nodes with results — they are verification acts with observable outcomes, not decisions."
     - "Did NOT stage the 'cite srcStatus_iff_checked not status_preservation' finding as an observation — it is fully recorded in both repos' provenance comments (repo already records it; skip filter)."
     - "Near-miss: C09 (strict-chain consistency) — audit re-verified its Lean hypothesis verbatim; consistent-with, not new evidence; no status change."
     - "No closure signals for the 19 unpromoted staged observations (O35/O36 topics untouched this turn); skipped a full stale sweep, flagged as inherited debt."
-    - "Noted in the session record that earlier 2026-08-03 conversations (paper plan, PRs #65-#67, #71) ran without epilogues — gap acknowledged, not fabricated."
+    - "Noted in the session record that earlier 2026-08-03 conversations (paper plan and related PRs) ran without epilogues — gap acknowledged, not fabricated."
 - turn: "2026-08-04_001#1"
   notes:
   - "Routed the comparison/source audit as experiment N104 DIRECT: it produced a concrete rewritten document and source-verified findings, not merely a literature interpretation."
@@ -461,7 +461,7 @@ entries:
   - "N105 remains unresolved; the plan does not adjudicate the separate C19/O12 tier-guarantee conflict."
 - turn: "2026-08-04_001#3"
   notes:
-  - "Recorded publication as an execution event only: moving the plan, running verification, committing 440db13, and opening PR #74 do not constitute researcher approval of N106/O40."
+  - "Recorded publication as an execution event only: moving the plan, running verification, committing 440db13, and opening the plan PR do not constitute researcher approval of N106/O40."
   - "No new research claim, decision, observation, crystallization, or stale-state transition occurred; N105 remains unresolved and the checker is unchanged."
 - turn: "2026-08-04_001#4"
   notes:
@@ -472,8 +472,8 @@ entries:
   - "No stale-state transition: this turn revisited O39/O40 and added O41/O42; existing stale entries remain unchanged."
 - turn: "2026-08-04_001#5"
   notes:
-  - "Recorded publication as an AI action only: commit d5ffa0f and stacked PR #75 publish the N107 plan review but do not constitute researcher approval of O41/O42."
-  - "Used PR #74's branch as #75's base because the revised plan depends on #74 and a main-based PR would duplicate its commits; recorded retargeting #75 after #74 merges as an open thread."
+  - "Recorded publication as an AI action only: commit d5ffa0f and stacked PR publish the N107 plan review but do not constitute researcher approval of O41/O42."
+  - "Used the plan PR's branch as the stacked PR's base because the revised plan depends on it and a main-based PR would duplicate its commits; recorded retargeting the stack after the base merges as an open thread."
   - "No new research event, crystallization, logic revision, or stale-state transition occurred."
 - turn: "2026-08-05_001#1"
   notes:
@@ -482,11 +482,11 @@ entries:
     - "Crystallized O43→C25 via artifact commitment: the shipped Driver now constructs the theorem's exact retained lists and AxCheck audits the fully checker-instantiated wrapper. Status supported because the claim is a sorry-free theorem with a passing axiom audit, not because differential tests pass."
     - "Revised C21 rather than merely appending evidence. Its previous 'dependent claim can only become gap, never justified' wording was overbroad: quarantine can delete an attacker and promote a different claim internally. C21 now covers missing-evidence routing for own support; C25 covers public non-promotion for the full influence closure."
     - "Crystallized O44→H08 via artifact commitment because both Haskell and Lean production code now depend on aligned raw/resolved selection. This is a reusable construction rule, not a one-off proof lemma."
-    - "Kept PR #79 and issue #80 as open external threads. The user supplied findings but did not authorize commit/push/PR editing or issue closure; moreover the remote PR must not claim the local theorem before the branch carries it."
+    - "Kept the admission PR and its companion issue as open external threads. The user supplied findings but did not authorize commit/push/PR editing or issue closure; moreover the remote PR must not claim the local theorem before the branch carries it."
 - turn: "2026-08-05_001#2"
   notes:
     - "No new research node, claim, heuristic, or observation: this turn was publication and review follow-up after the user explicitly authorized commit/push/reply. Per the skip rule, git operations themselves are session-only actions."
-    - "Updated the existing session rather than creating a second same-day session because this is the direct operational continuation of turn 1. The earlier external-authority open thread is now resolved; current state is PR awaiting re-review and issue #80 awaiting merge."
+    - "Updated the existing session rather than creating a second same-day session because this is the direct operational continuation of turn 1. The earlier external-authority open thread is now resolved; current state is the PR awaiting re-review and its companion issue awaiting merge."
     - "Did not self-resolve reviewer threads. Individual evidence replies and a top-level summary were posted; reviewer resolution remains the independent review signal."
 
 - turn: "2026-08-05_003#5"
@@ -583,7 +583,7 @@ entries:
     - "Routed N140 as a resolved USER question: the user asked for a code-paper impact assessment, and this turn delivered one without treating the recommendation as an approved edit."
     - "Routed N141 as one experiment rather than separate test events. The Haskell suite, Lean build/axiom audit, differential, source-count, and committed-report checks jointly establish the current post-merge state relevant to the paper."
     - "Staged O58 instead of changing logic or the paper. The surface-sync recommendation is AI-authored and awaits user adoption; silence is not artifact commitment."
-    - "Did NOT revise G1-G6 or the frozen corpus claims. PR #92 preserves Unit/core bytes for S2/S3/S4, so the new evidence bears on authoring, conformance counts, and mechanization scope rather than the calculus results."
+    - "Did NOT revise G1-G6 or the frozen corpus claims. The surface PR preserves Unit/core bytes for S2/S3/S4, so the new evidence bears on authoring, conformance counts, and mechanization scope rather than the calculus results."
     - "Recorded the Lean/Haskell LOC figures as an open thread rather than guessing the prior counting convention."
 - turn: "2026-08-09_001#2"
   notes:
@@ -592,11 +592,11 @@ entries:
     - "Crystallized O58 via verbal affirmation + artifact commitment into constraints.md's Boundary conditions (Surface/core boundary bullet), provenance upgraded to user-revised."
     - "Adjusted the polarity sentence after self-review: 'unprovable rather than weaker' was imprecise; the module proves the two polarities generate the same relation on transposed operands, so the paper now says a polarity error asks for the opposite comparison."
     - "Adjusted the file-count sentence: 'in 40 files' overclaimed, since 6 of the 40 are the aggregator, audit script, and driver mains; the paper now says 'the Lean tree contains 40 files'."
-    - "Left '19 rejection fixtures / 13 rejection classes' unchanged: no current count grounds it (CheckSpec negatives list is 17 entries / 15 classes), and PR #92 did not touch that architecture."
+    - "Left '19 rejection fixtures / 13 rejection classes' unchanged: no current count grounds it (CheckSpec negatives list is 17 entries / 15 classes), and the PR did not touch that architecture."
     - "First-turn epilogue writes did not persist (files were clean at HEAD); rewrote the session record and node appends this turn and verified via git status."
 - turn: "2026-08-09_001#3"
   notes:
-    - "Routed N144 as one user-revised decision rather than one node per menu choice: every choice belongs to the same issue #87 Step-0 delivery contract, and the user selected the options from AI-authored review menus."
+    - "Routed N144 as one user-revised decision rather than one node per menu choice: every choice belongs to the same Step-0 delivery contract, and the user selected the options from AI-authored review menus."
     - "Routed N145 as one experiment: the interactive and outside reviews produced an observable terminal verdict, plan revision, and five-row task artifact; no implementation evidence was produced."
     - "Did NOT stage a new observation or revise logic/. This turn settled a repository-specific implementation plan, not a generalized research claim, and no existing claim's status or content changed."
     - "Did NOT duplicate the core/surface freshness invariant in logic/: N144 explicitly relies on the already-crystallized exact-anchor discipline and records only the implementation decision."
@@ -608,18 +608,18 @@ entries:
     - "Routed N147 as one experiment rather than one node per commit/test/review: the three tasks jointly produce one observable Step-0 artifact and one integrated verification result."
     - "Did NOT stage an observation or revise logic claims. This turn implemented a repository-specific, already-crystallized audit-boundary decision and added no generalized scientific claim."
     - "Did NOT run Lean, AxCheck, differential, replay-tamper, or refreeze gates. The exact scope check proved their inputs and implementations unchanged; N147 records the Haskell/reporting gate appropriate to this reporting-only branch."
-    - "Replaced the completed implementation open thread with issue #87's remaining human audit Steps 1-3. No classification or audit judgment entered the worklist."
+    - "Replaced the completed implementation open thread with the tracker's remaining human audit Steps 1-3. No classification or audit judgment entered the worklist."
 
 - turn: "2026-08-09_001#5"
   notes:
-    - "Routed N148 as one user-revised decision: the user selected full issue #87 Steps 1-3, selected sealed judgments plus a deterministic analyzer, and approved the written design; the final implementation plan preserves those choices."
+    - "Routed N148 as one user-revised decision: the user selected the full Steps 1-3 audit scope, selected sealed judgments plus a deterministic analyzer, and approved the written design; the final implementation plan preserves those choices."
     - "The planning pass found and closed two protocol ambiguities before implementation: exact attack subject IDs/order are now pinned from current corpus units, and completed packets pass a write-free, status-free validate command before the human sealing commit."
     - "Did NOT stage an observation or revise logic claims. This turn designed an audit experiment and implementation protocol; it produced no human classification, analyzer result, paper number, or scientific claim."
     - "The human handoff remains a hard checkpoint. Tooling and empty templates may be implemented next, but results, summary, and paper updates remain blocked until the second author returns all 42 judgments."
 
 - turn: "2026-08-09_001#6"
   notes:
-    - "Routed N149 as one ai-executed experiment: the implementation commits and PR #96 review fixes jointly produce one status-free audit pipeline and one integrated Haskell verification result."
+    - "Routed N149 as one ai-executed experiment: the implementation commits and PR review fixes jointly produce one status-free audit pipeline and one integrated Haskell verification result."
     - "Updated the current session state from planned to implemented without altering N148: N148 remains the historical user-revised protocol decision; N149 records its implementation and hardening."
     - "Did NOT stage or crystallize a scientific observation. No second-author classification, sealed result set, summary.json, paper count, or claim-status join was produced."
     - "Kept the human checkpoint explicit: the detached 42-row packet must be completed, validated without checker statuses, and sealed before summarize can join statuses or emit paper-facing numbers."
@@ -631,7 +631,7 @@ entries:
     - "Crystallized O59/O60/O61 on artifact-commitment, not on affirmation: the spec's R2 row and the surface doc's note were EDITED this turn because of O59, the generators were changed and the diff committed as a deliverable for O60, and O61 is cited by mechanization-plan result 13. All three are depended on by merged artifacts, which is the signal."
     - "Did NOT crystallize O62 (nullary constants dominate the corpus vocabulary, 187/196) despite the same turn's commitment: what corpus-v1.policy.lara depends on is the census OUTPUT, not the generalization about first-order corpora. No downstream artifact cites the general form, so no artifact-commitment signal fired for it. Left staged."
     - "Routed O63 as potential_type: heuristic (not claim) — it is a design rule for where to put a fact, a how rather than a what."
-    - "N150 typed as pivot, not decision: it opens the first branch that moves the core rather than the surface, which is a boundary the surface track (#90/#88a/#91) had held for three prior sessions."
+    - "N150 typed as pivot, not decision: it opens the first branch that moves the core rather than the surface, which is a boundary the surface track had held for three prior sessions."
     - "Recorded the Lean/Haskell divergence on §3.3 (separate UnitError arm vs widened Violation) in N153's result and in the plan's new §13 rather than as a contradiction: the two drivers agree on class and stage order, which the differential checks, so there is nothing for the researcher to adjudicate."
     - "Appended N154 as a dead_end, not an experiment: the hypothesis (a green 574-fixture differential proves the two definitions agree) was falsified, and the lesson generalizes beyond the fix. Recorded after the fact within the same turn because it was found by re-reading, not by a gate."
     - "C28's Falsification is deliberately about the artifact's own history (find an unenforced class whose docs stayed true), not a re-run of the R2 gate — a gate re-run would be a tautology."
@@ -650,12 +650,12 @@ entries:
     - "Routed N158 as the user's open research-direction question; no user decision was made this turn."
     - "Routed N159 as one integrated readiness experiment: live merge/CI state, AxCheck, benchmark reproduction, and the result-12 inventory jointly answer what is actually unfinished."
     - "Staged O64 as a constraint rather than crystallizing it. The recommendation is AI-suggested and the user has not yet affirmed either closing result 12 or narrowing the paper claim."
-    - "Did NOT treat PR #99 merge as permission to cut m5-freeze-v4: hosted Haskell CI remained in progress at observation time."
+    - "Did NOT treat the PR merge as permission to cut m5-freeze-v4: hosted Haskell CI remained in progress at observation time."
     - "Did NOT modify logic claims. The turn produced roadmap evidence and a pending recommendation, not a closure signal for an existing claim."
 
 - turn: "2026-08-10_001#4"
   notes:
-    - "Routed N160 as a user decision because 'do it, commit, record ara, and pr' followed the explicit branch proposal for issue #98. This selects the immediate task, not the unresolved result-12 close-versus-narrow choice."
+    - "Routed N160 as a user decision because 'do it, commit, record ara, and pr' followed the explicit branch proposal for the benchmark repair. This selects the immediate task, not the unresolved result-12 close-versus-narrow choice."
     - "Routed N161 as one experiment: reproduction, implementation, generated outputs, full Haskell verification, and independent review all establish one benchmark-repair result."
     - "The first implementation derived counts from permissive parsers and therefore removed the old accidental manifest-integrity guard. Independent review identified the silent-drop failure mode; the final code compares parsed counts against an independent raw-row census and rejects empty manifests before timing."
     - "Did NOT crystallize O64. The user chose the benchmark repair but did not affirm either closing result 12 or narrowing the paper's mechanization claim."
@@ -663,9 +663,9 @@ entries:
 
 - turn: "2026-08-10_001#5"
   notes:
-    - "Routed N162 as one integrated post-merge experiment: the live commit, clean branch, and push-triggered Lean/Haskell workflow jointly establish that PR #100 is merged and hosted-green."
+    - "Routed N162 as one integrated post-merge experiment: the live commit, clean branch, and push-triggered Lean/Haskell workflow jointly establish that the PR is merged and hosted-green."
     - "Did NOT add a second staged recommendation. O64 already states the bounded result-12 parity closure and mechanical-guard recommendation; this turn revisited rather than changed it."
-    - "Did NOT crystallize O64. The researcher asked for the next step but did not affirm the proposed result-12 closure or the ordering against #88b."
+    - "Did NOT crystallize O64. The researcher asked for the next step but did not affirm the proposed result-12 closure or the ordering against the surface-bindings work."
     - "Distinguished release housekeeping from code work: the green main workflow unblocks m5-freeze-v4 on f4327b4, while the next code PR should address the explicit Lean Presentation parity gap."
     - "Repaired the current session ledger by appending its previously omitted turn-4 N160/N161 events and AI action; append-only exploration nodes were not altered."
 
@@ -674,7 +674,7 @@ entries:
     - "Routed N163 as a user decision: the directive explicitly selected a new branch rather than direct-main bookkeeping or an unrecorded tag-only action."
     - "Routed N164 as one integrated release experiment: isolated branch creation, remote annotated-tag publication, documentation update, verification, commit, and PR jointly close one housekeeping task."
     - "Did NOT crystallize O64. Publishing the freeze tag removes release debt but does not affirm the separate result-12 parity recommendation."
-    - "Kept the tag anchored to f4327b4 rather than PR #100's d43e6a1 because the checklist had already designated the v4 re-freeze merge commit; PR #100 only supplied the final hosted-green gate."
+    - "Kept the tag anchored to f4327b4 rather than the PR's d43e6a1 because the checklist had already designated the v4 re-freeze merge commit; the PR only supplied the final hosted-green gate."
     - "No logic-layer entry changed: this turn records release state and process, not a new scientific claim."
 
 - turn: "2026-08-10_001#7"
@@ -703,14 +703,14 @@ entries:
 - turn: "2026-08-11_001#3"
   notes:
     - "Routed N170 as one post-merge audit experiment: live PR state, hosted checks, synchronized main, issue closure, and plan dependencies jointly establish the current handoff."
-    - "Staged O68 as architecture rather than a decision: the #88b recommendation is AI-suggested and awaits researcher confirmation."
-    - "Did NOT treat the PR #102 reviewer's normalization-table cleanup as the next standalone milestone; it is fail-closed maintenance suitable to fold into the next parity-file touch."
+    - "Staged O68 as architecture rather than a decision: the surface-bindings recommendation is AI-suggested and awaits researcher confirmation."
+    - "Did NOT treat the PR reviewer's normalization-table cleanup as the next standalone milestone; it is fail-closed maintenance suitable to fold into the next parity-file touch."
     - "Separated value bindings from named certificate slots because strict Sigma resolves the former's bare-name hazard, while AST.hs and the grammar still define Cert payloads as opaque."
     - "No logic-layer entry changed. The user reported a merge and asked for a recommendation but did not affirm a new code direction."
 
 - turn: "2026-08-11_001#4"
   notes:
-    - "Routed N171 as a user decision: 'checkout a new branch for it' explicitly acts on the immediately preceding #88b sequencing recommendation."
+    - "Routed N171 as a user decision: 'checkout a new branch for it' explicitly acts on the immediately preceding surface-bindings sequencing recommendation."
     - "Promoted O68 through verbal affirmation and upgraded provenance to user-revised; its destination is the trace decision N171 rather than a logic claim."
     - "Created feature/88b-surface-bindings from synchronized main and preserved the current ARA edits; no source implementation began."
     - "No logic-layer entry changed. The next gate remains a focused design for value bindings and interpolation before implementation."
@@ -724,7 +724,7 @@ entries:
     - "No logic-layer entry changed; O65-O67 still lack closure signals."
 - turn: "2026-08-11_001#6"
   notes:
-    - "Routed N173 as a direct AI-executed implementation experiment: committed code, independent review, local gates, PR #103, and hosted CI are journey facts."
+    - "Routed N173 as a direct AI-executed implementation experiment: committed code, independent review, local gates, the PR, and hosted CI are journey facts."
     - "Did NOT stage a new observation. The implementation realizes the already crystallized O68/N171 direction and introduces no separately asserted research claim."
     - "Recorded the review-found escaped-brace/no-binding fixture interaction inside N173 rather than as a dead end because the production design was unchanged and the focused test repair passed."
     - "Did NOT revise H13: this turn supplies another instance of its existing compiler-witness rule, while its statement and forensic code bindings remain current."
@@ -735,28 +735,28 @@ entries:
     - "Did NOT stage a new claim. The authored-value versus evidence-cell distinction is a committed presentation contract specific to the already selected O68/N171 architecture, not a newly generalized research assertion."
     - "Kept TStr quoting rather than introducing a hand-built-AST-only special case; concrete .lara value RHS syntax still cannot express TStr."
     - "Restored S2/S5 comparison sub-claims to {cell ...}; this preserves N171's stronger evidence-derived anti-staleness guarantee while bindings continue to reduce repeated term positions."
-    - "No logic-layer entry changed. O65-O67 still lack closure signals; PR #103 now awaits reviewer re-approval rather than implementation work."
+    - "No logic-layer entry changed. O65-O67 still lack closure signals; the PR now awaits reviewer re-approval rather than implementation work."
 
 - turn: "2026-08-12_001#1"
   notes:
     - "Routed N175 as one AI-executed verification experiment: Task 7's local matrix, exact syntax and D6 diagnostics, 72-row parity, source/core identity, replay/tamper, differential, admission, determinism, and protected-artifact evidence jointly establish local completion."
-    - "Staged O69 rather than crystallizing a stronger completion claim: hosted Haskell and Lean CI remain pending until the implementation PR head runs them, so #104 stays open pending hosted verification."
-    - "Kept #105 explicitly open and separate: named certificate premise slots were not implemented, and the opaque Cert layering decision remains unresolved."
+    - "Staged O69 rather than crystallizing a stronger completion claim: hosted Haskell and Lean CI remain pending until the implementation PR head runs them, so the tracker item stays open pending hosted verification."
+    - "Kept the named-slots item explicitly open and separate: named certificate premise slots were not implemented, and the opaque Cert layering decision remains unresolved."
     - "Updated only the TODO and ARA bookkeeping surfaces; no production, generated, frozen, checker, wire, backend, replay, or measurement artifact was changed."
 
 - turn: "2026-08-12_002#1"
   notes:
-    - "Routed N176 as an AI-executed hosted-verification experiment: PR #106 was opened after the reviewed implementation and both hosted Haskell and Lean jobs passed on Actions run 31644485072."
-    - "The hosted result closes the conditional #104 verification thread; updated TODOS.md to state verification complete while keeping the GitHub issue attached to the open PR until merge."
+    - "Routed N176 as an AI-executed hosted-verification experiment: the PR was opened after the reviewed implementation and both hosted Haskell and Lean jobs passed on Actions run 31644485072."
+    - "The hosted result closes the conditional verification thread; updated TODOS.md to state verification complete while keeping the GitHub issue attached to the open PR until merge."
     - "Recorded O70 as crystallized by empirical resolution plus the PR artifact; no generalized logic-layer claim was added."
-    - "Kept #105 explicitly open and separate because named certificate premise slots and opaque Cert layering were not implemented."
-    - "Targeted YAML parsing and N176/O70/session-index assertions passed; repository-wide ara check --strict remains blocked by the pre-existing N131 scalar at exploration_tree.yaml:3249, so no unrelated ARA schema cleanup was folded into #104."
+    - "Kept the named-slots item explicitly open and separate because named certificate premise slots and opaque Cert layering were not implemented."
+    - "Targeted YAML parsing and N176/O70/session-index assertions passed; repository-wide ara check --strict remains blocked by the pre-existing N131 scalar at exploration_tree.yaml:3249, so no unrelated ARA schema cleanup was folded into that item."
 - turn: "2026-08-12_003#1"
   notes:
     - "Routed N177 as a verification AI-executed experiment: the full Haskell suite, 73-row presentation parity, Lean build and axiom gates, differential/admission, replay, and tamper checks passed locally after commit 2de1bcde; hosted CI then passed on ARA-append head c9c59a6 before this metadata correction commit was created, in Actions run 31653193555."
     - "Appended a correction rather than rewriting N176/O70: the earlier 72-row result and Actions run 31644485072 describe an intermediate hosted-verification state; N177 records the 73-row local result and the hosted result on its then-current ARA-append head."
     - "Recorded O71 as crystallized by empirical resolution plus the implementation PR artifact; no generalized logic-layer claim was added."
-    - "Kept PR #106 open with its merge state CLEAN but review decision CHANGES_REQUESTED pending reviewer re-review; kept #105 separate because opaque certificate layering was not implemented."
+    - "Kept the PR open with its merge state CLEAN but review decision CHANGES_REQUESTED pending reviewer re-review; kept the named-slots item separate because opaque certificate layering was not implemented."
     - "The repository-wide ara check --strict remains blocked by the pre-existing N131 scalar at exploration_tree.yaml:3249; targeted ARA validation is recorded after this append."
 - turn: "2026-08-12_004#1"
   notes:
@@ -767,7 +767,7 @@ entries:
 - turn: "2026-08-13_001#1"
   notes:
     - "Routed N179 as a user decision: invoking /implement on the DESIGN PROPOSED plan is the researcher approval its header requires (D1/D9 explicitly), so provenance user, not user-revised."
-    - "Crystallized O72 -> C31 same-turn: both artifact commitment (the two-candidate locate and its twin props are merged, PR #110 depends on them) and empirical resolution (props green, adversarially verified) fired; provenance stays ai-suggested - no user affirmation of the finding itself."
+    - "Crystallized O72 -> C31 same-turn: both artifact commitment (the two-candidate locate and its twin props are merged, the PR depends on them) and empirical resolution (props green, adversarially verified) fired; provenance stays ai-suggested - no user affirmation of the finding itself."
     - "Set C31 Status supported at birth: the one-step conservatism rule governs Stage 4 transitions of existing entries; this claim's evidence (passing twin props + independent review) existed before crystallization. Logged for revisit if the researcher disagrees."
     - "Kept O73 staged despite the committed V9b fix: the commitment is to the specific numeralTypo fix, not to the generalized mirroring heuristic - promoting would over-generalize from one instance (near-miss on artifact commitment)."
     - "Routed N181 as dead_end rather than folding into N180: the uniform-collapse cut was a real implemented-then-refuted design choice with a reusable lesson, exactly the record a dead_end exists for."
@@ -789,19 +789,19 @@ entries:
     - "No new staged observation: the reusable lesson is already mature through empirical resolution and artifact commitment, and is represented by the H14 revision plus N183-N185."
 - turn: "2026-08-18_001#1"
   notes:
-    - "Routed N189 as a user decision: address all five PR #117 findings while skipping behavioral suites and the performance experiment because the follow-up changes no wire behavior."
+    - "Routed N189 as a user decision: address all five PR findings while skipping behavioral suites and the performance experiment because the follow-up changes no wire behavior."
     - "Revised C32's protocol cardinality from 99 to independently verified 97; recorded the full before/after in the session record and left the measured timings unchanged."
     - "Added tagToString_injective and its AxCheck entry rather than deferring mechanization; lake build Lara.Driver passed and the theorem audit reported no axioms."
     - "Did NOT stage a new observation: the turn corrected a protocol constant and discharged an existing injectivity condition rather than establishing a new general claim."
-    - "Technical remediation is complete and all five threads are resolved; PR #117 remains CHANGES_REQUESTED pending reviewer re-approval, with hosted checks running on the review-fix head."
+    - "Technical remediation is complete and all five threads are resolved; the PR remains CHANGES_REQUESTED pending reviewer re-approval, with hosted checks running on the review-fix head."
 - turn: "2026-08-18_002#1"
   notes:
     - "Routed N191 as its own experiment rather than folding it into N192: the plan required probing the invalid-UTF-8 boundary on main BEFORE writing code, and the probe's outcome is what froze design decision D4. Collapsing it would lose the ordering that makes D4 a recorded choice instead of a review-time discovery."
     - "Routed N193 as an ai-executed decision, not a dead_end: withholding the regenerated table is a deliberate deviation from the plan's T8, taken on the plan's own noise guard, not a failed attempt. The user has not yet ruled on it."
     - "Crystallized O75 immediately via artifact-commitment plus empirical-resolution: the code merged into the branch depends on it and the same-session benchmark pair resolved it. Same signal pair as O74/C32 last session."
     - "Wrote C33's Statement as a mechanism claim about cursor representation and code-point discipline rather than as 'ByteString is faster than String', so it is not a restatement of the run numbers; every number lives in Conditions/Proof with a grounded Sources quote."
-    - "Set C33 Dependencies to [C32] rather than leaving it empty: #114 established that tag dispatch was a major term, and C33's premise is that what REMAINED after that fix was cursor representation. The two are sequential findings on the same hot path."
-    - "Did NOT revise C32: its Conditions already scope it to the #114 protocol and explicitly exclude the #115 parser change, and its own measured timings are untouched by this turn."
+    - "Set C33 Dependencies to [C32] rather than leaving it empty: the tag-dispatch fix established that tag dispatch was a major term, and C33's premise is that what REMAINED after that fix was cursor representation. The two are sequential findings on the same hot path."
+    - "Did NOT revise C32: its Conditions already scope it to the tag-dispatch protocol and explicitly exclude the parser change, and its own measured timings are untouched by this turn."
     - "Did NOT auto-upgrade provenance on C33 or O75. The user invoked the plan but has not commented on the result, so both stay ai-suggested; the plan's authorship is captured by N190's user provenance instead."
     - "Recorded the machine-load caveat inside C33's Conditions rather than only in the evidence file, because it bounds what the numbers can support and a reader of the claim alone would otherwise compare them against the published table."
 - turn: "2026-08-18_002#2"
@@ -820,7 +820,7 @@ entries:
     - "Recorded N197 as an experiment rather than folding it into N196's evidence. The acceptance-preservation result is falsifiable and was measured, not assumed - the zero-collision scan could have come back non-zero and forced a corpus migration."
     - "Touched no claim. @0.7 restricts the surface and changes no judgment, no AST, and no wire byte, so nothing in claims.md bears on it; recording a claim here would manufacture research content out of an engineering release."
     - "Revised concepts.md notation as terminology drift rather than flagging a contradiction: the concept's definition was still correct, only the notation named a spelling the parser now rejects."
-    - "Left the H15 sensitivity at medium rather than high. It cost one equation and changed no diagnostic, but the class it closes is the same one #135 was filed for."
+    - "Left the H15 sensitivity at medium rather than high. It cost one equation and changed no diagnostic, but the class it closes is the same one the surface release was filed for."
 - turn: "2026-08-21_001#1"
   notes:
     - "Routed N199 with provenance: user. The three-class design, the no-carve-out collision policy and the Part A/Part B split are the researcher's eng-reviewed plan decisions; only the implementation was ai-executed."
@@ -842,68 +842,68 @@ entries:
     - "Did NOT crystallize either: one instance each, and the user gave a procedural instruction ('commit, record ara, push') with no evaluative language about the design. Execution of a plan is artifact commitment for the plan's OWN content, not for observations the manager derived from watching it run."
     - "Considered and rejected an empirical-resolution signal for O77/O78/O79 - this turn's subject (mutation-generator module layout) shares no bound_to node with the @0.8 surface work those observations sit under."
     - "No Stage 4 edits. Checked whether N202 bears on C29 (zero reclassification delta is a property of the mutation generators) - it does not: C29 is about what the generators produce under a new checker stage, and this turn changed only where their source lives, holding output byte-fixed."
-    - "Recorded the freeze-checklist 580-vs-582 drift as an open thread rather than fixing it: out of #122's scope, and the plan explicitly ruled the live baseline the authority, so the doc row is a separate correction someone must budget."
+    - "Recorded the freeze-checklist 580-vs-582 drift as an open thread rather than fixing it: out of the module-split's scope, and the plan explicitly ruled the live baseline the authority, so the doc row is a separate correction someone must budget."
 
 - turn: "2026-08-22_001#1"
   notes:
     - "Routed N203 with provenance `user`: the researcher explicitly said they authored/reviewed and approved the plan before directing execution. The implementation is AI-executed, but the D1-D10 surface choice is adopted user intent."
-    - "Separated N204 from N203 as a dead end because the plan's bare formula-key sketch was directly refuted by the frozen nd@1 grammar before S8 could replay. The recovery uses `(atom KEY)` and opens #144 rather than silently widening the kernel annotation grammar."
+    - "Separated N204 from N203 as a dead end because the plan's bare formula-key sketch was directly refuted by the frozen nd@1 grammar before S8 could replay. The recovery uses `(atom KEY)` and opens a follow-up item rather than silently widening the kernel annotation grammar."
     - "Routed N205 as an experiment rather than treating the Lean theorems and byte witness as decision evidence only. The 21 vectors, independent Haskell oracles, 1070-byte core and 661-byte verdict twin, exact dependency, two theorems, twelve guards and gate counts are falsifiable results."
-    - "Routed the #140 final-review finding as dead_end N206. The implementation faithfully followed the approved plan's rule-global `any label` wording, but the partial-label counterexample refuted that condition; the recovery is resolver-owned and quantifies over every actual matching slot."
-    - "Routed N207 separately as the reviewed-release experiment: it records that the defect was found after task-level review, fixed in the one permitted integration wave, re-reviewed, and verified again on the committed tree before PR #145."
+    - "Routed the final-review finding as dead_end N206. The implementation faithfully followed the approved plan's rule-global `any label` wording, but the partial-label counterexample refuted that condition; the recovery is resolver-owned and quantifies over every actual matching slot."
+    - "Routed N207 separately as the reviewed-release experiment: it records that the defect was found after task-level review, fixed in the one permitted integration wave, re-reviewed, and verified again on the committed tree before the release PR."
     - "Staged O82 and O83 as heuristics, not claims. O82 is a proof-design practice at a validated-not-verified boundary; O83 is an actionable-diagnostic design rule. Each has one direct implementation episode and no researcher evaluation of the generalized wording."
-    - "Did NOT crystallize O77 despite @0.9 becoming a third presentation release. The earlier log explicitly rejected maturity-as-a-counter; this turn did not contain the researcher adopting the generalized sweep as a standing rule, and the #140 defect was found by review rather than that sweep."
-    - "Did NOT crystallize O78 or O79. #140 reinforces slot-indexed naming and @0.9 again abstracts external decisions in Lean, but neither is the closure signal their staged records require. Added O82 rather than overloading O79 because @0.9 proves a new recursive binder transformation, not a proof-neutral resolver extension."
+    - "Did NOT crystallize O77 despite @0.9 becoming a third presentation release. The earlier log explicitly rejected maturity-as-a-counter; this turn did not contain the researcher adopting the generalized sweep as a standing rule, and the review-caught defect was found by review rather than that sweep."
+    - "Did NOT crystallize O78 or O79. The finding reinforces slot-indexed naming and @0.9 again abstracts external decisions in Lean, but neither is the closure signal their staged records require. Added O82 rather than overloading O79 because @0.9 proves a new recursive binder transformation, not a proof-neutral resolver extension."
     - "No claim was created or revised. Like @0.7/@0.8, @0.9 changes authoring and no judgment, AST or wire contract; minting a claim would manufacture research content. Updated the mechanization status ledger as direct experiment evidence instead."
-    - "The only open research-design thread from the implementation is #144. PR #145 is an integration thread, while #132 and #140 are resolved by the branch and close on merge."
+    - "The only open research-design thread from the implementation is the follow-up item. The release PR is an integration thread, while the label release and the final-review fix are resolved by the branch and close on merge."
 - turn: "2026-08-23_001#1"
   notes:
-    - "Routed N208 as ai-suggested decision: the user directed execution of #144 ('do it directly and pr') but the specific (prop TEXT) embedded-sub-language spelling, the marker/residual amendments, and the rejected alternatives were chosen autonomously; direction to act is not ratification of the design."
-    - "Routed N209 as the release experiment on the N207 pattern: byte-equivalence oracles, unchanged S8 goldens, Lean theorem, and full gate counts are falsifiable results; PR #147 is the integration artifact."
+    - "Routed N208 as ai-suggested decision: the user directed execution of the follow-up work ('do it directly and pr') but the specific (prop TEXT) embedded-sub-language spelling, the marker/residual amendments, and the rejected alternatives were chosen autonomously; direction to act is not ratification of the design."
+    - "Routed N209 as the release experiment on the N207 pattern: byte-equivalence oracles, unchanged S8 goldens, Lean theorem, and full gate counts are falsifiable results; the PR is the integration artifact."
     - "Staged O84 as a heuristic (embedding an existing sub-language as one opaque host token vs a parallel structural grammar). One implementation episode, no researcher evaluation of the generalized wording."
     - "Did NOT crystallize O79/O82 despite a third abstraction-parameter instance (encodeProp). The instance is mixed: the new external decision was abstracted per the practice, but O79's zero-edit payoff story did not repeat because @0.10 changes the transformation itself (NFormula restatement), so this is neither clean artifact commitment on the generalized wording nor empirical resolution. Noted in ai_suggestions_pending instead."
     - "No claim minted for @0.10, matching the standing @0.7-@0.9 precedent: a presentation release that changes authoring but no judgment, AST, or wire contract is engineering evidence, not a research claim."
     - "Opened session 2026-08-23_001 rather than appending to 2026-08-22_001: calendar-day rule; the @0.9 spillover past midnight stayed in its originating session."
 - turn: "2026-08-25_001#1"
   notes:
-    - "Routed N210 as dead_end, not experiment: the entry that died is a hypothesis C23 recorded as its untested boundary ('accuracy detaches from 100% there'), and the #123 families settled it negatively. The families themselves are not a failure — they shipped and strengthened the gate — so the lesson field carries what they do buy, to keep the node from reading as a retraction of the work."
+    - "Routed N210 as dead_end, not experiment: the entry that died is a hypothesis C23 recorded as its untested boundary ('accuracy detaches from 100% there'), and the multi-defect families settled it negatively. The families themselves are not a failure — they shipped and strengthened the gate — so the lesson field carries what they do buy, to keep the node from reading as a retraction of the work."
     - "Flagged C23 rather than revising it, taking the contradiction trigger over the ai-suggested-narrowing path. The distinction I applied: narrowing tightens a scope the evidence still supports, whereas here the evidence positively contradicts a stated prediction. C23 is also paper-bearing methodology and the researcher owns core/semantics judgments, so an autonomous rewrite of its Statement would be the wrong default even though it is revertible."
     - "Did NOT flip C23 to weakened. The contradicted material is the extrapolation to an untested boundary and the Statement's last clause; the tested single-defect Statement stands on N96 unchanged. The rule against demoting on a single new event applies, and 'weakened' would misreport which half of the claim is in trouble."
     - "Staged O85 rather than minting it as a claim despite the strong evidence. No closure signal fired: no researcher comment this turn (the work ran as an unattended PR-review loop), and artifact commitment is ambiguous — docs/ now assert the harness-local fact, but O85's generalization past this harness is broader than anything committed. It is offered as C23's replacement clause in N212 instead, where the researcher can adopt or reject it."
     - "Staged O86 separately from O85 rather than folding them together. O85 is about what a metric can measure (an evaluation-design claim); O86 is about how to gate a composite fixture (a testing heuristic). They came from the same review but are independently useful and have different potential_types."
-    - "Did NOT record anything for the two type-shape notes (OpFamily String, non-empty [Constituent]). They are code-hygiene items against CLAUDE.md's symbolic-core rule with no research content, and #169 tracks them; staging them would inflate the buffer with engineering backlog."
-    - "Opened session 2026-08-25_001 with no 2026-08-24 record preceding it. The #123 implementation work of 08-24 was never captured — the trace jumps N209 (08-23) to N210 (08-25). N210's also_depends_on points back to N96 rather than to a non-existent 08-24 node; the gap is real and left visible rather than backfilled from commit messages."
+    - "Did NOT record anything for the two type-shape notes (OpFamily String, non-empty [Constituent]). They are code-hygiene items against CLAUDE.md's symbolic-core rule with no research content, and a tracker item follows them; staging them would inflate the buffer with engineering backlog."
+    - "Opened session 2026-08-25_001 with no 2026-08-24 record preceding it. The seeded-mutation implementation work of 08-24 was never captured — the trace jumps N209 (08-23) to N210 (08-25). N210's also_depends_on points back to N96 rather than to a non-existent 08-24 node; the gap is real and left visible rather than backfilled from commit messages."
 - turn: "2026-08-25_001#2"
   notes:
-    - "Reversed last turn's decision not to record the #169 type-shape notes, and recorded WHY rather than quietly changing course. Turn 1 declined them as 'code-hygiene items against CLAUDE.md's symbolic-core rule with no research content'. That was right about the style violation and wrong about the consequence: implementing the SeededSites half showed the shape corrupts a published rate — an empty publication collapses onto the same guard branch as 'seeds no site', so the row leaves the location-accuracy-rate denominator instead of counting as a miss. Staged that mechanism as O87; the OpFamily half remains pure hygiene and is recorded only as an ai_action."
-    - "Routed N213 as a decision with provenance user-revised, not ai-suggested. The researcher posed the sequencing question ('should we first finish 169 and 168, then refreeze?') and settled it by directing execution; the split of #168 from #169 and the choice to gate on gen-mutants --check were mine. This is the inverse of the N208 precedent, where direction to act did not ratify a design the user never raised."
+    - "Reversed last turn's decision not to record the type-shape notes, and recorded WHY rather than quietly changing course. Turn 1 declined them as 'code-hygiene items against CLAUDE.md's symbolic-core rule with no research content'. That was right about the style violation and wrong about the consequence: implementing the SeededSites half showed the shape corrupts a published rate — an empty publication collapses onto the same guard branch as 'seeds no site', so the row leaves the location-accuracy-rate denominator instead of counting as a miss. Staged that mechanism as O87; the OpFamily half remains pure hygiene and is recorded only as an ai_action."
+    - "Routed N213 as a decision with provenance user-revised, not ai-suggested. The researcher posed the sequencing question ('should we first finish [redacted] and [redacted], then refreeze?') and settled it by directing execution; the split of the paper-caveat handoff from the type refactor and the choice to gate on gen-mutants --check were mine. This is the inverse of the N208 precedent, where direction to act did not ratify a design the user never raised."
     - "Routed N214 as an experiment rather than folding it into N213. Byte-neutrality was a falsifiable prediction with a stated failure consequence (a second corpus regeneration), and it was tested rather than argued; recording it as a decision would lose the result. Its interest is the negative-result-that-did-not-happen, so the node carries the gate outputs verbatim."
-    - "Did NOT crystallize O85 despite the #168 handoff strengthening its artifact commitment. The paper-side handoff issue now states the by-construction caveat as a binding constraint on the paper's prose, which is closer to commitment than turn 1 had. But what is committed remains the harness-local fact, while O85 generalizes past this harness — the same gap turn 1 identified — and no researcher comment bore on it this turn. Also declined to treat closing #168 as adjudicating N212: the contradiction is about what C23's Statement should say, and moving an obligation between repositories does not answer that."
+    - "Did NOT crystallize O85 despite the paper-side handoff strengthening its artifact commitment. The paper-side handoff issue now states the by-construction caveat as a binding constraint on the paper's prose, which is closer to commitment than turn 1 had. But what is committed remains the harness-local fact, while O85 generalizes past this harness — the same gap turn 1 identified — and no researcher comment bore on it this turn. Also declined to treat closing the handoff as adjudicating N212: the contradiction is about what C23's Statement should say, and moving an obligation between repositories does not answer that."
     - "Did NOT crystallize O86 or O87. O86 was untouched this turn. O87 has exactly one instance and no researcher evaluation, and its artifact commitment is ambiguous in the same way O79's was: the code that depends on it is the change that produced it, which is self-referential rather than downstream."
-    - "No claim minted for #169, consistent with the standing precedent for lara-syntax@0.7-@0.10: a change that alters representation but no judgment, AST, or wire contract is engineering evidence. The byte-neutrality result reinforces this — the whole point of N214 is that nothing observable moved."
+    - "No claim minted for the type refactor, consistent with the standing precedent for lara-syntax@0.7-@0.10: a change that alters representation but no judgment, AST, or wire contract is engineering evidence. The byte-neutrality result reinforces this — the whole point of N214 is that nothing observable moved."
     - "Recorded the docs/168-repoint-paper-caveat branch as committed-but-unpushed in open_threads rather than silently omitting it. A local commit with no PR is exactly the kind of state that vanishes between sessions."
     - "Appended to session 2026-08-25_001 rather than opening a new record: same calendar day as turn 1, per the session-grouping rule."
 - turn: "2026-08-25_001#3"
   notes:
     - "Captured this conversation as one turn (#3) rather than four. The epilogue never fired on the intermediate messages — the work ran continuously from the remote audit through both merges and the tag — so splitting it retroactively would invent turn boundaries the record cannot support. Recorded here so the turn_count is not read as one user message."
     - "Crystallized O89 in the same turn it was staged, which is unusual but correct: the closure signal is artifact commitment, and the artifact (docs/naturalness-boundary.md, plus the surface grammar's intro citing it as binding policy) merged this turn. Staged it anyway rather than writing straight to constraints.md, to keep the raw->typed trail the crystallization procedure exists to preserve."
-    - "Recorded O89 as provenance user, not ai-suggested. The three layers, the Isar-over-CNL precedent and the remove-transcription rule are the researcher's own framing from the #109 issue body; I wrote the prose. The two clauses that are genuinely mine — layer 3's freedom covering prose but not the normative CertNd* templates, and permissible-is-not-worth-building — are marked ai-suggested inside the constraint itself rather than being laundered into the user's provenance."
+    - "Recorded O89 as provenance user, not ai-suggested. The three layers, the Isar-over-CNL precedent and the remove-transcription rule are the researcher's own framing from the naturalness-boundary issue body; I wrote the prose. The two clauses that are genuinely mine — layer 3's freedom covering prose but not the normative CertNd* templates, and permissible-is-not-worth-building — are marked ai-suggested inside the constraint itself rather than being laundered into the user's provenance."
     - "Routed the naturalness boundary to constraints.md, not claims.md. It is a design policy governing future work, not a falsifiable assertion about the world; minting it as a claim would give it a Status and a Falsification field neither of which means anything for a policy."
     - "Did NOT revise or re-status C23 despite this turn producing more evidence on N210's side (location_match 399/399 -> 436/436: the denominator grew by 37 seeded rows and the rate did not move). The contradiction trigger defers to the researcher, and no comment on C23 came this turn. Noted the strengthened evidence in open_threads instead, where adjudication will start."
     - "Routed N218 as one experiment rather than splitting the gates, measurement and record-keeping into separate nodes. The cycle's falsifiable content is a single set of five predictions about one regeneration; separating them would lose that they were tested together on one tree, which is the whole point of a shared refreeze."
     - "Routed N216 as user-revised, not ai-suggested, on the N213 precedent: the researcher declined the recommendation on trust and asked what the rider would buy, which is participation in the decision rather than delegation of it. The verdict was mine; the demand that it be grounded was theirs, and it changed the reasoning even though it did not change the outcome."
-    - "Staged O88 rather than crystallizing it despite two independent instances in one cycle. Two instances is stronger evidence than the one-instance observations already in the buffer, but there was no researcher evaluation of the generalized wording, and the artifact commitment is partial — #176 records instance (2) as an open issue with a recommendation, not as a merged dependency. Left staged."
-    - "Did NOT mint a claim for the freeze itself, consistent with the standing precedent for @0.7-@0.10 and #169: a regeneration that changes counts but no judgment, AST or wire contract is engineering evidence. The byte-neutrality and class-delta results are the experiment node's content."
+    - "Staged O88 rather than crystallizing it despite two independent instances in one cycle. Two instances is stronger evidence than the one-instance observations already in the buffer, but there was no researcher evaluation of the generalized wording, and the artifact commitment is partial — a tracker item records instance (2) as an open issue with a recommendation, not as a merged dependency. Left staged."
+    - "Did NOT mint a claim for the freeze itself, consistent with the standing precedent for @0.7-@0.10 and the type refactor: a regeneration that changes counts but no judgment, AST or wire contract is engineering evidence. The byte-neutrality and class-delta results are the experiment node's content."
     - "Recorded the CI-billing outage in N218's result, in key_context and in open_threads rather than only in the PR. It is a limitation on the freeze's evidence — ten green gates with no machine corroboration — and a future reader auditing m5-freeze-v5 needs it visible from the trace, not only from a PR body."
-    - "Flagged #121 in open_threads as newly on the critical path. It was previously one blocked item among many; now that the pivot to writing has happened (N219) it is the only open issue whose resolution changes what the paper may claim, and its dependency is a person, so it has a deadline shape nothing else here has."
+    - "Flagged the human-dependency audit item in open_threads as newly on the critical path. It was previously one blocked item among many; now that the pivot to writing has happened (N219) it is the only open issue whose resolution changes what the paper may claim, and its dependency is a person, so it has a deadline shape nothing else here has."
 - turn: "2026-08-26_001#1"
   notes:
-    - "Backfilled N220-N222 rather than recording only this turn's events. The theory spine had run from tracker #180 through a merged-ready M0 with zero trace presence, and the review that triggered this turn named that omission (finding 3, first pass). Backfill is stated as such in each node so the record does not read as if the carrier decision was taken today; the timestamps are the commit's, not the epilogue's."
+    - "Backfilled N220-N222 rather than recording only this turn's events. The theory spine had run from the theory tracker through a merged-ready M0 with zero trace presence, and the review that triggered this turn named that omission (finding 3, first pass). Backfill is stated as such in each node so the record does not read as if the carrier decision was taken today; the timestamps are the commit's, not the epilogue's."
     - "Routed the `attackable` node label as a dead_end, not as an alternative inside N221. It was drafted and removed, which is a hypothesis that failed on contact with wellFormed_contrary_target_attackable -- distinct from the naked-AF and term-labelled-AF carriers, which were weighed and rejected without being built. Collapsing the two would lose that one of them cost work."
-    - "Staged O90 and O91 rather than crystallizing. Their only artifact commitment is docs/theory-m0-compilation-invariants.md section 3, which is the document that produced them -- the same self-referential commitment that kept O79 and O87 staged. #184 being chartered downstream is not commitment either: the issue quantifies over the carrier, not over these two readings of it."
+    - "Staged O90 and O91 rather than crystallizing. Their only artifact commitment is docs/theory-m0-compilation-invariants.md section 3, which is the document that produced them -- the same self-referential commitment that kept O79 and O87 staged. The M1 item being chartered downstream is not commitment either: the issue quantifies over the carrier, not over these two readings of it."
     - "Split O90 and O91 instead of staging one observation about the image. They cut in opposite directions -- O90 says the realizability theorem has content, O91 says the sufficiency half is expensive -- and M1 could confirm either without the other."
     - "Staged O92 (conditional-counterexample vacuity) as a heuristic, not a claim: it is a check to run on a proof development, not a falsifiable assertion about the calculus. One instance, no researcher evaluation, so it stays staged despite the fix landing this turn."
-    - "Did NOT mint a claim for the M0 freeze. Consistent with the standing precedent for @0.7-@0.10, #169 and m5-freeze-v5: a freeze that fixes an object for downstream work is trace content. What could become claims here are O90/O91 -- statements about the image -- and they are staged."
+    - "Did NOT mint a claim for the M0 freeze. Consistent with the standing precedent for @0.7-@0.10, the type refactor and m5-freeze-v5: a freeze that fixes an object for downstream work is trace content. What could become claims here are O90/O91 -- statements about the image -- and they are staged."
     - "N224 recorded as user-revised, not ai-suggested. I framed the alternatives and made the recommendation; the researcher chose among them explicitly. Same reading as N216 -- participation in the decision rather than delegation of it. N223 stays ai-suggested: the reviewer found it and I implemented it with no researcher input."
     - "Did NOT run the stale sweep, despite roughly thirty unpromoted observations sitting unstale and many idle since before N219. The mechanical rule would flag most of them, but mass-flagging on the same turn the project pivots into a new milestone series would bury this turn's three new observations under thirty status changes, and the sweep's purpose is researcher triage rather than bookkeeping. Surfaced it in open_threads instead, which is where triage starts."
     - "Recorded the review's finding 6 in key_context even though it produced no edit. An external pass that checked whether a deferred obligation was actually provable now, and found it is not, is evidence about the deferral's correctness -- it is the reason the doc's wording survives unchanged, and a future reader auditing that wording needs it."
@@ -915,7 +915,7 @@ entries:
     - "Staged O93 instead of crystallizing it. The implementation plan depends on the observation, which is close to artifact commitment, but the plan is explicitly a draft, the counterexample is not mechanized, and the researcher has not commented. Defaulted to non-promotion."
     - "Did NOT mark O91 promoted even though N225 realizes its predicted failure mode. O91 says hidden undercut/undermine edges make construction difficult in general; this turn found the sharper empty-policy obstruction to the frozen iff. The new result supports O91's direction but does not empirically resolve its broader wording."
     - "Recorded the Fin-only isomorphism as a plan correction, not a separate dead_end node. It was caught and repaired during self-review before implementation; its reusable content is in turn 2 key_context and the ai_action, while N225 is the research-level dead end."
-    - "Appended to 2026-08-26_001 under the calendar-day rule. Preserved turn 1's now-stale PR #194 open-thread text and appended a closure note rather than rewriting trace history; the session index summary reflects the current state."
+    - "Appended to 2026-08-26_001 under the calendar-day rule. Preserved turn 1's now-stale PR open-thread text and appended a closure note rather than rewriting trace history; the session index summary reflects the current state."
 - turn: "2026-08-26_001#3"
   notes:
     - "Did NOT crystallize O93. The researcher affirmed N226's scope recommendation and permission to revisit M0, not the counterexample as an evidence-backed claim; N227 records that decision. O93 remains staged until the planned Lean theorem supplies empirical resolution or the researcher explicitly affirms the claim itself."
@@ -945,7 +945,7 @@ entries:
     - "Did NOT crystallize O96 despite three instances within this milestone. All three are the same milestone and the same author; that is one observation seen thrice, not three independent confirmations."
     - "Routed the six plan refutations as ONE experiment node (N234) rather than six decisions. They share a single method — mechanizing a prose claim and finding it contradicted — and splitting them would have implied six independent investigations."
     - "N232 records the guard-ordering decision AND its own correction: an initial reading attributed the support-level vacuity hazard to the ordering, and checking the alternative ordering refuted that. Kept both in the node's result field rather than recording only the conclusion, since the withdrawn attribution is the more instructive half."
-    - "The stale-observation sweep is tracked as #200. The buffer has 55 unpromoted observations, up from ~52, and the issue records the mechanical sweep, researcher triage, and cost of the artifact-only diff."
+    - "The stale-observation sweep has its own tracker item. The buffer has 55 unpromoted observations, up from ~52, and the item records the mechanical sweep, researcher triage, and cost of the artifact-only diff."
 - turn: "2026-08-28_001#2"
   notes:
     - "Routed the review round as one experiment N237 rather than three decisions. The shared result is empirical: three findings were upheld, each fix received a targeted check, and the full Lean/Haskell/ARA gates passed."
@@ -953,7 +953,7 @@ entries:
     - "Did not copy the suggested `resize 6 genAF` literally onto the old generator. The old generator ignored QuickCheck size, so `resize` would have been inert. Moved the helper to TestAF and made it size-aware before adding the six-argument generated property."
     - "Moved N232/N233/N235 result prose to the schema-published decision `rationale` field and removed unpublished status fields from the new decision/pivot nodes. This is the same parser-bound normalization applied to N229 in 2026-08-26_001#5, not a change to the recorded decisions."
     - "Did not stage a new generalized observation. All three findings correct artifacts in this milestone; none adds a new mechanism beyond C35 or the existing testing discipline."
-    - "Did not fold #200 into the active PR review loop. The sweep changes dozens of unrelated staging flags and would obscure the requested theorem, test, and documentation corrections."
+    - "Did not fold the sweep into the active PR review loop. The sweep changes dozens of unrelated staging flags and would obscure the requested theorem, test, and documentation corrections."
     - "Routed the second review as a separate experiment N238 within the same user turn. N237 records the first three-finding round and its exact gates; merging later mutation evidence into it would erase the review boundary."
     - "Added `reinstatementChain` rather than the optional Nixon-diamond framework. The three-chain is the smallest witness that makes the defended-argument clause observable and catches the reported completeB mutant; the larger framework would add cost without covering a distinct requested failure."
     - "Made the carrier-bound check generated rather than repeating one fixed outsider across the table frameworks. Choosing argument n outside `[0..n-1]` covers the input shape `candidates` cannot emit while keeping the failure independent of any named fixture."
@@ -964,10 +964,10 @@ entries:
   notes:
     - "Routed the integrated M3 delivery as one experiment N239 rather than seven task nodes. The research event is the closed update-dynamics matrix; per-task implementation/review commits are engineering traceability recorded in the session ai_actions."
     - "Routed the thirteen-cell addInstance prediction as dead_end N240. The prediction was explicitly present in the approved plan and was refuted by a general sink-extension theorem, so recording only the final count would erase the failed hypothesis and the reason it failed."
-    - "Staged O97-O99 and crystallized them in the same turn via artifact-commitment. PR #201, the typed matrices, durable paper boundaries, and AxCheck inventory depend on all three results; this follows the C35/C36 M2a precedent where implementation and evidence landed together."
+    - "Staged O97-O99 and crystallized them in the same turn via artifact-commitment. The PR, the typed matrices, durable paper boundaries, and AxCheck inventory depend on all three results; this follows the C35/C36 M2a precedent where implementation and evidence landed together."
     - "Split the M3 interpretation into three claims. C37 is a grounded structural result about sink extension; C38 is the public-reporting clean-base boundary; C39 is the checker-admissibility coverage condition. Combining them would create unrelated conditions and falsification criteria."
     - "Did NOT revise C25. The new matrix corollary recovers a clean-base transition instance of the established quarantine safety direction; it neither contradicts nor weakens C25's shipped production claim."
-    - "Recorded ARA validation as zero errors with the inherited warning/fixable set. No existing trace aliases or stale observations were normalized because that unrelated sweep remains issue #200."
+    - "Recorded ARA validation as zero errors with the inherited warning/fixable set. No existing trace aliases or stale observations were normalized because that unrelated sweep remains separately tracked."
 - turn: "2026-08-29_001#2"
   notes:
     - "Routed N244 and N247 as dead_end rather than decision: both are hypotheses the work refuted, and their lesson fields are the transferable part."
@@ -987,7 +987,7 @@ entries:
     - "Considered staging an observation about confident-but-wrong reconnaissance and did not: the transferable lesson is already in N249's lesson field, and a staged duplicate would just go idle."
 - turn: "2026-08-29_002#1"
   notes:
-    - "Stage 3 only. #200 asks for the mechanical stale flag and nothing else, so Stage 4 made no change: no claim status flipped, no logic entry was revised, and no observation was promoted or discarded."
+    - "Stage 3 only. The sweep asks for the mechanical stale flag and nothing else, so Stage 4 made no change: no claim status flipped, no logic entry was revised, and no observation was promoted or discarded."
     - "Made the counting rule explicit before applying it (N241), because the rule text — neither promoted nor referenced for 3+ session-days — does not say where a reference may live. Counted a reference from the session records, pm_reasoning_log turn ids, timestamped exploration_tree nodes, one staged observation citing another, and the observation's own creation day. Idleness is in session-days off the 32-day calendar, not calendar days: eight calendar days in the window carry no session."
     - "Held O37 and O85 live against the arithmetic. Both are 3+ session-days idle in the trace, but claims.md cites each inside an unresolved CONFLICT marker (O37 on C19, O85 on C23), and a live logic-layer citation is a reference. Surfaced instead that both are cited while still carrying `promoted: false` — that is a promotion decision, which this sweep may not make."
     - "Did NOT touch O06 and O15, which carry promoted and stale together. The rule flags unpromoted entries; a promoted entry's stale flag is pre-existing state, not sweep input."
@@ -1028,11 +1028,11 @@ entries:
     - "Recorded the adversarial self-review correction in N255: carrier-status tightness now has its own theorem obligation instead of being inferred from groundedC."
 - turn: "2026-08-30_001#4"
   notes:
-    - "Routed the implementation and gate result as experiment N256: one reviewed execution produced the fixed context/encoding, the closed realization fixtures, the INCONCLUSIVE gate, and PR #208."
+    - "Routed the implementation and gate result as experiment N256: one reviewed execution produced the fixed context/encoding, the closed realization fixtures, the INCONCLUSIVE gate, and the PR."
     - "Routed N257 separately as a dead end because the failed generalization has a reusable lesson not captured by the experiment result: closed fixtures do not lift the generated checker obligations automatically."
     - "Staged O108 as a constraint rather than crystallizing it. The spike document records the observed blocker, but the researcher has not affirmed a general follow-up architecture and no later artifact depends on the proposed compositional-lemma remedy."
     - "Did NOT revise C44 or C45. The gate outcome obeys C45's boundary and leaves C44's planned complexity claims untested; it neither supplies the missing proofs nor contradicts either entry."
-    - "Treated Tasks 3-7 as conditionally inapplicable under the approved stop rule, not as implementation omissions. PR #208 states the partial scientific outcome and keeps #181 open."
+    - "Treated Tasks 3-7 as conditionally inapplicable under the approved stop rule, not as implementation omissions. The PR states the partial scientific outcome and keeps the canonical-scope item open."
 - turn: "2026-08-30_001#5"
   notes:
     - "Routed the attempted review fixes and their local verification as experiment N258: the turn changed the executable fixture and produced fresh Lean/source-span results, with re-review still pending."
@@ -1051,20 +1051,20 @@ entries:
   notes:
     - "Routed the verified commit, push, and three evidence-backed review replies as experiment N261. This is one delivery event over N259/N260, not three new research decisions."
     - "Did NOT promote O108 or revise C44/C45. Shipping the fixture and documentation fixes changes review state, not the unresolved family-wide realization result or its interpretation."
-    - "Updated the live open thread from push/request-review to await re-review; the durable record still says re-review pending and keeps #181 open."
+    - "Updated the live open thread from push/request-review to await re-review; the durable record still says re-review pending and keeps the canonical-scope item open."
 - turn: "2026-08-30_001#8"
   notes:
     - "Skipped the conversation's first two exchanges (foresight next-step answer, branch checkout) as routine guidance and mechanics per the project's ARA thresholds; the recorded turn starts at the commissioning directive."
     - "Routed the commissioning as user decision N262 and the issue/plan/PR delivery as one experiment N263, mirroring the N254/N255 split between selecting a direction and producing the reviewed artifact."
     - "Crystallized O108 into logic/solution/constraints.md via artifact commitment: plan commit bcd16a6 adopts and operationalizes its compositional-lemma architecture, matching the O104-O107 precedent of crystallizing on a committed plan with engineering review still pending. Provenance stays ai-suggested."
     - "Staged O109 rather than crystallizing: the decodeNat_repr risk re-pricing is an interpretation inside an unreviewed plan; no affirmation, resolution, or dependent artifact beyond the plan that proposed it."
-    - "Did NOT change C44/C45. #181's COMPLETED closure is administrative (the record merged, succeeded by #209); the plan commits to supplying the missing proofs but resolves nothing empirically, so both stay testing. Logged as a near-miss on artifact commitment: they are already at testing, so the signal is a no-op."
-    - "Replaced both open threads: PR #208 re-review discharged by the merge and #181 closure; the follow-up-plan thread converted into the concrete PR #210 review gate."
+    - "Did NOT change C44/C45. The item's COMPLETED closure is administrative (the record merged, succeeded by its follow-up plan); the plan commits to supplying the missing proofs but resolves nothing empirically, so both stay testing. Logged as a near-miss on artifact commitment: they are already at testing, so the signal is a no-op."
+    - "Replaced both open threads: the PR re-review discharged by the merge and the closure; the follow-up-plan thread converted into the concrete review gate."
 - turn: "2026-08-30_002#1"
   notes:
     - "Routed the user's concurrency request as open question N268 rather than a decision: no milestone was selected or implementation authorized."
     - "Staged O110 as architecture, not a claim. It maps milestone/file ownership and critical-path dependencies; no closure signal fired because the user has not affirmed or committed to M5."
-    - "Recommended M5 over PW0 because M5 advances the core tracker and unlocks M4, while PW0 is labeled future-work. Did not recommend #196 because it touches Semantics, a likely M2b dependency; did not recommend #204 because its own issue budgets a driver-output-format blast radius."
+    - "Recommended M5 over PW0 because M5 advances the core tracker and unlocks M4, while PW0 is labeled future-work. Did not recommend the preferred-extension proof because it touches Semantics, a likely M2b dependency; did not recommend the deps-report work because its own issue budgets a driver-output-format blast radius."
     - "No existing staged observation gained a closure signal from this planning turn. O110 is new and not stale; the 2026-08-29 sweep and triage already handled the older backlog."
 - turn: "2026-08-30_002#2"
   notes:
@@ -1080,7 +1080,7 @@ entries:
     - "Advanced C44 and C45 from testing to supported. Both were already crystallized and the branch now supplies the exact missing evidence: fixed-context realization, realizable quartic tightness, polynomial accounting, and a specialized two-sided reduction under one frozen context."
     - "Revised C44/C45 Conditions, Sources, Falsification, Proof, and provenance so the current-state entries no longer cite the predecessor INCONCLUSIVE record or say the replacement proofs are absent. Full before/after values are preserved in the session record."
     - "Crystallized O109 as C46 via artifact commitment, not affirmation. Numeral injectivity and exact attack completeness are now implemented in separate committed modules, so the observation's architecture has a downstream artifact; C46 remains testing because the researcher did not explicitly affirm the generalized interpretation."
-    - "Did NOT fold issue #211 into this closeout. Its proof-side refactors are explicitly deferred and do not weaken any theorem or acceptance criterion."
+    - "Did NOT fold the proof-side refactor issue into this closeout. Its proof-side refactors are explicitly deferred and do not weaken any theorem or acceptance criterion."
     - "The first fresh ARA source-span run failed only on C44/C45's superseded line ranges. Replacing those citations with the durable closure record is part of this reconciliation, not an unrelated schema cleanup."
 - turn: "2026-08-31_001#2"
   notes:
@@ -1089,7 +1089,7 @@ entries:
     - "Closed the session's implementation-PR open thread. Hosted CI remains pending delivery evidence, not an open research question."
 - turn: "2026-08-31_001#3"
   notes:
-    - "Routed the five upheld PR #212 findings and their fresh verification as experiment N267. They form one audit-and-scope correction event, not five new research branches."
+    - "Routed the five upheld PR findings and their fresh verification as experiment N267. They form one audit-and-scope correction event, not five new research branches."
     - "Revised C44's title, Statement, and Conditions because repository evidence supports a universal n² lower bound and an exact n=2 counterexample to the pointwise cubic inequality, but not asymptotic optimality; the same evidence continues to support the narrowed claim, so Status remains supported."
     - "Corrected the realization-transfer direction: unrestricted-AF witnesses need realization evidence before establishing fixed-context realizable-class results; universal bounds already quantify over unrestricted frameworks."
     - "Updated C44/C45/C46 source ranges only because the corrected D4 paragraph shifted the cited documentation by one line. These are dependency repairs, not claim-content changes for C45 or C46."
@@ -1102,7 +1102,7 @@ entries:
     - "Set C47 Status: supported, not hypothesis. For a mechanized theorem the proof IS the evidence; hedging to hypothesis would understate an audited result. Conditions carries the untested boundary (non-identity translations, cross-signature contexts, other status transitions) so the generalized Statement stays bounded."
     - "Wrote C47's Statement as the mechanism (status preservation is strictly stronger than support preservation; any preservation theorem must quantify over the target's attackers) rather than as the fixture. Run-level facts (justified, defeated, the leaf term) live in Sources and Proof."
     - "Did NOT crystallize O111 despite it being proved this turn: T0/Iff.rfl is a design property of the import discipline, not a falsifiable research finding. Staged as potential_type: claim for a later signal."
-    - "Did NOT crystallize O112/O113 despite both being written into docs/theory-pw0-outer-model.md. They are inputs to the #192 exit decision, which is explicitly taken on the tracker and has not been taken; crystallizing them now would presuppose its outcome. Both are constraints awaiting that decision."
+    - "Did NOT crystallize O112/O113 despite both being written into docs/theory-pw0-outer-model.md. They are inputs to the possible-worlds exit decision, which is explicitly taken on the tracker and has not been taken; crystallizing them now would presuppose its outcome. Both are constraints awaiting that decision."
     - "Routed N271 as experiment (not decision): the acceptance gates were lake build and the axiom audit, and the record's content is what they returned. Routed N272 as decision because the reviews presented a genuine either/or -- weaken the prose or strengthen the proofs -- and the alternative is recorded."
     - "No contradiction trigger fired. The plan's prose said 45 theorems and its own code block said 42; this is a plan-internal defect, not a conflict between ARA entries, so it was corrected in the doc (now 47 after review fixes) and noted in key_context rather than flagged."
     - "No reader reports were supplied this turn."
@@ -1120,8 +1120,8 @@ entries:
     - "Did NOT open an issue. CLAUDE.md routes DEFERRED work to issues; this was fixed in the same turn it was found."
 - turn: "2026-09-02_001#4"
   notes:
-    - "Routed the concurrency directive as decision N275 with provenance user: 'in parallel to M4' is a real scheduling choice among recorded alternatives (wait for #218; plan PR first), not mere acknowledgment."
-    - "Crystallized O112 -> C48 via artifact commitment: Admits/admits_transport are committed, AxCheck-registered, and PR #223 depends on them. Status supported on the C47 precedent (audited proof IS the evidence). Provenance stays ai-suggested — the user directed the track, not the specific claims."
+    - "Routed the concurrency directive as decision N275 with provenance user: 'in parallel to M4' is a real scheduling choice among recorded alternatives (wait for the M4 plan; plan PR first), not mere acknowledgment."
+    - "Crystallized O112 -> C48 via artifact commitment: Admits/admits_transport are committed, AxCheck-registered, and the T6 PR depends on them. Status supported on the C47 precedent (audited proof IS the evidence). Provenance stays ai-suggested — the user directed the track, not the specific claims."
     - "Crystallized O113 -> constraints.md (PW-T6 translation-form constraint) via artifact commitment: docs/theory-pw-t6-structural-transport.md §8.1 now restates and depends on it. Routed as constraint, not claim — it is a design bound on T8/T9, not a falsifiable mechanism assertion."
     - "Did NOT crystallize O111 (conservativity-is-cheap): T6 carries the modules-only-import discipline forward but no closure signal fired — no affirmation, no artifact depending on the generalized statement itself."
     - "Staged O114/O115/O116 rather than folding them into C48: each is a distinct interpretive finding (verbatim obligations, disjoint commuting footprints, irreducible domain evidence) that may crystallize separately or die; C48's Statement carries only the first as a proved conjunct."
@@ -1130,10 +1130,10 @@ entries:
     - "No reader reports were supplied this turn."
 - turn: "2026-09-02_001#5"
   notes:
-    - "Crystallized C49 via artifact commitment (five commits merged on the branch, PR #218 updated, two docs and the name map depend on the declarations) — same signal and same ai-suggested/supported shape as C47 and C48. Researcher has not commented on the M4 result; provenance stays ai-suggested."
+    - "Crystallized C49 via artifact commitment (five commits merged on the branch, the M4 PR updated, two docs and the name map depend on the declarations) — same signal and same ai-suggested/supported shape as C47 and C48. Researcher has not commented on the M4 result; provenance stays ai-suggested."
     - "Did NOT crystallize O117 (admissibility is forced) despite it being the sharpest finding of the turn: it is an argument about what the theorem could have said, with no Lean artifact establishing the unconditional form false. Staged as a claim candidate."
     - "Routed the surface-witness failure (N281) and the vacuous-witness discovery (N283) as dead_end rather than experiment: in both cases the approach was abandoned and replaced, and the lesson is the payload."
-    - "Routed the compose-saturation finding (N282) as a resolved decision, not an unresolved contradiction: nothing in logic/ contradicts it — it bounds a statement made this same turn, and the alternatives are recorded with issue #229."
+    - "Routed the compose-saturation finding (N282) as a resolved decision, not an unresolved contradiction: nothing in logic/ contradicts it — it bounds a statement made this same turn, and the alternatives are recorded with the tracked follow-up."
     - "N277 marks the phase boundary as a pivot with the four phases plus three findings as children, so the level structure stays recoverable; also_depends_on points at N276 (the PW-T6 session) because M4 was the parallel track the researcher had scheduled against it."
     - "Five observations staged, none promoted: four are ai-suggested lessons from this turn with no closure signal, and O121 (the AF node-merging morphism) is concept-shaped but its home layer is not yet settled — it may belong in concepts.md rather than claims.md."
     - "No Stage 4 revisions: nothing in this turn bears on C01-C48. Considered and rejected touching C47/C48 — the PW track and M4 share no declarations."
@@ -1149,18 +1149,18 @@ entries:
   - "No reader reports were supplied this turn."
 - turn: "2026-09-03_002#1"
   notes:
-    - "Routed the task selection as decision N288 with provenance user: the user chose '#224' from explicitly offered alternatives, which are recorded because the M4-conflict reasoning (avoid #222/Compose.lean) is the durable part."
+    - "Routed the task selection as decision N288 with provenance user: the user chose '[redacted]' from explicitly offered alternatives, which are recorded because the M4-conflict reasoning (avoid the Compose.lean-conflicting work) is the durable part."
     - "Folded the CI diagnosis into N288's choice text rather than a separate node: it is infrastructure, but the billing block bears on what every 'audit PASS' in this artifact currently means (author-reported, no independent CI), so it belongs in the record without owning a node."
     - "Advanced C48's Sources/Proof via empirical resolution (audit re-run at 1712) — content revision only, Status stays supported; the Statement already asserted the cert_ok clause, and the new fixtures are evidence for it, not a scope change."
     - "Staged O123 (point-mass acceptance pairs) as heuristic, not claim: it is fixture-design guidance, falsifiable only as practice."
     - "Near-miss: considered crystallizing O114 (verbatim obligations) via artifact commitment since C48's Statement carries the conjunct — rejected: C48 crystallized from O112, and promoting O114 into it now would duplicate; left staged for its own closure or death."
-    - "Did NOT list the #224 boundary as untested in C48's Conditions removal — Conditions never named cert_ok vacuity, so nothing to remove."
+    - "Did NOT list the cert_ok boundary as untested in C48's Conditions removal — Conditions never named cert_ok vacuity, so nothing to remove."
     - "No reader reports were supplied this turn."
 - turn: "2026-09-03_003#1"
   notes:
     - "Routed both closures as direct decision nodes (N290 user, N291 user-revised): journey facts with explicit researcher sign-off, not interpretive."
     - "N291 provenance user-revised, not user: the researcher directed the pushback and affirmed, but the articulated rationale is the agent's."
-    - "Staged O124 (tautology-risk mechanism) rather than crystallizing despite the affirmed decision citing it: the researcher affirmed the ACTION, not the mechanism claim, and the mechanism is untested — artifact commitment exists (N291 cites it) but conservatism wins; revisit if #215/#216 commit."
+    - "Staged O124 (tautology-risk mechanism) rather than crystallizing despite the affirmed decision citing it: the researcher affirmed the ACTION, not the mechanism claim, and the mechanism is untested — artifact commitment exists (N291 cites it) but conservatism wins; revisit if the parametricity work commits."
     - "No Stage 4 edits: Part A claims (C49 etc.) are untouched by the Part B descope; grep confirmed no logic/ entry mentions full abstraction."
     - "Near-miss: considered a dead_end node for Part B — rejected: nothing was attempted and failed; descope is a decision, not a dead end."
     - "Session filed as _003 (separate conversation from today's _001/_002 per existing multi-session-per-day precedent)."
@@ -1174,8 +1174,8 @@ entries:
     - "No reader reports or taste comments were supplied this turn."
 - turn: "2026-09-03_004#2"
   notes:
-    - "Routed the approved two-PR implementation as user decision N293: the user explicitly selected PR #1 followed by PR #2 on a new branch; the node records the contract choices the reviewed plan made executable."
-    - "Routed the synchronized branch gates as experiment N294. PR #233 passed a 140-job build, 31-declaration coverage check, and standard-trio axiom audit; PR #236 passed a 140-job build, 60-declaration coverage check, and the same audit."
+    - "Routed the approved two-PR implementation as user decision N293: the user explicitly selected the first PR followed by the second on a new branch; the node records the contract choices the reviewed plan made executable."
+    - "Routed the synchronized branch gates as experiment N294. The foundation PR passed a 140-job build, 31-declaration coverage check, and standard-trio axiom audit; the stacked PR passed a 140-job build, 60-declaration coverage check, and the same audit."
     - "Crystallized O125 and O126 into mechanization.md §11 via artifact commitment: Accepted now exposes candidate relation ∧ Admits, accepted_iff_of_commutes requires candidate-relation coherence, and Commutes/direct_transport_agrees quantify over arbitrary BridgePath."
     - "Crystallized O127 into the PW-T9 path-witness constraint: gapPath is a typed StructuralBridge path and mid_path_translationUndefined connects its second-leg failure to comparison incomparability."
     - "Crystallized O128 and O129 as H16 and H17 via artifact commitment: the negative triangle theorem types carry HasSupport, and plan retirement was an explicit committed implementation step."
@@ -1193,7 +1193,7 @@ entries:
     - "No older staged observation was marked stale; this closeout did not establish safe topic abandonment."
 - turn: "2026-09-04_002#1"
   notes:
-    - "Routed the reviewed-head ownership correction as decision N298: commit 3362f00 proves that PR #233 already owned StructuralBridge.comp, support_transport_comp, BridgePath, path coherence, and path_support_transport."
+    - "Routed the reviewed-head ownership correction as decision N298: commit 3362f00 proves that the foundation PR already owned StructuralBridge.comp, support_transport_comp, BridgePath, path coherence, and path_support_transport."
     - "Preserved N293 as the historical pre-review split and updated only the mutable proof record and session-summary projections."
     - "Routed the post-correction 140-job build, 67-declaration targeted coverage run, and standard-trio axiom audit as experiment N299."
     - "Did not stage a claim or revise the logic layer: this pass corrects artifact provenance and PR ownership, not the theory contract."
@@ -1201,17 +1201,17 @@ entries:
     - "No older staged observation was marked stale; this closeout did not establish safe topic abandonment."
 - turn: "2026-09-04_003#1"
   notes:
-    - "Routed the researcher's 'clear the debts from M4 first' as user decision N300, carrying the three executable choices the session made (owner modules over Update.lean, #229 option 2, #227 deferred) as its alternatives."
+    - "Routed the researcher's 'clear the debts from M4 first' as user decision N300, carrying the three executable choices the session made (owner modules over Update.lean, the chosen compose-saturation option, the surface-corollary item deferred) as its alternatives."
     - "Routed the gate run as experiment N301; the two proof iterations are recorded in its result, not as dead ends — both were placement/tactic slips, not failed designs."
     - "Staged O130 (structural non-closure) rather than crystallizing: the witness proves one instance, the general statement is unproved and the user has not affirmed it."
     - "Staged O131 (cache bridge) despite the theorem being proved: artifact commitment is a commit on an unmerged branch; crystallize on merge."
-    - "Did NOT revise C49 at Stage 4. Its Conditions do not mention composition, its Sources quote the historical evidence lines which still stand, and #229's witness sharpens the boundary without changing what C49 asserts. Near-miss logged."
+    - "Did NOT revise C49 at Stage 4. Its Conditions do not mention composition, its Sources quote the historical evidence lines which still stand, and the compose-saturation witness sharpens the boundary without changing what C49 asserts. Near-miss logged."
     - "Appended a dated section to the append-only evidence file instead of editing the 218-declaration line; the coverage count is now 224 and both are true at their commits."
     - "No reader reports or taste comments were supplied this turn."
 - turn: "2026-09-04_004#1"
   notes:
     - "Crystallized C50 directly as supported: a Lean theorem with a passing audit is empirical resolution, matching how C48/C49 were recorded; provenance stays ai-suggested (the user approved implementing the plan, not this wording)."
-    - "Revised C47 and C48 Conditions via artifact-commitment (PR #240) — both recorded T8 as their untested boundary and T8 now exists; the Statements and supported status are untouched."
+    - "Revised C47 and C48 Conditions via artifact-commitment (merged PR) — both recorded T8 as their untested boundary and T8 now exists; the Statements and supported status are untouched."
     - "Routed the no-eng-review choice as decision N302 with provenance user-revised: the agent proposed the review, the user overrode it."
     - "Staged O132/O133 as heuristics rather than crystallizing: the pre-flight practice paid off once on one plan; no user affirmation and no downstream artifact depends on it yet."
     - "Staged O134 (WellFormed permits symmetric contraries) as a constraint, not a claim: it is a fact about the checker consumed by a witness, awaiting a second use or affirmation."
@@ -1225,7 +1225,7 @@ entries:
     - "Routed the two mutation runs as experiment N312 and put the failing declaration names and line numbers in its result — the issue's acceptance criteria are about which named audited theorem breaks, so the identification is the finding."
     - "Did NOT log a dead_end for either mutation: they are deliberate probes reverted immediately, not abandoned approaches."
     - "Staged O139 as a heuristic rather than crystallizing: one application (this fixture), no user affirmation, and nothing downstream depends on the pattern yet."
-    - "Did NOT revise C48 or C49 at Stage 4. Near-miss considered and rejected: #231 adds regression coverage over the existing T6 contract, changes no Statement, no Conditions clause, and no boundary either claim records; the T6 contract and its limitations are untouched."
+    - "Did NOT revise C48 or C49 at Stage 4. Near-miss considered and rejected: the guard work adds regression coverage over the existing T6 contract, changes no Statement, no Conditions clause, and no boundary either claim records; the T6 contract and its limitations are untouched."
     - "Appended new dated verification text to the docs/evidence rather than silently replacing the count history — the 1707/78 and 1713/84 figures stay in place at their commits, with 2495/87 as the current state."
     - "Consistency pass found dangling references: session 2026-09-05_001 logs N307-N310 and O137-O138 that were never appended to exploration_tree.yaml (stops at N306) or observations.yaml (stops at O136). Did not backfill them — reconstructing another session's nodes from summaries is not this turn's record. Reserved the ids, started at N311/O139, and raised it as an open thread for the researcher."
     - "No reader reports and no taste comments this turn; the work was issue execution."
@@ -1233,8 +1233,8 @@ entries:
   notes:
     - "Routed the proof route as decision N313, not as part of the experiment: the load-bearing choice is comparing S to canonize F T as a List.Sublist rather than as a subset, and it has a real rejected alternative (the issue's own ⊆-maximal-element route, which would have forced the Mathlib decision the lakefile anticipates)."
     - "Recorded the spike inside experiment N314 rather than as a separate node: it is the same investigation as the in-tree verification, and its result — [propext, Quot.sound], ~60 lines, no Nodup — is what settled the plan-or-not question the user asked."
-    - "Revised C35 and C36 Conditions via artifact-commitment (PR #251) but changed neither Status: both stay supported, both Statements are untouched, and each edit only narrows a boundary the entry already recorded."
-    - "Did NOT extend C36's narrowing to complete or semi-stable. Grounded (groundedSem_singleton) and preferred (preferred_exists) are proved; the other two are not, and inferring them from 'complete contains grounded' would be exactly the unmechanized assertion #196 existed to remove."
+    - "Revised C35 and C36 Conditions via artifact-commitment (merged PR) but changed neither Status: both stay supported, both Statements are untouched, and each edit only narrows a boundary the entry already recorded."
+    - "Did NOT extend C36's narrowing to complete or semi-stable. Grounded (groundedSem_singleton) and preferred (preferred_exists) are proved; the other two are not, and inferring them from 'complete contains grounded' would be exactly the unmechanized assertion the proof work existed to remove."
     - "Considered crystallizing O141 on the strength of the refuted cost estimate and rejected it: empirical resolution closes the *result*, not the meta-heuristic about reading issue estimates, which has one instance and no user affirmation."
     - "Staged O142 separately from O132 rather than folding it in: O132 is about compiling a plan's blocks before dispatching an implementer, O142 about compiling before deciding whether to write a plan at all. Same practice, different decision point; if either crystallizes they should probably merge."
     - "No dead_end node: nothing was abandoned. The issue's cost estimate was refuted, but the estimate was never an approach anyone took."
@@ -1243,22 +1243,22 @@ entries:
 - turn: "2026-09-06_001#3"
   notes:
     - "Routed N315 as one decision with four alternatives rather than as two decisions (where the collector lives, where the report comes out). They were taken together and share one reason — do not create a second thing the mechanization has to agree with — so splitting them would have hidden that."
-    - "Provenance on N315 is `user`, not `ai-suggested`: the user selected #204 and said 'just proceed'. That is authorization for the work, so the decision node is theirs; the specific design rationale inside it is mine, which is why O143/O144/O145 stay ai-suggested rather than inheriting the node's provenance."
-    - "Revised C42 Conditions via artifact-commitment but left Status at supported and the Statement untouched. C42 is a general lesson about sealed judgments and production paths; repairing its instance does not bear on the lesson. What the turn did establish — that the repair is two independent steps, retention (#182) then a consumer (#204) — is a genuine sharpening of the regime, so it went into Conditions."
+    - "Provenance on N315 is `user`, not `ai-suggested`: the user selected the deps-report work and said 'just proceed'. That is authorization for the work, so the decision node is theirs; the specific design rationale inside it is mine, which is why O143/O144/O145 stay ai-suggested rather than inheriting the node's provenance."
+    - "Revised C42 Conditions via artifact-commitment but left Status at supported and the Statement untouched. C42 is a general lesson about sealed judgments and production paths; repairing its instance does not bear on the lesson. What the turn did establish — that the repair is two independent steps, retention then a consumer — is a genuine sharpening of the regime, so it went into Conditions."
     - "Considered and rejected crystallizing O143 on artifact-commitment: the code that landed does depend on the design, but the observation is the general heuristic (reuse a pinned mirror rather than reimplement), and one application is not a heuristic. Same reasoning for O144 and O145."
     - "Did NOT open a claim about the report itself. Nothing new is asserted about the world or the calculus — the accounting was already mechanized and already mirrored; this turn only gave it a consumer. A claim here would restate C42's repair as if it were a finding."
     - "No dead_end node: the issue's first phrasing (fuse into inferSupport) was not attempted and abandoned, it was weighed and not chosen. That belongs in N315's alternatives, which is where it went."
-    - "Recorded an open thread rather than declaring #204 partially done: the issue's inherited boundary text named three consumers (verdict, audit record, CLI). The verdict was deliberately excluded with a reason; the audit record was never in scope and is a separate format decision. Neither is leftover work, but a future reader would otherwise read the gap as an omission."
+    - "Recorded an open thread rather than declaring the work partially done: the issue's inherited boundary text named three consumers (verdict, audit record, CLI). The verdict was deliberately excluded with a reason; the audit record was never in scope and is a separate format decision. Neither is leftover work, but a future reader would otherwise read the gap as an omission."
     - "The dangling N307-N310 / O137-O138 references from 2026-09-05_001 are still unbacked; this turn continued at N315/O143 without reserving that range. Third turn carrying it."
     - "No reader reports and no taste comments this turn."
 - turn: "2026-09-06_001#4"
   notes:
-    - "Routed the #248 closure as decision N317, not dead_end: nothing was abandoned — the work was found already done, and the load-bearing choice (close as moot vs. execute anyway, reopening the frozen Status.lean) has real rejected alternatives."
+    - "Routed the moot-closure as decision N317, not dead_end: nothing was abandoned — the work was found already done, and the load-bearing choice (close as moot vs. execute anyway, reopening the frozen Status.lean) has real rejected alternatives."
     - "Staged O146 rather than crystallizing: one instance, no user affirmation. Deliberately kept separate from O141 — O141 is about cost estimates encoding one imagined route, O146 about work descriptions encoding a superseded tree; noted in both places that they should merge if either crystallizes."
     - "Considered O141 closure via this turn as a second application and rejected it: the instances are kindred but not the same observation, and no closure signal (affirmation/resolution/commitment) fired on O141 itself."
-    - "Stage 4 no-op. Near-miss considered and rejected: C50 (PW-T8 status transport) — #248's mootness changes no Statement, Condition, or Proof ref; Matched and transportsB entered the tree with PR #247, before this turn."
-    - "Noted but did not backfill: PR #247 (the #244 re-land with the review feedback incorporated) has no session-record turn of its own — it appears to have been merged outside a recorded session. Its content is now documented in N317's evidence."
-    - "The previous conversation turn (backlog review recommending #204) was correctly skipped per CLAUDE.md as routine guidance; its durable output — #204 as recommended next step — is captured this turn in open_threads rather than as its own event."
+    - "Stage 4 no-op. Near-miss considered and rejected: C50 (PW-T8 status transport) — the item's mootness changes no Statement, Condition, or Proof ref; Matched and transportsB entered the tree with the earlier PR, before this turn."
+    - "Noted but did not backfill: the earlier PR (the re-land with the review feedback incorporated) has no session-record turn of its own — it appears to have been merged outside a recorded session. Its content is now documented in N317's evidence."
+    - "The previous conversation turn (backlog review recommending the deps-report work) was correctly skipped per CLAUDE.md as routine guidance; its durable output — the recommended next step — is captured this turn in open_threads rather than as its own event."
     - "The user's requested PR was not opened: an empty diff cannot be a PR. Recorded the substitution (verification comment + issue closure) in key_context so the deviation from the literal instruction is traceable."
     - "No reader reports and no taste comments this turn."
 - turn: "2026-09-07_001#1"
@@ -1266,21 +1266,21 @@ entries:
     - "Did NOT edit N300's third alternative or N281's dead_end even though both are now falsified: trace/ is append-only, and a rewritten alternative would erase the record that the sizing was believed. N318 carries the correction and names both as superseded, which is what a future /research-foresight read needs to see."
     - "Split the correction across N318 (the decision, with the corrected blocker) and N319 (the dead_end, the contaminated gate run) rather than one node. They failed for unrelated reasons — one is a wrong theory of which function is kernel-opaque, the other a wrong theory of what `lake build` builds — and merging them would hide the second, which is the one with a CI consequence."
     - "N319 as dead_end, not experiment: the hypothesis 'a green pinned axiom gate means the module was elaborated' was held, acted on, and is false. The lesson field is the payload."
-    - "N321 left status: open, not resolved. Filing #258 records the gap; it does not close it. Every other node this turn is resolved."
-    - "Crystallized O120 via artifact-commitment: PR #257 merged code whose entire shape — purpose-built env, kernel-form payload — exists because native_decide is banned from the audit. Note the constraint itself was never falsified; only its context line ('#227 tracks a fixture') went out of date, which is why it crystallized rather than being contradicted."
-    - "Did NOT crystallize O147 despite the gate run resolving it empirically: one instance, and the reviewing session hit the same contamination, so the two occurrences are one event and not independent confirmation. Revisit if #259's check ever fires on something new."
+    - "N321 left status: open, not resolved. Filing a tracker item records the gap; it does not close it. Every other node this turn is resolved."
+    - "Crystallized O120 via artifact-commitment: the PR merged code whose entire shape — purpose-built env, kernel-form payload — exists because native_decide is banned from the audit. Note the constraint itself was never falsified; only its context line ('a fixture is still tracked there') went out of date, which is why it crystallized rather than being contradicted."
+    - "Did NOT crystallize O147 despite the gate run resolving it empirically: one instance, and the reviewing session hit the same contamination, so the two occurrences are one event and not independent confirmation. Revisit if that gate check ever fires on something new."
     - "Did NOT crystallize O148 either — it is bound to N321, which is open. Crystallizing a claim about degeneracy before the attack-bearing witness exists would fix wording the witness is likely to sharpen."
     - "No claim touched. Considered a claims.md entry for the witnessed corollary and rejected it: claims.md carries the theory, and 'the corollary now has an instance' is a trace fact plus an evidence entry, not a new falsifiable assertion."
     - "The dangling N307-N310 / O137-O138 references from 2026-09-05_001 are still unbacked; this turn continued at N318/O147 and again reserved nothing in that range. Third session carrying it — worth a cleanup pass."
     - "No reader reports and no taste comments this turn. The six review findings came from a peer agent session, not a reader-report artifact, so they were routed as ordinary events."
-    - "Repaired C47's Sources span as a Stage 4 consistency pass, not a content revision: scripts/check_ara_source_spans.py failed on lean/Lara/Check/Program.lean:279, where the quoted line had drifted to :306. The quotation itself still matches verbatim, so only the line number moved; Statement, Conditions, and Status are untouched. Pre-existing on this branch and unrelated to #227 — it surfaced only because this turn ran the span checker over its own ara/ edits."
-    - "Node and observation ids renumbered N315-N318 -> N318-N321 and O143/O144 -> O147/O148 in the main-merge resolution, because main's concurrent #204/#248 session had taken N315-N317 and O143-O146. All bound_to, also_depends_on, and note references updated to match."
+    - "Repaired C47's Sources span as a Stage 4 consistency pass, not a content revision: scripts/check_ara_source_spans.py failed on lean/Lara/Check/Program.lean:279, where the quoted line had drifted to :306. The quotation itself still matches verbatim, so only the line number moved; Statement, Conditions, and Status are untouched. Pre-existing on this branch and unrelated to that item — it surfaced only because this turn ran the span checker over its own ara/ edits."
+    - "Node and observation ids renumbered N315-N318 -> N318-N321 and O143/O144 -> O147/O148 in the main-merge resolution, because main's concurrent session had taken N315-N317 and O143-O146. All bound_to, also_depends_on, and note references updated to match."
 - turn: "2026-09-07_001#2"
   notes:
     - "Split the insp@1 work into four decision/dead-end nodes rather than one 'shipped the backend' node. N322 (what is certified), N323 (why a cons spine), and N324 (contraries and their placement) failed-or-succeeded for independent reasons and a future reader needs them separable — N323 in particular is a Sigma-layer constraint that would be invisible if folded into N322."
-    - "N325 as dead_end, not experiment: the hypothesis 'the mutation leg is inside #260's budget' was held, acted on for a full build-and-verify cycle, and is false. The lesson field is the payload — the code worked, the budget did not."
+    - "N325 as dead_end, not experiment: the hypothesis 'the mutation leg is inside the tracked budget' was held, acted on for a full build-and-verify cycle, and is false. The lesson field is the payload — the code worked, the budget did not."
     - "Crystallized O150 into C51 via artifact-commitment: examples/S9/insp-v1.policy.lara's whole layering (strict diff, defeasible bridge, no contrary on the raw atoms) exists because of the criterion, and both halves are mechanized. Set Status: testing, NOT supported — artifact commitment alone does not reach supported, the user gave no affirmation this turn, and two backend instances is thin for a criterion stated over 'a strict backend'."
-    - "Did NOT crystallize O149 despite the empirical resolution being unambiguous (the collision was found by building it): one instance, and it is a process heuristic rather than a claim about the system. Same treatment as O147 last turn. It would earn a heuristic entry if #266's re-cut turns out to be the second instance where the rule would have saved a rebuild."
+    - "Did NOT crystallize O149 despite the empirical resolution being unambiguous (the collision was found by building it): one instance, and it is a process heuristic rather than a claim about the system. Same treatment as O147 last turn. It would earn a heuristic entry if the re-cut turns out to be the second instance where the rule would have saved a rebuild."
     - "Revised C27 rather than opening a new claim for insp@1's premise-only guard: it is the same mechanism with a third instance, and the claim's Conditions sentence had gone stale ('both rational-arithmetic backends'). Status left at supported — a confirming instance does not change status, and demoting or promoting on one event is exactly what the conservatism rule forbids."
     - "Considered and rejected a claims.md entry for 'the closed-world step is what makes code inspection strict'. It is the design record's §2 and the spec's §5.2 item 3 — a definition of what the adapter certifies, not a falsifiable assertion about the world. C51 is the falsifiable thing this turn produced."
     - "Repaired seven ara/logic/claims.md spec spans as a Stage 4 consistency pass. Five were already red on the clean tree (verified by stashing the branch and re-running the checker) and my §5.2 amendment shifted two more. Recorded as one logic_revisions row because it is one mechanical operation on one field type; the quotations themselves are untouched, so no Statement, Conditions, or Status moved."
@@ -1304,7 +1304,7 @@ entries:
     - "Applied the contradiction trigger to O152 rather than editing it: staging/ is append-only, and O152's primary content (parameterize the projection) was reinforced this turn, not refuted. Only its subsidiary 'sits beside rather than replaces' rationale is contradicted. Flagged both O152 and O155 with CONFLICT comments and appended N335 as `unresolved`. Adjudication is the researcher's."
     - "Revised C52 rather than authoring a new claim. The finding is that C52's own design corollary was necessary-but-not-sufficient as stated; that is a sharpening of an existing claim, not a competing one. Status left at `hypothesis` — a second landed design in the same development is not a second development, and the conservatism rule forbids hypothesis -> supported without both empirical resolution and verbal affirmation in the same turn."
     - "C49 got a Proof-pointer edit only. The refactor preserved every C49 statement verbatim — verified by the signature-level diff being purely additive — so there is no Statement, Conditions, or Status signal to act on."
-    - "Appended to ara/evidence/proofs/m4_generic_observation.md rather than correcting it in place, even though a reviewer flagged it as stale. evidence/ is append-only: PR #271 really did land the two-type design, and rewriting that record to match today's tree would erase the very comparison C52's revision now rests on."
+    - "Appended to ara/evidence/proofs/m4_generic_observation.md rather than correcting it in place, even though a reviewer flagged it as stale. evidence/ is append-only: the PR really did land the two-type design, and rewriting that record to match today's tree would erase the very comparison C52's revision now rests on."
     - "Near-miss considered and rejected: C51 and C27 were untouched. Nothing this turn concerned backend adapters or the contrary question; the refactor is orthogonal to both."
     - "Near-miss considered and rejected: no taste comment. The researcher's only evaluative act was selecting an option from a menu the manager itself constructed, which is a decision, not a reaction to a claim or trace node."
     - "The dangling N307-N310 / O137-O138 references from 2026-09-05_001 are still unbacked — fifth session carrying it. This turn reserved N332-N335 and O155-O156, again nowhere near that range."
@@ -1321,31 +1321,31 @@ entries:
     - "Crystallized two claims via artifact-commitment, not affirmation. C53 (the relational form is stronger only where no total extension satisfies the global hypothesis) and C54 (the side condition is forced where the calculus decides equality) are both committed in merged code — backend_replacement_parametricity_local instantiates the first, relInj_necessary witnesses the second — and in a new docs decision record. Both set to `hypothesis`, not `supported`: one mechanized instance apiece."
     - "Split the milestone's finding into two claims rather than one. C53 is about the STRENGTH of a relational generalization (a fact about hypotheses), C54 about where its SIDE CONDITION comes from (a fact about the calculus). They have different falsifications and C54 depends on C53's single-valuedness argument, so merging them would have produced a claim with two independent failure modes."
     - "C52 advanced hypothesis -> testing via artifact-commitment. A second instance of the equality-vs-pointwise mechanism landed this turn, along a different axis (generalizing along the relating structure rather than the reader). Recorded in Conditions together with why it is weak evidence: both instances inherit the equality from the same original lemma, so they are not independent. Did NOT reach `supported` — that needs empirical resolution AND affirmation in one turn, and the researcher did not comment on the result."
-    - "C49's Conditions revised via dependency-change: its own untested boundary named '#215 relational quantification over related backends', and #215 closed this turn. Replaced with the narrower remaining gap (#277, the two unrelationalized congruences). Status left `supported` — the relational form removes a caveat from C49, it does not add evidence for it, and the conservatism rule forbids moving `supported` on a single event."
+    - "C49's Conditions revised via dependency-change: its own untested boundary named 'relational quantification over related backends', and that issue closed this turn. Replaced with the narrower remaining gap (the two unrelationalized congruences). Status left `supported` — the relational form removes a caveat from C49, it does not add evidence for it, and the conservatism rule forbids moving `supported` on a single event."
     - "Kept O157/O158/O159 staged despite the same artifact commitment, for the same reason O152-O154 stayed staged on 2026-09-07: single-instance heuristics invented on the turn that produced them. O157 in particular is a diagnostic rule ('look where the functional statement names a computed image') that has been applied exactly twice, both in this module."
     - "Recorded the two plan-statement corrections (attackOcc_rel and contains_rel gaining RelInj) in key_context and the evidence file rather than as a dead_end node. Nothing was abandoned — the statements were unprovable as drafted and were corrected in place, with every call site already carrying the hypothesis, so no downstream weakening occurred."
-    - "N338 routed as `experiment` rather than `decision`: it records the answer to a question #215 posed about itself and the gates that answer produced, not a choice among alternatives. N337/N339/N340 are decisions; N341 is an open `question`, not a dead_end, because nothing was tried and abandoned."
+    - "N338 routed as `experiment` rather than `decision`: it records the answer to a question the parametricity work posed about itself and the gates that answer produced, not a choice among alternatives. N337/N339/N340 are decisions; N341 is an open `question`, not a dead_end, because nothing was tried and abandoned."
     - "Near-miss considered and rejected: the naming decision (N337) is user-provenance and explicit, but it affirms a NAME, not a claim's content — so it did not upgrade any staged observation's provenance and did not count as verbal affirmation for crystallization. The user affirmed what to call the result, not that the result holds."
     - "Did not record a taste comment: the turn carried no evaluative reaction from the researcher beyond the naming selection, which is a decision rather than a reaction to a claim."
 
 - turn: 2026-09-08_002#1
   notes:
   - 'Recorded the mechanized result as N342, linked to C49 through its evidence file. Removed only
-    the now-closed #270 boundary; no status or statement upgrade.'
-  - 'No new general claim or heuristic was inferred from this finite proof. Kept #269 open and preserved
+    the now-closed admissible-cycle boundary; no status or statement upgrade.'
+  - 'No new general claim or heuristic was inferred from this finite proof. Kept the certificate-bearing item open and preserved
     the earlier evidence record with a dated follow-up.'
 
 - turn: 2026-09-09_001#1
   notes:
   - 'Recorded the finite mechanized witness as N343, extending N342. No general
     claim or heuristic was inferred and no existing claim status was changed.'
-  - 'Kept #268 separate: one distinguishing context refutes contextual equivalence,
+  - 'Kept the context-equivalence item separate: one distinguishing context refutes contextual equivalence,
     but does not establish grounded equivalence over all contexts.'
 
 - turn: "2026-09-09_277#1"
   notes:
   - "Recorded N277001 as a decision grounded by checked proofs, not a new general research claim."
-  - "Revised C49's explicit #277 boundary and proof pointer; preserved its statement and status."
+  - "Revised C49's explicit congruence boundary and proof pointer; preserved its statement and status."
   - "Did not revise C53/C54: neither arbitrary-relation separation nor total-injection extension was investigated."
   - "Used an issue-specific session/node under concurrent branch coordination to avoid identifier collisions."
 
@@ -1380,7 +1380,7 @@ entries:
     and recorded exact before/after in the session.
   - 'Kept mixed feasibility observation O160 staged: execution authorization is recorded as direction,
     not blanket endorsement of a generalized claim. Its time-specific assessment remains historical.'
-  - 'Preserved the #268 standard-semantics/identical-export scope and the #217 core-filling/full-abstraction
+  - 'Preserved the standard-semantics/identical-export scope and the core-filling/full-abstraction
     limits; no claim of merged PRs or remote CI success.'
 
 - turn: 2026-09-09_001#4
@@ -1509,19 +1509,19 @@ entries:
 
 - turn: 2026-09-11_002#1
   notes:
-  - 'User scope split routed directly; runtime follow-up #322 was created before implementation.'
+  - 'User scope split routed directly; a runtime follow-up item was created before implementation.'
   - O169 staged as architecture. No generalized claim promoted solely from code/proof
     completion or user authorization to implement.
   - 'C55 and H18 inspected: naming/codec additions do not change gap separability
     or discharge undecidable T6 obligations; no logic revision warranted.'
-  - 'Prior trace entries about #313/#314 remain historical; appended the new closure
+  - 'Prior trace entries about the naming/codec work remain historical; appended the new closure
     work rather than rewriting them.'
   - 'No unrelated observations promoted or retired: this turn provides no new closure
     evidence for their interpretations.'
 - turn: 2026-09-11_001#2
   notes:
-  - 'Routed #317, #318 and #320 as ai_actions only: engineering hygiene with no research
-    claim. #320''s negative check is recorded in the action, not as an experiment node.'
+  - 'Routed the three hygiene items as ai_actions only: engineering hygiene with no research
+    claim. one item''s negative check is recorded in the action, not as an experiment node.'
   - 'Routed the merge fixture, the batch mechanization and the bench as experiment nodes
     (they produced results); the link-rejection resolution as a decision, provenance
     ai-suggested because the AI chose proof over fixture without a user ruling.'
@@ -1537,7 +1537,7 @@ entries:
 
 - turn: 2026-09-11_002#2
   notes:
-  - 'User scope (finish #322, PR) routed directly as N322_outer_runtime (provenance
+  - 'User scope (finish the outer runtime, PR) routed directly as N322_outer_runtime (provenance
     user). AI design choices split into N322_finite_boundary (ai-suggested), not attributed
     to the user.'
   - O172 staged as heuristic. A proof-construction lesson, not a claim about Lara; code
@@ -1545,7 +1545,7 @@ entries:
   - 'O169 considered for artifact commitment (both runtimes derive naming from the checked
     registry), but not promoted: the PR is not merged this turn and the user did not
     endorse the lesson.'
-  - 'No logic/ entry references #322 or the Haskell runtime; C55/H18 are not changed
+  - 'No logic/ entry references the PW runtime or the Haskell runtime; C55/H18 are not changed
     by an executable host. No Stage 4 revision.'
   - Review fixes (byte-equality gate, UTF-8 stdout) folded into the N322_conformance
     result rather than logged as a dead_end; no approach was abandoned.
@@ -1565,12 +1565,12 @@ entries:
   - 'Turn-2 entries citing 5 fixtures / 55 cases / 20 theorems left as written (append-only);
     turn 3 records the new counts.'
   - 'No logic/ entry references the PW runtime (claims.md:605 cites an older numeric
-    node N322, a different id). No Stage 4 revision. #331 recorded as an ai_action
+    node N322, a different id). No Stage 4 revision. The nesting-bound resolution is recorded as an ai_action
     and open thread, not a node.'
 - turn: '2026-09-11_002#4'
   notes:
   - >-
-    Routed the #331 resolution as a decision node rather than a bug-fix observation - the
+    Routed the nesting-cap resolution as a decision node rather than a bug-fix observation - the
     issue offered two resolutions and the turn chose one, so the alternatives belong on
     the record.
   - >-
@@ -1583,7 +1583,7 @@ entries:
     conservatism rule prefers leaving it staged.
   - >-
     Revised C12's Conditions/Proof/Sources on empirical resolution (scripts/differential.sh
-    is in its Proof refs and ran this turn) but did NOT touch Status - #331 sharpens the
+    is in its Proof refs and ran this turn) but did NOT touch Status - the resolution sharpens the
     regime the claim holds in rather than confirming or contradicting it, and a
     testing->supported jump would need verbal affirmation in the same turn.
   - >-
@@ -1591,13 +1591,13 @@ entries:
     docs/spec.md, not a falsifiable research assertion.
   - >-
     Appended turn 4 to 2026-09-11_002 rather than opening _003: same calendar day, and
-    _002 is today's live record (the _001/_002 split is the #328 rebase artifact noted in
+    _002 is today's live record (the _001/_002 split is the rebase artifact noted in
     turn 3).
   - >-
     Named this turn's nodes N331_shared_bound / N331_gate_controls /
     N331_pw_anchor_exclusion, following the established N{issue}_{slug} convention
     (N313_*, N314_*, N322_*). Note the tree ALSO carries a sequential node literally
-    called N331 from 2026-09-07, about congruence witnesses and unrelated to issue #331 -
+    called N331 from 2026-09-07, about congruence witnesses and unrelated to the tracked nesting-bound issue -
     distinct ids, but a reader should not read the bare N331 as the issue.
 - turn: 2026-09-12_001#1
   notes:
@@ -1609,7 +1609,7 @@ entries:
     and one Lean audit verified both; the anchor-manifest gap is recorded inside it
     rather than as a dead_end (a harness defect found in passing, not a hypothesis).'
   - 'Staged O176 (identity-of-empty-edit) and O177 (derivation door) as heuristics,
-    ai-suggested. (Renumbered from O174/O175 on merge with #331''s branch, which staged
+    ai-suggested. (Renumbered from O174/O175 on merge with the nesting-bound branch, which staged
     its own O174/O175 first.)'
   - 'O173 near-miss: this turn added locale reruns for a new text boundary (.lara program
     text) and the reruns did require a fix, which is evidence for the heuristic, but the
@@ -1657,7 +1657,7 @@ entries:
   - >-
     Recorded the pw gate's check_pw_subtree_total failure on the node and in the evidence
     record rather than treating it as this turn's result — fixtures/pw/source arrived in
-    #332, after the assertion, so it fails on main too. Not filed as an issue here: it is
+    the other branch, after the assertion, so it fails on main too. Not filed as an issue here: it is
     somebody else's open branch, and inventing a tracking item for it from this turn would
     misattribute it.
   - >-

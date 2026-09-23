@@ -6,7 +6,7 @@ session:
   turn_count: 3
   summary: >
     Implemented lara-syntax@0.3, closed the eight initial round-2 findings, then
-    addressed four re-review follow-ups on PR #92. The final follow-ups restore
+    addressed four re-review follow-ups on the PR. The final follow-ups restore
     nlStringLit's Haddock attachment, document the ordinary-claim brace
     migration, split an authored binding mismatch from policy-shape errors, and
     mutation-pin sparse premise-label indexing. Full Haskell, Lean, axiom,
@@ -94,7 +94,7 @@ events_logged:
     id: "N139"
     routing: direct
     provenance: ai-executed
-    summary: "Four PR #92 re-review follow-ups closed with red-green and mutation-effective coverage; full conformance gates passed"
+    summary: "Four re-review follow-ups closed with red-green and mutation-effective coverage; full conformance gates passed"
 ai_actions:
   - turn: 1
     action: "D1 — grammar Appendix B (six @0.3 forms) + the FROZEN §7 amendment text (637d769)"
@@ -142,7 +142,7 @@ ai_actions:
     files_changed: []
 
   - turn: 3
-    action: "Closed four PR #92 follow-ups: nlStringLit Haddock attachment, @0.3 brace-migration documentation, authored binding mismatch diagnostic, and sparse premise-label indexing coverage (8425c88)"
+    action: "Closed four PR follow-ups: nlStringLit Haddock attachment, @0.3 brace-migration documentation, authored binding mismatch diagnostic, and sparse premise-label indexing coverage (8425c88)"
     provenance: ai-executed
     files_changed: ["docs/lara-surface-grammar.md", "plans/2026-08-08-lara-syntax-03-surface.md", "src/Lara/Elaborate/Comparison.hs", "src/Lara/Elaborate/Error.hs", "src/Lara/Syntax.hs", "test/ElaborateSpec.hs"]
   - turn: 3
@@ -201,11 +201,11 @@ key_context:
       reviewer's naive filtered-label zip and observing StepPremise 0 instead
       of StepPremise 1.
 open_threads:
-  - "D7 / #88b (let value bindings, named premise-slot refs `(prem e1)`) remains deferred behind #89 — the many-sorted Σ that closes the mistyped-binding-becomes-nullary-constant hazard."
+  - "D7 (let value bindings, named premise-slot refs `(prem e1)`) remains deferred behind the many-sorted Σ that closes the mistyped-binding-becomes-nullary-constant hazard."
   - "PR not yet opened for lara-syntax-03-design; branch is 8 commits ahead of main."
   - "O57's candidate mitigation — an automated Haskell/Lean parity check on constructor and field counts — is unimplemented; result-12 drift would still be silent."
-  - "#89 tracker should gain the cross-reference App. B.1 promises: the `: Num` slot is a sort position that #89's signature must EXTEND rather than fork."
-  - "Supersedes the earlier PR-not-open thread: PR #92 is open at 8425c88; hosted Lean passed, hosted Haskell is pending, and fenfenai re-review was requested."
+  - "The tracker should gain the cross-reference App. B.1 promises: the `: Num` slot is a sort position that the issue's signature must EXTEND rather than fork."
+  - "Supersedes the earlier PR-not-open thread: the PR is open at 8425c88; hosted Lean passed, hosted Haskell is pending, and fenfenai re-review was requested."
   - "ARA strict validation is blocked by a pre-existing unquoted colon in N131's alternatives (exploration_tree.yaml line 3249); append-only trace policy prevents silently rewriting it. The three edited YAML files and appended N139 node parse independently."
 
 ai_suggestions_pending:

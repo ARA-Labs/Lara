@@ -7,12 +7,12 @@ live against the `lara` binary while writing this note (`cabal build exe:lara`);
 recheck them after a change. Updated 2026-08-08 for `lara-syntax@0.3`'s surface-context line (§1.1);
 every anchor below was re-run against the binary at that point and reproduced unchanged. Updated
 2026-08-19: mutation-suite counts refreshed to the `m5-freeze-v4` suite (504 mutants) and the R14
-row gained the codec-boundary note from #115 (code-point columns, invalid UTF-8). Updated
-2026-08-22 for `lara-syntax@0.9` named-`nd@1` lowering and the exact #140
+row gained the codec-boundary note (code-point columns, invalid UTF-8). Updated
+2026-08-22 for `lara-syntax@0.9` named-`nd@1` lowering and the exact
 partial-label repair condition. Updated 2026-08-23 for `lara-syntax@0.10`
 source-authored formula annotations (§1.4 row `CertNdFormulaMalformed`; the D7
 marker vocabulary gains `(prop _)`). Updated 2026-08-25: mutation-suite counts
-refreshed to the `m5-freeze-v5` suite (541 mutants, #156); the accept half is
+refreshed to the `m5-freeze-v5` suite (541 mutants); the accept half is
 unchanged at 58, since all 37 added mutants are rejects._
 
 The dated updates above are maintenance history; skip them on a first read.
@@ -104,8 +104,8 @@ Acceptance is unchanged — every payload the frozen corpus can contain lowers t
 itself byte-identically.
 
 Since `lara-syntax@0.8` (grammar Appendix G) the same lowering resolves a
-reference in a third name class — the citing rule's declared premise labels
-(#131) — so this section's rejection surface gains **one** family and rewords
+reference in a third name class — the citing rule's declared premise labels —
+so this section's rejection surface gains **one** family and rewords
 two messages. `lara-syntax@0.9` rewords `CertSlotMultiSlot` as described
 below. The normative template list is grammar Appendix G.5.
 
@@ -146,20 +146,20 @@ are located parse errors (R14) and one is an `ElabError`, all exit 2.
 
 Two additions at the **parse** door (`Lara.Syntax`, spec §10.1 R14, exit 2):
 
-- **`discharge`/`open` on a bare `leaf(…)` support term** (#135; grammar
+- **`discharge`/`open` on a bare `leaf(…)` support term** (grammar
   Appendix F.2) — previously accepted and dropped entirely, id and all. Now
   `discharge requires a rule application, not a bare leaf` and
   `open requires a rule application, not a bare leaf`, located at the keyword.
   This extends to both siblings the ruling Appendix A.1 already made for
   `assurance` in the same position.
-- **The retired two-identifier hole spelling `open q as o`** (#133; grammar
+- **The retired two-identifier hole spelling `open q as o`** (grammar
   Appendix F.3) — a hole is now spelled `open q`. Both legacy shapes, equal
   (`open q as q`) and divergent (`open q as o`), are the same located error:
   `lara-syntax@0.7 uses 'open q'; remove 'as …'`.
 
 One addition at the **elaborator** door (`ElabError`, exit 2):
 
-- **A shadowed discharge target** (#129; grammar Appendix F.4) — when
+- **A shadowed discharge target** (grammar Appendix F.4) — when
   `discharge q with x` names both a declared leaf and a prior argument, the
   resolver used to silently prefer the leaf. It is now `AmbiguousDischarge`:
   `arg 'A': discharge of 'q' names 'x', which is ambiguous between a declared leaf and a prior argument`.
@@ -203,7 +203,7 @@ non-atom `lam` binder, `N` is its canonical S-expression rendering.
 `(prem s)` is shared syntax, not a tenth `CertNd` family. Unresolved,
 leaf/prior ambiguity, label ambiguity, not-a-premise, multi-slot, and
 noncanonical failures from the shared resolver reuse the applicable `CertSlot*`
-family and the grammar Appendix G.5 message verbatim, including the #140
+family and the grammar Appendix G.5 message verbatim, including the
 conditional `CertSlotMultiSlot` repair wording preserved in §1.2. A schema
 mismatch belongs only to flat schema lowering and is not produced by this
 direct `nd@1` resolver path.
@@ -228,7 +228,7 @@ phrased over its numeric de Bruijn image; no source map restores the authored
 binder names or proposition spellings. §1.5's slot mapping is
 the premise-list half of that attribution, which has closed.
 
-### 1.5 The premise-slot mapping under an R13 (#130)
+### 1.5 The premise-slot mapping under an R13
 
 A backend rejection is phrased over premise *slots* — `(prem 0)`, `(prem 1)` —
 because that is the only vocabulary the seam has: `strictCheck` hands the
@@ -236,7 +236,7 @@ backend a positional list of premise conclusions and nothing else
 (`docs/strict-backend-decision.md` §2). Nothing else in the rejection said what
 slot *i* was, so the reader decoded it by hand against the policy declarations.
 
-Since #130 the reason line is followed by one line per slot. **Both doors carry
+The reason line is followed by one line per slot. **Both doors carry
 it**, which is the point: `lara-syntax@0.6`'s named slots fix slot mistakes for
 `ord@1`/`ra@1`/`insp@1` authors at authoring time on the `.lara` door, and do
 nothing for
@@ -298,7 +298,7 @@ edges, and the structural fallback; and by `test/CliSpec.hs` for the binary's by
 on both doors and for the absence of a slot block on the R9/R13 paths that report
 no slot sources.)
 
-### 1.6 The formula mapping under an `nd@1` R13 (#148)
+### 1.6 The formula mapping under an `nd@1` R13
 
 §1.5 makes the *premise list* of a refused certificate readable. The formulas in
 the same reason were still opaque. When an `nd@1` proof term lowers cleanly and
@@ -313,7 +313,7 @@ certificate replay: nd@1 (theory sha256:strict-v1-theory-0) rejected the certifi
 
 `lara-syntax@0.10` removed the last out-of-band key from *authoring* — the author
 wrote `(prop "holds(other_invariant, D)")` — and a rejection put it straight
-back, at the moment it is hardest to read. Since #148 the `.lara` door adds one
+back, at the moment it is hardest to read. The `.lara` door adds one
 line per atom the reason names, in the order it names them:
 
 ```
@@ -379,8 +379,8 @@ reproduce the class shown.
 | R10 attack-position | attack position undefined, or wrong occurrence kind for the attack kind | `examples/R3` | `lara check examples/R3/example.lara` → `reject R10` |
 | R11 attack-relation | no declared contrary pair licenses the rebut/undermine; no declared exception licenses the undercut | `fixtures/mutants/A--unlicensed-attack-0.sexp` | `reject R11` |
 | R12 policy-wf | a rule pattern variable falls outside its declared parameters (spec §4.1), or a `contrary` side may overlap a strict-reachable pattern (spec §8.1 Path B) | `fixtures/mutants/self-expansion.C04--out-of-scope-var-0.sexp` (scope); `examples/R2` (Path B) | both reject `R12` |
-| R13 backend | certificate replay rejects; unknown backend/version; theory digest not allowlisted. Since `lara-syntax@0.6`, a malformed premise-slot spelling under a matching `ord@1`/`ra@1`/`insp@1` schema on the `.lara` door rejects at elaboration instead of here (§1.2; grammar Appendix E). At `@0.9`/`@0.10` the same source-boundary migration applies only to `nd@1` payloads containing one of D7's five named markers (§1.4; grammar Appendices H and I); marker-free and raw `.sexp` payloads remain backend-owned — acceptance unchanged. Since #130 the reason is followed by the slot → source mapping on both doors (§1.5) | `fixtures/corpus/ord-lt-boundary-reject.sexp` | `reject R13`, stderr: `certificate replay: ord@1 (theory t0) rejected the certificate: the claimed comparison does not hold: 5 < 5 is false` then `  slot 0 = leaf e0` |
-| R14 codec | wire program fails to decode: malformed S-expression, S-expression nesting deeper than the readers' shared `maxDepth` (#331; see the bound note below), unknown fields, presentation parse error | `fixtures/mutants/malformed/A--codec-core-version-0.sexp` | exit 2, stderr: `lara: codec error at replay-id: unsupported core version: "lara-core@0.1"`, **nothing on stdout** |
+| R13 backend | certificate replay rejects; unknown backend/version; theory digest not allowlisted. Since `lara-syntax@0.6`, a malformed premise-slot spelling under a matching `ord@1`/`ra@1`/`insp@1` schema on the `.lara` door rejects at elaboration instead of here (§1.2; grammar Appendix E). At `@0.9`/`@0.10` the same source-boundary migration applies only to `nd@1` payloads containing one of D7's five named markers (§1.4; grammar Appendices H and I); marker-free and raw `.sexp` payloads remain backend-owned — acceptance unchanged. The reason is followed by the slot → source mapping on both doors (§1.5) | `fixtures/corpus/ord-lt-boundary-reject.sexp` | `reject R13`, stderr: `certificate replay: ord@1 (theory t0) rejected the certificate: the claimed comparison does not hold: 5 < 5 is false` then `  slot 0 = leaf e0` |
+| R14 codec | wire program fails to decode: malformed S-expression, S-expression nesting deeper than the readers' shared `maxDepth` (see the bound note below), unknown fields, presentation parse error | `fixtures/mutants/malformed/A--codec-core-version-0.sexp` | exit 2, stderr: `lara: codec error at replay-id: unsupported core version: "lara-core@0.1"`, **nothing on stdout** |
 
 One class is not individually anchored above, because it is a source-boundary rejection rather
 than a checker verdict:
@@ -389,7 +389,7 @@ than a checker verdict:
   §1's third case above; it is distinct from both the R1–R14 checker classes above it in the table
   and from quarantine below it.
 
-**R2 was unexercised, not under-anchored — corrected at `lara-core@0.2`.** Until #89 this section
+**R2 was unexercised, not under-anchored — corrected at `lara-core@0.2`.** Until then this section
 said R2 and R8 were both "exercised only inside larger worked cases". For R8 that is true. For R2
 it was not: `fixtures/mutants/MANIFEST.tsv` carried **zero** `reject-R2` rows across all 369
 mutants and no `examples/` directory produced one, because R2 was outside the executable core —
@@ -409,21 +409,21 @@ required". That clause was never violable — `Term ::= num | str | con(…)` ha
 constructor, so every `Prop` is ground *structurally* and pattern variables exist only in `Pat` —
 and spec §10.1 now records it as vacuous rather than leaving it looking unenforced.
 
-**Where a codec error is located (#115).** R14 positions are part of the differential contract, so
+**Where a codec error is located.** R14 positions are part of the differential contract, so
 the Haskell wire reader and the Lean reference driver must agree on them character-for-character.
 Both count **code points**, not bytes: Lean's `PState` advances per `Char`, and the Haskell reader —
 now over strict `ByteString` — advances by UTF-8 non-continuation bytes, so an error located after a
 multi-byte character on the same line reports the same column in both drivers
-(`fixtures/corpus/strict-cert-unicode-theory.sexp` is the live anchor). Since #115 a file that is not
+(`fixtures/corpus/strict-cert-unicode-theory.sexp` is the live anchor). A file that is not
 valid UTF-8 also fails *inside* the codec as a located R14 rather than as an IO-level read error;
 decoding uses `decodeUtf8'`, never the lenient form, so malformed bytes are never accepted with
 substituted content.
 
-**The nesting bound is located R14 on both sides (#331).** The same differential contract covers
+**The nesting bound is located R14 on both sides.** The same differential contract covers
 *depth*. Both readers — `Lara.Wire.parseSExprBS` and `Lara.Driver.parseWire` — refuse an
 S-expression nested deeper than the `maxDepth = 10000` they share, as a located R14 codec error at
 exit 2 with the same wording and the same column, rather than exhausting the stack on either side.
-Before #331 only the Haskell reader carried the bound: the Lean driver read the over-deep form and
+Originally only the Haskell reader carried the bound: the Lean driver read the over-deep form and
 refused it one layer later as a malformed envelope — the same exit code, a different refusal
 *category*, which is exactly the divergence class this document's positional contract exists to
 exclude. The bound is generated into the gates rather than committed as a fixture: an anchor at that
@@ -433,7 +433,7 @@ nests anywhere near it, so the bound restricts no expressible program. `scripts/
 bound and one at the deepest form it admits, and each reads the constant out of both sources so a
 one-sided edit fails by name.
 
-**And on the Lean side it is now proved (#335).** Until then the bound was enforced but unprovable:
+**And on the Lean side it is now proved.** Until then the bound was enforced but unprovable:
 `Lara.Driver`'s `parseForm`/`parseList`/`parseQuoted` were a `partial def` mutual block, which the
 kernel cannot reduce, so the gates above were the *only* evidence. The reader is now total —
 well-founded on the remaining input, with the consumption fact `parseList`'s element loop needs
@@ -496,7 +496,7 @@ drivers (`scripts/differential.sh`).
 
 - **Genuine overlap.** `rit`'s refusal rule — "if a value cannot be re-derived, refuse rather than
   guess" — corresponds to LARA's R13: a certificate whose cited cells do not support the claimed
-  ordering. Since #84, R13's `ord@1` rejection explains itself on stderr, e.g. (live output from
+  ordering. R13's `ord@1` rejection explains itself on stderr, e.g. (live output from
   `fixtures/corpus/ord-lt-boundary-reject.sexp`):
 
   ```
@@ -505,9 +505,9 @@ drivers (`scripts/differential.sh`).
     slot 0 = leaf e0
   ```
 
-  (The reason is one line; it is wrapped here. The `slot` line is #130's mapping, §1.5.)
+  (The reason is one line; it is wrapped here. The `slot` line is the §1.5 mapping.)
 
-  The premise-only guard (also #84, `fixtures/corpus/ord-premise-only-reject.sexp`) is the second
+  The premise-only guard (`fixtures/corpus/ord-premise-only-reject.sexp`) is the second
   half of the same idea: an artifact cannot self-supply a compared value as a theory entry instead of
   citing measured evidence (`ord cites premise slots only; slot names theory entry 0`).
 
@@ -538,7 +538,7 @@ resolution, not the core judgment.)
 
 ## Out of scope
 
-**Byte-level evidence admission** (issue #78, gated design — `docs/evidence-admission-decision.md`).
+**Byte-level evidence admission** (gated design — `docs/evidence-admission-decision.md`).
 A leaf is *declared* evidence, checked for admission (kind × provenance) and, for `certified` leaves,
 for a checker witness — it is not byte-checked against the underlying artifact. No rejection class in
 §2 covers "the number is not actually in the artifact"; that guarantee does not exist yet, and this

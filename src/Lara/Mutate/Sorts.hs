@@ -1,4 +1,4 @@
--- | The signature-family mutation operators (@lara-core\@0.2@, #89 D10).
+-- | The signature-family mutation operators (@lara-core\@0.2@, D10).
 --
 -- Spec §10.1 states its own invariant: /every class must be exercised by at
 -- least one rejected example and one mutation./ R2 satisfied neither — the
@@ -186,7 +186,7 @@ mapLeaf (DeclaredIx i) f u =
   u{unitLeaves = [(l, if j == i then f p else p) | (j, (l, p)) <- zip [0 :: Int ..] (unitLeaves u)]}
 
 -- | The declared leaf declarations the §4.3 quarantine retains, each with its
--- declared index — the sites the leaf-mutating operators may strike (#165). A
+-- declared index — the sites the leaf-mutating operators may strike. A
 -- quarantined leaf leaves Γ before the signature stage runs, so a mutation
 -- into one is invisible to the checker: an accepting no-op, not an R2 witness.
 -- The published constituent needs no mapping — a sort failure locates at
@@ -207,7 +207,7 @@ retainedArgDecls u = zip (map DeclaredIx (retainedIndices p)) (unitArgs (pruneCh
 -- The operators
 -- ---------------------------------------------------------------------------
 
--- | R2: an undeclared predicate head. By the class boundary (#89 §2.3 rule 1)
+-- | R2: an undeclared predicate head. By the class boundary (§2.3 rule 1)
 -- an undeclared /symbol/ is R2, not R1 — R1 is about declaration identifiers
 -- (leaf, argument, rule, question, backend, policy), and symbols have never
 -- been in its list.
@@ -262,7 +262,7 @@ undeclaredConSites u =
 -- parameter whose term has the wrong sort.
 --
 -- The key must be in @ruleParams@ and must have a derived sort. A key /off/ the
--- parameter list is R3's business (#89 §2.3 rule 3) and is exactly what
+-- parameter list is R3's business (§2.3 rule 3) and is exactly what
 -- @wrong-subst-domain@ already tests — keeping the two apart is what makes the
 -- reclassification delta over the pre-existing suite empty.
 wrongThetaSortSites :: Unit -> [Site]
@@ -300,7 +300,7 @@ wrongThetaSortSites u =
 --
 -- This is __policy__ well-formedness, not a sort failure: the mutated pattern
 -- is perfectly well-sorted, the variable simply is not in scope. Keeping it
--- R12 is what leaves R2 purely about sorts (#89 D-2).
+-- R12 is what leaves R2 purely about sorts (D-2).
 outOfScopeVarSites :: Unit -> [Site]
 outOfScopeVarSites u =
   [ (R12, CPolicy, rewriteRule i)

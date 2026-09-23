@@ -1,11 +1,11 @@
 -- | Conformance tests for conservative reporting of quarantine-affected claims
--- ("Lara.Blocked", spec §4.3, issue #76).
+-- ("Lara.Blocked", spec §4.3).
 --
 -- The metatheory is mechanized in @lean\/Lara\/Blocked.lean@ over an arbitrary
 -- pair of finite frameworks. The random properties instantiate that abstract
 -- theorem directly; the real-unit properties pin the drivers' seed obligations.
 -- The compact checked-program reindexing/support bridge is mechanized by
--- @production_justified_nonpromotion_of_not_blocked@ (issue #80); the corpus
+-- @production_justified_nonpromotion_of_not_blocked@; the corpus
 -- differential remains cross-implementation conformance evidence:
 --
 --   * __The safety property, executably.__ Over random frameworks with a random
@@ -20,7 +20,8 @@
 --     removed argument and every retained argument that lost an incoming edge —
 --     Lean @blocking_of_seed@'s @hmissing@ and @hedge@ hypotheses.
 --   * __No quarantine, no cost.__ A unit with no @≢@ group blocks nothing, so
---     every frozen artifact keeps its pre-#76 verdict bytes exactly.
+--     every frozen artifact keeps its pre-conservative-reporting verdict bytes
+--     exactly.
 module BlockedSpec (blockedSpecProps) where
 
 import qualified Data.Set as Set
@@ -235,8 +236,8 @@ seedObligations name declared =
     seed = blockedSeed p
 
 -- | A unit with no @≢@ duplicate-report group prunes nothing, so nothing is
--- blocked and its verdict bytes are exactly the pre-#76 ones. Every frozen
--- artifact is in this case.
+-- blocked and its verdict bytes are exactly the pre-conservative-reporting
+-- ones. Every frozen artifact is in this case.
 noQuarantineNothingBlocked :: String -> Unit -> Property
 noQuarantineNothingBlocked name declared =
   counterexample (name ++ ": unquarantined unit blocks nothing") $
@@ -283,16 +284,16 @@ blockedSpecProps =
   , ("blocked retained leaf indices project the checked leaf list", quickCheckResult prop_retainedLeafIndices)
   ]
 
--- | 'retainedAttackIndices' is the attack counterpart of 'retainedIndices'
--- (#159): indexing the declared attack list by it reproduces the checked attack
+-- | 'retainedAttackIndices' is the attack counterpart of 'retainedIndices':
+-- indexing the declared attack list by it reproduces the checked attack
 -- list exactly, order and multiplicity included. This is the contract
 -- "Lara.Mutate.Sites.Conflict" leans on to map a checked-space deletion back to
 -- the declared attack it must remove.
 --
 -- The projection equation alone is satisfied by the wrong implementation
 -- @[0 .. length (unitAttacks (pruneChecked p)) - 1]@ — checked-space indices,
--- the exact confusion #159 exists to prevent — on any fixture whose retained
--- list is @[]@ or @[0 .. n-1]@, which is every group fixture taken alone. The
+-- the exact confusion the contract exists to prevent — on any fixture whose
+-- retained list is @[]@ or @[0 .. n-1]@, which is every group fixture taken alone. The
 -- discriminating case is 'CheckSpec.quarantiningConflictBase': two declared
 -- attacks, the /pruned/ one first, so the retained list is @[1]@ — non-empty,
 -- non-zero, and gapped. The seeded prune is covered too, since
@@ -319,7 +320,7 @@ prop_retainedAttackIndices =
     -- misimplementation would get wrong.
     isGapped ix = ix /= [0 .. length ix - 1]
 
--- | 'retainedLeafIndices' is the leaf counterpart of the same contract (#165):
+-- | 'retainedLeafIndices' is the leaf counterpart of the same contract:
 -- indexing the declared leaf list by it reproduces the checked leaf list
 -- exactly, order and multiplicity included. This is what lets the
 -- "Lara.Mutate.Sorts" leaf-mutating operators draw sites from the checked Γ

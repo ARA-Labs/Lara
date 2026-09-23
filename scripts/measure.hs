@@ -1,4 +1,4 @@
--- | The axis-(c) measurement harness (M5 tracker #48, T3).
+-- | The axis-(c) measurement harness (T3).
 --
 -- One command that emits the machine-readable evaluation report the paper's
 -- tables are generated from: per mutant + per corpus unit, the rejection

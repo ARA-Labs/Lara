@@ -1,12 +1,12 @@
--- | Golden discipline for the T2 corpus units (M5 tracker #48).
+-- | Golden discipline for the T2 corpus units (M5).
 --
 -- The corpus-unit suite lowers the frozen 60-claim M0 sample
 -- (@m0\/sample.tsv@, seed-42 stratified draw) into @.lara@ units under
 -- @corpus-units\/@, one per claim, all checked against the shared
 -- @corpus-v1.policy.lara@ (conventions: @corpus-units\/LOWERING.md@). These
 -- properties pin the suite the same way 'WorkedExamplesSpec' pins the worked
--- examples, plus the manifest discipline the mutant suite established
--- (PR #49): discovery is manifest-driven and the manifest, the sample, and
+-- examples, plus the manifest discipline the mutant suite established:
+-- discovery is manifest-driven and the manifest, the sample, and
 -- the filesystem must agree exactly.
 --
 --   * __manifest ↔ sample__: the manifest's @(group, artifact, claim_id,

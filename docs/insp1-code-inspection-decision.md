@@ -1,8 +1,8 @@
 # `insp@1` — the static code-inspection backend
 
-_Status: settled for language v0.1. Recorded 2026-09-07 (issue #260). This record fixes what an
+_Status: settled for language v0.1. Recorded 2026-09-07. This record fixes what an
 accepted `insp@1` step certifies, the encoding it certifies it over, and where the conflicts its
-family admits are allowed to live. It closes the §5.2 portfolio item that PR #256 marked
+family admits are allowed to live. It closes the §5.2 portfolio item previously marked
 designed-but-unshipped; the seam contract itself is unchanged and stays in
 `strict-backend-decision.md`._
 
@@ -159,7 +159,7 @@ references for it, and the wire grammar would stop being a fixed-arity keyword a
 enumeration belongs in one premise because it is one observation.
 
 **Certifying over source bytes directly.** This is what an author actually wants, and it is
-precisely `lara-evidence@0.1` — byte-level evidence admission, gated under issue #78 and explicitly
+precisely `lara-evidence@0.1` — byte-level evidence admission, gated (`docs/evidence-admission-decision.md`) and explicitly
 out of v0.1 (spec §4.3). Building it into a strict backend would have moved a defeasible
 measurement into the TCB by the back door. The split taken here is the honest one: the backend owns
 the inference, the leaf layer owns the observation, and when byte-level admission ships it
@@ -188,7 +188,7 @@ question above statable and testable, and because the diff member decomposes int
 - **Golden**: four hand-authored wire anchors under `fixtures/corpus/insp-*.sexp`, plus the worked
   example `examples/S9`. All five are byte-compared across both drivers by
   `scripts/differential.sh`.
-- **Mutation**: issue #266's v6 refresh adds S9 and S2 (`ord@1`) together:
+- **Mutation**: the v6 refresh adds S9 and S2 (`ord@1`) together:
   27 verified mutants each, growing the seeded suite 541 → 595 and the measured
   input set 601 → 655. All previous mutant bytes are unchanged. S9's
   `cert-payload-tamper` replaces an `inspect` payload with `mut_corrupt` (R13);
@@ -197,7 +197,7 @@ question above statable and testable, and because the diff member decomposes int
   semantic recheck branch. `MutationSpec.prop_backendCertificateCoverage` pins
   both backends' measured certificate cases. The clean measurement snapshot,
   class deltas, hashes, and v6 publication procedure are recorded in
-  `m5-freeze-checklist.md`. The original S9-only trial in #260 was reverted to
+  `m5-freeze-checklist.md`. The original S9-only trial was reverted to
   avoid an unbudgeted freeze cycle; this combined refresh resolves that deferral.
 
 ## 7. What this does not settle

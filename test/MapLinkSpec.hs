@@ -1113,7 +1113,7 @@ attackEndpoints attack = case attack of
   Undercut source target _ -> [source, target]
   Undermine source target _ -> [source, target]
 
--- | __The structural merge fires through a real map__ (issue #316).
+-- | __The structural merge fires through a real map__.
 --
 -- @test\/fixtures\/map\/merge\/@ runs under @convention-v1@, whose
 -- @community_convention@ rule has no premises, and both of its members declare

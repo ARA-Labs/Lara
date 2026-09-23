@@ -1,4 +1,4 @@
-# Admissible three-cycle (#270)
+# Admissible three-cycle
 
 The generic congruence witness now uses the cycle where grounded and stable
 observations differ. This closes C49's disagreeing-carrier fixture boundary,
@@ -17,7 +17,7 @@ In `lean/Lara/Examples/ContextSemantics.lean`:
   grounded's contested result, stable's no-extension result, and their inequality.
 
 The fragment contains only leaves, so certificate relabeling is the identity.
-The certificate-bearing instance remains #269. The registry-swap witness
+The certificate-bearing instance remains open follow-up work. The registry-swap witness
 remains on the old chain where all five semantics agree.
 
 Verification performed with Lean 4.32.0:

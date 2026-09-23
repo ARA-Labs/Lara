@@ -1,5 +1,5 @@
 /-
-# PW-T6 — exact checked-support transport (issue #191, tracker #189)
+# PW-T6 — exact checked-support transport
 
 The `StructuralBridge` contract and the transport theorem. The design's
 dependent partial support map `T_{b,w,v,c}` is `trSupport` under the bridge's
@@ -42,7 +42,7 @@ preserving obligations exactly.
 labelling, or claim status — `t7_witness` (`Lara.Examples.PW`) is the proof
 that no such conclusion is available from support transport alone. The
 theorem neither assumes nor concludes grounded status preservation; that
-boundary is T8 (#193).
+boundary is T8.
 
 This module only imports; no local definition is touched.
 -/
@@ -58,7 +58,7 @@ open Lara.Support
 /-- **The structural-bridge contract** between two checking environments over
 a shared source canonicalizer. Each clause is read by exactly one arm of the
 transport induction; a field with no proof use would be dead weight and is
-not present (issue #191's acceptance bullet). -/
+not present (the design's acceptance bullet). -/
 structure StructuralBridge (canon : String → String)
     (Pi Pi' : RuleId → Option Rule)
     (Gamma Gamma' : LeafId → Option Atom)
@@ -419,8 +419,8 @@ theorem supports_transport
   obtain ⟨C', hC, hHS'⟩ := support_transport B hHS hw
   exact ⟨C', O, hHS', equiv_tr hC hp heq⟩
 
-/-- **Target-side occurrences replay against the target registry** (issue
-#191's acceptance bullet). Instantiating both certificate judgments from
+/-- **Target-side occurrences replay against the target registry** (the design's
+acceptance bullet). Instantiating both certificate judgments from
 registries, every strict occurrence of the transported term is accounted by
 its own backend as registered in the *target* registry: the target policy
 carries its rule, the certificate is accepted by the target instantiation,

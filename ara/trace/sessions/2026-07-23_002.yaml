@@ -1,7 +1,7 @@
 session:
   id: "2026-07-23_002"
   timestamp: "2026-07-23T10:12"
-  summary: "PR #10 re-review closed five semantic and supply-chain gaps and passed the full Lean/Haskell validation suite."
+  summary: "Re-review closed five semantic and supply-chain gaps and passed the full Lean/Haskell validation suite."
 
 events_logged:
   - type: experiment
@@ -14,7 +14,7 @@ events_logged:
     summary: "Grounded four-state determinism advanced to supported with the exact source-status iff theorem."
 
 ai_actions:
-  - action: "Evaluated all five collaborator review findings against PR #10 and implemented the valid corrections."
+  - action: "Evaluated all five collaborator review findings against the PR and implemented the valid corrections."
     provenance: ai-executed
     files_changed:
       - ".github/workflows/ci.yml"

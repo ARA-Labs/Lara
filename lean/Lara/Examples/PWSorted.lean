@@ -1,5 +1,5 @@
 /-
-Executable witnesses for the `Query_κ` well-sortedness refinement (issue #307).
+Executable witnesses for the `Query_κ` well-sortedness refinement.
 
 The headline fixture is **one world at which PW0 reports `gap` three times for
 three different reasons**, and at which the refinement reports three different

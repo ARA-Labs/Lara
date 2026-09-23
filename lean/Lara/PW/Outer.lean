@@ -1,5 +1,5 @@
 /-
-PW0 — the typed possible-world outer model (issue #192, tracker #189).
+PW0 — the typed possible-world outer model.
 
 The design adds an
 outer comparison layer over unchanged local Lara judgments. This module owns
@@ -17,7 +17,7 @@ field is that parameterization, stated once instead of duplicating the model.
 
 Nothing here mentions a checked program, a compiled framework, or a status
 computation: the frame is abstract, and the Lara instantiation lives in
-`Lara.PW.Instance`. That separation is gate 1 of #192 — the wrapper must leave
+`Lara.PW.Instance`. That separation is gate 1 of PW0 — the wrapper must leave
 every local judgment unchanged, and a module that cannot name them cannot
 change them.
 

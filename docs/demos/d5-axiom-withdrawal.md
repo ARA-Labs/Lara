@@ -101,7 +101,7 @@ The separate Lean witness supplies that proof.
 
 ## Verification and interface decision
 
-Issue [#350](https://github.com/ARA-Labs/Lara/issues/350) allowed either a new
+The follow-up allowed either a new
 source-admission-aware world interface or a separate Lean structural witness.
 This demo selects the latter and uses the existing admission evaluator,
 production ND registry, unit checker, and `PW.StructuralBridge` contract.

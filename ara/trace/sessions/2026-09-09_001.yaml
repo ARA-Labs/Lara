@@ -4,16 +4,16 @@ session:
   started: 2026-09-09T06:56
   last_turn: 2026-09-10T01:03
   turn_count: 5
-  summary: '#273: accepted fragments separated by stable semantic payloads. #275: certificate collapse
-    separates accepted grounded observations. Implemented #281/#197/#198/#268/#217 and opened stacked
-    PRs #296–#300. #266: refreshed S2/S9 mutation coverage and the clean v6 measurement snapshot. #305: G0 copying separation; re-descoped.'
+  summary: 'Accepted fragments separated by stable semantic payloads. Certificate collapse
+    separates accepted grounded observations. Implemented and opened stacked
+    PRs. Refreshed S2/S9 mutation coverage and the clean v6 measurement snapshot. G0 copying separation; re-descoped.'
 events_logged:
 - turn: 5
   type: observation
   id: O168
   routing: staged
   provenance: ai-suggested
-  summary: Drafted #303 composition/build plan with optional Make wrapper; awaiting design review.
+  summary: Drafted composition/build plan with optional Make wrapper; awaiting design review.
 - turn: 1
   type: experiment
   id: N343
@@ -31,31 +31,31 @@ events_logged:
   id: N277002
   routing: direct
   provenance: ai-executed
-  summary: '#281: Named checker soundness facts; PR #296 opened.'
+  summary: 'Named checker soundness facts; the PR opened.'
 - turn: 3
   type: experiment
   id: N277003
   routing: direct
   provenance: ai-executed
-  summary: '#197: Enumeration conflict-freedom removes incidental Nodup; PR #297 opened.'
+  summary: 'Enumeration conflict-freedom removes incidental Nodup; the PR opened.'
 - turn: 3
   type: experiment
   id: N277004
   routing: direct
   provenance: ai-executed
-  summary: '#198: Central semantics registry with declaration coverage; PR #298 opened.'
+  summary: 'Central semantics registry with declaration coverage; the PR opened.'
 - turn: 3
   type: experiment
   id: N277005
   routing: direct
   provenance: ai-executed
-  summary: '#268: Refute unrestricted transfer of grounded contextual equivalence; PR #299 opened.'
+  summary: 'Refute unrestricted transfer of grounded contextual equivalence; the PR opened.'
 - turn: 3
   type: experiment
   id: N277006
   routing: direct
   provenance: ai-executed
-  summary: '#217: Typed CQ holes and contextual substitution; PR #300 opened.'
+  summary: 'Typed CQ holes and contextual substitution; the PR opened.'
 - turn: 4
   type: experiment
   id: N266_v6
@@ -156,23 +156,23 @@ key_context:
   excerpt: 'User: "you do all in order, and open the prs". Order preserved; all five PRs opened, none
     merged.'
 - turn: 4
-  excerpt: 'User requested a new branch, direct resolution of #266, and a PR after the combined S2/S9
+  excerpt: 'User requested a new branch, direct resolution, and a PR after the combined S2/S9
     approach was proposed.'
 - turn: 5
-  excerpt: 'User scoped #305 to G0, both recorded obstructions and collapse risk; no proof phases before
+  excerpt: 'User scoped to G0, both recorded obstructions and collapse risk; no proof phases before
     a written exit.'
 open_threads:
-- 'PRs #296–#300 await review/merge; no requested implementation remains.'
+- 'The PRs await review/merge; no requested implementation remains.'
 ai_suggestions_pending: []
 logic_revisions:
 - turn: '275'
   entry: C53
   field: Conditions
   before: 'Untested boundary: no fixture exhibits two fragments related by a genuinely non-functional
-    relation whose observations differ (#275), so the gap is shown non-empty by construction of the localized
+    relation whose observations differ, so the gap is shown non-empty by construction of the localized
     hypothesis rather than by a separating witness;'
   after: 'The observational necessity of keeping an equality-reflection hypothesis is now witnessed by
-    `Examples.CertificateCollapse.relInj_observationally_necessary` (#275): a functional but non-injective
+    `Examples.CertificateCollapse.relInj_observationally_necessary`: a functional but non-injective
     relation satisfies all other premises and changes an accepted grounded observation. This does not
     separate the relational theorem''s strength from its functional counterpart. Untested boundary:'
   signal: artifact-commitment
@@ -190,9 +190,9 @@ logic_revisions:
 - turn: '275'
   entry: C54
   field: Proof
-  before: 'trace N337, N339; issue #215]'
+  before: 'trace N337, N339; the issue]'
   after: 'trace N337, N339, N275_observational_collapse; `ara/evidence/proofs/m4_certificate_collapse.md`;
-    issue #215, #275]'
+    the issue]'
   signal: artifact-commitment
   provenance: ai-suggested
 - turn: 3
@@ -207,7 +207,7 @@ logic_revisions:
     conflict-freedom of every extension, which the interface does not require and which is therefore supplied
     per instance; at the preferred instance both halves are now discharged by theorem rather than by hypothesis
     (`preferredSem_specConflictFree` and `preferredSem_enumerate_ne_nil`, the latter from `preferred_exists`,
-    #196). The interface cannot detect a semantics declared outside its module (#198).'
+    ). The interface cannot detect a semantics declared outside its module.'
   after: 'Holds over a finite conclusion-labelled framework with a decidable attack relation, for the
     five semantics mechanized here (grounded, complete, preferred, stable, semi-stable). The agreement
     half additionally requires a duplicate-free carrier, which compilation supplies. The non-functionality
@@ -217,9 +217,9 @@ logic_revisions:
     conflict-freedom of every extension, which the interface does not require and which is therefore supplied
     per instance; at the preferred instance both halves are now discharged by theorem rather than by hypothesis
     (`preferredSem_enumerateConflictFree` and `preferredSem_enumerate_ne_nil`, the latter from `preferred_exists`,
-    #196). The enumeration-based exclusivity theorems now avoid Nodup while retaining the spec-based compatibility
-    API (#197). The mathematical interface remains open; the repository registry audit now detects unregistered
-    named closed semantics declarations across modules (#198), including modules outside the library root
+    ). The enumeration-based exclusivity theorems now avoid Nodup while retaining the spec-based compatibility
+    API. The mathematical interface remains open; the repository registry audit now detects unregistered
+    named closed semantics declarations across modules, including modules outside the library root
     imports. Parameterized families and local values remain outside that finite table.'
   signal: artifact-commitment
   provenance: ai-suggested
@@ -245,7 +245,7 @@ logic_revisions:
   entry: C49
   field: Conditions
   before: 'Holds over the frozen compilation carrier at **any** extension semantics — originally proved
-    for grounded only, and generalized in #216 with no additional hypothesis, because what the profile-preservation
+    for grounded only, and later generalized with no additional hypothesis, because what the profile-preservation
     argument concludes is an *equality* of compiled carriers and every reader of a carrier inherits it
     (`obsGen_congr`, `backend_replacement_congruence_sem`). Requires admissible contexts — the link guard
     passes, both sides'' declared material is well-formed relative to the *linked* environment, and the
@@ -254,20 +254,20 @@ logic_revisions:
     an accepted target, so both detailed observations land in the observed arm; without it their rejection
     outcomes need not agree. Openness is leaf-name openness only: term-level holes are unrepresentable
     because the compile boundary forces an empty obligation set on every declared argument. Relational
-    quantification over related backends is no longer an open boundary: #215 replaced the function `f`
+    quantification over related backends is no longer an open boundary: the relational form replaced the function `f`
     with a relation `R` and re-derived this theorem as the `graphOf f` instance (`backend_replacement_congruence_of_parametricity`,
     guarded by `congruence_correspondence`), so nothing here is now stated more generally than what is
     proved. Untested boundary: contexts carrying assurances moved by the relabel, two-way acceptance,
-    how the *equivalence relations* at different semantics compare (#268 — the observation functions are
+    how the *equivalence relations* at different semantics compare (the observation functions are
     separated, the relations are not), and a semantics-parametric congruence witness on a certificate-bearing
-    fragment (#269). The disagreeing-carrier boundary (#270) is closed by `cycle_admissible` and `congruence_witness_sem`:
+    fragment. The disagreeing-carrier boundary is closed by `cycle_admissible` and `congruence_witness_sem`:
     admissibility and congruence now hold on the same cycle where grounded and stable observations differ.
-    The fixture remains certificate-free. The composed and whole-program relational boundary (#277) is
+    The fixture remains certificate-free. The composed and whole-program relational boundary is
     closed by `backend_replacement_parametricity_composed_sem` and `whole_program_parametricity_sem`;
     the latter preserves the already-checked contract without adding admissibility. `whole_program_parametricity_local_sem`
     supplies the separate closed-link occurrence-union instance.'
   after: 'Holds over the frozen compilation carrier at **any** extension semantics — originally proved
-    for grounded only, and generalized in #216 with no additional hypothesis, because what the profile-preservation
+    for grounded only, and later generalized with no additional hypothesis, because what the profile-preservation
     argument concludes is an *equality* of compiled carriers and every reader of a carrier inherits it
     (`obsGen_congr`, `backend_replacement_congruence_sem`). Requires admissible contexts — the link guard
     passes, both sides'' declared material is well-formed relative to the *linked* environment, and the
@@ -275,21 +275,21 @@ logic_revisions:
     acceptance-preservation hypothesis. Admissibility supplies an accepted source and preservation supplies
     an accepted target, so both detailed observations land in the observed arm; without it their rejection
     outcomes need not agree. The original family has leaf-name openness. The additive Context.Holes family
-    (#217) represents named CQ-answer holes and proves typed substitution before the unchanged complete-program
+    represents named CQ-answer holes and proves typed substitution before the unchanged complete-program
     boundary, with context-fixing extended to filling certificates and attack coverage stated after substitution.
     Core-valued fillings support nested template holes; recursive filling environments and full abstraction
-    are not claimed. Relational quantification over related backends is no longer an open boundary: #215
-    replaced the function `f` with a relation `R` and re-derived this theorem as the `graphOf f` instance
+    are not claimed. Relational quantification over related backends is no longer an open boundary: the
+    relational form replaced the function `f` with a relation `R` and re-derived this theorem as the `graphOf f` instance
     (`backend_replacement_congruence_of_parametricity`, guarded by `congruence_correspondence`), so nothing
     here is now stated more generally than what is proved. Untested boundary: contexts carrying assurances
     moved by the relabel, two-way acceptance, how the equivalence relations compare among the standard
     non-grounded semantics or under identical-export restrictions, and a semantics-parametric congruence
-    witness on a certificate-bearing fragment (#269). The unrestricted implication is refuted (#268) by
+    witness on a certificate-bearing fragment. The unrestricted implication is refuted by
     ContextualSeparation.counterexample: all-context grounded equivalence and an accepted distinction
-    under an adequate singleton-selector family. The disagreeing-carrier boundary (#270) is closed by
+    under an adequate singleton-selector family. The disagreeing-carrier boundary is closed by
     `cycle_admissible` and `congruence_witness_sem`: admissibility and congruence now hold on the same
     cycle where grounded and stable observations differ. The fixture remains certificate-free. The composed
-    and whole-program relational boundary (#277) is closed by `backend_replacement_parametricity_composed_sem`
+    and whole-program relational boundary is closed by `backend_replacement_parametricity_composed_sem`
     and `whole_program_parametricity_sem`; the latter preserves the already-checked contract without adding
     admissibility. `whole_program_parametricity_local_sem` supplies the separate closed-link occurrence-union
     instance.'
@@ -303,30 +303,30 @@ logic_revisions:
     `compileUnit_map`, `backend_replacement_congruence`, `registry_swap_congruence`, `link_attackComplete`,
     `link_checked`, `link_merge_status_eq`; witnesses `Lara.Examples.Linking.certAdmissible`, `cert_congruence_witness`,
     `cert_relabel_moves`, `cert_registry_swap_witness`; `ara/evidence/proofs/m4_contextual_adequacy.md`;
-    `docs/theory-m4-contextual-adequacy.md`; PR #218, commits 78493f5, 776e50c, 0dc676c, 4c308c2, c61c91f.
-    Generic instance (#216): `Lara.Context.obsGen_congr`, `backend_replacement_congruence_sem`, `registry_swap_congruence_sem`,
+    `docs/theory-m4-contextual-adequacy.md`; the PR, commits 78493f5, 776e50c, 0dc676c, 4c308c2, c61c91f.
+    Generic instance: `Lara.Context.obsGen_congr`, `backend_replacement_congruence_sem`, `registry_swap_congruence_sem`,
     `backend_replacement_congruence_composed_sem`, `whole_program_replacement_sem`; `ara/evidence/proofs/m4_generic_observation.md`;
-    `docs/theory-m4-generic-observation.md`; PR #271, commits 3bc0e65, 40202bc, 02a64fd, 4dc223e; unified
-    onto one observation type in commit eb6e955, which preserved every statement. Relational instance
-    (#215): `Lara.Context.obsGen_parametricity`, `backend_replacement_parametricity{,_sem,_local,_local_sem}`,
+    `docs/theory-m4-generic-observation.md`; the PR, commits 3bc0e65, 40202bc, 02a64fd, 4dc223e; unified
+    onto one observation type in commit eb6e955, which preserved every statement. Relational instance:
+    `Lara.Context.obsGen_parametricity`, `backend_replacement_parametricity{,_sem,_local,_local_sem}`,
     `backend_replacement_congruence_of_parametricity`, `congruence_correspondence`; `ara/evidence/proofs/m4_relational_parametricity.md`;
-    `docs/theory-m4-relational-parametricity.md`; trace N337-N341; disagreeing-carrier instance (#270):
+    `docs/theory-m4-relational-parametricity.md`; trace N337-N341; disagreeing-carrier instance:
     `Lara.Examples.ContextSemantics.cycle_admissible`, `congruence_witness_sem`, `obsSem_cycle_stable_ne_grounded`;
-    `ara/evidence/proofs/m4_cycle_admissibility.md`; #277: `ara/evidence/proofs/m4_relational_family_277.md`]'
+    `ara/evidence/proofs/m4_cycle_admissibility.md`; relational family: `ara/evidence/proofs/m4_relational_family_277.md`]'
   after: '[`Lara.Context.crossAttsFrom_map`, `crossAtts_relabel`, `link_relabel_commutes`, `checkUnit_map`,
     `compileUnit_map`, `backend_replacement_congruence`, `registry_swap_congruence`, `link_attackComplete`,
     `link_checked`, `link_merge_status_eq`; witnesses `Lara.Examples.Linking.certAdmissible`, `cert_congruence_witness`,
     `cert_relabel_moves`, `cert_registry_swap_witness`; `ara/evidence/proofs/m4_contextual_adequacy.md`;
-    `docs/theory-m4-contextual-adequacy.md`; PR #218, commits 78493f5, 776e50c, 0dc676c, 4c308c2, c61c91f.
-    Generic instance (#216): `Lara.Context.obsGen_congr`, `backend_replacement_congruence_sem`, `registry_swap_congruence_sem`,
+    `docs/theory-m4-contextual-adequacy.md`; the PR, commits 78493f5, 776e50c, 0dc676c, 4c308c2, c61c91f.
+    Generic instance: `Lara.Context.obsGen_congr`, `backend_replacement_congruence_sem`, `registry_swap_congruence_sem`,
     `backend_replacement_congruence_composed_sem`, `whole_program_replacement_sem`; `ara/evidence/proofs/m4_generic_observation.md`;
-    `docs/theory-m4-generic-observation.md`; PR #271, commits 3bc0e65, 40202bc, 02a64fd, 4dc223e; unified
-    onto one observation type in commit eb6e955, which preserved every statement. Relational instance
-    (#215): `Lara.Context.obsGen_parametricity`, `backend_replacement_parametricity{,_sem,_local,_local_sem}`,
+    `docs/theory-m4-generic-observation.md`; the PR, commits 3bc0e65, 40202bc, 02a64fd, 4dc223e; unified
+    onto one observation type in commit eb6e955, which preserved every statement. Relational instance:
+    `Lara.Context.obsGen_parametricity`, `backend_replacement_parametricity{,_sem,_local,_local_sem}`,
     `backend_replacement_congruence_of_parametricity`, `congruence_correspondence`; `ara/evidence/proofs/m4_relational_parametricity.md`;
-    `docs/theory-m4-relational-parametricity.md`; trace N337-N341; disagreeing-carrier instance (#270):
+    `docs/theory-m4-relational-parametricity.md`; trace N337-N341; disagreeing-carrier instance:
     `Lara.Examples.ContextSemantics.cycle_admissible`, `congruence_witness_sem`, `obsSem_cycle_stable_ne_grounded`;
-    `ara/evidence/proofs/m4_cycle_admissibility.md`; #277: `ara/evidence/proofs/m4_relational_family_277.md`;
+    `ara/evidence/proofs/m4_cycle_admissibility.md`; relational family: `ara/evidence/proofs/m4_relational_family_277.md`;
     `ara/evidence/proofs/lean_context_extensions_2026_09_09.md`; trace N277005, N277006]'
   signal: artifact-commitment
   provenance: ai-suggested
@@ -338,12 +338,12 @@ logic_revisions:
   before: 'Seeded single-defect mutation corpus; ablation cells `noCQConfig` / `noTypedConfig` of `Lara.Check.CheckConfig`,
     each removing exactly one rejection arm. The surgical+monotone property is mechanically checked (`AblationSpec`,
     10 pure properties). Untested boundary: the discriminating form over human-authored NATURAL defects
-    — where the missed-defect rate is a discovery, not a construction — is deferred to #52; this claim says nothing about that regime.'
+    — where the missed-defect rate is a discovery, not a construction — is deferred; this claim says nothing about that regime.'
   after: 'Seeded mutation corpus; ablation cells `noCQConfig`, `noTypedConfig`, and `noConflictScanConfig`
     of `Lara.Check.CheckConfig`. Each disables its documented obligations; `noTypedConfig` disables both
     typed attacks and conflict-scan completeness, so it maps to R10/R11/MissingConflict together. Surgicality
     and monotonicity are checked by `AblationSpec`. Untested boundary: human-authored natural defects,
-    deferred to #52; no claim about naturally occurring defect rates.'
+    deferred; no claim about naturally occurring defect rates.'
   signal: dependency-change
   provenance: ai-executed
   note: Refresh current evidence after the v6 snapshot replaces the previously cited frozen outputs; preserve
@@ -373,7 +373,7 @@ logic_revisions:
   before: '[measurements/frozen/ablation.{json,tsv} (post-freeze run: no-cq missed-rejects 18 all reject-IncompleteArgument
     / unchanged 400; no-typed missed-rejects 30 = R10 11 + R11 19 / unchanged 388), test/AblationSpec.hs
     (surgical-flip, monotonicity, partition-totality, conflict-scan gating — 10 pure properties), trace
-    N97 (T6 execution, PR #53 merged)]'
+    N97 (T6 execution, the PR merged)]'
   after: '[`measurements/frozen/ablation.{json,tsv}` (clean bc888a5 v6 run), `ara/evidence/results/backend_mutation_v6.md`,
     `test/AblationSpec.hs`, trace N266_v6; historical T6 execution remains recorded in N97]'
   signal: dependency-change

@@ -1,5 +1,5 @@
 /-
-# A `native_decide`-free surface transport fixture (#227)
+# A `native_decide`-free surface transport fixture
 
 `Lara.Context.surface_directAF_relabel` (`Lara/Context/Surface.lean:60`) relates
 two accepted surface programs whose elaborated units differ by an injective
@@ -749,7 +749,7 @@ theorem transport_relabel_moves_cert :
 /-- The two surface payloads are two payloads, not one cited twice. -/
 theorem transport_payloads_differ : wrappedPayload ≠ kernelPayload := by decide
 
-/-! ### The link shape (#255)
+/-! ### The link shape
 
 `Lara.Context.surface_directAF_link` is the stronger sibling of
 `surface_directAF_relabel`: rather than taking the argument and attack
@@ -777,13 +777,13 @@ since been closed, each by its own fixture.
   this witness does not exercise a relabel that has to *avoid* a context's own
   certificates. `Examples.Linking.cert_congruence_witness` is the core-level
   witness where the context carries material, and
-  `Lara.Examples.SurfaceTransportContext` (issue **#264**) is the surface-level
+  `Lara.Examples.SurfaceTransportContext` is the surface-level
   one: it splits a two-argument unit across the boundary so the context owns a
   plain defeasible argument the relabel must fix.
 * The fixture declares no attacks (`atts := []`, inherited from
   `transportElaborated`), so the attack half of `link_relabel_commutes` is
   discharged on empty lists and `crossAtts` saturates to nothing. That is the
-  same degeneracy issue **#258** records for `surface_directAF_relabel`; the
+  same degeneracy `SurfaceTransportAttack` records for `surface_directAF_relabel`; the
   attack-bearing surface fixture is `Lara.Examples.SurfaceTransportAttack`.
 -/
 

@@ -1,7 +1,7 @@
 /-
 # Node-merging morphisms of argumentation frameworks
 
-Generic vocabulary, extracted from the M4 context calculus (issue #187) because
+Generic vocabulary, extracted from the M4 context calculus because
 nothing in it mentions fragments, contexts, or linking: **the grounded
 observation is invariant under a morphism that collapses duplicate nodes.** A
 map that sends every node of one framework onto a node of another, covers the

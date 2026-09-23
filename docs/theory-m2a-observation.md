@@ -1,7 +1,7 @@
 # Theory M2a: semantics-parametric claim observation
 
-_Status: mechanized for the theory spine on 2026-08-28 (issue #185,
-tracker #180). This document records what the observation interface proves,
+_Status: mechanized for the theory spine on 2026-08-28.
+This document records what the observation interface proves,
 what it refutes, and the six places where the plan's own prose was wrong._
 
 _In plain terms: the checker always settles arguments with the grounded rule,
@@ -10,7 +10,7 @@ M2a makes the semantics a parameter of the observation interface, so theorems
 can be stated once for any rule instead of being welded to grounded, which
 the paper would otherwise have to caveat everywhere._
 
-_Update 2026-09-06 (issue #196): the general non-emptiness of preferred
+_Update 2026-09-06: the general non-emptiness of preferred
 extensions, listed below as follow-up work and as a paper must-not, is now
 proved — `Semantics.preferred_exists`, `Semantics.preferred_exists_candidate`
 and `Semantics.preferredSem_enumerate_ne_nil`, supported by
@@ -159,7 +159,7 @@ it never reached is genuinely false.
 only reason `F.args.Nodup` appears in those compatibility theorems: crossing from
 enumeration membership to `spec` goes through `sound`.
 
-Issue #197 adds `EnumerateConflictFree sem F`, requiring conflict-freedom of
+A follow-up adds `EnumerateConflictFree sem F`, requiring conflict-freedom of
 exactly the extensions returned by `sem.enumerate F`. The theorems
 `justified_defeated_exclusive_of_enumerate` and
 `observe_justified_not_all_defeated_of_enumerate` prove the same conclusions
@@ -169,7 +169,7 @@ old theorems retain their signatures and delegate through
 `specConflictFree_enumerateConflictFree`; this bridge alone needs `Nodup`.
 
 The *non-emptiness* half is also discharged for preferred semantics:
-`preferredSem_enumerate_ne_nil` (§10, issue #196) holds for every framework.
+`preferredSem_enumerate_ne_nil` (§10) holds for every framework.
 Together with `preferredSem_enumerateConflictFree`, it makes exclusivity at
 preferred semantics unconditional in the carrier. `stableSem` has no
 non-emptiness counterpart: `stableSem_enumerate_threeCycle` refutes it.
@@ -415,7 +415,7 @@ The table also makes §4(3) visible: the only `noExtension` cells are
 (semantics, framework) pair reports `gap` on `claimNoSupport` with `|E| = 0`,
 because the `gap` guard is tested first.
 
-**Registry and coverage guarantee (#198).** The semantics vocabulary now lives
+**Registry and coverage guarantee.** The semantics vocabulary now lives
 in `Lara.Semantics.Registry`; the table consumes that registry through compatible
 aliases. Its total label/object maps and `allSemantics_complete` ensure every
 registered constructor appears. Framework and claim completeness stay local to
@@ -576,7 +576,7 @@ The paper **must not**:
   it, and that contrast is the point of
   `preferred_exists_where_stable_does_not`. (This bullet previously forbade
   asserting the general non-emptiness of *preferred* extensions. It was lifted
-  on 2026-09-06 by `preferred_exists`, issue #196 — the paper may now state
+  on 2026-09-06 by `preferred_exists` — the paper may now state
   Dung's existence result for preferred extensions and cite the mechanization,
   with no `Nodup` side condition;)
 - say that `Compile.srcStatus_iff_checked` is an instance or a special case of

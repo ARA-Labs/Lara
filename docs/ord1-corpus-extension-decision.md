@@ -1,7 +1,7 @@
 # Decision: how `ord@1` earns corpus evidence (and why not yet)
 
 _Resolves the tracked follow-up "Corpus extension exercising `ord@1` end-to-end"
-(eng review 2026-08-06, PR #83). Companion to `docs/strict-backend-decision.md`
+(eng review 2026-08-06). Companion to `docs/strict-backend-decision.md`
 (the backend seam) and `lean/Lara/Ord.lean` (the adapter's own design
 docstring). Updated 2026-08-19: absorbed the factivity paragraph from the
 retired `ord@1` implementation plan and refreshed the freeze-tag reference._
@@ -39,7 +39,7 @@ contrary pair and so never trip R12.
 ## The question
 
 `ord@1` is motivated by "the most common claim shape in ML methodology papers".
-PR #83 landed the backend, its Lean metatheory, and a synthetic worked example,
+That same change landed the backend, its Lean metatheory, and a synthetic worked example,
 but kept `corpus-v1` frozen. So the motivation is currently an argument, not a
 measurement: no real paper's beats-claim has gone through the backend.
 
@@ -69,7 +69,7 @@ thing each, which is what makes them readable as a set.
    suite (the sweep derives mutants per corpus unit), invalidates
    `measurements/frozen/`, and forces a re-run of `scripts/measure.hs` plus the
    next freeze tag (v4 has since been cut for `lara-core@0.2`, so this would be
-   `m5-freeze-v5`). That is M5-scale work, and #60/#78 already ruled out an
+   `m5-freeze-v5`). That is M5-scale work, and the settled scope decisions ruled out an
    M5-scale refreeze in this cycle.
 
 2. **The paper's claim does not rest on it.** The evaluation section reports

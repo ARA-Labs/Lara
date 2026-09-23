@@ -19,13 +19,13 @@
 --   * the abstract strict-backend seam: Theorem 1 + ND instantiation (result 8) — Lara.Strict
 --   * the whole-status layer: direct vs compiled grounded semantics agreement
 --     (result 6) + grounded termination/determinism (result 5 core) — Lara.Grounded
---   * the semantics parameter, made explicit (theory M2a, issue #185): the
+--   * the semantics parameter, made explicit (theory M2a): the
 --     generic ExtensionSemantics interface (declarative spec + proof-oriented
 --     reference enumerator + bundled adequacy), the carrier-bounded admissible /
 --     complete / stable / preferred / semi-stable predicates with their Bool
 --     deciders, and representative-uniqueness under a nodup carrier. Dung's
 --     existence result for preferred extensions is proved here too
---     (preferred_exists, issue #196): every framework has one, with no nodup
+--     (preferred_exists): every framework has one, with no nodup
 --     hypothesis, so preferredSem's enumeration is never empty. The
 --     pre-existing grounded status layer is shown to AGREE with the groundedSem
 --     instance (observe_grounded, groundedSem_enumerate) rather than being
@@ -60,7 +60,7 @@
 --     constructively discharged by Compile.edgeB_faithful, exposed through the
 --     oracle-free wrappers checkedAF / srcStatus_checked / srcStatus_iff_checked
 --     — Lara.Compile
---   * source-to-framework observation transport (theory M2a, issue #185): the
+--   * source-to-framework observation transport (theory M2a): the
 --     carrier-locality property AttackExtensional, proved for all five
 --     specifications and refuted for bare ConflictFree; the generic transport
 --     of a carrier-local specification between two frameworks that decide
@@ -70,7 +70,7 @@
 --     to Compile.srcStatus_iff_checked under a support-boundedness hypothesis
 --     — Lara.Observation
 --   * the many-sorted proposition signature and well-sortedness (result 13,
---     lara-core@0.2 / issue #89): the object, sortOf, Sigma-WF, derived rule
+--     lara-core@0.2): the object, sortOf, Sigma-WF, derived rule
 --     parameter sorts, decidability without classical input, and the
 --     substitution lemma that carries pattern well-sortedness through
 --     instantiation — Lara.Sigma
@@ -89,12 +89,12 @@
 --   * backend replacement (result 9): uniform injective assurance relabel,
 --     with constructive well-checkedness transport making it non-vacuous —
 --     Lara.Erase / Lara.EraseTransport
---   * conservative reporting for quarantine-affected claims (spec §4.3, issue
---     #76): the locality lemma for the declarative grounded judgment, and the
+--   * conservative reporting for quarantine-affected claims (spec §4.3):
+--     the locality lemma for the declarative grounded judgment, and the
 --     non-promotion result plus same-support status preservation — Lara.Blocked;
 --     a declared-index framework pair and the drivers' seed discharge the three
 --     abstract Blocking obligations — Lara.BlockedProgram. The reindexing and
---     support bridge to the compact production AF closes issue #80.
+--     support bridge to the compact production AF closes the loop.
 --   * the `comparison` surface form's direction-of-goodness contract
 --     (lara-syntax@0.3 §1.2 / grammar Appendix B.3): the generated `ord@1` goal
 --     holds exactly when "ours is better than base" under the measurand's
@@ -102,20 +102,20 @@
 --     same relation, so it certifies the opposite claim rather than a weaker
 --     one. This is the surface-level lookup table, NOT a theorem about the
 --     Haskell elaborator, which stays validated-not-verified — Lara.Comparison
---   * named certificate premise slots (lara-syntax@0.6, #105): the
+--   * named certificate premise slots (lara-syntax@0.6): the
 --     presentation-layer payload lowering over an abstract name resolver —
 --     byte-identity on payloads with no symbolic reference in scope
 --     (dead-wire arm included) and agreement with the declarative positional
 --     substitution SymNumericSubst; the Haskell elaborator's name resolution
 --     and error taxonomy stay validated-not-verified — Lara.CertSlots
---   * named nd@1 proof terms (lara-syntax@0.9, #132; source-authored formula
---     annotations lara-syntax@0.10, #144): marker-selected lowering of named
+--   * named nd@1 proof terms (lara-syntax@0.9; source-authored formula
+--     annotations lara-syntax@0.10): marker-selected lowering of named
 --     binders, premise references, theory references, and (prop TEXT) formula
 --     annotations to the frozen de Bruijn kernel image; conservativity for
 --     kernel certificates and structural agreement with an independent
 --     named-term translation over an abstract proposition encoder —
 --     Lara.NDNamed
---   * the M2b realization closure (issue #209): the verified decimal
+--   * the M2b realization closure: the verified decimal
 --     round-trip and numeral injectivity for the complexity spine —
 --     Lara.Complexity.Numeral; the formula-indexed 3SAT gadget behind the
 --     closed injective leaf vocabulary `GadgetLeaf`, with the closed leaf
@@ -125,7 +125,7 @@
 --     with endpoint membership, exact attack completeness) assembled into the
 --     family-wide checker equation `checkUnit_formula_ok` under the frozen
 --     M2b context of Lara.Complexity.Context — Lara.Complexity.Gadget
---   * the M2b compile image (issue #209, Task 8): the reduction output
+--   * the M2b compile image (Task 8): the reduction output
 --     `reduceCode` with its intended adjacency matrix, the exact-edge
 --     characterization of the compiled closure over the generated family
 --     (`coveredB_gadget` — no closure-generated extras), the
@@ -140,7 +140,7 @@
 --     `fixedCredCompleteB`, and the `g(0)` self-edge negative control
 --     `selfEdgeCode_not_realizable` keeping the result a theorem about the
 --     realizable class, not unrestricted AFs — Lara.Complexity.Reduction
---   * the M2b cost-instrumented grounded kernel (issue #209, Task 9): the
+--   * the M2b cost-instrumented grounded kernel (Task 9): the
 --     attack-query-counting mirrors `anyAttackerC` / `defendedC` / `stepC` /
 --     `iterC` / `groundedC` of the proof-oriented grounded evaluator, their
 --     first-projection agreement with `Lara.Grounded`, and the two-sided
@@ -148,7 +148,7 @@
 --     bound `groundedC_cost_ge`, the `n³(1+n)` ceiling `groundedC_cost_le`,
 --     and the two-node all-attacks regression (cost `4 = 2²`) refuting the
 --     rejected exact pointwise cubic inequality at `n = 2` — Lara.Complexity
---   * the M2b realizable quartic witness (issue #209, Task 10): the
+--   * the M2b realizable quartic witness (Task 10): the
 --     three-block carrier `quarticAF` (for positive k: k-1 neutral `g` nodes,
 --     the defender `d` declared last in its block, k `b` nodes, and k `a`
 --     nodes; edges exactly `d → b(i)` and `b(i) → a(j)`), realized under
@@ -161,7 +161,7 @@
 --     `Θ(n⁴)` result on this fixed-context realizable family, NOT a universal
 --     per-instance floor (the proved universal lower bound remains `n²`) —
 --     Lara.Examples.Complexity
---   * the M2b shared carrier-status evaluator (issue #209, Task 11): the
+--   * the M2b shared carrier-status evaluator (Task 11): the
 --     status query factored over one grounded run — `labelFromGroundedC`
 --     reading labels off a shared grounded result, `statusSharedC`
 --     preserving `Grounded.statusC`'s observable guard order while computing
@@ -173,7 +173,7 @@
 --     quartic floor transfers to this surface via
 --     `carrierStatus_quartic_cost_ge` — Lara.Complexity and
 --     Lara.Examples.Complexity
---   * the PW0 possible-world outer-model gate (issue #192, tracker #189): the
+--   * the PW0 possible-world outer-model gate: the
 --     typed outer frame — scientific contexts, per-context worlds and queries,
 --     bridges carrying a candidate relation, a checked applicability judgment,
 --     and a bridge-global partial claim translation — the many-sorted outer
@@ -214,7 +214,7 @@
 --     existing semantics module changed. Deliberately absent: structural
 --     bridges/T6, T8-T10, approximation, epistemic/dynamic/hybrid operators,
 --     global scenarios, surface syntax — see docs/theory-pw0-outer-model.md
---   * the PW-T6 exact checked-support transport (issue #191, tracker #189):
+--   * the PW-T6 exact checked-support transport:
 --     the bridge-global partial symbol translation lifted structurally over
 --     terms, atoms, patterns, substitutions, rules, and support terms, with
 --     the two commuting facts that carry the milestone — instantiation
@@ -237,9 +237,9 @@
 --     vocabulary machinery off the identity, with the out-of-vocabulary
 --     claim reported as exactly translationUndefined —
 --     Lara.Examples.PWStructural. The theorem neither assumes nor concludes
---     grounded status preservation (that boundary is T8, #193); the modules
+--     grounded status preservation (that boundary is T8); the modules
 --     only import — see docs/theory-pw-t6-structural-transport.md
---   * PW-T9 structural-path composition (issue #190, tracker #189):
+--   * PW-T9 structural-path composition:
 --     arbitrary typed `BridgePath`s retain the chosen sequence of structural
 --     bridges and fold it to a named first-leg-first composite. Exact checked
 --     support transports stepwise along any such path and agrees with transport
@@ -249,9 +249,9 @@
 --     `Accepted R = R ∧ Admits` relation keeps caller-supplied candidates
 --     separate and requires their own coherence. Missing translations remain
 --     comparison-level incomparability, never a local status; grounded-status
---     preservation is the T8 boundary (#193), while approximation bridges
---     remain tracker #189 — Lara.PW.Compose and Lara.Examples.PWCompose.
---   * PW-T8 conditional status preservation (issue #193, tracker #189):
+--     preservation is the T8 boundary, while approximation bridges
+--     remain deferred — Lara.PW.Compose and Lara.Examples.PWCompose.
+--   * PW-T8 conditional status preservation:
 --     grounded labelling and four-state claim status over an abstract AF are
 --     invariant under a total attack bisimulation, with the design's AF
 --     isomorphism as a corollary whose injectivity half no proof consumes —
@@ -273,7 +273,7 @@
 --     Lara.PW.StatusCheck, Lara.Examples.PWStatusCheck.
 --     Neither T6 nor T9 is strengthened: every bridge-level result takes
 --     `StatusBridge` (or an explicit `SupportCorr`) as an extra hypothesis.
---   * sorted queries and the outer language's surface (issue #307, scheduled
+--   * sorted queries and the outer language's surface (scheduled
 --     once M5 landed out of the docs/theory-pw0-outer-model.md §5 non-goal
 --     rows and the docs/theory-pw-closeout.md §3 surface-syntax row):
 --     `Query_κ` refines from all of `Atom` to well-sorted claims over `Σ_κ`,
@@ -307,7 +307,7 @@
 --     `support_transport_declOK` transports a checked support across it —
 --     Lara.PW.Surface, Lara.Examples.PWSurface.
 --   * the fragment/linking context calculus and contextual representation
---     independence (theory M4 part A, issue #187): fragments with import/export
+--     independence (theory M4 part A): fragments with import/export
 --     interfaces, a witnessed link guard, linking that saturates cross-boundary
 --     conflicts and merges structurally identical arguments, context
 --     composition, and the headline — an injective, acceptance-preserving
@@ -315,7 +315,7 @@
 --     context, with the acceptance-profile generalization over two registries.
 --     Not parametricity, not full abstraction — Lara.Context.*
 --   * the same contextual observation at an arbitrary M2a extension semantics
---     (issue #216): `obsGen` parameterizes the *projection* read off the linked
+--     `obsGen` parameterizes the *projection* read off the linked
 --     carrier, so `obsGen_congr` proves the congruence once for every reading
 --     at once and `obsSem` / `CtxEquivSem` are instantiations of it rather than
 --     a second development. The generic congruences carry *no* additional
@@ -386,7 +386,7 @@ import Lara.Examples.CompilerInvariants
 import Lara.Examples.Complexity
 -- The Task-2 restricted-class realization spike. Imported here because
 -- nothing else did: the module was outside the build entirely, so its
--- theorems were never elaborated and could not be axiom-audited (#242).
+-- theorems were never elaborated and could not be axiom-audited.
 import Lara.Examples.Complexity.Realization
 import Lara.Examples.Realizability
 import Lara.Examples.BackendComposition
@@ -413,14 +413,14 @@ import Lara.Examples.ContextualSeparation
 import Lara.Context.Holes.Transport
 import Lara.Examples.TermHoles
 import Lara.Examples.CertificateCollapse
--- The #227 surface-transport witness. Imported here for the same reason as
+-- The surface-transport witness. Imported here for the same reason as
 -- Lara.Examples.Complexity.Realization above: AxCheck.lean is not a lake
 -- target, so a module reachable only from it is outside `lake build` and its
 -- theorems would never be elaborated on a clean checkout.
 import Lara.Examples.SurfaceTransport
--- The #258 attack-bearing surface-transport witness, for the same reason.
+-- The attack-bearing surface-transport witness, for the same reason.
 import Lara.Examples.SurfaceTransportAttack
--- The #264 context-bearing surface-link witness, for the same reason.
+-- The context-bearing surface-link witness, for the same reason.
 import Lara.Examples.SurfaceTransportContext
 import Lara.PW.Outer
 import Lara.PW.Uniform
@@ -445,7 +445,7 @@ import Lara.Examples.PWSorted
 import Lara.PW.Surface
 import Lara.Examples.PWSurface
 
--- Declared outer bridges, concrete wire input, and finite execution (#313/#314).
+-- Declared outer bridges, concrete wire input, and finite execution.
 import Lara.PW.Declared
 import Lara.PW.Wire
 import Lara.PW.Finite
@@ -453,5 +453,5 @@ import Lara.Examples.PWDeclared
 import Lara.Examples.PWWire
 import Lara.Examples.PWFinite
 import Lara.Examples.PWFileHost
--- The finite executable reference for `pw-run 1` documents (#322).
+-- The finite executable reference for `pw-run 1` documents.
 import Lara.PW.Run

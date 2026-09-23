@@ -1,5 +1,5 @@
 -- | The paper's running example (fig:example) as two checked programs, with
--- their checker reports rendered for pasting into the paper (P6, issue #70).
+-- their checker reports rendered for pasting into the paper (P6).
 --
 -- Run 1 (@examples\/running-example\/run1@) declares the empirical claim and
 -- its evidence leaves, including the recorded dead end @e4@, but the

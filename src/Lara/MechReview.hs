@@ -1,4 +1,4 @@
--- | D2 — mechanical reviewer (#63): render the checker's own per-claim verdicts
+-- | D2 — mechanical reviewer: render the checker's own per-claim verdicts
 -- over the FROZEN 60-unit corpus as reviewer-style markdown \"review comments\".
 --
 -- This is __untrusted presentation__ over the existing accept-path diagnostics —
@@ -82,8 +82,8 @@ data ReviewComment = ReviewComment
   , rcClaimNl :: String -- ^ the claim's natural-language statement
   , rcStatus :: PublicStatus
   -- ^ the public status: 'Published' carries the four-state answer,
-  -- 'EvidenceBlocked' the conditional label a §4.3 prune made unpublishable
-  -- (issue #76). The heading and the body both read this, so a rendered review
+  -- 'EvidenceBlocked' the conditional label a §4.3 prune made unpublishable.
+  -- The heading and the body both read this, so a rendered review
   -- can never disagree with the wire verdict.
   , rcBody :: String -- ^ the fixed-phrasing review sentence(s)
   }
@@ -108,7 +108,7 @@ unitReviewComments name ci prog =
   case verdictOutcome (runCheck ci) of
     Reject _ -> [] -- every frozen corpus unit is accept-class; nothing to render
     -- An @evidence-blocked@ query is not a justified claim whatever its
-    -- conditional label says (spec §4.3, issue #76), so it still draws a comment.
+    -- conditional label says (spec §4.3), so it still draws a comment.
     Accept labels _edges statuses ->
       [ comment p st rep
       | ((p, st), rep) <- zip statuses reports
@@ -166,7 +166,7 @@ reviewBody
   -> ClaimReport
   -> String
 reviewBody claimPid argViews attacks labelOf status rep = case status of
-  -- Spec §4.3 / issue #76: the four-state label under an @evidence-blocked@
+  -- Spec §4.3: the four-state label under an @evidence-blocked@
   -- claim is a conditional diagnostic, so the body names the quarantine rather
   -- than reporting the label as the finding.
   EvidenceBlocked conditional -> evidenceBlockedBody conditional
@@ -344,8 +344,8 @@ section rc =
 -- Small deterministic helpers (closed spelling tables; no external deps)
 -- ---------------------------------------------------------------------------
 
--- | The reviewer sentence for an @evidence-blocked@ claim (spec §4.3, issue
--- #76): the claim's own graph was edited by quarantine, so no four-state
+-- | The reviewer sentence for an @evidence-blocked@ claim (spec §4.3):
+-- the claim's own graph was edited by quarantine, so no four-state
 -- finding can be reported — and the conditional label is named as such rather
 -- than published.
 evidenceBlockedBody :: Status -> String
@@ -357,7 +357,7 @@ evidenceBlockedBody conditional =
     ++ ", but that label is conditional on evidence the checker refused to admit."
 
 -- | The heading word for a public status: the canonical wire tag for a
--- quarantine-affected claim, the four-state word otherwise (issue #76).
+-- quarantine-affected claim, the four-state word otherwise.
 publicStatusWord :: PublicStatus -> String
 publicStatusWord ps = case ps of
   EvidenceBlocked _ -> tagToString TEvidenceBlocked

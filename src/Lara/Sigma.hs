@@ -144,7 +144,7 @@ data Sigma = Sigma
   }
   deriving (Eq, Show)
 
--- | The signature declaring nothing. Under strict mode (#91 decision 2) every
+-- | The signature declaring nothing. Under strict mode (decision 2) every
 -- symbol is undeclared against it, so it accepts only symbol-free units; it is
 -- the unit of the object, not a permissive default.
 emptySigma :: Sigma
@@ -165,7 +165,7 @@ predArities sg = [(predSym s, length (predArgs s)) | s <- sigmaPreds sg]
 -- Σ-aware generation
 -- ---------------------------------------------------------------------------
 --
--- The mutation generators inject fresh symbols (#89 §8). Σ travels per unit and
+-- The mutation generators inject fresh symbols (§8). Σ travels per unit and
 -- the operator that injects a symbol is exactly the site that knows its
 -- argument sorts, so each such operator extends the mutant's carried Σ here.
 -- Without this a symbol-injecting operator would flip its mutant to R2 and

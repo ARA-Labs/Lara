@@ -1,5 +1,5 @@
 /-
-Conformance cells for declared-attack transport (issue #238, tracker #189).
+Conformance cells for declared-attack transport.
 
 The S2/R2 renaming pair is re-established as an `AttackBridge` — T8's attack
 hypotheses stated on the source language — and its `StatusBridge` is

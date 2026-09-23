@@ -1,5 +1,5 @@
 /-
-Executable StatusBridge checker (issue #239, tracker #189).
+Executable StatusBridge checker.
 
 `StatusBridge.forth`/`back` quantify over all Nat indices, but `corr_lt`
 bounds every corresponded pair and `Compile.edgeB_faithful.ranged` bounds
@@ -228,7 +228,7 @@ theorem backB_complete {m : SymMap} {lm : LeafId → LeafId}
       obtain ⟨k, hC', hE'⟩ := h i j k' (corrB_iff.mp hC) hE
       exact ⟨k, corrB_iff.mpr hC', hE'⟩
 
-/-- **The executable status-bridge checker** (issue #239): the four
+/-- **The executable status-bridge checker**: the four
 `StatusBridge` clauses, each scanned over the finite index ranges of the two
 compiled programs. -/
 def statusBridgeB (m : SymMap) (lm : LeafId → LeafId)

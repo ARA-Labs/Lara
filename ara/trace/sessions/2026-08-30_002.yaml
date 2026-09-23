@@ -94,9 +94,9 @@ key_context:
     excerpt: "Another contributor is working on M2b; identify a genuinely independent track rather than sharing its theory files or unsettled decision-problem contract."
   - turn: 1
     excerpt: >
-      Main contains the merged M0 (#194), M1 (#195), M2a (#199), M3 (#201),
-      and B0 (#205/#207) deliveries. Issue #188 gates M5 on stable carrier,
-      observations, and updates; issue #180 does not place M5 after M2b.
+      Main contains the merged M0, M1, M2a, M3,
+      and B0 deliveries. The issue gates M5 on stable carrier,
+      observations, and updates; the issue does not place M5 after M2b.
 
   - turn: 2
     excerpt: >

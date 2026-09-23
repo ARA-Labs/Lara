@@ -30,7 +30,7 @@ What this file discharges, against the exact spec figure:
   status preservation. The residual Bool-edge obligation is now discharged:
   executable support, positional-attack, and whole-program checking construct
   `CheckedProgram`, and the general closure-edge decider `edgeB` with its
-  `edgeB_faithful` proof (issue #17) supplies `Faithful` constructively —
+  `edgeB_faithful` proof supplies `Faithful` constructively —
   exposed oracle-free through `checkedAF`/`srcStatus_iff_checked` — closing §9
   result 6's source-vs-compiled half. Nothing else is missing at this layer.
 
@@ -589,7 +589,7 @@ compile to a `Grounded.AF`, and show a source-level declarative judgment
 defined over the Prop-level closure edges agrees with the abstract one —
 first per argument, then lifted to four-state claim status. The bridge below
 stays oracle-parametric (`Faithful`) by design; the checker-built
-`edgeB`/`edgeB_faithful` (issue #17) instantiate it in the "Oracle-free
+`edgeB`/`edgeB_faithful` instantiate it in the "Oracle-free
 result-6 wrappers" section. -/
 
 /-- The compiled abstract AF: arguments are indices into `P.args`; the edge
@@ -609,7 +609,7 @@ structure Faithful (P : CheckedProgram canon Pi Gamma CertOk dp)
     P.args[i]? = some a → P.args[j]? = some b →
     (edgeB i j = true ↔ Edge P a b)
 
-/-- **The checked-program edge decider (issue #17).** Indexing the checked
+/-- **The checked-program edge decider.** Indexing the checked
 program's arguments by list position, `edgeB P i j` decides `Edge P a b` for the
 terms `a`/`b` at those positions: out-of-range on either side is no edge, and in
 range it scans the declared attacks for one sourced at `a` whose attacked
@@ -764,7 +764,7 @@ inductive SrcStatus (P : CheckedProgram canon Pi Gamma CertOk dp)
 holds exactly at the executable compiled status: `SrcStatus P c
 (Grounded.statusC (toAF P edgeB) c)`. With `srcIn_iff_grounded` this is
 source-to-compiled status preservation, oracle-parametric — instantiated
-oracle-free by the constructive `Faithful` from `edgeB_faithful` (issue #17)
+oracle-free by the constructive `Faithful` from `edgeB_faithful`
 in `srcStatus_checked`. -/
 theorem srcStatus_correct {P : CheckedProgram canon Pi Gamma CertOk dp}
     {edgeB : Nat → Nat → Bool} (hf : Faithful P edgeB) (c : Grounded.Claim) :

@@ -1,5 +1,5 @@
 /-
-Executable witnesses for the outer language's surface syntax (issue #307).
+Executable witnesses for the outer language's surface syntax.
 
 Two fixtures, because the two authoring forms need different material.
 
@@ -18,8 +18,8 @@ declaration, and `support_transport_declOK` carries a checked support across it
 — T6 at a surface-authored bridge, instantiated.
 
 **A posed query** needs worlds, so it reuses `Lara.Examples.PWSorted`'s sorted
-frame unchanged. `elab_illSorted` is the fixture that joins the two halves of
-#307: an ill-sorted authored claim is a *typing error at authoring time*, named
+frame unchanged. `elab_illSorted` is the fixture that joins the two halves:
+an ill-sorted authored claim is a *typing error at authoring time*, named
 and located, where PW0 would have sent it to a world and got `gap` back.
 
 `Bridge` and `PW.Form` carry functions and dependent data and so have no
@@ -173,7 +173,7 @@ def ΓBridgeTgt : LeafId → Option Atom := fun l =>
 
 /-- No certificate judgment on either side: the fixture's rule is defeasible
 with an empty certifier allowlist, so no `AssuranceOk.cert` arm is reachable.
-`Examples.PWStructural.bridgeCert` (#224) is where `cert_ok` is discharged off
+`Examples.PWStructural.bridgeCert` is where `cert_ok` is discharged off
 the identity. -/
 def certBridge : BackendId → Digest → CertRef → List Atom → Atom → Prop :=
   fun _ _ _ _ _ => False
@@ -464,7 +464,7 @@ query that was authored: the typing pass renames nothing. -/
 theorem unelab_surfaceQuery : unelab naming coreQuery = surfaceQuery :=
   (elaborates_preserves naming elaborates_surfaceQuery).2
 
-/-- **The two halves of #307, joined.** An ill-sorted authored claim is a
+/-- **The two halves, joined.** An ill-sorted authored claim is a
 typing error at authoring time, naming the offending predicate — where PW0 had
 no choice but to send it to a world and report the `gap` that came back. -/
 theorem elab_illSorted :

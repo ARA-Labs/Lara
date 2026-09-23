@@ -6,7 +6,7 @@
 -- be misread as a bug in the code under test. It used to be copied into all
 -- four, each deriving its directory name from an 'System.IO.openTempFile'
 -- marker (@marker ++ ".d"@) and then adopting whatever was at that path with
--- @createDirectoryIfMissing True@ (issue #318). Two things were wrong with that:
+-- @createDirectoryIfMissing True@. Two things were wrong with that:
 --
 --   * the name was __derived, not reserved__ — 'System.IO.openTempFile'
 --     guaranteed the marker was unused, the marker was then deleted, and

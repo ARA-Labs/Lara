@@ -187,7 +187,7 @@ theorem shiftAssurance_ne_zero (x : Assurance) (name : String)
     shiftAssurance x ≠ .cert ⟨name, 0⟩ d c := by
   cases x <;> simp [shiftAssurance]
 
-/-- The unrestricted extension proposed in #279 is false on `Assurance`
+/-- The unrestricted extension is false on `Assurance`
 itself. The inverse graph of the shift already exhausts the target type,
 leaving no image for a certificate with backend version zero. -/
 theorem not_every_relInj_has_total_extension :

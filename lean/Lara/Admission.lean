@@ -323,7 +323,7 @@ def buildGamma (leaves : List (LeafId × Atom)) : LeafId → Option Atom :=
 /-! `buildGamma` is first-wins over the declaration list. The four facts below
 are the whole of what its consumers (`Lara.Update`'s Γ transport,
 `Lara.Context`'s linked environment) need, and they are public here rather
-than re-proved privately downstream (issue #220). -/
+than re-proved privately downstream. -/
 
 /-- Appending declarations never loses an existing entry. -/
 theorem buildGamma_append_of_some

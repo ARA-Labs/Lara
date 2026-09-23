@@ -5,12 +5,12 @@ session:
   last_turn: "2026-08-12T21:19"
   turn_count: 1
   summary: >
-    Recorded Task 7's local verification of #104 plain-argument theta
+    Recorded Task 7's local verification of plain-argument theta
     inference: exact `by rule from [refs]` syntax, stable D6 diagnostics,
     72-row presentation parity, unchanged source/core and replay artifacts,
     and clean local differential/admission/freshness evidence. Hosted Haskell
     and Lean CI remain pending until the implementation PR head runs them;
-    #105 named certificate premise slots remain a separate open opaque-layer
+    Named certificate premise slots remain a separate open opaque-layer
     design problem.
 
 events_logged:
@@ -19,20 +19,20 @@ events_logged:
     id: "N175"
     routing: direct
     provenance: ai-executed
-    summary: "Task 7 local verification passed for #104: exact inferred syntax and D6 diagnostics, 72-row parity, source/core identity, replay/tamper, differential, admission, determinism, and protected-artifact checks; hosted CI remains pending."
+    summary: "Task 7 local verification passed for the tracker item: exact inferred syntax and D6 diagnostics, 72-row parity, source/core identity, replay/tamper, differential, admission, determinism, and protected-artifact checks; hosted CI remains pending."
   - turn: 1
     type: observation
     id: "O69"
     routing: staged
     provenance: ai-suggested
-    summary: "The local #104 completion claim is conditional on hosted Haskell and Lean CI; #105 remains explicitly outside the implementation."
+    summary: "The local completion claim is conditional on hosted Haskell and Lean CI; remains explicitly outside the implementation."
 
 ai_actions:
   - turn: 1
     action: >
       Read the complete Task 7 report and current TODO/ARA conventions;
-      recorded the evidence-calibrated #104 backlog wording, the explicit open
-      #105 certificate-layer item, and append-only ARA observation, exploration,
+      recorded the evidence-calibrated backlog wording, the explicit open
+      Certificate-layer item, and append-only ARA observation, exploration,
       reasoning, session, and index records without changing production or
       protected artifacts.
     provenance: ai-executed
@@ -55,11 +55,11 @@ key_context:
       replay/tamper, determinism, and protected-artifact checks passing, but
       hosted Haskell and Lean CI are pending until the implementation PR head
       exists. The explicit-vs-inferred byte identity remains conditional on
-      sameTerm-equal spellings being spelled identically; #105 remains open.
+      sameTerm-equal spellings being spelled identically; remains open.
 
 open_threads:
-  - "Run and pass hosted Haskell and Lean CI on the #104 implementation PR head before closing #104."
-  - "Design named certificate premise slots and the opaque Cert layering for #105; no implementation is implied here."
+  - "Run and pass hosted Haskell and Lean CI on the implementation PR head before closing."
+  - "Design named certificate premise slots and the opaque Cert layering; no implementation is implied here."
   - "O65-O67 await closure signals."
 
 ai_suggestions_pending:

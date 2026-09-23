@@ -1,4 +1,4 @@
-# M4 Part B: G0 interface spike (#305)
+# M4 Part B: G0 interface spike
 
 **Exit decision: re-descoped, 2026-09-09.** The candidate below fails a
 same-context copying test: two fragments with matching occurrence profiles
@@ -17,7 +17,7 @@ The relational-parametricity and generic-semantics contextual-equivalence
 work has since closed with its
 results landed. That trigger justifies running G0; it does not establish the
 interface or authorize the theorem phases. The paper's claims and commit IDs
-are reported in #305; this spike checks the implementation at `7d0f738`, not
+are reported in the G0 follow-up record; this spike checks the implementation at `7d0f738`, not
 the separate paper checkout.
 
 ## Which equivalence would the relation explain?
@@ -37,12 +37,12 @@ context is admissible for both fragments. This is a proposed restricted target,
 not a change to `CtxEquiv`. Failure on an accepted pair already rules out a
 characterization of the unrestricted relation.
 
-The G0 reading is grounded `obs`. #216 supplies `obsSem` for other extension
+The G0 reading is grounded `obs`. The generic-observation record supplies `obsSem` for other extension
 semantics and `obsGen` for an arbitrary carrier projection. Neither makes those
 readings interchangeable. For example, an arbitrary projection can read node
 count, while grounded export statuses need not reveal it. No claim here ranges
 over every projection, possible-world observation, or the additive term-hole
-contexts of #217.
+contexts of the term-hole record.
 
 ## The candidate tested
 
@@ -165,7 +165,7 @@ the empty-defeat case shows why occurrence distinctions need not produce
 status distinctions. Neither permits selecting “characterization instead” as
 though the characterization had been established. If a later gate establishes
 that equality on a precisely stated policy and context domain, that result
-should be presented as a characterization theorem, as #305 requires.
+should be presented as a characterization theorem, as the gate requires.
 
 ## Why stop here?
 
@@ -175,8 +175,8 @@ should be presented as a characterization theorem, as #305 requires.
 | Characterization instead | No: finite realization characterizes the structural certificate relation's shape, not contextual equivalence. |
 | Re-descoped | Selected: stop before a relation freeze or either theorem direction. |
 
-#215 amortizes transport and finite realization after choosing a certificate
-relation. #216 amortizes changing the observation after preserving the carrier.
+Relational parametricity amortizes transport and finite realization after choosing a certificate
+relation. The generic observation amortizes changing the observation after preserving the carrier.
 Neither result needs a complete, context-free decision method for arbitrary
 fragment equivalence. The new trigger has been honored by running the gate;
 it does not remove the original absence of that consumer.
@@ -185,7 +185,7 @@ This is a completed negative G0 result, not a postponed implementation plan.
 Any future reopening must state the consuming equivalence problem, its policy
 and context domain, and a candidate that survives the copying case. Exact fault
 observations must either be covered or explicitly excluded in a separately
-named equivalence. The old #187 closure and existing paper claim boundaries
+named equivalence. The old M4 closure and existing paper claim boundaries
 stand.
 
 ## Reproduce the finite checks

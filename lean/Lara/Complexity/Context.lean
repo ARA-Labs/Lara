@@ -80,7 +80,7 @@ def m2bPolicy : Lara.Policy.Policy :=
 
 /-- The six contrary rows of the fixed policy, re-spelled literally rather
 than through the private pattern builders above — the drift tripwire consumed
-by the gadget and witness attack characterizations (issue #211): any drift in
+by the gadget and witness attack characterizations: any drift in
 the fixed defeat table breaks this `rfl` at compile time. -/
 theorem m2bDefeat_contraries :
     m2bPolicy.defeat.contraries =

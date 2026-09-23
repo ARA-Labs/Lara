@@ -1,5 +1,5 @@
 /-
-The static code-inspection domain-checker backend `insp@1` (issue #260; design
+The static code-inspection domain-checker backend `insp@1` (design
 records: `docs/strict-backend-decision.md` for the backend seam and
 `docs/insp1-code-inspection-decision.md` for what an accepted step certifies).
 

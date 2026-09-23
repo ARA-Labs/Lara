@@ -1,6 +1,6 @@
 # Declared outer bridges, concrete input, and finite execution
 
-Issues #313 and #314 join the two outer authoring forms and make them readable
+The wire contract joins the two outer authoring forms and makes them readable
 from a file. A checked registry derives both the frame's bridges and query-name
 resolution from the declarations. The file-driven Lean example evaluates modal
 queries and runs source-claim comparisons through those same bridges.
@@ -168,7 +168,7 @@ The example's chosen acceptance relation does not assert T6 applicability.
 No changes are made to `PW.Frame`, `PW.Sat`, `crossCompare`, the T6 contract,
 the local compiler, or the corpus. No existing freeze tag is bumped. Haskell
 execution, configurable world loading, and differential conformance are in
-[the outer runtime contract](theory-pw-outer-runtime.md) (#322).
+[the outer runtime contract](theory-pw-outer-runtime.md).
 
 ## Verification
 

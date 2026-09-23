@@ -4,7 +4,7 @@ session:
   started: "2026-07-21T22:15"
   last_turn: "2026-07-21T23:20"
   turn_count: 4
-  summary: "M0 kickoff: corpus pinned as submodule (PR #8), 231-claim/279-dead-end extraction pipeline, six-way typing pass, seeded 60-claim stratified sample."
+  summary: "M0 kickoff: corpus pinned as submodule, 231-claim/279-dead-end extraction pipeline, six-way typing pass, seeded 60-claim stratified sample."
 
 events_logged:
   - turn: 2
@@ -52,7 +52,7 @@ events_logged:
 
 ai_actions:
   - turn: 2
-    action: "Added corpus/ara-paperbench submodule at 62e9b54; updated docs/corpus-map.md §5; opened draft PR #8 (commit 75e2a65)."
+    action: "Added corpus/ara-paperbench submodule at 62e9b54; updated docs/corpus-map.md §5; opened the draft PR (commit 75e2a65)."
     provenance: ai-executed
     files_changed: [".gitmodules", "corpus/ara-paperbench", "docs/corpus-map.md"]
   - turn: 3
@@ -77,7 +77,7 @@ key_context:
 open_threads:
   - "Annotate the 60 sampled claims per the 8-field schema (corpus-map §4); walk each claim's dead ends via deadends-index.tsv."
   - "Human second-annotator pass on the 18 double-annotate claims; adjudicate against m0/claim-types.tsv."
-  - "PR #8 (draft) awaiting review/merge: submodule + m0 pipeline + typing + sample."
+  - "The PR (draft) awaiting review/merge: submodule + m0 pipeline + typing + sample."
   - "Tier-0 readings (Modgil & Prakken 2014, Yu & Zenker 2020, Caminada & Amgoud 2007 ex. 5-6) before annotation proper; resnet C02/E01 hand-checkpoint."
   - "Parallel Lean candidate: grounded-labelling invariance under AF isomorphism (abstract half of result 9)."
 

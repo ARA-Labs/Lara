@@ -1,4 +1,4 @@
--- | D2 — mechanical reviewer (#63): the IO around the pure
+-- | D2 — mechanical reviewer: the IO around the pure
 -- "Lara.MechReview" renderer. One command that turns the checker's own per-claim
 -- verdicts over the frozen 60-unit corpus sample
 -- (@corpus-units\/MANIFEST.tsv@, seed 20260801) into reviewer-style markdown — one review

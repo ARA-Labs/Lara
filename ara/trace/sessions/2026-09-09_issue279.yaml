@@ -4,7 +4,7 @@ session:
   started: '2026-09-09'
   last_turn: '2026-09-09'
   turn_count: 1
-  summary: '#279: finite injective realization with context fixing; unrestricted extension refuted.'
+  summary: 'Finite injective realization with context fixing; unrestricted extension refuted.'
 events_logged:
 - turn: 1
   type: pivot
@@ -53,9 +53,9 @@ logic_revisions:
     The localization is bounded from below by an inherited hypothesis: `RelFixesContext` plus `RelInj`
     pin the relation to the identity on the *context''s* occurrences too, so an assurance shared between
     context and fragment cannot move. Untested boundary: no fixture exhibits two fragments related by
-    a genuinely non-functional relation whose observations differ (#275), so the gap is shown non-empty
+    a genuinely non-functional relation whose observations differ, so the gap is shown non-empty
     by construction of the localized hypothesis rather than by a separating witness; the step from `relInj_functional`''s
-    *partial* function to a *total injective* extension is prose rather than proof (#279), and the Statement''s
+    *partial* function to a *total injective* extension is prose rather than proof, and the Statement''s
     "already reachable" clause rests on it; and no claim is made that a side condition weaker than `RelInj`
     — one that does not force single-valuedness — is unavailable for a calculus that decides equality
     less often.
@@ -83,7 +83,7 @@ logic_revisions:
     `backend_replacement_parametricity_local{,_sem}`, `backend_replacement_congruence_of_parametricity`,
     `congruence_correspondence`, `occRel`/`relFrag_occRel`/`relInj_occRel`, all `lean/Lara/Context/Parametricity.lean`;
     `ara/evidence/proofs/m4_relational_parametricity.md`; `docs/theory-m4-relational-parametricity.md`
-    §4, §6; trace N338, N339, N340; issue #215]
+    §4, §6; trace N338, N339, N340; the issue]
 
     - **Dependencies**: [C49]
 

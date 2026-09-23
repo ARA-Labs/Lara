@@ -1,14 +1,14 @@
 # Theory PW: sorted queries and the outer language's surface
 
-_Status: mechanized 2026-09-09 for issue #307, the two halves scheduled out of
+_Status: mechanized 2026-09-09, the two halves scheduled out of
 the `docs/theory-pw0-outer-model.md` §5 non-goal rows and the
 `docs/theory-pw-closeout.md` §3 surface-syntax row. This document records what the refinement
 froze, what it proved, what it deliberately left out, and the one limitation of
 PW0's contract it could **not** remove._
 
 PW0 froze `Query_κ` as all of `Atom` and deferred the refinement to the M5
-surface layer (`docs/theory-pw0-outer-model.md` §1, limitation 2). M5 landed
-(#188), so the condition fired — for the surface-syntax row, which recorded
+surface layer (`docs/theory-pw0-outer-model.md` §1, limitation 2). M5 landed,
+so the condition fired — for the surface-syntax row, which recorded
 *no* scheduling condition, this is the condition it was really waiting on. The
 two halves scheduled here are:
 
@@ -236,7 +236,7 @@ ones plus a proved collapse.**
 
 | Absent | Why |
 |---|---|
-| ~~A Haskell outer runtime and differential gate~~ | Landed in **#322**; see [the outer runtime contract](theory-pw-outer-runtime.md). Concrete input and declaration/query linkage landed earlier in **#313/#314** ([the wire contract](theory-pw-declared-wire.md)). The byte parser remains a tested boundary; structured codec round trips are proved. |
+| ~~A Haskell outer runtime and differential gate~~ | Landed; see [the outer runtime contract](theory-pw-outer-runtime.md). Concrete input and declaration/query linkage landed earlier in [the wire contract](theory-pw-declared-wire.md). The byte parser remains a tested boundary; structured codec round trips are proved. |
 | An edit to `PW.Frame`, `PW.Sat`, `crossCompare`, or `CrossResult` | PW0's frozen contract. The refinement is a second builder and an earlier guard; `sat_erase` relates them |
 | `holes(P, p)` at the instance layer | §4 |
 | Edge-dependent (configuration) translation | Still PW0 limitation 3 / T6 limitation 1. `trQuery` is bridge-global, exactly as `Frame.translate` was |
@@ -246,11 +246,11 @@ ones plus a proved collapse.**
 
 ## 6. Verification
 
-At the merge commit of #307: whole-tree AxCheck coverage passes at **2934
+At the merge commit: whole-tree AxCheck coverage passes at **2934
 declarations** (`scripts/check-axcheck-coverage.py` over `lean/AxCheck.lean`
 and every `lean/Lara/**/*.lean`), and the axiom audit admits only `propext`,
 `Classical.choice` and `Quot.sound` — so no declaration here can reach a
 `sorryAx`, `ofReduceBool`, or `nativeDecide` obligation. The four new modules
 are `Lara/PW/Sorted.lean`, `Lara/Examples/PWSorted.lean`,
 `Lara/PW/Surface.lean`, and `Lara/Examples/PWSurface.lean`; all four are inside
-the `lake build` closure through `lean/Lara.lean` (issue #259's discipline).
+the `lake build` closure through `lean/Lara.lean` (the closure discipline).

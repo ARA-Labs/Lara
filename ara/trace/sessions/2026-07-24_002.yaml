@@ -2,7 +2,7 @@ session:
   id: "2026-07-24_002"
   timestamp: "2026-07-24T08:48"
   ended: "2026-07-24T08:48"
-  summary: "Additional PR #14 review found a syntactic-vs-instance wf(Pi) gap; conservative overlap checking, ContraryMatch bridge proofs, and the exact regression now close it before v0.1."
+  summary: "Additional review found a syntactic-vs-instance wf(Pi) gap; conservative overlap checking, ContraryMatch bridge proofs, and the exact regression now close it before v0.1."
 
 events_logged:
   - type: experiment

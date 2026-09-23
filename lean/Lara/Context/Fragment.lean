@@ -260,7 +260,7 @@ def firstShared? (xs ys : List LeafId) : Option LeafId :=
 
 /-- Σ and policy agreement, shared by the link and composition guards. A
 context "may add fresh evidence, attacks, and rule instances but may not
-redefine the fixed policy" (issue #187); this is where that is enforced. -/
+redefine the fixed policy"); this is where that is enforced. -/
 def sigmaPolicyFault (F G : Fragment) : Option LinkFault :=
   if F.sigma ≠ G.sigma then some (.sigmaMismatch F.sigma G.sigma)
   else if F.policy ≠ G.policy then some (.policyMismatch F.policy G.policy)

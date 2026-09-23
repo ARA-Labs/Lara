@@ -1,4 +1,4 @@
--- | The checker-performance bench (E1, issue #69).
+-- | The checker-performance bench (E1).
 --
 -- One command that measures the production checker on the frozen corpus
 -- units and the manifest-discovered harness, prints the performance table in
@@ -26,7 +26,7 @@
 -- * The harness sweep pre-reads every manifest input, then times one full
 --   in-memory pass (decode + check + render, or the codec failure path).
 -- * @--map@ is a second protocol with its own table, never folded into the
---   rows above (issue #319). It measures every accepted @map.laramap@
+--   rows above. It measures every accepted @map.laramap@
 --   conformance anchor: one untimed pass reads the manifest, its policy, every
 --   member and every member's policy into a fresh source cache, then the timed
 --   sections run everything @lara check \<map.laramap\>@ does after argument
@@ -408,7 +408,7 @@ envOverride name probe = do
     Just "" -> die ("empty " ++ name)
     Just value -> pure value
 
--- | The host CPU model, per platform (issue #325): macOS asks @sysctl@; Linux
+-- | The host CPU model, per platform: macOS asks @sysctl@; Linux
 -- reads the first @model name@ line of @\/proc\/cpuinfo@ and, when the kernel
 -- omits it (aarch64 kernels do), @lscpu@'s @Model name@ row. Any other platform,
 -- or every probe failing, yields @""@ and the caller records the architecture.
@@ -496,7 +496,7 @@ trim = f . f
   where
     f = reverse . dropWhile (`elem` " \t\r\n")
 
--- Map mode (issue #319) ------------------------------------------------------
+-- Map mode -------------------------------------------------------------------
 
 -- | The roots whose @map.laramap@ anchors the map mode measures: the two that
 -- @scripts\/check-map-conformance.sh@ discovers anchors under, so a map is
@@ -992,7 +992,7 @@ data Options = Options
 -- renderer has no LaTeX case to reach.
 data Mode
   = KernelMode Format
-  | MapMode MapFormat -- ^ @--map@: the map anchors instead (issue #319)
+  | MapMode MapFormat -- ^ @--map@: the map anchors instead
 
 -- | The formats the map table prints in: 'Format' less LaTeX.
 data MapFormat = MapText | MapMarkdown

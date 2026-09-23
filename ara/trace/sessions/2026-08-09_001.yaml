@@ -5,11 +5,11 @@ session:
   last_turn: "2026-08-10T07:28"
   turn_count: 6
   summary: >
-    Audited and synced the merged @0.3 paper surface, engineering-cleared issue
-    #87 Step 0, and implemented the reviewed 38-row role-aware worklist. Then
+    Audited and synced the merged @0.3 paper surface, the engineering-cleared
+    issue's Step 0, and implemented the reviewed 38-row role-aware worklist. Then
     locked and implemented the Steps 1-3 audit tooling: blinded packet
     preparation, status-free pre-seal validation, sealed-result summarization,
-    exact input identities, and generated paper numbers. PR #96 review
+    exact input identities, and generated paper numbers. Review
     hardening made the packet transactional, diagnostics contextual, generated
     vocabularies canonical, and boundary tests mutation-effective. The detached
     42-judgment human audit, summary generation, and paper update remain open.
@@ -20,7 +20,7 @@ events_logged:
     id: "N140"
     routing: direct
     provenance: user
-    summary: "Which paper sections must change after PR #92 merged?"
+    summary: "Which paper sections must change after the PR merged?"
   - turn: 1
     type: experiment
     id: "N141"
@@ -80,18 +80,18 @@ events_logged:
     id: "N148"
     routing: direct
     provenance: user-revised
-    summary: "Locked full issue #87 Steps 1-3 with status-free pre-seal validation and deterministic reporting."
+    summary: "Locked the full Steps 1-3 with status-free pre-seal validation and deterministic reporting."
   - turn: 6
     type: experiment
     id: "N149"
     routing: direct
     provenance: ai-executed
-    summary: "Implemented and review-hardened the blinded binding-audit result pipeline in PR #96."
+    summary: "Implemented and review-hardened the blinded binding-audit result pipeline in the PR."
 
 ai_actions:
   - turn: 1
     action: >
-      Compared PR #92, lara-syntax@0.3 grammar, S4/S5 examples, Lean scope,
+      Compared the PR, lara-syntax@0.3 grammar, S4/S5 examples, Lean scope,
       and the Overleaf language/evaluation/appendix/mechanization text.
     provenance: ai-executed
     files_changed:
@@ -169,9 +169,9 @@ ai_actions:
       - "docs/superpowers/plans/2026-08-09-binding-audit-results.md"
   - turn: 6
     action: >
-      Implemented issue #87's status-free packet preparation and validation,
+      Implemented the issue's status-free packet preparation and validation,
       sealed result summarization, canonical JSON/input identities, and CLI;
-      then addressed every PR #96 review finding with targeted red-green tests,
+      then addressed every review finding with targeted red-green tests,
       removed tracked handoff artifacts, and preserved the exact packet as a
       detached archive.
     provenance: ai-executed
@@ -204,11 +204,11 @@ logic_revisions:
 key_context:
   - turn: 2
     excerpt: >
-      PR #92 changes presentation syntax and validated elaboration, while S2/S3/S4
+      The PR changes presentation syntax and validated elaboration, while S2/S3/S4
       still elaborate to byte-identical lara-core@0.1 units.
   - turn: 3
     excerpt: >
-      Issue #87 Step 0 stays reporting-only: checked core attacks determine role
+      The issue Step 0 stays reporting-only: checked core attacks determine role
       endpoints, surface declarations supply audit prose/context, and the
       existing byte-exact corpus freshness guard owns their join.
   - turn: 4
@@ -231,7 +231,7 @@ key_context:
 open_threads:
   - "Regenerate Lean/Haskell size metrics with the paper's original counting method before replacing LOC figures."
   - "The paper's '19 rejection fixtures / 13 rejection classes' sentence could not be grounded to a current count; left unchanged as pre-existing."
-  - "Issue #87 human checkpoint remains: complete and seal 42 second-author judgments, generate the canonical summary, and update the paper from generated numbers."
+  - "Human checkpoint remains: complete and seal 42 second-author judgments, generate the canonical summary, and update the paper from generated numbers."
 
 
 ai_suggestions_pending:

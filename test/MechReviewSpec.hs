@@ -1,4 +1,4 @@
--- | The D2 mechanical-reviewer renderer (#63) as a standing freshness test: the
+-- | The D2 mechanical-reviewer renderer as a standing freshness test: the
 -- committed golden @measurements\/frozen\/mechanical-reviews.md@ must reproduce
 -- byte-for-byte from re-running the pure "Lara.MechReview" renderer over the
 -- FROZEN 60 corpus units. If a corpus edit or a checker change moves any per-claim
@@ -280,7 +280,7 @@ gapReport obligations =
 -- private table; kept here so the shape prop can group by status without
 -- exporting the internal speller).
 -- | The heading word for a public status, mirroring
--- "Lara.MechReview".@publicStatusWord@ (spec §4.3, issue #76).
+-- "Lara.MechReview".@publicStatusWord@ (spec §4.3).
 publicStatusWord :: PublicStatus -> String
 publicStatusWord ps = case ps of
   EvidenceBlocked _ -> "evidence-blocked"

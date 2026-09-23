@@ -5,7 +5,7 @@
 -- premise-name resolution but before strict replay, replacing source-premise
 -- references, source-theory references, and named binders with ordinary
 -- indices, and lowering source-authored @(prop TEXT)@ formula annotations to
--- the backend's opaque @(atom KEY)@ encoding (@lara-syntax\@0.10@, #144).
+-- the backend's opaque @(atom KEY)@ encoding (@lara-syntax\@0.10@).
 -- Formula positions are otherwise left to the strict decoder: @false@,
 -- @(atom KEY)@, and non-grammar subtrees pass through unchanged, and @imp@
 -- recursion exists only to reach nested @prop@ spellings.
@@ -202,7 +202,7 @@ lowerFormula expr
   | otherwise = Right expr
 
 -- | Every source-authored formula annotation in a named proof-term payload, as
--- @(atom key, authored text)@ pairs in leftmost-outermost order (#148).
+-- @(atom key, authored text)@ pairs in leftmost-outermost order.
 --
 -- This is the inverse direction of 'lowerFormula', for one purpose only:
 -- when a payload lowers cleanly and the certificate is then refused at replay,

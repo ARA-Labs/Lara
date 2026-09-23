@@ -1,8 +1,9 @@
-# Declared outer bridges and wire input (#313/#314)
+# Declared outer bridges and wire input
 
 The user adopted a combined checked environment, codec, and file-driven Lean
-example, with the Haskell runtime and differential gate in a separate issue.
-Issue #322 was opened before code changes. Implementation is on the new branch
+example, with the Haskell runtime and differential gate in a separate follow-up
+that was filed before code changes.
+Implementation is on the new branch
 `feat/pw-declared-wire`; the PR is prepared after verification and this record.
 
 ## What is proved
@@ -59,4 +60,4 @@ fixed contexts, one checked world per context, and an explicit acceptance
 relation. It does not certify arbitrary maps for T6: leaf/certificate transport
 obligations remain explicit premises, and canonicalizer equality is supplied
 by the host. Haskell execution and cross-language agreement are not tested here;
-they remain #322. PW.Frame, PW.Sat, crossCompare, and T6 are unchanged.
+they remain open follow-up work. PW.Frame, PW.Sat, crossCompare, and T6 are unchanged.

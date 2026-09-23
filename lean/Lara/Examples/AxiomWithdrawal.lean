@@ -1,5 +1,5 @@
 /-
-Executable axiom-withdrawal witness (#350). This is a separate Lean
+Executable axiom-withdrawal witness. This is a separate Lean
 structural-contract example, not an extension of `lara pw` or CheckInput.
 The source certifies the assumed postulate itself using the production ND
 backend and an empty theory. Admission computes both checking environments.

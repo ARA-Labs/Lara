@@ -59,7 +59,7 @@ Nothing on GitHub now checks, on every change, that the Haskell and Lean
 implementations still agree. A gate that nothing runs drifts silently: when this
 decision was taken, `make pw-conformance` was already failing on `main`, because
 its fixture-ownership check had not been taught about `fixtures/pw/source/`
-(#327) while CI was switched off (#344).
+while CI was switched off.
 
 The mitigation is procedural, not mechanical:
 

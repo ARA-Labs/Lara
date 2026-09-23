@@ -46,7 +46,7 @@ as observed noise; this record makes no causal performance claim for that path.
 - `scripts/replay.sh bundles/walking-skeleton`: verdict bytes and exit code
   matched the frozen bundle.
 - `make presentation-parity`: passed with 73 rows.
-- [PR #117](https://github.com/ARA-Labs/lara/pull/117), hosted CI run
+- Hosted CI run
   `32107434809`: the Haskell build/test, replay, tamper, presentation parity,
   Haskell-Lean differential, and semantic admission differential gates passed;
   the Lean build and no-`sorry` standard-axiom audit also passed.

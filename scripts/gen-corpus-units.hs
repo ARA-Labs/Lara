@@ -1,4 +1,4 @@
--- | Corpus-unit @.core.sexp@ generator (M5 tracker #48, T2).
+-- | Corpus-unit @.core.sexp@ generator (T2).
 --
 -- For each row of @corpus-units/MANIFEST.tsv@, reads the committed
 -- @corpus-units/<artifact>/<claim_id>/unit.lara@ and the shared
@@ -12,8 +12,8 @@
 -- hardcoded here. The output shape is the exact one
 -- @scripts/gen-worked-examples.hs@ pins for the worked examples.
 --
--- Discovery is manifest-driven, never by globbing (the mutant-suite rule,
--- PR #49): the manifest and the committed unit directories must agree exactly.
+-- Discovery is manifest-driven, never by globbing (the mutant-suite rule):
+-- the manifest and the committed unit directories must agree exactly.
 -- @test/CorpusUnitsSpec.hs@ pins freshness (re-deriving each committed
 -- @unit.core.sexp@\/@expected.json@ reproduces the bytes), manifest ↔
 -- @m0/sample.tsv@ agreement, and expected-status agreement; the differential

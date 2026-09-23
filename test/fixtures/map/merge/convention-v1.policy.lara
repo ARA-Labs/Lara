@@ -1,4 +1,4 @@
-# convention-v1 — the smallest policy with a premise-less rule (issue #316).
+# convention-v1 — the smallest policy with a premise-less rule.
 #
 # Leaf qualification confines a support-term collision to a single member, so a
 # map's structural merge (D8 and D12 of docs/multi-artifact-composition-decision.md)

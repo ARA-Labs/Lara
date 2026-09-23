@@ -1,4 +1,4 @@
--- | The axis-(c) measurement library (M5 tracker #48, T3): the pure metrics
+-- | The axis-(c) measurement library (M5, T3): the pure metrics
 -- behind @scripts\/measure.hs@.
 --
 -- Everything deterministic lives here — manifest discovery, per-input rejection
@@ -105,7 +105,7 @@ data InputMeta = InputMeta
   -- (@docs\/localization-metric-decision.md@); 'Nothing' when the row seeds no
   -- site (@-@). Non-empty by construction, so a row cannot be seeded at
   -- nothing and thereby drop out of the location metrics' denominator
-  -- unnoticed (#169)
+  -- unnoticed
   , imHsDiag :: String -- ^ codec deletion-sensitivity pin (empty otherwise)
   , imLeanDiag :: String
   , imKind :: InputKind
@@ -117,7 +117,7 @@ data InputMeta = InputMeta
 -- Columns 3 and 5 are both gated against their vocabularies ('parseFamily',
 -- 'parseExpected') and a row failing either is dropped, so a stale or
 -- hand-edited manifest cannot carry an unrecognized family or expectation into
--- @measurements\/report.{json,tsv}@ (#171). Dropping is safe precisely because
+-- @measurements\/report.{json,tsv}@. Dropping is safe precisely because
 -- it is loud: @prop_manifestParsersTotal@ requires this parser to account for
 -- every data row, so a dropped row fails the suite rather than silently
 -- shrinking the measured set. That coupling only fires when a row /is/
@@ -197,7 +197,7 @@ data Deterministic = Deterministic
   , detLocationPrimary :: Maybe Bool
   -- ^ located constituent '==' the list head (the spec-order-first site) —
   -- the ordering claim, measured never gated ('-' off rejects)
-  , detReplayOk :: Maybe Bool -- ^ #36 replay identity carried + stable (corpus units only)
+  , detReplayOk :: Maybe Bool -- ^ replay identity carried + stable (corpus units only)
   , detTotalBytes :: Int
   , detPolicyBytes :: Int -- ^ rendered bytes of the @(policy …)@ subtree
   , detPayloadBytes :: Int -- ^ total − policy (the distribution-bearing size)
@@ -313,8 +313,8 @@ classMatches e outcome = case e of
 actualText :: Outcome -> String
 actualText outcome = case outcome of
   Reject r -> "reject-" ++ rejectionText r
-  -- An @evidence-blocked@ query has no four-state public status (spec §4.3,
-  -- issue #76), so it is its own class and never matches an expected status.
+  -- An @evidence-blocked@ query has no four-state public status — spec §4.3 —
+  -- so it is its own class and never matches an expected status.
   Accept _ _ statuses
     | evidenceBlocked outcome -> "accept-evidence-blocked"
     | allContested outcome -> "accept-all-contested"
@@ -336,7 +336,7 @@ allContested outcome = case outcome of
   _ -> False
 
 -- | The verdict accepts and some queried claim's public status is
--- @evidence-blocked@ (spec §4.3, issue #76).
+-- @evidence-blocked@ (spec §4.3).
 evidenceBlocked :: Outcome -> Bool
 evidenceBlocked outcome = case outcome of
   Accept _ _ statuses -> any (not . isPublished . snd) statuses
@@ -347,7 +347,7 @@ primaryStatus outcome = case outcome of
   Accept _ _ [(_, Published st)] -> Just st
   _ -> Nothing
 
--- | #36: the verdict carries the input's replay identity, and re-checking is
+-- | The verdict carries the input's replay identity, and re-checking is
 -- byte-stable (a regression guard on replay-carried identity + determinism).
 replayStable :: CheckInput -> Verdict -> Bool
 replayStable input verdict =
@@ -388,7 +388,7 @@ data AblationBucket
     -- ^ per-attack typing is load-bearing (R10\/R11 bad-attack-targets)
   | FlipUnderNoConflictScan
     -- ^ the completeness scan is load-bearing (the drop-covering-attack
-    -- mutants, #124) — the isolating evidence for attack completeness
+    -- mutants) — the isolating evidence for attack completeness
   | UnchangedUnderAblations
     -- ^ identical under every ablation: rejects decided by rules behind no
     -- flag, codec rows (decode fails before any config), and all accepts
@@ -406,7 +406,7 @@ ablationBucket e = case e of
   ExpectCodecReject -> UnchangedUnderAblations
   ExpectAllContested -> UnchangedUnderAblations
   -- Blocking is decided at the driver boundary from the §4.3 prune, behind no
-  -- ablation flag, and the mutant accepts either way (issue #76).
+  -- ablation flag, and the mutant accepts either way.
   ExpectEvidenceBlocked -> UnchangedUnderAblations
   ExpectPrimaryStatus _ -> UnchangedUnderAblations
 
@@ -417,7 +417,7 @@ ablationBucket e = case e of
 -- arbitrary attack edges\" baseline: it drops the whole typed-attack bundle,
 -- so both the typing rows and the completeness rows flip under it. @no-cq@ and
 -- @no-conflict-scan@ each carry one, and are therefore the isolating cells —
--- the second exists (#124) precisely because the first-generation partition had
+-- the second exists precisely because the first-generation partition had
 -- no cell that separated the completeness scan from the typing it shipped with.
 ablationConfigs :: [(String, CheckConfig, [AblationBucket])]
 ablationConfigs =

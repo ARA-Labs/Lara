@@ -1,5 +1,5 @@
--- | Navigation and rewriting helpers shared by the site enumerators (#125,
--- split out of "Lara.Mutate.Sites" alongside the certificate family; see
+-- | Navigation and rewriting helpers shared by the site enumerators, split
+-- out of "Lara.Mutate.Sites" alongside the certificate family; see
 -- @docs\/mutate-module-ownership-decision.md@).
 --
 -- These were private to "Lara.Mutate.Sites" before the split and stay
@@ -15,7 +15,7 @@
 -- order, and 'ruleSites' \/ 'leafSites' preserve it, so a change to the
 -- traversal here moves committed corpus bytes.
 --
--- __Two index spaces__ (#165). The checker runs on the §4.3 quarantine of the
+-- __Two index spaces__. The checker runs on the §4.3 quarantine of the
 -- declared unit, and its verdict names /checked/ indices; the mutation rewrite
 -- edits the /declared/ unit. 'ruleSites' and 'leafSites' therefore read a
 -- 'Prune' and carry both: sites are drawn from the checked argument list (a
@@ -74,7 +74,7 @@ import Lara.Prop (Prop (..), equiv)
 
 -- | An index into the __checked__ unit — the §4.3 quarantine the checker runs
 -- on, and so the space every published 'Lara.Diagnostics.Constituent' index
--- must be in (#165).
+-- must be in.
 newtype CheckedIx = CheckedIx {checkedIx :: Int}
   deriving (Eq, Ord, Show)
 
@@ -172,8 +172,8 @@ ruleOf :: Unit -> RuleId -> Maybe Rule
 ruleOf u rn = find ((== rn) . ruleId) (unitRules u)
 
 -- | A declared leaf whose proposition is ≢ the wanted one (the swap target
--- for premise\/discharge mismatch mutations). Callers pass the /checked/ unit
--- (#165): a swap target drawn from quarantined Γ would make the mutated
+-- for premise\/discharge mismatch mutations). Callers pass the /checked/ unit:
+-- a swap target drawn from quarantined Γ would make the mutated
 -- argument use a quarantined leaf, pruning it out of the checked unit — the
 -- mutation would vanish instead of manifesting.
 inequivLeaf :: Unit -> Prop -> Maybe LeafId

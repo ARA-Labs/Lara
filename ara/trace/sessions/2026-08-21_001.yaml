@@ -6,14 +6,14 @@ session:
   turn_count: 2
   summary: >
     Executed Part A of the eng-reviewed named-certificate-authoring plan as
-    lara-syntax@0.8 (#131): a certificate premise reference gained a third name
+    lara-syntax@0.8: a certificate premise reference gained a third name
     class - the citing rule's declared premise label - with cross-class
     collision a hard error and no carve-out for agreeing referents. Measured
     byte-identity against the numeric twin rather than asserting it, confirmed
     zero Lean re-proof was owed by the abstract-resolver parameterization, wrote
-    grammar Appendix G, added worked example S7, and opened PR #141. Part B
-    (#132) deliberately left unstarted per the plan's no-combine constraint.
-    Turn 2 then executed a separate, unrelated plan: the #122 split of the
+    grammar Appendix G, added worked example S7, and opened the PR. Part B
+    deliberately left unstarted per the plan's no-combine constraint.
+    Turn 2 then executed a separate, unrelated plan: the split of the
     1209-line Lara.Mutate into seven ownership modules, landed as one atomic
     output-preserving commit and verified byte-identical against a pre-split
     baseline (506 checksums, differential 582/0 and 56/0), so m5-freeze-v4
@@ -25,7 +25,7 @@ events_logged:
     id: "N199"
     routing: direct
     provenance: user
-    summary: "Land #131 alone as @0.8 with premise labels as a third name class; cross-class collision hard-errors even when both classes agree on the slot."
+    summary: "Land alone as @0.8 with premise labels as a third name class; cross-class collision hard-errors even when both classes agree on the slot."
   - turn: 1
     type: experiment
     id: "N200"
@@ -124,7 +124,7 @@ ai_actions:
       - "docs/mechanization-plan.md"
       - "README.md"
   - turn: 1
-    action: "Opened issue #140 (CertSlotMultiSlot advice no longer exhaustive) and PR #141; added a status banner to the plan file so it carries Part B only."
+    action: "Opened the issue (CertSlotMultiSlot advice no longer exhaustive) and the PR; added a status banner to the plan file so it carries Part B only."
     provenance: ai-executed
     files_changed:
       - "plans/2026-08-21-named-certificate-authoring.md"
@@ -195,7 +195,7 @@ logic_revisions:
       reachable representations and must extend the candidate set.
     after: >
       [unchanged text] ... must extend the candidate set. Scope, from
-      `lara-syntax@0.8` (#131): the claim is about the resolver's *locate*
+      `lara-syntax@0.8`: the claim is about the resolver's *locate*
       step, and the resolver now has a class that has no locate step - a rule
       premise label denotes its slot directly, so it is representation-invariant
       by construction and neither confirms nor tests this claim. The claim
@@ -215,7 +215,7 @@ key_context:
     excerpt: >
       Researcher scoped the session to Part A only when asked, endorsing the
       plan's own no-combine constraint: Part A ships and merges before Part B
-      (#132, named nd@1 proof terms) begins on the same branch.
+      (named nd@1 proof terms) begins on the same branch.
   - turn: 1
     excerpt: >
       The decisive design question was whether an agreeing-referent carve-out
@@ -233,15 +233,15 @@ key_context:
       post-split run was compared against.
 
 open_threads:
-  - "Part B (#132, lara-syntax@0.9 named nd@1 proof terms) - Tasks B1-B6 remain in plans/2026-08-21-named-certificate-authoring.md; starts after PR #141 merges."
-  - "Issue #140: CertSlotMultiSlot still advises 'cite a numeric slot', now one exit rather than the list. Fold into the next surface-version bump - it is a normative template change touching four places in lockstep."
-  - "PR #141 awaiting review/merge."
+  - "Part B (lara-syntax@0.9 named nd@1 proof terms) - Tasks B1-B6 remain in plans/2026-08-21-named-certificate-authoring.md; starts after the PR merges."
+  - "CertSlotMultiSlot still advises 'cite a numeric slot', now one exit rather than the list. Fold into the next surface-version bump - it is a normative template change touching four places in lockstep."
+  - "The PR awaits review/merge."
   - "Carried from 2026-08-20_001: O77's acceptance-preservation sweep procedure now has a second instance (@0.8) but is still staged; see pm_reasoning_log for why."
-  - "Lara.Mutate.Accept stays the one documented 400-line exception at 445; splitting it was explicitly out of #122's scope. Now tracked as issue #143 (filed during PR #142 review round 1), so the deferral is in the tracker rather than in prose."
-  - "RESOLVED in PR #142 review round 1: docs/m5-freeze-checklist.md's gate table read pass=580 against a live 582. Re-measured independently (582/0 positive, 56/0 negative) and corrected in-PR rather than deferred, with a note pinning the row as live-tracking and guarding the tag-scoped 580 in the reproduce block."
+  - "Lara.Mutate.Accept stays the one documented 400-line exception at 445; splitting it was explicitly out of the issue's scope. Now tracked as a follow-up (filed during review round 1), so the deferral is in the tracker rather than in prose."
+  - "RESOLVED in review round 1: docs/m5-freeze-checklist.md's gate table read pass=580 against a live 582. Re-measured independently (582/0 positive, 56/0 negative) and corrected in-PR rather than deferred, with a note pinning the row as live-tracking and guarding the tag-scoped 580 in the reproduce block."
 
 ai_suggestions_pending:
   - "O78 - slot-indexed vs referent-indexed naming: the non-injective case is exactly the expressiveness gap. No closure signal yet."
   - "O79 - abstract-resolver parameterization makes name-scope extensions proof-neutral. Demonstrated once at @0.8; no closure signal yet."
-  - "O80 - a deterministic derived corpus makes refactor gates free, in proportion to how much source structure the derivation is sensitive to. One instance (#122); no closure signal yet."
-  - "O81 - a vocabulary-owning root cannot facade its own siblings, which forces both the API break and the atomic landing. One instance (#122); no closure signal yet."
+  - "O80 - a deterministic derived corpus makes refactor gates free, in proportion to how much source structure the derivation is sensitive. One instance; no closure signal yet."
+  - "O81 - a vocabulary-owning root cannot facade its own siblings, which forces both the API break and the atomic landing. One instance; no closure signal yet."

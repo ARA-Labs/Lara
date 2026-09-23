@@ -1,16 +1,16 @@
 # Theory PW-T6: exact checked-support transport
 
-_Status: mechanized on 2026-09-02 (issue #191, tracker #189). This document
+_Status: mechanized on 2026-09-02 for T6 of the possible-world spike. This document
 records what T6 froze, what it proved, why its obligations clause is exact
-rather than conditional, and the limitations its successors T8 (#193) and T9
-(#190) inherit._
+rather than conditional, and the limitations its successors T8 and T9
+inherit._
 
 _Part of the possible-world spike (comparing artifacts across differing
 contexts); start from `theory-pw-closeout.md` for the subseries index and
 `theory-pw0-outer-model.md` for the model this builds on._
 
-The intended readers are the paper author, whoever takes decisions on tracker
-#189, and whoever implements T8/T9. They should cite the declarations below
+The intended readers are the paper author, whoever takes decisions on the
+spike, and whoever implements T8/T9. They should cite the declarations below
 rather than re-deriving them.
 
 T6 adds a structural layer over the unchanged PW0 wrapper and the unchanged
@@ -53,7 +53,7 @@ to be comparable as claims — the same shared binder B0 records for registries
 (`docs/theory-b0-backend-compositionality.md`, "two binders ARE shared").
 
 Every contract field is read by a named arm of the transport induction;
-issue #191's "every contract field is justified by a proof use or removed"
+T6's "every contract field is justified by a proof use or removed"
 was applied literally — early drafts carried no field that the final proof
 does not consume.
 
@@ -73,13 +73,13 @@ does not consume.
 | Renaming instance | `Examples.PW.bridgeRen`, `hasSupport_ren`, `ren_transport` |
 | Strict-certificate renaming instance | `Examples.PW.bridgeCert`, `hasSupport_cert`, `cert_transport` |
 | Contract clauses exercised off the identity | `Examples.PW.ren_leaf_translated`, `ren_support_renamed`, `cert_accept_translated`, `cert_reject_untranslated`, `cert_support_renamed` |
-| Strict-fixture drift guards (#231) | `Examples.PW.cert_reject_mismatched_certifier`, `cert_target_rule`, `cert_only_assurance` |
+| Strict-fixture drift guards | `Examples.PW.cert_reject_mismatched_certifier`, `cert_target_rule`, `cert_only_assurance` |
 | Translation-domain negative | `Examples.PW.ren_out_of_vocabulary`, `ren_translationUndefined` |
 
 The renaming instance discharges `rule_ok` and `leaf_ok` under a translation
 that actually renames — the target policy carries the translated rule, and the
 renamed leaf is admitted at the translated atom. The strict-certificate
-instance (#224) discharges the third clause: a strict rule with a live
+instance discharges the third clause: a strict rule with a live
 certifier allowlist and `allowTrusted` off, a `CertOk` pair holding exactly at
 the fixture's encoded step on each side, `cert_accept_translated` pinning that
 source acceptance at `([e], p)` survives translation to target acceptance at
@@ -93,7 +93,7 @@ are inhabitable off the identity.
 
 Because `cert_transport` exercises the strict fixture at exactly one certifier
 triple and one encoded step, two mutations of the fixture would leave it green
-while making the prose above false. #231 closes both. Dropping `(β, hd, κ)`
+while making the prose above false. The drift guards close both. Dropping `(β, hd, κ)`
 from either acceptance judgment — acceptance as a predicate on the encoded
 step alone — is rejected by `cert_reject_mismatched_certifier`, which pins
 that mismatching exactly one of the three components, with the side's own
@@ -146,7 +146,7 @@ Instantiating both certificate judgments from registries
 strict occurrence of the transported term is accounted by its own backend as
 registered in the target registry — the target policy carries its rule, the
 certificate is accepted by the target instantiation, and the
-occurrence-local consequence holds. This is issue #191's replay acceptance
+occurrence-local consequence holds. This is the replay acceptance
 bullet, and it is a corollary rather than a new induction — the intended
 signal (as with B0's own accounting laws) that the contract was factored at
 the right joint.
@@ -171,11 +171,11 @@ no longer promises more than any model supplies.
 endobridge's transport succeeds (`Admits` holds between `wT7src` and
 `wT7tgt`) *and* `cmpStatus` flips from `justified` to `defeated`. What
 `t7_witness` showed before T6 existed — support transport cannot give status
-preservation — is now exhibited *through* the T6 machinery itself. T8 (#193)
+preservation — is now exhibited *through* the T6 machinery itself. T8
 must therefore quantify over the target's attackers; nothing in this
 milestone's theorem set can be strengthened into T8 without new hypotheses.
 
-## 7. Verification (2026-09-06, with the #231 drift guards)
+## 7. Verification (2026-09-06, with the drift guards)
 
 ```
 $ cd lean && lake build
@@ -194,13 +194,13 @@ reports the whole dependency set, and the repo-wide convention is that
 example fixtures are gated through their theorems rather than registered
 separately. No `sorryAx`, no
 `ofReduceBool`, no `nativeDecide`, nothing outside `propext` /
-`Classical.choice` / `Quot.sound`. The original landing (PR #223, verified
+`Classical.choice` / `Quot.sound`. The original landing (verified
 2026-09-02 at 1707 declarations, 78 PW-T6) touched only the three new
 modules, the two roots (`Lara.lean`, `AxCheck.lean`), and the two docs — no
-existing semantics module (the PW0 gate-1 discipline, carried forward); the
-#224 follow-up added the strict-certificate fixtures to
+existing semantics module (the PW0 gate-1 discipline, carried forward);
+the next follow-up added the strict-certificate fixtures to
 `Lara/Examples/PWStructural.lean` and their six audit rows (verified
-2026-09-03 at 1713 declarations, 84 PW-T6), and the #231 follow-up adds the
+2026-09-03 at 1713 declarations, 84 PW-T6), and the drift-guard follow-up adds the
 three drift guards to the same fixture module and their three audit rows.
 Neither follow-up touches a semantics module.
 
@@ -229,13 +229,13 @@ These are design commitments, not oversights; each has a named home.
 3. **Attacks do not transport.** The contract preserves nothing about attack
    structure — deliberately, since basic support checking does not read
    attacks. Attack correspondence is exactly the additional hypothesis T8
-   (#193) must introduce. Discharged by T8 (#193): the attack correspondence is
+   must introduce. Discharged by T8: the attack correspondence is
    `PW.StatusBridge` (`forth`/`back`/`matched`); see
    docs/theory-pw-t8-status-preservation.md.
 4. **No composition.** Transport along a path of structural bridges, and the
    commuting-triangle conditions for equating a composite with a direct
-   bridge, are T9 (#190). `trSupport` composes as a function, but nothing
-   here states the bridge-level coherence laws. Discharged by T9 (#190): see
+   bridge, are T9. `trSupport` composes as a function, but nothing
+   here states the bridge-level coherence laws. Discharged by T9: see
    docs/theory-pw-t9-path-composition.md.
 5. **Question keys are frozen across the bridge.** A bridge that renames its
    critical-question vocabulary is not expressible; obligations transport

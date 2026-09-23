@@ -108,7 +108,7 @@ observations:
     from that result.
 
     '
-  context: 'Technical evaluation of PR #10 review feedback during the lock-pass hardening.'
+  context: 'Technical evaluation of review feedback during the lock-pass hardening.'
   potential_type: constraint
   bound_to:
   - N34
@@ -125,7 +125,7 @@ observations:
     the port.
 
     '
-  context: 'M1 lock pass; reconciled after the PR #14 rebase.'
+  context: 'M1 lock pass; reconciled after the rebase.'
   potential_type: heuristic
   bound_to:
   - N39
@@ -142,7 +142,7 @@ observations:
     decision procedures rather than the grounded semantics.
 
     '
-  context: 'M1 compile lock item; reconciled after the PR #14 rebase.'
+  context: 'M1 compile lock item; reconciled after the rebase.'
   potential_type: claim
   bound_to:
   - N42
@@ -159,7 +159,7 @@ observations:
     so payload-varying programs lack the required explicit node bijection.
 
     '
-  context: 'Technical evaluation of PR #14 review feedback.'
+  context: 'Technical evaluation of review feedback.'
   potential_type: constraint
   bound_to:
   - N44
@@ -195,7 +195,7 @@ observations:
     a ground CanFly(tweety) contrary side even though their instances participate in the same conflict.
 
     '
-  context: 'Additional PR #14 review finding; verified and repaired before the spec-v0.1 tag.'
+  context: 'Additional review finding; verified and repaired before the spec-v0.1 tag.'
   potential_type: claim
   bound_to:
   - N44
@@ -245,7 +245,7 @@ observations:
     '
   context: 'User directed (turn: "you should not just say what it claims in their write up ... I think
     there is a little discrepancy") a code-vs-write-up audit of rit; I read the live commit path and confirmed
-    five discrepancies, committed as ba6c45e, pushed to PR #22.
+    five discrepancies, committed as ba6c45e.
 
     '
   potential_type: claim
@@ -416,7 +416,7 @@ observations:
     (the default) off the rejection ladder entirely — a data conflict routes to gap, never a verdict.
 
     '
-  context: 'Implementing #38 (N84 decision, N86 experiment). Candidate concept: "driver-boundary rejection
+  context: 'Implementing the N84 decision (N86 experiment). Candidate concept: "driver-boundary rejection
     tier" as a named part of the checker architecture. Staged pending a cleaner formulation / reuse.
 
     '
@@ -441,9 +441,9 @@ observations:
     exercise every door on the same malformed input, not just the wire one.
 
     '
-  context: 'PR #45 review finding 1 (fenfenai, reproduced): fixed by Elaborate.validateGroups mirroring
+  context: 'review finding 1 (fenfenai, reproduced): fixed by Elaborate.validateGroups mirroring
     Wire.checkGroupInvariants (N87). Candidate methodological concept ("front-door invariant parity");
-    no reuse/affirmation beyond this fix yet and PR #45 is unmerged, so staged pending a cleaner formulation.
+    no reuse/affirmation beyond this fix yet and the PR is unmerged, so staged pending a cleaner formulation.
     Sibling of O20 (rejection tiers): R14 is the out-of-core codec tier that must hold at both doors.
 
     '
@@ -470,10 +470,10 @@ observations:
     difference is unobservable end-to-end.
 
     '
-  context: 'PR #45 second-round review finding (fenfenai) on remediation commit 7048b89; fixed in 9c85c3d
+  context: 'second-round review finding (fenfenai) on remediation commit 7048b89; fixed in 9c85c3d
     (N88): memberProps mapM/Option, consistentB none=>false, consistentB_iff re-proved. Sibling of O21
     (per-door invariant parity) — this is per-TWIN definitional parity. Staged: single instance, no reuse/affirmation
-    yet, PR #45 unmerged.
+    yet, the PR unmerged.
 
     '
   potential_type: heuristic
@@ -663,9 +663,8 @@ observations:
     exactly its mapped defect class and nothing else (no-cq: the 18 reject-IncompleteArgument rows;
     no-typed: the 30 reject-R10/R11 rows; zero non-miss rows change; all full-accepts byte-identical).
     This is rule-is-load-bearing evidence, confirmatory-by-construction - each seeded defect class is
-    caught only by its rule; it does not measure defect diversity or discovery (the discriminating
-    version over natural defects is #52).
-  context: T6 ablation smoke run (N97); pre-freeze numbers, PR #53 open.
+    caught only by its rule; it does not measure defect diversity or discovery.
+  context: T6 ablation smoke run (N97); pre-freeze numbers, the PR open.
   potential_type: claim
   bound_to:
   - N97
@@ -735,11 +734,11 @@ observations:
     cross-multiplication, and the canonical-numeral / lowest-terms wire grammar makes the seam
     byte-identical without importing Rat/Mathlib into Lean. The one representational asymmetry (Haskell
     bounds slots by host Int at decode; Lean decodes unbounded Nat and rejects at replay) is
-    unobservable at the seam because both sides reject. Source: PR #59 external review's branch-level
+    unobservable at the seam because both sides reject. Source: external review's branch-level
     trace (fenfenai, confidence 78 review, found no accept/reject divergence); the Haskell half of the
     asymmetry is now mechanically pinned by RASpec (prop_raHugeSlotRejected).
   context: >
-    PR #59 review-response turn (N101). The parity argument is the reviewer's interpretive analysis
+    review-response turn (N101). The parity argument is the reviewer's interpretive analysis
     plus the new RASpec pin; the repo's differential harness is the standing empirical check.
   potential_type: claim
   bound_to:
@@ -881,7 +880,7 @@ observations:
     theorem: compact justification plus absence from the exact production evidence-blocked list
     implies declared-index justification after lifting completeClaimFor. The theorem is implication,
     not status equality; equal status still needs statusC_agree's equal-support premise.
-  context: Issue #80 closure implementation and axiom/build/differential verification (N108-N111).
+  context: closure implementation and axiom/build/differential verification (N108-N111).
   potential_type: claim
   bound_to:
   - N108
@@ -1081,7 +1080,7 @@ observations:
     hand-maintained while the harness glob-discovers its inputs, the two drift
     silently -- so the coverage relation itself has to be asserted.
   context: >
-    PR #83 review: the four ord@1 fixtures were glob-discovered by
+    review: the four ord@1 fixtures were glob-discovered by
     differential.sh but absent from corpusGoldens; auditing found two more
     unpinned anchors. Closed by prop_goldensCoverAnchors in
     test/DifferentialSpec.hs.
@@ -1105,7 +1104,7 @@ observations:
     same change, and that assertion should be mutation-tested rather than
     observed to pass.
   context: >
-    PR #83 review finding on test/RASpec.hs; the added
+    review finding on test/RASpec.hs; the added
     prop_raRejectionMessages was verified to fail under the exact mutation
     (decodeSlot "RA" -> "ord") before being kept.
   potential_type: heuristic
@@ -1191,7 +1190,7 @@ observations:
   provenance: user-revised
   content: >
     The paper should receive a focused presentation-layer synchronization after
-    PR #92: distinguish lara-syntax@0.3 elaboration from the frozen
+    the merge: distinguish lara-syntax@0.3 elaboration from the frozen
     lara-core@0.1 AST and checker anchor; state that cell interpolation removes
     numeric transcription drift without verifying the prose-to-formal binding;
     replace the S4 appendix's hand-written comparison expansion with the merged
@@ -1202,7 +1201,7 @@ observations:
     and core performance do not change because S2/S3/S4 remain byte-identical
     after elaboration.
   context: >
-    Code-paper audit requested after PR #92 merged; user approved the sync
+    Code-paper audit requested after the merge; user approved the sync
     ('do these revisions?') and the eight-file paper edit was applied.
   potential_type: constraint
   bound_to: [N140, N141]
@@ -1224,7 +1223,7 @@ observations:
     because Term has no variable constructor. Both errors survived every review
     because nothing executable could contradict them.
   context: >
-    Found while implementing #89 D7/D1: the surface doc's note and the spec's
+    Found while implementing D7/D1: the surface doc's note and the spec's
     R2 row both had to be corrected, not merely extended.
   potential_type: claim
   bound_to: [N150, N152]
@@ -1247,7 +1246,7 @@ observations:
     decisions carry the rest: a theta key off the parameter list stays R3, and
     an instance whose rule id does not resolve stays R1.
   context: >
-    #89 §8 predicted the zero delta and required it be measured, not assumed.
+    The lara-syntax-03 surface plan §8 predicted the zero delta and required it be measured, not assumed.
     Measured: the expected-column diff over the 369 pre-existing mutants is
     empty, after the generators were changed.
   potential_type: claim
@@ -1311,7 +1310,7 @@ observations:
     wire field, a rule-grammar change, and a way for a declaration to disagree
     with the patterns beside it, and buys nothing.
   context: >
-    #89 §2.1 (eng review OV-3) and its implementation: no ninth wire field, no
+    The lara-syntax-03 surface plan §2.1 (eng review OV-3) and its implementation: no ninth wire field, no
     stored Rule field, no sort annotations in the rule grammar.
   potential_type: heuristic
   bound_to: [N150, N152]
@@ -1330,7 +1329,7 @@ observations:
     result-12 gap by bringing Lean Presentation parity to policySigma and the
     current measurand representation, then add a mechanical AST-parity guard.
   context: >
-    Post-PR #99 roadmap audit. Issue #60 says all 12 results are mechanized,
+    Post-PR roadmap audit. The tracker note said all 12 results are mechanized,
     while docs/mechanization-plan.md and lean/Lara/Presentation.lean explicitly
     record that the presentation round-trip models only a subset of the live
     Haskell AST.
@@ -1398,7 +1397,7 @@ observations:
     same-typed positions remain explicit assertions when constructors expose no
     selector metadata.
   context: >
-    PR #102 external review plus independent re-review of the implemented fixes
+    external review plus independent re-review of the implemented fixes
     (N169). The final guard code embodies the rule, but the researcher has not
     explicitly affirmed it as a durable project heuristic.
   potential_type: heuristic
@@ -1413,15 +1412,15 @@ observations:
   provenance: user-revised
   content: >
     After result-12 parity and strict Sigma have landed, the next bounded code
-    milestone should resume #88b as a new presentation-syntax version. Stage
+    milestone should resume the deferred value-binding thread as a new presentation-syntax version. Stage
     value bindings plus binding interpolation before named certificate-slot
     references: the former is now safe under strict Sigma, while the latter
     still needs an explicit layering decision because Cert payloads are opaque.
     Any Program-shape extension must update the Haskell and Lean presentation
     codecs, compiler witnesses, and the 68-row parity inventory together.
   context: >
-    Post-merge roadmap audit after PR #102. The live main branch and hosted
-    checks are green; #89 is closed; plans/2026-08-08-lara-syntax-03-surface.md
+    Post-merge roadmap audit after the merge. The live main branch and hosted
+    checks are green; that work has landed; plans/2026-08-08-lara-syntax-03-surface.md
     leaves only D7 deferred, while docs/lara-surface-grammar.md explicitly says
     named premise-slot references still cross an unresolved opaque-payload
     boundary.
@@ -1436,7 +1435,7 @@ observations:
   timestamp: "2026-08-12T21:19"
   provenance: ai-suggested
   content: >
-    Task 7 locally verified #104 plain-argument theta inference through the
+    Task 7 locally verified the plain-argument theta inference through the
     exact surface form `by rule from [refs]` (including stable D6 diagnostics),
     `presentation parity: PASS (72 rows)`, and unchanged A/S1 source/core and
     replay/tamper behavior. Hosted Haskell and Lean CI remain pending until the
@@ -1445,7 +1444,7 @@ observations:
   context: >
     Task 7 report for plans/2026-08-12-plain-arg-theta-inference.md; no
     generated or frozen artifact bytes changed, and the Task 8 TODO/backlog
-    record must not imply that #105 named certificate slots were implemented.
+    record must not imply that named certificate slots were implemented.
   potential_type: claim
   bound_to: [N175]
   promoted: true
@@ -1456,14 +1455,14 @@ observations:
   timestamp: "2026-08-12T22:02"
   provenance: ai-executed
   content: >
-    Hosted Haskell and Lean CI passed on implementation PR #106 after the
+    Hosted Haskell and Lean CI passed on the implementation PR after the
     local plain-argument theta inference matrix was complete. The final
     verification state is clean: the PR merge state is CLEAN, presentation
     parity remains 72 rows, and the local Haskell/Lean/AxCheck gates pass.
   context: >
-    PR #106 for plans/2026-08-12-plain-arg-theta-inference; the hosted jobs
+    Implementation of plans/2026-08-12-plain-arg-theta-inference; the hosted jobs
     were intentionally deferred until the implementation PR head existed.
-    Issue #105 remains separate and open for opaque certificate layering.
+    The opaque certificate-layering work remains separate and open.
   potential_type: claim
   bound_to: [N176]
   promoted: true
@@ -1475,14 +1474,14 @@ observations:
   timestamp: "2026-08-12T17:02"
   provenance: ai-executed
   content: >
-    Final-head verification corrected the earlier intermediate #104 record:
+    Final-head verification corrected the earlier intermediate record:
     presentation parity is `PASS (73 rows)`, and the complete local
     Haskell/Lean/AxCheck, differential, admission, replay, and tamper gates
     pass on commit 2de1bcde. Hosted Actions run 31653193555 passed both
     Haskell and Lean jobs on ARA-append head c9c59a6 before this metadata
     correction commit was created.
   context: >
-    The implementation PR #106 remains open with merge state CLEAN. Its GitHub
+    The implementation PR remains open with merge state CLEAN. Its GitHub
     review decision is still CHANGES_REQUESTED after the requested fixes were
     pushed and re-review was requested. The repository-wide strict ARA check
     remains blocked by the pre-existing N131 scalar at
@@ -1508,7 +1507,7 @@ observations:
     identically, with no false ambiguity (a same-named leaf already errors
     upstream in refMatches).
   context: >
-    Discovered during Task 3 of the #105 implementation when verifying the
+    Discovered during Task 3 of the implementation when verifying the
     D4 representation rule; drove the two-candidate locate in
     certSlotResolver, pinned by prop_priorArgumentCitationBothSpellings and
     prop_priorArgumentPremiseSpellingsAgree; accepted by adversarial spec
@@ -1550,7 +1549,7 @@ observations:
     injectivity property, the corresponding Lean injectivity theorem, and the
     independent Lean differential preserved the observable wire contract.
   context: >
-    Issue #114 implementation and same-session evaluation. A focused benchmark
+    Implementation and same-session evaluation. A focused benchmark
     over all 1052 head keywords measured the old association list at 233.56
     microseconds and the Map at 38.733 microseconds. Full differential results
     were 581 positive and 56 negative cases with zero failures.
@@ -1574,7 +1573,7 @@ observations:
     so the frozen measurement projection kept its code-point byte count by
     construction.
   context: >
-    Issue #115 implementation and same-session evaluation. The machine carried
+    Implementation and same-session evaluation. The machine carried
     a load average of 3.0 to 4.4 throughout, so every row ran about 1.4 times
     the committed table and only the same-session pair is comparable. The
     verbatim previous reader in test/WireSpec.hs asserted equal trees and exact
@@ -1595,7 +1594,7 @@ observations:
     rule cannot be bypassed, the same treatment has to reach every sibling
     helper that shares the rejection condition - including siblings whose
     rejection already worked, because those rely on the caller remembering to
-    check. In the @0.7 arg-body fold, #135 named only addArgDischarge and
+    check. In the @0.7 arg-body fold, the tracked fix named only addArgDischarge and
     addArgHole; setArgAssurance kept `inst _ = inst` and left Appendix A.1's
     already-correct ruling resting on a parser-side convention. Making the
     helper total-with-error costs one equation and removes the whole class.
@@ -1650,7 +1649,7 @@ observations:
     position-based class beside it (rather than instead of it) costs only a
     collision policy.
   context: >
-    lara-syntax@0.8 (#131). Worked in examples/S7 argument a2, where one leaf
+    lara-syntax@0.8. Worked in examples/S7 argument a2, where one leaf
     fills both premise slots of le_reflex; specified in grammar Appendix G.2
     and G.4, which supersedes E.3's "cite a numeric slot" as the only exit.
   potential_type: claim
@@ -1676,7 +1675,7 @@ observations:
     changes WHICH names resolve without changing HOW a resolved name is
     substituted - is proof-neutral by construction.
   context: >
-    lara-syntax@0.8 (#131). Recorded as grammar Appendix G.6 and in the
+    lara-syntax@0.8. Recorded as grammar Appendix G.6 and in the
     mechanization-plan row 12 note; verified by lake build + check-axioms.sh
     against an unmodified lean/ tree.
   potential_type: heuristic
@@ -1707,7 +1706,7 @@ observations:
     on stable integers with order-independent selection would have caught none
     of these.
   context: >
-    Splitting Lara.Mutate (#122) moved 870 lines across six new modules with no
+    Splitting Lara.Mutate moved 870 lines across six new modules with no
     intended behavior change. 506 checksums (504 mutants + MANIFEST.tsv +
     README.md) came back identical against a pre-split baseline, and the
     differential held at 582/0 and 56/0.
@@ -1736,7 +1735,7 @@ observations:
     and the root becomes the facade - keeps compatibility but inverts which
     module names the namespace.
   context: >
-    Design decision D1/D4 of the #122 split plan, taken through gstack eng
+    Design decision D1/D4 of the split plan, taken through gstack eng
     review. The break was bounded first: exactly two files imported Lara.Mutate
     wholesale, and the four selective importers took only names that stay in the
     root, so they did not change at all.
@@ -1762,7 +1761,7 @@ observations:
     price is an honest validated-not-verified boundary around the production
     classifier, resolver, dispatch and error taxonomy.
   context: >
-    lara-syntax@0.9 (#132), lean/Lara/NDNamed.lean. The proof design was chosen
+    lara-syntax@0.9, lean/Lara/NDNamed.lean. The proof design was chosen
     after the earlier N132 dead end established that this Lean development has
     no concrete `.lara` elaborator to prove correct end to end.
   potential_type: heuristic
@@ -1782,7 +1781,7 @@ observations:
     advertise an impossible exit; the availability predicate belongs beside
     candidate construction and quantifies over the complete candidate set.
   context: >
-    #140 final review defect. The counterexamples are an unrelated labelled
+    Final review defect. The counterexamples are an unrelated labelled
     slot beside two unlabelled matches and a three-match case whose first two
     displayed witnesses are labelled but whose third match is not.
   potential_type: heuristic
@@ -1808,7 +1807,7 @@ observations:
     the spelling expresses exactly what the sub-language's surface can
     already declare.
   context: >
-    lara-syntax@0.10 design choice for #144. The rejected alternative was a
+    lara-syntax@0.10 design choice. The rejected alternative was a
     second S-expression-structural prop spelling; the byte-equivalence
     property against encode_ND reduced to a shared-code-path argument plus
     one QuickCheck oracle rather than a grammar-agreement proof.
@@ -1837,7 +1836,7 @@ observations:
     reporting: such a suite's contribution is stated as the content of its
     gate, and quoting its rate as accuracy evidence is a category error.
   context: >
-    #167 review of the #123 discriminating-localization benchmark. C23
+    review of the discriminating-localization benchmark. C23
     predicted the off-site and multi-defect families would detach
     location_match from 100%; they do not, because prop_siteMatchesChecker
     and prop_localizationSites gate every published site against the checker
@@ -1867,7 +1866,7 @@ observations:
     composite's obligation to a prediction the component is already
     independently gated on.
   context: >
-    #167 review found that twin-support-defect and cross-stage-defect never
+    review found that twin-support-defect and cross-stage-defect never
     had their second rewrite applied by any property: changing mutJ . mutI to
     mutI left the whole suite green, with the only failure
     (prop_seededReproducibility) pointing the developer at the regeneration
@@ -1896,7 +1895,7 @@ observations:
     — is strictly weaker, because by then the producer has already discarded
     which case it meant.
   context: >
-    #169's second half. mutantSites :: [Constituent] let a site enumerator
+    The second half. mutantSites :: [Constituent] let a site enumerator
     publish [], which rendered "-", parsed back as [], and made withLocs
     return Nothing for both location metrics — the same state as a row that
     seeds no site by design (the codec, cycle and accept families), so the
@@ -1933,10 +1932,10 @@ observations:
     has no oracle, and pinning it in a golden converts an unchecked value
     into a defended one.
   context: >
-    Found while cutting m5-freeze-v5 (#156) — diffing the newly measured
+    Found while cutting m5-freeze-v5 — diffing the newly measured
     claim-support.json against the committed frozen copy showed the only
     delta was the environment block, which is what exposed the v4 dirty-tree
-    record. Filed (2) as #176 rather than fixing it in the freeze PR, since
+    record. Filed (2) on the tracker rather than fixing it in the freeze PR, since
     it rewrites a committed artifact and a golden.
   potential_type: heuristic
   bound_to: [N218]
@@ -1961,14 +1960,14 @@ observations:
     checking — and at layer 1 that rule is executable, since the readable
     spelling must lower to the terse spelling's exact bytes.
   context: >
-    The researcher's own framing, stated in issue #109 and directed into the
+    The researcher's own framing, directed into the
     tree this turn alongside the v5 refreeze. Crystallized the same turn on
-    artifact commitment: docs/naturalness-boundary.md merged in PR #174 and
+    artifact commitment: docs/naturalness-boundary.md merged and
     docs/lara-surface-grammar.md's intro now cites it as binding policy for
     any surface addition. Two bounds were added at crystallization and are
     marked ai-suggested inside the constraint: that layer 3's freedom covers
     the prose but not the normative CertNd* templates, and that permissible is
-    not the same as worth building (#151 as the worked case).
+    not the same as worth building.
   potential_type: constraint
   bound_to: [N215]
   promoted: true
@@ -1991,9 +1990,9 @@ observations:
   context: >
     Read off the frozen M0 invariant record while writing
     docs/theory-m0-compilation-invariants.md section 3, as one of two things
-    M1 (#184) should know before its sufficiency direction is attempted.
+    M1 should know before its sufficiency direction is attempted.
     Witnessed in Lean by unforcedConflictEx and, off the diagonal after the
-    #194 review, by unforcedDistinctConflict_not_invariant.
+    review, by unforcedDistinctConflict_not_invariant.
   potential_type: claim
   bound_to: [N221, N223]
   promoted: false
@@ -2043,7 +2042,7 @@ observations:
     than the degenerate point -- and to supply one that does not if they do
     not.
   context: >
-    Generalized from the #194 review's second-pass finding 2: both
+    Generalized from the review's second-pass finding 2: both
     conflict-completeness counterexamples were conditional on ContraryMatch,
     and selfContrary at p = q was the only witness, which is the self-attack
     diagonal the invariant table counts separately. Closed by sharedContrary
@@ -2068,7 +2067,7 @@ observations:
     exists, while a ranged one-node self-edge framework satisfies
     conflictComplete vacuously.
   context: >
-    Source-derived while investigating issue #184 before implementation.
+    Source-derived while investigating the M1 theory before implementation.
     Recorded as the failure mode in N225 and used to choose the corrected draft
     plan in N226. The Lean counterexample is planned but has not been
     mechanized, and the researcher has not yet reviewed the scope correction,
@@ -2169,7 +2168,7 @@ observations:
   context: >
     Mechanized while closing every addInstance cell in Theory M3. The result
     refuted the plan's proposed reachable-cell bound and is now consumed by the
-    typed matrix, durable documentation, and PR #201.
+    typed matrix, durable documentation, and the PR.
   potential_type: claim
   bound_to: [N239, N240]
   promoted: true
@@ -2187,7 +2186,7 @@ observations:
     can grow the blocked closure and move another query to evidence-blocked.
   context: >
     Proved and counter-witnessed in Theory M3. Typed clean-base public matrices,
-    the blocked-growth example, durable paper restrictions, and PR #201 all
+    the blocked-growth example, durable paper restrictions, and the PR all
     depend on the boundary.
   potential_type: claim
   bound_to: [N239]
@@ -2206,7 +2205,7 @@ observations:
     the real unit checker rejects the update for a missing conflict.
   context: >
     Theory M3 proves the sufficient condition and an exact rejection witness.
-    The constructor theorem, paper claim boundary, and PR #201 depend on this
+    The constructor theorem, paper claim boundary, and the PR depend on this
     distinction.
   potential_type: claim
   bound_to: [N239]
@@ -2267,7 +2266,7 @@ observations:
     widened to retain what the adapter already returns.
   context: >
     Found during the Haskell survey for B0 Task 5; repaired via D9 and
-    tracked onward as issue #204.
+    tracked onward on the tracker.
   potential_type: claim
   bound_to: [N247, N248]
   promoted: true
@@ -2401,7 +2400,7 @@ observations:
     concentrates in the AttackComplete characterization over generated root
     conclusions, not in numeral or leaf-identifier bookkeeping.
   context: >
-    Discovered while risk-pricing plan PR #210: the predecessor spike treated
+    Discovered while risk-pricing the plan: the predecessor spike treated
     family-wide injectivity as unpriced, but decodeNat_repr proves the
     round-trip for all n, making Nodup and atom-inversion lemmas cheap.
   potential_type: claim
@@ -2422,7 +2421,7 @@ observations:
     decision problems and complexity proofs if shared integration files remain
     singly owned. PW0 is also gate-unblocked but is explicitly future-work.
   context: >
-    Inferred from issues #180, #181, #188, #189, and #192 plus main at 816812c
+    Inferred from the tracker plus main at 816812c
     while answering which work can run concurrently with another contributor's
     M2b effort. No milestone was selected this turn.
   potential_type: architecture
@@ -2444,7 +2443,7 @@ observations:
     adequacy obligations that connect the executable interface back to the
     model.
   context: >
-    Observed while mechanizing PW0 (issue #192). t0_cmp and t0_src are Iff.rfl
+    Observed while mechanizing PW0. t0_cmp and t0_src are Iff.rfl
     and the diff is pure insertion touching no existing semantics module, which
     together are gate 1's evidence.
   potential_type: claim
@@ -2462,7 +2461,7 @@ observations:
     relation R. The outer model therefore names an applicability judgment it
     does not constrain, and every T2 normality law holds regardless of what
     accept means. Supplying that connection is exactly the structural-bridge
-    work of T6 (#191), so the T6 exit decision is not an extension of PW0 but
+    work of T6, so the T6 exit decision is not an extension of PW0 but
     the discharge of PW0's largest open hypothesis.
   context: >
     Recorded as limitation 1 of the frozen PW0 contract while writing
@@ -2491,8 +2490,8 @@ observations:
     Option as its first guard.
   context: >
     Recorded as limitation 3 and the T6 feasibility note in
-    docs/theory-pw0-outer-model.md, sizing the cost of #191 as input to the
-    #192 exit decision.
+    docs/theory-pw0-outer-model.md, sizing the cost of T6 as input to the
+    PW0 exit decision.
   potential_type: constraint
   bound_to: [N271, N272]
   promoted: true
@@ -2513,7 +2512,7 @@ observations:
     same obligation list, with completeness the O = [] special case rather
     than an extra hypothesis.
   context: >
-    Observed while proving support_transport (#191): the theorem's index is
+    Observed while proving support_transport: the theorem's index is
     the SAME O on both sides, via trRule_questionNames /
     trRule_mandatoryNames / trSupportDis_fst.
   potential_type: claim
@@ -2535,7 +2534,7 @@ observations:
     two footprints — nf touches literals, translation touches names — is what
     makes the commutation lemmas one-line-per-case rather than semantic.
   context: >
-    Design observation from Lara.PW.Translation (#191); the 22-field InstSide
+    Design observation from Lara.PW.Translation; the 22-field InstSide
     re-establishment consumes only these two facts plus verbatim-carrier
     lemmas.
   potential_type: heuristic
@@ -2558,7 +2557,7 @@ observations:
     caller must supply.
   context: >
     Found while deciding whether support_transport could conclude, rather
-    than assume, trSupport definedness (#191).
+    than assume, trSupport definedness.
   potential_type: constraint
   bound_to: [N276]
   promoted: false
@@ -2597,7 +2596,7 @@ observations:
     context former under composition is two properties, not one.
   context: >
     Surfaced when the final review called backend_replacement_congruence_composed nominal.
-    Building sideOk_composed from the halves exposed the two uncovered quadrants. Filed as #229.
+    Building sideOk_composed from the halves exposed the two uncovered quadrants. Filed on the tracker.
   potential_type: constraint
   bound_to: [N282]
   promoted: false
@@ -2633,7 +2632,7 @@ observations:
     wants to reuse old evidence, not at the point where the discipline is adopted.
   context: >
     F3's surface-transport corollary shipped with documented hypotheses instead of an instance;
-    issue #227 tracks a purpose-built native_decide-free surface fixture.
+    A tracker issue tracks a purpose-built native_decide-free surface fixture.
   potential_type: constraint
   bound_to: [N281]
   promoted: true
@@ -2668,7 +2667,7 @@ observations:
     exported statuses. A single undefined result collapses semantically distinct failures and makes
     contextual equivalence unable to say which boundary was crossed.
   context: >
-    PR #218 review identified the collapse. The researcher explicitly selected the broader redesign:
+    review identified the collapse. The researcher explicitly selected the broader redesign:
     change obs itself to a closed sum and enrich every LinkFault payload rather than add a diagnostic
     wrapper or patch only two constructors.
   potential_type: concept
@@ -2690,8 +2689,8 @@ observations:
     edit would fail. The same pattern should serve any future per-occurrence
     side condition the bridge contract grows.
   context: >
-    Fixture-design observation from closing #224 (bridgeCert,
-    cert_accept_translated in Lara/Examples/PWStructural.lean, PR #230).
+    Fixture-design observation from closing the strict-certificate fixture (bridgeCert,
+    cert_accept_translated in Lara/Examples/PWStructural.lean).
   potential_type: heuristic
   bound_to: [N289]
   promoted: false
@@ -2732,7 +2731,7 @@ observations:
     force equality of Admits while leaving Frame.R, Frame.accept, and therefore
     Frame.A unconstrained.
   context: >
-    Adversarial review of the PW-T9 implementation plan against issue #190 and
+    Adversarial review of the PW-T9 implementation plan against
     the canonical possible-world composition design.
   potential_type: architecture
   bound_to: [N292]
@@ -2820,9 +2819,9 @@ observations:
     endpoints among its own arguments, so a cross-half contrary conflict in a composite can be
     covered by the halves only vacuously (no such conflict) or through a term declared on both
     sides. sideOk_composed's cross-coverage hypotheses are therefore satisfiable only in those
-    two cases; option 1 of #229 (a saturating compose) is the only route to genuine closure.
+    two cases; the saturating-compose option is the only route to genuine closure.
   context: >
-    Surfaced while designing the #229 witness (hostileHalf/thirdFrag): neither half could be
+    Surfaced while designing the witness (hostileHalf/thirdFrag): neither half could be
     repaired by declaring the covering attack, because the attack's target lives in the other
     half. Witnessed by hostile_composite_not_admissible; the general statement is unproved.
   potential_type: claim
@@ -2843,8 +2842,8 @@ observations:
     performs is the one the checker would compute, and drift between the two caches under a
     change to either side now fails a proof rather than going unnoticed.
   context: >
-    Issue #226's F0 aspiration, proved in the debt-clearance pass; nothing in the saturation
-    proofs consumes it. Cost turned out modest, as the issue guessed.
+    The F0 aspiration, proved in the debt-clearance pass; nothing in the saturation
+    proofs consumes it. Cost turned out modest, as guessed.
   potential_type: claim
   bound_to: [N300, N301]
   promoted: false
@@ -2954,7 +2953,7 @@ observations:
     object tied down by a rfl equation, so drift in the source object cannot
     propagate into its own guard.
   context: >
-    Extracted while writing #231's guards over the #224 strict-certificate
+    Extracted while writing the guards over the strict-certificate
     fixture; validated by two mutation runs (N312), not yet applied to any
     other fixture.
   potential_type: heuristic
@@ -2968,12 +2967,12 @@ observations:
   timestamp: "2026-09-06T12:20"
   provenance: ai-executed
   content: >
-    Both #231 guards are axiom-cheap: cert_reject_mismatched_certifier and
+    Both guards are axiom-cheap: cert_reject_mismatched_certifier and
     cert_only_assurance depend on no axioms at all, and cert_target_rule on
     propext alone — decide over the derived DecidableEq instances and
     constructor inversion, with no nativeDecide anywhere.
   context: >
-    Read off the AxCheck output for the three new rows during the #231
+    Read off the AxCheck output for the three new rows during the
     verification run.
   potential_type: concept
   bound_to: [N312]
@@ -2987,7 +2986,7 @@ observations:
   provenance: ai-suggested
   content: >
     A cost estimate recorded on a tracked theory issue encodes one proof
-    route, not a lower bound on the result. #196 and preferredSem's docstring
+    route, not a lower bound on the result. The tracked issue and preferredSem's docstring
     both budgeted `Nodup` plus a subset-implies-shorter fact — i.e. the
     Mathlib dependency — because both had the ⊆-maximal-element argument in
     mind; re-deriving the statement's own geometry (compare a longest
@@ -2996,7 +2995,7 @@ observations:
     hypothesis-free. Read a budgeted dependency as a claim about the route
     that was imagined, and re-derive before paying it.
   context: >
-    Extracted while closing #196 (N313, N314). One instance so far; the
+    Extracted while closing that theory issue (N313, N314). One instance so far; the
     counter-case would be an issue whose budgeted cost is a property of the
     statement rather than of the route.
   potential_type: heuristic
@@ -3011,7 +3010,7 @@ observations:
   provenance: ai-executed
   content: >
     Spiking the candidate proof answered "does this need a plan?" faster than
-    reasoning about it: the whole #196 development compiled standalone in two
+    reasoning about it: the whole development compiled standalone in two
     attempts, and the axiom print settled scope, hypotheses and size before
     any planning document could have been drafted. Same practice as O132
     (compile a plan's Lean blocks before dispatching an implementer), applied
@@ -3041,7 +3040,7 @@ observations:
     recomputation, which is safe exactly when the recomputed oracle is a pure
     function of arguments the checker already fixed.
   context: >
-    N315. Issue #204's first phrasing was to fuse collection into
+    N315. The tracker item's first phrasing was to fuse collection into
     `inferSupport`'s traversal; the landed design calls
     `Lara.Strict.Deps.certDeps` from `Lara.Driver.unitCertDeps` instead. The
     same purity argument `assuranceError` uses for re-asking the oracle on the
@@ -3106,8 +3105,8 @@ observations:
   timestamp: "2026-09-06T18:08"
   provenance: ai-suggested
   content: >
-    An issue filed during a close-out sweep can be moot at birth: #248 was
-    written against PR #244's tree while PR #247 — merged seven minutes
+    An issue filed during a close-out sweep can be moot at birth: the filed issue was
+    written against an earlier PR's tree while a later PR — merged seven minutes
     before the filing — had already landed both work items and even the
     factoring the issue recorded as moot. Verifying an issue's premises
     against HEAD (grep for the named definitions, `git log -S`) before
@@ -3115,7 +3114,7 @@ observations:
     Kin to O141: there the issue's cost estimate encoded one imagined route;
     here the issue's work description encoded a superseded tree.
   context: >
-    N317. User directed "let's do #248"; the pre-execution read of
+    N317. User directed "let's do [redacted]"; the pre-execution read of
     StatusCheck.lean found `transportsB` and `Matched` already present,
     which triggered the git archaeology instead of the edit.
   potential_type: heuristic
@@ -3126,16 +3125,16 @@ observations:
   provenance: ai-executed
   content: >
     A build cache can make a verification pass for a reason the verification does not state. The
-    #227 module sat outside the lake build closure, so `lake build` never compiled it, yet the
+    module sat outside the lake build closure, so `lake build` never compiled it, yet the
     pinned axiom gate reported green because a hand-built olean from an earlier `lake build
     Lara.Examples.SurfaceTransport` was still on disk for the audit to consume. Two independent
     worktrees reproduced the identical contamination. Any gate whose result depends on a build is
     evidence about the artifacts that existed when it ran, not about a clean checkout, so it must
     be re-run from a wiped cache before being recorded as evidence.
   context: >
-    Code review of PR #257 caught the missing Lara.lean import; re-running the four gates after
+    Code review of the PR caught the missing Lara.lean import; re-running the four gates after
     `git clean -xdf lean/.lake` moved the job count 148 -> 149 and built the module in 485 ms.
-    Second occurrence of the #242 failure mode; #259 tracks a closure check in CI.
+    Second occurrence of the failure mode; a tracker issue tracks a closure check in CI.
   potential_type: heuristic
   bound_to: [N319, N320]
   promoted: false
@@ -3156,7 +3155,7 @@ observations:
     establish non-degeneracy of the *conclusion* being witnessed; those are separate properties
     and need separate guards.
   context: >
-    Raised in review of PR #257 and filed as issue #258. The module's own defense — that having
+    Raised in review of the PR and filed as a tracker issue. The module's own defense — that having
     no attacks "would not make the relabel any more genuine" — is true of the relabel and does
     not address the AF equality.
   potential_type: claim
@@ -3178,10 +3177,10 @@ observations:
     checklist's frozen-inputs row table. The check belongs before the evidence is built, not
     after it passes its gates.
   context: >
-    Issue #260 asked for property/golden/mutation evidence for insp@1. The mutation base was
+    A tracker issue asked for property/golden/mutation evidence for insp@1. The mutation base was
     implemented and fully verified (568 mutants, 27 new, all passing the generator's own gate,
     differential 647/0) before the collision with m5-freeze-checklist.md row 1 was noticed, and
-    was then reverted. Cost budgeted into #266 rather than left for a reviewer to find.
+    was then reverted. Cost budgeted into a follow-up tracker issue rather than left for a reviewer to find.
   potential_type: heuristic
   bound_to: [N325]
   promoted: false
@@ -3203,7 +3202,7 @@ observations:
     conclusion may not overlap a contrary side, so the conflict must sit on a defeasible bridge's
     conclusions one layer up.
   context: >
-    Established while shipping insp@1 (#260, PR #267) and mechanized in both directions:
+    Established while shipping insp@1 and mechanized in both directions:
     Lara.Insp.inspModels_excl_of_same_entry and inspModels_absent_present_sat against
     Lara.Ord.ordModels_excl_of_lt. Crystallized the same turn via artifact commitment — the
     layering of examples/S9/insp-v1.policy.lara exists because of it.
@@ -3227,7 +3226,7 @@ observations:
     results funnels through, and check whether its conclusion is an equation. If it is, the family
     generalizes along any reader of the object with no new hypotheses.
   context: >
-    #216 expected the generic congruence to be harder than its grounded ancestor. It is not.
+    The milestone expected the generic congruence to be harder than its grounded ancestor. It is not.
     Every M4 congruence funnels through compileUnit_link_relabel, whose conclusion is
     `compileUnit acc₂ = compileUnit acc₁`; obsGen_congr therefore carries exactly
     backend_replacement_congruence's hypotheses and takes no AttackExtensional, whereas
@@ -3254,7 +3253,7 @@ observations:
     exact shape decide-closed fixtures depend on, since the new parametric type sits beside it
     rather than replacing it.
   context: >
-    Implementing #216. The plan's first draft duplicated Observation/obs into a semantics-aware
+    Implementing the generalization milestone. The plan's first draft duplicated Observation/obs into a semantics-aware
     SemObservation/obsSem and copied four congruence proofs; eng review's outside voice built the
     Outcome α + obsGen version against the real tree instead, and it compiled first try at ~75
     lines with the parallel type and its compile blocker deleted.
@@ -3277,7 +3276,7 @@ observations:
     milestone generalizes: framework-level separations do not establish that a context-level
     observation observes anything new.
   context: >
-    #216's carriers ctxEx/fragEx and symCtx/symFrag were believed to have all five semantics
+    The milestone's carriers ctxEx/fragEx and symCtx/symFrag were believed to have all five semantics
     agree; obsSem_linking_agrees and obsSem_sym_agrees now pin that for all five, which is what
     justifies authoring the three-cycle and the sink. M2a had framework-level separations
     (five_semantics_pairwise_distinct) but no context-level one existed before this turn.
@@ -3299,7 +3298,7 @@ observations:
     consuming each direction; a regression theorem that must be exercised rather than merely
     stated gets a fixture derived *through* it instead of re-pinned by an independent rfl.
   context: >
-    #216's acceptance criteria included "the separations must actually separate" and
+    The milestone's acceptance criteria included "the separations must actually separate" and
     "ctxEquivSem_grounded_iff must stay an iff", both originally enforceable only by eyeball.
     Weakening the iff to an implication would otherwise keep both gates green.
   potential_type: heuristic
@@ -3324,7 +3323,7 @@ observations:
     # Supersedes O152's "avoids touching the frozen type ... sits beside it rather than
     # replacing it" clause; adjudicated in N335 (resolved), O152 otherwise stands.
   context: >
-    Landing #216's §2A refactor (commit eb6e955) after PR #271 had shipped the sit-beside
+    Landing the milestone's §2A refactor (commit eb6e955) after the earlier PR had shipped the sit-beside
     form. `Observation` became `abbrev Observation := ObservationOf Grounded.Status` and
     `Outcome α` was deleted; `Examples/Linking.lean` was not edited at all and its
     decide-closed `congruence_witness` / `registry_swap_witness` still compile.
@@ -3376,7 +3375,7 @@ observations:
     not "where does the proof use injectivity" but "where does the functional statement name a
     computed image in its conclusion".
   context: >
-    Found while relationalizing Task 9 of the #215 plan, whose stated forms for `attackOcc_rel`
+    Found while relationalizing Task 9 of the plan, whose stated forms for `attackOcc_rel`
     and `contains_rel` omitted `RelInj`. Both are unprovable as stated; both consumers already
     carry `RelInj`, so nothing downstream weakened.
   potential_type: heuristic
@@ -3401,7 +3400,7 @@ observations:
     was definitionally transparent becomes a rewrite, and the ones that appear in dependent
     positions are the expensive ones.
   context: >
-    Encountered writing `exists_accepted_rel` and `compileUnit_link_rel` for #215. The plan
+    Encountered writing `exists_accepted_rel` and `compileUnit_link_rel`. The plan
     anticipated the `link*_rel` half ("budget for that; it is the main place where 'just mirror
     the original' is not literally true") but not the dependent-type half.
   potential_type: heuristic
@@ -3424,7 +3423,7 @@ observations:
     the other level entirely: `backend_replacement_parametricity_local_sem` (obsSem, not obs) is
     genuinely distinct and is what the generic-observation doc actually needed.
   context: >
-    #215 Task 11c. The plan itself anticipated this ("if this is definitionally identical to
+    Task 11c. The plan itself anticipated this ("if this is definitionally identical to
     Task 11b's theorem, say so in one line and keep only one of the two names"), which is why
     the collapse was caught rather than shipped as a duplicate.
   potential_type: heuristic
@@ -3438,12 +3437,12 @@ observations:
   timestamp: "2026-09-09"
   provenance: ai-suggested
   content: >
-    Lean backlog assessment: #281 can replace checkUnit_sound's conjunction with
-    named Prop fields across its consumers; #197 can add an enumerate-based
-    conflict-freedom theorem while retaining the spec-based wrapper. #198 needs
+    Lean backlog assessment: one backlog item can replace checkUnit_sound's conjunction with
+    named Prop fields across its consumers; another can add an enumerate-based
+    conflict-freedom theorem while retaining the spec-based wrapper. A third needs
     an enforced registration boundary, since a registry alone cannot discover
-    arbitrary ExtensionSemantics values. #217 requires a substitution calculus
-    and transport proofs. #268 remains a proof-or-counterexample task; failure
+    arbitrary ExtensionSemantics values. A fourth requires a substitution calculus
+    and transport proofs. The fifth remains a proof-or-counterexample task; failure
     of decide on all contexts is not an undecidability result.
   context: >
     User asked whether all five issues can be resolved directly. Read
@@ -3463,7 +3462,7 @@ observations:
   content: An occurrence profile preserving identity only inside a fragment can miss observations caused
     by a context copying an exact term. A candidate interface may need mixed equality and containment
     against context material. This finite separation establishes no universal decorated-identity characterization.
-  context: 'G0 #305; same-context-copy calculation in docs/theory-m4-g0-interface-spike.md. Generalized
+  context: 'G0; same-context-copy calculation in docs/theory-m4-g0-interface-spike.md. Generalized
     interpretation remains unadopted.'
   potential_type: constraint
   bound_to:
@@ -3559,7 +3558,7 @@ observations:
     prove the *negation* of the premise at the fixture, which is cheap when the
     fixture is concrete and decidable.
   context: >-
-    #311 review. `structuralBridge_declOK` took `BridgeObligations` as a
+    review. `structuralBridge_declOK` took `BridgeObligations` as a
     hypothesis over a fixture whose shared `Gamma` ranges outside the declared
     symbol map; the reviewer compiled `¬ BridgeObligations …` against the branch.
     Generalized reading not yet adopted by the researcher.
@@ -3584,7 +3583,7 @@ observations:
     sound/complete through that `_iff` restores the intended reading at no proof
     cost, because the `_iff` already exists.
   context: >-
-    #311 review. Applied to `ElaboratesBridge.rule_ok` (was `ruleOkB … = true`,
+    review. Applied to `ElaboratesBridge.rule_ok` (was `ruleOkB … = true`,
     now T6's clause) and `Elaborates.status` (was `pose … = .ok q`, now
     `q.val = c`). Generalized reading not yet adopted by the researcher.
   potential_type: heuristic
@@ -3607,7 +3606,7 @@ observations:
     keep their shape. Whether the retrofit is worth it tracks how likely the fault
     is to reach an author, not how deep the traversal is.
   context: >-
-    #311 review. `PosingFault.bridgeVocabulary` was the one unlocated arm in a
+    review. `PosingFault.bridgeVocabulary` was the one unlocated arm in a
     module whose stated discipline is that faults are located; a surface-declared
     bridge always has a finite vocabulary (`predMapOf_eq_none`), which makes it
     the fault most likely to be hit. Generalized reading not yet adopted.
@@ -3623,7 +3622,7 @@ observations:
   timestamp: "2026-09-09T23:25"
   provenance: ai-suggested
   content: >
-    Issue #303 can use a flat content-pinned map and ordinary full source/link
+    The multi-artifact build can use a flat content-pinned map and ordinary full source/link
     checking, with Make as an optional command wrapper. The draft separates
     source digests from declared paper identities, requires actual shared
     policy/signature/theory identity, qualifies leaf references, and reuses
@@ -3632,7 +3631,7 @@ observations:
     Proposed v1 rejects nonempty admission/pruning audits rather than losing
     their source semantics. These are review proposals, not adopted decisions.
   context: >
-    User requested review of #303, assessment of Makefile-style builds, and a
+    User requested a review, assessment of Makefile-style builds, and a
     draft plan. Grounding: src/Lara/Replay.hs, src/Lara/Policy.hs,
     src/Lara/Elaborate.hs, lean/Lara/Context/Fragment.lean,
     lean/Lara/Context/Link.lean, and
@@ -3652,7 +3651,7 @@ observations:
     map than its declaration. The proof must retain membership in the original loaded
     declaration list, rather than only reasserting agreement between independently
     supplied environments.
-  context: '#313/#314 implemented: load_declarations and elabPosed_declared compose
+  context: 'Declared-wire and file-execution implemented: load_declarations and elabPosed_declared compose
     the loader and modal elaborator; generalized design lesson remains unendorsed.'
   potential_type: architecture
   bound_to:
@@ -3675,7 +3674,7 @@ observations:
     whole-map conclusion caches agree on every member argument. The equivalence needs no
     premise beyond what acceptance already needs.
   context: >
-    Issue #321. Proved as batch_atts_mem_iff_fold / batch_args_mem_iff_fold in
+    Proved as batch_atts_mem_iff_fold / batch_args_mem_iff_fold in
     lean/Lara/Map/Link.lean; the generalization beyond this calculus is not tested.
   potential_type: claim
   bound_to: [N321_batch_link]
@@ -3692,7 +3691,7 @@ observations:
     for the shipped four-member map, linking, the linked check, evaluation and rendering
     are about a tenth of a full pass. One machine, one run, three different maps.
   context: >
-    Issue #319, first make bench-map run at ad513b5
+    First make bench-map run at ad513b5
     (ara/evidence/results/map_bench_2026-09-11.md).
   potential_type: claim
   bound_to: [N319_map_bench]
@@ -3710,7 +3709,7 @@ observations:
     and the only remaining obligation is a separate index lemma that the frame at declared
     worlds is the file's edges. That lemma needs world identity (distinct checked programs),
     because Instance.World carries no name.
-  context: '#322 implemented: Model.evaluates_iff and compare_mem_iff_sat follow from
+  context: 'implemented: Model.evaluates_iff and compare_mem_iff_sat follow from
     evalFinite_iff and mem_compare_iff_sat_dia with trivial presentation proofs; candidates_declared
     carries the content. The generalized lesson is unendorsed.'
   potential_type: heuristic
@@ -3730,7 +3729,7 @@ observations:
     the command-line argument, paths read from inside the input, and error details that
     echo a path are separate boundaries, and an 8-bit locale fails differently from
     LC_ALL=C.
-  context: 'PR #328 reviews: the first gate''s only LC_ALL=C case used inline worlds,
+  context: 'reviews: the first gate''s only LC_ALL=C case used inline worlds,
     so file-path encoding diverged unseen, and the first fix handled paths but not argv,
     passing under C while failing under ISO-8859-1. Shown on one project; unendorsed.'
   potential_type: heuristic
@@ -3750,7 +3749,7 @@ observations:
     different stages; what makes a shared reader a checkable contract is comparing the
     located message — bound, column and wording — across drivers on the inputs where the
     refusal is the contract rather than a diagnostic.
-  context: '#331: the Haskell reader capped nesting at 10000 and the Lean reader had no
+  context: 'the Haskell reader capped nesting at 10000 and the Lean reader had no
     bound, so past that depth both exited 2 while one said syntax and the other malformed.
     Every gate was blind: the byte-equality families had no case at that depth and the
     exit-2-only families would have passed anyway. Shown on one boundary of one project;
@@ -3777,8 +3776,8 @@ observations:
     unconditionally is a failure that is early and named rather than an opaque output
     mismatch, and coverage of the case no generated input can reach: the constant renamed,
     reformatted, or deleted.'
-  context: 'Designing the #331 gates. First recorded as "the depth cases alone would have
-    survived raising only the Lean maxDepth"; the PR #333 review traced both directions and
+  context: 'Designing the nesting-bound gates. First recorded as "the depth cases alone would have
+    survived raising only the Lean maxDepth"; the review traced both directions and
     showed otherwise — the bound is interpolated into its own message, so each one-sided
     raise produces a different message or a different column on the two sides and every
     behavioural case goes red. The negative control in the same session agrees: with the
@@ -3800,7 +3799,7 @@ observations:
     with a conditioning edit exactly on the inputs where that edit is provably the
     identity; the proof obligation is that the edit's trigger set is empty and the edit
     is the identity on an empty trigger set, not anything about the edited program.
-  context: '#326: PW status atoms are Boolean, §4.3 quarantine makes local status
+  context: 'PW status atoms are Boolean, §4.3 quarantine makes local status
     conditional; accepting worlds whose groups all agree needed only quarantined_eq_nil
     and the two *_nil identities. One project; unendorsed.'
   potential_type: heuristic
@@ -3819,7 +3818,7 @@ observations:
     the gate then compares the reading runtime on the original with both on the derived
     document, and the derived document must also be the identity on inputs both could
     already read.
-  context: '#327 reused the lara map-input pattern (#303) as lara pw-input; the gate
+  context: 'reused the lara map-input pattern as lara pw-input; the gate
     reruns every envelope-only fixture through derivation to its golden. Second use of
     the pattern; no user endorsement.'
   potential_type: heuristic
@@ -3841,7 +3840,7 @@ observations:
     boundary is set once before anything is read, and its output half — every handle
     that will echo names or paths decoded there — is retargeted with it, or the fix
     converts a read failure into an encoder failure one step later.
-  context: '#334: pwTextBoundary (#327/#332) covered the PW doors only, so lara check
+  context: 'pwTextBoundary covered the PW doors only, so lara check
     refused under LC_ALL=C a non-ASCII program lara pw accepted. Moving it to main
     settled both directions and exposed a pre-existing stderr-encoder crash on a
     non-UTF-8 path argument. Second boundary-shaped bug on this project; unendorsed.'
@@ -3862,7 +3861,7 @@ observations:
     tests the environment the suite runs in rather than the binary. The same applies
     to the fixtures it writes and to any byte the case needs in argv, which the
     runtime's own process spawner may not be able to carry.
-  context: '#334: readProcessWithExitCode offers no environment and decodes pipes
+  context: 'readProcessWithExitCode offers no environment and decodes pipes
     with the test process''s locale; GHC''s process drops a lone surrogate from argv,
     so the non-UTF-8 path byte had to be spelled by sh. Discovered while giving the
     solo door its first locale coverage. One project; unendorsed.'
@@ -3885,7 +3884,7 @@ observations:
     "port it and prove its metatheory" cannot be satisfied incrementally over a partial
     definition — the redesign comes first, or the theorem does not exist to defer.
   context: >-
-    #335: the #331 nesting bound was enforced in Lean byte-for-byte with Haskell and covered
+    the nesting bound was enforced in Lean byte-for-byte with Haskell and covered
     by three differentials, yet AxCheck.lean was correctly empty of it because
     parseForm/parseList/parseQuoted were partial. One project, one instance; unendorsed.
   potential_type: claim
@@ -3911,7 +3910,7 @@ observations:
     them. The subtype's cost stays bounded because it can be hidden at the top-level entry
     point, leaving every consumer's type unchanged.
   context: >-
-    #335: parseList's element loop recurses on parseForm's output state. Closed by
+    parseList's element loop recurses on parseForm's output state. Closed by
     `structure Parsed (p) where ... consumed : rest.input.length < p.input.length`, with
     parseWire re-exporting `Except String Sx` so Lara.Map.Driver, Lara.PW.Wire, Lara.PW.Run
     and Lara.AdmissionDriver were untouched. One instance; unendorsed.
@@ -3934,7 +3933,7 @@ observations:
     which the exit code already shows, but "the position reported is the post-skip state",
     which is the half no exit-code-only family can see.
   context: >-
-    #335: parseList_error_of_parseForm_error states the located position is the
+    parseList_error_of_parseForm_error states the located position is the
     post-skipSpace state parseList handed to parseForm; parseWire_nested_error pins line 1,
     column maxDepth+2 for the whole family of over-deep inputs. Relates to C12's recorded
     bound on gate-visible divergence. One instance; unendorsed.

@@ -1,5 +1,4 @@
--- | The authored spelling of the formulas an @nd\@1@ replay rejection names
--- (#148).
+-- | The authored spelling of the formulas an @nd\@1@ replay rejection names.
 --
 -- When a named proof term lowers cleanly and the certificate is then refused at
 -- R13, the registered backend's reason is phrased over the __lowered__ image:
@@ -26,7 +25,7 @@
 --   text verbatim, because that is the string the author will recognize.
 -- * 'FOLeaf' — a declared leaf's proposition, reported through
 --   'Lara.Syntax.printProp' and tagged with the leaf id, which is also what
---   @slot i = leaf …@ names it (#130).
+--   @slot i = leaf …@ names it.
 --
 -- == Why this can be recovered rather than threaded
 --
@@ -122,7 +121,7 @@ ndPayloads program =
         certsOfAssurance assurance ++ concatMap certsOfTerm premises
 
 -- | Render the authored spelling of every formula a rejection reason names, one
--- line per key, in the order the keys occur in the reason (#148).
+-- line per key, in the order the keys occur in the reason.
 --
 -- __Why it selects on the reason rather than printing the whole map.__ The map
 -- covers the source; the reason names two or three atoms out of it. Printing

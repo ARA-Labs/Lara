@@ -1,7 +1,7 @@
 /-
 The direction-of-goodness contract behind the `comparison` surface form
-(`docs/lara-surface-grammar.md` Appendix B.3, landed as `lara-syntax@0.3` in
-PR #92).
+(`docs/lara-surface-grammar.md` Appendix B.3, landed as `lara-syntax@0.3`).
+
 
 ## What the surface form is for, and what goes wrong without it
 

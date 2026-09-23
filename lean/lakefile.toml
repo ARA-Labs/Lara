@@ -16,7 +16,7 @@ name = "Lara"
 name = "lara-driver"
 root = "Lara.DriverMain"
 
-# The multi-artifact map driver (issue #303 — the Lean side of
+# The multi-artifact map driver (the Lean side of
 # scripts/check-map-conformance.sh). Reads one `map-check-input@1` parity
 # envelope, performs the qualification, merge, cross-member saturation, check
 # and grounded evaluation itself, and prints `map-verdict@1` bytes that must
@@ -53,12 +53,12 @@ root = "Lara.SurfaceConformanceMain"
 name = "update-preconditions"
 root = "Lara.UpdatePreconditionParityMain"
 
-# File-driven declared-bridge and modal-query example (#313/#314).
+# File-driven declared-bridge and modal-query example.
 [[lean_exe]]
 name = "pw-example"
 root = "Lara.PW.ExampleMain"
 
-# The finite executable reference for `pw-run 1` (#322) — the Lean side of
+# The finite executable reference for `pw-run 1` — the Lean side of
 # scripts/check-pw-conformance.py. Loads declared worlds, edges and the
 # embedded `pw-surface 1` document, and prints bytes that must equal
 # `lara pw <file>`'s.
@@ -66,7 +66,7 @@ root = "Lara.PW.ExampleMain"
 name = "pw-run"
 root = "Lara.PW.RunMain"
 
-# Separate executable Lean structural-contract witness (#350).
+# Separate executable Lean structural-contract witness.
 [[lean_exe]]
 name = "axiom-withdrawal"
 root = "Lara.AxiomWithdrawalMain"

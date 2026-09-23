@@ -1,5 +1,5 @@
 /-
-The fixed-context realizable quartic witness (issue #209, Task 10).
+The fixed-context realizable quartic witness (Task 10).
 
 `quarticAF k` is the three-block carrier: for `k + 1` it lists, in
 declaration order, `k` neutral `g` nodes followed by the defender `d`, then
@@ -132,7 +132,7 @@ def quarticAF : Nat → Invariants.StructuredAF
       { nodes := (quarticLeaves k).map QuarticLeaf.atom
         attack := quarticAttack k }
 
-/-- **The frozen node count** (statement frozen by the #209 decision
+/-- **The frozen node count** (statement frozen by the decision
 record, `docs/theory-m2b-complexity.md`). -/
 theorem quartic_size (k : Nat) : (quarticAF k).size = 3 * k := by
   cases k with
@@ -186,7 +186,7 @@ theorem QuarticLeaf.encode_inj : Function.Injective QuarticLeaf.encode := by
 /-! ## The raw unit under the fixed context -/
 
 /-- The leaf support term of a quartic leaf (leaf-only support, per the
-#209 decision record). -/
+decision record). -/
 def leafArg (l : QuarticLeaf) : SupportTerm := .leaf l.encode
 
 private theorem leafArg_inj {l l' : QuarticLeaf} (h : leafArg l = leafArg l') :
@@ -1044,7 +1044,7 @@ def quarticEmptyIso :
     rw [h]
     simp [Realizability.Equiv.refl, quarticAF]
 
-/-! ## Realizability (statements frozen by the #209 decision record) -/
+/-! ## Realizability (statements frozen by the decision record) -/
 
 /-- **The quartic witness is realizable in the fixed M2b context**, for every
 `k`: the leaf-only raw unit passes the executable checker, its ground list
@@ -1434,7 +1434,7 @@ theorem quartic_cost_eval_three :
 theorem quartic_cost_eval_four :
     4 ^ 4 ≤ (groundedC (Invariants.eraseAF (quarticAF 4))).2 := by decide
 
-/-! ## Carrier-status transfer (issue #209)
+/-! ## Carrier-status transfer
 
 The quartic floor transfers to the actual carrier-status surface: the
 carrier claim for the unique `d` node has nonempty complete support, so

@@ -1,6 +1,6 @@
--- | Σ inference bootstrap (#89 D0) — __tooling, not a language feature__.
+-- | Σ inference bootstrap (D0) — __tooling, not a language feature__.
 --
--- Sort inference is deliberately outside the calculus (#89 §11): LARA terms are
+-- Sort inference is deliberately outside the calculus: LARA terms are
 -- ground first-order with no abstraction, application, or polymorphism and no
 -- site to put an annotation, so a declared signature already delivers the
 -- zero-annotation property inference would have been for. This script exists
@@ -11,7 +11,7 @@
 -- predicate and constructor argument positions it /occupies/, and a constant
 -- appearing under two heads forces those positions to share a sort. That is a
 -- union-find over occurrences, and the 187 nullary constants of @corpus-v1@ are
--- the dominant term a head-token grep misses entirely (#89 §7).
+-- the dominant term a head-token grep misses entirely.
 --
 -- == What it computes
 --
@@ -32,7 +32,7 @@
 --
 -- The __finest consistent partition__, with generated opaque sort names
 -- @S1, S2, …@ in first-occurrence order — plus a census header. The human pass
--- that follows is __merge-and-name, not authoring__ (#89 §7, OV-2): whether
+-- that follows is __merge-and-name, not authoring__ (OV-2): whether
 -- @imagenet_val@ is a @Dataset@ or an @EvalSetting@ is precisely the
 -- possible-worlds question, and an opaque name presumes no answer. The finest
 -- partition also maximizes @wrong-arg-sort@'s corpus sites, keeping R2

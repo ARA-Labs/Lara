@@ -1,4 +1,4 @@
--- | Conformance tests for the possible-world outer runtime (#322): the
+-- | Conformance tests for the possible-world outer runtime: the
 -- @pw-run 1@ / @pw-surface 1@ codecs ("Lara.PW.Wire"), posing, translation and
 -- comparison ("Lara.PW.Sorted"), and the run pipeline ("Lara.PW.Run").
 --
@@ -11,11 +11,11 @@
 --   * __committed goldens__ — every @fixtures\/pw\/run\/*.sexp@ and
 --     @fixtures\/pw\/source\/*.sexp@ runs to its @*.expected@ bytes without
 --     the CLI, and the document 'deriveRunFile' derives from it — every
---     source inline — runs to the same bytes (#327). The @source-rejected@
---     family pins run and derivation refusal to the same error golden (#350);
+--     source inline — runs to the same bytes. The @source-rejected@
+--     family pins run and derivation refusal to the same error golden;
 --   * __groups__ — a duplicate-report group whose members agree changes no
 --     answer, and a conflicting group is refused by name, under both
---     conflict modes (#326);
+--     conflict modes;
 --   * __round trips__ — structured and textual, over generated documents
 --     whose names include quotes, backslashes, newlines, Unicode and the
 --     empty string;
@@ -165,7 +165,7 @@ inlineInputs doc = mapM input (rdWorlds doc)
       SourceInline e -> Just (WorldInput (wdId d) (wdContext d) (Right e))
       _ -> Nothing
 
--- | Derivation preserves every fixture's run (#327): the derived document
+-- | Derivation preserves every fixture's run: the derived document
 -- has only inline sources, and running it gives the fixture's golden — the
 -- in-process half of what the gate checks across both drivers. Refused source
 -- fixtures must also refuse derivation with the same committed error.
@@ -205,7 +205,7 @@ substitute old new text = case breakOn old text of
           | needle `isPrefixOf` rest = Just (reverse acc, drop (length needle) rest)
           | otherwise = go (c : acc) cs
 
--- | Duplicate-report groups (#326): a group whose members agree is inert
+-- | Duplicate-report groups: a group whose members agree is inert
 -- under both conflict modes, and a conflicting group refuses the world by
 -- name, whatever the mode, naming the first such group. Each variant edits
 -- the inline fixture's first world; l1 and l3 report p, l2 reports q, and l3

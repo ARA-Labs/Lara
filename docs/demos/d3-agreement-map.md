@@ -1,12 +1,12 @@
-# D3 — cross-paper agreement map (issue #64)
+# D3 — cross-paper agreement map
 
-Draftable into #60 (M7 paper package), sections T1/T3. The demo ships **twice**,
+Draftable into the M7 paper package, sections T1/T3. The demo ships **twice**,
 and the pair is the point of the second half of this write-up:
 
 | Artifact | What it is |
 | --- | --- |
 | `examples/agreement-map/` | The original: all four papers in **one** `.lara` file, which therefore declares its own cross-paper attacks. Kept byte-unchanged as the oracle. |
-| `examples/agreement-map-multi/` | The same demonstration as **four independently authored, independently checkable artifacts** under one `map.laramap` (issue #303). No member declares a cross-paper attack; the map generates them. |
+| `examples/agreement-map-multi/` | The same demonstration as **four independently authored, independently checkable artifacts** under one `map.laramap`. No member declares a cross-paper attack; the map generates them. |
 
 The single-file artifact (`example.lara`, `agreement-v1.policy.lara`, derived
 `example.core.sexp` + `expected.json`) has its verdict pinned by
@@ -199,7 +199,7 @@ it. The open comparability CQ for P2:
 This is the artifact the map contributes to a literature review: not a verdict of
 agreement or disagreement, but a precise statement of the missing measurement.
 v0.1 has no vocabulary to encode a cross-setting contrary (that would be
-eval-settings-as-worlds, the possible-worlds follow-up — out of scope per #64),
+eval-settings-as-worlds, the possible-worlds follow-up — out of scope for this demo),
 so the comparability CQ lives here in the write-up and in the artifact's
 golden-oracle comment, not as a checker edge. That boundary is deliberate: adding
 a cross-setting contrary would be exactly the kind of manufactured disagreement
@@ -342,7 +342,7 @@ bytes.
 
 ## Validation
 
-### The single-file artifact (#64)
+### The single-file artifact
 
 All commands run from a clean tree in the worktree.
 
@@ -355,7 +355,7 @@ All commands run from a clean tree in the worktree.
 | `cd lean && lake build` | success (52 jobs) |
 | `bash scripts/differential.sh` | `pass=419 fail=0`, `negative pass=54 fail=0` — Haskell and Lean drivers agree byte-exactly on the agreement-map verdict |
 
-### The four-artifact map (#303)
+### The four-artifact map
 
 All commands run from the worktree root.
 
@@ -380,8 +380,8 @@ two computations meeting.
 
 ### End-to-end cost
 
-Measured by `make bench-map`, the map mode of the committed bench harness
-(issue #319). Its protocol, and the dated table for every accepted map anchor,
+Measured by `make bench-map`, the map mode of the committed bench harness.
+Its protocol, and the dated table for every accepted map anchor,
 are in [`../performance.md`](../performance.md#the-multi-artifact-map-a-separate-protocol).
 A map is a different shape of work from the kernel bench's: it reads and parses
 several `.lara` sources, checks each, then links and checks again. So it has its

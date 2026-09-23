@@ -12,7 +12,7 @@
 
 policy empirical-v1
 
-# --- Signature (spec §2, §3.4; lara-core@0.2, issue #89) -------------------------------------------
+# --- Signature (spec §2, §3.4; lara-core@0.2) ------------------------------------------------------
 # The many-sorted proposition signature the checker enforces as rejection class R2 at stage 2:
 # every predicate and constructor symbol this policy's rules and programs may use, with the sort
 # of each argument position. `Num` and `Str` are the two built-in base sorts (the sorts of numeric

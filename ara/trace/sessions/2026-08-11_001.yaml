@@ -6,13 +6,13 @@ session:
   turn_count: 7
   summary: >
     Executed, review-hardened, and merged the result-12 presentation-parity
-    closure. The researcher selected #88b value bindings as the next milestone.
-    The lara-syntax@0.4 implementation on PR #103 now includes resolved external
+    closure. The researcher selected value bindings as the next milestone.
+    The lara-syntax@0.4 implementation on the PR now includes resolved external
     review follow-up: lossless spaced directives, explicit authored-value versus
     canonical-cell rendering, and restored evidence-derived S2/S5 comparison
     prose. Generated core/verdict bytes remain stable; full local gates and both
     hosted jobs pass. Named certificate slots and theta inference remain
-    separately gated, and PR #103 awaits reviewer re-approval.
+    separately gated, and the PR awaits reviewer re-approval.
 
 events_logged:
   - turn: 1
@@ -50,7 +50,7 @@ events_logged:
     id: "N169"
     routing: direct
     provenance: ai-executed
-    summary: "PR #102 review gaps closed: alias and sum-payload anchors, selector-order checks, scoped normalization, meta-root isolation; final gates and re-review clean."
+    summary: "Review gaps closed: alias and sum-payload anchors, selector-order checks, scoped normalization, meta-root isolation; final gates and re-review clean."
   - turn: 2
     type: observation
     id: "O67"
@@ -62,25 +62,25 @@ events_logged:
     id: "N170"
     routing: direct
     provenance: ai-executed
-    summary: "Live post-merge audit: main/CI green; #88b unblocked by #89 but named cert slots remain under-specified."
+    summary: "Live post-merge audit: main/CI green; unblocked by the many-sorted-Σ follow-up but named cert slots remain under-specified."
   - turn: 3
     type: observation
     id: "O68"
     routing: staged
     provenance: ai-suggested
-    summary: "Recommended staged #88b milestone: value bindings first; resolve opaque named-slot layering separately; update both presentation models."
+    summary: "Recommended staged milestone: value bindings first; resolve opaque named-slot layering separately; update both presentation models."
   - turn: 4
     type: decision
     id: "N171"
     routing: direct
     provenance: user
-    summary: "Selected staged #88b surface bindings and opened feature/88b-surface-bindings."
+    summary: "Selected staged surface bindings and opened feature/88b-surface-bindings."
   - turn: 4
     type: observation
     id: "O68"
     routing: crystallized
     provenance: user-revised
-    summary: "Promoted the staged #88b architecture recommendation via user affirmation."
+    summary: "Promoted the staged architecture recommendation via user affirmation."
   - turn: 5
     type: experiment
     id: "N172"
@@ -92,13 +92,13 @@ events_logged:
     id: "N173"
     routing: direct
     provenance: ai-executed
-    summary: "Implemented and review-hardened lara-syntax@0.4 value bindings; PR #103 opened with local and hosted Haskell/Lean gates green."
+    summary: "Implemented and review-hardened lara-syntax@0.4 value bindings; the PR opened with local and hosted Haskell/Lean gates green."
   - turn: 7
     type: experiment
     id: "N174"
     routing: direct
     provenance: ai-executed
-    summary: "Resolved all PR #103 review threads; parser/docs/examples hardened; byte stability and complete local/hosted gates reconfirmed."
+    summary: "Resolved all review threads; parser/docs/examples hardened; byte stability and complete local/hosted gates reconfirmed."
 
 ai_actions:
   - turn: 1
@@ -129,7 +129,7 @@ ai_actions:
       - plans/2026-08-10-sorts-in-checker.md
   - turn: 2
     action: >
-      Verified every PR #102 review comment against the implementation; added
+      Verified every review comment against the implementation; added
       exact alias and sum-payload witnesses, declaration-derived selector
       checks, type-scoped Lean label normalization with a red/green regression,
       calibrated active prose, moved the parity executable under Lara, removed
@@ -153,9 +153,9 @@ ai_actions:
 
   - turn: 3
     action: >
-      Verified PR #102's merged state and hosted checks, confirmed local main is
+      Verified the PR's merged state and hosted checks, confirmed local main is
       clean and synchronized, audited open issues and live plans, and compared
-      the deferred #88b milestone against the current strict-Sigma,
+      the deferred milestone against the current strict-Sigma,
       opaque-Cert, and presentation-parity contracts.
     provenance: ai-executed
     files_changed: []
@@ -181,7 +181,7 @@ ai_actions:
       evaluation tasks with per-task review. Added the Haskell syntax and
       one-pass elaboration path, the Lean mirror/codecs and 70-row parity guard,
       migrated S2/S5 and active documentation, closed secondary-consumer test
-      gaps found by final review, ran the complete local gate, opened PR #103,
+      gaps found by final review, ran the complete local gate, opened the PR,
       and observed both final-head hosted jobs pass.
     provenance: ai-executed
     files_changed:
@@ -207,7 +207,7 @@ ai_actions:
       - TODOS.md
   - turn: 7
     action: >
-      Verified all external PR #103 feedback against the current implementation;
+      Verified all external the PR feedback against the current implementation;
       added and red-green-tested lossless inline directive gaps; pinned authored
       numeric and hand-built string rendering beside canonical evidence-cell
       rendering; restored S2/S5 sub-claims to cell interpolation; corrected the
@@ -253,17 +253,17 @@ key_context:
       claim semantic verification for positional labels or same-typed swaps.
   - turn: 3
     excerpt: >
-      The code-side successor is D7/#88b, but not as a blind implementation of
+      The code-side successor is D7, but not as a blind implementation of
       the old one-line deliverable: strict Sigma now unblocks bare value
       bindings, while named certificate slots still cross the intentionally
       opaque Cert boundary and need an explicit design choice.
   - turn: 4
     excerpt: >
-      "checkout a new branch for it" affirmed the recommended staged #88b
+      "checkout a new branch for it" affirmed the recommended staged milestone
       direction; the working branch is feature/88b-surface-bindings.
   - turn: 5
     excerpt: >
-      The plan narrows #88b to presentation-only value bindings and prose
+      The plan narrows to presentation-only value bindings and prose
       interpolation: binding RHS terms are strict-Sigma validated, constructor
       names cannot be shadowed, only nullary term occurrences substitute,
       interpolation runs exactly once before comparison expansion, and the
@@ -286,6 +286,6 @@ key_context:
       form; inline gaps are lexical only and round-trip raw.
 
 open_threads:
-  - "Reviewer re-approval and merge of PR #103."
+  - "Reviewer re-approval and merge of the PR."
   - "Named certificate slots and plain-argument theta inference remain separately gated."
   - "O65-O67 await closure signals."

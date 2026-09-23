@@ -7,18 +7,19 @@ session:
   summary: >
     Project-status turn then the M5 T5 freeze. Turn 1: assessed "are we done / can we write the paper" —
     established that M5 T5 (freeze) was the only remaining gate for the paper, that the full
-    4-axis evaluation is deliberately two papers, and that #52 is out of scope. Turn 2: created branch
-    m5-t5-freeze-protocol; the user first chose "land #52 first" but reversed to "freeze now, defer #52"
-    after the manager surfaced that #52 is deferred, LLM-gated, and its natural-defect corpus does not
+    4-axis evaluation is deliberately two papers, and that the deferred natural-defect follow-up is out of
+    scope. Turn 2: created branch m5-t5-freeze-protocol; the user first chose "land [redacted] first" but
+    reversed to "freeze now, defer [redacted]" after the manager surfaced that the follow-up is deferred,
+    LLM-gated, and its natural-defect corpus does not
     exist (N98). Executed T5 (N99): pinned frozen inputs by git-tree SHA + seed 20260801, gates green
     (seed byte-identical, differential 416/0 + 54/0, cabal test PASS), post-freeze measure.hs committed
     under measurements/frozen/ (418 records, class-match + lean_agree 418/418), docs/m5-freeze-checklist.md
     written, tag m5-freeze-v1 deferred to merge. M5 complete for the deterministic scope → pivot to M7 (N100).
     Crystallized O32→C24 (surgical/monotone ablation) and O34→H07 (audit gate coverage) via
-    artifact-commitment (#53 merged + post-freeze reproduction); staged O35 (freeze reproducibility-anchor
+    artifact-commitment (merged + post-freeze reproduction); staged O35 (freeze reproducibility-anchor
     heuristic). Freeze committed on branch 51be992; PR/push not yet done (held for user).
-    Turn 3 (separate conversation; intervening #55/#56/#57 implementation turns have no record here):
-    addressed the external review of PR #59 (ra@1 certifier) — its one important finding (no dedicated
+    Turn 3 (separate conversation; intervening implementation turns have no record here):
+    addressed the review of the PR (ra@1 certifier) — its one important finding (no dedicated
     conformance suite for Lara.Strict.RA) verified and fixed with test/RASpec.hs, 15 properties green,
     commit 69264a1 pushed, PR reply posted (N101); staged O36 (reviewer's differential-parity-by-
     construction analysis of the ra@1 Haskell/Lean seam).
@@ -29,7 +30,7 @@ events_logged:
     id: "N98"
     routing: direct
     provenance: user-revised
-    summary: "Defer #52 from the T5 freeze — freeze deterministic corpus now; #52 stays deferred (user reversed after evidence)"
+    summary: "Defer from the T5 freeze — freeze deterministic corpus now; stays deferred (user reversed after evidence)"
   - turn: 2
     type: decision
     id: "N99"
@@ -47,7 +48,7 @@ events_logged:
     id: "O32"
     routing: crystallized
     provenance: ai-executed
-    summary: "→ C24: single-rule ablation surgical + monotone, confirmatory-by-construction (via #53 merge + post-freeze reproduction)"
+    summary: "→ C24: single-rule ablation surgical + monotone, confirmatory-by-construction (via merge + post-freeze reproduction)"
   - turn: 2
     type: observation
     id: "O34"
@@ -66,7 +67,7 @@ events_logged:
     id: "N101"
     routing: direct
     provenance: ai-executed
-    summary: "PR #59 review response: RASpec conformance suite for ra@1 (15 properties, suite green, commit 69264a1)"
+    summary: "Review response: RASpec conformance suite for ra@1 (15 properties, suite green, commit 69264a1)"
   - turn: 3
     type: observation
     id: "O36"
@@ -92,7 +93,7 @@ ai_actions:
       - TODOS.md
 
   - turn: 3
-    action: "Fetched PR #59 review; verified finding (no test module references Lara.Strict.RA); wrote test/RASpec.hs (15 conformance properties mirroring StrictSpec); wired into Spec.hs + lara.cabal; cabal test PASS; commit 69264a1 pushed; replied on PR #59 (also noted the review's referenced inline comment is not visible via the API)"
+    action: "Fetched review; verified finding (no test module references Lara.Strict.RA); wrote test/RASpec.hs (15 conformance properties mirroring StrictSpec); wired into Spec.hs + lara.cabal; cabal test PASS; commit 69264a1 pushed; replied on the PR (also noted the review's referenced inline comment is not visible via the API)"
     provenance: ai-executed
     files_changed:
       - test/RASpec.hs
@@ -112,21 +113,21 @@ logic_revisions: []
 key_context:
   - turn: 1
     excerpt: >
-      User: "we just merged #53 — is our project largely finished, can we write the complete paper?"
+      User: "we just merged [redacted] — is our project largely finished, can we write the complete paper?"
       Manager assessment: M0–M4 + result 9 done, M2 all 12 results proved; M5 T1–T4/T6 done, only T5
       (freeze) open; the complete 4-axis evaluation is deliberately two papers (axes a+c now;
       axes b/d + LLM producer later). T5 is a real gate: "final numbers come only from post-freeze
       runs," so pre-freeze tables are not citable.
   - turn: 2
     excerpt: >
-      User initially answered "Land #52 first, then freeze." Manager read #52 in full (labelled
+      User initially answered "Land [redacted] first, then freeze." Manager read the issue in full (labelled
       deferred; out of scope for the current paper; gated on LLM elaborator /
       D3) and verified the natural-defect corpus is absent from the repo, then surfaced the conflict.
-      User reversed: "Freeze now, defer #52." This reversal is why N98 provenance is user-revised.
+      User reversed: "Freeze now, defer [redacted]." This reversal is why N98 provenance is user-revised.
 
   - turn: 3
     excerpt: >
-      /receiving-code-review "address all" on PR #59. Reviewer (fenfenai) summary: "This is a strong PR"
+      /receiving-code-review "address all" on the PR. Reviewer (fenfenai) summary: "This is a strong PR"
       with one important finding (confidence 78): "No dedicated conformance suite for the new backend"
       (src/Lara/Strict/RA.hs). The review body also traced Haskell/Lean value-semantics parity
       branch-for-branch and found no accept/reject divergence. The referenced inline comment was not
@@ -134,8 +135,8 @@ key_context:
       repost if it carried more specifics.
 
 open_threads:
-  - "PR #59 (ra@1 certifier + RASpec) open, awaiting reviewer follow-up / merge; ask reviewer to repost the lost inline comment if it had extra specifics"
-  - "Intervening turns (#55 freeze merge, #56/#58 claim-support aggregation, #57 ra@1 implementation, re-freeze v2) happened in conversations with no ara/ record — trace has a gap between N100 and N101"
+  - "The ra@1 certifier + RASpec PR is open, awaiting reviewer follow-up / merge; ask the reviewer to repost the lost inline comment if it had extra specifics"
+  - "Intervening turns (freeze merge, claim-support aggregation, ra@1 implementation, re-freeze v2) happened in conversations with no ara/ record — trace has a gap between N100 and N101"
   - "Push branch m5-t5-freeze-protocol and open the T5 PR (held for user)"
   - "After merge: apply annotated tag m5-freeze-v1 and fill the <FILL-AFTER-COMMIT> freeze SHA in docs/m5-freeze-checklist.md"
   - "M7 (paper package) — write from measurements/frozen/; check whether ara/PAPER.md has a draft skeleton"

@@ -21,7 +21,7 @@
 module CheckSpec
   ( checkSpecProps
   , negMissingConflict
-    -- * Quarantine fixtures, shared with "BlockedSpec" (spec §4.3, issue #76)
+    -- * Quarantine fixtures, shared with "BlockedSpec" (spec §4.3)
   , quarantineFixtures
   , quarantiningConflictBase
   , unquarantinedFixtures
@@ -153,14 +153,14 @@ rejectionOfUnit unit = case verdictOutcome (runCheck (testCheckInput unit)) of
 -- the unit is rejected / the atom is not queried).
 --
 -- Under §4.3 quarantine this is the __conditional__ label, not the public
--- status: see 'blockedOfUnit' (issue #76).
+-- status: see 'blockedOfUnit'.
 statusOfUnit :: Unit -> Prop -> Maybe Status
 statusOfUnit unit p = case verdictOutcome (runCheck (testCheckInput unit)) of
   Accept{verdictStatuses = sts} -> conditionalStatus <$> lookup p sts
   Reject{} -> Nothing
 
--- | The queries whose public status is @evidence-blocked@ (spec §4.3, issue
--- #76): quarantine edited the program under them, so their four-state label is
+-- | The queries whose public status is @evidence-blocked@ (spec §4.3):
+-- quarantine edited the program under them, so their four-state label is
 -- only a conditional diagnostic.
 blockedOfUnit :: Unit -> [Prop]
 blockedOfUnit unit = case verdictOutcome (runCheck (testCheckInput unit)) of
@@ -194,7 +194,7 @@ mkUnit rules contraries exceptions ls as ats qs =
     }
 
 -- | The one signature every fixture in this file is built against
--- (@lara-core\@0.2@, #89 D8). Authored rather than derived: a fixture that
+-- (@lara-core\@0.2@, D8). Authored rather than derived: a fixture that
 -- accidentally goes ill-sorted must fail stage 2, which is the whole point of
 -- the stage.
 checkSigma :: Sigma
@@ -291,7 +291,7 @@ negR3 =
     []
     [atom0 "q" []]
 
--- R2, the per-instance half's own witness (#89 §3.2, §10). The rule's patterns
+-- R2, the per-instance half's own witness (§3.2, §10). The rule's patterns
 -- are all well-sorted and Gamma is well-sorted, so the STATIC half of stage 2
 -- accepts this unit outright; only the theta-range check sees the defect. The
 -- rule binds X at `score1(Num)`, so X's derived sort is Num, and the instance
@@ -316,7 +316,7 @@ negR2Theta =
     []
     []
 
--- R2: an undeclared predicate head in Gamma. The class boundary (#89 §2.3
+-- R2: an undeclared predicate head in Gamma. The class boundary (§2.3
 -- rule 1) puts an undeclared SYMBOL in R2, not R1: R1 is about declaration
 -- identifiers and symbols have never been in its list.
 negR2Undeclared :: Unit
@@ -387,7 +387,7 @@ prop_sigmaWellFormedFaults =
 -- R3, NOT R2: a theta key off the rule's parameter list, bound to a term that
 -- is itself ill-sorted (an undeclared constructor). Stage 2 must not look at a
 -- binding whose key is not a declared parameter — theta's DOMAIN is R3's
--- business (#89 §2.3 rule 3). If stage 2 inspected it, the 19 committed
+-- business (§2.3 rule 3). If stage 2 inspected it, the 19 committed
 -- `wrong-subst-domain` mutants would silently become R2 and the paper's
 -- per-class table would move.
 negR3OffDomainIllSorted :: Unit
@@ -901,7 +901,7 @@ prop_groupQuarantineDropsArgAndAttack =
           (statusOfUnit groupQuarantineDropsArgUnit (atom0 "concl" []) === Just Gap)
       ]
 
--- | __The promotion hazard (spec §4.3, issue #76).__ The mirror image of
+-- | __The promotion hazard (spec §4.3).__ The mirror image of
 -- 'groupQuarantineDropsArgUnit': here the conflicted leaf backs the
 -- __attacker__, not the target.
 --
@@ -936,7 +936,7 @@ groupQuarantinePromotionUnit =
     }
 
 -- | Quarantining the sole attacker must not promote its target's public status
--- (spec §4.3, issue #76; Lean @Lara.Blocked.justified_nonpromotion@).
+-- (spec §4.3; Lean @Lara.Blocked.justified_nonpromotion@).
 --
 -- The first two cases pin that the hazard is real — the unit accepts and the
 -- pruned graph really does label @concl@ @justified@ — and the third pins that
@@ -999,7 +999,7 @@ prop_numericMultiBlockedDriver = once (ioProperty check)
                   , (atom0 "score2" [TNum "2"], EvidenceBlocked Justified)
                   ]
 
--- | __The lost-edge hazard (spec §4.3, issue #76).__ Quarantine removes an
+-- | __The lost-edge hazard (spec §4.3).__ Quarantine removes an
 -- argument, and with it every attack that named the argument as an endpoint —
 -- but under subargument closure such an attack also carried edges onto /other/
 -- arguments containing the attacked occurrence. Dropping it therefore deletes an
@@ -1053,7 +1053,7 @@ groupQuarantineLostEdgeCompleteUnit =
     }
 
 -- | Quarantine must not promote a claim by deleting an attack /edge/ rather than
--- an attack's target (spec §4.3, issue #76). Seeding only the removed arguments
+-- an attack's target (spec §4.3). Seeding only the removed arguments
 -- fails this focused property; the corpus differential independently guards the
 -- same retained-to-retained lost-edge path.
 prop_groupQuarantineLostEdge :: Property
@@ -1087,7 +1087,7 @@ quarantineFixtures =
   ]
 
 -- | Units with no @≢@ group: quarantine prunes nothing, so nothing may be
--- blocked and their verdict bytes are the pre-#76 ones.
+-- blocked and their verdict bytes are the pre-conservative-reporting ones.
 unquarantinedFixtures :: [(String, Unit)]
 unquarantinedFixtures =
   [ ("group-consistent", groupConsistentUnit)
@@ -1096,7 +1096,7 @@ unquarantinedFixtures =
   , ("missing-conflict", negMissingConflict)
   ]
 
--- | A base whose §4.3 quarantine is not the identity (#159): the leaf group
+-- | A base whose §4.3 quarantine is not the identity: the leaf group
 -- @g1@ is inconsistent (@q@ vs @conflictq@), so quarantine removes @Lq@, the
 -- argument @aQ@ built on it, and the declared attack that names @aQ@ as an
 -- endpoint. What survives is the minimal covering shape: @aS@ (@notk@)

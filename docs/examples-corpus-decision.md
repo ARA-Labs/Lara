@@ -137,5 +137,4 @@ python3 ../scripts/check-axcheck-coverage.py AxCheck.lean $(find Lara -name '*.l
 ```
 
 Of the 353 gaps the audit found, only 9 were in `Examples/`; the gap was in the
-core mechanization, and closing it is issue #242 — not a reason to touch this
-corpus.
+core mechanization — not a reason to touch this corpus.

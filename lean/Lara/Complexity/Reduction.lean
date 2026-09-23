@@ -1,5 +1,5 @@
 /-
-The compile image of the formula gadget (issue #209, Task 8).
+The compile image of the formula gadget (Task 8).
 
 `reduceCode φ` is the finite carrier the M2b reduction emits: the gadget's
 root conclusions in declaration order and the *intended* adjacency matrix —
@@ -15,8 +15,8 @@ size obligations (§1 constraint 5: `CarrierCode.byteSize` is the carrier
 accounting measure, `Formula3.byteSize` the UTF-8 length of the canonical
 S-expression).
 
-This module owns the compile-image seam (see `docs/theory-m2b-complexity.md`
-and issue #209): the gadget module proves what the checker accepts, this one
+This module owns the compile-image seam (see
+`docs/theory-m2b-complexity.md`): the gadget module proves what the checker accepts, this one
 proves what compilation makes of it and how large the result is.
 
 Task 12 adds the reduction's *correctness*.  `Formula3.Satisfiable` defines

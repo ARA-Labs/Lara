@@ -1,9 +1,10 @@
-# Evidence — M4 relational parametricity over related backends (#215)
+# Evidence — M4 relational parametricity over related backends
 
 Branch `theory/m4-relational-parametricity`, from `3ebdbf0` to the branch head.
-`b4998e0` folded `origin/main` in (picking up #274/#216, which moved
+`b4998e0` folded `origin/main` in (picking up the generic-observation landing,
+which moved
 `Context/Equivalence.lean` and `Context/Observation.lean`); the commits after it
-are the response to PR #278's first review round. Every gate outcome and line
+are the response to the first review round. Every gate outcome and line
 count below was re-run at the branch head, not at an intermediate commit.
 
 Lean-only; no corpus regeneration, no freeze-tag bump.
@@ -30,7 +31,7 @@ Axiom audit passed.
 
 `scripts/test-check-axioms.sh` exit 0; `scripts/test_check_axcheck_coverage.py` exit 0.
 
-Build-closure check (the #259 failure mode) — `comm -23` of source modules against
+Build-closure check (the known failure mode) — `comm -23` of source modules against
 built `.olean`s reports only the three pre-existing driver/main modules
 (`Lara/AdmissionDriver`, `Lara/AdmissionDriverMain`,
 `Lara/UpdatePreconditionParityMain`); both new modules are inside the closure.
@@ -88,9 +89,9 @@ theorem relInj_necessary :
 Discharged by explicit derivations for the three relational conjuncts and
 `decide` for the disequality.
 
-## The answer to #215's own sizing question
+## The answer to the sizing question
 
-#215 asked whether the grounded fixpoint argument needs the equality.
+The request asked whether the grounded fixpoint argument needs the equality.
 **It does not.** `compileUnit_rel` concludes an equation between `StructuredAF`s,
 so both branches run one and the same framework and the relation is erased before
 any semantics runs. No grounded-labelling lemma, no `AttackExtensional`

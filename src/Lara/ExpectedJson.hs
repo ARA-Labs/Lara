@@ -342,7 +342,7 @@ expectedJsonValue input =
         , ("holes", JNumber (length (claimHoles (crClaim rep))))
         , ("incomplete-alternative", JBool (crIncompleteAlternative rep))
         ]
-          -- Spec §4.3 / issue #76: an @evidence-blocked@ claim's four-state
+          -- Spec §4.3: an @evidence-blocked@ claim's four-state
           -- label is a conditional diagnostic, so it goes in its own field —
           -- mirroring the wire's statuses/conditional split — and never under
           -- @status@, which must agree with the verdict.
@@ -353,7 +353,7 @@ expectedJsonValue input =
     -- The verdict's labels cover the __checked__ (post-§4.3-quarantine)
     -- program, so the argument name must come from the checked argument list:
     -- indexing the declared list would misattribute every label after a pruned
-    -- argument (issue #76 review round 2 — found while pinning the
+    -- argument (review round 2 — found while pinning the
     -- quarantine-attacker golden). With nothing quarantined the lists are equal.
     checkedArgs = unitArgs (pruneChecked (prune unit))
 
@@ -495,7 +495,7 @@ groupConflictDiagnostic unit =
 
 -- | The public claim status, exactly as the wire verdict spells it: the
 -- four-state word, or @evidence-blocked@ when a §4.3 prune made the label
--- unpublishable (issue #76).
+-- unpublishable.
 publicStatusString :: PublicStatus -> String
 publicStatusString ps
   | isPublished ps = statusString (conditionalStatus ps)

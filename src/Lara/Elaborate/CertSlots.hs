@@ -1,9 +1,9 @@
--- | Named certificate premise slots (lara-syntax\@0.6, #105): the pure
+-- | Named certificate premise slots (lara-syntax\@0.6): the pure
 -- lowering pass sitting in the presentation layer __above__ the opaque
 -- strict certificate. An @ord\@1@ or @ra\@1@ certificate may cite a premise
 -- by its source name — @(prem e4)@ instead of @(prem 0)@ — and this pass
 -- rewrites exactly those references to the byte-identical numeric payload
--- the backend already decodes. At @lara-syntax\@0.8@ (#131) the name a
+-- the backend already decodes. At @lara-syntax\@0.8@ the name a
 -- reference may carry also includes the citing rule's declared /premise
 -- label/, which names the slot itself rather than the term filling it; the
 -- name scope stays entirely the caller's, so that extension shows up here
@@ -59,7 +59,7 @@ data SlotRefError
   | -- | the name denotes more than one candidate in scope
     SlotNameAmbiguous
   | -- | the name is both a rule premise label and a declared leaf or prior
-    -- argument (@lara-syntax\@0.8@, #131): never silently either class, even
+    -- argument (@lara-syntax\@0.8@): never silently either class, even
     -- when the two classes would agree on the slot.
     SlotNameLabelAmbiguous
   | -- | the name resolves, but not to a premise of this instance

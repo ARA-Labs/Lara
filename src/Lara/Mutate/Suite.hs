@@ -37,9 +37,9 @@ module Lara.Mutate.Suite
     -- checker's, which means calling the enumerators directly — going through
     -- 'mutantsForBase' would only see the seeded subset and the rendered
     -- bytes, not the prediction. 'siteOps' is the whole table
-    -- (@prop_siteMatchesChecker@, #165); 'dropCoveringAttackSites' stays
+    -- (@prop_siteMatchesChecker@); 'dropCoveringAttackSites' stays
     -- exported for the conflict-specific property that carries the
-    -- @drop-covering-attack@ design rationale (#159).
+    -- @drop-covering-attack@ design rationale.
   , SiteOp (..)
   , siteOps
   , dropCoveringAttackSites
@@ -73,7 +73,7 @@ import qualified Lara.Mutate.Sorts as Sorts
 -- site enumerator. 'mutantsForBase', 'sweepOps', and
 -- @test\/MutationSpec.hs@'s checker-agreement property all read 'siteOps', so
 -- the generated suite, the corpus sweep, and the gated answer key cannot
--- drift apart (#165).
+-- drift apart.
 data SiteOp = SiteOp
   { siteOp :: MutationOp
   , siteCap :: Int
@@ -82,7 +82,7 @@ data SiteOp = SiteOp
   -- ^ each proposed site carries its ordered ground truth ('mutantSites'
   -- contract: head = the spec-order-first constituent, every element
   -- admissible). 'SeededSites' is non-empty by construction, so an enumerator
-  -- cannot publish a site seeded at nothing (#169). The single-defect
+  -- cannot publish a site seeded at nothing. The single-defect
   -- enumerators publish singletons via 'single'.
   }
 
@@ -107,13 +107,13 @@ siteOps =
   , SiteOp OpUnlicensedAttack 1 False (single unlicensedAttackSites)
   , SiteOp OpDropCoveringAttack 1 False (single dropCoveringAttackSites)
   , SiteOp OpGroupConflict 1 False (single groupConflictSites)
-  , -- The localization family (#123, @docs\/localization-metric-decision.md@):
+  , -- The localization family (@docs\/localization-metric-decision.md@):
     -- the only enumerators publishing composite ground-truth lists — off-site
     -- manifestation and multi-defect ordering ("Lara.Mutate.Sites.Localize").
     SiteOp OpRetractRule 1 False Localize.retractRuleSites
   , SiteOp OpTwinSupportDefect 1 False Localize.twinSupportDefectSites
   , SiteOp OpCrossStageDefect 1 False Localize.crossStageDefectSites
-  , -- The signature family (@lara-core\@0.2@, #89 D10): R2 had zero mutants
+  , -- The signature family (@lara-core\@0.2@, D10): R2 had zero mutants
     -- before this pass, and spec §10.1 requires every class to be exercised.
     SiteOp OpUndeclaredPred 1 False (classed Sorts.undeclaredPredSites)
   , SiteOp OpWrongPredArity 1 False (classed Sorts.wrongPredAritySites)
@@ -240,7 +240,7 @@ data SweepOp = SweepOp
 -- gap corpus unit with no args yields no sites, so they propose nothing there,
 -- no special casing; sweeping the signature family is what makes its
 -- applicability assertion meaningful — `wrong-arg-sort` must find real sites
--- in corpus-v1's own vocabulary, not only in hand-built examples, #89 §8).
+-- in corpus-v1's own vocabulary, not only in hand-built examples, §8).
 -- Codec corruption and the constructed cycle family are not part of the corpus
 -- sweep (they are base-independent structural families).
 sweepOps :: [SweepOp]

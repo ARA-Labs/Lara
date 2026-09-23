@@ -5,9 +5,9 @@ session:
   last_turn: "2026-08-12T22:02"
   turn_count: 1
   summary: >
-    Opened PR #106 for plain-argument theta inference and confirmed clean hosted
-    Haskell/Lean CI; #104 verification is complete pending merge, while #105
-    remains a separate open certificate-layer design problem.
+    Opened the PR for plain-argument theta inference and confirmed clean hosted
+    Haskell/Lean CI; verification is complete pending merge, while the certificate-layer
+    item remains a separate open design problem.
 
 events_logged:
   - turn: 1
@@ -15,20 +15,20 @@ events_logged:
     id: "N176"
     routing: direct
     provenance: ai-executed
-    summary: "Hosted Haskell and Lean CI passed on PR #106 after the final local verification gates; the PR merge state is CLEAN."
+    summary: "Hosted Haskell and Lean CI passed on the PR after the final local verification gates; the PR merge state is CLEAN."
   - turn: 1
     type: observation
     id: "O70"
     routing: staged
     provenance: ai-executed
-    summary: "The conditional #104 verification thread resolved through hosted CI; 72-row parity and local Haskell/Lean/AxCheck gates remain passing."
+    summary: "The conditional verification thread resolved through hosted CI; 72-row parity and local Haskell/Lean/AxCheck gates remain passing."
 
 ai_actions:
   - turn: 1
     action: >
       Ran the final local Haskell, presentation-parity, Lean build, check-axioms,
       and AxCheck gates; pushed feature/104-plain-arg-theta-inference; opened
-      PR #106; monitored Actions run 31644485072; updated the #104 TODO and
+      the PR; monitored Actions run 31644485072; updated the TODO and
       append-only ARA trace, staging, reasoning, session, and index records.
     provenance: ai-executed
     files_changed:
@@ -47,16 +47,16 @@ key_context:
   - turn: 1
     excerpt: >
       The hosted Haskell (cabal build + test) and Lean (lake build) jobs both
-      passed. The implementation PR is open and merge-clean; #104 is attached
-      to the PR and will close on merge. #105 named certificate premise slots
+      passed. The implementation PR is open and merge-clean; the tracker item is
+      attached to the PR and will close on merge. Named certificate premise slots
       remain unimplemented and explicitly separate. The modified ARA YAML
       files parse and targeted N176/O70/session-index assertions pass, while
       repository-wide `ara check --strict ara` remains blocked by the
       pre-existing N131 scalar at `exploration_tree.yaml:3249`.
 
 open_threads:
-  - "Merge PR #106 after review; #104 is verified and attached to the PR."
-  - "Design named certificate premise slots and opaque Cert layering for #105; no implementation is implied here."
+  - "Merge the PR after review; the item is verified and attached to the PR."
+  - "Design named certificate premise slots and opaque Cert layering; no implementation is implied here."
   - "O65-O67 await closure signals."
 
 ai_suggestions_pending: []

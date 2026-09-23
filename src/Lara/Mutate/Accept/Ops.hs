@@ -1,4 +1,4 @@
--- | The six accept-verdict constructions (#143, split out of "Lara.Mutate.Accept").
+-- | The six accept-verdict constructions (split out of "Lara.Mutate.Accept").
 --
 -- Each operator takes a /justified/ corpus unit and edits it into a mutant that
 -- still ACCEPTS but lands the queried claim at a specified status, by attaching
@@ -87,7 +87,7 @@ opAttachUndercut base input =
     excP = exceptionProp base u r theta
     leaf = LeafId "mut_undercut_leaf"
 
--- | @quarantine-attacker@ (spec §4.3, issue #76): @attach-undercut@'s
+-- | @quarantine-attacker@ (spec §4.3): @attach-undercut@'s
 -- construction, plus a @≢@ duplicate-report group that quarantines the
 -- attacker's own leaf.
 --
@@ -97,7 +97,7 @@ opAttachUndercut base input =
 -- claim looks exactly as strong as before even though the evidence deciding its
 -- only objection turned out to be internally inconsistent. The mutant must
 -- therefore come back @accept-evidence-blocked@; an ordinary @accept-justified@
--- here is the #76 bug.
+-- here is that bug.
 --
 -- The group's second member is a fresh leaf with a proposition that is not @≡@
 -- the attacker's (the exception atom wrapped in a distinct predicate), which is

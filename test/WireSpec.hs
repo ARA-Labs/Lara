@@ -13,7 +13,7 @@
 --     attack endpoints; checker inputs and verdicts carry varied canonical
 --     replay identities — 0-3 sorted theory digests, occasionally non-ASCII
 --     to exercise the quoted-atom path, and varied backend selections —
---     PR #44 review C10);
+--     review C10);
 --   * __malformed-input rejection matrix__ — text-level errors, then one
 --     field short / one field long per grammar construct, unknown tags, bad
 --     naturals, and the two wire-well-formedness invariants (duplicate
@@ -306,7 +306,7 @@ genUnit = do
       }
 
 -- ---------------------------------------------------------------------------
--- Varied replay identities (PR #44 review C10)
+-- Varied replay identities (review C10)
 -- ---------------------------------------------------------------------------
 
 -- | Theory-digest text: mostly bare @sha256:@ digests, occasionally carrying
@@ -375,7 +375,7 @@ genStatus :: Gen Status
 genStatus = elements [Gap, Justified, Contested, Defeated]
 
 -- | A public status: ordinary, or @evidence-blocked@ over a conditional label
--- (spec §4.3, issue #76). Blocked entries are generated at roughly one in three
+-- (spec §4.3). Blocked entries are generated at roughly one in three
 -- so the conditional section is exercised on most multi-query verdicts.
 genPublicStatus :: Gen PublicStatus
 genPublicStatus =
@@ -404,7 +404,7 @@ genVerdict = do
             else
               listOf
                 ((,) <$> choose (0, n - 1) <*> choose (0, n - 1))
-        -- Some queries are @evidence-blocked@ (spec §4.3, issue #76), so the
+        -- Some queries are @evidence-blocked@ (spec §4.3), so the
         -- round-trip covers the conditional section. Blockedness lives inside
         -- the status, so the generator cannot construct an inconsistent
         -- statuses/blocked pairing even by accident.
@@ -487,7 +487,7 @@ prop_printParsePrintIdempotent =
      in fmap printSExpr (parseSExpr text) == Right text
 
 -- ---------------------------------------------------------------------------
--- The reference-parser differential (#115)
+-- The reference-parser differential
 -- ---------------------------------------------------------------------------
 --
 -- 'parseSExprBS' replaced a @String@ ([Char]) reader with one over strict
@@ -657,7 +657,7 @@ prop_referenceParserMutated =
   forAll genMutatedWire (agreesWithReference "mutated")
 
 -- ---------------------------------------------------------------------------
--- Targeted error positions (#115 T5)
+-- Targeted error positions (T5)
 -- ---------------------------------------------------------------------------
 
 -- | Exact @(line, column, message)@ pins. The generic differential above only
@@ -942,7 +942,7 @@ prop_replayEnvelopeMalformedMatrix =
       , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories) (artifact))"
       , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories) (artifact sha256:a extra))"
       , "(replay-id (policy empirical-v1) (core lara-core@0.2) (backends) (theories) (artifact sha256:a))"
-        -- The retired version (hard cutover, #91 decision 5): a @0.1 envelope is
+        -- The retired version (hard cutover, decision 5): a @0.1 envelope is
         -- an unsupported core version, not a compatibility path.
       , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
       , "(replay-id (core (lara-core@0.2)) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
@@ -1072,7 +1072,7 @@ prop_verdictGoldenVectors =
           [ (Prop (Pred "p") [], Published Justified)
           , (Prop (Pred "q") [TNum "2"], Published Defeated)
           ]
-    -- Spec §4.3 / issue #76: @p@'s support could have been affected by
+    -- Spec §4.3: @p@'s support could have been affected by
     -- quarantine, so its public status is @evidence-blocked@ and the four-state
     -- label it would have had moves to the @conditional@ section. @q@ is out of
     -- reach of the edit and keeps its ordinary status.
@@ -1306,7 +1306,7 @@ prop_verdictMalformedMatrix = all isLeft (map decodeVerdict malformed)
       -- The rows above omit the replay-id, so they die on the outer shape and
       -- never reach the section decoders. These carry a well-formed replay-id so
       -- the section checks are the thing under test — including the four
-      -- rejection paths the conditional section adds (spec §4.3, issue #76).
+      -- rejection paths the conditional section adds (spec §4.3).
       , accept [labelsSec, edgesSec] -- accept short
       , accept [labelsSec, edgesSec, statusesSec, conditionalSec, conditionalSec] -- accept long
       , accept [labelsSec, edgesSec, blockedStatusesSec] -- evidence-blocked, no conditional section

@@ -152,7 +152,7 @@ data RuleSite
 -- Two arms, one class. Spec §8.1 Path B and spec §4.1 rule well-formedness are
 -- both /policy/ well-formedness — a policy the checker may not read as patterns
 -- — so they share R12 and this stage rather than splitting a frozen class. R2
--- stays purely about sorts (#89 D-2): an out-of-scope pattern variable is
+-- stays purely about sorts (D-2): an out-of-scope pattern variable is
 -- perfectly well-sorted, it is simply not in scope.
 data Violation
   = -- | §8.1 Path B: a strict rule's conclusion pattern may overlap a declared

@@ -2,7 +2,7 @@ session:
   id: "2026-07-25_001"
   timestamp: "2026-07-25T00:00"
   ended: "2026-07-25T14:05"
-  summary: "rit comparison hardened from analysis to source-verified evidence: C18 crystallized, §11 addendum + novelty row (d192047), PR #22 merged. Follow-up commit-path audit found five write-up-vs-code discrepancies (C19, §11.5); PR #22's squash stranded that work, rebased + nitpicked onto PR #23. Then C20 + §11.6: rit's formal verification is node-level only — the roll-up is a conditional guarantee over an untrusted edge set (missing-edge laundering)."
+  summary: "rit comparison hardened from analysis to source-verified evidence: C18 crystallized, §11 addendum + novelty row (d192047), the PR merged. Follow-up commit-path audit found five write-up-vs-code discrepancies (C19, §11.5); the PR's squash stranded that work, rebased + nitpicked onto the PR. Then C20 + §11.6: rit's formal verification is node-level only — the roll-up is a conditional guarantee over an untrusted edge set (missing-edge laundering)."
 
 events_logged:
   - turn: 1
@@ -64,23 +64,23 @@ ai_actions:
     provenance: ai-executed
     files_changed: ["docs/novelty-and-related-work.md"]
   - turn: 4
-    action: "Pushed chore/update-comparison to origin and opened PR #22 (d192047 + 5307671)."
+    action: "Pushed chore/update-comparison to origin and opened the PR (d192047 + 5307671)."
     provenance: ai-executed
     files_changed: []
   - turn: 4
-    action: "Read rit's live commit path (rit.py, action/push.py, admit/__init__.py, formal/{kernel,checker,uses,semantics,grammar,system}.py, gate/{solve,collision,grade}.py, grounding/{__init__,provenance}.py) + grep confirmations; wrote the rit commit-path audit plus a K-tier caveat; committed ba6c45e and pushed to PR #22."
+    action: "Read rit's live commit path (rit.py, action/push.py, admit/__init__.py, formal/{kernel,checker,uses,semantics,grammar,system}.py, gate/{solve,collision,grade}.py, grounding/{__init__,provenance}.py) + grep confirmations; wrote the rit commit-path audit plus a K-tier caveat; committed ba6c45e and pushed to the PR."
     provenance: ai-executed
     files_changed: []
   - turn: 5
-    action: "PR #22 merged into main (squash 29c7570) but captured only d192047+5307671; §11.5 (ba6c45e) + C19 capture (3692817) were stranded. Synced main, branched chore/comparison-nitpick, cherry-picked ba6c45e+3692817, added a doc-consistency nitpick (§4 K-tier row + 'deepest difference' prose forward-pointed to §11.5, since they asserted K-tier as fact), committed 2321a87, pushed, opened PR #23."
+    action: "The PR merged into main (squash 29c7570) but captured only d192047+5307671; §11.5 (ba6c45e) + C19 capture (3692817) were stranded. Synced main, branched chore/comparison-nitpick, cherry-picked ba6c45e+3692817, added a doc-consistency nitpick (§4 K-tier row + 'deepest difference' prose forward-pointed to §11.5, since they asserted K-tier as fact), committed 2321a87, pushed, opened the PR."
     provenance: ai-executed
     files_changed: []
   - turn: 6
-    action: "Answered 'what does rit's formal verification mean' (verifies nodes not the graph; roll-up is a conditional guarantee over an untrusted edge set; missing-edge laundering; division of labor with lara). User affirmed; persisted as claim C20 on PR #23."
+    action: "Answered 'what does rit's formal verification mean' (verifies nodes not the graph; roll-up is a conditional guarantee over an untrusted edge set; missing-edge laundering; division of labor with lara). User affirmed; persisted as claim C20 on the PR."
     provenance: ai-executed
     files_changed: ["ara/logic/claims.md"]
   - turn: 7
-    action: "PR #23 merged into main (squash a5328b5) but again stranded its final commit (0427cf7 = §11.6 + C20) — same partial-squash as #22. Synced main, branched docs/comparison-formal-verification-meaning, cherry-picked 0427cf7 (clean; cc5307c), opened PR #24 with a note asking for a complete merge."
+    action: "The PR merged into main (squash a5328b5) but again stranded its final commit (0427cf7 = §11.6 + C20) — same partial-squash. Synced main, branched docs/comparison-formal-verification-meaning, cherry-picked 0427cf7 (clean; cc5307c), opened the PR with a note asking for a complete merge."
     provenance: ai-executed
     files_changed: []
 
@@ -118,7 +118,7 @@ key_context:
 open_threads:
   - "Add attack completeness to the executable checker, then prove the result-7 grounded consistency theorem."
   - "Assess whether exact non-linear unifiability is worth a later core-version change; v0.1 deliberately uses the proved conservative overlap relation."
-  - "PR #23 merged (squash a5328b5) — landed §11.5 + C19 + nitpick, but stranded its final commit (§11.6 + C20). RECURRING: both #22 and #23 squash-merged before their last commit; §11.6 + C20 now on PR #24 (docs/comparison-formal-verification-meaning) — merge must capture cc5307c."
+  - "The PR merged (squash a5328b5) — landed §11.5 + C19 + nitpick, but stranded its final commit (§11.6 + C20). RECURRING: both squash-merged before their last commit; §11.6 + C20 now on the PR (docs/comparison-formal-verification-meaning) — merge must capture cc5307c."
   - "O12 (rit-lara composition) awaits a design commitment before crystallizing; its K-tier premise is now qualified by C19/N47 (K-tier designed but unwired in rit today)."
   - "C19's generalization beyond rit (whether other kernel-attestation verifiers' gates under-enforce their write-ups) is argued from mechanism, not source-verified elsewhere."
 

@@ -2,7 +2,7 @@ session:
   id: "2026-07-24_008"
   timestamp: "2026-07-24T17:47"
   ended: "2026-07-24T17:47"
-  summary: "Closed issue #16 with reviewed executable support, attack, and raw-program checkers, exact adequacy proofs, and complete Lean/Haskell verification."
+  summary: "Closed the issue with reviewed executable support, attack, and raw-program checkers, exact adequacy proofs, and complete Lean/Haskell verification."
 
 events_logged:
   - type: decision
@@ -47,7 +47,7 @@ ai_actions:
   - action: "Ported and tested the exact UTF-8 framed Atom key in Haskell and Lean."
     provenance: ai-executed
     files_changed: ["src/Lara/Strict/ND.hs", "test/StrictSpec.hs"]
-  - action: "Reconciled result status without claiming the #17 edge decider, #18 attack completeness, result-3 dependency accountability, or result-9 erased identity."
+  - action: "Reconciled result status without claiming the edge decider, attack completeness, result-3 dependency accountability, or result-9 erased identity."
     provenance: ai-executed
     files_changed:
       - "docs/spec.md"
@@ -64,8 +64,8 @@ claims_touched:
     provenance: ai-suggested
 
 open_threads:
-  - "Issue #17 must construct the general executable Compile.Faithful edge decider."
-  - "Issue #18 must add attack completeness before closing result-7 status consistency."
+  - "Must construct the general executable Compile.Faithful edge decider."
+  - "Must add attack completeness before closing result-7 status consistency."
   - "Certificate dependency accountability (Backend.uses/certDeps) remains the result-3 certificate half."
   - "Certificate-erased argument identity and backend replacement remain result 9."
 

@@ -5,7 +5,7 @@ session:
   last_turn: "2026-08-05T22:50"
   turn_count: 5
   summary: >
-    Reviewed and approved policy admission delivery. Issue #77 is now a self-contained runtime
+    Reviewed and approved policy admission delivery. The issue is now a self-contained runtime
     source-conformance plan; raw/resolved Lean attack alignment, declarative relation/evaluator
     correspondence, the dedicated admission differential, and paper edits are a linked dependent
     plan. Both preserve lara-core@0.1, exact source precedence, canonical audits, and production
@@ -17,13 +17,13 @@ events_logged:
     id: "N114"
     routing: child-of-N106
     provenance: user
-    summary: "Formalize policy admission context construction while repairing #77"
+    summary: "Formalize policy admission context construction while repairing"
   - turn: 5
     type: decision
     id: "N115"
     routing: direct
     provenance: user-revised
-    summary: "Split runtime issue #77 from dependent metatheory while retaining complete reviewed coverage"
+    summary: "Split the runtime issue from dependent metatheory while retaining complete reviewed coverage"
 
 ai_actions:
   - turn: 4
@@ -50,8 +50,8 @@ claims_touched: []
 key_context:
   - turn: 3
     excerpt: >
-      The support calculus consumes Gamma but does not define its construction; #77 is
-      therefore an implementation conformance repair, while the already-landed #76/#80
+      The support calculus consumes Gamma but does not define its construction; the
+      runtime item is therefore an implementation conformance repair, while the already-landed
       non-promotion theorem carries the current quarantine metatheory.
   - turn: 4
     excerpt: >
@@ -79,7 +79,7 @@ logic_revisions:
     provenance: user-revised
 
 open_threads:
-  - "Implement the reviewed runtime plan for issue #77 on fix/77-policy-admission"
+  - "Implement the reviewed runtime plan for the issue on fix/77-policy-admission"
   - "Start the metatheory/differential plan after the runtime API and fixtures stabilize"
   - "Update the separate Overleaf paper only after AxCheck theorem names stabilize"
 

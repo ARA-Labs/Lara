@@ -17,7 +17,7 @@
 # their `.lara` sources by `scripts/gen-worked-examples.hs` (parse → elaborate →
 # encodeUnit).
 #
-# Negative half (PR #44 review C8): every fixtures/malformed/*.sexp is a
+# Negative half (review C8): every fixtures/malformed/*.sexp is a
 # deliberately malformed check-input envelope. Both drivers must reject each
 # one at the codec boundary — exit code 2 with empty stdout — reported as
 # "negative pass=N fail=M" and folded into the exit status. stderr
@@ -28,16 +28,16 @@
 # per-operator stderr substrings recorded in the mutant manifest's
 # hs-diagnostic / lean-diagnostic columns, for the same reason — with a codec
 # check deleted, its mutants would still exit 2 via a different downstream
-# check and stay silently green (PR #49 review).
+# check and stay silently green (review).
 #
-# Mutant suite discovery (PR #49 review): the generated suite under
+# Mutant suite discovery (review): the generated suite under
 # fixtures/mutants/ is discovered from fixtures/mutants/MANIFEST.tsv, never
 # by globbing, and each half (verdict mutants, codec mutants) must be
 # non-empty on its own — legacy fixtures/malformed anchors can no longer
 # satisfy the counters for an absent suite. The manifest and the committed
 # *.sexp files must also agree exactly (no missing, no unlisted files).
 #
-# Stderr pinning (PR #44 re-review + #45 R9): two rejection classes carry
+# Stderr pinning (re-review + R9): two rejection classes carry
 # their location only on stderr, because the stdout verdict is a bare class
 # atom. The three fixtures/corpus/reject-preflight-*.sexp anchors all emit
 # "(verdict … reject R13)", so the duplicate → unknown → unselected-certificate
@@ -48,7 +48,7 @@
 # these anchors the harness additionally byte-compares stderr — a Lean-side
 # regression turns red here instead of passing silently.
 #
-# Nesting bound (issue #331): a third, GENERATED family. Both readers cap
+# Nesting bound: a third, GENERATED family. Both readers cap
 # S-expression nesting at the same `maxDepth`, and the two cases that straddle
 # that bound are built here from the constant each reader declares in source
 # rather than committed as ten kilobytes of parentheses. Over the bound the
@@ -111,7 +111,7 @@ for root in fixtures examples bundles corpus-units; do
   # deliberately malformed envelopes of fixtures/malformed/ are the negative
   # half below; the generated mutant suite (fixtures/mutants/) is discovered
   # manifest-driven, so an absent or half-written suite fails loudly instead of
-  # shrinking the anchor set (PR #49 review); the source admission fixtures
+  # shrinking the anchor set (review); the source admission fixtures
   # (fixtures/admission/) belong to scripts/admission-differential.sh; the
   # possible-world fixtures (fixtures/pw/) have their own harnesses —
   # fixtures/pw/run/ and its worlds/ go through both pw drivers in
@@ -181,7 +181,7 @@ if ! cmp -s "$anchor_listed" "$anchor_discovered"; then
 fi
 
 # ---------------------------------------------------------------------------
-# Mutant suite (fixtures/mutants/, M5 tracker #48 T1): manifest-driven
+# Mutant suite (fixtures/mutants/, T1): manifest-driven
 # discovery. The manifest is the source of truth: split its rows into the
 # verdict half (byte-parity anchors) and the codec half (negative anchors),
 # require EACH half non-empty, and require the committed *.sexp files to
@@ -328,7 +328,7 @@ if [ "$((pass + fail))" -eq 0 ]; then
   exit 2
 fi
 
-# Canonical-order pinning (issue #36 re-review): the negative anchor
+# Canonical-order pinning (re-review): the negative anchor
 # fixtures/malformed/non-canonical-theory-order.sexp cannot isolate the
 # canonical-order rejection by exit code alone. The theory-identity
 # comparison is list-ordered on BOTH drivers (Haskell:
@@ -341,12 +341,12 @@ fi
 # replayFailureMessage is). Every other negative anchor's stderr stays free.
 #
 # ---------------------------------------------------------------------------
-# Negative anchors (PR #44 review C8): every fixtures/malformed/*.sexp is a
+# Negative anchors (review C8): every fixtures/malformed/*.sexp is a
 # deliberately malformed check-input envelope. BOTH drivers must reject it at
 # the codec boundary: exit code 2 AND empty stdout. stderr diagnostics are
 # free to differ and are never compared (two exceptions: the canonical-order
 # anchor above, and the generated codec mutants' manifest-pinned per-operator
-# diagnostics — PR #49 review).
+# diagnostics — review).
 # ---------------------------------------------------------------------------
 printf '\n== negative anchors (fixtures/malformed + manifest codec mutants): both drivers must exit 2 with empty stdout\n'
 
@@ -359,7 +359,7 @@ fi
 # non-empty ON THEIR OWN; the generated codec mutants come from the manifest
 # codec half validated above (also non-empty on its own). Merging happens
 # only after both counters are satisfied, so neither half can stand in for
-# an absent other (PR #49 review).
+  # an absent other (review).
 legacy_negative_list="$tmp_dir/negative.legacy"
 if ! find fixtures/malformed -name '*.sexp' -print >"$legacy_negative_list"; then
   echo "FAIL: could not discover negative anchors under fixtures/malformed"
@@ -459,7 +459,7 @@ done <"$negative_list"
 echo "negative pass=$neg_pass fail=$neg_fail"
 
 # ---------------------------------------------------------------------------
-# The reader's nesting bound (issue #331): GENERATED, not committed.
+# The reader's nesting bound: GENERATED, not committed.
 #
 # Both readers — `Lara.Wire.parseSExprBS` and `Lara.Driver.parseWire` — refuse
 # input nested deeper than the `maxDepth` they share, so a pathologically nested
@@ -480,7 +480,7 @@ echo "negative pass=$neg_pass fail=$neg_fail"
 # Over the bound the located message IS compared, once each driver's own
 # program-name prefix is stripped — the depth, the column and the wording are
 # the shared reader's contract, and it is precisely the refusal CATEGORY that
-# used to differ: before #331 the Lean reader had no bound, read the over-deep
+# used to differ: previously the Lean reader had no bound, read the over-deep
 # form, and refused it one layer later as a malformed envelope, at the same exit
 # code. At the bound the two diagnostics are NOT compared — the Haskell driver's
 # there prints the rejected tree, which is free to differ — but the bound's own

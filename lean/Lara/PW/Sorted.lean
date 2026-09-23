@@ -1,8 +1,8 @@
 /-
-# PW — the `Query_κ` well-sortedness refinement (issue #307)
+# PW — the `Query_κ` well-sortedness refinement
 
 PW0 froze `Query_κ` as all of `Atom` and deferred the refinement to the M5
-surface layer, which has since landed (#188). This module takes the deferral:
+surface layer, which has since landed. This module takes the deferral:
 per-context queries become **well-sorted claims over `Σ_κ`**, and the
 executable layer gains a posing stage that runs *before* any world is
 consulted.

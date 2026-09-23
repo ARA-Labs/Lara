@@ -85,6 +85,6 @@ key_context:
       part of the same claims, so both queries are evidence-blocked.
 
 open_threads:
-  - "PR #79 awaits reviewer re-review with this follow-up diff"
+  - "The PR awaits reviewer re-review with this follow-up diff"
 
 ai_suggestions_pending: []

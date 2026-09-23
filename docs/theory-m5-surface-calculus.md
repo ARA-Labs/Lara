@@ -6,7 +6,7 @@ hypotheses are load-bearing, how the verified model relates to the shipped
 Haskell path, and which stronger statements the paper must not make. The Lean
 sources are authoritative.
 
-_Status: settled record (2026-09-01; theory spine, tracker #180)._
+_Status: settled record (2026-09-01; theory spine)._
 
 ## Motivation and Trusted Boundary
 

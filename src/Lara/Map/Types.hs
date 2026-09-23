@@ -517,7 +517,7 @@ mkMapManifest policy policyPath backends members alignments questions
 --
 -- A fact about the frozen 'Coord' type, so it lives beside it, and it is the
 -- only copy: the manifest codec, the envelope codec and the smart constructors
--- all read this one (issue #317).
+-- all read this one.
 sameSelectorKind :: Coord -> Coord -> Bool
 sameSelectorKind CoordWhole CoordWhole = True
 sameSelectorKind (CoordArg _) (CoordArg _) = True
@@ -534,7 +534,7 @@ sameSelectorKind _ _ = False
 --
 -- The single copy for the whole map pipeline — "Lara.Map.Wire",
 -- "Lara.Map.Driver", "Lara.Map.Load" and 'mkMapManifest' all call it. They used
--- to carry one each, which nothing asserted agreed (issue #317); a decoder that
+-- to carry one each, which nothing asserted agreed; a decoder that
 -- accepts what its sibling refuses is the failure that would have surfaced.
 -- Not to be confused with @Lara.Check.firstDuplicate@, which scans a unit's
 -- /support terms/ and reports index pairs.

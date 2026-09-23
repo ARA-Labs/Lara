@@ -1,4 +1,4 @@
--- | The corpus claim-support aggregation (#56) as a standing test: the pure
+-- | The corpus claim-support aggregation as a standing test: the pure
 -- "Lara.ClaimSupport" classifiers, plus an end-to-end run over the FROZEN 60
 -- corpus units that PINS every headline number the paper cites AND re-diffs the
 -- committed frozen deliverable byte-for-byte. The integration props are the

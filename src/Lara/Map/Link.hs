@@ -9,7 +9,7 @@
 --                -> load and recheck each member  ("Lara.Map.Load")
 --                -> qualify each member's local identities  ("Lara.Map.Qualify")
 --                -> merge \/ saturate \/ check \/ evaluate    <- here
---                -> composite verdict  (\@Lara.Map.Driver\@, issue #303)
+--                -> composite verdict  (\@Lara.Map.Driver\@)
 -- @
 --
 -- == Nothing is asserted; everything is checked
@@ -65,7 +65,7 @@
 -- (@convention-v1@), so the merge, the endpoint re-pointing it forces
 -- ('renameTable') and the co-owned saturation pair below are exercised through
 -- 'linkMap' and compared across both drivers, as well as directly on
--- synthesized terms (issue #316). It would be implemented regardless: the
+-- synthesized terms. It would be implemented regardless: the
 -- alternative is a linked unit whose well-formedness silently depends on a
 -- property of the policy.
 --

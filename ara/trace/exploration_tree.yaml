@@ -284,7 +284,7 @@ tree:
           by:
           - docs/spec.md §8.2
           - lean/Lara/Grounded.lean
-          - 'PR feat/direct-status-semantics (issue #4)'
+          - branch feat/direct-status-semantics
           note: 'ABSTRACT CORE DONE; COMPILE STEP STILL OPEN. Spec §8.2 defines the direct big-step judgment
             W ⊢ a ⇓ label as the mutually-inductive least fixed point DirectIn/DirectOut, and lean/Lara/Grounded.lean
             proves it equals the executable bounded-iteration labelling over an ARBITRARY framework F:
@@ -299,7 +299,7 @@ tree:
             : Source → AF and its subargument closure are only defined and characterized (compile_attack_iff),
             never exercised. Genuine result 6 = define a status on the source W and prove it equals status(grounded(compile(W))),
             exercising the closure edges. This is M1 work (gated on the concrete support-term layer).
-            Flagged by code review on PR #7; provenance relabeled "result 6 — abstract AF layer" / "partially
+            Flagged by code review; provenance relabeled "result 6 — abstract AF layer" / "partially
             mechanized" to match.
 
             '
@@ -333,7 +333,7 @@ tree:
             structure is a separate defined contestedProvenance report, not part of the status. statusC
             is total and deterministic by construction (a function of the deterministic labelling), so
             the four-state status is total and deterministic (result 5, C07). Refined after code review
-            on PR #7 to distinguish the mechanized half from the modeling conventions.
+            to distinguish the mechanized half from the modeling conventions.
 
             '
 - id: N18
@@ -382,7 +382,6 @@ tree:
   source_refs:
   - corpus/ara-paperbench (submodule)
   - docs/corpus-map.md §5
-  - 'PR #8 (draft)'
   title: 'M0 kickoff: vendor ara-paperbench as a git submodule pinned at 62e9b54'
   choice: 'Corpus vendored as submodule corpus/ara-paperbench at upstream commit 62e9b54b2d4efe45b97f25676a16784530dd552a
     (main, 2026-07-09). All M0 annotation provenance is valid only at this pin; bumping it invalidates
@@ -564,7 +563,7 @@ tree:
   support_level: explicit
   source_refs:
   - docs/spec.md §7, §11 task 6
-  - 'commits d3902a4, bd78a37 (PR #9)'
+  - 'commits d3902a4, bd78a37'
   title: dead_end nodes lower to support OR attack — elaborator per-node judgment, kernel-agnostic
   choice: 'A dead_end trace node may lower to a support leaf/argument instead of a typed attack (restricted_mlm
     C14: a failed line of attempts IS a negative-result claim''s primary evidence). The choice is the
@@ -585,7 +584,7 @@ tree:
   support_level: explicit
   source_refs:
   - docs/spec.md §4.3, §11 task 2
-  - 'commit 8a82d9e (PR #9)'
+  - 'commit 8a82d9e'
   title: Result-cell conflicts quarantine to gap — revised same-session from audit-only
   choice: 'Conflicting duplicate reports of one measurand cell: the elaborator declares duplicate-report
     groups (untrusted, audited); admission enforces ≡ within each group; a disagreeing group is quarantined
@@ -614,7 +613,7 @@ tree:
   support_level: explicit
   source_refs:
   - docs/spec.md §4.5
-  - 'commits 7eec3fb, 3002ed9 (PR #9)'
+  - 'commits 7eec3fb, 3002ed9'
   title: 'v0.1 scheme spellings settled: descriptive snake_case + empirical-v1; short vocabulary reserved;
     frontend naming with ARA maintainer'
   choice: 'The nine family identifiers are settled as descriptive snake_case (controlled_comparison, intervention_ablation,
@@ -644,7 +643,7 @@ tree:
   - docs/spec.md §5.2
   - ara/logic/claims.md C14 Conditions
   - m0/annotations/rebench-nanogpt_chat_rl.yaml:22 certifier_note
-  - 'commit 5e2383f (PR #9)'
+  - 'commit 5e2383f'
   title: 'Reference-nd call split on review: instance identities arithmetic; ≥N−1 lower bound is the corpus''s
     one ND-shaped derivation'
   choice: 'Reviewing the actual annotation (nanogpt_chat_rl C04 certifier_note) split the single reference-nd
@@ -669,13 +668,12 @@ tree:
   timestamp: 2026-07-22T22:08
   support_level: explicit
   source_refs:
-  - 'PR #10 review threads'
   - lean/Lara/Support.lean
   - lean/Lara/Attack.lean
   - lean/Lara/Compile.lean
   - lean/Lara/Examples.lean
   - lean/AxCheck.lean
-  title: 'PR #10 formal-model hardening and adversarial conformance pass'
+  title: 'Formal-model hardening and adversarial conformance pass'
   result: 'Eleven review findings were checked against the frozen model. The Lean layer now preserves
     the full certificate triple and authorization indices, exact duplicate-free substitution domains and
     question partitions, namespace-distinct identifiers/symbols, duplicate-free argument nodes, and four-state
@@ -764,13 +762,12 @@ tree:
   timestamp: 2026-07-23T10:12
   support_level: explicit
   source_refs:
-  - 'PR #10 review 4761730561'
   - lean/Lara/Strict.lean
   - lean/Lara/Support.lean
   - lean/Lara/Compile.lean
   - lean/Lara/Examples.lean
   - .github/workflows/ci.yml
-  title: 'PR #10 re-review closes five semantic and security gaps'
+  title: 'Re-review closes five semantic and security gaps'
   result: 'All five requested changes were verified against the model and addressed. Backend replay is
     indexed by the exact submitted certificate reference; source four-state status now has uniqueness
     and an iff/equality theorem; obligation collection is a proved duplicate-free union with a repeated-child
@@ -783,7 +780,6 @@ tree:
   evidence:
   - lean/AxCheck.lean
   - cabal test all (22 properties, pass)
-  - 'PR #10 review 4761730561'
 - id: N38
   type: decision
   provenance: user-revised
@@ -799,7 +795,7 @@ tree:
 
     '
   alternatives:
-  - 'Treat PR #9 as M1 complete — rejected because it froze corpus-derived inputs, not the language surface'
+  - 'Treat the PR as M1 complete — rejected because it froze corpus-derived inputs, not the language surface'
   - Switch to Rocq — rejected because Lean was the recorded default and already carried the mechanization
   evidence: docs/spec.md §1.1; docs/m1-freeze-checklist.md
 - id: N39
@@ -899,13 +895,12 @@ tree:
   timestamp: 2026-07-24T08:14
   support_level: explicit
   source_refs:
-  - 'PR #14 review 4771132852'
   - lean/Lara/Policy.lean
   - lean/AxCheck.lean
   also_depends_on:
   - N43
-  title: 'PR #14 review remediation rebases the freeze and mechanizes §8.1 wf(Pi)'
-  result: 'The freeze branch was rebased onto PR #10''s squash, dropping stale pre-newtype Lean duplicates.
+  title: 'Review remediation rebases the freeze and mechanizes §8.1 wf(Pi)'
+  result: 'The freeze branch was rebased onto the formal-model PR''s squash, dropping stale pre-newtype Lean duplicates.
     Spec theorem pointers and public status text were reconciled; the ARA session recovered its append-only
     turn-1 blocks. Lara.Policy now gives the finite strict-reachable relation, executable wfB with exactness
     theorem, and a located R12 payload. lake build and the standard-trio AxCheck audit pass; all 22 Haskell
@@ -922,7 +917,6 @@ tree:
   timestamp: 2026-07-24T08:48
   support_level: explicit
   source_refs:
-  - 'PR #14 additional review finding'
   - docs/spec.md §8.1
   - lean/Lara/Policy.lean
   - lean/AxCheck.lean
@@ -997,7 +991,7 @@ tree:
     run over a cfg block-CFG the push path never builds (only gate/entail is live, via derive.settle).
     What HOLDS: per-fact re-extraction (push writes axiom label_grounded = value from the binding; admit.gate
     re-extracts every binding via sha256 + regex), and kernel sorry/rogue-axiom rejection via #print axioms.
-    Committed as ba6c45e, pushed to PR #22.
+    Committed as ba6c45e, pushed to the PR.
 
     '
   evidence:
@@ -1220,12 +1214,12 @@ tree:
   - N52
   - N53
   - N56
-  title: 'Issue #16 executable checker surface passes complete verification'
+  title: 'Executable checker surface passes complete verification'
   result: 'The final Lean build is warning-free. The standalone AxCheck audit covers 304 declarations,
     including all 177 public theorem additions from the issue, with no sorryAx and exactly propext, Classical.choice,
     and Quot.sound. Cabal builds cleanly and all 28 named Haskell property groups pass, including 100
     generated nested/Unicode Atom-key round trips. Exact support, positional-attack, and raw-program checker
-    adequacy closes the result-1 Lean checker portion while #17, #18, result 3, and result 9 remain explicitly
+    adequacy closes the result-1 Lean checker portion while the edge-decider and attack-completeness trackers, result 3, and result 9 remain explicitly
     open.
 
     '
@@ -1241,7 +1235,6 @@ tree:
   timestamp: 2026-07-24T21:02
   support_level: explicit
   source_refs:
-  - 'PR #21 requested-changes review'
   - lean/Lara/Examples.lean
   - lean/Lara/Strict.lean
   - src/Lara/Strict/ND.hs
@@ -1251,7 +1244,7 @@ tree:
   - N50
   - N51
   - N57
-  title: 'PR #21 review makes executable conformance gates and frame tags structural'
+  title: 'Review makes executable conformance gates and frame tags structural'
   result: 'Six previously inert Lean Bool matrices are now #guard build gates. The A/N/S/C/L codec vocabulary
     is a closed FrameTag sum in both languages; encoding and decoding share the render/parse table, Lean
     proves its parse/render inverse, and the Haskell golden-vector group checks the same exhaustive round
@@ -1278,7 +1271,7 @@ tree:
   also_depends_on:
   - N42
   - N16
-  title: 'Issue #17 closed: checker-built edge decider discharges Faithful (result 6 source-vs-compiled
+  title: 'Edge-decider tracker closed: checker-built edge decider discharges Faithful (result 6 source-vs-compiled
     half, oracle-free)'
   result: 'The Faithful edge oracle that N42''s source-vs-compiled bridge assumed is now supplied constructively.
     containsB (subterm occurrence) and attackClosureB (attack on any contained occurrence) build the checker''s
@@ -1288,7 +1281,7 @@ tree:
     and srcStatus_iff_checked therefore state result 6''s source-vs-compiled half over an accepted program
     with NO oracle hypothesis. This is oracle elimination only: SrcIn/SrcOut/SrcStatus remain the Prop-level
     shadow of the SAME compiled Edge closure that edgeB executes — not an independent source calculus
-    — and grounded consistency / attack completeness (result 7) stay open as issue #18. lake build succeeds;
+    — and grounded consistency / attack completeness (result 7) stay open as the attack-completeness tracker. lake build succeeds;
     the AxCheck audit prints no sorryAx and exactly propext, Classical.choice, Quot.sound; all 30 Haskell
     property groups still pass (Lean-only change).
 
@@ -1305,7 +1298,6 @@ tree:
   timestamp: 2026-07-25T18:03
   source_refs:
   - plans/2026-07-25-issue-18-attack-completeness-result-7.md
-  - 'GitHub issue #18'
   - lean/Lara/Compile.lean
   - lean/Lara/Check/Program.lean
   - lean/Lara/Policy.lean
@@ -1427,7 +1419,7 @@ tree:
       also_depends_on:
       - N62
       - N63
-      title: 'Issue #18 closes checked-unit attack completeness and computed-claim result 7'
+      title: 'Closes checked-unit attack completeness and computed-claim result 7'
       result: 'The Lean reference PL now proves exact compiled-edge coverage at the checkUnit-built CheckedUnit
         boundary, generic grounded conflict-freedom, exact stable complete-claim support extraction, and
         non-joint justification of contrary computed claims, including self-conflict. The proof-oriented
@@ -1452,7 +1444,6 @@ tree:
   support_level: explicit
   source_refs:
   - plans/2026-07-26-m3-production-checker.md
-  - 'GitHub issue #27'
   also_depends_on:
   - N60
   from: Lean reference PL complete on main (checkUnit -> CheckedUnit, f33e084)
@@ -1539,7 +1530,7 @@ tree:
   trigger: 'M3 froze the Unit checker anchor; M4a adds the trusted surface front-end that lowers .lara
     to that anchor, plus the self-authored worked-examples suite that exhibits the calculus''s discriminating
     power (defeated/contested/gap/justified + illegal-attack rejection). Executed under the eng-review-CLEAR
-    plan plans/2026-07-27-m4a-compiler-worked-examples.md (#31).
+    plan plans/2026-07-27-m4a-compiler-worked-examples.md.
 
     '
   also_depends_on:
@@ -1579,7 +1570,6 @@ tree:
     - 8c50e74 A2-1 per-example dirs + .core.sexp + Haskell<->Lean differential (32 fixtures)
     - 2373e7a A2-2 expected.json goldens + measured coverage matrix
     - 3e6243e A3 mechanize result 12 (presentation codec round-trip) in Lean
-    - 'PR #33'
     status: resolved
     children:
     - id: N70
@@ -1722,20 +1712,19 @@ tree:
   also_depends_on:
   - N74
   title: M4 closed; retire backlog and pick M5 as the next milestone
-  choice: 'After PR #34 (M4b) merged, both M4 children (M4a #31/PR #33, M4b #32/PR #34) are done, so the
+  choice: 'After the M4b PR merged, both M4 children (M4a and M4b) are done, so the
     research-proposal.md §7 walking-skeleton spine is satisfied. Retired the M4 section of TODOS.md and
-    closed umbrella issue #29; the remaining child #30 (LLM/JSON producer) is a later gated stage. User
-    chose the next track: housekeeping first, then mechanize result 9 (over starting #38 groups or #36
+    closed the M4 umbrella tracker; the remaining child (LLM/JSON producer) is a later gated stage. User
+    chose the next track: housekeeping first, then mechanize result 9 (over starting the duplicate-report groups or replay-identity
     replay-id, which are M5 prerequisites).
 
     '
   alternatives:
-  - 'Start #38 duplicate-report groups now (M5 mutation-suite spine) — deferred to M5'
-  - 'Start #36 verdict-carried replay identity — deferred to M5'
+  - 'Start duplicate-report groups now (M5 mutation-suite spine) — deferred to M5'
+  - 'Start verdict-carried replay identity — deferred to M5'
   - Draft the M5 evaluation-corpus plan first — deferred; result 9 is the standing mechanization obligation
   evidence:
   - TODOS.md header retired (branch chore/retire-m4-backlog, commit 711c361)
-  - 'GitHub issue #29 closed with M4-complete comment'
   status: resolved
 - id: N76
   type: dead_end
@@ -1817,23 +1806,23 @@ tree:
   timestamp: 2026-07-30T12:00
   also_depends_on:
   - N78
-  title: 'PR #41 code review: drop the two unused companion lemmas'
-  choice: 'Review of PR #41 (result 9) raised two non-blocking items. Item 1: two AxCheck-listed companion
+  title: 'Code review: drop the two unused companion lemmas'
+  choice: 'Review of the result-9 PR raised two non-blocking items. Item 1: two AxCheck-listed companion
     lemmas (mapAssurAtt_target, mapAssurDis_eq) are unused downstream. Verified: both were referenced
     only by their AxCheck #print-axioms lines, never in a proof (mapAssurAtt_source / mapAssurList_eq
     are the used twins; the target side and dis-eq shape are unused because coveredB matches only on the
     attack source and mapAssur_subterm takes the discharge case through lookupDis_mapAssurDis). Removed
     both (YAGNI) — user confirmed "keep them removed"; trivially re-derivable when a consumer needs them.
     Item 2 (a concrete worked example / transport lemma making backend_replacement non-vacuous) filed
-    as issue #42, PR #41 left to merge.
+    as a follow-up tracker item, the PR left to merge.
 
     '
   alternatives:
   - 'Keep the two lemmas for API symmetry — rejected: dead exports, against the no-unused-code rule; re-add
     when a consumer (the transport lemma) uses them'
   evidence:
-  - 'commit 3db1e75 (drop unused companion lemmas); PR #41 merged as cd62b37'
-  - 'issue #42 (worked example / transport lemma follow-up)'
+  - 'commit 3db1e75 (drop unused companion lemmas); merged as cd62b37'
+  - 'the worked example / transport lemma follow-up'
   status: resolved
 - id: N80
   type: decision
@@ -1841,18 +1830,18 @@ tree:
   timestamp: 2026-07-30T12:30
   also_depends_on:
   - N79
-  title: 'Prioritize #42 transport lemma over a Haskell mapAssur conformance port'
-  choice: 'Between the two remaining result-9 P3 follow-ups, chose the #42 transport lemma over a Haskell
+  title: 'Prioritize the transport lemma over a Haskell mapAssur conformance port'
+  choice: 'Between the two remaining result-9 P3 follow-ups, chose the transport lemma over a Haskell
     mapAssur port. Rationale: mapAssur/relabel is a proof device, not a frozen spec definition any runtime
     path uses, so a Haskell port would add relabel + QuickCheck code that no production code exercises,
     only to re-confirm empirically what Lean already proves (conformance, not soundness). The transport
     lemma instead stays in the soundness-bearing layer and strengthens the result (general non-vacuity
-    + constructive discharge of the acceptance hypothesis). User: "do 42 first."
+    + constructive discharge of the acceptance hypothesis). User: "do [redacted] first."
 
     '
   alternatives:
   - 'Haskell mapAssur conformance port — deprioritized: conformance-only, duplicates unused logic'
-  - 'Pivot to #38 / M5 (evaluation corpus) — the bigger-picture next step; deferred until result 9 is
+  - 'Pivot to M5 (evaluation corpus) — the bigger-picture next step; deferred until result 9 is
     airtight'
   status: resolved
 - id: N81
@@ -1872,8 +1861,8 @@ tree:
     is now non-vacuous by construction and Theorem 2''s "accept the same strict instances" is constructively
     discharged. Notable strengthening: the two transport lemmas need only hpres, NOT injectivity (hf is
     required solely for mapCertProg''s nodup). Re-added mapAssurDis_eq / mapAssurAtt_target as now-used
-    lemmas. lake build 48 jobs; AxCheck 0 sorryAx / 516 decls, trio-only. Independently verified. PR #43
-    (closes #42).
+    lemmas. lake build 48 jobs; AxCheck 0 sorryAx / 516 decls, trio-only. Independently verified. The PR
+    (closes the transport-lemma item).
 
     '
   evidence:
@@ -1881,7 +1870,6 @@ tree:
   - 'lean/AxCheck.lean (transport #print axioms lines)'
   - ara/evidence/status/mechanization_status.md (result-9 transport verification run)
   - 'lake build: 48 jobs; AxCheck: 0 sorryAx / 516 decls, trio-only'
-  - 'PR #43; issue #42'
   status: resolved
 - id: N82
   type: decision
@@ -1890,19 +1878,17 @@ tree:
   also_depends_on:
   - N81
   title: Complete status housekeeping before M5 implementation
-  choice: 'With PR #43 merged and result 9 complete, synchronize the public README, Lean README, TODO
+  choice: 'With the transport PR merged and result 9 complete, synchronize the public README, Lean README, TODO
     roadmap, mechanization plan/status ledger, presentation slides, and source-level codec documentation
-    before starting M5 work. Close the completed M4a (#31) and strict-certificate frontend (#37) trackers;
-    leave #36 and #38 as the explicit M5 prerequisites.
+    before starting M5 work. Close the completed M4a and strict-certificate frontend trackers;
+    leave replay identity and duplicate-report groups as the explicit M5 prerequisites.
 
     '
   alternatives:
-  - 'Start #36 immediately while leaving stale result-9, result-12, M3, and tracker status text in place'
+  - 'Start replay identity immediately while leaving stale result-9, result-12, M3, and tracker status text in place'
   evidence:
-  - 'PR #43 merged; issue #42 closed'
   - README.md; lean/README.md; TODOS.md; docs/mechanization-plan.md
   - ara/evidence/status/mechanization_status.md; docs/slides/keynote.html
-  - 'GitHub issues #31 and #37 closed as completed'
   status: resolved
 - id: N83
   type: pivot
@@ -1911,8 +1897,8 @@ tree:
   also_depends_on:
   - N82
   from: M4 / result-9 mechanization complete; status housekeeping done
-  to: 'M5 implementation track: #38 duplicate-report groups, cross-layer'
-  trigger: 'user: ''go to a worktree, do issue #38'''
+  to: 'M5 implementation track: duplicate-report groups, cross-layer'
+  trigger: 'user: ''go to a worktree, do issue [redacted]'''
   status: resolved
 - id: N84
   type: decision
@@ -1931,7 +1917,7 @@ tree:
   - A new checkUnit stage (would entangle admission with the executable core)
   - Elaborator-only enforcement (not differential-checked, not mechanized)
   evidence:
-  - 'PR #45; src/Lara/Driver.hs; lean/Lara/Driver.lean; src/Lara/Wire.hs'
+  - 'src/Lara/Driver.hs; lean/Lara/Driver.lean; src/Lara/Wire.hs'
   - spec §4.3, §10.1 (R9 located at the group declaration)
   status: resolved
 - id: N85
@@ -1964,18 +1950,18 @@ tree:
   also_depends_on:
   - N84
   - N85
-  title: '#38 duplicate-report groups landed cross-layer; all gates green'
+  title: 'Duplicate-report groups landed cross-layer; all gates green'
   result: 'Implemented end-to-end: AST carrier (DupGroup/GroupConflictMode, unitGroups/unitGroupMode,
     R9), surface parser/printer, wire codec, elaborator lowering, and the driver boundary check (consistent→admit,
     conflict→quarantine→gap, escalated→R9). Lean: new Lara.Groups module with 6 sorry-free theorems (pairwise-≡
     ⟺ representative, quarantine membership, arg exclusion, leaf-rule connection, escalation characterization).
     Gates: `cabal test` PASS; `lake build` clean; `scripts/check-axioms.sh` passed (all 6 Lara.Groups
     theorems trio-only, no sorryAx); `scripts/differential.sh` pass=41 fail=0 + 5/5 malformed negatives.
-    Committed + pushed; PR #45 opened (closes #38).
+    Committed + pushed; the PR opened (closing the duplicate-report work).
 
     '
   evidence:
-  - 'PR #45 (branch worktree-issue-38-duplicate-report-groups)'
+  - 'branch worktree-issue-38-duplicate-report-groups'
   - 'differential.sh: «pass=41 fail=0» + «negative pass=5 fail=0» [result]'
   - 'check-axioms.sh: «Axiom audit passed.» [result]'
   - lean/Lara/Groups.lean; fixtures/corpus/{group-consistent-accept,group-conflict-quarantine,reject-r9}.sexp
@@ -1986,8 +1972,8 @@ tree:
   timestamp: 2026-07-31T10:30
   also_depends_on:
   - N86
-  title: 'PR #45 review remediation: R9-evasion hole fixed, R9 diagnostic added, coverage hardened'
-  result: 'Addressed all findings of the CHANGES_REQUESTED review on PR #45. Key correctness fix (reviewer-reproduced):
+  title: 'Review remediation: R9-evasion hole fixed, R9 diagnostic added, coverage hardened'
+  result: 'Addressed all findings of the CHANGES_REQUESTED review. Key correctness fix (reviewer-reproduced):
     the .lara elaborator never validated duplicate-report-group R14 well-formedness (the .sexp wire decoder
     did), so a dangling group member was silently dropped, degrading the group to a vacuously-consistent
     singleton and turning an intended R9 rejection into an ACCEPT — the two front doors disagreed on the
@@ -2006,7 +1992,7 @@ tree:
 
     '
   evidence:
-  - 'PR #45 review (fenfenai, CHANGES_REQUESTED); reviewer reproduced the R9-evasion on this branch'
+  - 'review (fenfenai, CHANGES_REQUESTED); reviewer reproduced the R9-evasion on this branch'
   - 'differential.sh: «pass=41 fail=0» + «negative pass=6 fail=0» [result]'
   - 'check-axioms.sh: «Axiom audit passed.» [result]'
   - src/Lara/Elaborate.hs (validateGroups); src/Lara/Driver.hs + lean/Lara/Driver.lean (groupConflictMessage);
@@ -2019,7 +2005,7 @@ tree:
   timestamp: 2026-07-31T21:30
   also_depends_on:
   - N87
-  title: 'PR #45 second-round remediation: Lean twin re-synced to Haskell dangling-member semantics; parity
+  title: 'Second-round remediation: Lean twin re-synced to Haskell dangling-member semantics; parity
     coverage completed'
   result: 'All 6 first-round threads resolved by the reviewer (original exploit re-reproduced as fixed);
     4 new findings on remediation commit 7048b89, all addressed in 9c85c3d. Headline: the first-round
@@ -2039,7 +2025,7 @@ tree:
 
     '
   evidence:
-  - 'PR #45 re-review (fenfenai, CHANGES_REQUESTED): 6/6 prior threads resolved, 4 new findings on 7048b89'
+  - 're-review (fenfenai, CHANGES_REQUESTED): 6/6 prior threads resolved, 4 new findings on 7048b89'
   - 'differential.sh: «pass=41 fail=0» + «negative pass=9 fail=0» [result]'
   - 'check-axioms.sh: «Axiom audit passed.» [result]'
   - 'cabal test: «elaborate negatives are located Left ElabError +++ OK» / «R13-over-R9 precedence +++
@@ -2053,12 +2039,12 @@ tree:
     c)'
   provenance: user
   timestamp: 2026-08-01T00:20
-  from: 'M4 walking skeleton + result mechanization (all 12 frozen-spec results proved, #47)'
-  to: 'M5 evaluation corpus, deterministic scope (tracker #48): T1 seeded mutation generators + T4 worked
+  from: 'M4 walking skeleton + result mechanization (all 12 frozen-spec results proved)'
+  to: 'M5 evaluation corpus, deterministic scope: T1 seeded mutation generators + T4 worked
     cases first'
   trigger: 'User directive to execute branch feat/m5-mutation-suite-worked-cases end to end (implement,
     experiment, record, PR). M5 is scoped to the LLM-independent axes; T1/T4
-    chosen together per #48 ("choose them while designing T1/T2 so mutation coverage and case selection
+    chosen together per the scoping note ("choose them while designing T1/T2 so mutation coverage and case selection
     agree").
 
     '
@@ -2089,7 +2075,7 @@ tree:
 
     '
   evidence:
-  - 'examples/E4/example.lara + examples/E5/example.lara + empirical-v2.policy.lara (committed, PR #49)'
+  - 'examples/E4/example.lara + examples/E5/example.lara + empirical-v2.policy.lara (committed via the PR)'
   - 'test/WorkedExamplesSpec.hs prop_E4/prop_E5/prop_coverageMatrix: «coverage matrix: every status, attack
     kind, kind×label cell, and R1/R12/R10 witnessed +++ OK» [result]'
   - 'E4 verdict: «(labels (0 in) (1 out) (2 in) (3 in) (4 out) (5 in) (6 in) (7 out) (8 in))… justified/defeated/justified/justified»
@@ -2117,7 +2103,7 @@ tree:
     green incl. three new MutationSpec properties (specified outcomes, seeded reproducibility, coverage).
     Boundary pinned: cert theory-digest tamper lands in R7 (CertifierUnallowlisted), NOT R13; R13 reachable
     only via allowlisted-cert payload corruption or replay preflight. No Lean changes: generator is corpus
-    tooling, not a frozen definition. PR #49 opened (T1+T4 of #48).
+    tooling, not a frozen definition. The PR opened (T1+T4 of the M5 scope).
 
     '
   evidence:
@@ -2125,7 +2111,6 @@ tree:
   - 'scripts/gen-mutants.hs: «wrote 148 verified mutants to fixtures/mutants» [result]'
   - 'fixtures/mutants/MANIFEST.tsv per-class tally: 20/7/6/6/6/7/7/8/7/8/17 + 45 codec + 4 cycles [result]'
   - 'cabal test: «mutation suite: every mutant produces its specified outcome +++ OK» x3 [result]'
-  - PR https://github.com/ARA-Labs/lara/pull/49
   status: resolved
 - id: N92
   type: decision
@@ -2254,7 +2239,7 @@ tree:
     caught + fixed a policyBytes bug (was matching the replay-id's (policy <id>)
     form, not the unit's policy body). aeson is a test-only dependency (D12); src
     stays base+containers. 5 commits (11c5c2a, 74176cf, 2e02829, 510b5ff,
-    aac72bd); PR #51 opened.
+    aac72bd); the PR opened.
   status: resolved
   also_depends_on:
   - N95
@@ -2274,7 +2259,7 @@ tree:
   - measurements/ablation.tsv
   result: >
     /implement of the eng-reviewed T6 plan (5 commits a58a6fa/30bf673/a8a1e78/
-    2cb743c/d880a1f, PR #53; per-step spec+quality subagent reviews all PASS).
+    2cb743c/d880a1f; per-step spec+quality subagent reviews all PASS).
     CheckConfig {ccObligationGate, ccTypedAttacks} threaded through Check.hs/
     Driver.hs gating exactly three sites (obligation gate, checkAttack call,
     conflict scan); wire format and Lean driver untouched; checkUnit kept its
@@ -2301,29 +2286,27 @@ tree:
   provenance: user-revised
   timestamp: 2026-08-02T11:30
   source_refs:
-  - 'GitHub issue #52'
-  - 'GitHub issue #48'
   - docs/m5-freeze-checklist.md
-  title: 'Defer #52 (human-authored natural-defect ablation) from the T5 freeze; freeze the deterministic
+  title: 'Defer human-authored natural-defect ablation from the T5 freeze; freeze the deterministic
     corpus now'
   choice: >
-    Freeze the LLM-independent evaluation corpus now and keep #52 deferred to LLM follow-up work. The user
-    first directed "land #52 first, then freeze"; the manager surfaced that #52 is labelled deferred,
-    is gated on the LLM elaborator / D3 flip (the same boundary as #30 and axes b/d), and its
+    Freeze the LLM-independent evaluation corpus now and keep it deferred to LLM follow-up work. The user
+    first directed "land [redacted] first, then freeze"; the manager surfaced that the item is labelled deferred,
+    is gated on the LLM elaborator / D3 flip (the same boundary as the LLM producer and axes b/d), and its
     human-authored NATURAL-defect certificate corpus does not exist in the repo (examples/ are golden,
     fixtures/mutants/ are seeded, no natural-defect corpus present). On that evidence the user reversed
-    to "freeze now, defer #52." The in-scope way to get a harder-than-confirmatory number is the seeded
-    discriminating localization benchmark (TODOS P3), not #52.
+    to "freeze now, defer [redacted]." The in-scope way to get a harder-than-confirmatory number is the seeded
+    discriminating localization benchmark (TODOS P3), not that work.
   alternatives:
-  - 'Land #52 first, then freeze (original user direction) — pulls deferred, LLM-gated substrate into
+  - 'Land [redacted] first, then freeze (original user direction) — pulls deferred, LLM-gated substrate into
     the paper''s freeze and blocks on a corpus that must be authored'
   - 'Build the seeded multi-defect / off-site discriminating localization benchmark before freezing —
     in-scope and LLM-free, but delays the freeze'
   evidence:
-  - 'gh issue view 52 (labels: enhancement, deferred; body: the issue belongs to LLM follow-up
+  - 'gh issue view (labels: enhancement, deferred; body: the issue belongs to LLM follow-up
     work, outside the LLM-independent scope)'
   - 'find over repo: no human-authored natural-defect certificate corpus (examples/ golden, mutants/ seeded)'
-  - 'AskUserQuestion answer "Freeze now, defer #52"'
+  - 'AskUserQuestion answer "Freeze now, defer [redacted]"'
   status: resolved
   also_depends_on:
   - N97
@@ -2377,7 +2360,7 @@ tree:
     harness, ablations, freeze'
   to: 'M7 — paper package: write the paper from the frozen axis-(c) tables (measurements/frozen/)'
   trigger: 'T5 freeze landed — the citable, reproducible axis-(c) numbers now exist; every M5 task is
-    closed for the LLM-independent scope. #52 and the LLM-producer axes (b/d, #30) remain deferred LLM follow-up work.'
+    closed for the LLM-independent scope. The natural-defect ablation and the LLM-producer axes (b/d) remain deferred LLM follow-up work.'
   status: open
   also_depends_on:
   - N99
@@ -2387,10 +2370,9 @@ tree:
   timestamp: 2026-08-02T16:52
   source_refs:
   - test/RASpec.hs
-  - "PR #59 review (fenfenai)"
-  title: 'PR #59 review response: RASpec conformance suite for the ra@1 backend'
+  title: 'Review response: RASpec conformance suite for the ra@1 backend'
   description: >
-    External review of PR #59 (ra@1 rational-arithmetic certifier, issue #57 — implemented in a session
+    External review of the PR (ra@1 rational-arithmetic certifier — implemented in a session
     with no trace record here) found one important issue: Lara.Strict.RA had no dedicated conformance
     suite (the ND backend has StrictSpec; ra@1 had only corpus coverage). Verified against the codebase
     (no test module referenced RA), then added test/RASpec.hs mirroring the StrictSpec conventions.
@@ -2403,7 +2385,7 @@ tree:
     exactly-one-literal convention; generated drop scenarios (F=f, C=c/10^k, A=F(1-C)) replay to
     acceptance with exact premise/theory dependencies end-to-end through strictCheck; single-field
     mutations (wrong witness, swapped cells, out-of-range slot, unknown digest) all reject.
-    Commit 69264a1 pushed to issue-57-strict-certifier; replied on PR #59.
+    Commit 69264a1 pushed to issue-57-strict-certifier; replied on the PR.
   evidence:
   - test/RASpec.hs
   - "commit 69264a1"
@@ -2414,9 +2396,8 @@ tree:
   provenance: ai-executed
   timestamp: 2026-08-03T13:30
   source_refs:
-  - "issue #68"
-  - "PR #72 (commit e43be03)"
-  title: 'P1-P3 gate: read-only Lean name-map audit (#68) — equivalence confirmed two-sided'
+  - "commit e43be03"
+  title: 'P1-P3 gate: read-only Lean name-map audit — equivalence confirmed two-sided'
   description: >
     The paper revision plan gates paper items P1-P3 on a read-only audit mapping each paper
     statement to its Lean declaration, carrying the P1 contingency: does a true two-sided
@@ -2428,13 +2409,13 @@ tree:
     Prop-level Edge relation (no AF, no iteration), and the Faithful oracle is discharged
     constructively by edgeB_faithful. Grounded.status_preservation is only the abstract-AF
     core (both sides read the same F.attack) and must never be cited as the headline.
-    Issue #68's pointer "Compile.lean:606" for the scope note is a typo — it lives in
+    The audit request's pointer "Compile.lean:606" for the scope note is a typo — it lives in
     Grounded.lean (module header + status_preservation docstring). B1 (deterministic
     terminating replay) has no separate termination lemma: replayFull is a total Lean
     function into Bool, so the paper states totality + adequacy (replayFull_iff).
     Strict-chain hypothesis = Policy.WellFormed over Policy.StrictReachable, quoted
     verbatim. All ~60 mapped declaration names spot-checked; every headline theorem
-    already AxCheck-gated. Deliverable: PR #72.
+    already AxCheck-gated. Deliverable: the audit PR.
   evidence:
   - "lean/AxCheck.lean (srcStatus_iff_checked :381, contrary_claims_not_both_justified :600)"
   status: resolved
@@ -2449,7 +2430,7 @@ tree:
   - "paper plan/lean-name-map.md"
   title: 'Paper-side P1-P3 side-by-side validation against the finalized name map'
   description: >
-    With the #68 audit landed, validated the already-transcribed paper displays
+    With the name-map audit landed, validated the already-transcribed paper displays
     (def:direct-status, thm:preservation, def:grounded, def:status, def:strict-wf,
     def:registry-entry B1-B4) side-by-side against the Lean statements.
   result: >
@@ -2553,9 +2534,7 @@ tree:
     timestamp: 2026-08-05T20:57
     source_refs:
     - plans/2026-08-05-policy-admission-calculus.md
-    - "issue #77"
-    - "PR #79"
-    title: Formalize policy admission as context construction while repairing issue #77
+    title: Formalize policy admission as context construction while repairing the admission defect
     choice: >
       Execute the policyAdmission repair as both a source conformance fix and a small
       mechanized calculus extension. Define the policy-to-Gamma judgment, preserve declared
@@ -2611,7 +2590,6 @@ tree:
   provenance: user
   timestamp: 2026-08-05T15:10
   source_refs:
-  - "issue #80"
   - lean/Lara/BlockedProgram.lean
   - lean/Lara/Driver.lean
   title: Does the declared-index non-promotion proof actually cover the shipped compact production AF?
@@ -2626,7 +2604,6 @@ tree:
     provenance: user
     timestamp: 2026-08-05T15:10
     source_refs:
-    - "issue #80"
     - lean/Lara/BlockedProgram.lean:171
     title: Treat the abstract declared-index theorem plus differential tests as production mechanization
     description: >
@@ -2728,9 +2705,9 @@ tree:
   also_depends_on:
   - N110
   - N107
-  title: Split issue 77 runtime repair from dependent admission metatheory after engineering review
+  title: Split the runtime repair from dependent admission metatheory after engineering review
   choice: >
-    Deliver issue #77 as a runtime source-conformance plan with one hidden source carrier,
+    Deliver the admission repair as a runtime source-conformance plan with one hidden source carrier,
     typed invalid-versus-R8 outcomes, declared-table group evaluation, one canonical combined
     prune/audit, and the exact invalid > R8 > R13 > R9 > core precedence. Deliver raw/resolved
     Lean attack alignment, a declarative admission relation with evaluator correspondence, a
@@ -2801,7 +2778,6 @@ tree:
   - Preserve the broad source-differential claim despite only comparing admission/audit primitives
   - Keep unordered fixture alignment and normalize only one adapter's audit
   evidence:
-  - https://github.com/ARA-Labs/lara/pull/81#discussion_r3730226506
   - fixtures/admission/MANIFEST
   - lean/Lara/Admission.lean
   - test/AdmissionSpec.hs
@@ -2857,11 +2833,10 @@ tree:
     replay, corpus, frozen, or golden byte changes. Independent final review
     reported no P0/P1 findings. Paper head 16f82b9 built to 30 pages and its
     mechanization table was visually verified within page margins. Both heads
-    were pushed and PR #81 was updated for re-review. GitHub did not dispatch
+    were pushed and the PR was updated for re-review. GitHub did not dispatch
     hosted checks because Actions was in major outage incident qcvjkzcs7j74.
   evidence:
   - ara/evidence/results/policy_admission_boundary.md
-  - https://github.com/ARA-Labs/lara/pull/81
   - https://www.githubstatus.com/incidents/qcvjkzcs7j74
   status: resolved
 
@@ -3131,7 +3106,7 @@ tree:
   provenance: ai-executed
   timestamp: 2026-08-07T04:30
   parent: N126
-  title: External review of PR #83, and the golden-coverage hole it exposed
+  title: External review of the ord@1 PR, and the golden-coverage hole it exposed
   result: >
     Reviewer reproduced all four gates green and found no correctness defect;
     the central design claim (Haskell premise-only guard and Lean empty-theory
@@ -3166,7 +3141,7 @@ tree:
   provenance: user
   timestamp: 2026-08-07T05:15
   parent: N129
-  title: Disposition of the PR #83 review's three no-change notes
+  title: Disposition of the review's three no-change notes
   choice: >
     Asked whether to fix the three notes the reviewer raised without requesting
     changes; the user accepted the recommendation to defer two and answer one
@@ -3194,7 +3169,7 @@ tree:
     PremiseSlot Int, so a narrower type would only move the conversion, and
     RACert has the same shape.
   alternatives:
-  - Fix all three in PR #83 (scope creep on a branch already carrying a backend, its metatheory, and a review round)
+  - Fix all three in the PR (scope creep on a branch already carrying a backend, its metatheory, and a review round)
   - Remove the i >= 0 guard as dead (converts an unreachable branch into a latent crash)
   - Switch OrdCert slots to Natural (moves the conversion, and desynchronises ord@1 from RACert)
   evidence:
@@ -3434,7 +3409,7 @@ tree:
 
 - id: N139
   type: experiment
-  title: "PR #92 re-review closure: four follow-ups repaired and mutation-pinned"
+  title: "Re-review closure: four follow-ups repaired and mutation-pinned"
   provenance: ai-executed
   timestamp: "2026-08-08T23:38"
   result: >
@@ -3449,7 +3424,7 @@ tree:
     and axiom audit, 18 elaborator tests, 4 freezer tests, replay/authenticity/
     tamper gates, 446 behavioral plus 54 codec-negative differential anchors,
     20 admission-differential fixtures, three generators, and the S2/S3/S4
-    byte-identity check passed. Commit 8425c88 was pushed to PR #92; hosted Lean
+    byte-identity check passed. Commit 8425c88 was pushed to the PR; hosted Lean
     passed and hosted Haskell/re-review remain pending.
   evidence:
   - src/Lara/Elaborate/Comparison.hs
@@ -3469,14 +3444,14 @@ tree:
   provenance: user
   timestamp: "2026-08-09T00:56"
   description: >
-    Assess merged PR #92 against the current Overleaf paper and distinguish
+    Assess the merged surface release against the current Overleaf paper and distinguish
     required paper-facing updates from frozen-core results that remain valid.
   status: resolved
   also_depends_on: [N139]
 
 - id: N141
   type: experiment
-  title: "Post-merge PR #92 code-paper synchronization audit"
+  title: "Post-merge code-paper synchronization audit"
   provenance: ai-executed
   timestamp: "2026-08-09T00:56"
   result: >
@@ -3489,7 +3464,6 @@ tree:
     anchors, and its S4 appendix listing showed the hand-written pre-@0.3
     expansion rather than the merged comparison block and named binding path.
   evidence:
-  - https://github.com/ARA-Labs/lara/pull/92
   - test/Spec.hs
   - scripts/differential.sh
   - measurements/report.json
@@ -3548,7 +3522,7 @@ tree:
   provenance: user-revised
   timestamp: "2026-08-09T11:43"
   choice: >
-    Keep issue #87 Step 0 reporting-only. Derive the exact 38-row role-aware
+    Keep the binding-audit Step 0 reporting-only. Derive the exact 38-row role-aware
     worklist from the existing claim-support projection; use checked
     unitAttacks endpoints for attack roles and parsed .lara declarations for
     human-facing leaf/claim fields; retain one manifest-driven generator; force
@@ -3561,7 +3535,6 @@ tree:
   - "Keep unconditional restore, lazy write ordering, representative-only negatives, and a directory blacklist (rejected: avoidable loss and drift risks)."
   evidence:
   - plans/2026-08-09-binding-audit-worklist.md
-  - https://github.com/ARA-Labs/lara/issues/87
   status: resolved
 
 - id: N145
@@ -3635,7 +3608,7 @@ tree:
   provenance: user-revised
   timestamp: "2026-08-10T01:03"
   choice: >
-    Complete all of issue #87 Steps 1-3: audit the 38 load-bearing leaf
+    Complete all of the binding-audit Steps 1-3: audit the 38 load-bearing leaf
     bindings plus the one strict-step and three typed-attack objects, preserve
     second-author status blinding, seal the human judgments before any checker
     status join, generate deterministic cross-tabs, and update the paper from
@@ -3657,7 +3630,7 @@ tree:
   provenance: ai-executed
   timestamp: "2026-08-10T07:28:51Z"
   description: >
-    Implemented the approved issue #87 Steps 1-3 tooling in PR #96: deterministic
+    Implemented the approved binding-audit Steps 1-3 tooling in the PR: deterministic
     42-subject blinded packet preparation, status-free structural validation,
     sealed-result summarization, exact Git input identities, canonical JSON, and
     the binding-audit CLI. PR review then tightened contextual IO errors,
@@ -3678,7 +3651,6 @@ tree:
     - scripts/binding-audit.hs
     - test/BindingAuditSpec.hs
     - test/ClaimSupportSpec.hs
-    - https://github.com/ARA-Labs/lara/pull/96
   also_depends_on: [N147, N148]
   status: resolved
 - id: N150
@@ -3686,7 +3658,7 @@ tree:
   title: "Opened lara-core@0.2: the first change that moves the core, not the surface"
   provenance: user
   timestamp: "2026-08-10T10:00"
-  from: "Surface track (#90/#88a/#91): every addition additive over a frozen lara-core@0.1"
+  from: "Surface track: every addition additive over a frozen lara-core@0.1"
   to: >
     Core change: Sigma enters Unit, the wire bumps to lara-core@0.2, checkUnit
     becomes seven stages in both languages, spec 10.1 amends a frozen class, and
@@ -3694,7 +3666,7 @@ tree:
   trigger: >
     User directive to implement plans/2026-08-10-sorts-in-checker.md. This also
     settles D-4, the plan's one open sign-off — the scheduling question of
-    whether the pass lands inside the #60 schedule window. Decided in favour
+    whether the pass lands inside the schedule window. Decided in favour
     of now; the regeneration's two measurement diffs came back empty, so the
     evaluation table the decision was protecting did not move.
   also_depends_on: [N140, N141]
@@ -3846,7 +3818,6 @@ tree:
     constructors present in the conclusion; a reusable per-pattern lemma is not
     itself whole-checker closure.
   evidence:
-    - "PR #97 review comment 3754845825"
     - lean/Lara/Check/Unit.lean
     - lean/Lara/Sigma.lean
   also_depends_on: [N153]
@@ -3854,7 +3825,7 @@ tree:
 
 - id: N156
   type: experiment
-  title: "PR #97 review repair closed all nine threads and passed local plus hosted gates"
+  title: "Review repair closed all nine threads and passed local plus hosted gates"
   provenance: ai-executed
   timestamp: "2026-08-10T20:24"
   description: >
@@ -3873,7 +3844,6 @@ tree:
   evidence:
     - "commits: 7d064de, dd7560f"
     - "GitHub Actions run 31454957058"
-    - "PR #97 review threads"
     - scripts/differential.sh
     - scripts/admission-differential.sh
     - lean/AxCheck.lean
@@ -3908,7 +3878,7 @@ tree:
   provenance: user
   timestamp: "2026-08-10T22:10"
   description: >
-    After PR #99 merged and closed the lara-core@0.2 fixture/freeze debt, decide
+    After the re-freeze PR merged and closed the lara-core@0.2 fixture/freeze debt, decide
     whether the next milestone should be further proof mechanization or a
     different paper-readiness task.
   also_depends_on: [N156, N157]
@@ -3916,28 +3886,27 @@ tree:
 
 - id: N159
   type: experiment
-  title: "Post-PR 99 readiness audit found a green theorem gate and a broken paper benchmark"
+  title: "Post-merge readiness audit found a green theorem gate and a broken paper benchmark"
   provenance: ai-executed
   timestamp: "2026-08-10T22:10"
   description: >
-    Inspected merged PR #99, the live issue queue, the M7 tracker, the
+    Inspected the merged tree, the live issue queue, the M7 tracker, the
     mechanization inventory, and the current main checkout; then ran the Lean
     axiom audit and the paper benchmark entry point.
   result: >
-    PR #99 is merged at f4327b4. Lean hosted CI is green while Haskell hosted CI
+    The re-freeze is merged at f4327b4. Lean hosted CI is green while Haskell hosted CI
     was still running at observation time, so m5-freeze-v4 is not yet eligible
     to be cut. The local AxCheck audit passed within the standard axiom trio.
-    make bench reproduced issue #98 and stopped because scripts/bench.hs expects
+    make bench reproduced the benchmark defect and stopped because scripts/bench.hs expects
     429 manifest inputs but the v4 suite has 564. The semantic headline
     theorems are already mechanized; the bounded mechanization debt is result
     12, because Presentation.lean still omits policySigma and the current
     optional/general measurand representation.
   evidence:
-    - "PR #99 merge commit f4327b4"
+    - "merge commit f4327b4"
     - "GitHub Actions run 31460541455"
     - "local: lake env lean AxCheck.lean | ../scripts/check-axioms.sh"
     - "local: make bench -> expected 429 manifest inputs, found 564"
-    - issue://98
     - docs/mechanization-plan.md
     - lean/Lara/Presentation.lean
   also_depends_on: [N158]
@@ -3949,7 +3918,7 @@ tree:
   provenance: user
   timestamp: "2026-08-10T22:36"
   description: >
-    After the post-PR 99 readiness audit identified issue #98 as the immediate
+    After the post-merge readiness audit identified the benchmark defect as the immediate
     paper blocker, the researcher directed implementation, commit, ARA
     recording, and a pull request for that repair. This chooses the benchmark
     repair as the next concrete action without yet deciding whether result 12
@@ -3977,7 +3946,7 @@ tree:
     silently dropped. Added a committed-manifest totality property and updated
     the Makefile description.
   result: >
-    Commit 9a3aab3 repairs issue #98. cabal test all passed, including the new
+    Commit 9a3aab3 repairs the benchmark defect. cabal test all passed, including the new
     manifest-parser totality property. make bench completed over 60 corpus units
     and 564 harness records, regenerated tables/performance.tex, and wrote
     measurements/bench.json with sweep_records 564 and sweep_ns 713544000.
@@ -3991,17 +3960,16 @@ tree:
     - test/MeasureSpec.hs
     - tables/performance.tex
     - measurements/bench.json
-    - issue://98
   also_depends_on: [N159, N160]
   status: resolved
 
 - id: N162
   type: experiment
-  title: "PR 100 merge passed the main-branch release gate"
+  title: "The merge passed the main-branch release gate"
   provenance: ai-executed
   timestamp: "2026-08-10T23:02"
   description: >
-    Inspected the live repository after PR #100 merged, confirmed main and
+    Inspected the live repository after the benchmark-repair PR merged, confirmed main and
     origin/main at d43e6a1 with a clean tree, and waited for the push-triggered
     hosted workflow rather than relying only on the pull-request checks.
   result: >
@@ -4012,7 +3980,7 @@ tree:
     uncut; docs/m5-freeze-checklist.md assigns it to the v4 re-freeze merge
     commit f4327b4.
   evidence:
-    - "PR #100 merge commit d43e6a1"
+    - "merge commit d43e6a1"
     - "GitHub Actions run 31463095876"
     - "docs/m5-freeze-checklist.md:182-195"
   also_depends_on: [N160, N161]
@@ -4024,11 +3992,11 @@ tree:
   provenance: user
   timestamp: "2026-08-10T23:13"
   description: >
-    The researcher directed the post-PR #100 release housekeeping to be
+    The researcher directed the post-merge release housekeeping to be
     completed on a new branch.
   choice: >
     Create an isolated release branch, publish the annotated m5-freeze-v4 tag
-    on the already-designated PR #99 merge commit, update the checklist and
+    on the already-designated re-freeze merge commit, update the checklist and
     backlog, and deliver the documentation through a pull request.
   alternatives:
     - "Cut the tag without recording the completed state in the repository."
@@ -4041,7 +4009,7 @@ tree:
 
 - id: N164
   type: experiment
-  title: "Published m5-freeze-v4 and opened housekeeping PR 101"
+  title: "Published m5-freeze-v4 and opened the housekeeping PR"
   provenance: ai-executed
   timestamp: "2026-08-10T23:13"
   description: >
@@ -4050,14 +4018,13 @@ tree:
     tag, and moved the tag task into the completed backlog.
   result: >
     Remote annotated tag object db13d66cfa185f97de52e3fec1a3167ca532a1ca
-    dereferences to f4327b4d10056bc1f4f5e4d24a05fcd515a2895e, the PR #99
+    dereferences to f4327b4d10056bc1f4f5e4d24a05fcd515a2895e, the re-freeze
     re-freeze merge commit. Commit 816cdf7 records the housekeeping, and PR
-    #101 is open against main. git diff --check passed and all changed ARA YAML
+    The housekeeping PR is open against main. git diff --check passed and all changed ARA YAML
     parsed successfully.
   evidence:
     - "refs/tags/m5-freeze-v4"
     - "commit 816cdf7"
-    - "PR #101"
     - "GitHub Actions run 31463095876"
   also_depends_on: [N162, N163]
   status: resolved
@@ -4068,7 +4035,7 @@ tree:
   provenance: user
   timestamp: "2026-08-11T00:13"
   description: >
-    After PR #101 merged and main CI passed, the researcher directed the
+    After the housekeeping PR merged and main CI passed, the researcher directed the
     previously recommended result-12 closure to proceed by checking out a
     dedicated branch and drafting the implementation plan.
   choice: >
@@ -4078,11 +4045,11 @@ tree:
     surface again.
   alternatives:
     - "Narrow the paper claim and leave the Lean mirror intentionally partial."
-    - "Implement #88b first and accept another deliberate mirror-divergence window."
+    - "Implement surface bindings first and accept another deliberate mirror-divergence window."
   evidence:
     - "User directive: do that; checkout the branch, draft a plan"
     - "plans/2026-08-10-result-12-presentation-parity.md"
-    - "PR #101 merge commit 378837e"
+    - "merge commit 378837e"
   also_depends_on: [N159, N164]
   status: resolved
 
@@ -4185,7 +4152,7 @@ tree:
 
 - id: N169
   type: experiment
-  title: "PR #102 review closed unanchored parity-guard drift paths"
+  title: "Review closed unanchored parity-guard drift paths"
   provenance: ai-executed
   timestamp: "2026-08-11T10:06"
   description: >
@@ -4205,7 +4172,6 @@ tree:
     passed; and the complete Haskell test suite passed. Independent re-review
     reported no remaining Critical/Important finding.
   evidence:
-    - "PR #102 review comments"
     - scripts/presentation-shape.hs
     - lean/Lara/PresentationParity.lean
     - lean/Lara/PresentationParityMain.lean
@@ -4216,29 +4182,27 @@ tree:
 
 - id: N170
   type: experiment
-  title: "Post-PR #102 handoff audit found #88b unblocked but under-specified"
+  title: "Post-merge handoff audit found surface bindings unblocked but under-specified"
   provenance: ai-executed
   timestamp: "2026-08-11T10:29"
   description: >
     Inspected the live merged PR, hosted checks, synchronized main branch,
-    recent commits, open issues, the #91 surface tracker, the implemented
-    lara-syntax@0.3 plan, the closed #89 sort issue, the current Program/Policy
+    recent commits, open issues, the surface tracker, the implemented
+    lara-syntax@0.3 plan, the closed sort tracker, the current Program/Policy
     AST, and the active grammar contract to identify the next bounded code
     milestone.
   result: >
-    PR #102 is merged at main commit 56decad; both hosted Haskell and Lean jobs
+    The parity work is merged at main commit 56decad; both hosted Haskell and Lean jobs
     pass; the local main branch is clean and synchronized with origin/main.
-    #90 and #88a were implemented by PR #92, #89's strict Sigma prerequisite is
-    closed, and D7/#88b is the only explicitly deferred surface deliverable.
+    The earlier surface work and the strict-Sigma prerequisite are
+    closed, and D7 surface bindings are the only explicitly deferred surface deliverable.
     The existing D7 scope is not directly executable: named certificate-slot
     references still require a layering decision because Cert payloads remain
-    opaque, and PR #102 now requires any Program-shape change to update both
+    opaque, and the merged parity guard now requires any Program-shape change to update both
     presentation models and the parity guard.
   evidence:
-    - "PR #102 and hosted checks"
+    - "merged main and hosted checks"
     - "commit 56decad"
-    - issue://89
-    - issue://88
     - plans/2026-08-08-lara-syntax-03-surface.md
     - docs/lara-surface-grammar.md
     - src/Lara/AST.hs
@@ -4247,11 +4211,11 @@ tree:
 
 - id: N171
   type: decision
-  title: "Open #88b surface-bindings work on an isolated feature branch"
+  title: "Open surface-bindings work on an isolated feature branch"
   provenance: user
   timestamp: "2026-08-11T10:32"
   choice: >
-    Proceed with the recommended #88b/D7 direction on
+    Proceed with the recommended surface-bindings/D7 direction on
     feature/88b-surface-bindings: design and implement value bindings plus
     binding interpolation first, while keeping named certificate-slot
     references behind their explicit opaque-payload layering decision.
@@ -4276,7 +4240,7 @@ tree:
     comparison and natural-language expansion order, strict Sigma API,
     Haskell test runner, Lean presentation codec, cross-language parity
     witnesses, active version documentation, worked-example regeneration, and
-    authoritative CI workflow. Drafted and self-reviewed the focused #88b
+    authoritative CI workflow. Drafted and self-reviewed the focused surface-bindings
     implementation plan requested by the researcher.
   result: >
     plans/2026-08-11-lara-syntax-04-value-bindings.md now fixes the additive
@@ -4320,7 +4284,7 @@ tree:
     byte-identical rows; Lean build and axiom audit pass; replay, tamper,
     differential, admission-differential, Python, generator-idempotence, and
     protected-artifact checks pass. S2/S5 generated core and expected-verdict
-    bytes are unchanged. PR #103 opened at commit 8b42de8; hosted Haskell and
+    bytes are unchanged. The PR opened at commit 8b42de8; hosted Haskell and
     Lean jobs both pass on that head.
   evidence:
     - plans/2026-08-11-lara-syntax-04-value-bindings.md
@@ -4330,13 +4294,13 @@ tree:
     - scripts/check-presentation-parity.sh
     - examples/S2/example.lara
     - examples/S5/example.lara
-    - "PR #103 and Actions run 31564023177"
+    - "Actions run 31564023177"
   also_depends_on: [N171, N172]
   status: resolved
 
 - id: N174
   type: experiment
-  title: "PR #103 external review resolved without weakening evidence-derived prose"
+  title: "External review resolved without weakening evidence-derived prose"
   provenance: ai-executed
   timestamp: "2026-08-12T00:10"
   description: >
@@ -4351,7 +4315,7 @@ tree:
     evidence-derived renderDecimal spelling. S2/S5 core and expected-JSON
     hashes remained unchanged across two generator runs. Full local gates and
     hosted Haskell/Lean CI pass; all four inline threads are replied to and
-    resolved. PR #103 is merge-clean and awaits reviewer re-approval.
+    resolved. The PR is merge-clean and awaits reviewer re-approval.
   evidence:
     - src/Lara/Syntax.hs
     - test/SyntaxSpec.hs
@@ -4360,17 +4324,17 @@ tree:
     - examples/S2/example.lara
     - examples/S5/example.lara
     - "commit 942e9ef"
-    - "PR #103 and Actions run 31572212188"
+    - "Actions run 31572212188"
   also_depends_on: [N173]
   status: resolved
 
 - id: N175
   type: experiment
-  title: "Task 7 locally verified #104 plain-argument theta inference; hosted CI remains pending"
+  title: "Task 7 locally verified plain-argument theta inference; hosted CI remains pending"
   provenance: ai-executed
   timestamp: "2026-08-12T21:19"
   description: >
-    Evaluated the complete #104 contract after the inferred-theta
+    Evaluated the complete theta-inference contract after the inferred-theta
     implementation and Task 7 integration correction. The verified surface
     spelling is `by rule from [refs]`, with `from []` legal for zero-premise
     rules; the explicit positional form remains available and the semantic
@@ -4395,7 +4359,7 @@ tree:
     only when the authored spellings also match; spelling differences remain
     checker-equivalent with identical verdicts but may differ in bytes. Hosted
     Haskell and Lean CI are pending until the implementation PR head
-    runs them, so #104 remains open pending that verification; #105 named
+    runs them, so the tracker item remains open pending that verification; named
     certificate premise slots were not implemented and remain a separate open
     opaque-certificate-layering design problem.
   evidence:
@@ -4408,11 +4372,11 @@ tree:
   status: resolved
 - id: N176
   type: experiment
-  title: "Hosted CI verified #104 plain-argument theta inference on PR #106"
+  title: "Hosted CI verified plain-argument theta inference on the implementation PR"
   provenance: ai-executed
   timestamp: "2026-08-12T22:02"
   description: >
-    Opened implementation PR #106 after the reviewed local implementation,
+    Opened the implementation PR after the reviewed local implementation,
     final documentation correction, and clean branch verification, then
     monitored the hosted Haskell and Lean jobs on the PR head.
   result: >
@@ -4420,14 +4384,13 @@ tree:
     The PR merge state is CLEAN. Fresh final-head local gates also passed:
     the full Haskell suite, 72-row presentation parity, Lean build,
     check-axioms tests, and the complete AxCheck audit. The implementation
-    remains intentionally separate from #105's unresolved opaque-certificate
+    remains intentionally separate from the unresolved opaque-certificate
     layering design.
     Modified ARA YAML files parse and targeted N176/O70/session/index
     assertions pass. Repository-wide `ara check --strict ara` remains blocked
     by the pre-existing N131 scalar at `exploration_tree.yaml:3249`; this
-    blocker is outside the #104 implementation record.
+    blocker is outside the implementation record.
   evidence:
-    - "PR #106"
     - "Actions run 31644485072"
     - plans/2026-08-12-plain-arg-theta-inference.md
     - TODOS.md
@@ -4436,7 +4399,7 @@ tree:
 
 - id: N177
   type: experiment
-  title: "Verification and review handoff for #104 plain-argument theta inference"
+  title: "Verification and review handoff for plain-argument theta inference"
   provenance: ai-executed
   timestamp: "2026-08-12T17:02"
   description: >
@@ -4453,14 +4416,14 @@ tree:
     matched the committed verdict byte-for-byte; and trusted-input,
     manifest-identity, and artifact-digest tamper checks passed. Hosted
     Actions run 31653193555 passed both Haskell and Lean jobs on ARA-append
-    head c9c59a6 before this metadata correction commit was created. PR #106
+    head c9c59a6 before this metadata correction commit was created. The PR
     is open with merge state CLEAN; its GitHub review decision remains
     CHANGES_REQUESTED pending reviewer re-review.
 
   evidence:
     - plans/2026-08-12-plain-arg-theta-inference.md
     - "local verification commit 2de1bcde"
-    - "PR #106 ARA-append head c9c59a6 before metadata correction"
+    - "ARA-append head c9c59a6 before metadata correction"
     - "Actions run 31653193555"
     - scripts/differential.sh
     - scripts/admission-differential.sh
@@ -4502,7 +4465,7 @@ tree:
 
 - id: N179
   type: decision
-  title: "Approve the #105 named-cert-slots design (D1-D10) and execute plan-to-PR"
+  title: "Approve the named-cert-slots design (D1-D10) and execute plan-to-PR"
   provenance: user
   timestamp: "2026-08-13T20:41"
   description: >
@@ -4529,7 +4492,7 @@ tree:
 
 - id: N180
   type: experiment
-  title: "#105 implemented plan-to-PR: 10 commits, all gates green, PR #110"
+  title: "Named-cert-slots implemented plan-to-PR: 10 commits, all gates green"
   provenance: ai-executed
   timestamp: "2026-08-13T20:41"
   description: >
@@ -4550,10 +4513,9 @@ tree:
     nested assurances are not surface-expressible, so the D4 locate matches
     both premise representations and the D8 recursion is pinned at AST level;
     and prop_S6 plus examples/README.md S6 coverage were added for S-series
-    consistency beyond the plan's file map. PR #110 opened; merge gated on
+    consistency beyond the plan's file map. The PR opened; merge gated on
     hosted Haskell + Lean CI.
   evidence:
-    - "https://github.com/ARA-Labs/lara/pull/110"
     - plans/2026-08-12-named-cert-premise-slots.md
     - test/CertSlotsSpec.hs
     - examples/S6/example.core.sexp
@@ -4595,7 +4557,7 @@ tree:
 
 - id: N182
   type: experiment
-  title: "PR #110 review findings resolved and hosted gates re-proved"
+  title: "Review findings resolved and hosted gates re-proved"
   provenance: ai-executed
   timestamp: "2026-08-13T21:36"
   description: >
@@ -4611,12 +4573,11 @@ tree:
     The full Haskell suite, Lean build, standard-axiom audit, 73-row
     presentation parity, differential gate (pass=581 fail=0; negative pass=56
     fail=0), replay/tamper gate, and frozen-directory check passed locally.
-    Commit 56f7c2b was pushed to PR #110. Hosted Actions run 31769934475 passed
+    Commit 56f7c2b was pushed to the PR. Hosted Actions run 31769934475 passed
     both Haskell and Lean jobs. All eight inline review threads received
     finding-specific replies and are resolved; GitHub still reports
     CHANGES_REQUESTED pending reviewer re-approval.
   evidence:
-    - "https://github.com/ARA-Labs/lara/pull/110"
     - "commit 56f7c2b"
     - "Actions run 31769934475"
     - test/CertSlotsSpec.hs
@@ -4698,7 +4659,7 @@ tree:
     presentation parity passed 73 rows; differential passed with negative
     pass=56 fail=0; replay/tamper passed; frozen artifact directories remained
     byte-clean. A focused Lara.CertSlots build also passed. Commit 708fa7e was
-    pushed to PR #110; hosted Actions run 31772295184 passed both Haskell and
+    pushed to the PR; hosted Actions run 31772295184 passed both Haskell and
     Lean jobs.
   evidence:
     - test/CertSlotsSpec.hs
@@ -4711,7 +4672,7 @@ tree:
 
 - id: N186
   type: decision
-  title: "Execute the bounded #114 Map-backed tag lookup"
+  title: "Execute the bounded Map-backed tag lookup"
   provenance: user
   timestamp: "2026-08-17T23:27"
   description: >
@@ -4722,13 +4683,13 @@ tree:
     Replace only Lara.Wire.parseTag's 97-entry association-list scan with a
     top-level NOINLINE Data.Map.Strict table derived from tagToString. Preserve
     the public API, every call site, all tag spellings, the Lean driver, frozen
-    artifacts, and the separate scope of issues #115 and #116.
+    artifacts, and the separate scope of the wire-parser follow-ups.
   alternatives:
     - "Rewrite more than 40 tag-membership guards as direct string equality."
-    - "Combine the change with issue #115's ByteString parser work."
+    - "Combine the change with the ByteString parser work."
     - "Keep the linear scan and qualify the paper's performance discussion."
   evidence:
-    - issue://114
+    - tracker reference removed
   status: resolved
 
 - id: N187
@@ -4763,11 +4724,11 @@ tree:
 
 - id: N188
   type: experiment
-  title: "PR #117 hosted CI confirms integration"
+  title: "Hosted CI confirms integration"
   provenance: ai-executed
   timestamp: "2026-08-17T23:42"
   description: >
-    Pushed perf/114-parsetag-map, opened ARA-Labs/lara PR #117, and waited for
+    Pushed perf/114-parsetag-map, opened the tracker PR, and waited for
     the complete hosted CI workflow rather than treating local gates as the
     final integration result.
   result: >
@@ -4775,9 +4736,8 @@ tree:
     tested, checked presentation parity, replay and tamper gates, policy-copy
     authenticity, the full Haskell-Lean differential, and semantic admission
     differential. The Lean job built and passed the no-sorry standard-axiom
-    audit. PR #117 is open and mergeable at commit ea450c5.
+    audit. The PR is open and mergeable at commit ea450c5.
   evidence:
-    - "PR #117"
     - "GitHub Actions run 32107434809"
     - "commit ea450c5"
   supports:
@@ -4787,7 +4747,7 @@ tree:
 
 - id: N189
   type: decision
-  title: "Resolve PR #117 review with exact cardinality and mechanized injectivity"
+  title: "Resolve the review with exact cardinality and mechanized injectivity"
   provenance: user
   timestamp: "2026-08-18T00:13"
   description: >
@@ -4804,7 +4764,6 @@ tree:
     - "Leave the Lean theorem to a separate follow-up."
     - "Repeat the full behavioral and performance matrix despite no behavioral change."
   evidence:
-    - "PR #117 review comments 3801741495 through 3801741522"
     - "commit 722aad3"
     - ara/evidence/results/parsetag_map_lookup.md
   also_depends_on: [N186, N187, N188]
@@ -4812,11 +4771,11 @@ tree:
 
 - id: N190
   type: decision
-  title: "Execute the reviewed #115 plan: ByteString wire parser, then evaluate and deliver"
+  title: "Execute the reviewed plan: ByteString wire parser, then evaluate and deliver"
   provenance: user
   timestamp: "2026-08-18T23:40"
   description: >
-    Issue #115 asks whether the wire reader should move from String to strict
+    The tracked question asks whether the wire reader should move from String to strict
     ByteString, and requires the column-semantics question (bytes versus code
     points) to be answered explicitly rather than discovered at review. The
     plan had already been written and review-revised at 1b2d245.
@@ -4832,8 +4791,6 @@ tree:
     - "Write a Rust frontend, which would measure nothing and put an FFI boundary inside the trusted base."
   evidence:
     - plans/2026-08-18-115-bytestring-wire-parser.md
-    - "issue #115"
-    - "issue #116"
   also_depends_on: [N186, N187, N189]
   status: resolved
 
@@ -4919,24 +4876,23 @@ tree:
     not commit the regenerated table. The plan's own guard says a check +
     render movement beyond a few percent means the run is noisy. The table
     needs one make bench on an idle machine; the code change does not depend on
-    it. PR #118 states the deviation explicitly for the reviewer.
+    it. The PR states the deviation explicitly for the reviewer.
   alternatives:
     - "Commit the regenerated table anyway and let an untouched evaluation row regress 52% for reasons unrelated to the change."
     - "Block the whole change until an idle machine is available."
   evidence:
     - ara/evidence/results/bytestring_wire_parser.md
-    - "PR #118"
     - docs/m5-freeze-checklist.md
   also_depends_on: [N192]
   status: resolved
 
 - id: N194
   type: experiment
-  title: "PR #118 hosted CI confirms integration"
+  title: "Hosted CI confirms integration"
   provenance: ai-executed
   timestamp: "2026-08-19T00:35"
   description: >
-    Pushed perf/115-bytestring-wire-parser, opened ARA-Labs/lara PR #118, and
+    Pushed perf/115-bytestring-wire-parser, opened the tracker PR, and
     waited for the complete hosted workflow rather than treating the local gate
     matrix as the final integration result. The hosted run is the independent
     check that the ByteString reader behaves identically on a clean machine
@@ -4948,7 +4904,6 @@ tree:
     and the semantic admission differential. The Lean job built and passed the
     no-sorry standard-axiom audit.
   evidence:
-    - "PR #118"
     - "GitHub Actions run 32226016340"
     - "commit 37781e9"
   supports:
@@ -4988,7 +4943,6 @@ tree:
   evidence:
     - C33
     - ara/evidence/results/bytestring_wire_parser.md
-    - "PR #118"
   supports:
     - C33
   also_depends_on: [N192, N193]
@@ -5000,15 +4954,15 @@ tree:
   provenance: user
   timestamp: "2026-08-20T04:00"
   choice: >
-    Ship #135, #133 and #129 as one surface release enforcing a single
+    Ship the three wart fixes as one surface release enforcing a single
     invariant: every authored surface token must affect the semantic object or
     trigger an explicit error. All three warts have the same shape - the parser
     or elaborator accepts a token and then does not mean it. Bare-leaf
-    discharge/open lines become located parse errors (#135); the two-identifier
+    discharge/open lines become located parse errors; the two-identifier
     hole spelling `open q as o` collapses to `open q`, retiring the `as`
-    keyword (#133); and a discharge target naming both a declared leaf and a
+    keyword; and a discharge target naming both a declared leaf and a
     prior argument becomes a hard AmbiguousDischarge instead of a silent
-    preference for the leaf (#129). No compatibility aliases: every .lara
+    preference for the leaf. No compatibility aliases: every .lara
     source is in-repo, so the ten affected spellings migrated in the same
     commit as the restriction that required them.
   alternatives:
@@ -5017,8 +4971,8 @@ tree:
     - "Keep `open q as o` and have the elaborator check q == o - rejected in Appendix F.3: it preserves a second name that nothing downstream reads."
   evidence:
     - "docs/lara-surface-grammar.md Appendix F"
-    - "commit 62e23f9 (#135, #133 parser)"
-    - "commit d4da098 (#129 elaborator)"
+    - "commit 62e23f9 (parser)"
+    - "commit d4da098 (elaborator)"
     - "commit 6992889 (Appendix F)"
   also_depends_on: [N113]
   status: resolved
@@ -5034,7 +4988,7 @@ tree:
     files: 10 hole spellings in 7 files needed migration, all of them the equal
     form `open X as X`; no source attaches a discharge or open line to a bare
     leaf; and of 120 `discharge ... with ...` lines, zero name a reference that
-    is both a declared leaf and an argument id - so #129's new error cannot
+    is both a declared leaf and an argument id - so the new error cannot
     fire on the corpus even ignoring declaration order. The frozen-artifact
     pathspec diff against origin/main is empty: every corpus and example
     .core.sexp and expected.json, the walking-skeleton emitted core and
@@ -5060,7 +5014,7 @@ tree:
   provenance: ai-suggested
   timestamp: "2026-08-20T05:00"
   choice: >
-    #135's design decision D1 required addArgDischarge and addArgHole to return
+    The design decision D1 required addArgDischarge and addArgHole to return
     Either String ArgInstantiation with no catch-all equation, so that a caller
     reaching the helper directly cannot re-create the silent drop by bypassing
     the parser's check. Independent spec review found the third sibling,
@@ -5085,7 +5039,7 @@ tree:
   provenance: user
   timestamp: "2026-08-21T04:00"
   choice: >
-    Land #131 alone as lara-syntax@0.8 rather than bundling it with #132's
+    Land the label feature alone as lara-syntax@0.8 rather than bundling it with the
     named nd@1 proof terms, and give a certificate premise reference a THIRD
     name class: the premise label the citing rule declares for that slot, sat
     beside the @0.6 declared-leaf and prior-argument classes under the
@@ -5095,19 +5049,18 @@ tree:
     whose labels were consulted. Labels are per-rule, not per-policy: a nested
     instance's certificate resolves against its own rule's labels, never the
     enclosing one's. The plan's own no-combine constraint drove the split -
-    #131 is S-M and #132 is L with its own Lean mechanization, so bundling
+    The label feature is S-M and the named-proof feature is L with its own Lean mechanization, so bundling
     would hold the small feature hostage to the large one.
   alternatives:
-    - "Let the label win on a cross-class collision - rejected: it reintroduces the silent preference #129 removed from the discharge resolver."
+    - "Let the label win on a cross-class collision - rejected: it reintroduces the silent preference the @0.7 release removed from the discharge resolver."
     - "Carve out agreeing referents (allow the collision when both classes name the same slot) - rejected: whether `base` is ambiguous would then depend on which slot a leaf elsewhere in the artifact happens to fill, which is invisible from the citing line. It would be the first conditional case in an otherwise uniform collision policy; relaxing later is additive, tightening later would be breaking."
     - "Make labels replace the leaf/prior namespace - rejected: labels are optional (`rulePremiseLabels :: [Maybe PremiseLabel]`), so they cannot be universal; a third class beside the other two keeps every pre-@0.8 rule cited exactly as before."
-    - "Bundle #131 and #132 into one release - rejected by the plan's split; recorded here because it was the live alternative."
+    - "Bundle the two features into one release - rejected by the plan's split; recorded here because it was the live alternative."
   evidence:
     - "docs/lara-surface-grammar.md Appendix G"
     - "commit 567b639 (resolver + error plumbing)"
     - "commit df2c832 (recursion, conservativity and message pins)"
     - "commit 2384dae (Appendix G, rejection surface, version sweep)"
-    - "PR #141"
   also_depends_on: [N196]
   status: resolved
 
@@ -5164,17 +5117,17 @@ tree:
     moves land as ONE atomic compiling commit: extracting Seed first would
     transiently form Lara.Mutate -> Seed -> Lara.Mutate, so there is no
     intermediate state that both compiles and is partially split. Two deviations
-    from issue #122's own sketch were taken deliberately: the sweep module is
+    from the tracked sketch were taken deliberately: the sweep module is
     named Suite rather than Corpus because the sweep and the worked-example
     assembly share unitMutants and the operator order and must be read together,
     and three cuts beyond the issue's Sites/Codec/Corpus sketch (Seed, Cycle,
     Manifest) were needed because the issue's split leaves core at ~460 and
     Sites at ~465, both still over the bound.
   alternatives:
-    - "Re-export facade at Lara.Mutate preserving the old import surface - rejected: needs a further Lara.Mutate.Core layer to break the cycle, adding public surface for a goal #122 did not ask for."
+    - "Re-export facade at Lara.Mutate preserving the old import surface - rejected: needs a further Lara.Mutate.Core layer to break the cycle, adding public surface for a goal the split did not ask for."
     - "Per-module commits for reviewability - rejected: the root-first dependency direction makes every intermediate state cyclic or uncompilable."
-    - "Issue #122's literal Sites/Codec/Corpus + core split - rejected on measurement: leaves two modules over the 400-line bound."
-    - "Split the 445-line Lara.Mutate.Accept in the same pass - rejected: out of scope for #122, left as the one explicit documented exception."
+    - "The literal Sites/Codec/Corpus + core split - rejected on measurement: leaves two modules over the 400-line bound."
+    - "Split the 445-line Lara.Mutate.Accept in the same pass - rejected: out of scope for the module split, left as the one explicit documented exception."
   evidence:
     - "commit 3dd655c"
     - "commit 08985e8 (gstack-reviewed plan)"
@@ -5229,7 +5182,7 @@ tree:
   provenance: user
   timestamp: "2026-08-22T20:00"
   choice: >
-    Execute the approved #132 plan as a presentation-only extension owned by
+    Execute the approved named-proof plan as a presentation-only extension owned by
     the exact registered nd@1 identity. A payload enters named mode only when
     it contains one of four marker shapes: `(prem s)`, `(thy n)`, a four-field
     named `lam`, or `(hyp s)` whose decoded atom starts like a source
@@ -5246,7 +5199,6 @@ tree:
   evidence:
     - "docs/lara-surface-grammar.md Appendix H"
     - "commits 360bcda, 40e0b2c, 421c678"
-    - "PR #145"
   also_depends_on: [N199, N200]
   status: resolved
 
@@ -5269,12 +5221,11 @@ tree:
     grammar's existing constructor spelling even when the surrounding surface
     becomes more convenient. S8 wraps the generated key with the closed TAtom
     tag in both named and numeric twins; source-authored formula annotations
-    remain the deliberately separate issue #144.
+    remain the deliberately separate follow-up.
   evidence:
     - "examples/S8/example.lara"
     - "test/WorkedExamplesSpec.hs prop_S8 numeric twin"
     - "commit 4dd5922"
-    - "issue #144"
   also_depends_on: [N203]
   status: resolved
 
@@ -5302,7 +5253,6 @@ tree:
     - "test/NDNamedSpec.hs"
     - "examples/S8/"
     - "commits 4dd5922, bfb2f28"
-    - "PR #145"
   supports: []
   also_depends_on: [N203, N204]
   status: resolved
@@ -5313,7 +5263,7 @@ tree:
   provenance: ai-executed
   timestamp: "2026-08-23T00:05"
   hypothesis: >
-    The #140 diagnostic could advertise a premise-label exit whenever the
+    The diagnostic could advertise a premise-label exit whenever the
     citing rule declared any premise label (`any Just rulePremiseLabels`).
   failure_mode: >
     Labels are optional per slot. In a rule shaped `[alpha, alpha, repair:
@@ -5332,13 +5282,12 @@ tree:
     - "src/Lara/Elaborate/Internal.hs certSlotResolver"
     - "test/CertSlotsSpec.hs partialTwin and partialTriple"
     - "commit 97ced05"
-    - "issue #140"
   also_depends_on: [N199, N203]
   status: resolved
 
 - id: N207
   type: experiment
-  title: "The reviewed @0.9 release closes #132 and #140 without kernel or frozen-artifact drift"
+  title: "The reviewed @0.9 release closes both tracked items without kernel or frozen-artifact drift"
   provenance: ai-executed
   timestamp: "2026-08-23T00:16"
   result: >
@@ -5349,12 +5298,10 @@ tree:
     Fresh post-commit verification repeated the full Haskell suite, 583/0
     differential and 56/0 negative anchors, 504-mutant byte regeneration, the
     76-job Lean build and axiom audit, 73-row presentation parity, and the
-    walking-skeleton oracle. PR #145 is open against main and closes #132 and
-    #140 on merge; #144 intentionally stays open.
+    walking-skeleton oracle. The release PR is open against main and closes both items
+    on merge; the annotation follow-up intentionally stays open.
   evidence:
     - "commit 97ced05"
-    - "PR #145"
-    - "issue #144"
   supports: []
   also_depends_on: [N205, N206]
   status: resolved
@@ -5382,13 +5329,12 @@ tree:
   evidence:
     - "docs/lara-surface-grammar.md Appendix I"
     - "src/Lara/Elaborate/NDNamed.hs lowerFormula"
-    - "issue #144"
   also_depends_on: [N203, N204, N207]
   status: resolved
 
 - id: N209
   type: experiment
-  title: "The lara-syntax@0.10 release closes #144 with byte-identical S8 goldens and all gates green"
+  title: "The lara-syntax@0.10 release closes the annotation follow-up with byte-identical S8 goldens and all gates green"
   provenance: ai-executed
   timestamp: "2026-08-23T12:14"
   result: >
@@ -5409,11 +5355,10 @@ tree:
     Fresh verification: full Haskell suite PASS (53 named-ND tests),
     differential 583/0 with 56/0 negatives, presentation parity 73 rows,
     504-mutant byte-identical regeneration; m5-freeze-v4 stands with no core,
-    wire, checker, replay, or corpus change. PR #147 is open and closes #144
+    wire, checker, replay, or corpus change. The PR is open and closes the follow-up
     on merge.
   evidence:
     - "commit ddb39b6"
-    - "PR #147"
     - "docs/lara-surface-grammar.md Appendix I"
     - "lean/Lara/NDNamed.lean lowerFormula_eq_translation"
   supports: []
@@ -5429,7 +5374,7 @@ tree:
     C23's recorded untested boundary: that over inputs whose defect manifests
     off the seeded site, or that carry multiple defects, measured
     localization accuracy detaches from 100% for reasons other than
-    diagnostic ordering — i.e. that the #123 families turn location_match
+    diagnostic ordering — i.e. that the multi-defect families turn location_match
     into a number that discriminates.
   failure_mode: >
     The number cannot move in this harness, and the reason is upstream of the
@@ -5453,14 +5398,13 @@ tree:
     the edit site — which the earlier families could not state at all. That
     is a real contribution, but it is not a headline number that can move,
     and prose quoting 399/399 as evidence of discriminating localization is
-    a false claim. Found by external review of PR #167, not by the
+    a false claim. Found by external review, not by the
     implementation.
   evidence:
-    - "PR #167 review (fenfenai), inline comment on docs/localization-metric-decision.md:104"
+    - "review (fenfenai), inline comment on docs/localization-metric-decision.md:104"
     - "docs/localization-metric-decision.md — 'These families do not make the reported rate move'"
     - "docs/m5-freeze-checklist.md — rewritten Location-match caveat"
     - "commit a8b3885"
-    - "issue #168"
   also_depends_on: [N96]
   status: resolved
 
@@ -5487,7 +5431,7 @@ tree:
     - "Keep re-deriving the published lists from wrongPremiseSites / badAttackPositionSites with the same comprehension shape — rejected: this is what shipped, and it catches only pair-order, a /= b, and component-class drift. It says nothing about the mutant, so dropping the second rewrite left the entire suite green while the answer key advertised a defect the mutant did not contain."
     - "Assert only that the mutant's bytes differ from the base at both edited positions — rejected as too weak: it witnesses that an edit happened, not that the edit is a defect the checker reports at the published constituent."
   evidence:
-    - "PR #167 review (fenfenai), inline comment on test/MutationSpec.hs:772, with the defect demonstrated empirically rather than by reading"
+    - "review (fenfenai), inline comment on test/MutationSpec.hs:772, with the defect demonstrated empirically rather than by reading"
     - "test/MutationSpec.hs prop_localizationSites (tailManifests / headRevertLocates)"
     - "commit a8b3885"
   also_depends_on: [N210]
@@ -5504,7 +5448,7 @@ tree:
     off-site-manifesting suites, and its Statement asserts that localization
     "becomes a real signal only over inputs whose defect manifests off the
     seeded site or that carry multiple defects". N210 shows both are wrong
-    for this harness: the #123 families were built and the rate stays at
+    for this harness: the families were built and the rate stays at
     ceiling by construction, because the ground truth is checker-gated
     upstream of the measurement rather than because of the defect structure.
     C23's core Statement about the single-defect regime is untouched and
@@ -5524,15 +5468,15 @@ tree:
 
 - id: N213
   type: decision
-  title: "Land the #169 type refactor before the m5-freeze-v5 refreeze, gated on a byte-neutrality check rather than on an argument"
+  title: "Land the type refactor before the m5-freeze-v5 refreeze, gated on a byte-neutrality check rather than on an argument"
   provenance: user-revised
   timestamp: "2026-08-25T20:40"
   choice: >
-    The researcher asked whether #169 and #168 should land before the #156
-    refreeze cycle. Answered by splitting them. #168 is not sequenceable here
+    The researcher asked whether the type refactor and the paper-side item should land before the
+    refreeze cycle. Answered by splitting them. The paper-side item is not sequenceable here
     at all — its work is results prose in the paper repository, so it was
     closed in favour of a paper-side handoff and the two in-repo pointers were
-    retargeted. #169 lands first, because the decision turns on a property
+    retargeted. The type refactor lands first, because the decision turns on a property
     that is cheap to test rather than to argue: the family spellings are
     manifest column 3 and the ground-truth list is column 8, both inside the
     frozen deterministic projection, so the refactor is only free to land in
@@ -5543,22 +5487,22 @@ tree:
     the tag rather than after, when it would cost a second corpus
     regeneration.
   alternatives:
-    - "Refreeze first, land #169 after — defensible, since the refactor is cleanup with no live defect and #156 is on the critical path. Rejected on the asymmetry of discovery: if byte-neutrality fails, finding out after the tag costs a full regeneration, while finding out before costs one --check run."
-    - "Land #169 and #168 together as one pre-refreeze batch — rejected: #168 cannot be discharged from this repository, so batching them would have parked a paper-repo obligation behind a code change indefinitely."
+    - "Refreeze first, land the type refactor after — defensible, since the refactor is cleanup with no live defect and the refreeze is on the critical path. Rejected on the asymmetry of discovery: if byte-neutrality fails, finding out after the tag costs a full regeneration, while finding out before costs one --check run."
+    - "Land the type refactor and the paper-side item together as one pre-refreeze batch — rejected: the paper-side item cannot be discharged from this repository, so batching them would have parked a paper-repo obligation behind a code change indefinitely."
     - "Argue byte-neutrality from the code (familyText preserves the spellings; the wrapper renders identically) and skip the check — rejected: the argument is sound but is exactly the kind of claim the freeze discipline exists to verify rather than trust."
   evidence:
-    - "issue #169; issue #156 (Task 4 refreeze cycle); plans/2026-08-24-m5-freeze-v5-batch.md"
+    - "the Task 4 refreeze cycle; plans/2026-08-24-m5-freeze-v5-batch.md"
     - "trace node N214 (the check itself)"
   also_depends_on: [N210]
   status: resolved
 
 - id: N214
   type: experiment
-  title: "The #169 typed mutation vocabulary is byte-neutral on the frozen corpus"
+  title: "The typed mutation vocabulary is byte-neutral on the frozen corpus"
   provenance: ai-executed
   timestamp: "2026-08-25T20:55"
   description: >
-    Implemented #169 and tested the property the sequencing decision (N213)
+    Implemented the typed vocabulary and tested the property the sequencing decision (N213)
     rested on. opFamily :: MutationOp -> String became a closed OpFamily sum
     type with familyText as the sole spelling table; mutantSites ::
     [Constituent] and Lara.Measure.imExpectedLocation became Maybe
@@ -5574,16 +5518,16 @@ tree:
     prop_expectedLocationColumn and the two location-metric properties.
     scripts/differential.sh: pass=620 fail=0, negative pass=56 fail=0.
     scripts/admission-differential.sh: pass=20 fail=0 expected=20. No Lean
-    change, so the axiom audit is untouched. Landed as PR #170.
+    change, so the axiom audit is untouched. Landed as a PR.
     Two secondary findings, both from the type rather than from testing: in
     Localize.retractRuleSites the smart constructor replaces the hand-written
     "not (null affected)" guard, making that self-gate structural; and
     seededPrimary is total, so location_primary can no longer fail to have a
-    head. The .Internal escape hatch #169 anticipated turned out to be
+    head. The .Internal escape hatch the refactor anticipated turned out to be
     unnecessary — the only value test/MeasureSpec.hs forges is the empty one,
     and seededSites [] is legitimately Nothing.
   evidence:
-    - "PR #170; commit ac3b6a0"
+    - "commit ac3b6a0"
     - "src/Lara/Diagnostics.hs (SeededSites), src/Lara/Mutate.hs (OpFamily/familyText)"
     - "scripts/gen-mutants.hs --check output"
   also_depends_on: [N213]
@@ -5597,34 +5541,33 @@ tree:
   description: >
     Audited the remote to test the researcher's read that only the refreeze
     remained. Confirmed: no open PRs, main == origin/main at 89c25ef, and of
-    the seven open issues only #156 was schedulable code work. #151 is a
+    the seven open issues only the refreeze was schedulable code work. One is a
     decision whose own recommendation is "do nothing until the paper package
-    is out"; #126 is future-work gated on the possible-worlds design; #121 is
-    blocked on a second author, not on code; #78 is a scope decision; #52 and
-    #30 are deferred. #109 was the one open item that could be finished
+    is out"; one is future-work gated on the possible-worlds design; the binding audit is
+    blocked on a second author, not on code; one is a scope decision; two items are
+    deferred. The naturalness-boundary note was the one open item that could be finished
     alongside the freeze without touching a frozen input.
   choice: >
-    Run #156 and #109 in this session as two independent PRs, docs first. The
-    two do not interact: #109 is docs-only and touches no frozen input, while
-    #156 requires a clean tree for its measurement run, so landing the docs
+    Run the refreeze and the naturalness-boundary note in this session as two independent PRs, docs first. The
+    two do not interact: the note is docs-only and touches no frozen input, while
+    the refreeze requires a clean tree for its measurement run, so landing the docs
     change first keeps the tree clean for the freeze rather than complicating
     it.
   alternatives:
     - "Fold both into one PR — rejected: unrelated concerns, and it would put a policy note inside the diff a future reader consults for the freeze protocol."
-    - "Refreeze alone and defer #109 — rejected: #109 costs nothing against a frozen input and the researcher asked for both."
+    - "Refreeze alone and defer the note — rejected: the note costs nothing against a frozen input and the researcher asked for both."
   evidence:
-    - "issue #156; issue #109; gh issue list / gh pr list audit of ARA-Labs/lara"
-    - "PR #174 (#109); PR #175 (#156)"
+    - "gh issue list / gh pr list audit of ARA-Labs/lara"
   also_depends_on: [N213]
   status: resolved
 
 - id: N216
   type: decision
-  title: "Skip the #165 quarantining-corpus-base rider; keep the quarantine path gated from fixtures"
+  title: "Skip the quarantining-corpus-base rider; keep the quarantine path gated from fixtures"
   provenance: user-revised
   timestamp: "2026-08-25T22:25"
   description: >
-    #156 carried an optional rider deferred from #165: add a corpus base whose
+    The refreeze carried an optional rider deferred from an earlier scope item: add a corpus base whose
     section 4.3 quarantine is not the identity, so that some committed mutant
     file walks the non-identity path. It had to be settled before step 1
     (gen-mutants.hs), because it changes the mutant count and every downstream
@@ -5637,7 +5580,7 @@ tree:
     (38 group-conflict and 18 quarantine-attacker mutants inject a groups
     form, and both drivers run them), so the real gap is only that sites are
     enumerated on bases whose quarantine is the identity, leaving no committed
-    mutant whose expected-location was published off-diagonal. Since #166 that
+    mutant whose expected-location was published off-diagonal. Since the skewed-sibling work that
     contract is gated from fixtures by prop_siteMatchesChecker,
     prop_siteDirectionSkewed, prop_sitesQuarantiningBase and
     prop_localizationSites, which run over a skewed sibling of every base with
@@ -5645,9 +5588,9 @@ tree:
     witness for an already-gated contract and pays for it by permanently
     enlarging a frozen count.
   alternatives:
-    - "Take the rider — it rides along at no extra tag or regeneration cost and would give the #123 answer key an end-to-end anchor through gen-mutants -> MANIFEST -> measure -> report on a quarantining base. Rejected on cost/benefit, not on soundness; it remains available at the next refreeze as a standalone item."
+    - "Take the rider — it rides along at no extra tag or regeneration cost and would give the mutation answer key an end-to-end anchor through gen-mutants -> MANIFEST -> measure -> report on a quarantining base. Rejected on cost/benefit, not on soundness; it remains available at the next refreeze as a standalone item."
   evidence:
-    - "issue #165; issue #166 (the skewed-sibling gates); issue #156 rider section"
+    - "the skewed-sibling gates; the refreeze rider section"
     - "test/MutationSpec.hs quarantineSkewed / prop_siteDirectionSkewed / prop_sitesQuarantiningBase"
     - "fixtures/mutants/MANIFEST.tsv operator census (38 group-conflict, 18 quarantine-attacker)"
   also_depends_on: [N215]
@@ -5660,8 +5603,8 @@ tree:
   timestamp: "2026-08-25T22:25"
   description: >
     Cutting a fifth tag was the natural moment to decide whether the series
-    keeps a name that no longer describes it: M5 closed long ago (tracker
-    #48), and every re-cut after v1 was for something else.
+    keeps a name that no longer describes it: M5 closed long ago (the milestone
+    tracker), and every re-cut after v1 was for something else.
   choice: >
     Keep m5-freeze-v5 and add a line to the checklist header saying the m5-
     prefix is legacy and the series is the evaluation-corpus freeze.
@@ -5679,8 +5622,8 @@ tree:
   provenance: ai-executed
   timestamp: "2026-08-25T23:40"
   description: >
-    Task 4 of the batch — the single regeneration cycle shared by #125, #124
-    and #123, each of which had changed a frozen input. Predictions under
+    Task 4 of the batch — the single regeneration cycle shared by the three frozen-input changes
+    each of which had changed a frozen input. Predictions under
     test, all falsifiable: (a) the committed suite already regenerates
     unchanged, since the task PRs regenerated additively; (b) the class
     deltas are exactly the new operators' rows and nothing else moved; (c) no
@@ -5702,13 +5645,13 @@ tree:
     differential moving 583 -> 620 is the same fact from the other side.
     (d) corpus-units/ holds its @0.7 tree SHA exactly, claim-support.tsv is
     byte-identical, and binding-audit/worklist.tsv regenerated byte-identical,
-    so the 38-leaf audit denominator (#121) is untouched. (e) location_match
+    so the 38-leaf audit denominator is untouched. (e) location_match
     399/399 -> 436/436 and the new location_primary column also 436/436 — the
     denominator grew by the seeded rows and the rate did not move, which is
     N210's finding reproduced at larger scale.
     Headline: 601/601 class match, 601/601 lean_agree, 60/60 replay, 1/1
     claim-support. Ablations no-cq 18, no-typed 30 -> 35, and the new
-    isolating no-conflict-scan cell at 5 — exactly the split #124 predicted,
+    isolating no-conflict-scan cell at 5 — exactly the split the ablation item predicted,
     with noTypedConfig deliberately not narrowed so no published row changed
     meaning. All ten gates green on clean 89c25ef.
     Two provenance defects found in the v4 snapshot. The v4 claim-support.json
@@ -5717,17 +5660,17 @@ tree:
     disagreed about their own provenance and nothing had caught it across two
     freezes; repaired here. Separately, frozen-tag is hardcoded to
     "m5-freeze-v2" in ClaimSupport.hs and BindingAudit.hs and has been stale
-    since v3; filed as #176 rather than fixed here, since it rewrites a
+    since v3; filed as a tracked item rather than fixed here, since it rewrites a
     committed artifact.
     Caveat on the evidence: GitHub Actions ran no job in this window (account
     billing), and no run was created for either PR, so all ten gate results
     are local runs on the environment of record rather than CI corroboration.
   evidence:
-    - "PR #175; tag m5-freeze-v5 (annotated 0c55580) on commit 5dd326b"
+    - "tag m5-freeze-v5 (annotated 0c55580) on commit 5dd326b"
     - "measurements/frozen/report.{json,tsv}, ablation.{json,tsv} at 601 records"
     - "report.tsv cut -f1-15 = d7396558022965c842e51bb223dce9ef6753325d2a638c2753558239e99aaff0; ablation.tsv = 503c231a2e9759c1207cbf48dbb9b446466c84237b2cdac2091a26de85821c1b"
-    - "docs/m5-freeze-checklist.md (v5 addendum, gates table, anchors); PR #177 (tag commit pinned)"
-    - "issue #176 (stale frozen-tag literal)"
+    - "docs/m5-freeze-checklist.md (v5 addendum, gates table, anchors; tag commit pinned)"
+    - "(stale frozen-tag literal)"
   also_depends_on: [N215, N216, N217, N214]
   status: resolved
 
@@ -5738,33 +5681,33 @@ tree:
   timestamp: "2026-08-25T23:58"
   description: >
     With m5-freeze-v5 cut, the researcher declared the code side of this paper
-    complete. What remains open in this repository is not code work: #151 is a
-    decision recommending no action until the paper package ships, #126 is
-    gated on the possible-worlds design and may never fire, #78 is a scope
-    decision, #52 and #30 are deferred, and #176 is a small provenance
-    cleanup. The one exception is #121, whose dependency is a person rather
+    complete. What remains open in this repository is not code work: one item is a
+    decision recommending no action until the paper package ships, one is
+    gated on the possible-worlds design and may never fire, one is a scope
+    decision, two are deferred, and one is a small provenance
+    cleanup. The one exception is the binding audit, whose dependency is a person rather
     than code.
   from: "Evaluation-suite completion and corpus freezing"
   to: "Paper writing (paper repository)"
   trigger: >
-    m5-freeze-v5 cut on 5dd326b; the batch #123/#124/#125 landed and frozen;
+    m5-freeze-v5 cut on 5dd326b; the batch's three frozen-input changes landed and frozen;
     no schedulable code work remains against the current scope.
   evidence:
     - "trace node N218 (the freeze this pivot rests on)"
-    - "gh issue list ARA-Labs/lara after the merge: #176, #151, #126, #121, #78, #52, #30"
+    - "gh issue list ARA-Labs/lara after the merge: the seven remaining open items"
   also_depends_on: [N218]
   status: open
 
 - id: N220
   type: pivot
-  title: "Theory spine opens: core mechanization (#180)"
+  title: "Theory spine opens: core mechanization"
   provenance: user
   timestamp: "2026-08-26T09:00"
   description: >
     A second, independent milestone series opened in this repository after the
     code freeze. Its canonical design lives in the paper repository;
-    tracker #180 carries B0
-    and M0-M5 as native sub-issues, with the possible-world wrapper (#192) on
+    the theory tracker carries B0
+    and M0-M5 as native sub-issues, with the possible-world wrapper on
     a separate tracker because it is gated by M2a and is not a committed
     addition to the core calculus. The work is metatheory about the existing
     checker, not new checker features: realizability of the compilation image
@@ -5777,8 +5720,7 @@ tree:
     work. This node exists because the theory spine had run through M0 with
     no trace record at all.
   evidence:
-    - "issues #180 (tracker), #181, #182, #183, #184, #185, #186, #192"
-    - "PR #194 (M0), branch theory/m0-compilation-invariants"
+    - "branch theory/m0-compilation-invariants (M0)"
   also_depends_on: [N219]
   status: open
 
@@ -5804,7 +5746,7 @@ tree:
        terms degenerates 'realizable' into 'already built from checked terms',
        so the theorem would restate its own hypothesis."
   evidence:
-    - "PR #194; commit 80d6160; lean/Lara/Invariants.lean (StructuredAF, eraseAF, CompilerInvariant, compileUnit)"
+    - "commit 80d6160; lean/Lara/Invariants.lean (StructuredAF, eraseAF, CompilerInvariant, compileUnit)"
     - "Invariants.status_compileUnit, Invariants.support_compileUnit (adequacy)"
     - "Invariants.erase_compileUnit, Invariants.compileUnit_size"
     - "docs/theory-m0-compilation-invariants.md sections 1-2 (carrier decision, eight-row invariant table)"
@@ -5867,7 +5809,6 @@ tree:
        off-diagonal case is what makes M1's only-if direction bite; conceding
        it would have made the carrier decision (N221) unmotivated."
   evidence:
-    - "PR #194 review (fenfenai, second pass, finding 2)"
     - "commit f0c692f; lean/Lara/Examples/CompilerInvariants.lean (sharedContrary, unforcedDistinctConflict_not_invariant)"
     - "existing fixture Examples.contrary_shared_substitution (lean/Lara/Examples.lean:1242) over Examples.dpShared, pTa, qTa"
     - "gates after the change: lake build 78 jobs clean; scripts/check-axioms.sh pass, 780 declaration reports, no sorryAx; make presentation-parity PASS (73 rows)"
@@ -5880,26 +5821,25 @@ tree:
   provenance: user-revised
   timestamp: "2026-08-26T17:02"
   choice: >
-    #183's acceptance criterion "every invariant has a rejecting
+    The acceptance criterion "every invariant has a rejecting
     counterexample" is narrowed to *carrier-level* invariants. A source-level
     invariant -- one quantifying over term structure erasure discards -- is
     accepted with its Lean declaration plus a named owner for its witness,
     because its rejection is a statement about programs rather than about the
     carrier M1 quantifies over. Exactly one row is affected: strict-chain
     well-formedness, proved by Support.cert_steps_accounted, whose
-    backend-leakage rejection is already the fourth Work item on #182 (B0).
+    backend-leakage rejection is already the fourth Work item on the B0 list.
   alternatives:
-    - "Keep #183 open until #182 lands (Refs #183 rather than Closes #183):
-       rejected. #184 is marked blocked by the M0 sub-issue, so this would
+    - "Keep the item open until B0 lands (Refs rather than Closes):
+       rejected. M1 is marked blocked by the M0 sub-issue, so this would
        block M1 on a witness with no bearing on the carrier M1 consumes."
-    - "Merge with Closes #183 and say nothing: rejected. The auto-close would
+    - "Merge with Closes and say nothing: rejected. The auto-close would
        erase the distinction the PR body is otherwise honest about."
   evidence:
-    - "issue #183 (acceptance edited; reasoning recorded as a comment)"
-    - "issue #182 Work list, item 4 (the backend-leakage rejecting example)"
-    - "issue #184 Work list (conclusion well-sortedness added as an M1 obligation)"
+    - "(acceptance edited; reasoning recorded as a comment)"
+    - "tracker Work-list item 4 (the backend-leakage rejecting example)"
+    - "tracker Work list (conclusion well-sortedness added as an M1 obligation)"
     - "docs/theory-m0-compilation-invariants.md section 2, Recorded obligations"
-    - "PR #194 review (fenfenai, first pass, findings 1 and 2)"
   also_depends_on: [N221, N223]
   status: resolved
 
@@ -5930,7 +5870,7 @@ tree:
     record: that invalidates M0 and risks turning realizability into a
     definitional restatement.
   evidence:
-    - "issue #184, M1 target theorem"
+    - "the M1 target theorem"
     - "lean/Lara/Invariants.lean:121-128 (CompilerInvariant.ranged and conflictComplete)"
     - "lean/Lara/Attack.lean:538-570 (the three HasAttack constructors and their contrary/exception premises)"
     - "lean/Lara/Compile.lean:563-572 (every compiled edge exposes a typed declared attack)"
@@ -5948,7 +5888,7 @@ tree:
     all-Nat structured-framework isomorphism, executable realizability and
     the checked-conclusion sortedness bridge; prove realizability implies the
     frozen invariant; then mechanize N225's empty-policy one-self-edge
-    counterexample. Amend #184 and the paper plan before implementation claims
+    counterexample. Amend the M1 charter and the paper plan before implementation claims
     completion. A generated-policy universality theorem, if wanted, gets a
     separate issue with different quantifiers.
   alternatives:
@@ -5957,7 +5897,7 @@ tree:
        M0 is frozen and the resulting converse would approach a definitional
        restatement."
     - "Generate or extend the policy inside realize: separated as follow-up,
-       because it changes the fixed-context quantifiers of #184."
+       because it changes the fixed-context quantifiers of the M1 theorem."
   evidence:
     - "N225 (universal fixed-context converse dead end)"
     - "docs/theory-m1-compilation-image.md"
@@ -6061,8 +6001,8 @@ tree:
   title: "M1 closed; begin M2a, the semantics-parametric observation"
   provenance: user
   timestamp: "2026-08-28T07:00"
-  prior_direction: "M1 compilation-image boundary (#184, landed as #195)"
-  new_direction: "M2a semantics-parametric claim observation (#185)"
+  prior_direction: "M1 compilation-image boundary (landed on main)"
+  new_direction: "M2a semantics-parametric claim observation"
   reason: >
     M1 fixed the image boundary over one semantics without saying so. Every
     status theorem in the tree read `Grounded.grounded` and nothing else;
@@ -6191,11 +6131,11 @@ tree:
 
 - id: N236
   type: pivot
-  title: "M2a complete and additive; PR #199 opened"
+  title: "M2a complete and additive; the review PR opened"
   provenance: ai-executed
   timestamp: "2026-08-28T18:45"
-  prior_direction: "M2a implementation (#185)"
-  new_direction: "M2a in review as PR #199; M2b (#181) and M3 (#186) unblocked"
+  prior_direction: "M2a implementation"
+  new_direction: "M2a in review; M2b and M3 unblocked"
   reason: >
     Nine commits, 4819 insertions and 0 deletions across 12 files.
     Compile.lean, Grounded.lean, Invariants.lean and Realizability.lean are
@@ -6204,7 +6144,7 @@ tree:
     All gates pass, including the five unchanged-behaviour gates —
     differential, admission-differential, replay-tamper, freeze-bundle and
     presentation-parity — which is what makes the additivity claim checkable
-    rather than asserted. Follow-ups filed as #196, #197, #198.
+    rather than asserted. Three follow-ups were filed.
   also_depends_on: [N234, N235]
 
 - id: N237
@@ -6213,7 +6153,6 @@ tree:
   provenance: ai-executed
   timestamp: "2026-08-28T19:44"
   evidence:
-    - "PR #199 review comments 3883463248, 3883463255, 3883463263"
     - "lake build; lake env lean AxCheck.lean | scripts/check-axioms.sh"
     - "cabal test all --test-show-details=direct"
     - "ara check ara --json"
@@ -6237,8 +6176,6 @@ tree:
   provenance: ai-executed
   timestamp: "2026-08-28T19:57"
   evidence:
-    - "PR #199 review comments 3883479629, 3883497523, 3883497532, 3883497540, 3883497544"
-    - "issue #200"
     - "make semantics-goldens"
     - "cabal test all --test-show-details=direct"
     - "lake build; lake env lean AxCheck.lean | scripts/check-axioms.sh"
@@ -6253,7 +6190,7 @@ tree:
     the Lean Haskell-literal block and rejected a deliberately stale chain row.
     Deterministic table checks now run once, while grounded, outsider, and
     powerset checks use generators. Executed-plan defects are quoted inline,
-    the pre-existing-file narrative names the prose file separately, and #200
+    the pre-existing-file narrative names the prose file separately, and a tracker item
     tracks the stale-observation sweep. The 84-job Lean build, axiom audit,
     full Haskell suite, golden parity gate, and ARA validation passed; ARA
     remains at zero errors and 160 warnings.
@@ -6285,9 +6222,9 @@ tree:
     Classical.choice, and Quot.sound; the main differential passed 620 positive
     and 56 malformed-negative anchors; admission differential passed 20 of 20;
     presentation, semantics, update-golden, replay-tamper, and freeze gates all
-    passed. PR #201 opened from commit d246abf.
+    passed. The PR opened from commit d246abf.
   evidence:
-    - "PR #201; commits 81c4898, ec564dc, fae36e2, ac6a466, 5ab6f24, 6de9c74, c301cf8, d246abf"
+    - "commits 81c4898, ec564dc, fae36e2, ac6a466, 5ab6f24, 6de9c74, c301cf8, d246abf"
     - "docs/theory-m3-source-updates.md; test/update-matrices.golden"
     - "lean/Lara/Update.lean; lean/Lara/Examples/Update.lean; lean/AxCheck.lean"
     - "src/Lara/Update.hs; test/UpdateSpec.hs"
@@ -6325,7 +6262,7 @@ tree:
   timestamp: "2026-08-29T16:16"
   choice: >
     Applied the research-manager 3+-session-day stale rule mechanically to
-    staging/observations.yaml (#200). An observation's last-reference day is the
+    staging/observations.yaml. An observation's last-reference day is the
     latest of: its own timestamp, any session record naming it, any
     pm_reasoning_log turn naming it, any timestamped exploration_tree node
     naming it, and any citation of it from another staged entry. Idleness is
@@ -6336,12 +6273,11 @@ tree:
   alternatives:
     - "Calendar-day idleness — rejected: the rule says session-days, and the calendar has gaps (no sessions on 2026-07-26, 08-07, 08-14 through 08-16, 08-19, 08-24, 08-27) that would age entries during weeks with no research."
     - "Date an observation only by its own timestamp — rejected: it ignores the reference half of the rule and would have flagged O37 and O85, which live CONFLICT markers in claims.md still cite."
-    - "Sweep and triage in one pass (promote or discard the stale set) — rejected: #200 scopes the mechanical flag only; promotion and deletion are researcher decisions."
+    - "Sweep and triage in one pass (promote or discard the stale set) — rejected: the sweep scopes the mechanical flag only; promotion and deletion are researcher decisions."
   evidence:
     - "ara/staging/observations.yaml: 33 `stale: false` -> `stale: true`, no other field or line changed (git diff -U0 shows only stale lines)"
     - "post-sweep census: 99 staged, 44 promoted, 45 unpromoted+stale, 10 unpromoted+live"
     - "`ara check ara`: 0 errors, 160 warnings — unchanged from the pre-sweep baseline"
-    - "issue #200; PR #199 review comment 3883479629"
   rationale: >
     The counting rule is the whole content of the decision: idle-in-session-days
     with reference detection across all four trace surfaces is what makes the
@@ -6374,7 +6310,7 @@ tree:
     - "Promote everything whose content is still verifiable in the repo — rejected: verifiable is not the same as endorsed, and it is the endorsement that is missing. The artifacts for O46, O53, O54 and O66 all still exist and were checked; that establishes the observations are not stale in the ordinary sense, not that the project wants them as durable entries."
     - "Leave the whole backlog untriaged for a researcher pass — rejected: the evidence-reachable part can be settled without taste, and O64/H13 settles the O65-O67 batch outright."
   evidence:
-    - "O69's stated condition (hosted CI pending) is discharged by O70, which is itself promoted to N176 — the same #104 thread, one turn later"
+    - "O69's stated condition (hosted CI pending) is discharged by O70, which is itself promoted to N176 — the same verification thread, one turn later"
     - "N105 (status: unresolved) names O12 and O37 and says both should be narrowed unless a source path enforcing L1/K replay is produced"
     - "N212 (status: unresolved) carries the C23 adjudication that O85 is the proposed replacement for"
     - "O64 -> heuristics.md:H13 via verbal-affirmation; O65 and O67 record in their own `context` that they stay staged absent explicit affirmation"
@@ -6533,7 +6469,6 @@ tree:
     - "src/Lara/Strict.hs: strictCheck, StrictJudgment"
     - "src/Lara/Driver/Internal.hs: buildCertOk"
     - "src/Lara/SupportTerm.hs: CertOutcome, certAccepted"
-    - "issue #204"
   also_depends_on: [N243]
 
 - id: N248
@@ -6658,7 +6593,7 @@ tree:
     the grounded surface; prove a shared verified status procedure; and add no
     Haskell query-count gate.
   alternatives:
-    - "Grounded-only minimum, which would require reducing canonical #181 scope."
+    - "Grounded-only minimum, which would require reducing the canonical M2b scope."
     - "Broad full-semantics programme, which retains high cost and theorem risk."
     - "Variable encoded policy, which weakens the fixed-class scientific claim."
     - "Checked-unit or witness-bearing hardness inputs, which change the measured problem."
@@ -6666,7 +6601,7 @@ tree:
   evidence:
     - "N250: the current cost statements fail under their own schedule"
     - "N251: the motivation-alignment question"
-    - "issue #181 and the canonical M2b section"
+    - "the canonical M2b section"
     - "memory/m2b-restricted-class-complexity-review.txt"
   also_depends_on: [N220, N221, N250, N251]
 
@@ -6756,7 +6691,7 @@ tree:
     checker fixtures, exact carrier isomorphisms, a reversed-edge control, and
     the formula-indexed raw-unit construction. The general checker acceptance,
     compile-image, realizability, and size theorem family did not close, so the
-    gate is INCONCLUSIVE. Tasks 3-7 stopped and PR #208 explicitly keeps #181
+    gate is INCONCLUSIVE. Tasks 3-7 stopped and the PR explicitly keeps the M2b item
     open without a hardness or tractability claim.
   evidence:
     - "commit c0061fd"
@@ -6764,7 +6699,6 @@ tree:
     - "docs/theory-m2b-complexity-spike.md"
     - "lake env lean Lara/Examples/Complexity/Realization.lean: success, no output"
     - "lake build: 90 jobs"
-    - "PR #208"
   also_depends_on: [N252, N254, N255]
 
 - id: N257
@@ -6795,7 +6729,7 @@ tree:
 
 - id: N258
   type: experiment
-  title: "PR #208 review hardens fixture independence and accounting wording"
+  title: "Review hardens fixture independence and accounting wording"
   provenance: ai-executed
   timestamp: "2026-08-30T19:27"
   description: >
@@ -6811,7 +6745,6 @@ tree:
     completed with no output, and the ARA source-span validator passed all 38
     quotations.
   evidence:
-    - "https://github.com/ARA-Labs/lara/pull/208#pullrequestreview-5062656252"
     - "lean/Lara/Examples/Complexity/Realization.lean"
     - "lean/Lara/Complexity/Encoding.lean"
     - "git object 17d07ffec693797b4b39599e787723328fa3f61f:plans/2026-08-29-m2b-restricted-class-complexity.md"
@@ -6862,7 +6795,7 @@ tree:
 
 - id: N261
   type: experiment
-  title: "Remaining PR #208 findings shipped and answered"
+  title: "Remaining review findings shipped and answered"
   provenance: ai-executed
   timestamp: "2026-08-30T19:58"
   description: >
@@ -6870,7 +6803,7 @@ tree:
     documentation, plan-lifecycle, and trace corrections, push the PR branch,
     and answer each outstanding review thread with specific evidence.
   result: >
-    Commit 5ce6339 was pushed to theory/m2b-complexity and became PR #208's
+    Commit 5ce6339 was pushed to theory/m2b-complexity and became the PR's
     head. The full Lean build completed all 90 jobs, all 38 ARA source
     quotations passed, four edited trace YAML files parsed, and git diff
     whitespace validation passed. Replies were posted to all three outstanding
@@ -6878,12 +6811,9 @@ tree:
     re-review-pending wording.
   evidence:
     - "commit 5ce633947a3d880404b266e7f55a584293924e49"
-    - "PR #208 headRefOid 5ce633947a3d880404b266e7f55a584293924e49"
+    - "PR headRefOid 5ce633947a3d880404b266e7f55a584293924e49"
     - "lake build: 90 jobs"
     - "make ara-source-spans: PASS (38 quotations)"
-    - "https://github.com/ARA-Labs/lara/pull/208#discussion_r3891412827"
-    - "https://github.com/ARA-Labs/lara/pull/208#discussion_r3891413397"
-    - "https://github.com/ARA-Labs/lara/pull/208#discussion_r3891413805"
   also_depends_on: [N259, N260]
 
 - id: N262
@@ -6892,7 +6822,7 @@ tree:
   provenance: user
   timestamp: "2026-08-30T20:31"
   choice: >
-    With PR #208 merged as a27b7ae and #181 closed COMPLETED on the
+    With the spike merged as a27b7ae and the M2b item closed COMPLETED on the
     INCONCLUSIVE record, adopt the recorded open thread as the next step:
     draft a follow-up plan for closing the fixed-policy realization theorem
     on a fresh branch and open it as a PR that serves as the plan's
@@ -6902,14 +6832,14 @@ tree:
     - "Implement the realization closure directly without a reviewed plan — not chosen; the spike stop condition and the predecessor plan's D6 require a separately reviewed follow-up."
     - "Deprioritize M2b for other theory-spine work — not chosen; no other spine item was recorded as schedulable ahead of it."
   evidence:
-    - "commit a27b7ae (merge of PR #208)"
-    - "gh issue view 181: CLOSED COMPLETED 2026-08-31T04:03:50Z"
+    - "commit a27b7ae (the merge)"
+    - "gh issue view: CLOSED COMPLETED 2026-08-31T04:03:50Z"
     - "session 2026-08-30_001 open_threads (pre-turn-8)"
   also_depends_on: [N256, N261]
 
 - id: N263
   type: experiment
-  title: "Follow-up plan drafted, issued as #209, opened as PR #210"
+  title: "Follow-up plan drafted, issued as a tracker item, opened as a PR"
   provenance: ai-executed
   timestamp: "2026-08-30T21:15"
   description: >
@@ -6917,9 +6847,9 @@ tree:
     exact obstruction record, open the successor issue, and open the plan PR
     as the engineering-review vehicle.
   result: >
-    Issue #209 opened under tracker #180 as #181's successor. Commit bcd16a6
+    The successor issue was opened under the theory tracker. Commit bcd16a6
     adds plans/2026-08-30-m2b-realization-followup.md on
-    theory/m2b-realization-followup-plan, opened as PR #210. The plan selects
+    theory/m2b-realization-followup-plan, opened as a PR. The plan selects
     compositional lifting lemmas through Check.Unit.checkUnit_complete over
     manual CheckedUnit construction and over a replacement gadget, freezes
     D7 (numeral injectivity by verified decoder round-trip), D8 (gadget
@@ -6930,8 +6860,6 @@ tree:
     established that Lara.ND.decodeNat_repr already provides the family-wide
     decimal round-trip via Std.Data.String.ToNat.
   evidence:
-    - "https://github.com/ARA-Labs/lara/issues/209"
-    - "https://github.com/ARA-Labs/lara/pull/210"
     - "commit bcd16a6"
     - "plans/2026-08-30-m2b-realization-followup.md"
     - "lean/Lara/ND.lean:112 (decodeNat_repr)"
@@ -6966,7 +6894,6 @@ tree:
     - "PW0 or a smaller open issue instead of M5."
   evidence:
     - "user selection: Full presentation AST"
-    - "issue #188"
     - "plans/2026-08-30-m5-surface-calculus.md"
   also_depends_on: [N268]
 
@@ -6994,7 +6921,7 @@ tree:
   provenance: ai-executed
   timestamp: "2026-08-31T15:38"
   description: >
-    Audit the completed issue-#209 branch against the renewed gate, the
+    Audit the completed follow-up branch against the renewed gate, the
     preserved thirteen-task plan, the registered theorem surface, and fresh
     repository verification before re-adjudicating the ARA claims.
   result: >
@@ -7003,7 +6930,7 @@ tree:
     quartic grounded and carrier-status lower bounds, and the two-sided 3SAT
     reduction. The renewed gate records HARDNESS. All thirteen plan tasks are
     implemented; the separate proof-refactoring ideas remain out of scope in
-    issue #211. Fresh Lean and Haskell build/test gates passed. The ARA
+    a deferred refactor item. Fresh Lean and Haskell build/test gates passed. The ARA
     source-span gate found that C44/C45 still cited line ranges from the
     superseded INCONCLUSIVE record, which this closeout replaces with the
     durable closure record.
@@ -7012,7 +6939,7 @@ tree:
     - "lean/Lara/Complexity/Gadget.lean: checkUnit_formula_ok"
     - "lean/Lara/Complexity/Reduction.lean: reduce_realizable, reduce_byteSize, reduce_correct"
     - "lean/Lara/Examples/Complexity.lean: quartic_realizable, quartic_cost_ge, carrierStatus_quartic_cost_ge"
-    - "lean/AxCheck.lean: issue-#209 registration"
+    - "lean/AxCheck.lean: follow-up registration"
     - "docs/theory-m2b-complexity.md"
     - "make build: PASS; make test: PASS"
   also_depends_on: [N263, N257, N255]
@@ -7031,37 +6958,36 @@ tree:
     - "Leave the ARA at the predecessor INCONCLUSIVE state and defer delivery — rejected because the implementation and durable decision record are complete."
   evidence:
     - "User directive: do the ARA re-adjudication and push/open the implementation PR"
-    - "issue #209 acceptance and closeout comment"
+    - "the acceptance and closeout comment"
   also_depends_on: [N264, N262]
 
 - id: N266
   type: experiment
-  title: "M2b realization closure opened as implementation PR #212"
+  title: "M2b realization closure opened as an implementation PR"
   provenance: ai-executed
   timestamp: "2026-08-31T15:53"
   description: >
     Push the completed theory/m2b-realization-closure branch with upstream
-    tracking and open the issue-#209 implementation pull request against main
+    tracking and open the follow-up implementation pull request against main
     with the proof, plan-completion, review, and verification evidence.
   result: >
-    The branch was pushed to origin and PR #212 opened against main. Its body
+    The branch was pushed to origin and the implementation PR opened against main. Its body
     maps all thirteen plan tasks to the implemented theorem surface, records
     the 100% contract-family coverage audit and clean adversarial review, and
     names the successful Lean, Haskell, AxCheck, ARA source-span, YAML, and
     whitespace gates. Hosted CI is pending.
   evidence:
-    - "https://github.com/ARA-Labs/lara/pull/212"
     - "commit 64346ed"
     - "origin/theory/m2b-realization-closure"
   also_depends_on: [N265, N264]
 
 - id: N267
   type: experiment
-  title: "PR #212 review narrows the universal-cost claim and hardens audits"
+  title: "Review narrows the universal-cost claim and hardens audits"
   provenance: ai-executed
   timestamp: "2026-08-31T18:26"
   description: >
-    Evaluate all five requested changes from the first PR #212 review against
+    Evaluate all five requested changes from the first review round against
     the public theorem surface, leaf-ID definitions, quartic-family parameter,
     realization quantifiers, and grounded-cost proofs; implement only findings
     supported by the repository evidence and rerun the affected gates.
@@ -7075,7 +7001,6 @@ tree:
     transfer in the correct restricted-class direction. Full build, Haskell
     tests, AxCheck, ARA source-span, and whitespace gates pass.
   evidence:
-    - "https://github.com/ARA-Labs/lara/pull/212#pullrequestreview-5069676657"
     - "lean/AxCheck.lean: direct rows for the four public gadget theorems"
     - "lean/Lara/Complexity/Gadget.lean: closed leaf-ID spelling fixtures"
     - "lean/Lara/Complexity.lean: groundedC_twoNodeAllAttacks_cost scope"
@@ -7090,8 +7015,8 @@ tree:
   provenance: ai-executed
   timestamp: "2026-09-02T00:00"
   description: >
-    Execute the compile-verified PW0 implementation plan (issue #192, tracker
-    #189): the typed outer frame, the many-sorted modal language and
+    Execute the compile-verified PW0 implementation plan (the possible-world wrapper,
+    under its tracker): the typed outer frame, the many-sorted modal language and
     satisfaction, the tagged executable comparison, the Lara instantiation, and
     the executable examples. The plan's Lean blocks had already been compiled
     and axiom-audited during its engineering review, so the five modules were
@@ -7109,7 +7034,7 @@ tree:
     and the only Lean files touched outside the new modules are the two roots.
     Full library build 127 jobs, axiom audit 1612 declarations, both clean.
   evidence:
-    - "PR #221; commits 54fdce4..071f0e7"
+    - "commits 54fdce4..071f0e7"
     - "lean/Lara/PW/Outer.lean: sat_K, sat_congr, not_sat_two_status"
     - "lean/Lara/PW/Compare.lean: mem_compare_iff_sat_dia, not_sat_dia_of_incomparable"
     - "lean/Lara/PW/Instance.lean: srcStatus_iff_cmpStatus, sat_src_iff_cmp, t0_cmp, t0_src"
@@ -7161,7 +7086,7 @@ tree:
     reports "Ambiguous term", and an unapplied compare silently resolves to
     Ord.compare. Ordinary applications were never at risk, since argument shape
     disambiguates. The deciding factor is that the T5 proofs reason about
-    unfolding this definition and T6 (#191) will be a downstream module that
+    unfolding this definition and T6 will be a downstream module that
     opens Lara.PW, so the collision would land on the next module written
     against the interface. The repository declares no Ord instance anywhere, so
     nothing is conceded by leaving compare to core, and the name map records
@@ -7219,32 +7144,32 @@ tree:
   provenance: user
   timestamp: "2026-09-02T22:30"
   choice: >
-    With PR #221 merged, take the PW0 gate outcome forward: proceed to T6
-    (#191) now, running the possible-world track concurrently with the M4
-    core-spine work (PR #218) rather than waiting for it to land. The world
-    model's retrieval showed four of tracker #189's five advancement-gate
-    conditions discharged with mechanized evidence and B0 (#182) closed, so
+    With the PW0 PR merged, take the PW0 gate outcome forward: proceed to T6
+    now, running the possible-world track concurrently with the M4
+    core-spine work rather than waiting for it to land. The world
+    model's retrieval showed four of the tracker's five advancement-gate
+    conditions discharged with mechanized evidence and B0 closed, so
     the only open judgment was T6 tractability; the file-ownership precedent
     (N268) supports the concurrent track since the PW modules are
     insertion-only under Lara/PW/* while M4 lives in the fragment/linking
     calculus, sharing only additive lines in the two roots.
   alternatives:
-    - "Land M4 (PR #218) first and take the #189 exit decision afterwards."
-    - "Record the exit decision on #189 and open a compile-verified plan PR before implementing."
+    - "Land M4 first and take the exit decision afterwards."
+    - "Record the exit decision and open a compile-verified plan PR before implementing."
   evidence:
     - "user directive: continue possible-world semantics, in parallel to M4"
     - "docs/theory-pw0-outer-model.md §3 (gate assessment) and §6 (T6 feasibility note)"
-    - "issue #189 sub-issues 1/4 complete; issue #182 closed; PR #218 open"
+    - "tracker sub-issues 1/4 complete; B0 closed; the M4 plan PR open"
   status: resolved
   also_depends_on: [N271, N268]
 
 - id: N276
   type: experiment
-  title: "PW-T6 exact checked-support transport mechanized and opened as PR #223"
+  title: "PW-T6 exact checked-support transport mechanized and opened as a PR"
   provenance: ai-executed
   timestamp: "2026-09-02T23:55"
   description: >
-    Implement T6 (#191) directly against the frozen PW0 interface and the B0
+    Implement T6 directly against the frozen PW0 interface and the B0
     occurrence layer: design the partial symbol translation, freeze the
     three-clause StructuralBridge contract, prove the transport theorem by
     full induction over HasSupport, derive the corollaries without new
@@ -7270,9 +7195,9 @@ tree:
     a p -> p_r renaming bridge plus the translationUndefined domain negative.
     Build 130 jobs and the hardened axiom audit at 1707 declarations (78
     PW-T6) both clean; the diff is pure insertion (2142 lines) touching only
-    the three modules, the two roots, and the two docs. Opened as PR #223.
+    the three modules, the two roots, and the two docs. Opened as a PR.
   evidence:
-    - "https://github.com/ARA-Labs/lara/pull/223; commit 13ae1d7"
+    - "commit 13ae1d7"
     - "lean/Lara/PW/Structural.lean: StructuralBridge, support_transport, Admits, admits_transport"
     - "lean/Lara/PW/Translation.lean: instAPat_tr, equiv_tr, trSupport"
     - "lean/Lara/Examples/PWStructural.lean: t7_t6_boundary, ren_transport, ren_translationUndefined"
@@ -7287,7 +7212,7 @@ tree:
     provenance: user
     timestamp: 2026-09-02T17:40
     title: Execute M4 Part A end to end rather than phase by phase across sessions
-    from: "M4 planned only — plan PR #218 open with F0 gate NOT YET RUN"
+    from: "M4 planned only — the plan PR open with F0 gate NOT YET RUN"
     to: "M4 Part A executed F0-F3 in one session, plan reduced to its Part B half"
     trigger: >
       Researcher directive: implement the plan and finish it off, open a PR. The plan's own
@@ -7377,7 +7302,7 @@ tree:
         lesson: >
           An axiom-discipline boundary can make a milestone's own witnesses unreachable from
           existing fixtures even when the theorem is proved and audited. The corollary shipped with
-          its hypotheses documented instead of an instance, and the missing fixture is issue #227 —
+          its hypotheses documented instead of an instance, and the missing fixture is a tracked follow-up —
           a smaller purpose-built surface program is the likely fix, not a reduction of the existing
           one.
         status: resolved
@@ -7389,7 +7314,7 @@ tree:
         choice: >
           Kept compose registry-free and Gamma-free (its F0-frozen, data-only signature) and made
           sideOk_composed take the two cross-boundary quadrants as explicit hypotheses, documenting
-          that a composite of mutually-attacking contexts is not admissible. Filed as #229.
+          that a composite of mutually-attacking contexts is not admissible. Filed as a tracked item.
         alternatives:
           - "Give compose a registry and a Gamma so it can saturate like link — rejected for now: it changes the F0-frozen signature and re-opens every Compose lemma."
           - "Leave backend_replacement_congruence_composed assuming the composite's Admissible outright — rejected: the final review called it nominal, and it was."
@@ -7451,14 +7376,13 @@ tree:
           - "Add a separate diagnostic observation wrapper — rejected: leaves CtxEquiv on the lossy API."
           - "Enrich only the two payload-free LinkFault constructors — rejected: preserves inconsistent diagnostics."
         evidence:
-          - "PR #218 review comments 3921042417 and 3921042420"
           - lean/Lara/Context/Fragment.lean
         status: resolved
       - id: N286
         type: experiment
         provenance: ai-executed
         timestamp: 2026-09-03T04:45
-        title: PR 218 review remediation closes semantic and audit-coverage gaps
+        title: M4 review remediation closes semantic and audit-coverage gaps
         description: >
           Implemented detailed Observation outcomes, side/value-bearing LinkFaults, concrete
           incompatible/rejected/composition/admissibility witnesses, all seven missing AxCheck
@@ -7494,36 +7418,36 @@ tree:
 
 - id: N288
   type: decision
-  title: "Parallel-to-M4 slot goes to the #224 cert_ok witness"
+  title: "Parallel-to-M4 slot goes to the cert_ok witness"
   provenance: user
   timestamp: "2026-09-03T00:30"
   choice: >
-    With others working M4, spend this session's parallel slot on #224 (the
+    With others working M4, spend this session's parallel slot on the
     strict-certificate cert_ok witness): self-contained in
     Lara/Examples/PWStructural.lean, zero file overlap with the active M4
-    issues. Explicitly avoided #222, which edits Lara/Context/Compose.lean —
-    the module M4 issue #229 lives in. In the same turn the CI outage (#225)
+    issues. Explicitly avoided the Compose.lean item, which edits Lara/Context/Compose.lean —
+    the module the M4 compose-saturation work lives in. In the same turn the CI outage
     was diagnosed to its root cause: the job annotation reports the run was
     not started because of failed payments / spending limit on the ARA-Labs
     org, so the fix is an org-admin billing action, not repo work.
   alternatives:
-    - "#204: surface retained-certificate reports through the driver (engineering-side)."
-    - "#219/#220/#228 lemma-ownership refactors (merge-conflict risk with M4 branches on shared modules)."
+    - "Surface retained-certificate reports through the driver (engineering-side)."
+    - "Lemma-ownership refactors (merge-conflict risk with M4 branches on shared modules)."
     - "No coding work; only the CI billing fix."
   evidence:
-    - "user selection: '#224 PW-T6 witness (Recommended)'"
-    - "https://github.com/ARA-Labs/lara/issues/225#issuecomment-5520263197 (billing-block diagnosis)"
-    - "issue #229 names Lara/Context/Compose.lean as active M4 territory"
+    - "user selection: '[redacted] PW-T6 witness (Recommended)'"
+    - "(billing-block diagnosis)"
+    - "Lara/Context/Compose.lean is active M4 territory"
   status: resolved
   also_depends_on: [N275, N276]
 
 - id: N289
   type: experiment
-  title: "#224 closed: cert_ok discharged off the identity, opened as PR #230"
+  title: "The cert_ok item closed: discharged off the identity, opened as a PR"
   provenance: ai-executed
   timestamp: "2026-09-03T01:30"
   description: >
-    Give StructuralBridge.cert_ok the off-identity witness #224 specified: a
+    Give StructuralBridge.cert_ok the off-identity witness the tracker item specified: a
     strict rule with a live certifier allowlist, a CertOk pair that actually
     holds at some (β, hd, κ, As, C), and a target CertOk' holding at the
     translated (As', C') — under the existing p -> p_r, e -> e_r renaming
@@ -7545,9 +7469,9 @@ tree:
     propext / propext+Quot.sound). Counts moved together in the T6 doc, the
     ARA evidence file, and C48's Sources per the issue's cost note; the
     frozen contract in Lara/PW/Structural.lean is untouched. Build 130 jobs
-    and axiom audit both clean, locally — CI remains dark (#225).
+    and axiom audit both clean, locally — CI remains dark.
   evidence:
-    - "https://github.com/ARA-Labs/lara/pull/230; commit 48187b0"
+    - "commit 48187b0"
     - "lean/Lara/Examples/PWStructural.lean: bridgeCert, cert_accept_translated, cert_transport"
     - "docs/theory-pw-t6-structural-transport.md §7 (2026-09-03 verification)"
     - "ara/evidence/proofs/pw_t6_transport.md"
@@ -7557,11 +7481,11 @@ tree:
 
 - id: N290
   type: decision
-  title: "#184 (M1) closed on maintainer review; paper integration deferred"
+  title: "M1 closed on maintainer review; paper integration deferred"
   provenance: user
   timestamp: "2026-09-03T00:20"
   choice: >
-    Close #184 against its re-scoped acceptance (necessity + the emptyDefeat
+    Close M1 against its re-scoped acceptance (necessity + the emptyDefeat
     non-sufficiency counterexample), verified present: realizable_invariant,
     compilerInvariant_iso, oneSelfEdge_not_realizable, emptyUnitCheck_ok in
     Lara/Realizability.lean and Examples/Realizability.lean, AxCheck coverage,
@@ -7572,7 +7496,7 @@ tree:
   alternatives:
     - "Keep open until the paper states the M1 theorem — rejected: the remaining work is paper-side and the researcher chose to close now."
   evidence:
-    - "https://github.com/ARA-Labs/lara/issues/184 (closing comment, 2026-09-03)"
+    - "(closing comment, 2026-09-03)"
     - "lean/Lara/Realizability.lean; lean/Lara/Examples/Realizability.lean"
   status: resolved
   also_depends_on: [N277]
@@ -7583,8 +7507,8 @@ tree:
   provenance: user-revised
   timestamp: "2026-09-03T00:50"
   choice: >
-    Descope Part B rather than leave it gated: close #187 on Part A with the
-    boundary recorded (PR #232 rewrites docs/theory-m4-contextual-adequacy.md
+    Descope Part B rather than leave it gated: close the Part B item on Part A with the
+    boundary recorded (the descope PR rewrites docs/theory-m4-contextual-adequacy.md
     §7 as the durable descope record and deletes the executed plan file). The
     rationale, articulated by the agent after the researcher's explicit
     pushback ("do you think this is something we really have to prove?") and
@@ -7596,19 +7520,18 @@ tree:
     over the linked AF) push contextual equivalence toward syntactic identity
     up to contrary-invisible decoration, i.e. toward Erase.mapAssur
     generalized, so full abstraction risks landing true-but-empty; (3) tracker
-    #180 named this the first item to drop under its explicit drop policy.
-    Reopening trigger recorded: committing to #215 or #216, entered through a
+    The tracker named this the first item to drop under its explicit drop policy.
+    Reopening trigger recorded: committing to the parametricity or generic-observation work, entered through a
     fresh issue and a G0 interface spike. The session also found the Part B
     not-entered rationale had never been recorded in ara/ (only in docs/ and
-    #187); this node is that remediation.
+    the tracker); this node is that remediation.
   alternatives:
-    - "Keep #187 open as the Part B gate-keeper (status quo) — rejected: leaves a milestone open indefinitely with no committed consumer."
+    - "Keep the Part B item open as the gate-keeper (status quo) — rejected: leaves a milestone open indefinitely with no committed consumer."
     - "Run the G0 soundness spike first to convert the suspected tautology into a recorded verdict — declined as not required to close honestly; still available under the reopening path."
   evidence:
-    - "https://github.com/ARA-Labs/lara/pull/232 (docs §7 descope record + plan deletion; closes #187)"
-    - "https://github.com/ARA-Labs/lara/issues/187#issuecomment-5522477874"
+    - "(docs §7 descope record + plan deletion)"
     - "docs/theory-m4-contextual-adequacy.md §7 (retained G0-G4 design, LabelExpressive sketch, reopening triggers)"
-    - "cross-notes: issues #215 and #216 (reopening triggers)"
+    - "cross-notes: the parametricity and generic-observation reopening triggers"
   status: resolved
   also_depends_on: [N277, N290]
 
@@ -7618,8 +7541,8 @@ tree:
   provenance: ai-executed
   timestamp: "2026-09-03T08:38"
   description: >
-    Reviewed plans/2026-09-03-theory-pw-t9-path-composition.md against issue
-    #190, its canonical composition section, and the landed PW0/T6 Lean modules,
+    Reviewed plans/2026-09-03-theory-pw-t9-path-composition.md against the composition tracker
+    its canonical composition section, and the landed PW0/T6 Lean modules,
     explicitly excluding the twelve findings already accepted by the prior
     review. Ran a Lean 4.32 stdin probe for the equality-direction proof pattern
     used by both free-corner lemmas.
@@ -7638,7 +7561,7 @@ tree:
     - "lean/Lara/PW/Outer.lean:83-96"
     - "lean/Lara/PW/Instance.lean:98-106"
     - "lean/Lara/PW/Structural.lean:465-469"
-    - "GitHub issue ARA-Labs/lara#190 and its linked canonical Composition section"
+    - "the composition tracker issue and its linked canonical Composition section"
     - "Lean 4.32 stdin elaboration probe: opposite-orientation Option.some equality rejected"
   status: resolved
   also_depends_on: [N289]
@@ -7649,9 +7572,9 @@ tree:
   provenance: user
   timestamp: "2026-09-03T18:55"
   choice: >
-    Implement the reviewed PW-T9 plan as two stacked pull requests. PR #233
+    Implement the reviewed PW-T9 plan as two stacked pull requests. The foundation PR
     owns first-leg-first Kleisli composition for the existing partial
-    translation. PR #236 owns StructuralBridge.comp, indexed BridgePath,
+    translation. The stacked PR owns StructuralBridge.comp, indexed BridgePath,
     stepwise/folded path coherence, path transport, and direct-versus-path
     triangles. The triangle is path-level, not binary-only; its Commutes
     predicate equates atom and support translations. Full accepted-edge
@@ -7665,8 +7588,6 @@ tree:
     - "Leave the adversarial-review corrections as follow-up work — rejected because they are contract gaps, not optional hardening."
     - "Encode the mid-path gap with standalone SymMap values — rejected because it would not witness failure along the milestone's typed path abstraction."
   evidence:
-    - "https://github.com/ARA-Labs/lara/pull/233"
-    - "https://github.com/ARA-Labs/lara/pull/236"
     - "lean/Lara/PW/Compose.lean: BridgePath, Commutes, Accepted, accepted_iff_of_commutes"
     - "lean/Lara/Examples/PWCompose.lean: checked triangles and gapPath"
     - "docs/theory-pw-t9-path-composition.md"
@@ -7679,23 +7600,23 @@ tree:
   provenance: ai-executed
   timestamp: "2026-09-03T18:56"
   description: >
-    Rebased the logical stack by merging current main into PR #233 and the
-    updated PR #233 into PR #236, preserving both concurrent ARA histories, then
+    Rebased the logical stack by merging current main into the foundation PR and the
+    updated foundation PR into the stacked PR, preserving both concurrent ARA histories, then
     reran the branch-specific Lean build, coverage, and axiom gates. Also checked
-    that PR #236 does not modify the frozen T6 translation, structural-bridge,
-    or support modules relative to the synchronized PR #233 head.
+    that the stacked PR does not modify the frozen T6 translation, structural-bridge,
+    or support modules relative to the synchronized foundation head.
   result: >
-    PR #233: lake build completed successfully with 140 jobs; AxCheck coverage
+    The foundation PR: lake build completed successfully with 140 jobs; AxCheck coverage
     passed for 31 declarations; the axiom audit passed with only propext,
-    Classical.choice, and Quot.sound. PR #236: lake build completed successfully
+    Classical.choice, and Quot.sound. The stacked PR: lake build completed successfully
     with 140 jobs; AxCheck coverage passed for 60 declarations; the same
     standard-trio audit passed. The three frozen T6 module diffs are empty.
-    Both pull requests are open, non-draft, and mergeable; PR #236 targets the
-    PR #233 branch.
+    Both pull requests are open, non-draft, and mergeable; the stacked PR targets the
+    the foundation branch.
   evidence:
     - "ara/evidence/proofs/pw_t9_path_composition.md"
-    - "https://github.com/ARA-Labs/lara/pull/233 (verified head 7fdc573)"
-    - "https://github.com/ARA-Labs/lara/pull/236 (verified implementation head 920bf0c)"
+    - "(verified head 7fdc573)"
+    - "(verified implementation head 920bf0c)"
     - "lean/AxCheck.lean and scripts/check-axcheck-coverage.py (PW-T9 two-file scope)"
   status: resolved
   also_depends_on: [N293]
@@ -7720,7 +7641,6 @@ tree:
     - "lean/Lara/Examples/PWCompose.lean: direct_ne_composed_support, direct_ne_composed_claim"
     - "ara/logic/solution/heuristics.md:H16"
     - "ara/logic/solution/mechanization.md §11"
-    - "https://github.com/ARA-Labs/lara/pull/236#discussion_r3930992343"
   status: resolved
   also_depends_on: [N293, N294]
 
@@ -7751,7 +7671,7 @@ tree:
   provenance: ai-executed
   timestamp: "2026-09-04T05:03"
   description: >
-    Merged the reviewed PR #233 foundation and current main into PR #236,
+    Merged the reviewed foundation and current main into the stacked PR,
     retained both witness sets, rebuilt the applicability bridges over
     gapAppContext's exact policy, evidence, and certificate fields, corrected
     the negative-triangle records, and reran every documented Lean gate.
@@ -7765,7 +7685,6 @@ tree:
     - "ara/evidence/proofs/pw_t9_path_composition.md"
     - "lean/AxCheck.lean"
     - "lean/Lara/Examples/PWCompose.lean"
-    - "https://github.com/ARA-Labs/lara/pull/236"
   status: resolved
   also_depends_on: [N295, N296]
 
@@ -7775,9 +7694,9 @@ tree:
   provenance: ai-suggested
   timestamp: "2026-09-04T05:18"
   choice: >
-    Treat PR #233 as the owner of first-leg-first Kleisli laws together with
+    Treat the foundation PR as the owner of first-leg-first Kleisli laws together with
     StructuralBridge.comp, support_transport_comp, indexed BridgePath,
-    stepwise/folded path coherence, and path_support_transport. Treat PR #236 as
+    stepwise/folded path coherence, and path_support_transport. Treat the stacked PR as
     the owner of applicability factorization, Commutes and direct-path
     agreement, accepted-edge separation, the expanded witness suite, durable
     records, and final audit wiring. Correct the active proof record and session
@@ -7786,10 +7705,9 @@ tree:
     - "Leave the split as originally planned — rejected because reviewed head 3362f00 mechanically contains the core bridge/path declarations."
     - "Rewrite N293 — rejected because the exploration tree records the historical decision; the corrected ownership is appended here."
   evidence:
-    - "reviewed PR #233 head 3362f00: lean/Lara/PW/Compose.lean"
-    - "reviewed PR #233 head 3362f00: lean/Lara/Examples/PWCompose.lean"
+    - "reviewed foundation head 3362f00: lean/Lara/PW/Compose.lean"
+    - "reviewed foundation head 3362f00: lean/Lara/Examples/PWCompose.lean"
     - "ara/evidence/proofs/pw_t9_path_composition.md"
-    - "https://github.com/ARA-Labs/lara/pull/236#discussion_r3931080876"
   status: resolved
   also_depends_on: [N293, N294, N297]
 
@@ -7800,7 +7718,7 @@ tree:
   timestamp: "2026-09-04T05:18"
   description: >
     Corrected the active proof record and session summaries to match reviewed
-    PR #233 head 3362f00, appended ownership decision N298 without rewriting
+    foundation head 3362f00, appended ownership decision N298 without rewriting
     historical N293, and reran the documented Lean build, targeted coverage,
     and axiom audit on the unchanged synchronized proof tree.
   result: >
@@ -7811,8 +7729,7 @@ tree:
   evidence:
     - "ara/evidence/proofs/pw_t9_path_composition.md"
     - "ara/trace/exploration_tree.yaml: N298"
-    - "reviewed PR #233 head 3362f00"
-    - "https://github.com/ARA-Labs/lara/pull/236"
+    - "reviewed foundation head 3362f00"
   status: resolved
   also_depends_on: [N298]
 
@@ -7824,20 +7741,20 @@ tree:
   choice: >
     The researcher directed that the M4 follow-up issues be cleared before any
     new milestone. Executed as one branch (claude/m4-debts-clearance-af1b56,
-    commit 14b9e34): #219 moves the five DecidableEq instances onto their
-    structures; #220/#228 make the Γ-transport, buildGamma, and HasSupport
+    commit 14b9e34): the DecidableEq item moves the five instances onto their
+    structures; the transport items make the Γ-transport, buildGamma, and HasSupport
     inversion lemmas public at the judgment modules (Support, Attack,
     Admission) and delete every private re-proof in Update, Consistency, and
-    Context/Link; #226 proves the conclusionCache/conflictCache bridge
-    (Context.conclusionCache_eq_conflictCache, link_cache_bridge); #229 takes
+    Context/Link; the cache-bridge item proves the conclusionCache/conflictCache bridge
+    (Context.conclusionCache_eq_conflictCache, link_cache_bridge); the compose-boundary item takes
     option 2 and witnesses the composition boundary
-    (Examples.Linking.hostile_composite_not_admissible). #222 is closed as
+    (Examples.Linking.hostile_composite_not_admissible). The Compose list-helper item is closed as
     moot — the list helpers it names never landed in Context/Compose.lean.
-    #227 stays open with a sharper sizing.
+    The surface-witness item stays open with a sharper sizing.
   alternatives:
-    - "#220 literally at Update.lean (as the issue body says) with Context/Link importing Lara.Update — rejected: the issue's own rationale and #228 name the judgment's module as the owner, and it avoids a Context→Update dependency."
-    - "#229 option 1, give compose a registry and Γ so it saturates — rejected for now: changes the F0-frozen data-only signature and re-opens every Compose lemma; the witness converts the prose boundary into a theorem at small cost."
-    - "Attempt #227 in the same pass — rejected: surfaceEnv runs parseSurfaceProp, canonNum, and the ND registry, none of which reduce under kernel decide, so a witness needs a purpose-built environment as well as a purpose-built program; milestone-sized, not a debt."
+    - "Locate it literally at Update.lean (as the issue body says) with Context/Link importing Lara.Update — rejected: the issue's own rationale and its sibling item name the judgment's module as the owner, and it avoids a Context→Update dependency."
+    - "Compose option 1, give compose a registry and Γ so it saturates — rejected for now: changes the F0-frozen data-only signature and re-opens every Compose lemma; the witness converts the prose boundary into a theorem at small cost."
+    - "Attempt the surface witness in the same pass — rejected: surfaceEnv runs parseSurfaceProp, canonNum, and the ND registry, none of which reduce under kernel decide, so a witness needs a purpose-built environment as well as a purpose-built program; milestone-sized, not a debt."
   evidence:
     - "commit 14b9e34 on claude/m4-debts-clearance-af1b56"
     - "lean/Lara/Context/Link.lean: conclusionCache_eq_conflictCache, link_cache_bridge"
@@ -7912,7 +7829,6 @@ tree:
     explicit context index. No theorem statement was altered by any fix.
   evidence:
     - "ara/evidence/proofs/pw_t8_status_preservation.md §Process record"
-    - "https://github.com/ARA-Labs/lara/pull/240"
   status: resolved
   also_depends_on: [N302]
 
@@ -7930,7 +7846,7 @@ tree:
     needing SymMap.Injective for the reflection half.
   alternatives:
     - "Prove only the isomorphism route — rejected: the same induction is needed and the injectivity half is never consumed."
-    - "State forth/back on declared attacks — deferred to issue #238; T8's design statement is the AF-level correspondence."
+    - "State forth/back on declared attacks — deferred to a tracked follow-up; T8's design statement is the AF-level correspondence."
   evidence:
     - "lean/Lara/PW/AFBisim.lean"
     - "lean/Lara/PW/Status.lean"
@@ -7958,7 +7874,6 @@ tree:
     matched at leaf l2.
   evidence:
     - "ara/evidence/proofs/pw_t8_status_preservation.md"
-    - "https://github.com/ARA-Labs/lara/pull/240"
   status: resolved
   also_depends_on: [N303, N304]
 
@@ -7970,16 +7885,14 @@ tree:
   choice: >
     The plan's optional contested cell landed because checkUnit accepts
     symmetric contraries, so all four statuses have an executable cell.
-    Deriving forth/back from declared-attack transport is issue #238; an
-    executable StatusBridge checker with a soundness theorem is issue #239.
+    Deriving forth/back from declared-attack transport is a tracked follow-up; an
+    executable StatusBridge checker with a soundness theorem is likewise tracked separately.
     The freeze record, name map, and T6/T9 limitation pointers are committed
     and the plan file retired.
   alternatives:
     - "Record contested as covered by the theorem only — not needed; the cell is executable."
     - "Widen claimSupport_corr to take AttackBisim instead of StatusBridge — declined as an interface change to the approved spec; noted for follow-up."
   evidence:
-    - "https://github.com/ARA-Labs/lara/issues/238"
-    - "https://github.com/ARA-Labs/lara/issues/239"
     - "docs/theory-pw-t8-status-preservation.md §9"
   status: resolved
   also_depends_on: [N305]
@@ -7990,7 +7903,7 @@ tree:
   provenance: ai-suggested
   timestamp: "2026-09-06T12:00"
   choice: >
-    Issue #231's two guards are written so that each named mutation makes a
+    The tracked guards are written so that each named mutation makes a
     theorem *false*, not merely harder to prove. Certifier blindness is
     caught by cert_reject_mismatched_certifier: six negatives that hold the
     side's own encoded step fixed and mismatch exactly one of the frozen
@@ -8007,14 +7920,13 @@ tree:
     - "Leave the coverage to a Haskell property test — rejected: the fixture is Lean-only and the repo's mechanization discipline puts provable-now facts in the Lean development."
   evidence:
     - "lean/Lara/Examples/PWStructural.lean: cert_reject_mismatched_certifier, ruleCertTgt, cert_target_rule, cert_only_assurance"
-    - "lean/AxCheck.lean: three #231 audit rows"
-    - "https://github.com/ARA-Labs/lara/issues/231"
+    - "lean/AxCheck.lean: three audit rows"
   status: resolved
   also_depends_on: [N298]
 
 - id: N312
   type: experiment
-  title: "Mutation-test both #231 guards, then re-verify the pinned build and axiom audit"
+  title: "Mutation-test both guards, then re-verify the pinned build and axiom audit"
   provenance: ai-executed
   timestamp: "2026-09-06T12:20"
   result: >
@@ -8039,11 +7951,11 @@ tree:
 
 - id: N313
   type: decision
-  title: "Prove #196 by longest-candidate + sublist comparison, not by the maximal-element principle the issue budgeted"
+  title: "Prove the preferred-extension theorem by longest-candidate + sublist comparison, not by the maximal-element principle the issue budgeted"
   provenance: ai-suggested
   timestamp: "2026-09-06T14:10"
   choice: >
-    Close #196 (general non-emptiness of preferred extensions) by taking a
+    Close the general non-emptiness of preferred extensions by taking a
     maximum-LENGTH admissible member of `(candidates F).filter (admissibleB F)`
     and meeting a competing admissible `T` at its canonical representative
     `canonize F T`, where `List.Sublist.filter` places the maximum inside the
@@ -8054,20 +7966,18 @@ tree:
     so the Mathlib-dependency decision the issue expected to force was not
     forced and stays scoped to result 5 as `lean/lakefile.toml` records.
   alternatives:
-    - "The route #196 and preferredSem's docstring specified — a ⊆-maximal-element principle over `candidates F`, requiring `F.args.Nodup` plus a subset-implies-shorter fact. Rejected once the sublist framing compiled: `Nodup` is only needed to stop a shorter list from having the same members as a longer one, and a shared carrier already rules that out."
+    - "The route the issue and preferredSem's docstring specified — a ⊆-maximal-element principle over `candidates F`, requiring `F.args.Nodup` plus a subset-implies-shorter fact. Rejected once the sublist framing compiled: `Nodup` is only needed to stop a shorter list from having the same members as a longer one, and a shared carrier already rules that out."
     - "Take the Mathlib dependency the lakefile anticipates for result 5, and import its order/Finset machinery. Rejected: it buys nothing here and would make a core-Lean development depend on Mathlib for a result that does not need it."
     - "State the existence result only for duplicate-free carriers, matching how `groundedSem_singleton` is stated. Rejected: the hypothesis turned out to be unnecessary, and a needless hypothesis on a headline existence theorem is a weaker paper sentence."
   evidence:
     - "lean/Lara/Semantics.lean: preferred_exists, preferred_exists_candidate, preferredSem_enumerate_ne_nil, admissible_nil"
     - "lean/Lara/Semantics/Sublists.lean: exists_max_length"
-    - "https://github.com/ARA-Labs/lara/issues/196"
-    - "https://github.com/ARA-Labs/lara/pull/251"
   status: resolved
   also_depends_on: [N230]
 
 - id: N314
   type: experiment
-  title: "Spike the #196 proof standalone before deciding whether it needed a plan, then verify in-tree"
+  title: "Spike the proof standalone before deciding whether it needed a plan, then verify in-tree"
   provenance: ai-executed
   timestamp: "2026-09-06T14:20"
   result: >
@@ -8089,17 +7999,16 @@ tree:
     - "lean/Lara/Semantics.lean"
     - "lean/Lara/Semantics/Sublists.lean"
     - "lean/AxCheck.lean"
-    - "https://github.com/ARA-Labs/lara/pull/251"
   status: resolved
   also_depends_on: [N313]
 
 - id: N315
   type: decision
-  title: "Surface certDeps through a separate `lara deps` subcommand, reusing the mirror rather than fusing a collector into inferSupport (#204)"
+  title: "Surface certDeps through a separate `lara deps` subcommand, reusing the mirror rather than fusing a collector into inferSupport"
   provenance: user
   timestamp: "2026-09-06T16:10"
   choice: >
-    Issue #204 phrased the work as "carry dependency reports through the
+    The tracked item phrased the work as "carry dependency reports through the
     checker's own traversal (or an enriched variant the existing API
     projects)". Two sub-decisions departed from that first phrasing, both
     deliberately.
@@ -8147,7 +8056,7 @@ tree:
 
 - id: N316
   type: experiment
-  title: "Verify that the report reaches a consumer and that no frozen output moved (#204)"
+  title: "Verify that the report reaches a consumer and that no frozen output moved"
   provenance: ai-executed
   timestamp: "2026-09-06T16:40"
   result: >
@@ -8177,13 +8086,12 @@ tree:
     - "test/CliSpec.hs"
     - "scripts/differential.sh"
     - "scripts/check-backend-deps-golden.sh"
-    - "https://github.com/ARA-Labs/lara/issues/204"
   status: resolved
   also_depends_on: [N315]
 
 - id: N318
   type: decision
-  title: "#227 closed: the M4 surface corollary gets a witness, and the sizing that deferred it was wrong"
+  title: "The M4 surface corollary gets a witness, and the sizing that deferred it was wrong"
   provenance: ai-executed
   timestamp: "2026-09-07T10:30"
   choice: >
@@ -8207,14 +8115,13 @@ tree:
     are left as written; this node is where the correction lives.
   alternatives:
     - "Reduce one of the existing native_decide surface fixtures instead of authoring a new pair — rejected, and this part of N281's lesson held: D9 bans Lean.ofReduceBool from the audit, so any witness resting on Examples/Surface.lean imports it."
-    - "Make reconstructExplicitTerm structurally recursive first (issue #254) — rejected as mistaken and #254 closed as not-planned: `#print` shows it already compiles to brecOn. The plan's premise was false."
+    - "Make reconstructExplicitTerm structurally recursive first (a tracked suggestion) — rejected as mistaken and closed as not-planned: `#print` shows it already compiles to brecOn. The plan's premise was false."
     - "Attack the well-founded lowering pass directly, e.g. by proving reduction lemmas for lowerFormula — rejected: authoring the payload in kernel form sidesteps the pass entirely at no proof cost, since lowerNamed_id_of_kernel's hNat hypothesis is literally the Env.startsIdent_nat_false field."
   evidence:
     - "lean/Lara/Examples/SurfaceTransport.lean: surfaceTransport_directAF_eq, surfaceTransport_relabel_moves, surfaceTransport_inputs_differ"
     - "lean/Lara.lean: import Lara.Examples.SurfaceTransport"
-    - "ara/evidence/proofs/m4_contextual_adequacy.md: 'The surface corollary, witnessed (#227, 2026-09-07)'"
+    - "ara/evidence/proofs/m4_contextual_adequacy.md: 'The surface corollary, witnessed (2026-09-07)'"
     - "docs/theory-m4-contextual-adequacy.md"
-    - "https://github.com/ARA-Labs/lara/pull/257"
   status: resolved
   also_depends_on: [N281, N300]
 
@@ -8233,7 +8140,7 @@ tree:
     globs := roots.map Glob.one, so the build graph is import-driven, not
     directory-driven, and the module sat outside the import closure of all
     four defaultTargets. `lake build` reported success (148 jobs) without ever
-    compiling it. The gate table in PR #257 was nevertheless green because a
+    compiling it. The gate table in the PR was nevertheless green because a
     reviewer agent had hand-built the olean with
     `lake build Lara.Examples.SurfaceTransport` minutes earlier, and the audit
     then consumed that artifact. On a clean checkout the same commands give
@@ -8247,36 +8154,35 @@ tree:
     when it ran, not about what a clean checkout would produce, so any gate
     whose result depends on a build must be re-run from a wiped cache before
     it is recorded as evidence. This is the second occurrence of the failure
-    mode #242 fixed for Lara.Examples.Complexity.Realization; both times
+    mode the earlier fix addressed for Lara.Examples.Complexity.Realization; both times
     `lake build` stayed green. The existing stack does catch it — the coverage
     script is a source-text scan that catches unpinned theorems, and
     check-axioms.sh refuses to report over Lean errors — but detection lands
     at the wrong gate with a message that names an olean rather than a missing
-    import. Issue #259 tracks a closure check at the gate whose job it is.
+    import. A tracked item records a closure check at the gate whose job it is.
   evidence:
     - "lean/Lara.lean:347-351 (the new import and its comment)"
-    - "lean/Lara.lean:331-334 (the #242 precedent, same failure mode)"
+    - "lean/Lara.lean:331-334 (the precedent, same failure mode)"
     - "scripts/check-axioms.sh:43"
-    - "https://github.com/ARA-Labs/lara/issues/259"
   status: resolved
   also_depends_on: [N318]
 
 - id: N317
   type: decision
-  title: "Close #248 as moot: both PW-T8 cleanups already landed in the #247 re-land"
+  title: "Close as moot: both PW-T8 cleanups already landed in the re-land"
   provenance: ai-suggested
   timestamp: "2026-09-06T18:05"
   choice: >
-    Close issue #248 (name the T8 `matched` clause; unify `admitsB`/`matchedB`
+    Close the tracked cleanup item (name the T8 `matched` clause; unify `admitsB`/`matchedB`
     on one transport helper) without any code change, after verifying that
-    commit 1a7240d (PR #247, merged 2026-09-06 07:04 UTC — seven minutes
+    commit 1a7240d (the re-land, merged 2026-09-06 07:04 UTC — seven minutes
     before the issue was filed at 07:11 UTC) already contains both items:
     `def Matched` at Lara/PW/Status.lean:185 with the `StatusBridge.matched`
     field restated through it, `matchedB_iff` reading `= true ↔ Matched`, and
     `transportsB`/`transportsB_iff` with both `admitsB` and `matchedB`
     routed through them and AxCheck covering all decider theorems. The
-    issue's text describes PR #244's tree throughout — even its "moot"
-    section is inverted, since #247 landed the shared `bisimScanB` scan the
+    issue's text describes the pre-re-land tree throughout — even its "moot"
+    section is inverted, since the re-land already carried the shared `bisimScanB` scan the
     issue records as unnecessary.
   alternatives:
     - "Execute the issue as written, reopening Lara/PW/Status.lean. Rejected: every deliverable already exists verbatim in the tree; a change would reopen the frozen T8 record for zero content."
@@ -8285,7 +8191,6 @@ tree:
     - "git log -S 'def Matched' — only 1a7240d introduces it; same for 'def transportsB'"
     - "lean/Lara/PW/Status.lean:185, lean/Lara/PW/StatusCheck.lean:61-107"
     - "lean/AxCheck.lean:3432-3444 (transportsB_iff, admitsB_iff, matchedB_iff, statusBridgeB_sound/_complete/_iff)"
-    - "https://github.com/ARA-Labs/lara/issues/248"
   status: resolved
   also_depends_on: [N313]
 
@@ -8308,7 +8213,6 @@ tree:
     the plan's 36 s budget.
   evidence:
     - "ara/evidence/proofs/m4_contextual_adequacy.md: 'Gates (2026-09-07, commit ae5b408)'"
-    - "https://github.com/ARA-Labs/lara/pull/257"
   status: resolved
   also_depends_on: [N318, N319]
 
@@ -8331,13 +8235,12 @@ tree:
     "would not make the relabel any more genuine" is true of the relabel but
     is not a claim about the AF equality, which is where the empty attack set
     bites. Open until an attack-bearing witness exercises coveredB_relabel on
-    a non-empty list. Filed as #258, alongside #255 for surface_directAF_link.
+    a non-empty list. Filed as a tracked item, alongside a second one for surface_directAF_link.
   evidence:
     - "lean/Lara/Examples/SurfaceTransport.lean: transportElaborated, transportPairs"
     - "lean/Lara/Context/Surface.lean:32,53,60"
     - "lean/Lara/Erase.lean:198"
     - "lean/Lara/Compile.lean:441"
-    - "https://github.com/ARA-Labs/lara/issues/258"
   status: open
   also_depends_on: [N318]
 
@@ -8362,7 +8265,7 @@ tree:
     - >
       Certify over source bytes directly. Rejected: that is lara-evidence@0.1
       (byte-level evidence admission), explicitly out of v0.1 by spec §4.3 and
-      gated under #78. Building it into a strict backend would move a
+      gated under a scope decision. Building it into a strict backend would move a
       defeasible measurement into the TCB by the back door. The split taken
       keeps the backend owning the inference and the leaf layer owning the
       observation, so evidence admission later strengthens the leaf without
@@ -8384,7 +8287,6 @@ tree:
     - "docs/spec.md §5.2 item 3"
     - "m0/annotations/rebench-rust_codecontests.yaml: C09 (scheme plan_vs_shipped_diff)"
     - "m0/annotation-summary.md: 'code_inspection (+plan_vs_shipped_diff) | 3'"
-    - "https://github.com/ARA-Labs/lara/pull/267"
   status: resolved
 
 - id: N323
@@ -8457,7 +8359,7 @@ tree:
   provenance: ai-executed
   timestamp: "2026-09-07T16:20"
   hypothesis: >
-    Issue #260 asked for property, golden, AND mutation conformance evidence,
+    The tracked item asked for property, golden, AND mutation conformance evidence,
     so adding "S9" to Lara.Mutate.mutationBases and regenerating would be an
     additive step inside the issue's budget — the same shape as adding a worked
     example or a corpus fixture.
@@ -8471,7 +8373,7 @@ tree:
     collision is not with any gate: fixtures/mutants/ is frozen input row 1 of
     docs/m5-freeze-checklist.md, so 541 -> 568 grows the measured input set
     601 -> 628 and requires an m5-freeze-v5 -> v6 re-cut plus a full axis-(c)
-    measurement re-run. #260 budgeted neither. Reverted; suite regenerated back
+    measurement re-run. The item budgeted neither. Reverted; suite regenerated back
     to 541 with an empty tracked diff.
   lesson: >
     A conformance leg named in an issue is not automatically inside that
@@ -8480,12 +8382,11 @@ tree:
     mutation suite), and the difference is invisible from the issue text — it
     lives in the freeze checklist's row table. Check which evidence surfaces
     are frozen inputs BEFORE building the evidence, not after it passes. The
-    cost was budgeted into #266 rather than discovered by a reviewer, and the
-    same gap applies to ord@1, which is why #266 proposes batching S2 with S9
+    cost was budgeted into the re-cut rather than discovered by a reviewer, and the
+    same gap applies to ord@1, which is why the re-cut proposes batching S2 with S9
     into one re-cut instead of two.
   evidence:
     - "docs/m5-freeze-checklist.md: frozen inputs row 1, post-v5 addendum"
-    - "https://github.com/ARA-Labs/lara/issues/266"
     - "src/Lara/Mutate.hs: mutationBases"
   status: resolved
   also_depends_on: [N322]
@@ -8510,7 +8411,7 @@ tree:
     PASS. gen-mutants --check: 541 mutants, unchanged. check_ara_source_spans:
     PASS 58 quotations, up from 5 pre-existing failures on the clean tree.
   evidence:
-    - "https://github.com/ARA-Labs/lara/pull/267 (gate table)"
+    - "(gate table)"
     - "docs/m5-freeze-checklist.md post-v5 addendum (620 -> 625)"
   status: resolved
   also_depends_on: [N322, N323, N324, N325]
@@ -8582,7 +8483,6 @@ tree:
     - "lean/Lara/Observation.lean:406 (observe_congr, which does take hext)"
     - "lean/Lara/Invariants/Observation.lean:90 (observeSem_grounded, no hypothesis)"
     - "ara/evidence/proofs/m4_generic_observation.md"
-    - "https://github.com/ARA-Labs/lara/pull/271"
   status: resolved
   also_depends_on: [N327]
 
@@ -8614,7 +8514,7 @@ tree:
       asymmetry is what the separation needs.
     - >
       Ship generic definitions plus the grounded regression only. Rejected: it
-      would leave the milestone open to the question that motivated #216, one
+      would leave the milestone open to the question that motivated the milestone, one
       level up — you generalized the observation, but did you show the
       generalization observes anything new?
   evidence:
@@ -8631,7 +8531,7 @@ tree:
   provenance: ai-suggested
   timestamp: "2026-09-07T16:45"
   description: >
-    What #216 separates are the observation *functions*, at concrete contexts
+    What the milestone separates are the observation *functions*, at concrete contexts
     and fragments. It does not separate the *relations*. `CtxEquiv reg F₁ F₂`
     quantifies over all contexts, so neither
     `CtxEquiv reg F₁ F₂ → CtxEquivSem sem reg F₁ F₂` nor its refutation is
@@ -8644,12 +8544,11 @@ tree:
     relations, and that is precisely what is not proved. What is known beyond
     the definition: `ctxEquivSem_negative` exhibits a pair `CtxEquivSem` is
     false of at `stableSem`, so the relation is not trivially satisfiable. Open,
-    filed as #268.
+    filed as a tracked follow-up.
   evidence:
     - "lean/Lara/Context/Observation.lean (CtxEquivSem, ctxEquivSem_grounded_iff)"
     - "lean/Lara/Examples/ContextSemantics.lean (ctxEquivSem_negative)"
     - "docs/theory-m4-generic-observation.md §4"
-    - "https://github.com/ARA-Labs/lara/issues/268"
   status: open
   also_depends_on: [N328, N329]
 
@@ -8672,27 +8571,25 @@ tree:
     the same carrier. Compounding it, `fragEx` carries no certificate, so
     `mapAssurFrag f` is the identity on it for every `f` — the same
     shape-witness caveat `docs/theory-m4-contextual-adequacy.md` §1 records for
-    the grounded `congruence_witness`. Filed as #270 (an admissible disagreeing
-    carrier) and #269 (a certificate-bearing instantiation).
+    the grounded `congruence_witness`. Filed as one item (an admissible disagreeing
+    carrier) and another (a certificate-bearing instantiation).
   evidence:
     - "lean/Lara/Examples/ContextSemantics.lean (congruence_witness_sem, registry_swap_witness_sem and their recorded limitations)"
     - "lean/Lara/Examples/Linking.lean:345 (admissible_split)"
     - "docs/theory-m4-generic-observation.md §6"
-    - "https://github.com/ARA-Labs/lara/issues/270"
-    - "https://github.com/ARA-Labs/lara/issues/269"
   status: open
   also_depends_on: [N329]
 - id: N332
   type: pivot
-  title: "#216 found already landed mid-implementation; work rescoped to the plan's unexecuted §2A refactor"
+  title: "The milestone target was already landed mid-implementation; work rescoped to the plan's unexecuted §2A refactor"
   provenance: user
   timestamp: "2026-09-07T20:40"
   from: "Execute plans/2026-09-07-theory-m4-generic-ctxequiv.md end to end"
-  to: "Land only the plan's §3/Task-3/T1 refactor, the one part PR #271 did not implement"
+  to: "Land only the plan's §3/Task-3/T1 refactor, the one part the merged PR did not implement"
   trigger: >
     Task 1 had been implemented and its spec review had passed when a check of the
-    referenced issues showed #216 CLOSED. `origin/main` was at d250d52 — turn 3's own
-    PR #271, merged 2026-09-07T23:47Z — and already carried
+    referenced issues showed the milestone CLOSED. `origin/main` was at d250d52 — turn 3's own
+    merged PR, 2026-09-07T23:47Z — and already carried
     `lean/Lara/Context/Observation.lean`, `lean/Lara/Examples/ContextSemantics.lean`
     and `docs/theory-m4-generic-observation.md`. The branch held only the two plan
     commits and was one commit behind. The plan's own coordination note had
@@ -8702,8 +8599,7 @@ tree:
     and highest-risk step — while Task 1, Task 3 and finding T1 were not. Implementation
     was stopped and the scope decision put to the researcher rather than assumed.
   evidence:
-    - "git log HEAD..origin/main -> d250d52 'M4: contextual observation at an arbitrary ExtensionSemantics (#216) (#271)'"
-    - "gh issue view 216 -> CLOSED"
+    - "git log HEAD..origin/main -> d250d52 'M4: contextual observation at an arbitrary ExtensionSemantics'"
     - "plans/2026-09-07-theory-m4-generic-ctxequiv.md, 'Coordination note'"
   status: resolved
   also_depends_on: [N327, N328]
@@ -8714,7 +8610,7 @@ tree:
   provenance: user
   timestamp: "2026-09-07T20:45"
   choice: >
-    Replace PR #271's two-type design with the plan's §3 layering. `Fragment.lean`'s
+    Replace the merged PR's two-type design with the plan's §3 layering. `Fragment.lean`'s
     `Observation` inductive becomes the payload-generic `ObservationOf α` with
     `Observation` an abbreviation of it at `Grounded.Status`; `Lara.Context.Outcome α`
     is deleted; `obsGen` and the `obsGen_*` lemmas move from `Context/Observation.lean`
@@ -8745,7 +8641,7 @@ tree:
     by `rfl`. Under the two-type design this equation does not typecheck at all —
     `obs : Observation` and `obsGen g : Outcome α` are different types — so the sentence
     "`obs` is `obsGen` at `g := Invariants.status canon`", which is the milestone's whole
-    design premise and which PR #271 asserts in prose at
+    design premise and which the merged PR asserts in prose at
     `docs/theory-m4-generic-observation.md:81`, could only be a comment. It is now a
     theorem the kernel checks, pinned in `AxCheck.lean`.
 
@@ -8836,12 +8732,12 @@ tree:
   provenance: user
   timestamp: "2026-09-08T10:05"
   choice: >
-    Ship the #215 theorems under the `parametricity` name
+    Ship the parametricity theorems under the `parametricity` name
     (`obsGen_parametricity`, `backend_replacement_parametricity{,_sem,_local,_local_sem}`),
     and amend `docs/theory-m4-contextual-adequacy.md` §6 / `theory-m4-generic-observation.md`
     §7's "Not parametricity" bullets to say the relational form exists but is bounded by
     `RelInj`, rather than deleting them. Surfaced to the user before any doc was written,
-    because the plan flagged it as the one judgement the proof cannot settle: #187's
+    because the plan flagged it as the one judgement the proof cannot settle: the Part B item's
     acceptance criterion asks for a relational quantifier, and `RelInj` forces the relation
     to be a partial bijection, so the result is parametricity over partial-bijective
     certificate relations rather than over arbitrary ones.
@@ -8855,18 +8751,18 @@ tree:
 
 - id: N338
   type: experiment
-  title: "#215's sizing question answered: the grounded fixpoint needs nothing from the equality"
+  title: "The parametricity sizing question answered: the grounded fixpoint needs nothing from the equality"
   provenance: ai-executed
   timestamp: "2026-09-08T12:40"
   result: >
-    #215 stated its own risk as "if the grounded fixpoint argument needs the equality it is
+    The tracked item stated its own risk as "if the grounded fixpoint argument needs the equality it is
     not cheap". It does not. `compileUnit_rel` concludes an EQUATION between `StructuredAF`s,
     not a pointwise agreement, so `Grounded.statusC` and `Semantics.observe` are applied to
     one and the same framework on both branches and the relation is erased before any
     semantics runs. No grounded-labelling lemma, no `AttackExtensional` hypothesis and no new
     fixpoint machinery appears anywhere in the 1710-line development. This is a second
-    instance of the mechanism C52 names, reached along a different axis: #216 generalized the
-    family along the *reader*, #215 generalizes it along the *relating structure*, and both
+    instance of the mechanism C52 names, reached along a different axis: the earlier milestone generalized the
+    family along the *reader*, the parametricity work generalizes it along the *relating structure*, and both
     are free for the same reason — the shared lemma concludes an equality.
   evidence:
     - "lean/Lara/Context/Parametricity.lean (compileUnit_rel, obsGen_parametricity)"
@@ -8934,24 +8830,21 @@ tree:
     the level of the coverage DECIDER, on two hand-built terms. That is enough to show
     `RelInj` is forced by the theorem rather than by the proof strategy, but it is not an
     observational separation: no fixture exhibits two fragments related by a genuinely
-    non-functional `R` with differing `obs`. The same shape of gap #270/#269 record for
-    #216's witnesses. Filed as #275. Two of the four M4 congruences
+    non-functional `R` with differing `obs`. The same shape of gap the two witness items record for
+    the milestone's witnesses. Filed as a tracked follow-up. Two of the four M4 congruences
     (`backend_replacement_congruence_composed_sem`, `whole_program_replacement_sem`) also
-    still have no relational form — filed as #277 — and the two `registry_swap_congruence`
+    still have no relational form — filed separately — and the two `registry_swap_congruence`
     docstrings still describe the global-hypothesis gap as open with no pointer to the
-    theorems that close it — filed as #276.
+    theorems that close it — also filed separately.
   evidence:
     - "lean/Lara/Context/Parametricity.lean (relInj_necessary)"
     - "docs/theory-m4-relational-parametricity.md §7"
-    - "https://github.com/ARA-Labs/lara/issues/275"
-    - "https://github.com/ARA-Labs/lara/issues/276"
-    - "https://github.com/ARA-Labs/lara/issues/277"
   status: open
   also_depends_on: [N339, N331]
 
 - id: N342
   type: experiment
-  title: Congruence on an admissible semantics-separating cycle (#270)
+  title: Congruence on an admissible semantics-separating cycle
   provenance: ai-executed
   timestamp: 2026-09-08T22:45
   parent: N341
@@ -8963,7 +8856,7 @@ tree:
 
 - id: N343
   type: experiment
-  title: Accepted fragments separated by stable semantic payloads (#273)
+  title: Accepted fragments separated by stable semantic payloads
   provenance: ai-executed
   timestamp: 2026-09-09T06:56
   parent: N342
@@ -8972,7 +8865,7 @@ tree:
     empty context and two accepted fragments with the same export. The complete
     cycle yields noExtension and the singleton yields observed justified. The
     cycle yields observed contested at grounded semantics. The all-context
-    implication in #268 remains open.
+    implication remains open.
   evidence:
   - ara/evidence/proofs/m4_semantic_negative.md
   status: resolved
@@ -8996,7 +8889,7 @@ tree:
 
 - id: N279-extension
   type: pivot
-  title: Replace unrestricted relation extension with finite realization (#279)
+  title: Replace unrestricted relation extension with finite realization
   provenance: ai-executed
   timestamp: '2026-09-09'
   parent: N338
@@ -9011,7 +8904,7 @@ tree:
 
 - id: N275_observational_collapse
   type: experiment
-  title: Accepted observation changes under certificate collapse (#275)
+  title: Accepted observation changes under certificate collapse
   provenance: ai-executed
   timestamp: 2026-09-09T18:16
   parent: N341
@@ -9031,7 +8924,6 @@ tree:
     and propositions unchanged.
   evidence:
   - ara/evidence/proofs/lean_context_extensions_2026_09_09.md
-  - https://github.com/ARA-Labs/lara/pull/296
   - git:aa5168d
   status: resolved
 - id: N277003
@@ -9043,7 +8935,6 @@ tree:
     theorem signatures remain as wrappers.
   evidence:
   - ara/evidence/proofs/lean_context_extensions_2026_09_09.md
-  - https://github.com/ARA-Labs/lara/pull/297
   - git:5f38b2f
   status: resolved
 - id: N277004
@@ -9056,7 +8947,6 @@ tree:
     values remain outside the finite inventory.
   evidence:
   - ara/evidence/proofs/lean_context_extensions_2026_09_09.md
-  - https://github.com/ARA-Labs/lara/pull/298
   - git:d1d0e73
   status: resolved
 - id: N277005
@@ -9069,7 +8959,6 @@ tree:
     and identical-export restrictions are not resolved by this witness.
   evidence:
   - ara/evidence/proofs/lean_context_extensions_2026_09_09.md
-  - https://github.com/ARA-Labs/lara/pull/299
   - git:8bc580f
   status: resolved
 - id: N277006
@@ -9083,7 +8972,6 @@ tree:
     Nested fixtures include a typed attack, errors and positive transport applications.
   evidence:
   - ara/evidence/proofs/lean_context_extensions_2026_09_09.md
-  - https://github.com/ARA-Labs/lara/pull/300
   - git:9ba73dd
   status: resolved
 
@@ -9135,11 +9023,11 @@ tree:
 - id: N307_schedule
   type: decision
   title: >-
-    Schedule both halves of issue 307 out of the PW close-out's deferred list
+    Schedule both halves of the sorted-queries item out of the PW close-out's deferred list
   provenance: user
   timestamp: 2026-09-09T20:10-07:00
   choice: >-
-    Execute both halves of issue 307 directly and open the PR — the `Query_κ`
+    Execute both halves of that item directly and open the PR — the `Query_κ`
     well-sortedness refinement and the outer language's surface syntax.
   alternatives:
   - >-
@@ -9308,7 +9196,7 @@ tree:
     `q()` where the translated `p()` is required. No `StructuralBridge` was
     exhibited anywhere in the PR, and `elabBridge_support_transport` was never
     instantiated — while the theory record presented both as established. Found
-    by the #311 reviewer, who compiled `¬ BridgeObligations …` against the branch.
+    by the external reviewer, who compiled `¬ BridgeObligations …` against the branch.
   lesson: >-
     A theorem that takes a contract as a *hypothesis* is not evidence the contract
     is inhabited, and at the type level a vacuous premise is indistinguishable
@@ -9328,7 +9216,7 @@ tree:
   also_depends_on:
   - N311_vacuous_obligations
   choice: >-
-    Three changes taken together, all from the #311 review. (1) Every reported
+    Three changes taken together, all from the external review. (1) Every reported
     fault names its symbol: `PosingFault.bridgeVocabulary` carries an
     `OutOfVocabulary`, computed by `vocabFault` — `trAtom`'s own traversal —
     with `vocabFault_eq_none_iff` proving the scan is exactly `trAtom`'s domain
@@ -9365,8 +9253,8 @@ tree:
     declared `BridgeId` to `Naming.bridgeOf` on the query side, so no theorem says
     the bridge a posed query travels along is the bridge a declaration declared.
     The two authoring forms meet at the status-atom level (`Sorted.pose`) and not
-    at the bridge level. Opened as issue 313; the missing concrete parser and wire
-    format, previously recorded only as a doc table cell, opened as issue 314.
+    at the bridge level. Opened as a tracked follow-up; the missing concrete parser and wire
+    format, previously recorded only as a doc table cell, likewise opened as a tracked item.
   status: open
 
 - id: N303_path_linking
@@ -9374,7 +9262,7 @@ tree:
   title: Use ordinary path-based linking without hashing
   provenance: user
   timestamp: 2026-09-10T00:11
-  choice: 'For issue #303, load members by path and qualify local names by manifest
+  choice: 'For the tracked composition item, load members by path and qualify local names by manifest
     alias. Recheck current contents without source pins, map hashes, or a lockfile.
     Preserve existing single-file digest fields.'
   alternatives:
@@ -9387,7 +9275,7 @@ tree:
 
 - id: N303_impl
   type: decision
-  title: Implement #303 as five reviewed increments, not one landing
+  title: Implement the composition work as five reviewed increments, not one landing
   provenance: user
   timestamp: 2026-09-10T00:30
   choice: 'Execute the multi-artifact plan task by task, each increment gated by an
@@ -9450,16 +9338,15 @@ tree:
   title: Join declared bridges and concrete authoring before the Haskell runtime
   provenance: user
   timestamp: 2026-09-11T00:14-07:00
-  choice: 'Implement #313/#314 together on a new branch: declaration-derived naming
+  choice: 'Implement the declared-wire increments together on a new branch: declaration-derived naming
     and frame maps, versioned codec, file-driven Lean execution, verification and
-    PR. Open the Haskell runtime/differential follow-up first; created as #322.'
+    PR. Open the Haskell runtime/differential follow-up first; filed as a new tracker item.'
   alternatives:
-  - 'Implement #313 alone'
+  - 'Implement the first increment alone'
   - Include the Haskell runtime and differential gate in this PR
   evidence:
   - 'User: open the new issue first, then directly proceed to our pr on a new branch,
     finish all, $research-manager record the changes, and pr'
-  - https://github.com/ARA-Labs/lara/issues/322
   - docs/theory-pw-declared-wire.md
   status: resolved
   also_depends_on:
@@ -9551,7 +9438,7 @@ tree:
   title: Settle the link-rejection anchor by proof instead of a fixture
   provenance: ai-suggested
   timestamp: 2026-09-11T07:30
-  choice: 'Issue #316 asked for a cross-driver MRLinkRejected anchor. Record it as
+  choice: 'The tracked review item asked for a cross-driver MRLinkRejected anchor. Record it as
     impossible rather than build one: linkedUnitOf_checked shows a map whose members each
     pass their solo check always links to an accepted unit. The Haskell side stays covered
     by byte-for-byte conformance with the Lean driver.'
@@ -9568,10 +9455,10 @@ tree:
 
 - id: N322_outer_runtime
   type: decision
-  title: 'Finish #322 in one PR: Haskell outer runtime, finite Lean reference, differential gate'
+  title: 'Finish the outer runtime in one PR: Haskell outer runtime, finite Lean reference, differential gate'
   provenance: user
   timestamp: 2026-09-11T01:52-07:00
-  choice: 'Implement #322 directly and submit a PR. One pw-run 1 file declares worlds
+  choice: 'Implement the outer runtime directly and submit a PR. One pw-run 1 file declares worlds
     (check-input envelopes), candidate edges with acceptance, and comparisons, and
     embeds pw-surface 1 unchanged. lara pw runs it in Haskell; the Lean pw-run executable
     is the reference.'
@@ -9579,7 +9466,7 @@ tree:
   - Host (worlds/edges) and surface document as two separate files
   - Extend the fixed-host pw-example instead of a new reference executable
   evidence:
-  - 'User: let''s finish https://github.com/ARA-Labs/lara/issues/322, directly do it
+  - 'User: let''s finish [redacted], directly do it
     and submit a pr'
   - docs/theory-pw-outer-runtime.md
   status: resolved
@@ -9632,7 +9519,7 @@ tree:
   title: Review found a Haskell/Lean divergence the gate missed, at the locale text boundary
   provenance: ai-executed
   timestamp: 2026-09-11T12:45-07:00
-  result: 'PR #328 reviews reproduced three places where lara pw and pw-run disagreed,
+  result: 'PR reviews reproduced three places where lara pw and pw-run disagreed,
     because GHC encodes paths with the locale and Lean always uses UTF-8. (1) Under
     LC_ALL=C, a non-ASCII world path: Haskell exit 1 (world-input), Lean exit 0. Fixed
     in 3b865cb with a UTF-8//ROUNDTRIP file-system encoding. (2) That fix switched after
@@ -9646,7 +9533,7 @@ tree:
     The gate now reports 6 fixtures, 94 cases, 107 runs, with reruns under LC_ALL=C
     and a localedef-built ISO-8859-1. The same round added fault-order-within-stage,
     every-environment-field and renamed rule-clause cases. The shared reader''s Haskell-only
-    nesting bound predates #322 and is issue #331.'
+    nesting bound predates the runtime work and is tracked separately.'
   evidence:
   - ara/evidence/proofs/pw_outer_runtime_322.md
   - ara/evidence/proofs/pw_outer_runtime_verification.txt
@@ -9660,7 +9547,7 @@ tree:
   title: The step from declared edge names to frame positions is proved, not only tested
   provenance: ai-executed
   timestamp: 2026-09-11T12:45-07:00
-  result: 'Review of PR #328 noted that candidates_declared / accepts_declared are
+  result: 'Review noted that candidates_declared / accepts_declared are
     stated over resolved positions while the docs claimed "exactly the file''s edges".
     lean/Lara/PW/Run.lean now proves resolveEdges_declared (resolution relates declared
     and resolved edges one for one), loadWorlds_nodup (world ids are unique per context,
@@ -9703,7 +9590,7 @@ tree:
     Haskell-only boundary
   provenance: ai-suggested
   timestamp: 2026-09-11T19:10-07:00
-  choice: 'Issue #331 offered two resolutions for the reader''s nesting cap: thread a
+  choice: 'The nesting-bound item offered two resolutions for the reader''s nesting cap: thread a
     depth counter through the Lean reader so both refuse alike, or record maxDepth = 10000
     as a documented Haskell-only boundary and teach the gates to expect the asymmetry.
     Chose the first. Lara.Driver.parseForm / parseList now carry a depth counter and
@@ -9736,7 +9623,7 @@ tree:
   result: 'Each differential gate gained a case over the bound AND one at the deepest
     form it admits (the second stops a reader that refuses one level too early from
     satisfying the first), plus a check that reads maxDepth out of both sources and
-    compares them before the cases run. CORRECTED in PR #333 review: the at-the-bound
+    compares them before the cases run. CORRECTED in review: the at-the-bound
     case initially had teeth in only two of the three gates — differential.sh asserted
     exit 2 and empty stdout there and nothing more, and its over-the-bound case asserted
     only that the two drivers AGREE, which a pair of readers both running off the end of
@@ -9792,7 +9679,7 @@ tree:
     its own harness
   provenance: ai-suggested
   timestamp: 2026-09-11T19:10-07:00
-  choice: 'scripts/differential.sh had failed on main since #328, before reaching any
+  choice: 'scripts/differential.sh had failed on main since the PW runtime round, before reaching any
     anchor: fixtures/pw/ arrived without an ANCHORS.tsv entry and the manifest pin
     (correctly) refuses to treat unlisted files as free passes. Resolved by the exclusion
     rather than the listing, in both scripts/gen-anchor-manifest.sh and the gate''s
@@ -9807,7 +9694,7 @@ tree:
     prevent.'
   alternatives:
   - Regenerate ANCHORS.tsv to list every fixtures/pw file as a check-input anchor
-  - 'File the breakage as its own issue and verify #331 against a locally patched manifest'
+  - 'File the breakage as its own issue and verify the bound against a locally patched manifest'
   evidence:
   - scripts/gen-anchor-manifest.sh
   - scripts/differential.sh
@@ -9820,7 +9707,7 @@ tree:
   title: A PW world with agreeing duplicate-report groups is checked as declared; a conflicting group is refused by name
   provenance: ai-suggested
   timestamp: 2026-09-12T01:38+00:00
-  choice: 'Option 1 of #326. addWorld refuses a world only when some declared group is
+  choice: 'Option 1 as recorded. addWorld refuses a world only when some declared group is
     not pairwise ≡ (first such group in declaration order, printed as (world-groups W G)),
     whatever the policy''s conflict mode: under quarantine the local status would be
     conditional (evidence-blocked), under reject the local checker would refuse the unit
@@ -9887,7 +9774,7 @@ tree:
     the checker). Locale reruns of the .lara program-text case required setLocaleEncoding
     on the PW doors. Lean: 11 new AxCheck pins, coverage 3127 declarations, audit passed.
     cabal test: 37 groups pass. scripts/differential.sh passed after excluding fixtures/pw
-    from anchor discovery: the PW fixtures of #314 and #322 had been discovered but never
+    from anchor discovery: the PW fixtures of both earlier rounds had been discovered but never
     listed in fixtures/ANCHORS.tsv, so the wire differential failed on main.'
   evidence:
   - ara/evidence/proofs/pw_groups_lara_sources_326_327.md
@@ -9917,7 +9804,7 @@ tree:
   - 'Make the whole CLI locale-independent in this PR: settles the converse asymmetry
     too, but the binding cost is on the output side (the solo door echoes author names
     to a stderr handle GHC opened with the startup locale) plus a locale axis in a gate
-    that has none. Deferred to #334 with that cost stated.'
+    that has none. Deferred with that cost stated.'
   evidence:
   - app/Main.hs
   - docs/theory-pw-outer-runtime.md
@@ -9928,7 +9815,7 @@ tree:
   - N326_327_conformance
 - id: N326_327_conformance_rerun
   type: experiment
-  title: Gate rerun after the #332 review fixes
+  title: Gate rerun after the review fixes
   provenance: ai-executed
   timestamp: 2026-09-12T04:20+00:00
   result: 'scripts/check-pw-conformance.py: 7 fixtures, 99 cases, 112 runs; 1 .lara
@@ -9974,7 +9861,7 @@ tree:
     but a diagnostic echoing author-chosen names or a path byte that is not UTF-8
     then leaves through an encoder that cannot write it, turning a verdict into an
     encoding exception.'
-  - 'Keep the boundary per-door and document the asymmetry: what #327/#332 did. It
+  - 'Keep the boundary per-door and document the asymmetry: what the earlier rounds did. It
     leaves one binary disagreeing with itself about the same bytes, which the
     cross-driver differential cannot see because both PW doors share the boundary.'
   evidence:
@@ -10025,7 +9912,7 @@ tree:
   choice: >-
     Lara.Driver's reader stops being a `partial def` mutual block and becomes a total
     definition, because a `partial def` has no kernel reduction behaviour and therefore no
-    statement about its results is dischargeable — the #331 bound was enforced with no
+    statement about its results is dischargeable — the shared bound was enforced with no
     theorem attachable to it. skipComment/skipSpace become well-founded on the remaining
     input off one fact, step_input (`step` drops exactly one character); parseQuoted leaves
     the mutual block, since it never recurses back into a form; parseForm/parseList stay
@@ -10078,7 +9965,7 @@ tree:
     differential pass=1322 fail=0, depth-bound pass=2 fail=0, cross-driver pass=4
     pre-boundary=3; check-pw-conformance.py 7 fixtures / 101 cases / 114 runs plus 1 .lara
     fixture / 17 cases / 21 runs, run with the pre-existing check_pw_subtree_total failure
-    on fixtures/pw/source/lara.sexp skipped (that tree arrived in #332, after the
+    on fixtures/pw/source/lara.sexp skipped (that tree arrived on the later branch, after the
     assertion); Lean citations PASS (420, 29 allowlisted) after repointing nine AxCheck.lean
     line citations by name; ARA source spans PASS (66). No corpus regeneration and no
     freeze-tag bump, as the issue budgeted; the re-audit of proofs consuming parseWire was
@@ -10118,14 +10005,13 @@ tree:
   timestamp: 2026-09-20T08:02+00:00
   choice: 'Admission can quarantine an assumed leaf, but PW refuses the pruned source before bridges;
     leaf-ok/cert-ok remain declarations. Atomic nd@1 hypothesis reuse cannot prove the distinct triangle-sum
-    atom. Record the boundary and track an executable witness in issue #350.'
+    atom. Record the boundary and track an executable witness as a follow-up item.'
   alternatives:
   - Label a declared rejected edge as a mechanically detected missing-premise failure; rejected as misleading.
-  - 'Change the world carrier and proof backend in this example task; deferred with costs in #350.'
+  - 'Change the world carrier and proof backend in this example task; deferred with stated costs.'
   evidence:
   - docs/non-empirical-worlds-decision.md
   - test/WorkedExamplesSpec.hs
-  - https://github.com/ARA-Labs/Lara/issues/350
   status: resolved
   also_depends_on:
   - N327_lara_sources
@@ -10153,7 +10039,7 @@ tree:
   title: Use a separate Lean contract witness for axiom withdrawal
   provenance: ai-executed
   timestamp: 2026-09-20T08:40+00:00
-  choice: 'Select the separate Lean option allowed by issue #350. Reuse the assumed postulate itself through
+  choice: 'Select the separate Lean option the follow-up allowed. Reuse the assumed postulate itself through
     the production ND backend with an empty theory; keep source rejection, contract failure, and local
     status distinct.'
   alternatives:
@@ -10164,7 +10050,6 @@ tree:
   evidence:
   - docs/demos/d5-axiom-withdrawal.md
   - lean/Lara/Examples/AxiomWithdrawal.lean
-  - https://github.com/ARA-Labs/Lara/issues/350
   status: resolved
   also_depends_on:
   - N349_worlds

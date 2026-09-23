@@ -1,8 +1,8 @@
 /-
-PW0 T5 — the tagged comparison result and its adequacy (issue #192).
+PW0 T5 — the tagged comparison result and its adequacy.
 
 The executable comparison interface returns either a nonempty status profile
-or an incomparability reason. Gate 3 of #192 — "incomparability cannot
+or an incomparability reason. Gate 3 of PW0 — "incomparability cannot
 collapse into a local Lara status" — is enforced three ways: *structurally*,
 because `CrossResult` keeps reasons and profiles in different constructors and
 `IncomparabilityReason` contains no `Status`, so no coercion exists to build;

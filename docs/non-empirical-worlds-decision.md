@@ -1,12 +1,12 @@
 # Axiom-relative worlds demo: defer the proposed bridge-failure story
 
-Decision for [#349](https://github.com/ARA-Labs/Lara/issues/349), 2026-09-20:
+Decision for the non-empirical-examples request, 2026-09-20:
 ship the level-one [P1 philosophy demo](demos/d4-philmath.md). Defer the
 triangle/parallel-postulate worlds story because today's runtime cannot
 produce the proposed *checked structural-bridge failure*. The follow-up is
-[#350](https://github.com/ARA-Labs/Lara/issues/350).
+tracked in the axiom-withdrawal witness.
 
-Follow-up in #350: [D5](demos/d5-axiom-withdrawal.md) now supplies the
+Follow-up: [D5](demos/d5-axiom-withdrawal.md) now supplies the
 separate executable Lean structural-contract witness and a positive transport
 control. The CLI limitations below still hold. D5 reuses the assumed
 postulate itself and makes no triangle-theorem claim.
@@ -74,13 +74,13 @@ axioms, not the parallel postulate alone.
 The regression probe deliberately certifies the assumed postulate itself.
 A future demo can retain that narrow shape, mechanize a separate Lean
 contract witness, or provide a backend that checks the intended geometric
-proof. Those are design choices in #350, not results of this example PR.
+proof. Those are design choices in the deferred follow-up, not results of this example PR.
 
 ## Cost and paper boundary
 
-No calculus, wire contract, frozen corpus, or freeze tag changes in #349.
+No calculus, wire contract, frozen corpus, or freeze tag changes here.
 A runtime extension needs matching Haskell/Lean work and conformance gates;
-any new envelope version or corpus regeneration must be budgeted in #350.
-The decision here meets #349's request to resolve Demo 2 before presenting it.
+any new envelope version or corpus regeneration must be budgeted in the follow-up.
+The decision here resolves Demo 2 before presenting it.
 Only P1's checked statuses are available for paper-side reporting after this
 change lands; no paper sentence should claim the deferred bridge outcome.

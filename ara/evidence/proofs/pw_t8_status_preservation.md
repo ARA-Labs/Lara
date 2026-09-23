@@ -2,8 +2,7 @@
 
 ## Result
 
-Issue #193 (tracker #189) is implemented in PR #240 (branch
-`claude/eyh0602-lara-193-plan-9b752b`, commits `424e4e7`..`5637540`, 14
+Implemented on branch `claude/eyh0602-lara-193-plan-9b752b` (commits `424e4e7`..`5637540`, 14
 commits including the plan and its retirement). Three new modules only import;
 no local, PW0, T6, or T9 definition is touched.
 
@@ -82,15 +81,15 @@ axioms. The wrapper-discipline diff against `origin/main` over
 `hinj` from `status_transport`'s signature leaves an unfillable goal
 (scratch negative check, two errors as expected).
 
-## Re-verification after merging #237 (2026-09-04, merge commit 84c51b6)
+## Re-verification after the merge (2026-09-04, merge commit 84c51b6)
 
 `origin/main` moved `Support.lean`, `Consistency.lean`, `Attack.lean`, and
 `AxCheck.lean` after this branch's base, so the gates were re-run on the merged
 tree: `Build completed successfully (143 jobs).`; `AxCheck coverage passed (60
 declarations).`; `Axiom audit passed.` with 2073 reports (the 2058 above plus
-#237's 15), the 60 PW-T8 rows unchanged and still within the standard trio; the
+15 from the merged work), the 60 PW-T8 rows unchanged and still within the standard trio; the
 wrapper-discipline diff against `origin/main` remains empty. The ARA journey
-identifiers this work allocated were renumbered past #237's (`N302`–`N306`,
+identifiers this work allocated were renumbered past the merged work's (`N302`–`N306`,
 `O132`–`O136`, session `2026-09-04_004`); no Lean or docs content changed.
 
 ## Process record
@@ -108,10 +107,11 @@ signatures against the plan.
 ## Boundary
 
 `forth`/`back` are index-level conditions on `edgeB`, not derived from a
-correspondence of declared attacks (issue #238). There is no executable
-`StatusBridge` decider (issue #239). `status_transport` needs an injective
+correspondence of declared attacks (later addressed by the declared-attack
+transport follow-up). There is no executable
+`StatusBridge` decider in the frozen record (later provided by the decider
+follow-up). `status_transport` needs an injective
 translation; non-injective bridges use `status_transport_of_corr`. T6
-limitations 1, 2, and 5 are inherited. Approximation bridges remain tracker
-#189.
+limitations 1, 2, and 5 are inherited. Approximation bridges remain open.
 
 Full record: `docs/theory-pw-t8-status-preservation.md`.

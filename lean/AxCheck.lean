@@ -129,13 +129,13 @@ open Lara
 -- Map-backed reverse lookup.
 #print axioms Lara.Driver.tagToString_injective
 
--- The same, for the multi-artifact map's own keyword table (issue #303). Both
+-- The same, for the multi-artifact map's own keyword table. Both
 -- Haskell map tables derive their reverse lookup by enumerating their tag type,
 -- so a spelling collision would break the inverse silently rather than failing
 -- to compile.
 #print axioms Lara.Map.Driver.mtagToString_injective
 
--- Result 13 (the many-sorted signature, `lara-core@0.2` / issue #89).
+-- Result 13 (the many-sorted signature, `lara-core@0.2`).
 -- (a) decidability without classical input: the executable check IS the
 --     relation, so the instance below reports the empty axiom set.
 #print axioms Lara.Sigma.wellSorted_decidable
@@ -191,7 +191,7 @@ open Lara
 #print axioms Lara.Driver.firstDup_none_nodup
 
 -- The wire reader's nesting bound, proved rather than only differentialled
--- (#331/#335). The reader used to be a `partial def` mutual block, about which
+-- The reader used to be a `partial def` mutual block, about which
 -- nothing is provable; it is now total (well-founded on the remaining input,
 -- with `Parsed` carrying the consumption proof `parseList`'s element loop
 -- needs), which is what makes these statements reachable at all.
@@ -404,8 +404,8 @@ open Lara
 #print axioms Lara.ND.hyp_out_of_range_untypable
 #print axioms Lara.ND.mem_shiftDown
 
--- Named nd@1 proof-term lowering (`lara-syntax@0.9`, #132; source-authored
--- formula annotations `lara-syntax@0.10`, #144): closed-tag and encoder
+-- Named nd@1 proof-term lowering (`lara-syntax@0.9`; source-authored
+-- formula annotations `lara-syntax@0.10`): closed-tag and encoder
 -- support, kernel conservativity, formula-annotation agreement with the
 -- abstract proposition encoder, and structural agreement with the
 -- independent named-term-to-de-Bruijn translation.  This mechanizes the pure
@@ -466,7 +466,7 @@ open Lara
 #print axioms Lara.Strict.ndEnc_iff
 #print axioms Lara.Strict.nd_strict_step_sound
 
--- Issue #57: the rational-arithmetic domain-checker backend `ra@1` — the
+-- The rational-arithmetic domain-checker backend `ra@1` — the
 -- full `Backend` instantiation (replay adequacy, certificate soundness via
 -- witness cancellation, and the three obligation-4 laws), plus its
 -- supporting integer-cancellation and extraction lemmas.
@@ -512,7 +512,7 @@ open Lara
 #print axioms Lara.Ord.ordModels_relHolds
 #print axioms Lara.Ord.ordModels_excl_of_lt
 
--- Issue #260: the static code-inspection domain-checker backend `insp@1` —
+-- The static code-inspection domain-checker backend `insp@1` —
 -- the full `Backend` instantiation (replay adequacy, certificate soundness,
 -- and the three obligation-4 laws), plus the domain theory: the closed-world
 -- step itself, the diff decomposition, and the two halves of the
@@ -536,7 +536,7 @@ open Lara
 #print axioms Lara.Insp.inspModels_excl_of_same_entry
 #print axioms Lara.Insp.inspModels_absent_present_sat
 
--- Named certificate premise slots (lara-syntax@0.6, #105): the presentation
+-- Named certificate premise slots (lara-syntax@0.6): the presentation
 -- pass's payload-rewrite math over an abstract resolver.  The identity
 -- theorem (no symbolic reference in scope → byte-identical pass-through,
 -- dead-wire arm included) and the substitution theorem (a successful
@@ -698,7 +698,7 @@ open Lara
 #print axioms Lara.Attack.emptySubstCanonAgrees
 #print axioms Lara.Attack.contraryMatchDecl_iff
 #print axioms Lara.Attack.contraryMatchB_iff
--- The derived `DecidableEq Attack` (#272) enters the kernel computation of every
+-- The derived `DecidableEq Attack` enters the kernel computation of every
 -- `by decide` over an attack-mentioning statement, so it is pinned here too.
 #print axioms Lara.Attack.instDecidableEqAttack
 
@@ -1100,7 +1100,7 @@ open Lara
 #print axioms Lara.Erase.mapCertProg_atts
 #print axioms Lara.Erase.backend_replacement_transport
 
--- Duplicate-report groups (spec §4.3, issue #38): the frozen consistency and
+-- Duplicate-report groups (spec §4.3): the frozen consistency and
 -- quarantine/escalation definitions and their metatheory.
 #print axioms Lara.Groups.all_equiv_head_iff
 #print axioms Lara.Groups.consistentB_iff
@@ -1109,10 +1109,10 @@ open Lara
 #print axioms Lara.Groups.quarantined_leaf_absent
 #print axioms Lara.Groups.conflictReject_iff
 
--- Conservative public reporting for quarantine-affected claims (spec §4.3,
--- issue #76): the locality lemma and the non-promotion / preservation results
+-- Conservative public reporting for quarantine-affected claims (spec §4.3):
+-- the locality lemma and the non-promotion / preservation results
 -- (preservation requires equal complete-support sets), plus the declared-index
--- seed obligations and the compact production-AF bridge (issue #80).
+-- seed obligations and the compact production-AF bridge.
 #print axioms Lara.Blocked.directIn_transfer
 #print axioms Lara.Blocked.directOut_transfer
 #print axioms Lara.Blocked.directIn_reflect
@@ -1152,7 +1152,7 @@ open Lara
 #print axioms Lara.BlockedProgram.production_justified_nonpromotion_of_not_blocked
 #print axioms Lara.BlockedProgram.checked_production_justified_nonpromotion_of_not_blocked
 
-/-! ### M0 — the frozen compilation carrier and invariant record (issue #183) -/
+/-! ### M0 — the frozen compilation carrier and invariant record -/
 
 #print axioms Lara.Invariants.compileUnit_size
 #print axioms Lara.Invariants.erase_compileUnit
@@ -1196,7 +1196,7 @@ open Lara
 #print axioms Lara.Examples.Realizability.oneSelfEdge_invariant
 #print axioms Lara.Examples.Realizability.oneSelfEdge_not_realizable
 
-/-! ### M2a — semantics-parametric observation (issue #185)
+/-! ### M2a — semantics-parametric observation
 
 The generic `ExtensionSemantics` interface and its five instances. Each
 instance bundles its own adequacy proof (`sound`), so printing axioms for the
@@ -1398,7 +1398,7 @@ them a new constructor would silently drop a table row. -/
 #print axioms Lara.Examples.Semantics.allFrameworks_complete
 #print axioms Lara.Examples.Semantics.allClaims_complete
 
-/-! ### M2a — source-to-framework observation transport (issue #185)
+/-! ### M2a — source-to-framework observation transport
 
 Carrier-locality of the five specifications, the generic transport onto the
 compiled framework with its per-semantics corollaries, and the claim-level
@@ -2014,7 +2014,7 @@ outside the public audit surface. -/
 #print axioms Lara.Examples.Surface.unknownValueInterpolation_unsupported
 #print axioms Lara.Examples.Surface.unresolvedAttackPath_isolated
 #print axioms Lara.Examples.Surface.unresolvedAttackPath_unsupported
-/-! ### M2b follow-up — realization closure (issue #209)
+/-! ### M2b follow-up — realization closure
 
 The plan's headline rows: the numeral-injectivity foundation, the closed leaf
 vocabulary, the family-wide `checkUnit_complete` premises, and the assembled
@@ -2091,9 +2091,9 @@ checker equation (`Lara.Complexity.Numeral` / `Lara.Complexity.Gadget`). -/
 #print axioms Lara.Complexity.Formula3.occurringVariables_length_le
 #print axioms Lara.Complexity.Formula3.literals_length
 
--- Spike-era fixed-context surface (issue #208): the pre-existing public
+-- Spike-era fixed-context surface: the pre-existing public
 -- theorems of Lara.Complexity.Context and Lara.Complexity.Encoding that the
--- #209 closure reads (registered here per a Task-7 review follow-up; the
+-- the M2b closure reads (registered here per a Task-7 review follow-up; the
 -- occurringVariables Nodup row is above).
 #print axioms Lara.Complexity.m2bSigma_wellFormed
 #print axioms Lara.Complexity.m2bPolicy_wellSorted
@@ -2216,7 +2216,7 @@ checker equation (`Lara.Complexity.Numeral` / `Lara.Complexity.Gadget`). -/
 #print axioms Lara.Complexity.negativeFixture_unsatisfiable
 #print axioms Lara.Complexity.selfEdgeCode_not_realizable
 
-/-! ### M2b follow-up — shared lemma extraction (issue #211)
+/-! ### M2b follow-up — shared lemma extraction
 
 The drift-tripwire lemmas formerly held as verbatim private copies by the
 gadget and witness modules, now public at their owning modules, plus the
@@ -2233,7 +2233,7 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.Check.Unit.exists_ok_of_isOk
 #print axioms Lara.Check.Unit.okValue_eq
 
-/-! ### PW0 — possible-world outer-model gate (issue #192) -/
+/-! ### PW0 — possible-world outer-model gate -/
 -- Task 1 (Lara.PW.Outer): typed normality, valuation coherence, and the
 -- valuation-congruence core that makes T4 a one-line instantiation.
 #print axioms Lara.PW.sat_imp
@@ -2305,7 +2305,7 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.Examples.PW.presentsOverlapRejected
 #print axioms Lara.Examples.PW.overlap_rejected_no_dia
 
-/-! ### PW-T6 — exact checked-support transport (issue #191) -/
+/-! ### PW-T6 — exact checked-support transport -/
 -- Task 1 (Lara.PW.Translation): the partial symbol translation and its
 -- structural lifts, the list/substitution/rule bookkeeping, the two
 -- commuting facts (instantiation, ≡), and the inert identity translation.
@@ -2396,7 +2396,7 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.Examples.PW.ren_transport
 #print axioms Lara.Examples.PW.ren_out_of_vocabulary
 #print axioms Lara.Examples.PW.ren_translationUndefined
--- #224: the strict-certificate renaming bridge — cert_ok discharged
+-- The strict-certificate renaming bridge — cert_ok discharged
 -- non-vacuously off the identity, and the transported strict derivation.
 #print axioms Lara.Examples.PW.bridgeCert
 #print axioms Lara.Examples.PW.cert_accept_translated
@@ -2404,14 +2404,14 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.Examples.PW.cert_support_renamed
 #print axioms Lara.Examples.PW.hasSupport_cert
 #print axioms Lara.Examples.PW.cert_transport
--- #231: the fixture's drift guards — the acceptance judgments read the
+-- The fixture's drift guards — the acceptance judgments read the
 -- certifier triple on both sides, and the certificate arm is the only
 -- reachable assurance (`allowTrusted` pinned off, source and target).
 #print axioms Lara.Examples.PW.cert_reject_mismatched_certifier
 #print axioms Lara.Examples.PW.cert_target_rule
 #print axioms Lara.Examples.PW.cert_only_assurance
 
-/-! ### PW-T9 — structural-path composition (issue #190) -/
+/-! ### PW-T9 — structural-path composition -/
 -- The definitions `StructuralBridge.comp`, `AdmitsSteps`, `BridgePath`,
 -- `BridgePath.compose`, `BridgePath.trans`, `Commutes`, and `Accepted` have no
 -- standalone axiom rows; the theorem rows below audit them transitively. Every
@@ -2437,7 +2437,7 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.PW.trQuestion_comp
 #print axioms Lara.PW.trQuestions_comp
 
--- The shared traversal seam behind the composition family (issue #234).
+-- The shared traversal seam behind the composition family.
 #print axioms Lara.PW.zipOpt_bind
 #print axioms Lara.PW.trAtoms_cons
 #print axioms Lara.PW.trTerms_cons
@@ -2518,14 +2518,14 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.Examples.PW.Compose.trQuestions_nonempty_computes
 #print axioms Lara.Examples.PW.Compose.trSupportDis_nonempty_computes
 
--- Focused witnesses for the remaining composition laws (issue #235).
+-- Focused witnesses for the remaining composition laws.
 #print axioms Lara.Examples.PW.Compose.first_leg_gap_computes
 #print axioms Lara.Examples.PW.Compose.first_leg_gap_law
 #print axioms Lara.Examples.PW.Compose.id_comp_ren2
 #print axioms Lara.Examples.PW.Compose.comp_id_ren2
 #print axioms Lara.Examples.PW.Compose.zipOpt_computes
 
-/-! ### PW-T8 — conditional status preservation (issue #193) -/
+/-! ### PW-T8 — conditional status preservation -/
 -- The definitions `AttackBisim`, `SupportCorr`, `AFIso`, `AFIso.graph`,
 -- `SymMap.Injective`, `Corr`, `StatusBridge` have no standalone rows; the
 -- theorem rows below audit them transitively. Every theorem declaration in
@@ -2597,7 +2597,7 @@ shared ok-assembly helper behind the named accepted checker outputs. -/
 #print axioms Lara.Examples.PW.Status.t8_box_defeated_r
 #print axioms Lara.Examples.PW.Status.t8_box_defeated_r_holds
 
-/-! ### Theory M4 — the fragment/linking context calculus (issue #187)
+/-! ### Theory M4 — the fragment/linking context calculus
 
 Phase F0 is definitions only (`Lara.Context.Fragment`), so it has nothing to
 audit. F1 mechanizes the calculus — the guard's rejection classes, the
@@ -2731,7 +2731,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.checkUnit_map
 #print axioms Lara.Context.nodes_conclusion_map
 #print axioms Lara.Context.compileUnit_map
--- The projection layer (#216): `obsGen` is `obs` with the per-export reading
+-- The projection layer: `obsGen` is `obs` with the per-export reading
 -- left open, so `obs_eq_of_ok` and `backend_replacement_congruence` below are
 -- one-line corollaries of it. Rationale in docs/theory-m4-generic-observation.md §2.
 #print axioms Lara.Context.obsGen_incompatible
@@ -2759,7 +2759,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.backend_replacement_congruence_composed
 #print axioms Lara.Context.whole_program_replacement
 
--- Invariants.Observation: the semantics-parametric carrier projection (#216).
+-- Invariants.Observation: the semantics-parametric carrier projection.
 -- `Invariants.status` reads the grounded labelling off a `StructuredAF`; these
 -- read an arbitrary `ExtensionSemantics` off the same carrier, and recover the
 -- old function at `groundedSem` with no hypothesis.
@@ -2767,7 +2767,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Invariants.observeSem_gap
 #print axioms Lara.Invariants.observeSem_of_status_gap
 
--- Context.Observation: the semantics layer (#216) — the observation at an
+-- Context.Observation: the semantics layer — the observation at an
 -- arbitrary `ExtensionSemantics`, its equivalence relation, the grounded
 -- regression, and the four congruences. Each congruence is `obsGen_congr`
 -- (pinned above, in the Context.Equivalence block) instantiated at one
@@ -2785,7 +2785,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.whole_program_replacement_sem
 
 -- ListRel: pointwise list relations. Core Lean 4.32.0 has no `List.Forall₂`;
--- this is the local replacement the #215 relational development consumes.
+-- this is the local replacement the relational development consumes.
 #print axioms Lara.Forall₂.length_eq
 #print axioms Lara.Forall₂.of_same
 #print axioms Lara.Forall₂.of_map_right
@@ -2796,14 +2796,14 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Forall₂.mem_right
 #print axioms Lara.Forall₂.mem_left
 
--- Context.Parametricity: the relational form of the M4 congruence (#215).
+-- Context.Parametricity: the relational form of the M4 congruence.
 -- `R` replaces the function `f`; `RelInj` is what the structural merge and the
 -- coverage decider force on it, and `relInj_necessary` witnesses that.
 #print axioms Lara.Context.relInj_necessary
 #print axioms Lara.Context.relTerms_iff_forall₂
 #print axioms Lara.Context.relTerms_length
 
--- Finite realization and unrestricted-extension counterexample (#279).
+-- Finite realization and unrestricted-extension counterexample.
 #print axioms Lara.Context.swapAssurance_involutive
 #print axioms Lara.Context.swapAssurance_injective
 #print axioms Lara.Context.exists_total_injective_extension_on
@@ -2903,7 +2903,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.backend_replacement_parametricity_local
 #print axioms Lara.Context.backend_replacement_parametricity_local_sem
 
--- #275: a collapsing relation changes an accepted grounded observation.
+-- A collapsing relation changes an accepted grounded observation.
 #print axioms Lara.Examples.CertificateCollapse.replaySlot_eq
 #print axioms Lara.Examples.CertificateCollapse.observations
 #print axioms Lara.Examples.CertificateCollapse.preserving
@@ -2918,7 +2918,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Examples.CertificateCollapse.relInj_observationally_necessary
 
 -- Examples.ContextSemantics: the semantics parameter is not an abstraction
--- over one instance at the context level either (#216).
+-- over one instance at the context level either.
 #print axioms Lara.Examples.ContextSemantics.cycle_sideOk_ctx
 #print axioms Lara.Examples.ContextSemantics.cycle_sideOk_frag
 #print axioms Lara.Examples.ContextSemantics.cycle_admissible
@@ -3037,7 +3037,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Examples.Linking.cert_relabel_moves
 
 -- ---------------------------------------------------------------------------
--- Ledger completion (issue #242).
+-- Ledger completion.
 --
 -- The sections above are organized by *result*: each groups the theorems one
 -- spec result or plan task delivered. That organization left the modules
@@ -3104,7 +3104,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Grounded.labelC_spec
 
 -- Lara/Blocked.lean (7).
--- Spec 4.3 conservative reporting (issue #76): the quarantine deficit bounds
+-- Spec 4.3 conservative reporting: the quarantine deficit bounds
 -- that keep missing evidence from making a claim look stronger.
 #print axioms Lara.Blocked.any_congr
 #print axioms Lara.Blocked.closureIter_subset_args
@@ -3462,7 +3462,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Examples.Realizability.nonemptyRetainedNode_mem
 
 -- Lara/Examples/Complexity/Realization.lean (5).
--- M2b Task-2 restricted-class realization spike. Until issue #242 this module
+-- M2b Task-2 restricted-class realization spike. Until ledger completion this module
 -- was an orphan: nothing imported it, so `lake build` never elaborated it and
 -- its theorems were unchecked. `Lara.lean` now imports it, which is what puts
 -- it in the build and in reach of `#print axioms`.
@@ -3472,7 +3472,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Examples.Complexity.Realization.rawUnitOfFormula_shape
 #print axioms Lara.Examples.Complexity.Realization.rawUnitOfFormula_fixedFields
 
-/-! ### PW-T8 — executable StatusBridge checker (issue #239) -/
+/-! ### PW-T8 — executable StatusBridge checker -/
 
 -- Deciders are definitions (audited transitively through their theorems).
 #print axioms Lara.PW.corrB_iff
@@ -3513,7 +3513,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Examples.PW.StatusCheck.forthB_discriminates
 #print axioms Lara.Examples.PW.StatusCheck.backB_discriminates
 
-/-! ### PW-T8 — declared-attack transport (issue #238) -/
+/-! ### PW-T8 — declared-attack transport -/
 
 -- Definitions `trAttack`, `trAttackList`, and the `AttackBridge` structure
 -- are audited transitively through the theorems below.
@@ -3552,7 +3552,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Examples.PW.Attack.ques_position_computes
 #print axioms Lara.Examples.PW.Attack.ques_position_law
 
-/-! ### The surface transport fixture (#227)
+/-! ### The surface transport fixture
 
 The certificate-lowering foundation for a `native_decide`-free instance of
 `Lara.Context.surface_directAF_relabel`. These are the only obligations that sit
@@ -3609,7 +3609,7 @@ fixture would be worthless. -/
 #print axioms Lara.Examples.SurfaceTransport.surfaceTransport_link_relabel_moves
 #print axioms Lara.Examples.SurfaceTransport.surfaceTransport_link_imports_nonempty
 
-/-! ### #258: the attack-bearing surface transport witness -/
+/-! ### The attack-bearing surface transport witness -/
 
 #print axioms Lara.Examples.SurfaceTransportAttack.attack_supported
 #print axioms Lara.Examples.SurfaceTransportAttack.attack_supported_wrapped
@@ -3656,7 +3656,7 @@ fixture would be worthless. -/
 #print axioms Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_relabel_moves
 #print axioms Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_inputs_differ
 
-/-! ### The context-bearing surface link fixture (#264)
+/-! ### The context-bearing surface link fixture
 
 `SurfaceTransport.surfaceTransport_link_directAF_eq` discharges `FixesContext`
 on an empty context argument list, so the one hypothesis distinguishing a
@@ -3709,7 +3709,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.SurfaceTransportContext.surfaceTransportContext_link_imports_nonempty
 #print axioms Lara.Examples.SurfaceTransportContext.surfaceTransportContext_inputs_differ
 
--- #273: accepted fragments separated by their semantic payloads.
+-- Accepted fragments separated by their semantic payloads.
 #print axioms Lara.Examples.ContextSemantics.semantic_negative_exports
 #print axioms Lara.Examples.ContextSemantics.semantic_negative_link_ok
 #print axioms Lara.Examples.ContextSemantics.semantic_negative_accepted
@@ -3718,7 +3718,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.ContextSemantics.obsSem_semantic_negative_grounded
 #print axioms Lara.Examples.ContextSemantics.ctxEquivSem_semantic_negative
 
--- Issue #277: composed and whole-program relational companions.
+-- Composed and whole-program relational companions.
 #print axioms Lara.Context.relFixesContext_composed
 #print axioms Lara.Context.obsGen_parametricity_composed
 #print axioms Lara.Context.backend_replacement_parametricity_composed_sem
@@ -3738,7 +3738,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Context.mem_occurrences_iff
 #print axioms Lara.Context.occurrences_composed
 
--- #268: an all-context grounded equivalence separated by an adequate selector.
+-- An all-context grounded equivalence separated by an adequate selector.
 #print axioms Lara.Examples.ContextualSeparation.grounded_ctxEquiv
 #print axioms Lara.Examples.ContextualSeparation.separating_link_ok
 #print axioms Lara.Examples.ContextualSeparation.separating_accepted
@@ -3747,7 +3747,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.ContextualSeparation.counterexample
 #print axioms Lara.Examples.ContextualSeparation.grounded_does_not_imply_semantic
 
--- #217: typed CQ substitution, contextual integration and transport.
+-- Typed CQ substitution, contextual integration and transport.
 
 -- lean/Lara/Context/Holes/Assurance.lean
 #print axioms Lara.Context.Holes.lookupFilling_map
@@ -3882,7 +3882,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.TermHoles.functional_transport_sem
 #print axioms Lara.Examples.TermHoles.relational_transport_sem
 
--- Multi-artifact maps (issue #303): member-alias qualification and the
+-- Multi-artifact maps: member-alias qualification and the
 -- N-member linking fold.
 #print axioms Lara.Map.qualifiedKey_inj
 #print axioms Lara.Map.qualifyLeaf_injective
@@ -3938,7 +3938,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Map.foldHygiene_two_aliases_of_one_member
 -- The premises of `linkMembers_checked` exhibited holding together at a
 -- concrete map, which is what makes that theorem non-vacuous rather than merely
--- true (PR #315 review).
+-- true.
 #print axioms Lara.Map.memberP_foldHygiene
 #print axioms Lara.Map.memberP_sideOk
 #print axioms Lara.Map.unitPolicyEx_wellFormed
@@ -3950,7 +3950,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Map.soloMap_status
 #print axioms Lara.Map.contestedMap_status
 #print axioms Lara.Map.linkMembers_status_not_preserved
--- The batch link the drivers run, and its agreement with the fold (issue #321).
+-- The batch link the drivers run, and its agreement with the fold.
 #print axioms Lara.Map.mem_crossPairs
 #print axioms Lara.Map.crossPairs_spec
 #print axioms Lara.Map.crossPairs_emits
@@ -3980,7 +3980,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Map.Driver.linkedGammaOf_eq
 #print axioms Lara.Map.Driver.mem_linkedTermsOf
 #print axioms Lara.Map.Driver.linkedUnitOf_checked
-/-! ### PW — the `Query_κ` well-sortedness refinement (issue #307) -/
+/-! ### PW — the `Query_κ` well-sortedness refinement -/
 
 -- 1. Query formation. `queryFault` is the existing `Sigma` judgment, located:
 --    no fault IS well-sortedness, each of the two faults is pinned to exactly
@@ -4082,7 +4082,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.PWSorted.sorted_dia_q_erased
 #print axioms Lara.Examples.PWSorted.sorted_dia_q_src
 
-/-! ### PW — surface syntax for the outer language (issue #307) -/
+/-! ### PW — surface syntax for the outer language -/
 
 -- 6. The declared maps, and the one clause the elaborator decides. `ruleOkB`
 --    is a genuine decider for `StructuralBridge.rule_ok` because a policy
@@ -4133,7 +4133,7 @@ context's own arguments make unavailable. -/
 --    whose `BridgeObligations` are *discharged* rather than assumed, and
 --    across which `elabBridge_support_transport` actually carries a checked
 --    support; and a posed query whose ill-sorted variant is a *typing error at
---    authoring time* — the fixture that joins the two halves of #307.
+--    authoring time* — the fixture that joins the two halves.
 #print axioms Lara.Examples.PWSurface.rule_clause_holds
 #print axioms Lara.Examples.PWSurface.rule_clause_fails
 #print axioms Lara.Examples.PWSurface.rule_clause_fails_mistranslated
@@ -4168,7 +4168,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.PWSurface.elabPosed_unknownContext
 #print axioms Lara.Examples.PWSurface.surfaceQuery_holds
 
-/-! ### Declared outer bridges, wire round trips, and finite evaluation (#313/#314) -/
+/-! ### Declared outer bridges, wire round trips, and finite evaluation -/
 #print axioms Lara.PW.Surface.Declared.Registry.lookup_name
 #print axioms Lara.PW.Surface.Declared.Registry.lookup_mem
 #print axioms Lara.PW.Surface.Declared.Registry.lookup_get
@@ -4260,7 +4260,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.PW.Run.load_candidates_named
 #print axioms Lara.PW.Run.load_accepts_named
 
--- PW outer runtime, #326: consistent duplicate-report groups are inert. The
+-- PW outer runtime: consistent duplicate-report groups are inert. The
 -- §4.3 identities (`Lara.Groups`) and the loader theorem that rests on them:
 -- a world `addWorld` accepts has an empty quarantine set, so the leaf table
 -- and argument list it checks are the declared ones.
@@ -4276,7 +4276,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.PW.Run.addWorld_quarantine_empty
 #print axioms Lara.PW.Run.addWorld_checks_declared
 
--- #350: admission, local statuses, and structural failure are separate facts.
+-- Admission, local statuses, and structural failure are separate facts.
 #print axioms Lara.Examples.AxiomWithdrawal.withdrawal_prunes
 #print axioms Lara.Examples.AxiomWithdrawal.rejection_stops
 #print axioms Lara.Examples.AxiomWithdrawal.certificate_depends_on_premise

@@ -1,5 +1,5 @@
 /-
-PW0 — executable examples and the T7 witness (issue #192).
+PW0 — executable examples and the T7 witness.
 
 Deliverables of the mechanization gate:
 

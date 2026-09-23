@@ -1,6 +1,6 @@
 /-
-Named proof-term lowering for `nd@1` (`lara-syntax@0.9`, #132; source-authored
-formula annotations `lara-syntax@0.10`, #144).
+Named proof-term lowering for `nd@1` (`lara-syntax@0.9`; source-authored
+formula annotations `lara-syntax@0.10`).
 
 This is a Lean mirror of the pure presentation pass in
 `Lara.Elaborate.NDNamed`, not a verification of the Haskell implementation.
@@ -854,13 +854,13 @@ private def atomFormula (key : String) : SExpr := encodeFormula (.atom key)
     (.list [.atom Lara.ND.Tag.lam.toString, .atom "h", atomFormula "<F>",
       .list [.atom Lara.ND.Tag.hyp.toString, .atom "007"]]) == none
 
--- #144: a source formula annotation lowers to the encoder's atom node.
+-- A source formula annotation lowers to the encoder's atom node.
 #guard lowerNamed vectorStarts vectorResolver vectorEncode 2 []
     (.list [.atom Lara.ND.Tag.lam.toString, propNode "p(a)", premNode "0"]) ==
   some (.list [.atom Lara.ND.Tag.lam.toString, atomNode "<KEY-p-a>",
     kernelHypothesis 1])
 
--- #144: named-binder and abort formula positions lower the same way.
+-- Named-binder and abort formula positions lower the same way.
 #guard lowerNamed vectorStarts vectorResolver vectorEncode 2 []
     (.list [.atom Lara.ND.Tag.lam.toString, .atom "h", propNode "p(a)",
       .list [.atom Lara.ND.Tag.hyp.toString, .atom "h"]]) ==
@@ -872,7 +872,7 @@ private def atomFormula (key : String) : SExpr := encodeFormula (.atom key)
   some (.list [.atom Lara.ND.Tag.abort.toString, atomNode "<KEY-p>",
     kernelHypothesis 0])
 
--- #144: imp recursion reaches a nested source formula.
+-- Imp recursion reaches a nested source formula.
 #guard lowerNamed vectorStarts vectorResolver vectorEncode 2 []
     (.list [.atom Lara.ND.Tag.lam.toString,
       .list [.atom Lara.ND.Tag.imp.toString, propNode "p",
@@ -883,17 +883,17 @@ private def atomFormula (key : String) : SExpr := encodeFormula (.atom key)
       .atom Lara.ND.Tag.fls.toString],
     kernelHypothesis 1])
 
--- #144: a source formula alone selects named mode, so a numeric kernel
+-- A source formula alone selects named mode, so a numeric kernel
 -- hypothesis in its body is rejected.
 #guard lowerNamed vectorStarts vectorResolver vectorEncode 2 []
     (.list [.atom Lara.ND.Tag.lam.toString, propNode "p(a)",
       kernelHypothesis 0]) == none
 
--- #144: an unencodable proposition text fails.
+-- An unencodable proposition text fails.
 #guard lowerNamed vectorStarts vectorResolver vectorEncode 2 []
     (.list [.atom Lara.ND.Tag.lam.toString, propNode "p(", premNode "0"]) == none
 
--- #144: a prop node in certificate position is residual.
+-- A prop node in certificate position is residual.
 #guard lowerNamed vectorStarts vectorResolver vectorEncode 2 []
     (.list [.atom Lara.ND.Tag.app.toString, propNode "p", premNode "0"]) == none
 

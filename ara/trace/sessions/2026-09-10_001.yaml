@@ -4,7 +4,7 @@ session:
   started: 2026-09-10T00:11
   last_turn: 2026-09-10T06:45
   turn_count: 2
-  summary: '#303: hashing removed from the plan, then the multi-artifact map implemented and landed in six commits.'
+  summary: 'Hashing removed from the plan, then the multi-artifact map implemented and landed in six commits.'
 events_logged:
 - turn: 1
   type: decision
@@ -17,7 +17,7 @@ events_logged:
   id: N303_impl
   routing: direct
   provenance: user
-  summary: Implement #303 as five increments, each gated by two independent reviews.
+  summary: Implement the plan as five increments, each gated by two independent reviews.
 - turn: 2
   type: experiment
   id: N303_d3_split
@@ -85,15 +85,15 @@ key_context:
 open_threads:
 - 'Two map conformance anchors remain unwritten (cross-driver link rejection, structural
   merge): both need a policy with a premise-less rule, which no shipped policy has. Tracked
-  by issue #316.'
+  as a follow-up.'
 - 'The EXPECTED COMPOSITE VERDICT block in examples/agreement-map-multi/map.laramap is
   hand-transcribed and nothing checks it; map.verdict.sexp beside it is machine-pinned.
-  Tracked by issue #320.'
-- 'The end-to-end timing table has no committed regeneration harness. Tracked by issue #319.'
+  Tracked as a follow-up.'
+- 'The end-to-end timing table has no committed regeneration harness. Tracked as a follow-up.'
 - 'sameSelectorKind, firstDuplicate and strictlyAscending are triplicated across
-  Lara.Map.Wire, Lara.Map.Driver and Lara.Map.Load. Tracked by issue #317.'
+  Lara.Map.Wire, Lara.Map.Driver and Lara.Map.Load. Tracked as a follow-up.'
 - 'withTree derives its scratch directory name from openTempFile rather than reserving it,
-  in three test modules. Tracked by issue #318.'
+  in three test modules. Tracked as a follow-up.'
 ai_suggestions_pending:
 - 'C55 is ai-suggested: crystallized on artifact commitment, not on user affirmation.'
 

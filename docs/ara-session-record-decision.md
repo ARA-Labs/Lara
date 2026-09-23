@@ -2,18 +2,18 @@
 
 _Records the schema of the per-session trace files under
 `ara/trace/sessions/` and the projection rule that fixes what each
-`session_index.yaml` row must say about its file (issues #333, #337, #338;
-gate `scripts/check_ara_session_index.py`, `make ara-session-index`). Settled
+`session_index.yaml` row must say about its file (gate
+`scripts/check_ara_session_index.py`, `make ara-session-index`). Settled
 2026-09-12. The session file is authoritative; the index row is derived from
 it and is checked, never the other way round. The reading of
-`logic_revisions` entries as history was added 2026-09-13 (#340)._
+`logic_revisions` entries as history was added 2026-09-13._
 
 ## Why a record was needed
 
 The index is the only enumeration of the trace, so a row that disagrees with
-its file misreports the session to every reader that stops at the index. #333
-found exactly that (a duplicate row whose counts were stale), #337 gated
-totality and uniqueness, and #338 asked for the counts to be compared too. The
+its file misreports the session to every reader that stops at the index.
+Exactly that was found (a duplicate row whose counts were stale), which is
+why totality and uniqueness are gated and the counts are compared too. The
 comparison was not decidable until the file shape was fixed: the 79 files
 written between July and September 2026 came in six spellings, and a naive
 count of `events_logged` disagreed with 16 rows. This record states which
@@ -98,7 +98,8 @@ in `ara/logic/claims.md`, the `context` of the staged observation, or a
 `CORRECTED` note on the trace node. Never edit the past entry's `after:`. A
 review-round fix that rewords `ara/logic/` without crossing the CLAUDE.md
 threshold for a new session record therefore leaves the earlier entry stale
-compared with the logic file, and that is expected. #333 followed this rule:
+compared with the logic file, and that is expected. The motivating correction
+followed this rule:
 turn 4 of `2026-09-11_002` keeps an `after:` for C12's Conditions whose
 reasoning the same PR later withdrew, and the correction lives in the claim.
 
@@ -153,7 +154,7 @@ No corpus, fixture, or wire content was touched; no freeze tag moves.
 - **Keep the gate stdlib-only.** The files use block scalars, quoted strings
   with escapes and nested mappings; a line grammar would have to re-derive
   YAML. PyYAML is the gate's one dependency; CI supplies it with
-  `uv run --with pyyaml`, and the row enumeration still uses the #337 line
+  `uv run --with pyyaml`, and the row enumeration still uses the strict line
   grammar so a reshaped index fails loudly rather than being half-read.
 - **Sum the `open_threads` blocks.** Gives 21 for `2026-07-22_001` where the
   row (correctly) says 5; the blocks are snapshots, not increments.

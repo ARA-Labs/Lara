@@ -136,7 +136,7 @@ could get wrong*, and none of them changed what the kernel checks.
 ## 6. What this rule does not decide
 
 The rule says whether a convenience is **permissible**, not whether it is
-**worth building**. Those come apart, and #151 is the worked case: the binder
+**worth building**. Those come apart, and one worked case shows it: the binder
 half of the `nd@1` diagnostics is squarely layer 3 and therefore permitted, but
 the only sound implementation replaces the registered-backend seam's flat
 `String` rejection with a structured one — a shared seam that `ord@1` and `ra@1`
@@ -157,7 +157,7 @@ faithful to the checked artifact.
   reopening one.
 - **Scope split.** The core language may cite the design rule and layer 1
   as a language-design commitment. Layer-2 evaluation — how faithfully a
-  producer lowers prose — is deferred future work, along with #52.
+  producer lowers prose — is deferred future work.
 - Future ease-of-use proposals cite this note. A proposal that keeps layer 1
   deterministic and lowers to identical bytes needs no re-litigation; one that
   does not is a change to *this* document first.

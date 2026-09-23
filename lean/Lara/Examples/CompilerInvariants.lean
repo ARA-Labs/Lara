@@ -1,5 +1,5 @@
 /-
-M0 rejecting counterexamples (issue #183).
+M0 rejecting counterexamples.
 
 For each invariant the M0 carrier can express, the smallest structured
 framework that violates it, together with the corollary that no accepted unit
@@ -11,7 +11,7 @@ M1 rather than discovered during it.
 Invariants that live in the *source* judgment are rejected by programs, not by
 carriers. Subargument closure gets its witness here because the running fixture
 already supplies one; positional attack coherence is rejected by the inversion
-theorems of `Lara.Attack`, and strict-chain well-formedness waits on B0 (#182).
+theorems of `Lara.Attack`, and strict-chain well-formedness waits on B0.
 `docs/theory-m0-compilation-invariants.md` names each one.
 -/
 

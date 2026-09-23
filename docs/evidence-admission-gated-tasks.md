@@ -1,14 +1,14 @@
 # Evidence-admission gated tasks (`lara-evidence@0.1` — not planned)
 
-_Status: archival design record. Issue #78 (roadmap: evidence admission scope
-decision) closed 2026-08-26 as **not planned**: "The approved scope is
+_Status: archival design record. The roadmap's evidence-admission scope
+decision closed 2026-08-26 as **not planned**: "The approved scope is
 complete. The remaining `lara-evidence@0.1` work is not planned; its design
 remains preserved in the repository." This document is that preserved design.
 It replaces `plans/2026-08-04-rit-informed-evidence-admission.md` Tasks 3, 4,
 5, and 7, which were deleted 2026-09-09 once nothing under them remained live
 — the plan's Task 1/2/6 output already landed as
-`docs/evidence-admission-decision.md`, `docs/registration-receipt-contract.md`,
-and issues #76/#77. Read this as "if the inventory gate below is ever met and
+`docs/evidence-admission-decision.md`, `docs/registration-receipt-contract.md`.
+Read this as "if the inventory gate below is ever met and
 a researcher explicitly approves the work," not as scheduled work._
 
 The design boundary, judgment forms, outcome join, and negative guarantees

@@ -472,7 +472,7 @@ theorem compose_assoc_witness :
             (composedContext emptyHalf thirdHalf)).frame.imports.leaves := by
   decide
 
-/-! ### Composition is not closed for linkability (issue #229)
+/-! ### Composition is not closed for linkability
 
 `compose` merges material and does not saturate, so `sideOk_composed` takes
 the two cross-boundary quadrants as explicit hypotheses. This section converts

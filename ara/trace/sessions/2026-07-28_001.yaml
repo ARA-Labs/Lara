@@ -5,7 +5,7 @@ session:
   last_turn: "2026-07-28T12:00"
   turn_count: 1
   summary: >
-    Implemented M4a end-to-end (#31, PR #33): the .lara front-end (hand-rolled
+    Implemented M4a end-to-end (the PR): the .lara front-end (hand-rolled
     Lara.Syntax parser/printer in the TCB, no new dep; pure Lara.Elaborate
     Program+Policy->Unit; lara check extension-dispatch + co-located policy), the
     worked-examples suite (E1-E3 justified/gap/defeated+contested+justified, R1/R12/R10
@@ -79,7 +79,7 @@ events_logged:
 
 ai_actions:
   - turn: 1
-    action: "Executed the M4a plan task-by-task (fresh subagent per task + spec/quality review): A0 freeze, A0.5 grammar, A1a parser, A1b elaborator, A1c-1 CLI, A1c-2 examples, A2-1 dirs+differential, A2-2 expected.json, A3 Lean. Committed each step; pushed; refreshed PR #33."
+    action: "Executed the M4a plan task-by-task (fresh subagent per task + spec/quality review): A0 freeze, A0.5 grammar, A1a parser, A1b elaborator, A1c-1 CLI, A1c-2 examples, A2-1 dirs+differential, A2-2 expected.json, A3 Lean. Committed each step; pushed; refreshed the PR."
     provenance: ai-executed
     files_changed:
       - "src/Lara/Syntax.hs"
@@ -125,7 +125,7 @@ key_context:
       targeting a leaf occurrence).
 
 open_threads:
-  - "PR #33 awaits human review; the load-bearing check is Example A's narrative correction (undermine now targets the generalization leaf) in the m4a-checklist correction log."
+  - "The PR awaits human review; the load-bearing check is Example A's narrative correction (undermine now targets the generalization leaf) in the m4a-checklist correction log."
   - "A1a left two round-trip-guarded code-quality follow-ups: centralize structural keyword spellings (currently duplicated parser/printer); drop a double-reverse no-op in commaSep1."
   - "Deferred to TODOS as planned: a strict-certificate worked example (nd@1 frontend cert path); result-9 backend-replacement mechanization (eraseCert/CheckedProgram)."
   - "O16 (hand-authored-cert-not-self-checking) staged as a claim candidate bound to N71 + C11 — awaits affirmation or further instances."

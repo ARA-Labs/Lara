@@ -128,7 +128,7 @@ class SessionIndexTests(unittest.TestCase):
     def validate(self):
         return load_checker().validate_sessions(self.sessions)
 
-    # -- totality and uniqueness (#337) -------------------------------------
+    # -- totality and uniqueness --------------------------------------------
 
     def test_accepts_bijection_between_rows_and_files(self):
         for session_id in ("2026-07-21_001", "2026-07-22_001", "2026-09-09_issue279"):
@@ -228,7 +228,7 @@ class SessionIndexTests(unittest.TestCase):
         self.write_index(INDEX_HEADER + row("2026-07-21_001"))
         self.assertEqual(checker.main(["--sessions-dir", str(self.sessions)]), 0)
 
-    # -- field agreement (#338) ---------------------------------------------
+    # -- field agreement ----------------------------------------------------
 
     def test_accepts_row_that_agrees_with_its_file(self):
         self.write_session(

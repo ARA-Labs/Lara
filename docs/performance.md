@@ -132,7 +132,7 @@ compiled run beat this *quiet*-machine interpreted snapshot on every metric
 Load inflates timings and never deflates them, so the harness is the
 explanation, not noise. The `~203 µs` control-row reference above is
 therefore itself an interpreted-harness artifact, not a compiled-harness
-baseline; #120 also found no host available to the project reaches the
+baseline; that follow-up also found no host available to the project reaches the
 container publication runner's quiet-window gate, so no corrected snapshot
 has been produced. Treat every number in this section as an upper bound from
 a retired harness until a fresh compiled-harness snapshot replaces it.
@@ -144,7 +144,7 @@ make bench-map                     # aligned text (default)
 make bench-map FORMAT=markdown     # markdown
 ```
 
-`make bench-map` runs `lara-bench --map` (issue #319). It measures every
+`make bench-map` runs `lara-bench --map`. It measures every
 **accepted** `map.laramap` conformance anchor, which are the maps
 `scripts/check-map-conformance.sh` discovers under `test/fixtures/map/` and
 `examples/agreement-map-multi/`. It writes the raw record to
@@ -185,7 +185,7 @@ Measured at commit `ad513b5` on 2026-09-11 with
 cores. The CPU and RAM fields were supplied through `LARA_BENCH_HOST_CPU` and
 `LARA_BENCH_HOST_RAM_BYTES`, because at that commit the environment probe
 read only macOS `sysctl`; the Linux probe (`/proc/cpuinfo`, `/proc/meminfo`)
-landed afterwards with issue #325, so the next snapshot needs no overrides.
+landed afterwards, so the next snapshot needs no overrides.
 Like the kernel snapshot, this is indicative: re-run it rather than cite it.
 
 _Setting: 3 accepted map anchors; AMD EPYC 9354 32-Core Processor, 1507 GB RAM,

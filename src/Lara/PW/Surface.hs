@@ -1,4 +1,4 @@
--- | The possible-world outer surface (#307, #313, #314): the Haskell mirror of
+-- | The possible-world outer surface: the Haskell mirror of
 -- the authoring AST in @lean\/Lara\/PW\/Surface.lean@.
 --
 -- A 'BridgeDecl' declares a bridge between two named contexts, with its

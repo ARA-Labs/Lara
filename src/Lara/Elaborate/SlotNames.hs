@@ -1,4 +1,4 @@
--- | The authored spelling of a rule instance's premise slots (#130).
+-- | The authored spelling of a rule instance's premise slots.
 --
 -- When a registered backend refuses a certificate, the rejection is phrased
 -- over premise /slots/ — @(prem 0)@, @(prem 1)@ — because that is the only

@@ -1,4 +1,4 @@
-/- Executable companion to the separately proved #350 structural witness. -/
+/- Executable companion to the separately proved structural witness. -/
 import Lara.Examples.AxiomWithdrawal
 
 open Lara.Examples.AxiomWithdrawal

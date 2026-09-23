@@ -5,13 +5,13 @@ session:
   last_turn: "2026-08-05T15:57"
   turn_count: 2
   summary: >
-    Closed issue #80's production mechanization gap locally: exact raw-ID retention,
+    Closed the issue's production mechanization gap locally: exact raw-ID retention,
     aligned resolved attacks, compact-to-declared AF embedding, production blocked-support
     discharge, and a checkUnit_sound-instantiated justified non-promotion theorem. Corrected
     evidence-blocked wording/tag rendering, verdict-grammar locator, multi-blocked wire
     malformed coverage, stale prose, and the frozen positive-anchor count. All gates pass:
     cabal test, Lean build, axiom audit, differential 435/435 positive + 54/54 negative.
-    Turn 2 published commit bd2896a to PR #79, synchronized the PR description, and
+    Turn 2 published commit bd2896a to the PR, synchronized the PR description, and
     replied with evidence on all 10 unresolved review threads without self-resolving them.
 
 events_logged:
@@ -73,7 +73,7 @@ ai_actions:
       - ara/evidence/README.md
   - turn: 2
     action: >
-      Committed and pushed bd2896a; replaced the stale PR #79 description with the exact
+      Committed and pushed bd2896a; replaced the stale PR description with the exact
       production theorem/equal-support/count wording; replied individually to all 10 unresolved
       review threads and posted a verification summary, leaving resolution to the reviewer.
     provenance: ai-executed
@@ -102,7 +102,7 @@ key_context:
       reports 435/435 positive anchors, and reports existing Lean warnings accurately.
 
 open_threads:
-  - "PR #79 awaits reviewer re-review and thread resolution after bd2896a"
-  - "Issue #80 should close when the production bridge merges; it was not closed ahead of landing"
+  - "The PR awaits reviewer re-review and thread resolution after bd2896a"
+  - "Should close when the production bridge merges; it was not closed ahead of landing"
 
 ai_suggestions_pending: []

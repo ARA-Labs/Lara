@@ -102,7 +102,7 @@ formalization of the paper sentences.
 
 ## Candidate: `adaptive-pruning` (APT)
 
-Chosen from the ara-paperbench corpus as issue #62 flags: APT's kurtosis-salience ablation is **single-run**, so `corpus-v1`'s mandatory `variance_reported` critical question has no discharging leaf and the ablation claim lands `gap` (corpus unit `corpus-units/adaptive-pruning/C04`). That annotated gap is exactly what a rebuttal round can discharge when the author supplies variance runs — a real `gap → justified` transition, not a synthetic one. The demo carries the **defeasible ablation leg only**; C04's separate `ra@1` arithmetic certificate is orthogonal to the review exchange and is omitted here.
+Chosen from the ara-paperbench corpus as the corpus annotation flags: APT's kurtosis-salience ablation is **single-run**, so `corpus-v1`'s mandatory `variance_reported` critical question has no discharging leaf and the ablation claim lands `gap` (corpus unit `corpus-units/adaptive-pruning/C04`). That annotated gap is exactly what a rebuttal round can discharge when the author supplies variance runs — a real `gap → justified` transition, not a synthetic one. The demo carries the **defeasible ablation leg only**; C04's separate `ra@1` arithmetic certificate is orthogonal to the review exchange and is omitted here.
 
 The demo constructs three claims from the paper so the review round has arguments to attack and the rebuttal round has a gap to discharge. Two use scheme families with **no** variance CQ (`benchmark_evaluation`, `measurement`), so they are honestly `justified` at submission without seeds; the third is the single-run ablation (`component_ablation`), `gap` at submission.
 
@@ -182,4 +182,4 @@ Each `example.lara` carries a bottom-of-file golden-oracle comment (the expected
 
 ## Scaled version (out of scope)
 
-LLM elaboration of real OpenReview threads at scale, and correlation studies of LARA verdicts vs. human reviewer complaints, are deferred future work (tracker #61). Here the reviews are **hand-lowered** per the corpus-unit discipline, grounded in the gaps the C04 annotation already documents.
+LLM elaboration of real OpenReview threads at scale, and correlation studies of LARA verdicts vs. human reviewer complaints, are deferred future work. Here the reviews are **hand-lowered** per the corpus-unit discipline, grounded in the gaps the C04 annotation already documents.

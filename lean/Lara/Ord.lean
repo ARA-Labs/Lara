@@ -1,5 +1,5 @@
 /-
-The ordered-comparison domain-checker backend `ord@1` (issue-tracked as PR #83;
+The ordered-comparison domain-checker backend `ord@1` (
 design records: `docs/strict-backend-decision.md` for the backend seam and
 `docs/ord1-corpus-extension-decision.md` for what an accepted step certifies).
 

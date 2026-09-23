@@ -1,7 +1,7 @@
 # Theory PW0: the possible-world outer-model gate
 
 _Status: mechanized for the possible-world semantics spike on 2026-09-02
-(issue #192, tracker #189). This document records what PW0 froze, what it
+for PW0. This document records what PW0 froze, what it
 proved, what it deliberately left out, and the three limitations of the frozen
 contract that its successors inherit._
 
@@ -12,7 +12,7 @@ wraps unchanged local judgments in a frame of worlds to make that question
 statable. `theory-pw-closeout.md` indexes the four PW records._
 
 The intended readers are the paper author, whoever takes the exit decision on
-#192, and whoever implements T6 (#191). They should cite the declarations below
+PW0, and whoever implements T6. They should cite the declarations below
 rather than re-deriving them.
 
 PW0 adds an outer comparison layer over **unchanged** local Lara judgments.
@@ -166,7 +166,7 @@ symmetric edge would leave `p` *contested* rather than defeated.
 
 ## 3. Gate assessment
 
-The five advancement-gate conditions of #189 / #192:
+The five advancement-gate conditions of the spike / PW0:
 
 1. **The wrapper changes no local checking, compilation, grounded labelling, or
    status behavior.** Mechanized as an import discipline and verified by the
@@ -238,7 +238,7 @@ layer separates only the bridge-domain case, and reports it as
 `overlap_translationUndefined` fixes for the source-only claim `s`. The rest
 waits on the M5 well-sortedness refinement.
 
-_Narrowed, not closed, by #307 (`docs/theory-pw-sorted-queries.md`)._ Refining
+_Narrowed, not closed, by the sorted-queries refinement (`docs/theory-pw-sorted-queries.md`)._ Refining
 `Query_κ` to well-sorted claims over `Σ_κ` removes the two Σ-level conditions:
 an out-of-vocabulary or ill-sorted atom is not a query, so `PW.Sorted.pose`
 reports it — naming which — before any world is consulted, and
@@ -265,31 +265,31 @@ this context" must not be read as "this artifact". Nothing pins the program.
 
 ## 5. What PW0 deliberately does not contain
 
-Read as of PW0. The first three rows have since landed — T6 (#191), T8 (#193),
-and T9 (#190) — and tracker #189 is closed; `docs/theory-pw-closeout.md` is the
+Read as of PW0. The first three rows have since landed — T6, T8,
+and T9 — and the spike is closed; `docs/theory-pw-closeout.md` is the
 spike index and the home of everything the tracker deferred.
 
 | Absent | Home |
 |---|---|
-| Structural bridges, T6 (exact checked-support transport) | **#191**, gated by the #192 exit decision on tracker #189 |
-| T8 (conditional status preservation) | **#193** |
-| T9 (exact structural-path composition) | **#190** |
-| T10 and beyond | `docs/theory-pw-closeout.md` §3 (moved there when tracker #189 closed) |
+| Structural bridges, T6 (exact checked-support transport) | Gated by the PW0 exit decision; landed — `docs/theory-pw-t6-structural-transport.md` |
+| T8 (conditional status preservation) | `docs/theory-pw-t8-status-preservation.md` (landed) |
+| T9 (exact structural-path composition) | `docs/theory-pw-t9-path-composition.md` (landed) |
+| T10 and beyond | `docs/theory-pw-closeout.md` §3 (moved there when the spike closed) |
 | Approximation bridges | `docs/theory-pw-closeout.md` §3 |
 | Epistemic relations, dynamic update operators, hybrid/named-world operators | `docs/theory-pw-closeout.md` §3 |
 | Global scenarios | `docs/theory-pw-closeout.md` §3 |
-| Surface syntax for the outer language | **Landed** (#307) — `docs/theory-pw-sorted-queries.md` |
-| Well-sortedness refinement of `Query_κ` | **Landed** (#307) — `docs/theory-pw-sorted-queries.md`; limitation 2 above |
-| Sensitivity predicates (`WorldSensitive`, `ContextSensitive`) | In the design doc but **not** in #192's Work list — excluded as YAGNI |
+| Surface syntax for the outer language | **Landed** — `docs/theory-pw-sorted-queries.md` |
+| Well-sortedness refinement of `Query_κ` | **Landed** — `docs/theory-pw-sorted-queries.md`; limitation 2 above |
+| Sensitivity predicates (`WorldSensitive`, `ContextSensitive`) | In the design doc but **not** in PW0's work list — excluded as YAGNI |
 | Stronger modal laws (T, 4, B, D, 5) | Not posited; they belong only to bridges whose accepted relations satisfy the corresponding relational laws. All five are refuted on PW0-legal frames: `sat_T_fails`, `sat_D_fails`, `sat_B_fails`, `sat_5_fails` (two-world frame), `sat_4_fails` (three-world chain) |
 
-## 6. T6 feasibility note (#191)
+## 6. T6 feasibility note
 
-Input to the #192 exit decision; the decision itself is taken on the issue, not
-here. The work this section sizes is tracked by **#191** (*theory(PW-T6):
-prove exact checked-support transport*); its two successors are **#193** (T8,
+Input to the PW0 exit decision; the decision itself is taken in the gate record, not
+here. The work this section sizes is T6 itself (*theory(PW-T6):
+prove exact checked-support transport*); its two successors are T8 (
 conditional status preservation — the theorem whose boundary `t7_witness`
-fixes) and **#190** (T9, exact structural-path composition).
+fixes) and T9 (exact structural-path composition).
 
 A `StructuralBridge` contract would need, from B0's occurrence-level
 obligations, enough to relate a source support term's occurrences to target

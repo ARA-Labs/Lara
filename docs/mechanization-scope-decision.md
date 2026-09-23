@@ -1,8 +1,8 @@
 # Decision: what the Lean development mechanizes, and when a checker-boundary flag owes an `AxCheck.lean` entry
 
-_Records the settled scope rule for the Lean development, fixed when issue #124
-split the attack-completeness scan out of the typed-attack bundle and added a
-third `Lara.Check.CheckConfig` flag. The implementation plan that produced the
+_Records the settled scope rule for the Lean development, fixed when the
+attack-completeness scan was split out of the typed-attack bundle and a
+third `Lara.Check.CheckConfig` flag added. The implementation plan that produced the
 split has since been executed and deleted, per the `plans/` rule; this record
 carries the durable half, and the cycle it fed is `m5-freeze-v5`
 (`docs/m5-freeze-checklist.md`). Companion to
@@ -45,7 +45,7 @@ and easy to check, but it only says the flag is absent — it does not answer
 "what if the split changed `fullConfig`?".
 
 **The strong one: `fullConfig`'s behaviour is pinned independently.** The
-conflict scan — the stage #124 made separately ablatable — is itself fully
+conflict scan — the stage the split made separately ablatable — is itself fully
 mechanized *and* axiom-checked. Six `AxCheck.lean` entries cover it:
 
 | `AxCheck.lean` | theorem |
@@ -72,7 +72,7 @@ the reporting vocabulary for `ablation.{json,tsv}`.
 
 The distinction matters: enumerating only the named list left five states
 unenforced, including `ccTypedAttacks = False, ccConflictScan = True`, which
-first became reachable when #124 split the two. Three flags is eight states and
+first became reachable when the two flags were split. Three flags is eight states and
 needs no new fixtures, so the property quantifies over the whole record and the
 enforcement matches the claim exactly.
 

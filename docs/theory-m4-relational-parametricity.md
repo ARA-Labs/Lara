@@ -1,4 +1,4 @@
-# Relational Parametricity over Related Backends (issue #215)
+# Relational Parametricity over Related Backends
 
 **Landed 2026-09-08.** Lean-only, purely additive. No corpus regeneration, no
 freeze-tag bump, no Haskell change.
@@ -11,9 +11,9 @@ fragments' assurances correspond — so unobservability follows for whole
 families of backend variations at once._
 
 Modules: `lean/Lara/ListRel.lean`, `lean/Lara/Context/Parametricity.lean`.
-The original #215 edits outside those two were import lines in `lean/Lara.lean` and the
-pin block in `lean/AxCheck.lean`. #279 adds `Context/FiniteExtension.lean` and
-corrects the extension argument below; #275 adds `Examples/CertificateCollapse.lean`
+The original edits outside those two were import lines in `lean/Lara.lean` and the
+pin block in `lean/AxCheck.lean`. A follow-up adds `Context/FiniteExtension.lean` and
+corrects the extension argument below; another adds `Examples/CertificateCollapse.lean`
 (§3.2). Every pre-existing Lean declaration is
 untouched — in particular `backend_replacement_congruence` keeps its name, its
 statement and its proof.
@@ -24,7 +24,7 @@ statement and its proof.
 
 M4 Part A's headline, `Lara.Context.backend_replacement_congruence`
 (`lean/Lara/Context/Equivalence.lean:831`), quantifies over a **function**
-`f : Assurance → Assurance` and relates `F` to `mapAssurFrag f F`. #187's
+`f : Assurance → Assurance` and relates `F` to `mapAssurFrag f F`. M4's
 acceptance criterion reserves the word *parametricity* for a **relational**
 quantifier. This is that theorem with the function replaced by a relation:
 
@@ -150,7 +150,7 @@ already carries `RelInj`, so nothing downstream weakens.
 
 ---
 
-### 3.2 The observation-level witness (#275)
+### 3.2 The observation-level witness
 
 `lean/Lara/Examples/CertificateCollapse.lean` uses a context that declares the
 premise and attacker leaves but contributes no arguments. The fragment has two
@@ -192,7 +192,7 @@ This section is the milestone's justification. It is not obvious and it is
 easy to overstate, so it is stated in full.
 
 The structural step is now mechanized in
-`lean/Lara/Context/FiniteExtension.lean` (#279):
+`lean/Lara/Context/FiniteExtension.lean`:
 
 ```lean
 theorem relFrag_exists_injective_fixesContext
@@ -212,7 +212,7 @@ No enumeration of `Assurance`, decidability of `R`, or Mathlib is needed;
 classical choice handles the existential case split.
 
 **Extending all of an arbitrary `R` is false, even on this countably infinite
-type.** The proposed statement in #279 confused finite realization with an
+type.** The proposed statement confused finite realization with an
 unrestricted extension. `not_every_relInj_has_total_extension` mechanizes the
 counterexample: `shiftAssurance` increments every certificate's backend
 version, fixing `none` and `trusted`. It is injective and misses certificates
@@ -276,7 +276,7 @@ occurrence-local *registry swap* at the grounded reading **is**
 
 ## 5. Why the grounded fixpoint needed nothing
 
-#215 stated its own sizing risk: *"if it generalizes from 'equal profiles' to
+The milestone stated its own sizing risk: *"if it generalizes from 'equal profiles' to
 'R-related profiles' without new machinery this is cheap; if the grounded
 fixpoint argument needs the equality it is not."*
 
@@ -343,21 +343,21 @@ The chain, with the erasure point marked (the same diagram is embedded in
               └─► backend_replacement_congruence_of_parametricity  (the
                     └─► congruence_correspondence   functional theorem,
                                                     via graphOf)
-  Composition (#277): dedupList_rel + the two RelFixesContext hypotheses
+  Composition: dedupList_rel + the two RelFixesContext hypotheses
       ──► relFixesContext_composed
       ──► obsGen_parametricity_composed (obsGen_parametricity at the composite)
         ├─► backend_replacement_parametricity_composed_sem
         └─► backend_replacement_parametricity_composed
       admissible_composed supplies admissibility from the halves unchanged.
 
-  Closed-link union (#277): occurrences_composed + mem_closedOccurrences
+  Closed-link union: occurrences_composed + mem_closedOccurrences
       closedOccRel ──► relInj_closedOccRel, relFrag_closedOccRel,
                       relFixesContext_closedOccRel
       ──► obsGen_parametricity_closed_local (instance of obsGen_parametricity)
         ├─► whole_program_parametricity_local_sem
         └─► whole_program_parametricity_local
 
-  Already-checked whole programs (#277), a separate carrier route:
+  Already-checked whole programs, a separate carrier route:
       coveredB_rel ──► edgeB_rel ──► checkedAF_rel
         ├─► whole_program_parametricity_sem
         └─► whole_program_parametricity
@@ -406,7 +406,7 @@ two side hypotheses `hC` and `hA`: the localization is to `F`'s occurrences
   certificate occurrences** (`backend_replacement_parametricity_local`,
   `_local_sem`) — the localization the docstrings of `registry_swap_congruence`
   and `registry_swap_congruence_sem` name as the hypothesis they do not
-  themselves carry, and point at by name (#276). State the trade, not
+  themselves carry, and point at by name. State the trade, not
   a pure upgrade: the localized theorem is **not** strictly stronger than
   `registry_swap_congruence`. It weakens the acceptance hypothesis to
   `α ∈ occurrences F` but **adds** `hC` and `hA`, requiring the context's own
@@ -435,7 +435,7 @@ two side hypotheses `hC` and `hA`: the localization is to `F`'s occurrences
 - **Not full abstraction.** `RelTerm` is a *structural lifting of a relation on
   certificates*. It is **not** the logical relation over the contrary-visible
   occurrence profile that `docs/theory-m4-contextual-adequacy.md` §7's G1
-  describes, and nothing here reopens Part B. #215 landing does **not** amortize
+  describes, and nothing here reopens Part B. This landing does **not** amortize
   the G1 freeze.
 - **Not unconditional in the context quantifier.** `Admissible reg₁ C F₁` is
   inherited, for the reason `backend_replacement_congruence` records: `obs`
@@ -448,10 +448,10 @@ two side hypotheses `hC` and `hA`: the localization is to `F`'s occurrences
   a non-injective function: it violates equality reflection, not single-valuedness.
   It does not establish necessity of each half of `RelInj` separately or prove
   that no weaker, carrier-specific hypothesis could suffice.
-- **Not arbitrary relations, even across the completed family.** #277 adds
+- **Not arbitrary relations, even across the completed family.** The follow-up adds
   composed and whole-program companions (§8); each keeps `RelInj`. The original
   functional APIs remain unchanged.
-- **Not an extension of all pairs of an arbitrary relation.** #279 proves
+- **Not an extension of all pairs of an arbitrary relation.** The finite-extension follow-up proves
   finite realization, including context fixing, and refutes the unrestricted
   extension statement on `Assurance`. Global acceptance preservation remains
   an independent hypothesis; no strict-separation witness for its failure is
@@ -463,7 +463,7 @@ two side hypotheses `hC` and `hA`: the localization is to `F`'s occurrences
 ## 8. Verification
 
 - `lake build` clean; `Lara/ListRel.lean` and `Lara/Context/Parametricity.lean`
-  are both inside the build closure (a `.olean` exists for each — the #259
+  are both inside the build closure (a `.olean` exists for each — the known closure
   failure mode).
 - `scripts/check-axioms.sh` clean: every new declaration depends only on
   `propext`, `Classical.choice`, `Quot.sound`. No `sorry`, no `native_decide`
@@ -478,7 +478,7 @@ two side hypotheses `hC` and `hA`: the localization is to `F`'s occurrences
   this option is the only thing that can.
 
 
-## 8. Composed and whole-program companions (#277)
+## 8. Composed and whole-program companions
 
 All four semantics-parametric M4 congruences now have relational companions:
 

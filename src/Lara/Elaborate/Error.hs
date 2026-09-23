@@ -45,14 +45,14 @@ data ElabError
     ThetaReferenceConclUnderivable ArgId RuleId Int ArgRef
   | -- | a rule parameter is absent from every inferred premise binding.
     ThetaParameterUnbound ArgId RuleId Param
-    -- * Named certificate premise slots (@lara-syntax\@0.6@, #105; @\@0.8@, #131)
+    -- * Named certificate premise slots (@lara-syntax\@0.6@; @\@0.8@)
     --
     -- | Each names the citing @arg@, the certificate backend and version,
     -- and the offending reference as structured identifiers. The renderer
     -- alone constructs the author's @beta\@version@ spelling. The scope
     -- extends the one 'ThetaReferenceUnresolved' and 'ThetaReferenceAmbiguous'
     -- police — declared leaves and prior arguments — with the citing rule's
-    -- declared premise labels (@\@0.8@, #131), but the failures are their own
+    -- declared premise labels (@\@0.8@), but the failures are their own
     -- family because a certificate cites a /premise slot of one instance/,
     -- not a θ position, and the author's fix differs.
     --
@@ -64,7 +64,7 @@ data ElabError
   | -- | the reference names both a declared leaf and a prior argument.
     CertSlotAmbiguous ArgId BackendId Int ArgRef
   | -- | the reference names both a premise label of the citing rule and a
-    -- declared leaf or prior argument (#131). Rejected even when the two
+    -- declared leaf or prior argument. Rejected even when the two
     -- classes agree on the slot: one collision policy, no carve-outs.
     CertSlotLabelAmbiguous ArgId BackendId Int ArgRef RuleId
   | -- | the reference resolves, but to nothing this instance takes as a premise.
@@ -84,8 +84,8 @@ data ElabError
     -- wire there, so the certificate is rejected here rather than handed to a
     -- backend that must refuse it (the dead-wire rule).
     CertSlotSchemaMismatch ArgId BackendId Int ArgRef
-    -- * Named natural-deduction proof terms (@lara-syntax\@0.9@, #132;
-    -- formula annotations @lara-syntax\@0.10@, #144)
+    -- * Named natural-deduction proof terms (@lara-syntax\@0.9@;
+    -- formula annotations @lara-syntax\@0.10@)
   | CertNdBinderUnbound ArgId BackendId Int ArgRef
   | CertNdBinderShadowed ArgId BackendId Int ArgRef
   | CertNdBinderShadowsPremise ArgId BackendId Int ArgRef
@@ -109,7 +109,7 @@ data ElabError
     -- place the source identifier is unwrapped.
     UnresolvedDischarge ArgId QuestionId ArgRef
   | -- | a @discharge q with ref@ whose @ref@ names /both/ a declared leaf and a
-    -- prior arg (#129): @arg@, @question@, the reference. The one collision
+    -- prior arg: @arg@, @question@, the reference. The one collision
     -- policy shared with 'ThetaReferenceAmbiguous' and 'CertSlotAmbiguous' —
     -- a shadowed discharge target is never silently resolved to the leaf.
     AmbiguousDischarge ArgId QuestionId ArgRef
@@ -184,7 +184,7 @@ data ElabError
     ComparisonUndeclaredMeasurand PropId MeasurandId
   | -- | the measurand after @on@ is declared but carries no polarity clause
     -- (App. B.1). Polarity is @Num@-gated and optional since @lara-core\@0.2@
-    -- opened the sort slot (#89 D-1), so a measurand can be well-formed and
+    -- opened the sort slot (D-1), so a measurand can be well-formed and
     -- still be unusable as a comparison key.
     ComparisonMeasurandNoPolarity PropId MeasurandId
   | -- | the policy declares no @comparison-scheme@ for the block's
@@ -498,7 +498,7 @@ elabErrorMessage e = case e of
   ComparisonDuplicateBlock c (PropId other) ->
     cmpPrefix c ++ "duplicates the comparison claiming '" ++ other ++ "'"
 
--- | Location prefix for a certificate premise reference (#105): the citing
+-- | Location prefix for a certificate premise reference: the citing
 -- @arg@, the certificate's @beta\@version@, and the reference as written.
 -- 'CertSlotSchemaMismatch' is the one member of the family that does not use
 -- it — that failure is about the payload, and only mentions the reference to

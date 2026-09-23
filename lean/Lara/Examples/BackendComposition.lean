@@ -516,7 +516,7 @@ A discharge position only exists under a *defeasible* ancestor: `InstSide`'s
 discharge subterm needs a defeasible parent above it.  `ruleMix` supplies one —
 mandatory question `q1`, optional `q2` — and the certified node sits at `q1`.
 
-This defeasible-ancestor shape is also what issue #191 (PW-T6) will need, which
+This defeasible-ancestor shape is also what PW-T6 will need, which
 is why it is built here rather than inline in a later milestone. -/
 
 /-- Defeasible parent with the shipped `nd@1` node discharging `q1`. -/

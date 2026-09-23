@@ -5,9 +5,9 @@ session:
   last_turn: "2026-08-31T18:26"
   turn_count: 3
   summary: >
-    Audited, closed, and shipped the issue-#209 implementation record: all
+    Audited, closed, and shipped the issue- implementation record: all
     thirteen plan tasks are implemented, the renewed gate is HARDNESS, C44/C45
-    are supported, and O109 crystallized as C46. PR #212's first review
+    are supported, and O109 crystallized as C46. The PR's first review
     correction registers the missing public theorem rows, pins the leaf-ID
     spelling contract, fixes the quartic parameter summary, and narrows C44's
     cost and realization-transfer wording to exactly what the proofs establish.
@@ -37,18 +37,18 @@ events_logged:
     id: "N266"
     routing: direct
     provenance: ai-executed
-    summary: "Pushed theory/m2b-realization-closure and opened implementation PR #212 against main with the complete proof, audit, and verification record."
+    summary: "Pushed theory/m2b-realization-closure and opened implementation the PR against main with the complete proof, audit, and verification record."
   - turn: 3
     type: experiment
     id: "N267"
     routing: direct
     provenance: ai-executed
-    summary: "Upheld and corrected all five PR #212 findings: audit completeness, leaf-ID spellings, quartic parameterization, realization direction, and fixed-size cost scope."
+    summary: "Upheld and corrected all five the PR findings: audit completeness, leaf-ID spellings, quartic parameterization, realization direction, and fixed-size cost scope."
 
 ai_actions:
   - turn: 1
     action: >
-      Reconstructed and audited the eighteen-commit branch against issue #209,
+      Reconstructed and audited the eighteen-commit branch against the issue,
       the preserved thirteen-task plan, the durable M2b decision record, the
       registered AxCheck surface, and fresh repository build/test results; then
       reconciled C44/C45, promoted O109 to C46, repaired superseded source-span
@@ -66,7 +66,7 @@ ai_actions:
   - turn: 2
     action: >
       Pushed theory/m2b-realization-closure with upstream tracking and opened
-      PR #212 against main with the thirteen-task completion map, contract-family
+      The PR against main with the thirteen-task completion map, contract-family
       coverage audit, clean adversarial review, and local verification results.
     provenance: ai-executed
     files_changed:
@@ -76,7 +76,7 @@ ai_actions:
       - "ara/trace/sessions/session_index.yaml"
   - turn: 3
     action: >
-      Verified all five PR #212 findings against the theorem definitions and
+      Verified all five review findings against the theorem definitions and
       proof scope; added the missing AxCheck registrations and closed spelling
       fixtures, corrected the quartic summary, narrowed the grounded-cost and
       realization-transfer claims across the Lean/docs/ARA surfaces, and ran
@@ -321,9 +321,9 @@ logic_revisions:
     field: Operationalization
     before: >
       Operationalized by the follow-up plan
-      (`plans/2026-08-30-m2b-realization-followup.md`, PR #210, issue #209).
+      (`plans/2026-08-30-m2b-realization-followup.md`, the PR, the issue).
     after: >
-      Issue #209 discharges this constraint through the compositional-lemma
+      The issue discharges this constraint through the compositional-lemma
       architecture in `lean/Lara/Complexity/Gadget.lean`; the durable account
       is `docs/theory-m2b-complexity.md`, and the retired execution plan is
       preserved at git object
@@ -473,11 +473,11 @@ key_context:
       implementation-PR delivery to be completed now.
   - turn: 2
     excerpt: >
-      Branch theory/m2b-realization-closure is on origin and PR #212 is open
-      against main with Closes #209.
+      Branch theory/m2b-realization-closure is on origin and the PR is open
+      against main with Closes.
   - turn: 3
     excerpt: >
-      PR #212's first review requested five corrections. Repository evidence
+      The PR's first review requested five corrections. Repository evidence
       upheld all five; the corrected scope preserves the mechanized quartic
       worst case while withdrawing the unsupported inference from one size-two
       regression to asymptotic optimality.

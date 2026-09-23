@@ -1,5 +1,5 @@
 /-
-# PW-T9 — exact structural-path composition (issue #190, tracker #189)
+# PW-T9 — exact structural-path composition
 
 Composition of the T6 layer, three levels deep:
 
@@ -33,7 +33,7 @@ Composition of the T6 layer, three levels deep:
 
 Nothing here concerns approximation bridges: composition for those needs
 separate domains, observables, comparison spaces, and error/convergence
-laws, and remains deferred (issue #190's boundary).
+laws, and remains deferred (the T9 boundary).
 
 This new module imports T6 without modifying its modules or definitions; the
 composition definitions and theorems below are local to this module.
@@ -72,7 +72,7 @@ theorem SymMap.comp_id (m : SymMap) : m.comp SymMap.id = m := by
   cases m
   rfl
 
-/-! ### The shared traversal seam (issue #234) -/
+/-! ### The shared traversal seam -/
 
 /-- All-or-nothing combination: the step every elementwise traversal takes. -/
 def zipOpt {α β γ : Type} (k : α → β → γ) : Option α → Option β → Option γ

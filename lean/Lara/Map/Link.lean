@@ -1,7 +1,7 @@
 /-
 # Multi-artifact maps, part 2 — the N-member fold
 
-The mechanized half of `Lara.Map.Link` (issue #303). `Lara.Context.Link` proves
+The mechanized half of `Lara.Map.Link`. `Lara.Context.Link` proves
 the linking calculus for a **two-sided** link: `link_attackComplete` shows the
 saturated attack list satisfies `Compile.AttackComplete`, and `link_checked`
 shows a well-linked composition of two well-formed sides is accepted by the
@@ -43,7 +43,7 @@ whole map's environment — and neither calls `linkMembers`. `Lara.Map.Batch` is
 that construction and `Lara.Map.batch_checked` its acceptance theorem, stated up
 to membership so that it applies to the drivers' own spelling of the unit;
 `Lara.Map.Driver.linkedUnitOf_checked` instantiates it at the Lean driver's.
-This module adds the agreement (issue #321): `linkMembers_emits` characterizes
+This module adds the agreement: `linkMembers_emits` characterizes
 what the fold produces by the shared `Lara.Map.Emits`, and
 `batch_atts_mem_iff_fold` / `batch_args_mem_iff_fold` show the batch produces
 the same arguments and the same attacks. It is not a reordering argument. Each
@@ -292,7 +292,7 @@ on the Lean side), and neither calls `linkMembers` or `linkStep`. That batch
 construction has its own acceptance theorem, `Lara.Map.batch_checked`, proved
 directly rather than transferred from this one, and `batch_atts_mem_iff_fold` /
 `batch_args_mem_iff_fold` below show the two constructions produce the same
-arguments and the same attacks (issue #321). `Lara.Map.Driver.linkedUnitOf_checked`
+arguments and the same attacks. `Lara.Map.Driver.linkedUnitOf_checked`
 instantiates the batch theorem at the Lean driver's own linked unit. What stays
 outside the proofs is the frontend's side of the boundary — that each member is
 well-formed on its own is the solo check the Haskell loader runs, which no
@@ -524,7 +524,7 @@ theorem declared_nodup_of_qualified :
         exact List.mem_map.mpr ⟨q, hq, rfl⟩
       exact qualifyLeaf_ne_of_alias_ne hne l₀ l₁ hab
 
-/-! ### The fold and the batch emit the same attacks (issue #321)
+/-! ### The fold and the batch emit the same attacks
 
 The drivers do not run the fold. They merge every member's arguments into one
 list and saturate all cross-member pairs at once, under one cache computed in
@@ -740,7 +740,7 @@ theorem linkMembers_emits {canon : String → String} {reg : BackendRegistry can
     (by intro w; simp [emptyMap, closedTail])
     (by intro k; simp [emptyMap, closedTail, Emits])
 
-/-- **The batch emits exactly the fold's attacks** (issue #321): the drivers'
+/-- **The batch emits exactly the fold's attacks**: the drivers'
 all-pairs saturation over the merged arguments, with the reference
 cross-member predicate `ownedApart`, and the fold's per-step boundary
 saturation produce the same attack set. Order and multiplicity differ, and

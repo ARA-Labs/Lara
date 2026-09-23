@@ -18,7 +18,7 @@
 -- and surface-variant supports, so identity canonicalization would publish
 -- @justified@ while @canonNum@ correctly reports @evidence-blocked@.
 --
--- PR #44 review anchors: three replay-preflight fixtures
+-- Review anchors: three replay-preflight fixtures
 -- (@reject-preflight-*.sexp@, review C3) pin the runtime preflight's
 -- duplicate → unknown → unselected-certificate precedence (each rejects R13
 -- under a deliberately broken backend selection), and
@@ -65,7 +65,7 @@ mkUnit rules contraries exceptions ls as ats qs =
     }
 
 -- | The one authored signature every fixture in this file is built against
--- (@lara-core\@0.2@, #89). It is a single shared Σ rather than one per fixture
+-- (@lara-core\@0.2@). It is a single shared Σ rather than one per fixture
 -- because the fixtures share one small vocabulary, and because a per-fixture Σ
 -- derived from the fixture would make stage 2 vacuous exactly where these
 -- anchors are supposed to keep it honest.
@@ -191,7 +191,7 @@ groupConflictQuarantine =
     , unitGroupMode = QuarantineOnConflict
     }
 
--- | The §4.3 promotion hazard (issue #76): the quarantined leaf backs the
+-- | The §4.3 promotion hazard: the quarantined leaf backs the
 -- __attacker__, not the target. @a2@ (leaf @e2 : base@) rebuts @a1@ (rule
 -- instance on @e1 : p@), and @e2@ is grouped with @e3 : q@, so the group is @≢@
 -- and @a2@ is pruned — leaving @a1@ unattacked. The pruned graph therefore says
@@ -262,7 +262,7 @@ groupQuarantineNumericMultiBlocked =
     , unitGroupMode = QuarantineOnConflict
     }
 
--- | The lost-edge half of the §4.3 hazard (issue #76), mirroring
+-- | The lost-edge half of the §4.3 hazard, mirroring
 -- @test\/CheckSpec.groupQuarantineLostEdgeUnit@ as a cross-driver differential
 -- anchor: the prune deletes an attack /edge between two retained arguments/
 -- rather than an argument. @aT@ (rule @r@ on premises @Lq@, @Lk@) is
@@ -588,7 +588,7 @@ strictCertUnicodeTheory =
     , unitGroupMode = QuarantineOnConflict
     }
 
--- Replay-preflight anchors (PR #44 review C3) -------------------------------
+-- Replay-preflight anchors (review C3) --------------------------------------
 
 -- | The shared unit for the preflight anchors: the 'strictCertAccept' shape
 -- with the assurance certificate (and its rule certifier) pointing at
@@ -657,7 +657,7 @@ corpus =
   , ("fixtures/corpus/strict-cert-unicode-theory.sexp", strictCertUnicodeTheory)
   ]
 
--- | The preflight anchors (PR #44 review C3), as
+-- | The preflight anchors (review C3), as
 -- @(path, backend selection, unit)@: each selection is a deliberate preflight
 -- violation, and lower-precedence violations ride along so the precedence
 -- order (duplicate → unknown → unselected certificate) is exercised. All

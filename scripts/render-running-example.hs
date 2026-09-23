@@ -1,4 +1,4 @@
--- | Emit the running example's pinned checker reports (P6, issue #70).
+-- | Emit the running example's pinned checker reports (P6).
 --
 -- Thin IO shim over the pure "Lara.RunningExample": load both run programs,
 -- check them through the CLI's own pipeline, and write the golden document

@@ -9,7 +9,7 @@
 --                -> load and recheck each member  ("Lara.Map.Load")
 --                -> qualify each member's local identities   <- here
 --                -> merge + saturate + check  ("Lara.Map.Link")
---                -> composite verdict  (\@Lara.Map.Driver\@, issue #303)
+--                -> composite verdict  (\@Lara.Map.Driver\@)
 -- @
 --
 -- == What is a handle and what is a meaning

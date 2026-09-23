@@ -117,8 +117,8 @@ jobs:
         run: bash scripts/test-replay-tamper.sh
 
       # The committed fixtures/mutants tree must be exactly what the generator
-      # emits today (#160). test/MutationSpec.hs re-derives the mutant bytes and
+      # emits today. test/MutationSpec.hs re-derives the mutant bytes and
       # MANIFEST.tsv from the library, but README.md is rendered inside the
-      # script, so no test can reach it — which is how it shipped stale in #158.
+      # script, so no test can reach it — which is how it shipped stale.
       - name: Generated mutation suite is fresh
         run: cabal exec -- runghc scripts/gen-mutants.hs --check

@@ -4,7 +4,7 @@ session:
   started: 2026-09-11T05:00
   last_turn: 2026-09-11T07:45
   turn_count: 2
-  summary: 'Resolved the six #315 follow-ups (#316-#321): merge reached through a real
+  summary: 'Resolved the six follow-ups: merge reached through a real
     map, link rejection proved impossible, batch link mechanized, map bench committed.'
 events_logged:
 - turn: 2
@@ -24,7 +24,7 @@ events_logged:
   id: N316_rejection_by_proof
   routing: direct
   provenance: ai-suggested
-  summary: MRLinkRejected anchor recorded as impossible, settled by the #321 theorem, not a fabricated fixture.
+  summary: MRLinkRejected anchor recorded as impossible, settled by the batch-link theorem, not a fabricated fixture.
 - turn: 2
   type: experiment
   id: N319_map_bench
@@ -45,7 +45,7 @@ events_logged:
   summary: A map pass is dominated by member recheck; linking is about a tenth for the shipped map.
 ai_actions:
 - turn: 2
-  action: '#317: firstDuplicate and strictlyAscending moved to one exported definition each
+  action: 'FirstDuplicate and strictlyAscending moved to one exported definition each
     in Lara.Map.Types; copies in Wire, Driver, Load and Types removed (commit aff7aa3).'
   provenance: ai-executed
   files_changed:
@@ -54,7 +54,7 @@ ai_actions:
   - src/Lara/Map/Driver.hs
   - src/Lara/Map/Load.hs
 - turn: 2
-  action: '#318: four copies of the map specs'' temp-tree helper replaced by
+  action: 'Four copies of the map specs'' temp-tree helper replaced by
     test/Lara/TempTree.hs, which reserves the directory with mkdtemp (commit c9aea9f).'
   provenance: ai-executed
   files_changed:
@@ -64,7 +64,7 @@ ai_actions:
   - test/MapLinkSpec.hs
   - test/MapExampleSpec.hs
 - turn: 2
-  action: '#320: the D3 manifest''s expected-verdict comment made parseable and checked
+  action: 'The D3 manifest''s expected-verdict comment made parseable and checked
     by prop_manifestVerdictCommentIsCurrent; confirmed it fails on a corrupted label
     (commit b8cc4f6).'
   provenance: ai-executed
@@ -72,7 +72,7 @@ ai_actions:
   - examples/agreement-map-multi/map.laramap
   - test/MapExampleSpec.hs
 - turn: 2
-  action: '#316: merge fixture, MapLinkSpec/MapSpec properties, Lara.Map.Link notes and
+  action: 'Merge fixture, MapLinkSpec/MapSpec properties, Lara.Map.Link notes and
     decision-record D12 (commit 0fbdf35); D11 and follow-up entry updated (commit ed58e4c).'
   provenance: ai-executed
   files_changed:
@@ -82,7 +82,7 @@ ai_actions:
   - src/Lara/Map/Link.hs
   - docs/multi-artifact-composition-decision.md
 - turn: 2
-  action: '#319: lara-bench --map, make bench-map, Lara.Map.Load.loadMapWith, protocol and
+  action: 'Lara-bench --map, make bench-map, Lara.Map.Load.loadMapWith, protocol and
     snapshot docs (commits ad513b5, 0301781).'
   provenance: ai-executed
   files_changed:
@@ -92,7 +92,7 @@ ai_actions:
   - docs/performance.md
   - docs/demos/d3-agreement-map.md
 - turn: 2
-  action: '#321: batch link construction mechanized by a forked agent in its own worktree,
+  action: 'Batch link construction mechanized by a forked agent in its own worktree,
     cherry-picked as bf31acc and re-verified here (build, coverage, axiom audit, conformance).'
   provenance: ai-executed
   files_changed:
@@ -146,24 +146,24 @@ key_context:
 - turn: 1
   excerpt: 'User: check the issue tracker, what are the todos?'
 - turn: 2
-  excerpt: 'User: can we resolve all Follow-ups from the multi-artifact maps PR (#303 /
-    #315), all opened 2026-09-10 together?'
+  excerpt: 'User: can we resolve all Follow-ups from the multi-artifact maps PR ([redacted] /
+    [redacted]), all opened 2026-09-10 together?'
 threads_closed:
 - '2026-09-10_001 thread on the two unwritten map anchors: merge anchor landed (0fbdf35);
-  link-rejection anchor settled by proof (ed58e4c, bf31acc). Issue #316.'
+  link-rejection anchor settled by proof (ed58e4c, bf31acc). The issue.'
 - '2026-09-10_001 thread on the unchecked expected-verdict comment: now test-checked
-  (b8cc4f6). Issue #320.'
+  (b8cc4f6). The issue.'
 - '2026-09-10_001 thread on the timing table with no harness: make bench-map (ad513b5,
-  0301781). Issue #319.'
-- '2026-09-10_001 thread on triplicated helpers: one definition each (aff7aa3). Issue #317.'
+  0301781). The issue.'
+- '2026-09-10_001 thread on triplicated helpers: one definition each (aff7aa3). The issue.'
 - '2026-09-10_001 thread on withTree''s derived directory name: mkdtemp helper (c9aea9f).
-  Issue #318.'
+  The issue.'
 open_threads:
 - 'The Haskell driver''s MRLinkRejected is covered by byte-for-byte conformance with the
   Lean driver, not by proof; the proof also takes each member''s solo check as a premise.'
 - 'The bench''s environment probe reads only macOS sysctl; on Linux the CPU and RAM fields
-  must be supplied by override. Tracked as issue #325.'
-- 'Branch map-followups-316-321 is pushed and open for review as PR #324.'
+  must be supplied by override. Tracked as a follow-up.'
+- 'Branch map-followups-316-321 is pushed and open for review as the PR.'
 ai_suggestions_pending:
 - 'O170 and O171 staged as ai-suggested; no closure signal yet.'
 - 'C56 remains ai-suggested.'

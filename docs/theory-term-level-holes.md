@@ -1,6 +1,6 @@
-# Term-level critical-question holes (#217)
+# Term-level critical-question holes
 
-_Durable record for issue #217, landed 2026-09-09 (theory spine follow-on to
+_Durable record, landed 2026-09-09 (theory spine follow-on to
 M4). For cold readers: a *critical question* is an obligation a reasoning
 scheme imposes — "was the experiment randomized?" — that must be answered by
 an argument term in the instance's discharge map; a *hole* is a typed
@@ -125,7 +125,7 @@ assurances, so no certificate moves in that positive instance. Separately,
 the old frame is fixed by the relabel, but the filling is not. This makes the
 extra context-fixing condition substantive.
 
-This closes the term-level CQ-hole obligation retained by M3 and carried by #217.
+This closes the term-level CQ-hole obligation retained by M3.
 It changes no Haskell code, corpus vector, or freeze tag. The original M4 theorems
 remain available; the new layer proves the substitution bridges that make them
 applicable to instantiated fragments.

@@ -9,7 +9,7 @@ over one conclusion cache computed under the fully merged Γ — `crossMemberAtt
 on the Haskell side, and on the Lean side `Lara.Map.Driver.generatedAttacksOf`,
 which calls `crossPairs` below. This module is that construction and its
 acceptance theorem, so the mechanization is about the unit the drivers check
-rather than about a neighbouring one (issue #321).
+rather than about a neighbouring one.
 
 ## The construction
 

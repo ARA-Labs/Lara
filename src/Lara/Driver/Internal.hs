@@ -40,7 +40,7 @@ module Lara.Driver.Internal
   , runCheckLocatedReported
   , runCheckWithPrune
   , runCheckReported
-    -- * Certificate dependency reports (#204)
+    -- * Certificate dependency reports
   , unitCertDeps
   , runCheckDeps
   , renderCertDeps
@@ -194,9 +194,9 @@ runCheckWithPrune cfg input pruned =
 -- the checker (doubling the work the E1 bench measures) or reconstructs the
 -- decision independently and risks disagreeing with it.
 --
--- __The report costs nothing unless demanded__ (\#204). The fifth component is
+-- __The report costs nothing unless demanded__. The fifth component is
 -- built lazily from the accepted unit, so a caller that only wants the verdict
--- — every caller before \#204, including @lara check@ and the E1 bench — never
+-- — every earlier caller, including @lara check@ and the E1 bench — never
 -- forces 'unitCertDeps' and never replays a certificate for it. It is @[]@ on
 -- every rejecting path, which is not an approximation: a rejected unit has no
 -- accepted checked term for the accounting to range over.
@@ -281,7 +281,7 @@ backendRejectionMessage err = case err of
           )
   _ -> Nothing
 
--- | The slot → source mapping of a __checker-side__ R13 (#130): what the
+-- | The slot → source mapping of a __checker-side__ R13: what the
 -- checked term put in each premise slot the refused certificate cites. Empty
 -- for every other rejection class, and for the preflight R13s, which reject
 -- before a premise list exists.
@@ -296,7 +296,7 @@ backendRejectionSlots err = case err of
   _ -> []
 
 -- | Render a slot → source mapping as one @stderr@ line per slot, under the
--- rejection reason it explains (#130).
+-- rejection reason it explains.
 --
 -- __Why this is worth a line each.__ The bare reason names a @(prem i)@ the
 -- author is left to decode by hand against the policy declarations. A numeric
@@ -315,7 +315,7 @@ slotMappingLines = zipWith line [0 :: Int ..]
   where
     line i src = "  slot " ++ show i ++ " = " ++ renderSlotSource src
 
--- | The structural spelling of one slot's source (#130).
+-- | The structural spelling of one slot's source.
 renderSlotSource :: SlotSource -> String
 renderSlotSource src = case src of
   SlotLeaf (LeafId l) -> "leaf " ++ l
@@ -422,9 +422,10 @@ toStrictDigest (TheoryDigest s) = St.TheoryDigest s
 -- statuses are __conditional__ — grounded status is non-monotonic across graph
 -- changes, so a deleted attacker can inflate its target. 'blockedQueries' names
 -- the queries that could have moved; they are reported @evidence-blocked@ and
--- their conditional label is retained as a diagnostic (issue #76; metatheory in
+-- their conditional label is retained as a diagnostic (metatheory in
 -- @lean\/Lara\/Blocked.lean@). With nothing quarantined the two units are equal,
--- the blocked list is empty, and this is the pre-#76 outcome exactly.
+-- the blocked list is empty, and this is the pre-conservative-reporting
+-- outcome exactly.
 buildAccept :: Prune -> CheckedUnit -> Outcome
 buildAccept pruned accepted =
   Accept
@@ -445,7 +446,7 @@ buildAccept pruned accepted =
       | otherwise = Published
 
 -- ---------------------------------------------------------------------------
--- Certificate dependency reports (#204)
+-- Certificate dependency reports
 -- ---------------------------------------------------------------------------
 
 -- | The certificate dependency report of a unit, argument by argument: for each
@@ -480,8 +481,8 @@ unitCertDeps unit =
     pI = lookupRule (unitRules unit)
 
 -- | The verdict of a wire check-input paired with its certificate dependency
--- report — the raw @.sexp@ door's report entry point, and the shipped consumer
--- \#204 was about.
+-- report — the raw @.sexp@ door's report entry point, and the shipped consumer,
+-- @lara deps@.
 --
 -- The report is @[]@ on rejection, and on acceptance it is the report of the
 -- unit /this very call/ accepted: both come out of the one

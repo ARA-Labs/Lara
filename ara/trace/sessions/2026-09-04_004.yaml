@@ -5,13 +5,13 @@ session:
   last_turn: "2026-09-04T13:10"
   turn_count: 1
   summary: >
-    PW-T8 mechanized and delivered as PR #240: grounded status is invariant
+    PW-T8 mechanized and delivered as a PR — grounded status is invariant
     under a total attack bisimulation, StatusBridge instantiates it at
     structural bridges, status_transport preserves all four statuses, the
     modal reading collapses, and hypotheses compose along T9. T7 is recorded
     as a forward attack homomorphism failing matched; all four statuses
     transport off the identity. Implemented without a cleared eng review;
-    pre-flight compilation found 12 plan defects. Issues #238/#239 filed.
+    pre-flight compilation found 12 plan defects. The follow-up issues were filed.
 
 events_logged:
   - turn: 1
@@ -43,7 +43,7 @@ events_logged:
     id: "N306"
     routing: direct
     provenance: ai-suggested
-    summary: "Contested cell kept; attack derivation #238 and StatusBridge decider #239 deferred; plan retired."
+    summary: "Contested cell kept; attack derivation and StatusBridge decider deferred; plan retired."
   - turn: 1
     type: observation
     id: "O132"
@@ -87,8 +87,8 @@ ai_actions:
       Executed the PW-T8 plan via /implement with per-task spec and quality
       reviews; pre-compiled every plan Lean block; created AFBisim.lean,
       Status.lean, Examples/PWStatus.lean; wired Lara.lean, AxCheck.lean, CI;
-      wrote the freeze record, T6/T9 pointers; filed issues
-      #238/#239; retired the plan; pushed and opened PR #240; wrote this ARA
+      wrote the freeze record, T6/T9 pointers; filed the two follow-up issues;
+      retired the plan; pushed and opened the PR; wrote this ARA
       closeout.
     provenance: ai-executed
     files_changed:
@@ -130,11 +130,11 @@ logic_revisions:
     after: "The other side of the boundary is now T8 (C50): under the additional StatusBridge hypotheses — matched and attack forth/back — status is preserved, and the T7 edge fails matched at leaf l2; justified, defeated, gap, and contested transport off the identity across contexts with disjoint signatures. Untested boundary: status behaviour under non-injective (merging) translations."
     signal: artifact-commitment
     provenance: ai-suggested
-    note: "PR #240 discharges the boundary this claim recorded; the separation itself is unchanged and remains supported."
+    note: "Discharges the boundary this claim recorded; the separation itself is unchanged and remains supported."
   - turn: 1
     entry: C48
     field: Conditions
-    before: "Untested boundary: edge-indexed (world-dependent or ambiguous) translation, partial leaf maps, bridges renaming question vocabulary, and attack correspondence (T8, #193)."
+    before: "Untested boundary: edge-indexed (world-dependent or ambiguous) translation, partial leaf maps, bridges renaming question vocabulary, and attack correspondence (T8)."
     after: "Untested boundary: edge-indexed (world-dependent or ambiguous) translation, partial leaf maps, and bridges renaming question vocabulary. Attack correspondence is now a separate T8 theorem package (C50; `Lara.PW.Status`; `ara/evidence/proofs/pw_t8_status_preservation.md`), not a remaining boundary of this T6 claim."
     signal: artifact-commitment
     provenance: ai-suggested
@@ -149,9 +149,9 @@ key_context:
       spot, one undecidable-in-principle decide.
 
 open_threads:
-  - "PR #240 awaits review and merge."
-  - "Issue #238: derive StatusBridge.forth/back from declared-attack transport."
-  - "Issue #239: executable StatusBridge checker with a soundness theorem."
+  - "The PR awaits review and merge."
+  - "Derive StatusBridge.forth/back from declared-attack transport."
+  - "Executable StatusBridge checker with a soundness theorem."
   - "Possible follow-up: widen claimSupport_corr to take AttackBisim instead of StatusBridge (interface change, declined in-PR)."
 
 ai_suggestions_pending:

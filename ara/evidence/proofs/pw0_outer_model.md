@@ -2,7 +2,7 @@
 
 ## Result
 
-Issue #192, tracker #189, PR #221. An outer *comparison* layer over unchanged
+An outer *comparison* layer over unchanged
 local Lara judgments, mechanized in five modules that only import: no existing
 checking, compilation, grounded-labelling, or status definition was modified.
 
@@ -73,8 +73,8 @@ t7_support_transported :
 ```
 
 So status preservation needs strictly more than support transport. This fixes
-the boundary between T6 (exact checked-support transport, #191) and T8
-(conditional status preservation, #193).
+the boundary between T6 (exact checked-support transport) and T8
+(conditional status preservation).
 
 The witness exists at all only because the missing-conflict search is
 directional: `firstMissingConflict?` (`lean/Lara/Check/Program.lean:279`) tests
@@ -137,7 +137,7 @@ Lean files touched outside the five new modules are `Lara.lean` and
 
 1. `accept` is an arbitrary `Prop` with no posited connection to any checker,
    certificate, or soundness condition — the name promises more than the model
-   supplies. Discharging it is T6 (#191).
+   supplies. Discharging it is T6.
 2. `gap` conflates *out of vocabulary*, *ill-sorted*, *not posed*, and *posed
    but unsupported*, because queries are all of `Atom`. Only the bridge-domain
    case is separated, reported as `translationUndefined`.

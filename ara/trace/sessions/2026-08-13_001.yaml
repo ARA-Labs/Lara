@@ -4,7 +4,7 @@ session:
   started: "2026-08-13T20:41"
   last_turn: "2026-08-13T22:16"
   turn_count: 3
-  summary: "Implemented #105 named certificate premise slots, review-hardened PR #110, then repaired a Unicode Haskell/Lean classifier divergence with an explicit production-lexer parameter; all local and hosted gates green, reviewer re-approval remains."
+  summary: "Implemented named certificate premise slots, review-hardened the PR, then repaired a Unicode Haskell/Lean classifier divergence with an explicit production-lexer parameter; all local and hosted gates green, reviewer re-approval remains."
 
 events_logged:
   - turn: 1
@@ -12,13 +12,13 @@ events_logged:
     id: "N179"
     routing: direct
     provenance: user
-    summary: "User approved the #105 design (D1-D10) by invoking /implement on the eng-cleared plan; commit-per-task, ARA recording, PR."
+    summary: "User approved the design (D1-D10) by invoking /implement on the eng-cleared plan; commit-per-task, ARA recording, PR."
   - turn: 1
     type: experiment
     id: "N180"
     routing: direct
     provenance: ai-executed
-    summary: "Plan executed task-by-task with two-stage subagent reviews; all close-out gates green; S6 golden byte-identical to numeric twin; PR #110."
+    summary: "Plan executed task-by-task with two-stage subagent reviews; all close-out gates green; S6 golden byte-identical to numeric twin; the PR."
   - turn: 1
     type: dead_end
     id: "N181"
@@ -42,7 +42,7 @@ events_logged:
     id: "N182"
     routing: direct
     provenance: ai-executed
-    summary: "Adjudicated and fixed all PR #110 review findings; mutation-sensitive regressions, local gates, hosted Actions run 31769934475, replies, and thread resolutions all completed."
+    summary: "Adjudicated and fixed all review findings; mutation-sensitive regressions, local gates, hosted Actions run 31769934475, replies, and thread resolutions all completed."
   - turn: 2
     type: observation
     id: "O73"
@@ -71,7 +71,7 @@ events_logged:
 
 ai_actions:
   - turn: 1
-    action: "Implemented the 8-task plan via per-task implementer subagents with spec+quality reviews; 10 commits on feat/105-extended-name-resolution (93c3de8..1de91ff); pushed and opened PR #110"
+    action: "Implemented the 8-task plan via per-task implementer subagents with spec+quality reviews; 10 commits on feat/105-extended-name-resolution (93c3de8..1de91ff); pushed and opened the PR"
     provenance: ai-executed
     files_changed:
       - src/Lara/Strict/Cell.hs
@@ -98,7 +98,7 @@ ai_actions:
       - docs/rejection-surface.md
       - TODOS.md
   - turn: 2
-    action: "Verified all eight PR #110 inline findings, implemented the confirmed fixes, added mutation-sensitive regressions and Lean V9c, committed 56f7c2b, pushed, passed hosted run 31769934475, replied in-thread, and resolved every thread"
+    action: "Verified all eight the PR inline findings, implemented the confirmed fixes, added mutation-sensitive regressions and Lean V9c, committed 56f7c2b, pushed, passed hosted run 31769934475, replied in-thread, and resolved every thread"
     provenance: ai-executed
     files_changed:
       - TODOS.md
@@ -177,7 +177,7 @@ key_context:
     excerpt: "The legal é counterexample refuted the independent Lean classifier, while #x/.x refuted the numeric-looking-only fallback; explicit production-lexer classification is now part of the mirror theorem contract."
 
 open_threads:
-  - "PR #110: technical work and hosted CI complete; GitHub reviewDecision remains CHANGES_REQUESTED pending reviewer re-approval."
+  - "Technical work and hosted CI complete; GitHub reviewDecision remains CHANGES_REQUESTED pending reviewer re-approval."
   - "OV-2 follow-up recorded in TODOS: render the slot->source-premise mapping in R13 backend replay rejections."
   - "Deferred design alternatives recorded in grammar Appendix E.7: named nd@1 de Bruijn form; rule-premise-label citations."
 

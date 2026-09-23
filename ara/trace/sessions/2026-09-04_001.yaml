@@ -102,8 +102,8 @@ key_context:
       the checked world's context.
 
 open_threads:
-  - "PR #236 awaits approval and merge."
-  - "Issue #234 tracks the deferred translation-traversal refactor."
-  - "Issue #235 tracks standalone witnesses for trAtom_comp_none_left and the SymMap unit laws."
+  - "The PR awaits approval and merge."
+  - "Tracks the deferred translation-traversal refactor."
+  - "Tracks standalone witnesses for trAtom_comp_none_left and the SymMap unit laws."
 
 ai_suggestions_pending: []

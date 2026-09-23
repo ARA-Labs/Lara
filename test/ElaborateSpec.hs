@@ -1238,13 +1238,13 @@ prop_negatives = once $ ioProperty $ do
       Right _ -> counterexample "expected Left, got Right" (property False)
 
 -- ---------------------------------------------------------------------------
--- lara-syntax@0.7 (#129) — the discharge-target collision matrix
+-- lara-syntax@0.7 — the discharge-target collision matrix
 -- ---------------------------------------------------------------------------
 
 -- | The two surfaces a @discharge q with x@ target can arrive on. An explicit
 -- rule application carries it as @'SLeaf' ('LeafId' x)@ (@resolveDischarges@);
--- an inferred one carries it as @'ArgRef' x@ (@resolveArgDischarges@). #129
--- put both on one resolver, so every row below is asserted on both.
+-- an inferred one carries it as @'ArgRef' x@ (@resolveArgDischarges@). One
+-- resolver handles both, so every row below is asserted on both.
 data DischargePayload = ExplicitPayload | InferredPayload
   deriving (Eq, Show)
 
@@ -1344,7 +1344,8 @@ dischargeProgramSource payload before dischargeLines after =
       ++ after
       ++ ["status c1"]
 
--- | Elaborate one assembled @#129@ program against 'dischargePolicySource'.
+-- | Elaborate one assembled discharge-collision program against
+-- 'dischargePolicySource'.
 elabDischarge :: String -> Either ElabError Unit
 elabDischarge src =
   case (parseProgram src, parsePolicy dischargePolicySource) of
@@ -1399,7 +1400,7 @@ dischargeMatrix =
         )
       ]
 
--- | #129: @discharge q with x@ resolves against declared leaves and /prior/
+-- | @discharge q with x@ resolves against declared leaves and /prior/
 -- arguments under one collision policy, on both payload surfaces.
 --
 -- Before this, a name carried by both namespaces silently resolved to the leaf
@@ -1448,7 +1449,7 @@ prop_dischargeDuplicateLeafAmbiguous =
       | payload <- [ExplicitPayload, InferredPayload]
       ]
 
--- | #129 determinism: two faulty @discharge@ lines in one argument report the
+-- | Determinism: two faulty @discharge@ lines in one argument report the
 -- /first in declaration order/, whichever error family it belongs to. Both
 -- orderings are pinned, on both payload surfaces, so the resolver cannot pass
 -- by preferring one constructor over the other.

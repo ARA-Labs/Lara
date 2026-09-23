@@ -17,7 +17,7 @@
 --   over every base with no special casing — a gap unit with no arguments
 --   simply yields nothing for the argument-dependent operators.
 --
--- * A published 'Constituent' index is in __checked__ index space (#165). The
+-- * A published 'Constituent' index is in __checked__ index space. The
 --   checker runs on the §4.3 quarantine of the declared unit
 --   ('Lara.Blocked.quarantineUnit') and its verdict names checked indices, so
 --   that is the space the ground truth must live in; only the /rewrite/ edits
@@ -42,7 +42,7 @@
 -- attack-completeness one in "Lara.Mutate.Sites.Conflict"; both /are/
 -- re-exported here, so 'Lara.Mutate.Suite' keeps its single import of this
 -- module; the navigation helpers they share live in "Lara.Mutate.Sites.Nav"
--- (#125, splitting the certificate family off this module along the seam
+-- (splitting the certificate family off this module along the seam
 -- @docs\/mutate-module-ownership-decision.md@ records).
 --
 -- Internal to the library: the navigation helpers were private before the
@@ -139,7 +139,7 @@ hiddenContrarySites _ =
     mutStrictRule =
       Rule (RuleId "mut_strict") [] Strict [] [] mutP False [] []
     mutContrary = Contrary mutQ mutP
-    -- Σ-aware injection (#89 §8): the operator that invents `mut_p`/`mut_q`
+    -- Σ-aware injection (§8): the operator that invents `mut_p`/`mut_q`
     -- declares them, so the mutant tests R12 — the class it seeds — instead of
     -- flipping to R2 on incidental signature noise.
     declareMut sg = declarePred (Pred "mut_p") [] (declarePred (Pred "mut_q") [] sg)

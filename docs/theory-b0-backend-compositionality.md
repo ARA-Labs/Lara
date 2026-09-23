@@ -6,7 +6,7 @@ the external checkers that re-verify strict certificates (`nd@1`, `ra@1`,
 firewall guaranteeing no backend's acceptance can leak influence into
 another's._
 
-Milestone B0 (issue #182, tracker #180). This record holds what B0 froze: the
+Milestone B0 of the theory spine. This record holds what B0 froze: the
 occurrence vocabulary, the firewall theorem, the two accounting laws, the
 claim boundary the paper must respect, and the scope decisions taken along the
 way — including one the implementation re-opened on evidence.
@@ -19,7 +19,7 @@ standard trio `propext` / `Classical.choice` / `Quot.sound`.
 
 ## What B0 Actually Was
 
-Most of what #182 asked for was already mechanized before the milestone
+Most of what B0 asked for was already mechanized before the milestone
 started, and recognizing that changed its shape. `certOkOf`
 (`Lara/Support.lean`) already resolves each `BackendId` to its own
 `RegisteredBackend`, each carrying its own `core : Strict.Backend canon` with
@@ -33,7 +33,7 @@ already the two directions of the dependency union.
 What was missing is that no theorem *stated* heterogeneity. Every existing
 result quantified one occurrence at a time. The property was true and unstated
 — and an unstated property is one a later refactor can silently break, which
-is precisely what M4 (#187) must not discover.
+is precisely what M4 must not discover.
 
 So B0 is mostly consolidation, plus one genuinely new theorem (the firewall),
 plus the repair of a live gap on the Haskell side that the survey did not
@@ -170,7 +170,7 @@ nothing. So:
   indistinguishable report.
 
 *Surfacing* the retained reports to shipped consumers is deliberately out of
-B0's scope and is tracked as **#204**. Retention alone is the prerequisite
+B0's scope and is left as follow-up. Retention alone is the prerequisite
 everything downstream needs.
 
 ## Scope Decisions
@@ -319,10 +319,10 @@ construct in the frozen core to serve a test.
   identities to one core. What is claimed is the absence of a binder relating
   them.
 - **That this is parametricity.** It quantifies over registered identities, not
-  relationally over related backends. This is the same distinction #187 draws.
+  relationally over related backends. This is the same distinction M4 draws.
 - **That the shipped Haskell checker surfaces dependency reports.** It retains
   them; production `inferSupport` still reads only the acceptance projection.
-  Surfacing is #204.
+  Surfacing is that follow-up.
 - **That the Lean mixed witness uses two shipped backends in its typed
   results.** `mixed_swap` and `mixed_dis_swap` use `nd@1` plus a fixture core;
   only the syntactic, resolution, and `certDeps` results use `nd@1` + `ord@1`.
@@ -339,7 +339,7 @@ construct in the frozen core to serve a test.
 - `bash scripts/admission-differential.sh`
 
 **CI caveat.** GitHub Actions has been billing-blocked on the ARA-Labs org
-since 2026-08-25; the last green run on `main` is `156cf10`. Tracker #180's
+since 2026-08-25; the last green run on `main` is `156cf10`. The theory spine's
 shared gate requires "CI reports no unproved obligations or unexpected axioms".
 Until billing is restored that line is satisfied by the local stack above and
 by nothing else.

@@ -79,11 +79,11 @@ snapshot lives at the top of its file and is still updated per freeze cycle).
 ## Theory notes — two series, one prefix
 
 The `theory-*.md` files record mechanized results, and the prefix is
-load-bearing: **`theory-m0`…`theory-m5` are the theory spine (tracker
-#180) and are unrelated to the engineering milestones of the same numbers
+load-bearing: **`theory-m0`…`theory-m5` are the theory spine
+and are unrelated to the engineering milestones of the same numbers
 above.**
 
-- **Theory spine (tracker #180)**, in order:
+- **Theory spine**, in order:
   [`theory-m0-compilation-invariants.md`](theory-m0-compilation-invariants.md)
   (the carrier everything quantifies over),
   [`theory-m1-compilation-image.md`](theory-m1-compilation-image.md),
@@ -103,7 +103,7 @@ above.**
   [`theory-m5-surface-calculus.md`](theory-m5-surface-calculus.md), plus the
   side milestone
   [`theory-b0-backend-compositionality.md`](theory-b0-backend-compositionality.md).
-- **Possible-world spike (tracker #189)**: start from
+- **Possible-world spike**: start from
   [`theory-pw-closeout.md`](theory-pw-closeout.md), the subseries index; the
   contracts are [`theory-pw0-outer-model.md`](theory-pw0-outer-model.md),
   [`theory-pw-t6-structural-transport.md`](theory-pw-t6-structural-transport.md),

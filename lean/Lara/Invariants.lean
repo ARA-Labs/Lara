@@ -1,5 +1,5 @@
 /-
-M0 — the frozen compilation carrier and invariant record (issue #183).
+M0 — the frozen compilation carrier and invariant record.
 
 M0's job is not to prove a new metatheorem. It is to answer, once and
 irrevocably, the question every downstream item quotes: *what is the formal

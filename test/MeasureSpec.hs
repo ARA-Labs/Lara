@@ -1,4 +1,4 @@
--- | The measurement harness (M5 tracker #48, T3) as a standing test: the pure
+-- | The measurement harness (M5, T3) as a standing test: the pure
 -- "Lara.Measure" library over both manifests (no subprocess, no timing).
 --
 -- Timing and Lean-subprocess columns are exercised by a harness smoke run in
@@ -69,7 +69,7 @@ prop_manifestParsersTotal = once $ ioProperty $ do
       , counterexample "corpus manifest has no data rows" (not (null corpus))
       ]
 
--- | The @family@ column round-trips (#171). Column 3 is now gated on the way in
+-- | The @family@ column round-trips. Column 3 is now gated on the way in
 -- by 'parseFamily', so the manifest's spelling and the vocabulary cannot drift
 -- apart without a row being dropped — and a dropped row fails
 -- 'prop_manifestParsersTotal'. This pins the inverse itself: every 'OpFamily'
@@ -96,7 +96,7 @@ prop_familyColumnRoundTrips =
       ]
 
 -- | The column gates are /wired into/ 'parseMutantManifest', not merely
--- defined (#171). This is the negative test the other three cannot be:
+-- defined. This is the negative test the other three cannot be:
 -- 'prop_familyColumnRoundTrips' exercises 'parseFamily' in isolation, and
 -- 'prop_manifestParsersTotal' \/ 'prop_seededDenominatorPinned' run against a
 -- committed manifest whose every column-3 and column-5 spelling is already
@@ -139,7 +139,7 @@ prop_manifestGatesRejectUnknownSpellings =
     tabs = intercalate "\t"
 
 -- | The location metrics' denominator is pinned by count against the raw
--- manifest column (#172).
+-- manifest column.
 --
 -- 'Lara.Measure.withLocs' defines @location_match@ and @location_primary@
 -- exactly on the rows carrying seeded ground truth. A row that silently leaves
@@ -148,7 +148,7 @@ prop_manifestGatesRejectUnknownSpellings =
 -- failure is invisible, because "seeds no site" and "seeded at nothing" render
 -- identically as @-@.
 --
--- #169 closed the producer half in the type ('Lara.Diagnostics.SeededSites' is
+-- The producer half is closed in the type ('Lara.Diagnostics.SeededSites' is
 -- non-empty by construction). This is the decoder half: the number of rows the
 -- harness treats as seeded must equal the number whose raw column 8 is not
 -- @-@. Asserted as a count rather than per row, because the failure this
@@ -266,8 +266,7 @@ prop_reportRoundTrips = once $ ioProperty $ do
         let n = length (splitOn '\t' header)
          in n == length (splitOn '\t' tsvHeader) && all ((== n) . length . splitOn '\t') rows
 
--- | The report's column /identity/ and the two location cells' /values/
--- (#167 review).
+-- | The report's column /identity/ and the two location cells' /values/ (review).
 --
 -- 'prop_reportRoundTrips' checks that every row carries the header's column
 -- count, which is invariant under reordering 'tsvHeader' or
@@ -446,7 +445,7 @@ prop_constituentListRoundTrip =
              ]
       )
 
--- | The @,@ guard in 'Lara.Diagnostics.constituentListText' (#167 review).
+-- | The @,@ guard in 'Lara.Diagnostics.constituentListText' (review).
 --
 -- 'GroupId' is free-form, so a group id containing a comma would render an
 -- @expected-location@ column that 'parseConstituentList' cannot invert;

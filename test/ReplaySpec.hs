@@ -159,7 +159,7 @@ prop_theoriesUseUnicodeScalarOrder =
     unit = emptyUnit {unitTheories = policyTheories policy}
     sourceResult = rawInputFor sourceProgram policy unit
 
--- | Wire-level quoted-atom golden (PR #44 review C11): a replay-id whose
+-- | Wire-level quoted-atom golden (review C11): a replay-id whose
 -- theories section carries QUOTED non-ASCII digests in canonical Unicode
 -- code-point order (@é@ is U+00E9, @λ@ is U+03BB, both outside the bare-atom
 -- set, and @sha256:é@ sorts before @sha256:λ@). The canonical text must

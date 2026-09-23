@@ -174,7 +174,7 @@ parseConstituentList s = traverse parseConstituent (splitComma s)
 -- admissible manifestation sites, head first in the checker's spec-fixed
 -- stage order. Wrapping 'NonEmpty' makes "seeded, but at nothing" — the one
 -- shape the metric boundary cannot distinguish from "seeds no site" — a type
--- error rather than a silently-dropped row (#169).
+-- error rather than a silently-dropped row.
 --
 -- The distinction the wrapper protects is @Maybe SeededSites@: 'Nothing' is
 -- "this row seeds no site" (the codec, cycle, and accept families), which

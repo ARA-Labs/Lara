@@ -4,20 +4,20 @@ session:
   started: 2026-08-01T00:15
   last_turn: 2026-08-01T23:50
   turn_count: 4
-  summary: 'M5 opens (T1+T4 of #48, PR #49): worked cases E4 (reinstatement per attack kind) + E5 (contested
+  summary: 'M5 opens (T1+T4, the PR): worked cases E4 (reinstatement per attack kind) + E5 (contested
     via undermine/undercut cycles, gap amid attacks) on empirical-v2 close all nine attack-kind x target-label
     cells; Lara.Mutate seeded mutation suite (SplitMix64 seed 20260801) yields 148 verified-at-generation
     mutants covering all 11 executable reject classes + 45 codec negatives + 4 cycle accepts; differential
-    positive 146/0 negative 54/0, cabal test 136 props green. Turn 2 (PR #49 merged): T2 corpus units
+    positive 146/0 negative 54/0, cabal test 136 props green. Turn 2 (the PR merged): T2 corpus units
     complete on branch m5-t2-corpus-units — all 60 M0-sample claims lowered under corpus-v1 (9 justified
     / 48 gap / 3 defeated), cabal 141 props + differential 206/54 byte-exact; O23/O24/O25 crystallized
-    (C22, R7/R13 concept, H06). Turn 3 (/implement, PR #51): T1 corpus half + T3 measurement harness on
+    (C22, R7/R13 concept, H06). Turn 3 (/implement, the PR): T1 corpus half + T3 measurement harness on
     branch m5-t1corpus-t3 — corpus rejection sweep (uniform derived-applicability B=12) + new
     Lara.Mutate.Accept accept-verdict family (every status + attack kind) grow the suite 148 -> 340;
     Lara.Diagnostics located-rejection vocabulary + Driver.runCheckLocated; Lara.Measure + scripts/measure.hs
     emit the axis-(c) report; differential 398/54 byte-exact, smoke run class-match/lean-agree 400/400,
     location-accuracy 246/246, replay 60/60. C22 Proof extended (corpus-scale evidence); O29/O30/O31 staged.
-    Turn 4 (/implement, PR #53): T6 ablation baselines — CheckConfig (no-cq / no-typed) surgical over
+    Turn 4 (/implement, the PR): T6 ablation baselines — CheckConfig (no-cq / no-typed) surgical over
     seeded mutants (18 IncompleteArgument / 11 R10 + 19 R11 misses, zero else) and monotone; suite
     340->358 via OpHoleObligation; differential 416/54; C23 crystallized (localization verification-style),
     O31 -> timing-protocol constraint; O32/O33/O34 staged.'
@@ -107,7 +107,7 @@ events_logged:
   id: O23
   routing: crystallized
   provenance: ai-suggested
-  summary: 'O23 -> C22 via artifact-commitment (PR #49 merged)'
+  summary: 'O23 -> C22 via artifact-commitment (the PR merged)'
 - turn: 2
   type: observation
   id: O24
@@ -160,7 +160,7 @@ events_logged:
   id: N97
   routing: direct
   provenance: ai-executed
-  summary: 'T6 ablation baselines (/implement, PR #53) — CheckConfig ablations surgical (no-cq 18 IncompleteArgument,
+  summary: 'T6 ablation baselines (/implement, the PR) — CheckConfig ablations surgical (no-cq 18 IncompleteArgument,
     no-typed 11 R10 + 19 R11, zero other changes) and monotone; suite 340->358 via OpHoleObligation;
     differential 416/54; first cross-driver IncompleteArgument coverage'
 - turn: 4
@@ -189,7 +189,7 @@ events_logged:
   id: O29
   routing: crystallized
   provenance: ai-suggested
-  summary: 'O29 -> C23 (localization verification-style) via artifact-commitment (PR #51 merged; T6 plan
+  summary: 'O29 -> C23 (localization verification-style) via artifact-commitment (the PR merged; T6 plan
     D10 + TODOS localization entry depend on it)'
 - turn: 4
   type: observation
@@ -225,13 +225,13 @@ ai_actions:
   - fixtures/mutants/
 - turn: 1
   action: 'Ran experiments (differential.sh positive 146/0 negative 54/0; cabal test 136 props); recorded
-    results in plan doc; committed 3-commit series; opened PR #49; updated TODOS.md'
+    results in plan doc; committed 3-commit series; opened the PR; updated TODOS.md'
   provenance: ai-executed
   files_changed:
   - plans/2026-08-01-m5-mutation-suite-worked-cases.md
   - TODOS.md
 - turn: 2
-  action: 'Ticked T1/T4 checkboxes on issue #48; branch m5-t2-corpus-units created'
+  action: 'Ticked T1/T4 checkboxes on the tracker item; branch m5-t2-corpus-units created'
   provenance: ai-executed
   files_changed: []
 - turn: 2
@@ -288,13 +288,13 @@ ai_actions:
   - .gitignore
 - turn: 3
   action: 'Step 5 — cabal test + differential.sh green; execution record in plan; TODOS.md updates
-    (M5 progress, retire #36, add Mutate-split + T6 follow-ups); 5 commits; pushed; opened PR #51'
+    (M5 progress, retire, add Mutate-split + T6 follow-ups); 5 commits; pushed; opened the PR'
   provenance: ai-executed
   files_changed:
   - TODOS.md
   - plans/2026-08-01-m5-t1corpus-t3-measurement.md
 - turn: 4
-  action: '/implement of the T6 plan in 5 reviewed commits (PR #53) — CheckConfig refactor, OpHoleObligation
+  action: '/implement of the T6 plan in 5 reviewed commits — CheckConfig refactor, OpHoleObligation
     + 18 regenerated mutants (additions-only), Measure ablation core + AblationSpec (10 props),
     measure.hs ablation.{json,tsv} + --ablation-only, execution record + TODOS note + Reporting
     comment qualifier'
@@ -329,10 +329,10 @@ logic_revisions:
 - turn: 1
   entry: C21
   field: Proof
-  before: '[trace N86 (...), trace N87 (...), trace N88 (...), lean/Lara/Groups.lean, PR #45]'
+  before: '[trace N86 (...), trace N87 (...), trace N88 (...), lean/Lara/Groups.lean, the PR]'
   after: '[trace N86 (...), trace N87 (...), trace N88 (...), trace N91 (7 seeded R9 group-escalation
     mutants generated over the worked examples all verify as reject R9 byte-identically through both drivers),
-    lean/Lara/Groups.lean, PR #45]'
+    lean/Lara/Groups.lean, the PR]'
   signal: empirical-resolution
   provenance: ai-suggested
   note: 'Evidence-only append: T1''s generated R9 mutants are systematic (generated, per-base) confirmation
@@ -361,7 +361,7 @@ key_context:
     contrary (completeness forces the reverse edge -> cycle); introduced the one-directional refuted_by_metareview
     contrary instead. This asymmetry is load-bearing for defense.'
 - turn: 2
-  excerpt: 'User: "https://github.com/ARA-Labs/lara/pull/49 is merged, what is the next step?" then "check
+  excerpt: 'User: "[redacted] is merged, what is the next step?" then "check
     out a new branch to do it" — T2 selected as next, executed end-to-end this turn.'
 - turn: 3
   excerpt: 'User: /implement plans/2026-08-01-m5-t1corpus-t3-measurement.md — autonomous execution of the
@@ -376,12 +376,12 @@ key_context:
 open_threads:
 - 'Deferred cleanup (TODOS): full Lara.Mutate module split (Accept already split off the largest block).'
 - 'Review flags from lowering (still open from turn 2): lbcs/C03 scheme divergence; rice/C01 analytic strand.'
-- '[turn 4] PR #51 merged (main 1d91bdb). PR #53 (feat/m5-t6-ablation-baselines) open: T6 ablations.
+- '[turn 4] the PR merged (main 1d91bdb). The PR (feat/m5-t6-ablation-baselines) open: T6 ablations.
   Merge when CI green.'
-- '[turn 4] M5 remaining after #53: T5 freeze protocol only (freeze covers the 358-mutant suite incl.
+- '[turn 4] M5 remaining after: T5 freeze protocol only (freeze covers the 358-mutant suite incl.
   OpHoleObligation + the ablation config definitions; final paper numbers post-freeze).'
 - '[turn 4] Follow-ups recorded: discriminating localization benchmark (C23 boundary), standalone
-  conflict-scan ablation (D11), Lara.Mutate split (more pressing after OpHoleObligation), #52
+  conflict-scan ablation (D11), Lara.Mutate split (more pressing after OpHoleObligation),
   human-cert discriminating ablation.'
 ai_suggestions_pending:
 - 'O29 (localization is verification-style / T6 discriminating benchmark), O30 (payload is the cert-size
@@ -392,5 +392,5 @@ ai_suggestions_pending:
 - 'O26 (R5 optional-CQ accounting), O28 (policy vocabulary gaps) still staged from turn 2.'
 - '[turn 4] O32 (ablations rule-is-load-bearing), O33 (accept-justified dominant miss class), O34
   (gate-coverage audit heuristic) staged from the T6 smoke — pre-freeze numbers on an open PR; let
-  PR #53 merge / T5 freeze / paper-table adoption close them. O30 (payload vs total) still staged:
+  The PR merge / T5 freeze / paper-table adoption close them. O30 (payload vs total) still staged:
   merged code computes both, paper framing unconfirmed.'

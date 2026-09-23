@@ -1,4 +1,4 @@
-# The Lean wire reader's nesting bound, proved (issue #335)
+# The Lean wire reader's nesting bound, proved
 
 Trace nodes: `N335_reader_totalization` (the design), `N335_bound_proved` (the result).
 Branch `fix/335-lean-reader-nesting-bound-proved`, commit `81dea71`. Every declaration
@@ -7,7 +7,7 @@ below is gated in `lean/AxCheck.lean`.
 ## What was open
 
 `Lara.Driver.parseWire` enforced the shared `maxDepth = 10000` bound byte for byte with
-`Lara.Wire.parseSExprBS` — same message, same column, same exit code (#331). Nothing about
+`Lara.Wire.parseSExprBS` — same message, same column, same exit code. Nothing about
 it was provable. `parseForm`, `parseList` and `parseQuoted` were a `partial def` mutual
 block, and Lean's kernel has no reduction behaviour for a `partial def`: there are no
 equation lemmas, so no statement about the function's results can be discharged. The
@@ -15,7 +15,7 @@ enforcement was real; the only evidence was behavioural — the straddling cases
 `scripts/differential.sh`, `scripts/check-map-conformance.sh` and
 `scripts/check-pw-conformance.py`, plus `prop_envelopeNestingBound` in `test/MapSpec.hs`.
 
-`AxCheck.lean` was correctly untouched at #331: there was no theorem to cover.
+`AxCheck.lean` was correctly untouched by the earlier change: there was no theorem to cover.
 
 ## What made it provable
 
@@ -72,8 +72,8 @@ is that fact as a theorem rather than as three gates' worth of cases that happen
 - The Haskell reader. `src/Lara/Wire.hs` is unchanged and carries no proof; the two sides
   are still tied by the three differentials and by the source-level constant check, not by
   a shared mechanization.
-- `printSx` remains a `partial def` — it is the printer, not the reader, and #335 is about
-  the bound.
+- `printSx` remains a `partial def` — it is the printer, not the reader, and this change is
+  about the bound.
 - Nothing is proved about the reader's *accepting* behaviour. The theorems are refusal
   statements; that an input at or under the bound parses is still gate evidence only.
 
@@ -94,7 +94,7 @@ before the rewrite — the refusal behaviour did not move.
 - `scripts/check-pw-conformance.py`: `PW outer runtime conformance passed: 7 fixtures, 101
   cases, 114 runs; 1 .lara source fixtures, 17 source cases, 21 runs.` Run with
   `check_pw_subtree_total` skipped: that assertion fails on `fixtures/pw/source/lara.sexp`
-  on `main` as well (the tree arrived in #332, after the assertion was written) and is
+  on `main` as well (the tree arrived after the assertion was written) and is
   unrelated to this change.
 - `scripts/check-lean-citations.py`: `Lean citations: PASS (420 citations, 29 allowlisted)`.
 - `scripts/check_ara_source_spans.py`: `ARA source spans: PASS (66 quotations)`.

@@ -946,7 +946,7 @@ theorem trSupportDis_nonempty_computes :
   ⟨rfl, rfl, rfl, rfl⟩
 
 
-/-! ### Focused witnesses for the remaining composition laws (issue #235) -/
+/-! ### Focused witnesses for the remaining composition laws -/
 
 /-- `trAtom_comp_none_left` on a concrete first-leg vocabulary gap: `q` is
 outside `renSym`'s predicate vocabulary, and the gap survives composition
@@ -983,7 +983,7 @@ theorem comp_id_ren2 :
   ⟨SymMap.comp_id ren2Sym, rfl, rfl, rfl, rfl⟩
 
 /-- `zipOpt` is all-or-nothing: `some` only when both legs are `some`. All
-four cases pinned by computation (issue #234). -/
+four cases pinned by computation. -/
 theorem zipOpt_computes :
     zipOpt (α := Nat) (β := Nat) (· + ·) (some 1) (some 2) = some 3 ∧
       zipOpt (α := Nat) (β := Nat) (· + ·) (some 1) none = none ∧

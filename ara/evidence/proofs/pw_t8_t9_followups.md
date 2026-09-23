@@ -2,24 +2,23 @@
 
 ## Result
 
-The four follow-ups the PW-T8/PW-T9 freezes left behind (tracker #189) are
+The four follow-ups the PW-T8/PW-T9 freezes left behind are
 implemented as four pull requests, planned in
 `plans/2026-09-04-pw-t8-t9-followups.md` (eng-review cleared, ten decisions)
 and executed task-by-task. No frozen module is modified except
 `Lara/PW/Compose.lean` (public statements byte-identical; proofs refactored)
 and the example modules; no corpus regeneration, no freeze-tag bump.
 
-**#235 — executable witnesses for the remaining T9 laws (PR #243).**
+**Executable witnesses for the remaining T9 laws.**
 `Lara/Examples/PWCompose.lean` gains four focused witnesses:
 `first_leg_gap_computes`/`first_leg_gap_law` pin `trAtom_comp_none_left` on a
 concrete first-leg vocabulary gap, both computed and derived via the law;
 `id_comp_ren2`/`comp_id_ren2` pin `SymMap.id_comp`/`comp_id` at the
 non-identity partial map `ren2Sym` with the composite's action pinned on
-predicate/constructor hits and misses. They are the regression pins the #234
-refactor relies on.
+predicate/constructor hits and misses. They are the regression pins the
+traversal-seam refactor relies on.
 
-**#234 — reusable traversal seam under the T9 composition proofs (PR #245,
-stacked on #243).** The seven-times-repeated cons-step argument is factored
+**Reusable traversal seam under the T9 composition proofs.** The seven-times-repeated cons-step argument is factored
 into `zipOpt` (all-or-nothing `Option` combination), `zipOpt_bind` (the
 single generic cons-step algebra, mutual families included), and nine
 per-traversal cons equation lemmas (`trAtoms_cons`, `trTerms_cons`,
@@ -30,8 +29,8 @@ through the seam with every public statement byte-identical. `zipOpt` is a
 `def`, invisible to the coverage gate, so `zipOpt_computes` pins all four
 cases by computation (eng review 7A).
 
-**#239 — executable `StatusBridge` decider with soundness and completeness
-(PR #244).** New wrapper modules `Lara/PW/StatusCheck.lean` and
+**Executable `StatusBridge` decider with soundness and completeness.**
+New wrapper modules `Lara/PW/StatusCheck.lean` and
 `Lara/Examples/PWStatusCheck.lean`; the frozen `Lara/PW/Status.lean` is
 untouched. `statusBridgeB` scans the two finite index ranges (completeness of
 the scan follows from `corr_lt` and `edgeB_faithful.ranged`);
@@ -42,8 +41,7 @@ through completeness. Four cross-paired isolating cells pin `admitsB` and
 conjunct would otherwise pass every cell). The O(n²m²) kernel-reduction
 bound is documented in the module header (8A); `native_decide` is not used.
 
-**#238 — compiled attack correspondence derived from declared-attack
-transport (PR #246, stacked on #245).** New modules
+**Compiled attack correspondence derived from declared-attack transport.**
 `Lara/PW/AttackTransport.lean` and `Lara/Examples/PWAttack.lean`.
 `trAttack`/`trAttackList` translate declared attacks (both stored terms
 translated, kind and position verbatim); `AttackBridge` restates T8's attack
@@ -57,10 +55,10 @@ theorems: substitution/support injectivity (`trSubst_inj`, the
 helpers with no total-map analogue: `trSupport_inst_inv`,
 `trSupport_subterm_some`, `lookupDis_mem`, the two `_some_of_mem` lemmas),
 containment/coverage invariance (the `containsB_trSupport` mutual triple,
-`trAttack_source`, `attackClosureB_trAttack`, `coveredB_trAttack`), and the
-`Contains_trSupport`/`AttackOcc_trSupport` Prop corollaries the issue names
+`trAttack_source`, `attackClosureB_trAttack`, `coveredB_trAttack`), and
+the `Contains_trSupport`/`AttackOcc_trSupport` Prop corollaries the request names
 (`DisNodup` discharged at use sites via `hasSupport_disNodup`, as
-`edgeB_iff` does). `trAttackList`'s cons step goes through the #234 seam
+`edgeB_iff` does). `trAttackList`'s cons step goes through the traversal seam
 (`trAttackList_cons`) — the seam's first reuse outside the eight traversals
 (eng review 3A).
 
@@ -77,23 +75,23 @@ question-key preservation (7A). The S2/R2 pair is re-established as an
 `AttackBridge` and its `StatusBridge` rederived
 (`s2_r2_attackBridge`, `s2_r2_statusBridge_via_attacks`).
 
-## Gates (per PR; CI known broken, #225 — local gates are the record)
+## Gates (per PR; CI known broken — local gates are the record)
 
-- PR #243: `lake build` 144 jobs; coverage 2262 declarations; axiom audit
+- T9-law witnesses: `lake build` 144 jobs; coverage 2262 declarations; axiom audit
   passed (`[propext, Quot.sound]` on the new rows).
-- PR #244: `lake build` 146 jobs; coverage 2273 declarations; axiom audit
+- StatusBridge decider: `lake build` 146 jobs; coverage 2273 declarations; axiom audit
   passed; the five StatusCheck theorems `[propext, Quot.sound]`, the ten
   cells `[propext, Classical.choice, Quot.sound]`; no `ofReduceBool`.
-- PR #245: `lake build` 144 jobs; coverage 2273 declarations (+11);
+- Traversal seam: `lake build` 144 jobs; coverage 2273 declarations (+11);
   axiom audit passed.
-- PR #246: `lake build` 146 jobs; coverage 2304 declarations (+31);
+- Declared-attack transport: `lake build` 146 jobs; coverage 2304 declarations (+31);
   axiom audit passed, standard trio only, no `sorryAx`.
 
 ## Execution notes
 
 Two lanes per the plan's worktree-parallelization table: lane A
-(#235 → #234 → #238, stacked branches `pw-t9-witnesses`,
-`pw-t9-traversal-seam`, `pw-t8-attack-transport`) and lane B (#239, branch
+(T9 witnesses → traversal seam → attack transport, stacked branches `pw-t9-witnesses`,
+`pw-t9-traversal-seam`, `pw-t8-attack-transport`) and lane B (the StatusBridge decider, branch
 `pw-t8-status-decider` off main in a separate worktree, executed by a
 subagent verbatim from the plan). Task 4 was built ladder-first: all
 signatures elaborated with `sorry` before any proof (eng review 5A), then

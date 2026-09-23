@@ -1,11 +1,11 @@
 # Theory PW-T9: exact structural-path composition
 
-_Status: mechanized on 2026-09-03 (issue #190, tracker #189). This document
+_Status: mechanized on 2026-09-03 for T9 of the possible-world spike. This document
 records the exact path-composition contract frozen by T9, the consequences it
 proves, and the boundary it leaves to later work._
 
-The intended readers are the paper author, whoever takes decisions on tracker
-#189, and anyone extending or citing structural bridges. They should cite the
+The intended readers are the paper author, whoever takes decisions on the
+spike, and anyone extending or citing structural bridges. They should cite the
 declarations below rather than reconstructing the contract from implementation
 details.
 
@@ -253,7 +253,7 @@ none is smuggled into `Commutes`, `Admits`, or path transport.
 4. **Status preservation is not a T9 theorem.** Checked-support preservation
    along paths is T6 composed by T9. Status preservation along such paths is T8
    composed with T9 and requires T8's attack-correspondence hypotheses.
-   Discharged by T8 (#193): `PW.StatusBridge.comp` composes the hypotheses
+   Discharged by T8: `PW.StatusBridge.comp` composes the hypotheses
    along the T9 composite, and status along a path is `Eq.trans` of
    per-edge `status_transport`; see
    docs/theory-pw-t8-status-preservation.md.

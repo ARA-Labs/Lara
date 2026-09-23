@@ -1,4 +1,4 @@
-# The batch link construction, mechanized (issue #321)
+# The batch link construction, mechanized
 
 Trace node: `N321_batch_link`. Commit `bf31acc` on branch `map-followups-316-321`
 (cherry-picked from `104aa86`). All declarations are gated in `lean/AxCheck.lean`.

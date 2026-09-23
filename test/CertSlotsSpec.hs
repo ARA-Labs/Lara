@@ -12,14 +12,14 @@
 -- have written numerically by hand.
 --
 -- The second half drives the same pass through a real @parse + elaborate@
--- (@lara-syntax\@0.6@, #105), where the resolver is the elaborator's own name
+-- (@lara-syntax\@0.6@), where the resolver is the elaborator's own name
 -- scope rather than a fixture function: an authored certificate that cites its
 -- premises by source name must elaborate to /exactly/ the 'Lara.AST.Unit' the
 -- numeric spelling produces, in both the explicit and the inferred spelling,
 -- and every way a name can fail must be rejected with its own located
 -- 'Lara.Elaborate.Internal.ElabError'.
 --
--- The third part carries the pass through the rest of the pipeline (#105's
+-- The third part carries the pass through the rest of the pipeline (the
 -- verification target verbatim): symbolic and numeric twins encode to
 -- byte-identical wire units and byte-identical verdicts on both schema'd
 -- backends, the lowered unit replays and a tampered payload byte is an R13
@@ -354,7 +354,7 @@ prop_identityOnSymbolicFreePayloads =
 -- Every rule but 'plain', 'plainTwin', the two ambiguous slots of
 -- 'partialTwin', and the final ambiguous slot of 'partialTriple' /labels/
 -- its premises
--- (@lara-syntax\@0.8@, #131), so
+-- (@lara-syntax\@0.8@), so
 -- the same fixture reaches the third name class: 'pair' for the twin property,
 -- 'twin' for the multi-slot case only labels can cite, and 'select'\/'promote'
 -- for the nested-instance scoping pin (a label belongs to the rule of the
@@ -494,7 +494,7 @@ pairArgInferred payload =
 -- | @twin@ over its one repeated premise pattern, certified by the given
 -- payload text. Both slots are filled by @e1@, so a /leaf/ name cannot say
 -- which slot it means — this is the instance the @\@0.8@ premise labels exist
--- for (#131).
+-- for.
 twinArg :: String -> [String]
 twinArg payload =
   [ "arg a_twin : supports(c_twinned) by twin(sys_a, 0.74)"
@@ -516,7 +516,7 @@ shadowedTwinLabelArg payload =
 
 -- | The pre-@\@0.8@ control: @plain@ is @pair@ with its premise labels
 -- removed, so every resolution here runs the path a policy written before
--- #131 takes.
+-- premise labels takes.
 plainArg :: String -> [String]
 plainArg payload =
   [ "arg a_plain : supports(c_paired) by plain(sys_a, 0.74)"
@@ -663,7 +663,7 @@ payloadOf _ = Nothing
 -- Elaboration: the symbolic/numeric twin property
 -- ---------------------------------------------------------------------------
 
--- | The headline property (#105): an argument whose certificate cites its
+-- | The headline property: an argument whose certificate cites its
 -- premises by source name elaborates to exactly the 'Unit' the numeric
 -- spelling produces — same θ, same premises, same payload bytes.
 prop_symbolicTwinMatchesNumeric :: Property
@@ -710,10 +710,10 @@ prop_priorArgumentCitationBothSpellings = once $
     ]
 
 -- ---------------------------------------------------------------------------
--- Elaboration: premise-label citation (lara-syntax@0.8, #131)
+-- Elaboration: premise-label citation (lara-syntax@0.8)
 -- ---------------------------------------------------------------------------
 
--- | #131's twin property: a certificate citing its rule's declared premise
+-- | The twin property: a certificate citing its rule's declared premise
 -- __labels__ elaborates to exactly the 'Unit' the numeric spelling produces.
 -- Pinned at both elaboration sites, because a label resolves the same way
 -- under @from […]@ as it does under an explicit θ.
@@ -734,7 +734,7 @@ prop_labelCitationLowersToNumericTwin = once $
         (pairArg "(ordcmp (prem 0) (prem 1))")
     ]
 
--- | #131's headline: labels name the /slots/, so they keep working in the one
+-- | The headline: labels name the /slots/, so they keep working in the one
 -- case the @\@0.6@ leaf\/prior namespace cannot express. @twin@'s two premises
 -- share one pattern, so the leaf @e1@ fills both and its name is
 -- 'CertSlotMultiSlot' — while @left@ and @right@ resolve, because a label
@@ -760,7 +760,7 @@ prop_labelResolvesMultiSlot = once $
         ]
     ]
 
--- | #140: label advice is valid only when every slot matched by the
+-- | Label advice is valid only when every slot matched by the
 -- ambiguous source name has its own label. An unrelated labelled slot must
 -- not turn a numeric-only repair into the two-exit repair wording.
 prop_partialLabelsDoNotAdvertiseUnavailableRepair :: Property
@@ -777,7 +777,7 @@ prop_allMatchingSlotsNeedLabels = once $
     certErrorMessage (partialTripleArg "(ordcmp (prem e1) (prem 1))")
       === Right "arg 'a_partial_triple': certificate 'ord@1' premise reference 'e1' occupies premise slots 0 and 1; cite a numeric slot"
 
--- | #140: every matching slot needs a label that the same resolver would
+-- | Every matching slot needs a label that the same resolver would
 -- accept. Merely declaring @left@ does not make it actionable when a leaf
 -- shadows that label.
 prop_shadowedLabelDoesNotAdvertiseUnavailableRepair :: Property
@@ -1145,7 +1145,7 @@ prop_lowersNestedCertificate = once $
       payloadOf inner === Just (ordcmp (prem "0") (prem "0"))
     Right other -> counterexample ("unexpected a2 term: " ++ show other) False
 
--- | The @\@0.8@ half of D8 (#131): premise __labels__ are scoped to the rule
+-- | The @\@0.8@ half of D8: premise __labels__ are scoped to the rule
 -- of the instance that cites them, exactly as the leaf\/prior classes are
 -- scoped to that instance's premise list.
 --
@@ -1381,7 +1381,7 @@ sameWireBytes what lowered symbolic numeric =
                 (property (lowered `isInfixOf` bytesA))
             ]
 
--- | #105's verification target verbatim, @ord\@1@: the Task-3 fixture pair's
+-- | The verification target verbatim, @ord\@1@: the Task-3 fixture pair's
 -- symbolic and numeric spellings lower to byte-identical Cert payloads and
 -- units under the wire encoder.
 prop_ordTwinsEncodeByteIdentical :: Property
@@ -1452,7 +1452,7 @@ prop_raE2EVerdictIdentity = once $
     1
 
 -- ---------------------------------------------------------------------------
--- End-to-end: replay and tamper (the #57 harness, unchanged)
+-- End-to-end: replay and tamper (the harness, unchanged)
 -- ---------------------------------------------------------------------------
 
 -- | Replace every top-level certificate payload in the unit's arguments — the
@@ -1469,7 +1469,7 @@ tamperCertPayloads payload unit =
 -- lowered unit replays to an accept, and the unit with a single tampered
 -- payload byte still passes preflight but is rejected R13 at the certificate
 -- replay gate — the argument never reaches the accept semantics, exactly the
--- pre-#105 tamper behavior.
+-- tamper behavior from before named slots.
 replayThenTamper :: String -> [String] -> SExpr -> Property
 replayThenTamper what decls tampered =
   case e2eElaborated decls of

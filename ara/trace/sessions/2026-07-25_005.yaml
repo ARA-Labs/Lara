@@ -2,7 +2,7 @@ session:
   id: "2026-07-25_005"
   timestamp: "2026-07-25T18:03"
   ended: "2026-07-26T00:49"
-  summary: "Implemented Issue #18: exact checked-unit attack completeness, Path-B grounded consistency, computed complete-claim result 7, and full verification."
+  summary: "Implemented exact checked-unit attack completeness, Path-B grounded consistency, computed complete-claim result 7, and full verification."
 
 events_logged:
   - type: decision

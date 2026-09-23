@@ -5,7 +5,7 @@ session:
   last_turn: "2026-08-29T16:16"
   turn_count: 1
   summary: >
-    Executed the #200 stale sweep. Applied the research-manager 3+-session-day
+    Executed the stale sweep. Applied the research-manager 3+-session-day
     rule to staging/observations.yaml with reference detection across all four
     trace surfaces: 33 of 43 unpromoted, unstale observations were flagged
     stale, ten stay live. The diff changes only `stale` flags — no observation,
@@ -64,9 +64,9 @@ key_context:
       for the mechanical sweep to fix.
 
 open_threads:
-  - "Triage the 33-entry stale set below: promote, discard, or re-open. #200 closes on merge of the sweep; the triage decisions are separate work."
+  - "Triage the 33-entry stale set below: promote, discard, or re-open. Closes on merge of the sweep; the triage decisions are separate work."
   - "Settle whether O37 and O85 should be marked promoted, given that C19 and C23 already cite them in live CONFLICT markers."
-  - "PR #201 (theory M3) review and hosted CI; issue #186 closes on merge."
+  - "The PR (theory M3) review and hosted CI; the issue closes on merge."
 
 ai_suggestions_pending:
   - >
@@ -77,6 +77,6 @@ ai_suggestions_pending:
   - "Measurement and freeze discipline: O35 (heuristic, 08-03, 19) hash the deterministic projection, not the whole report file; O39 (constraint, 08-04, 18) an append-only local log does not resist HARKing without a remote anchor; O88 (heuristic, 08-25, 3) provenance metadata inside a frozen artifact is ungated and drifts silently."
   - "Differential and mechanization evidence: O36 (claim, 08-04, 18) ra@1 parity holds by construction across different internal representations; O46 (heuristic, 08-06, 16) print captured stderr on every failure branch; O53 (heuristic, 08-08, 15) a differential proves agreement, so it is weakest where implementations were aligned deliberately; O55 (heuristic, 08-09, 14) settle vacuity by perturbation, not argument; O57 (heuristic, 08-09, 14) a mechanization can drift from its implementation with every gate still green; O56 (claim, 08-08, 15) the direction-of-goodness contract landed three independent ways without coordination."
   - "Seam and backend design: O42 (architecture, 08-06, 16) quantify the admission theorem over an abstract checker registry; O48 (claim, 08-06, 16) restate a mechanized result at the granularity it proves; O51 (heuristic, 08-07, 16) a guard cannot depend on a distinction the seam erases; O52 (concept, 08-07, 16) a strict goal grammar accepts the preimage of the canonical image under nf; O62 (claim, 08-10, 13) nullary constants dominate the ground vocabulary and are invisible to grepping."
-  - "Cross-language shape guards (#104 era): O54 (heuristic, 08-08, 15) behaviour-preserving parameters create a failure mode the old suite cannot see; O65 (claim, 08-12, 11) paired compiler witnesses plus arity tripwires fail closed on observed drift; O66 (heuristic, 08-11, 12) a compile witness guards nothing with autoImplicit on; O67 (heuristic, 08-12, 11) hand-maintained inventories false-pass on counted aliases and arity-only sum arms; O69 (claim, 08-12, 11) the #104 local verification result, whose hosted-CI condition has since resolved."
+  - "Cross-language shape guards: O54 (heuristic, 08-08, 15) behaviour-preserving parameters create a failure mode the old suite cannot see; O65 (claim, 08-12, 11) paired compiler witnesses plus arity tripwires fail closed on observed drift; O66 (heuristic, 08-11, 12) a compile witness guards nothing with autoImplicit; O67 (heuristic, 08-12, 11) hand-maintained inventories false-pass on counted aliases and arity-only sum arms; O69 (claim, 08-12, 11) the local verification result, whose hosted-CI condition has since resolved."
   - "Presentation layer (@0.6 era): O77 (heuristic, 08-22, 5) prove a restriction acceptance-preserving by namespace scan plus frozen-artifact pathspec diff; O78 (claim, 08-22, 5) slot-indexed naming is strictly more expressive than referent-indexed, and the gap is the non-injective case; O81 (claim, 08-21, 6) a root that owns shared vocabulary cannot be left as a re-export facade; O82 (heuristic, 08-23, 4) mechanize a binder transformation at its structured input; O83 (heuristic, 08-23, 4) a repair suggestion must hold for every candidate the ambiguity leaves open; O84 (heuristic, 08-23, 4) embed an existing sub-language as one opaque host token."
   - "Mutation harness: O80 (heuristic, 08-21, 6) wire the seed key and selection rule to what refactors disturb; O86 (heuristic, 08-25, 3) re-derive a composite fixture's expectation from the composed artifact, since re-running the component enumerators is an identity, not an oracle."

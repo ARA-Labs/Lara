@@ -277,7 +277,7 @@ exhaustion, which the driver cannot map to an exit code and which the
 Haskell/Lean differential gates would misread.
 
 The two readers share the bound, the message and the column, so an over-deep
-input is refused identically by both runtimes (#331). Comfortably above any real
+input is refused identically by both runtimes. Comfortably above any real
 artifact's structural depth; `scripts/differential.sh` measures the deepest
 anchor it discovers and fails if the margin ever narrows. -/
 def maxDepth : Nat := 10000
@@ -297,7 +297,7 @@ smaller. Carrying it in the result is what lets the reader be a total definition
 instead of a `partial def`, and a total definition is the precondition for
 `parseForm_of_maxDepth_lt` and `parseWire_nested_error` below: Lean's kernel has
 no reduction behaviour for a `partial def`, so nothing about one is provable
-(issue #335). `parseWire` re-exports the plain `Except String Sx` contract, so
+`parseWire` re-exports the plain `Except String Sx` contract, so
 the subtype is invisible to every consumer. -/
 structure Parsed (p : PState) where
   sx : Sx
@@ -394,7 +394,7 @@ def parseWire (input : String) : Except String Sx :=
     if rest'.input.isEmpty then .ok r.sx
     else rest'.err "expected a single S-expression, found more input"
 
-/-! ### The nesting bound, proved (issue #335)
+/-! ### The nesting bound, proved
 
 `scripts/differential.sh`, `scripts/check-map-conformance.sh` and
 `scripts/check-pw-conformance.py` each straddle `maxDepth` with a pair of inputs,
@@ -1529,7 +1529,7 @@ def encodeReject (rid : ReplayId) (cls : WireRejection) : Sx :=
   .list [.atom (tagToString .verdict), encodeReplayId rid,
     .atom (tagToString .reject), .atom (wireRejectionString cls)]
 
-/-- The public status of one query (issue #76) — mirrors
+/-- The public status of one query — mirrors
 `Lara.Wire.PublicStatus`. `published` is an ordinary four-state answer;
 `evidenceBlocked` says §4.3 quarantine edited the program under the claim, so
 its four-state label is only a conditional diagnostic. Keeping the conditional
@@ -1544,7 +1544,7 @@ inductive PublicStatus where
 /-- The accept verdict. An `evidenceBlocked` status prints `evidence-blocked`
 in the `statuses` section and its conditional label moves to a trailing
 `conditional` section, which is emitted only when something is blocked. With
-nothing blocked this is the pre-#76 encoding byte-for-byte. Mirrors
+nothing blocked this is the pre-`evidenceBlocked` encoding byte-for-byte. Mirrors
 `Lara.Wire.encodeVerdict`. -/
 def encodeAccept (rid : ReplayId) (labels : List (Nat × Label))
     (edges : List (Nat × Nat)) (statuses : List (Atom × PublicStatus)) : Sx :=
@@ -1573,13 +1573,13 @@ def encodeAccept (rid : ReplayId) (labels : List (Nat × Label))
              .list [.atom (tagToString .status), encodeAtom ps.1,
                .atom (statusStr ps.2)])) ]))
 
-/-! ### Conservative reporting for quarantine-affected queries (spec §4.3, #76)
+/-! ### Conservative reporting for quarantine-affected queries (spec §4.3)
 
 The seed and declared-index framework definitions live in
 `Lara.BlockedProgram`, where the three abstract `Blocking` obligations are
 *proved* (`blocking_of_blockedSeed`). That module also transports the compact AF
 and `completeClaimFor` support labelled below through the retained-index
-embedding and instantiates production non-promotion (issue #80). The Haskell
+embedding and instantiates production non-promotion. The Haskell
 counterpart is `src/Lara/Blocked.hs`. -/
 
 /-- The queries whose public status is `evidence-blocked`: those with a complete

@@ -1,9 +1,9 @@
 # Theory M0 — the compilation carrier and invariant record
 
-_Status: frozen for the theory spine. Recorded 2026-08-26 (issue #183,
-tracker #180). The carrier, the erasure function, and the invariant record fixed
-here are what M1 (#184), M2a (#185), M2b (#181), M3 (#186) and the possible-world
-wrapper (#192) quantify over. Changing any of them after this point invalidates a
+_Status: frozen for the theory spine. Recorded 2026-08-26.
+The carrier, the erasure function, and the invariant record fixed
+here are what M1, M2a, M2b, M3 and the possible-world
+wrapper quantify over. Changing any of them after this point invalidates a
 downstream theorem statement, not just a proof._
 
 _One definition up front, since everything below builds on it: a
@@ -13,7 +13,7 @@ carries the proposition it concludes, so claim statuses can be read off the
 graph._
 
 The `theory-` prefix is load-bearing: this M0 belongs to the open
-theory spine (tracker #180), not to the closed engineering spine (tracker #48),
+theory spine, not to the closed engineering spine,
 whose M0 was the semantic corpus study (`docs/corpus-map.md`) and whose
 milestone documents are the unprefixed
 `docs/m1-freeze-checklist.md`,
@@ -100,7 +100,7 @@ rejecting counterexample. "Layer" is the classification M0 owes its dependents:
 | 4 | Conclusion and claim ownership | adequacy | `Invariants.support_compileUnit` (`:246`) — carrier support agrees with `Consistency.claimSupportFor` (`Consistency.lean:63`); lifted to status by `Invariants.status_compileUnit` (`:257`) | none: a violation is not a framework but a disagreement between two projections, excluded by the theorem |
 | 5 | Subargument closure | source | `Compile.Covered` (`Compile.lean:435`), decided by `Compile.coveredB_iff` (`:446`) over the per-attack closure test `Compile.attackClosureB_iff` (`:352`); `Compile.closure_includes_direct` (`:576`) shows closure extends, never replaces, the direct attack | `Examples.CompilerInvariants.closure_rejects_noncontaining_target` (`:133`) — in the running fixture node `0` is in range and is the attack's own source, yet receives no edge, because it does not contain the attacked occurrence. Closure adds edges onto containing arguments only |
 | 6 | Positional attack coherence | source | `Compile.AttackOcc` (`Compile.lean:76`), `attackOcc_unique` (`:82`), `target_contains_occ` (`:97`) | the inversion theorems *are* the rejections: `Attack.undercut_target_rule` (`Lara/Attack.lean:622`) and `Attack.undermine_target_leaf` (`:632`) exclude the mismatched position kinds; `rebut_top_defeasible` (`:590`) and `undercut_pos_defeasible` (`:603`) exclude strict occurrences |
-| 7 | Strict-chain well-formedness | source | `Support.cert_steps_accounted` (`Lara/Support.lean:1244`) over `Support.CertStepIn` (`:1045`) | **open — B0 (#182).** The backend-leakage rejection is B0's deliverable; this row closes when #182 lands |
+| 7 | Strict-chain well-formedness | source | `Support.cert_steps_accounted` (`Lara/Support.lean:1244`) over `Support.CertStepIn` (`:1045`) | **open — B0.** The backend-leakage rejection is B0's deliverable; this row closes when B0 lands |
 | 8 | Declared-identity preservation | source | `Compile.CheckedProgram.nodup` (`Compile.lean:478`); `Unit.CheckedUnit.nodes_terms` (`Lara/Unit.lean:198`) aligns the cache with the argument list | none at the carrier level, deliberately: two nodes *may* share a conclusion. Term-level identity is a source invariant and is not observable after labelling |
 
 ### Recorded obligations
@@ -109,7 +109,7 @@ M0 recorded two downstream obligations rather than dropping them, following
 the scope rule to give every candidate invariant a Lean declaration or mark it
 as a new obligation:
 
-- **Row 7** still waits on B0 (#182) for its rejecting example. The invariant
+- **Row 7** still waits on B0 for its rejecting example. The invariant
   itself is proved; only its counterexample remains outstanding.
 - **Signature well-sortedness of node conclusions.** M0 recorded that
   `Unit.CheckedUnit.args_well_sorted` (`Lara/Unit.lean:204`) covers argument terms,

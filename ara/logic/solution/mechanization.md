@@ -76,7 +76,7 @@ has precedent (Marmsoler–Brucker code-generate a Haskell oracle from an Isabel
   consistency. Do NOT mechanize Path A unless the corpus forces the flip. Full hole computation,
   a production Haskell checker/evaluator, and NL-to-structure validation remain outside this result.
 
-## 5. Result 6: source-vs-compiled half complete — oracle eliminated (#17 closed)
+## 5. Result 6: source-vs-compiled half complete — oracle eliminated
 
 Result 6 ("status preservation between a *direct source semantics* and the compiled-AF semantics") is
 no longer blocked on a missing direct semantics. `Lara.Compile.SrcIn`/`SrcOut`/`SrcStatus` read the
@@ -89,10 +89,10 @@ checker's `hasSupport_disNodup`), so the specialized wrappers `checkedAF`,
 `srcIn_iff_checkedGrounded`, `srcStatus_checked`, and `srcStatus_iff_checked` give source-vs-compiled
 agreement over an accepted program with **no oracle hypothesis**; `Lara.Examples` pins the decider on
 concrete fixtures. Executable backend replay and proof-bearing raw-program construction are complete.
-This closes issue #17. Issue #18 subsequently closes attack completeness and result 7 at the
+This closes the source-vs-compiled half. Attack completeness and result 7 subsequently close at the
 proof-bearing `CheckedUnit` boundary; the generic `CheckedProgram` boundary remains unchanged.
 
-## 6. Result 7: checked-unit consistency complete (#18)
+## 6. Result 7: checked-unit consistency complete
 
 The public accepted-program path is `checkUnit → Unit.CheckedUnit`. Its fixed rejection order is:
 duplicate rule identifiers, R12/Path-B violations, duplicate arguments, support failures, typed
@@ -149,9 +149,9 @@ promoted from O110._
 ## 9. PW0 wraps the local layer without redefining it
 
 PW0 is a spike, not a milestone: it mechanizes the minimum typed possible-world
-wrapper so that the decision on proceeding to structural bridges (T6, #191) is
+wrapper so that the decision on proceeding to structural bridges (T6) is
 taken against proved objects rather than a design sketch. The exit decision
-itself stays on tracker #189.
+itself stays on the tracker.
 
 The architectural commitment is that the wrapper only *imports*. Five modules
 land under `Lara.PW` and `Lara.Examples.PW`; no existing checking, compilation,
@@ -180,9 +180,9 @@ Two obligations sit around that spine and are easy to lose. The executable
 Incomparability is kept out of the status lattice structurally, behaviorally,
 and semantically, never by convention.
 
-What PW0 deliberately does not contain: structural bridges and T6 (#191),
-conditional status preservation T8 (#193), exact structural-path composition T9
-(#190), approximation bridges, epistemic/dynamic/hybrid operators, global
+What PW0 deliberately does not contain: structural bridges and T6,
+conditional status preservation T8, exact structural-path composition T9,
+approximation bridges, epistemic/dynamic/hybrid operators, global
 scenarios, and surface syntax. The well-sortedness refinement of `Query_κ` is
 deferred to the M5 surface layer, which is why `gap` currently conflates four
 distinct conditions.
@@ -200,7 +200,7 @@ symbol map lifted structurally (`Lara.PW.Translation`); the contract
 (`Lara.PW.StructuralBridge`) states one correspondence per environment
 parameter the judgment reads — leaf typing, rule lookup, certificate
 acceptance — over a shared canonicalizer, and nothing else. That "nothing
-else" is enforced by issue #191's acceptance bullet taken literally: every
+else" is enforced by T6's acceptance bullet taken literally: every
 contract field is consumed by a named arm of the transport induction.
 
 Two design facts carry the proof. First, the translation's footprint is
@@ -220,7 +220,7 @@ fixtures (`t7_t6_boundary`): transport succeeds, status still flips.
 
 What T6 deliberately does not contain: edge-indexed translation (see the
 PW-T6 translation-form constraint in `constraints.md`), partial leaf maps,
-attack correspondence (T8, #193), and bridge composition (T9, #190).
+attack correspondence (T8), and bridge composition (T9).
 
 _Committed by N275/N276; durable theorem contract:
 `docs/theory-pw-t6-structural-transport.md`; proof record:

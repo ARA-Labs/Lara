@@ -4,7 +4,7 @@ session:
   started: "2026-08-23T12:14"
   last_turn: "2026-08-23T12:14"
   turn_count: 1
-  summary: "Executed lara-syntax@0.10 source-authored nd@1 formula annotations (#144): (prop TEXT) carries the surface prop production and lowers through encodeAtomKey . nf; S8 rewritten with byte-identical goldens; Lean gains lowerFormula_eq_translation over an abstract encodeProp; all release gates green; PR #147 opened."
+  summary: "Executed lara-syntax@0.10 source-authored nd@1 formula annotations: (prop TEXT) carries the surface prop production and lowers through encodeAtomKey. Nf; S8 rewritten with byte-identical goldens; Lean gains lowerFormula_eq_translation over an abstract encodeProp; all release gates green; the PR opened."
 
 events_logged:
   - turn: 1
@@ -18,7 +18,7 @@ events_logged:
     id: "N209"
     routing: direct
     provenance: ai-executed
-    summary: "@0.10 release: byte-equivalence with encode_ND by construction plus QuickCheck oracle; S8 goldens byte-unchanged; Lean theorem + 19 guards; differential 583/0, parity 73, mutants byte-identical; PR #147"
+    summary: "@0.10 release: byte-equivalence with encode_ND by construction plus QuickCheck oracle; S8 goldens byte-unchanged; Lean theorem + 19 guards; differential 583/0, parity 73, mutants byte-identical; the PR"
   - turn: 1
     type: observation
     id: "O84"
@@ -28,7 +28,7 @@ events_logged:
 
 ai_actions:
   - turn: 1
-    action: "Implemented lara-syntax@0.10 (#144) end to end: Lara.Syntax.parseProp export; NDNamed lowerFormula/propSource/formulaResidualMarker with NamedFormulaMalformed; CertNdFormulaMalformed template; 12 vectors + 2 properties + 2 CLI cases; S8 rewrite; Lean NDNamed extension (encodeProp parameter, NFormula, lowerFormula_eq_translation, 19 guards) with AxCheck row; grammar Appendix I plus doc pointer sweep; committed ddb39b6 and opened PR #147"
+    action: "Implemented lara-syntax@0.10 end to end: Lara.Syntax.parseProp export; NDNamed lowerFormula/propSource/formulaResidualMarker with NamedFormulaMalformed; CertNdFormulaMalformed template; 12 vectors + 2 properties + 2 CLI cases; S8 rewrite; Lean NDNamed extension (encodeProp parameter, NFormula, lowerFormula_eq_translation, 19 guards) with AxCheck row; grammar Appendix I plus doc pointer sweep; committed ddb39b6 and opened the PR"
     provenance: ai-executed
     files_changed: ["src/Lara/Syntax.hs", "src/Lara/Elaborate/NDNamed.hs", "src/Lara/Elaborate/Error.hs", "src/Lara/Elaborate/Internal.hs", "test/NDNamedSpec.hs", "test/CliSpec.hs", "test/WorkedExamplesSpec.hs", "test/DifferentialSpec.hs", "examples/S8/example.lara", "examples/S8/strict-v1.policy.lara", "lean/Lara/NDNamed.lean", "lean/AxCheck.lean", "lean/Lara.lean", "lean/README.md", "docs/lara-surface-grammar.md", "docs/rejection-surface.md", "docs/spec.md", "docs/m5-freeze-checklist.md", "docs/engineering-plan.md", "docs/mechanization-plan.md", "docs/worked-examples-plan.md", "examples/README.md", "README.md"]
 
@@ -38,10 +38,10 @@ logic_revisions: []
 
 key_context:
   - turn: 1
-    excerpt: "User: 'sure checkout a new branch for that. do it directly and pr' — directing autonomous execution of #144 after the progress briefing recommended it as the next step."
+    excerpt: "User: 'sure checkout a new branch for that. Do it directly and pr' — directing autonomous execution after the progress briefing recommended it as the next step."
 
 open_threads:
-  - "PR #147 awaits review/merge; #144 closes on merge."
+  - "The PR awaits review/merge; it closes on merge."
   - "Post-lowering R13 error attribution (source map back to authored names) remains the deliberate @0.9 deferral, restated in Appendix I.3."
   - "A citing formula form ((of premise-name)) was considered and deferred at N208; only worth revisiting if authored re-spelling proves repetitive in practice."
 

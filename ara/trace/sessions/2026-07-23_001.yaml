@@ -1,7 +1,7 @@
 session:
   id: "2026-07-23_001"
   timestamp: "2026-07-23T00:16"
-  summary: "PR #10 CI restored by bypassing a retired Hackage mirror; the full Haskell and Lean workflow passed."
+  summary: "CI restored by bypassing a retired Hackage mirror; the full Haskell and Lean workflow passed."
 
 events_logged:
   - type: dead_end

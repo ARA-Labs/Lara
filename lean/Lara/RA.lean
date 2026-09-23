@@ -1,5 +1,5 @@
 /-
-The rational-arithmetic domain-checker backend `ra@1` (issue #57).
+The rational-arithmetic domain-checker backend `ra@1`.
 
 The adapter certifies one goal shape — the relative-drop inequality
 `rel_drop_ge(F, A, C, T)` over numeric literals — by exact rational

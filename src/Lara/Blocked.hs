@@ -1,5 +1,5 @@
--- | Conservative public reporting for quarantine-affected claims (spec §4.3,
--- issue #76) — the executable counterpart of @lean\/Lara\/Blocked.lean@.
+-- | Conservative public reporting for quarantine-affected claims (spec §4.3) —
+-- the executable counterpart of @lean\/Lara\/Blocked.lean@.
 --
 -- __The hazard.__ §4.3 quarantine removes a leaf, every argument whose support
 -- term uses it, and every attack with a removed endpoint
@@ -39,7 +39,7 @@
 -- construction over declared-index frameworks. Lean's
 -- @production_justified_nonpromotion_of_not_blocked@ transports the compact
 -- 'Lara.Driver.buildAccept' AF and computed complete support through the
--- retained-index embedding (issue #80). @test\/BlockedSpec.hs@ and the corpus
+-- retained-index embedding. @test\/BlockedSpec.hs@ and the corpus
 -- differential remain conformance evidence that this Haskell computation
 -- mirrors those proved definitions.
 --
@@ -331,7 +331,7 @@ retainedAttackIndices p =
     keptArgSet = pruneKeptArgSet p
 
 -- | Declaration-order indices of the leaves quarantine retained — the leaf
--- counterpart of 'retainedIndices' (#165). 'pruneWithPolicySeed' filters, so
+-- counterpart of 'retainedIndices'. 'pruneWithPolicySeed' filters, so
 -- the retained leaves keep their declared relative order and entry @i@ of this
 -- list is the declared index of checked-unit leaf @i@. Selection is by
 -- membership in 'pruneRemovedLeaves' rather than the smart constructor's full
@@ -425,7 +425,7 @@ blockedQueries :: Prune -> [CheckedNode] -> [Prop] -> [Prop]
 blockedQueries p nodes queries
   -- Fast path: quarantine removed nothing, so the checked program /is/ the
   -- declared one and no status is conditional. This keeps every non-quarantining
-  -- artifact — which is all of them today — at exactly its pre-#76 cost.
+  -- artifact — which is all of them today — at exactly its pre-conservative-reporting cost.
   | unitArgs (pruneDeclared p) == unitArgs (pruneChecked p)
   , unitAttacks (pruneDeclared p) == unitAttacks (pruneChecked p) =
       []

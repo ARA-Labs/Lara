@@ -7,18 +7,18 @@ session:
   summary: >
     M4 closed and result 9 mechanized under Model A, then strengthened by
     acceptance-preserving well-checkedness transport so backend replacement is
-    non-vacuous by construction. PR #43 merged. Turn 4 completed status
+    non-vacuous by construction. The PR merged. Turn 4 completed status
     housekeeping: synchronized the root/Lean READMEs, TODO roadmap,
     mechanization plan and status ledger, keynote proof ledger, and
-    Presentation.lean scope comment; closed completed trackers #31 and #37.
-    Next milestone M5 starts with #36 replay identity and #38 duplicate-report
+    Presentation.lean scope comment; closed completed trackers.
+    Next milestone M5 starts with replay identity and duplicate-report
     groups. Result 3 backend certificate dependency accountability remains the
-    formal gap. Turn 5 implemented #38 cross-layer (AST/surface/wire/driver +
+    formal gap. Turn 5 implemented cross-layer (AST/surface/wire/driver +
     Lean Lara.Groups with 6 sorry-free theorems); enforced §4.3 as a
     driver-boundary check (R9) with quarantine→gap by drop-the-arg, escalation→
     reject; all gates green (cabal test, lake build, check-axioms, differential
-    41/41); PR #45 opened (closes #38). C21 crystallized. Both M5 prerequisites
-    (#36, #38) now closed.
+    41/41); the PR opened. C21 crystallized. Both M5 prerequisites
+    now closed.
 
 events_logged:
   - turn: 1
@@ -26,7 +26,7 @@ events_logged:
     id: "N75"
     routing: direct
     provenance: user
-    summary: "M4 closed after PR #34; retire TODOS M4 section, close #29, pick result-9 mechanization as next track"
+    summary: "M4 closed after the PR; retire TODOS M4 section, pick result-9 mechanization as next track"
   - turn: 1
     type: dead_end
     id: "N76"
@@ -56,32 +56,32 @@ events_logged:
     id: "N79"
     routing: direct
     provenance: user
-    summary: "PR-#41 review: dropped two unused companion lemmas (verified AxCheck-only refs); filed worked-example/transport follow-up #42"
+    summary: "PR review: dropped two unused companion lemmas (verified AxCheck-only refs); filed worked-example/transport follow-up"
   - turn: 3
     type: decision
     id: "N80"
     routing: direct
     provenance: user
-    summary: "Chose #42 transport lemma over a Haskell mapAssur conformance port (soundness layer > conformance-only duplicate)"
+    summary: "Chose transport lemma over a Haskell mapAssur conformance port (soundness layer > conformance-only duplicate)"
   - turn: 3
     type: experiment
     id: "N81"
     routing: direct
     provenance: ai-executed
-    summary: "Transport mechanized (EraseTransport.lean): mapAssur preserves well-checkedness; backend_replacement non-vacuous by construction; 48 jobs, 516 decls, 0 sorryAx; PR #43"
+    summary: "Transport mechanized (EraseTransport.lean): mapAssur preserves well-checkedness; backend_replacement non-vacuous by construction; 48 jobs, 516 decls, 0 sorryAx; the PR"
 
   - turn: 4
     type: decision
     id: "N82"
     routing: direct
     provenance: user
-    summary: "Housekeeping before M5: synchronize completion status and close completed trackers #31/#37"
+    summary: "Housekeeping before M5: synchronize completion status and close completed trackers"
   - turn: 5
     type: pivot
     id: "N83"
     routing: direct
     provenance: user
-    summary: "M4/result-9 → M5 implementation: user directed 'do issue #38' in a worktree"
+    summary: "M4/result-9 → M5 implementation: user directed 'do issue [redacted]' in a worktree"
   - turn: 5
     type: decision
     id: "N84"
@@ -99,7 +99,7 @@ events_logged:
     id: "N86"
     routing: direct
     provenance: ai-executed
-    summary: "#38 landed cross-layer; cabal test PASS, lake build, check-axioms clean, differential 41/41 + 5/5; PR #45 (closes #38)"
+    summary: "Landed cross-layer; cabal test PASS, lake build, check-axioms clean, differential 41/41 + 5/5; the PR"
   - turn: 5
     type: observation
     id: "O20"
@@ -115,7 +115,7 @@ events_logged:
 
 ai_actions:
   - turn: 1
-    action: "Retired M4 backlog in TODOS.md and closed GitHub umbrella issue #29"
+    action: "Retired M4 backlog in TODOS.md and closed the issue"
     provenance: ai-executed
     files_changed: ["TODOS.md"]
   - turn: 1
@@ -131,11 +131,11 @@ ai_actions:
     provenance: ai-executed
     files_changed: ["ara/evidence/status/mechanization_status.md", "lean/README.md"]
   - turn: 2
-    action: "PR-#41 review item 1: removed unused mapAssurAtt_target/mapAssurDis_eq + AxCheck line; rebuilt (47 jobs, 0 sorryAx); committed 3db1e75; opened issue #42 for item 2"
+    action: "PR review item 1: removed unused mapAssurAtt_target/mapAssurDis_eq + AxCheck line; rebuilt (47 jobs, 0 sorryAx); committed 3db1e75; opened the issue for item 2"
     provenance: ai-executed
     files_changed: ["lean/Lara/Erase.lean", "lean/AxCheck.lean", "ara/evidence/status/mechanization_status.md", "ara/logic/claims.md"]
   - turn: 3
-    action: "Delegated transport lemma to a fork; independently verified. Added lean/Lara/EraseTransport.lean (hasSupport_mapAssur, hasAttack_mapAssur, mapCertProg, backend_replacement_transport); committed e72c884; opened PR #43 (closes #42)"
+    action: "Delegated transport lemma to a fork; independently verified. Added lean/Lara/EraseTransport.lean (hasSupport_mapAssur, hasAttack_mapAssur, mapCertProg, backend_replacement_transport); committed e72c884; opened the PR"
     provenance: ai-executed
     files_changed: ["lean/Lara/EraseTransport.lean", "lean/Lara.lean", "lean/AxCheck.lean", "ara/evidence/status/mechanization_status.md", "lean/README.md"]
 
@@ -144,8 +144,8 @@ ai_actions:
       Updated README.md, lean/README.md, TODOS.md, docs/mechanization-plan.md,
       ara/evidence/status/mechanization_status.md, docs/slides/keynote.html, and
       lean/Lara/Presentation.lean to reflect M3/M4/result-9/result-12 completion,
-      the remaining result-3 formal gap, and M5 prerequisites #36/#38; closed
-      GitHub issues #31 and #37 as completed.
+      the remaining result-3 formal gap, and M5 prerequisites; closed
+      the GitHub issues as completed.
     provenance: ai-executed
     files_changed:
       - "README.md"
@@ -156,7 +156,7 @@ ai_actions:
       - "docs/slides/keynote.html"
       - "lean/Lara/Presentation.lean"
   - turn: 5
-    action: "Implemented #38 duplicate-report groups end-to-end (Haskell + Lean), added differential fixtures + R9 negatives, updated grammar doc/TODOS, committed + pushed, opened PR #45"
+    action: "Implemented duplicate-report groups end-to-end (Haskell + Lean), added differential fixtures + R9 negatives, updated grammar doc/TODOS, committed + pushed, opened the PR"
     provenance: ai-executed
     files_changed:
       - "src/Lara/AST.hs"
@@ -268,13 +268,13 @@ key_context:
       is the faithful, provable condition.
   - turn: 4
     excerpt: >
-      User confirmed PR #43 was merged, asked whether the language/compiler/type
+      User confirmed the PR was merged, asked whether the language/compiler/type
       checker were complete, then directed: "do house keeping first" and "update
       our readme and docs." The resulting status language distinguishes the
       usable M4-complete core from the remaining spec/evaluation prerequisites.
   - turn: 5
     excerpt: >
-      User: "go to a worktree, do issue #38", then "/commit-commands:commit-push-pr".
+      User: "go to a worktree, do issue [redacted]", then "/commit-commands:commit-push-pr".
       The decisive design finding was that checkUnit rejects (R1) on a missing-leaf
       reference, so quarantine cannot be modelled by Gamma-removal alone — the
       §4.3 "quarantine is not rejection / routes to gap" semantics forced dropping
@@ -283,8 +283,8 @@ key_context:
 
 open_threads:
   - "M5 — evaluation corpus (research-proposal.md §7): gold annotations, mutation suite, baselines, ablations, blinded held-out set. No plan/issue yet — the bigger-picture next step after result-9 polish."
-  - "Both scoped M5 prerequisites are now closed: #38 duplicate-report groups (this turn, PR #45) and #36 verdict-carried replay identity (PR #44). M5 corpus work itself has no plan/issue yet."
-  - "PR #45 is open, not merged: C21's artifact-commitment rests on the branch, not main. Revisit C21 status if the PR is revised or rejected in review."
+  - "Both scoped M5 prerequisites are now closed: duplicate-report groups (this turn, the PR) and verdict-carried replay identity. M5 corpus work itself has no plan/issue yet."
+  - "The PR is open, not merged: C21's artifact-commitment rests on the branch, not main. Revisit C21 status if the PR is revised or rejected in review."
   - "O19 staged (methodological concept: erasure-invariance via injective relabel) — refined by N81 (forward typing transport needs only hpres, not injectivity); still awaiting a closure signal to crystallize."
   - "O20 staged (three-tier rejection architecture / driver-boundary tier) — awaiting a closure signal or reuse."
 
@@ -294,11 +294,11 @@ ai_suggestions_pending:
 
 resolved_threads:
   - turn: 4
-    thread: "PR #43 transport merge and result-9 close"
-    resolution: "Merged; issue #42 closed; status documents synchronized."
+    thread: "Transport merge and result-9 close"
+    resolution: "Merged; the issue closed; status documents synchronized."
   - turn: 4
-    thread: "Stale completed trackers #31 and #37"
-    resolution: "Closed as completed with PR #33/#39 evidence."
+    thread: "Stale completed trackers"
+    resolution: "Closed as completed with the PR evidence."
   - turn: 5
-    thread: "#38 duplicate-report groups (M5 mutation-suite spine)"
-    resolution: "Implemented cross-layer + mechanized (Lara.Groups, 6 sorry-free theorems); differential 41/41 + 5/5; PR #45 opened (closes #38). C21 crystallized."
+    thread: "Duplicate-report groups (M5 mutation-suite spine)"
+    resolution: "Implemented cross-layer + mechanized (Lara.Groups, 6 sorry-free theorems); differential 41/41 + 5/5; the PR opened. C21 crystallized."

@@ -5,9 +5,9 @@ session:
   last_turn: "2026-08-20T05:30"
   turn_count: 1
   summary: >
-    Executed the lara-syntax@0.7 surface-strictness batch end to end: #135
-    bare-leaf discharge/open parse errors, #133 the sole `open q` hole spelling
-    with the `as` keyword retired, and #129 a shadowed discharge target as a
+    Executed the lara-syntax@0.7 surface-strictness batch end to end:
+    bare-leaf discharge/open parse errors, the sole `open q` hole spelling
+    with the `as` keyword retired, and a shadowed discharge target as a
     hard AmbiguousDischarge. Migrated the ten affected corpus spellings in the
     same commit as the restriction, proved acceptance-preservation and an empty
     frozen-artifact diff across ten gates, wrote grammar Appendix F, and closed
@@ -19,7 +19,7 @@ events_logged:
     id: "N196"
     routing: direct
     provenance: user
-    summary: "Ship #135/#133/#129 as one removal-only surface release; no compatibility aliases since every .lara source is in-repo."
+    summary: "Ship as one removal-only surface release; no compatibility aliases since every .lara source is in-repo."
   - turn: 1
     type: experiment
     id: "N197"
@@ -47,7 +47,7 @@ events_logged:
 
 ai_actions:
   - turn: 1
-    action: "Implemented #135 and #133 in the parser: Either-returning arg-body folds with no catch-all, `open q` as the sole hole spelling, `as` removed from the grammar vocabulary, printer updated, and all ten corpus spellings plus every test-side spelling migrated in the same commit."
+    action: "Implemented in the parser: Either-returning arg-body folds with no catch-all, `open q` as the sole hole spelling, `as` removed from the grammar vocabulary, printer updated, and all ten corpus spellings plus every test-side spelling migrated in the same commit."
     provenance: ai-executed
     files_changed:
       - "src/Lara/Syntax.hs"
@@ -64,7 +64,7 @@ ai_actions:
       - "examples/rebuttal-replay/round1/example.lara"
       - "examples/rebuttal-replay/round2/example.lara"
   - turn: 1
-    action: "Implemented #129: added AmbiguousDischarge, retyped UnresolvedDischarge's final field String -> ArgRef, and routed both discharge payload forms through one refMatches-based resolveDischargeRef. Verified by mutation - collapsing the resolver back to leaf-preference fails three distinct pins."
+    action: "Implemented the shadowed-discharge change: added AmbiguousDischarge, retyped UnresolvedDischarge's final field String -> ArgRef, and routed both discharge payload forms through one refMatches-based resolveDischargeRef. Verified by mutation - collapsing the resolver back to leaf-preference fails three distinct pins."
     provenance: ai-executed
     files_changed:
       - "src/Lara/Elaborate/Error.hs"
@@ -128,7 +128,7 @@ logic_revisions:
       name nothing downstream read).
     signal: terminology-drift
     provenance: ai-suggested
-    note: "Records the one-identity fact that motivated #133, which the concept had never stated."
+    note: "Records the one-identity fact that motivated the hole-spelling restriction, which the concept had never stated."
 
 key_context:
   - turn: 1

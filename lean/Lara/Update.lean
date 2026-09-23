@@ -282,7 +282,7 @@ theorem applyUpdate_addInstance_notFresh {canon : String → String}
 
 The Γ-weakening lemmas this section rests on — `Support.hasSupport_mono_gamma`,
 `Attack.hasAttack_mono_gamma` — and the `Admission.buildGamma_*` facts live at
-their owning modules (issue #220). -/
+their owning modules. -/
 
 private theorem mem_leavesList_of_mem {child : SupportTerm}
     {children : List SupportTerm} (hchild : child ∈ children)

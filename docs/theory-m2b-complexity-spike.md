@@ -11,7 +11,7 @@ argument to go through?_
 **HARDNESS**
 
 This is the D9 gate outcome of the follow-up plan
-(issue #209, branch `theory/m2b-realization-closure`): the realization
+(branch `theory/m2b-realization-closure`): the realization
 closure is achieved and the hardness path (Phase 2, Tasks 9–13) is unlocked.
 It supersedes the 2026-08-30 INCONCLUSIVE record, which is preserved
 verbatim below.

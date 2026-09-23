@@ -1,5 +1,5 @@
 /-
-The Lean reference executable for `pw-run 1` (#322): `pw-run <file.sexp>`.
+The Lean reference executable for `pw-run 1`: `pw-run <file.sexp>`.
 
 It reads the run file, reads every `(file PATH)` world source relative to the
 run file's directory, and hands the pure `Lara.PW.Run.run` the parsed inputs.
@@ -20,7 +20,7 @@ open Lara.PW.Run
 reports them in declaration order. A `lara` source is a presentation program,
 and this reference has no surface parser: it is reported as unreadable, and
 `lara pw-input` is the door that derives a run document with the envelope
-inline (#327). -/
+inline. -/
 def readSource (dir : System.FilePath) : WorldSource → IO (Except String Sx)
   | .inline e => pure (.ok e)
   | .lara p => pure (.error (p ++ ": lara sources have no Lean reader; derive an inline envelope with lara pw-input"))

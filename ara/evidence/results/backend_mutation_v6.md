@@ -1,4 +1,4 @@
-# Backend mutation coverage — evaluation freeze v6 (#266)
+# Backend mutation coverage — evaluation freeze v6
 
 Measured from clean input commit `bc888a5d4b60438565bcf0922a8a3f04cfc645b8` on 2026-09-09.
 

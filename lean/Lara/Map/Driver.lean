@@ -828,7 +828,7 @@ theorem mem_linkedTermsOf (shared : Decoded) (qualified : List QualifiedMember)
       mem_declaredArgs.mpr ⟨m, hm, a, ha, rfl⟩, rfl⟩, List.not_mem_nil⟩
 
 /-- **The Lean driver's linked unit is accepted** whenever its members are
-well-formed on their own (issue #321).
+well-formed on their own.
 
 `Lara.Map.batch_checked` instantiated at `linkedUnitOf` — the unit
 `linkAndEvaluate` hands to `checkUnit`, in the driver's own spelling: its
@@ -1054,7 +1054,7 @@ The linked unit is `linkedUnitOf`, and its cross-member saturation is
 `generatedAttacksOf` — `Lara.Map.crossPairs`, the batch generator
 `Lara.Map.batch_checked` is proved about. So `linkedUnitOf_checked` is a theorem
 about the exact value checked below: a map whose members are well-formed on
-their own never reaches `.linkRejected` (issue #321).
+their own never reaches `.linkRejected`.
 
 The duplicate-leaf guard here is defensive and cannot fire, which is a change
 from how it started: `decodeMemberIn` now refuses a member whose own leaf ids

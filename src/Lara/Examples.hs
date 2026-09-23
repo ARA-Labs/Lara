@@ -116,7 +116,7 @@ inst r theta prems disch holes =
 -- Designed status: __gap__ — the mandatory question @o_seed@ is left open,
 -- matching C02's own "seed-fragile below the practical stop floor" caveat, so
 -- the argument is incomplete exactly as spec §10 intends. The hole names that
--- question once and only once: since @lara-syntax\@0.7@ (#133) an @open@ line
+-- question once and only once: since @lara-syntax\@0.7@ an @open@ line
 -- carries a single identifier, and §6.1 reads it /as/ the question left open
 -- (@holeNames@ in "Lara.SupportTerm"). The retired @open q as o@ spelling let
 -- this narrative name the question and the obligation differently, which is

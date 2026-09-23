@@ -5,12 +5,12 @@ session:
   last_turn: "2026-09-05T00:00"
   turn_count: 1
   summary: >
-    PW-T8/PW-T9 follow-ups (#234, #235, #238, #239) implemented as four PRs
-    per the eng-review-cleared plan: #235 executable witnesses (PR #243),
-    #234 zipOpt traversal seam with byte-identical statements (PR #245),
-    #239 executable StatusBridge decider with soundness and completeness
-    (PR #244, lane-B subagent worktree), #238 declared-attack transport with
-    AttackBridge.toStatusBridge (PR #246). T8 limitation 1 recorded as
+    PW-T8/PW-T9 follow-ups implemented as four PRs
+    per the eng-review-cleared plan: executable witnesses,
+    zipOpt traversal seam with byte-identical statements,
+    executable StatusBridge decider with soundness and completeness
+    (the PR, lane-B subagent worktree), declared-attack transport with
+    AttackBridge.toStatusBridge. T8 limitation 1 recorded as
     NARROWED (extra Function.Injective lm hypothesis), not discharged.
     All gates pass locally; coverage 2262 → 2304 across the stack.
 
@@ -20,13 +20,13 @@ events_logged:
     id: "N307"
     routing: direct
     provenance: ai-executed
-    summary: "Lane A (#235→#234→#238) and lane B (#239) run in parallel worktrees per plan; all four PRs open with the three local gates green each."
+    summary: "Lane A and lane B run in parallel worktrees per plan; all four PRs open with the three local gates green each."
   - turn: 1
     type: decision
     id: "N308"
     routing: direct
     provenance: ai-executed
-    summary: "Task 4 built ladder-first: 21 signatures elaborated with sorry before any proof (eng review 5A), then filled bottom-up; trAttackList routed through the #234 zipOpt seam (3A)."
+    summary: "Task 4 built ladder-first: 21 signatures elaborated with sorry before any proof (eng review 5A), then filled bottom-up; trAttackList routed through the zipOpt seam (3A)."
   - turn: 1
     type: decision
     id: "N309"
@@ -38,7 +38,7 @@ events_logged:
     id: "N310"
     routing: direct
     provenance: ai-executed
-    summary: "#238 ladder lands 23 theorems sorry-free in the standard trio; negatives pin atts-gap refutability and the collapsing-leaf-map containsB boundary (2A); ques-position commutation pinned (7A)."
+    summary: "The declared-attack ladder lands 23 theorems sorry-free in the standard trio; negatives pin atts-gap refutability and the collapsing-leaf-map containsB boundary (2A); ques-position commutation pinned (7A)."
   - turn: 1
     type: observation
     id: "O137"

@@ -1,6 +1,6 @@
 /-
-The formula-indexed M2b gadget behind a closed leaf vocabulary (issue #209,
-decision D8).
+The formula-indexed M2b gadget behind a closed leaf vocabulary (decision
+D8).
 
 `rawUnitOfFormula` and its generators moved here unchanged in value from
 `Lara.Examples.Complexity.Realization`, because the post-gate `reduceCode` and

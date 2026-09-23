@@ -489,7 +489,7 @@ prop_strictCheckSeals =
         _ -> False
 
 -- ---------------------------------------------------------------------------
--- Heterogeneous backend composition (issue #182; spec §6 @certDeps@)
+-- Heterogeneous backend composition (spec §6 @certDeps@)
 --
 -- One support term may carry certificates from /different/ backends, and the
 -- dependency report of the whole term is the union of the per-step reports —
@@ -933,7 +933,7 @@ prop_dupBackendDepsCollected =
 -- multiplicity reconciliation as an artifact rather than an argument.
 -- ---------------------------------------------------------------------------
 
--- | The canonical encoding is the library's since \#204
+-- | The canonical encoding is the library's
 -- ("Lara.Strict.Deps".'encodeCertDeps'), not a copy defined here. It moved
 -- because the shipped @lara deps@ report and this golden must be the /same/
 -- text: a report format defined separately from the one

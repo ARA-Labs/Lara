@@ -1,5 +1,5 @@
--- | Formula attribution on an @nd\@1@ replay rejection (#148,
--- "Lara.Elaborate.FormulaNames").
+-- | Formula attribution on an @nd\@1@ replay rejection
+-- ("Lara.Elaborate.FormulaNames").
 --
 -- The contract under test is one stderr block. When a named proof term lowers
 -- cleanly and the certificate is then refused at R13, the backend's reason

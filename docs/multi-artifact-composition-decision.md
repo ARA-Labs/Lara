@@ -1,7 +1,7 @@
 # Decision: composing independently checkable artifacts into a map
 
 _Status: the composition boundary is settled, and every stage behind it has
-landed. Recorded 2026-09-10 for issue #303, with the first increment
+landed. Recorded 2026-09-10, with the first increment
 (`Lara.Map.Types`, `Lara.Map.Wire`, `test/MapWireSpec.hs`), which shipped the
 vocabulary, the two grammars, and their codecs only. Loading, qualification,
 linking, the `.laramap` driver, `--out`, and the worked example landed behind
@@ -10,7 +10,7 @@ amending this file again. **No corpus regeneration and no freeze-tag bump is owe
 layer is strictly additive above `lara-core@0.2`, and no corpus unit, mutant, wire,
 replay-identity, or golden byte changes — the only core-side edit is two additive exports of an
 existing `Lara.Wire` production. Companion to `docs/spec.md` §12 and its dated
-#303 amendment (the versioned extension marker), `strict-backend-decision.md` (the shared-contract
+amendment (the versioned extension marker), `strict-backend-decision.md` (the shared-contract
 fields a member is compared on), and `rejection-surface.md` (the two-exit-code
 door story a map inherits)._
 
@@ -419,7 +419,7 @@ makes a status ambiguous.
 No anchor under `test/fixtures/map/` exercises `MRLinkRejected`, and none can
 be built: when every member of a map passes its own check, the linked unit is
 always accepted. This used to be a review-time argument, and it is now a
-theorem for the Lean driver (issue #321). `Lara.Map.Driver.linkedUnitOf_checked`
+theorem for the Lean driver. `Lara.Map.Driver.linkedUnitOf_checked`
 proves that the unit `linkAndEvaluate` builds is accepted by `checkUnit`
 whenever each member is well-formed on its own and the aliases and leaf
 identities are unique. The envelope decoder enforces the uniqueness, and the
@@ -623,7 +623,7 @@ own unit has already passed `firstDuplicate`. So the merge can only fire on a
 `Lara.Map.Link.mergeArguments`, and tested two ways: directly on synthesized
 terms, and through a real map. `test/fixtures/map/merge/` runs under
 `convention-v1`, a fixture policy with one premise-less rule, and both of its
-members declare the same leaf-free argument (issue #316). That map is a
+members declare the same leaf-free argument. That map is a
 conformance anchor like any other, so both drivers are shown to fold the two
 handles onto one index — the composite's `nodes` section carries
 `(node paper_adopt conv 0) (node paper_critic conv 0)` — and to agree on every
@@ -749,7 +749,7 @@ linkable.
 Between them they settle qualification, the merge, the linked check and the
 grounded evaluation for the fold. Neither driver runs the fold. Both build the
 linked unit in one batch, saturating every cross-member pair over the fully
-merged argument list. Since issue #321 that batch has its own theorems, in
+merged argument list. That batch has its own theorems, in
 `lean/Lara/Map/Batch.lean` and `lean/Lara/Map/Link.lean`:
 
 - `Lara.Map.batch_checked` proves the batch unit is accepted. It is stated for
@@ -923,12 +923,12 @@ map can reach the structural merge. It is tested now. `test/fixtures/map/merge/`
 reaches the merge through `linkMap` (`MapLinkSpec`'s
 `prop_mergeFiresThroughAMap`) and through both drivers
 (`scripts/check-map-conformance.sh`), with its goldens pinned fresh beside the
-agreement map's (issue #316).
+agreement map's.
 
 **Three follow-ups recorded from the driver increment's reviews, since
-resolved.** Each was tracked as an issue: #316, #317 and #318 respectively.
+resolved.**
 
-1. **Two more conformance anchors: resolved** (issue #316). The review asked for
+1. **Two more conformance anchors: resolved**. The review asked for
    a map in which the structural merge fires and for a cross-driver *link
    rejection*. The first now exists: `test/fixtures/map/merge/` runs under a
    fixture policy with a premise-less rule, and both drivers agree on it (see
@@ -937,7 +937,7 @@ resolved.** Each was tracked as an issue: #316, #317 and #318 respectively.
    `MRLinkRejected` note under D11). So the gate gained one anchor, and the
    link-rejection row is settled by proof instead of by a fixture.
 
-2. **Three helpers were triplicated: resolved** (issue #317). `sameSelectorKind`,
+2. **Three helpers were triplicated: resolved**. `sameSelectorKind`,
    `firstDuplicate` and `strictlyAscending` now each have exactly one
    definition, in `Lara.Map.Types`, beside the `Coord` type the first one is
    about. `Lara.Map.Wire`, `Lara.Map.Driver`, `Lara.Map.Load` and the
@@ -946,8 +946,8 @@ resolved.** Each was tracked as an issue: #316, #317 and #318 respectively.
    three were never tables, so one definition couples no vocabulary. The copies
    were behaviourally identical: the move changed no test outcome.
 
-3. **`withTree`'s temporary directory name was predictable: resolved** (issue
-   #318). It used to be derived from a deleted `openTempFile` marker plus a fixed
+3. **`withTree`'s temporary directory name was predictable: resolved**.
+   It used to be derived from a deleted `openTempFile` marker plus a fixed
    suffix, and `createDirectoryIfMissing` then adopted whatever was at that
    path, a planted symlink included. The four map test modules (`MapSpec`,
    `MapLoadSpec`, `MapLinkSpec`, and `MapExampleSpec`, which carried a fourth
@@ -1010,7 +1010,7 @@ bytes that had drifted in the meantime.
 ### The shipped D3 map, and what the example is evidence of
 
 `examples/agreement-map-multi/` is the record's worked example: the D3
-agreement map (issue #64) rewritten as four independently authored,
+agreement map rewritten as four independently authored,
 independently checkable artifacts under one `map.laramap`. It is registered
 three ways, and each registration buys something different.
 
@@ -1047,8 +1047,8 @@ the declared `artifact` digests are illustrative reconstructions, as everywhere
 in `examples/`; a digest is author-declared metadata carried through unchanged,
 never a checksum of the member's bytes (D1).
 
-**The manifest's expected-verdict comment is checked, not deleted** (issue
-#320). `map.laramap` ends with an `EXPECTED COMPOSITE VERDICT` comment: the
+**The manifest's expected-verdict comment is checked, not deleted**.
+`map.laramap` ends with an `EXPECTED COMPOSITE VERDICT` comment: the
 verdict's `nodes`, `labels`, `edges` and `statuses` sections, with each status
 row cut to its `(alias claim status)` handle. It is the first statement of the
 example's answer a reader meets, and a comment survives every change that

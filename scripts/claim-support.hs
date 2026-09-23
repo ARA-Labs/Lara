@@ -1,4 +1,4 @@
--- | The corpus claim-support aggregation harness (#56): the IO around the pure
+-- | The corpus claim-support aggregation harness: the IO around the pure
 -- "Lara.ClaimSupport" metrics. One command that emits the four
 -- corpus-descriptive numbers the paper's /Claim-support outcomes/ paragraph
 -- (@\\msfive@ in the external paper repo's @evaluation.tex@; this repo ships no

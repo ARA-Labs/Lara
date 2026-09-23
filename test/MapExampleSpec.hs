@@ -349,7 +349,7 @@ prop_shippedVerdictGoldenIsFresh = once $ ioProperty $ do
       printSExpr (encodeMapVerdict verdict) ++ "\n" === golden
 
 -- | The @EXPECTED COMPOSITE VERDICT@ comment in the shipped @map.laramap@ is the
--- verdict the map produces today (issue #320).
+-- verdict the map produces today.
 --
 -- That block is the reader-facing statement of what the example demonstrates,
 -- and a comment survives every pipeline change: were the node order, a status

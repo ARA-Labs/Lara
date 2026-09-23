@@ -15,8 +15,8 @@ spine that drove this order — now a closed record, not a worklist — was:_
 | M6 — full evaluation | all four axes reported; at least five worked cases spanning every status/attack kind |
 | M7 — release package | paper, mechanization, implementation, corpus, and reproducibility scripts |
 
-M0–M5 are closed (tracker #48); M6's LLM-dependent axes (b)/(d) are deferred to
-future work (#52, #30); M7 closed 2026-08-24 (#60) because paper-writing moved to the paper repository.
+M0–M5 are closed; M6's LLM-dependent axes (b)/(d) are deferred to
+future work; M7 closed 2026-08-24 because paper-writing moved to the paper repository.
 
 _If you are new to the project, start with the top-level `../README.md` and
 spec §0 instead; this is a living engineering log for contributors, and §0
@@ -24,13 +24,13 @@ below records the current state atop a stack of dated updates._
 
 ## 0. Current state (2026-07-21; M1 update 2026-07-22; M5 update 2026-08-19; surface updates 2026-08-22/23; milestone update 2026-08-24)
 
-**Milestone update (2026-08-24): no milestone is open in this repository.** #60
-(M7, the paper package) was closed as completed — paper-writing and
+**Milestone update (2026-08-24): no milestone is open in this repository.** M7
+(the paper package) was closed as completed — paper-writing and
 submission-package work is tracked in the paper repository, not here. The
 milestone spine above is now a closed record, not a worklist. Remaining
 engineering work is the open GitHub issues, chiefly the
-`refreeze-batch` evaluation-suite extensions (#125 in #154, #124, and #123),
-which landed together and were frozen by the shared refreeze cycle #156 as
+`refreeze-batch` evaluation-suite extensions,
+which landed together and were frozen by the shared refreeze cycle as
 **`m5-freeze-v5`** — 541 mutants + 60 corpus units = 601 measured inputs. The
 protocol and every anchor are in `docs/m5-freeze-checklist.md`.
 
@@ -39,7 +39,7 @@ terms as a presentation-only lowering to the unchanged de Bruijn kernel;
 Appendix H and the S8 worked example are the durable specification and witness.
 **Surface update (2026-08-23):** `lara-syntax@0.10` adds source-authored
 `nd@1` formula annotations — `(prop TEXT)` lowered through the shared
-`encodeAtomKey ∘ nf` path — closing #144; Appendix I and the rewritten S8 are
+`encodeAtomKey ∘ nf` path — Appendix I and the rewritten S8 are
 the durable specification and witness.
 
 **M5 update (2026-08-19): M1–M5 are closed and the build order below is fully
@@ -61,7 +61,7 @@ axis-(c) harness), `Lara.ClaimSupport` + `Lara.BindingAudit` (reporting and the
 blinded audit pipeline), and the cross-language presentation-parity guard
 (`scripts/check-presentation-parity.sh`).
 
-**M1 update (2026-07-22):** M0 exited (PR #8/#9) and the v0.1 language froze — `spec.md` is now
+**M1 update (2026-07-22):** M0 exited and the v0.1 language froze — `spec.md` is now
 "v0.1 — frozen at M1" with the row-by-row record in `m1-freeze-checklist.md`. The Lean
 development additionally mechanizes the frozen §6.1 support-term typing, §7.1 attack typing, and
 §8 compilation layers (`lean/Lara/{Support,Attack,Compile}.lean`) plus the executable §8.1
@@ -194,7 +194,7 @@ reject any policy whose `contrary` sides may overlap it at the ground-instance l
 These plug the untrusted producer into the checker and must **not** drive the trusted design, so
 they come after layers 1–8:
 
-- `Lara.Json` — untrusted LLM-producer surface over the Unit IR (issue #30); the checker-input wire
+- `Lara.Json` — untrusted LLM-producer surface over the Unit IR; the checker-input wire
   codec is `Lara.Wire`'s S-expressions (spec §1), and JSON is not a TCB codec.
 - `Lara.Syntax` — presentation parser + canonical printer; codec round-trip to α-equivalent AST
   (spec §9 result 12).

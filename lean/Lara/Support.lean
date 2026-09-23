@@ -179,7 +179,7 @@ theorem instAPat_head {θ : Subst} {pn : String} {ps : Pats}
 
 /-- Mapping an injective function preserves duplicate-freedom. The shared home
 of the list-bookkeeping helper behind the gadget/witness leaf-table `Nodup`
-proofs (issue #211). -/
+proofs. -/
 theorem nodup_map_of_injective {α β : Type _} {f : α → β}
     (hf : Function.Injective f) {l : List α} (hl : l.Nodup) :
     (l.map f).Nodup := by
@@ -752,7 +752,7 @@ theorem hasSupport_unique {canon Pi Gamma CertOk} {w : SupportTerm}
 These are the inversion and weakening lemmas every downstream module needs
 about `HasSupport` itself — none is specific to a checker, an update, or a
 link. They live here, at the judgment's module, so that no downstream module
-re-proves them privately (issues #220 and #228). -/
+re-proves them privately. -/
 
 /-- **Root inversion.** A derivation of an instance is headed by its rule: the
 rule resolves, and the derived conclusion is the rule's instantiated

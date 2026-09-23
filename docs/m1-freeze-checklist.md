@@ -17,7 +17,7 @@ compilation, claim aggregation, and specified rejection behavior; the strict-cha
 well-formedness check (spec §8.1, Path B) and the proposition normalization `nf`/`≡` (spec §3.2) are
 part of the frozen definition.
 
-**M1 is not PR #9.** PR #9 (`41a97f9`) froze the *corpus-derived* decisions — leaf grain, scheme
+**M1 is not commit `41a97f9`.** That commit froze the *corpus-derived* decisions — leaf grain, scheme
 vocabulary, adapter portfolio, defeat typing (spec §3, §4.3, §4.5, §5.2, §7, §11; claims C13–C17).
 Those are M1 *inputs*. M1 additionally freezes the corpus-*independent* language surface (syntax,
 JSON, the full static-judgment set, compilation, rejection behavior) and versions the whole thing.
@@ -29,7 +29,7 @@ M1 is a **spec-freeze / docs task**, not Haskell (that is M3). Its output trigge
 | Gate | Status | Evidence |
 | --- | --- | --- |
 | §8 #8 — TCB enumeration + Lean/Rocq host | **Resolved (2026-07-22)** | spec §1.1; host = Lean 4 |
-| M0 exit (≥80% construct coverage) | **Passed** | `m0/annotation-summary.md` §3 (~90%, PR #8/#9) |
+| M0 exit (≥80% construct coverage) | **Passed** | `m0/annotation-summary.md` §3 (~90%) |
 | §8 #1/#2/#3/#5 — adapters / schemes / defeat / leaf grain | **Frozen** | spec §5.2/§4.5/§7/§3 (C13–C16) |
 
 All blocking gates for the freeze are clear. Remaining M1 work is the language-surface lock below.
@@ -45,16 +45,16 @@ v0.1-lock pass; **Defer** = explicitly out of v0.1 (recorded, not an open gap).
 | 2 | Proposition / leaf shape (`nl`/`formal`/`binding`, per-cell grain) | §3, §3.1 | **Frozen** | none (C15); distribution-valued leaf → Defer (C17) | serializes into core AST |
 | 3 | Policy language: patterns, substitution, CQ discharge, admission table | §4.1–§4.4 | **Frozen** | ✅ §4.1 instantiation + §4.2 accounting markers; §4.3 `Gamma(P)` construction figure; Lean: `instPat`/`instAPat`, `InstSide`, `DefeatPolicy` | §9 r1, r3 (see rows 8/9) |
 | 4 | Reference scheme vocabulary (9 families) | §4.5 | **Frozen** | none (C13); spellings revisitable until `empirical-v1` ships | schema instances, no new theorem |
-| 5 | §8.1 strict-reachable `contrary` well-formedness (Path B) | §8.1 | **Frozen** | ✅ frozen as part of the definition; violation = R12; duplicate rule IDs and R12 run before program checking | §9 r7/C09 ✅ for the Lean reference PL (`Lara.Policy`, `Lara.Check.Unit`, `Lara.Consistency`; #18 implementation) |
+| 5 | §8.1 strict-reachable `contrary` well-formedness (Path B) | §8.1 | **Frozen** | ✅ frozen as part of the definition; violation = R12; duplicate rule IDs and R12 run before program checking | §9 r7/C09 ✅ for the Lean reference PL (`Lara.Policy`, `Lara.Check.Unit`, `Lara.Consistency`) |
 | 6 | Strict-backend seam + ND reference adapter | §5.1, §5.3 | **Frozen** | none (carve-out 2) | §9 r2, r8, r10 — **done for ND** (`lean/Lara/{Strict,ND}.lean`) |
-| 7 | Shipped adapter portfolio (`ra@1` + `ord@1` + `insp@1`; LP non-shipping) — **amended 2026-09-07 (#256), completed 2026-09-07 (#260)** | §5.2 | **Frozen** | C14; `ord@1` added under PR #83; `insp@1` (static code inspection) shipped under #260 | §9 r10 per shipped adapter — ND ✅ (`lean/Lara/{Strict,ND}.lean`); `ra@1`/`ord@1`/`insp@1` ✅ (`lean/Lara/{RA,Ord,Insp}.lean`) |
-| 8 | Support-term `w` AST + typing (`⊢ w : supports(p) ▷ O`, `leaves`, `certDeps`) | §6, **§6.1** | **Frozen (def)** | ✅ typing rules, exact executable Lean checker (`Lara.Check.inferSupport`), and the `certDeps` layer over `Backend.uses` landed (#46) | §9 r1 support/program checker ✅; r3 both halves ✅; r11 relational ✅ |
+| 7 | Shipped adapter portfolio (`ra@1` + `ord@1` + `insp@1`; LP non-shipping) — **amended 2026-09-07, completed 2026-09-07** | §5.2 | **Frozen** | C14; `ord@1` added with the portfolio amendment; `insp@1` (static code inspection) shipped with the portfolio completion | §9 r10 per shipped adapter — ND ✅ (`lean/Lara/{Strict,ND}.lean`); `ra@1`/`ord@1`/`insp@1` ✅ (`lean/Lara/{RA,Ord,Insp}.lean`) |
+| 8 | Support-term `w` AST + typing (`⊢ w : supports(p) ▷ O`, `leaves`, `certDeps`) | §6, **§6.1** | **Frozen (def)** | ✅ typing rules, exact executable Lean checker (`Lara.Check.inferSupport`), and the `certDeps` layer over `Backend.uses` landed | §9 r1 support/program checker ✅; r3 both halves ✅; r11 relational ✅ |
 | 9 | Typed positional attacks (rebut / undercut / undermine, `w@π`) | §7, **§7.1** | **Frozen (def)** | ✅ typing rules, exact executable Lean checker (`Lara.Check.checkAttack`), and relational compile-facing soundness landed | §9 r1 positional checker ✅; r4 (with item 11) ✅ |
 | 10 | Holes (open obligations) | §4.2, §6.1, §10.1 | **Frozen** | ✅ absorbed by the §6.1 `D ⊎ H` fix + §4.2 marker; mis-declared holes = R5, open mandatory = gap-routed (not rejection) | §9 r1 (mechanized invariants, row 8) |
-| 11 | Compilation `compile(P) = AF` + subargument closure | §8 (**compilation rules**) | **Frozen (def)** | ✅ generic `checkProgram`/`CheckedProgram` remains unchanged; detailed acceptance adds exact conflict coverage and retained checker nodes — pending: r9 | §9 r4 both halves ✅; r6 source-vs-compiled half ✅ (#17); r7 attack completeness ✅ (#18); r9 pending |
-| 12 | Grounded labelling + four-state aggregation | §8, §8.2 | **Frozen** | none | §9 r5 ✅; r6 source-vs-compiled half ✅ (#17 closed); r7/C09 computed-complete-claim consistency ✅ for the Lean reference PL (#18 implementation) |
-| 13 | Abstract syntax + wire schema (S-expression codec `Lara.Wire`; JSON producer surface is #30 — **amended 2026-09-07 (#256)**), **versioning** | §2, **§2.1** | **Frozen** | ✅ `lara-core@0.1` / `lara-syntax@0.1` + the replay-identity tuple. Declared deferral: the complete presentation grammar lands with `Lara.Syntax` (M3) under `lara-syntax@0.1`, gated by r12 | §9 r12 — presentation half ✅ (`parse ∘ print` at `lara-syntax@0.10`, spec §2.1); wire-decode boundary ✅ (`WireSpec` malformed-input matrix) |
-| 14 | Specified rejection behavior (located, per rejection class) — **amended 2026-09-07 (#256), amended 2026-09-11 (#331)** | **§10.1** | **Frozen** | ✅ R1–R14 enumerated with locations; quarantine and cycles deliberately non-classes; mapped onto the mutation list | §9 r1 (decidability); M5 mutation-suite spine |
+| 11 | Compilation `compile(P) = AF` + subargument closure | §8 (**compilation rules**) | **Frozen (def)** | ✅ generic `checkProgram`/`CheckedProgram` remains unchanged; detailed acceptance adds exact conflict coverage and retained checker nodes — pending: r9 | §9 r4 both halves ✅; r6 source-vs-compiled half ✅; r7 attack completeness ✅; r9 pending |
+| 12 | Grounded labelling + four-state aggregation | §8, §8.2 | **Frozen** | none | §9 r5 ✅; r6 source-vs-compiled half ✅; r7/C09 computed-complete-claim consistency ✅ for the Lean reference PL |
+| 13 | Abstract syntax + wire schema (S-expression codec `Lara.Wire`; future JSON producer surface — **amended 2026-09-07**), **versioning** | §2, **§2.1** | **Frozen** | ✅ `lara-core@0.1` / `lara-syntax@0.1` + the replay-identity tuple. Declared deferral: the complete presentation grammar lands with `Lara.Syntax` (M3) under `lara-syntax@0.1`, gated by r12 | §9 r12 — presentation half ✅ (`parse ∘ print` at `lara-syntax@0.10`, spec §2.1); wire-decode boundary ✅ (`WireSpec` malformed-input matrix) |
+| 14 | Specified rejection behavior (located, per rejection class) — **amended 2026-09-07, amended 2026-09-11** | **§10.1** | **Frozen** | ✅ R1–R14 enumerated with locations; quarantine and cycles deliberately non-classes; mapped onto the mutation list | §9 r1 (decidability); M5 mutation-suite spine |
 
 ## M0 conditions the freeze must absorb
 
@@ -62,7 +62,7 @@ From the M0 gate verdict (`annotation-summary.md` §3), the ~90% PASS came with 
 
 1. **Kind-(a) annotation conventions → spec.** Open-class/asymptotic scope via `binding`;
    heterogeneous strands as multiple `arg` (N19 no-accrual); conjunctive claim-splitting.
-   *Partly in PR #9; confirm each is stated in §3/§4/§11 before the tag.*
+   *Partly in the M0 corpus freeze commit; confirm each is stated in §3/§4/§11 before the tag.*
 2. **C17 six-item construct wishlist → Defer, recorded.** Equivalence/non-inferiority scheme,
    monotone-functional propositions, parametric growth-rate, distribution-valued leaf, negative
    existentials over code, graded predicates. Held in `ara/logic/solution/constraints.md`; the freeze
@@ -86,8 +86,8 @@ From the M0 gate verdict (`annotation-summary.md` §3), the ~90% PASS came with 
 
 ## M2 backlog (opened at freeze; ordered by dependency, all corpus-independent)
 
-1. **§8.1 validator + accepted-unit consistency — done for the Lean reference PL
-   (#18 implementation)**: `lean/Lara/Policy.lean` defines the finite
+1. **§8.1 validator + accepted-unit consistency — done for the Lean reference PL**:
+   `lean/Lara/Policy.lean` defines the finite
    strict-reachable set, proves `strictReachable_iff_mem`, conservatively checks instance overlap,
    proves canonically equivalent ground instances are caught
    (`aPatMayOverlap_of_instances`), decides `wf(Pi)` via `wfB_iff`, connects the judgment to
@@ -103,9 +103,9 @@ From the M0 gate verdict (`annotation-summary.md` §3), the ~90% PASS came with 
    `checkAttack`, and `checkProgram` exactly decide the frozen support,
    positional-attack, and raw-program judgments; their legacy generic behavior
    is unchanged. The checker-built
-   `Compile.edgeB`/`edgeB_faithful` edge decider (issue #17) now discharges
+   `Compile.edgeB`/`edgeB_faithful` edge decider now discharges
    `Compile.Faithful` constructively, closing r6's source-vs-compiled half.
-3. **`certDeps` accountability — done (#46)**: the abstract `Backend` is a
+3. **`certDeps` accountability — done**: the abstract `Backend` is a
    theory-free core, fixed per registered `(name, version)`; a digest
    resolves only to theory *data* (`RegisteredBackend.resolveTheory`), and
    the core carries `uses` with obligation 4's coverage (`uses_covers`),
@@ -125,14 +125,14 @@ From the M0 gate verdict (`annotation-summary.md` §3), the ~90% PASS came with 
    at the compile boundary, then prove checking transport, graph isomorphism, and status equality.
 5. **Shipped-adapter obligations (r10) — done, portfolio complete**: `ra@1`, `ord@1`, and
    `insp@1` each discharge the same soundness/dependency obligations as ND (`lean/Lara/RA.lean`,
-   `lean/Lara/Ord.lean`, `lean/Lara/Insp.lean`). Issue #260 closed the last designed-but-unshipped
+   `lean/Lara/Ord.lean`, `lean/Lara/Insp.lean`). The 2026-09-07 portfolio completion closed the last
    portfolio item, so no adapter now carries an outstanding r10 debt.
 6. **r12 codec round-trip — resolved**: the presentation half (`parse ∘ print`,
    `lean/Lara/Presentation.lean` at `lara-syntax@0.10`) and the wire-decode boundary (`WireSpec`)
    landed with `Lara.Syntax`/`Lara.Wire`; there is no JSON codec in the TCB — `Lara.Json` is the
-   #30 LLM-producer surface.
+   LLM-producer surface.
 
-Issue #18 does **not** claim Path A, a production Haskell checker,
+The reference-PL implementation does **not** claim Path A, a production Haskell checker,
 NL-to-structure validation, full `holes(P,p)`, or `incompleteAlternative`
 computation. `Lara.Grounded` is the proof-oriented reference evaluator, not the
 deferred optimized implementation. The passing Haskell gates (`cabal build`;
@@ -144,7 +144,7 @@ negative-tested multiline CI axiom parser.
 
 ### M3 delivered (2026-07-27): production checker + differential anchor
 
-The deferrals the #18 note lists above are now implemented in Haskell, each the
+The deferrals listed above are now implemented in Haskell, each the
 executable mirror of the frozen Lean development:
 
 - **Production Haskell checker** — `Lara.Check.checkUnit` decides the seven-stage
@@ -209,22 +209,22 @@ conservative pattern-overlap check with a proved ground-instance soundness bridg
 blockers for the remaining r7 theorem and r9 are recorded above rather than deferred on queue order
 alone._
 
-### Amendment (2026-09-07, issue #256): shipped-adapter portfolio and wire wording
+### Amendment (2026-09-07): shipped-adapter portfolio and wire wording
 
 Rows 7 and 13 and M2 backlog items 5–6 above are amended to match the Haskell tree:
 
 - **Shipped portfolio.** v0.1 ships `ra@1` (rational-arithmetic/table-recheck) and `ord@1`
-  (ordered comparison, PR #83) beside the §5.1 reference backend `nd@1`. The static code-inspection
-  checker remained portfolio-designed but **unshipped** at the time of this amendment, with its
-  build tracked in issue #260; that issue has since landed — see the #260 amendment below.
+  (ordered comparison) beside the §5.1 reference backend `nd@1`. The static code-inspection
+  checker remained portfolio-designed but **unshipped** at the time of this amendment; it has since
+  shipped — see the portfolio-completion amendment below.
 - **Wire wording.** The M1-era spec named JSON as the wire encoding; the implementation
   deliberately ships a single S-expression codec (`Lara.Wire`, the N11 differential anchor).
   Spec §1/§1.1/§2.1/§3.2/§4.1/§9 r12/§10.1 R14 and `docs/rejection-surface.md` now name that
-  codec; `Lara.Json` is tracked as the future LLM-producer surface (issue #30). No corpus
+  codec; `Lara.Json` is tracked as the future LLM-producer surface. No corpus
   regeneration or freeze-tag bump is owed: the amendment is prose-only and no byte reaches the
   corpus, the wire, or replay identity.
 
-### Amendment (2026-09-07, issue #260): the portfolio is complete
+### Amendment (2026-09-07): the portfolio is complete
 
 Row 7 and M2 backlog item 5 are amended again: the third §5.2 portfolio member ships.
 
@@ -240,26 +240,26 @@ Row 7 and M2 backlog item 5 are amended again: the third §5.2 portfolio member 
 - **Conformance evidence** is `test/InspSpec.hs`, four hand-authored wire anchors under
   `fixtures/corpus/insp-*.sexp`, and the worked example `examples/S9` (both certificate arities
   under one defeasible bridge). A mutation base for `S9` is *not* included: it would grow the
-  seeded suite 541 → 568 and so cost an evaluation-corpus freeze-tag bump, which #260 did not
-  budget — tracked in issue #266; see the `m5-freeze-checklist.md` post-v5 addendum.
+  seeded suite 541 → 568 and so cost an evaluation-corpus freeze-tag bump, which the portfolio
+  completion did not budget — see the `m5-freeze-checklist.md` post-v5 addendum.
 - **No freeze-tag bump or corpus regeneration is owed.** The adapter is additive at the registry,
   no existing unit selects it, and no corpus, wire, mutant, or replay-identity bytes change.
 
-### Amendment (2026-09-11, issue #331): the reader's nesting bound is an R14 class arm
+### Amendment (2026-09-11): the reader's nesting bound is an R14 class arm
 
 Row 14 is amended: spec §10.1's **R14 codec** trigger list gains a nesting arm, and the section
 gains a contract paragraph naming the bound. `docs/rejection-surface.md` moves with it, as it did
-under #256.
+under the portfolio-and-wire amendment.
 
 - **What changed.** Both readers — `Lara.Wire.parseSExprBS` and `Lara.Driver.parseWire` — refuse an
   S-expression nested deeper than the `maxDepth = 10000` they share, as a located R14 codec error at
-  exit 2. Before #331 only the Haskell reader carried the bound; the Lean driver read the over-deep
+  exit 2. Before this amendment only the Haskell reader carried the bound; the Lean driver read the over-deep
   form and refused it one layer later as a malformed envelope. Same exit code, different refusal
   *category* — the divergence class the reader differentials exist to catch, and one every gate was
   structurally blind to, because no committed anchor comes near that depth.
 - **Why it is an amendment and not a new class.** The refusal was already R14 on the Haskell side
   and already reached R14's positional contract (`docs/rejection-surface.md` §"Where a codec error
-  is located"). What #331 froze is that the *category*, the wording and the column are shared, not
+  is located"). What this amendment froze is that the *category*, the wording and the column are shared, not
   merely the exit code. No class was added, renamed, or removed; R1–R14 still enumerate fourteen.
 - **Rejected alternative: commit an over-deep anchor.** An anchor at `maxDepth + 2` is ten kilobytes
   of parentheses and would pin the bound's *value* into the corpus, making any future change to it a

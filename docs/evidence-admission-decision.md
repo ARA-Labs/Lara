@@ -1,8 +1,8 @@
 # Evidence-admission decision record (`lara-evidence@0.1` — gated)
 
 _Status: gated design record, 2026-08-06. This document freezes the design
-boundary and the paper claim for byte-level evidence admission, per the scope
-decision in issue #78. It authorizes no implementation: the layer is
+boundary and the paper claim for byte-level evidence admission, per the
+2026-08-26 scope decision. It authorizes no implementation: the layer is
 deferred, blocked on the corpus inventory gate below plus explicit researcher
 approval. Nothing here is part of the frozen `lara-core@0.1` specification,
 and `docs/spec.md` intentionally does not specify this layer._
@@ -39,10 +39,10 @@ Two adjacent repairs that this sketch originally motivated are **already
 landed inside v0.1** and are not part of the gated layer:
 
 - conservative `evidence-blocked` public reporting for quarantine-affected
-  claims (issue #76; `docs/spec.md` §4.3, `lean/Lara/Blocked.lean`,
+  claims (`docs/spec.md` §4.3, `lean/Lara/Blocked.lean`,
   `lean/Lara/BlockedProgram.lean`); and
 - enforcement of the declared `policyAdmission` table at the source boundary
-  (issue #77; `docs/policy-admission-calculus-decision.md`).
+  (`docs/policy-admission-calculus-decision.md`).
 
 ## 2. Judgment forms
 
@@ -139,7 +139,7 @@ evidence-checked identity, and the two identities are reported separately.
 
 ## 7. Inventory gate
 
-Per issue #78, no evidence-layer code is written before this inventory
+Per this decision, no evidence-layer code is written before this inventory
 passes, and failing it closes the gated work unbuilt (reported as future
 work — an acceptable outcome, not a failure):
 
@@ -151,7 +151,7 @@ work — an acceptable outcome, not a failure):
 
 The gated implementation tasks (abstract calculus mechanization, `tsv-row@1`,
 integration, and the promotion-gate evaluation) are enumerated in
-`docs/evidence-admission-gated-tasks.md` and in issue #78, which closed
+`docs/evidence-admission-gated-tasks.md`; the scope decision closed
 2026-08-26 as not planned. Task 5 in particular changes replay identity and
 combined-report bytes — an M5-scale refreeze.
 

@@ -5,14 +5,14 @@ session:
   last_turn: "2026-08-23T00:16"
   turn_count: 1
   summary: >
-    Executed the approved named-nd@1 plan as lara-syntax@0.9 (#132): a
+    Executed the approved named-nd@1 plan as lara-syntax@0.9: a
     marker-selected presentation pass lowers named binders, premises and theory
     references to the unchanged de Bruijn kernel; independent Haskell
     properties and Lean theorems establish conservativity and translation
     correspondence; S8 is byte-identical to its numeric twin. Final review
-    exposed and closed #140's rule-global partial-label advice defect. All
-    release gates are green and PR #145 is open; formula-annotation authoring
-    remains explicitly tracked as #144.
+    exposed and closed the issue's rule-global partial-label advice defect. All
+    release gates are green and the PR is open; formula-annotation authoring
+    remains explicitly tracked.
 
 events_logged:
   - turn: 1
@@ -26,7 +26,7 @@ events_logged:
     id: "N204"
     routing: direct
     provenance: ai-executed
-    summary: "The plan's bare formula key cannot replay under the frozen ND grammar; S8 must use `(atom KEY)`, leaving source-authored annotations to #144."
+    summary: "The plan's bare formula key cannot replay under the frozen ND grammar; S8 must use `(atom KEY)`, leaving source-authored annotations."
   - turn: 1
     type: experiment
     id: "N205"
@@ -44,7 +44,7 @@ events_logged:
     id: "N207"
     routing: direct
     provenance: ai-executed
-    summary: "Per-task review, final review/fix/re-review and fresh post-commit gates pass; PR #145 closes #132/#140 on merge."
+    summary: "Per-task review, final review/fix/re-review and fresh post-commit gates pass; the PR closes on merge."
   - turn: 1
     type: observation
     id: "O82"
@@ -98,7 +98,7 @@ ai_actions:
     action: >
       Wrote normative grammar Appendix H and the @0.9 rejection/engineering/
       mechanization records, retired the executed plan, and opened follow-up
-      #144 for source-authored formula annotations.
+      for source-authored formula annotations.
     provenance: ai-executed
     files_changed:
       - "docs/lara-surface-grammar.md"
@@ -108,10 +108,10 @@ ai_actions:
       - "plans/2026-08-22-named-nd1-proof-terms.md"
   - turn: 1
     action: >
-      Corrected #140 after holistic review by moving label-repair availability
+      Corrected after holistic review by moving label-repair availability
       into certSlotResolver's complete actual matching-slot set; added partial
       and three-match regressions, swept ten minor findings, reran every release
-      gate, committed, pushed and opened PR #145.
+      gate, committed, pushed and opened the PR.
     provenance: ai-executed
     files_changed:
       - "src/Lara/Elaborate/CertSlots.hs"
@@ -138,17 +138,17 @@ key_context:
       and conservativity inside that boundary.
   - turn: 1
     excerpt: >
-      The final review's #140 counterexample was plan-significant rather than a
+      The final review's counterexample was plan-significant rather than a
       spelling nit: optional labels are per slot, so global label presence does
       not entail an actionable label for any ambiguous match.
 
 open_threads:
-  - "Issue #144 remains open: define source-authored formula annotations for named nd@1 binders without changing the frozen kernel formula grammar."
-  - "PR #145 is open for review/merge; it closes #132 and #140 on merge."
+  - "The issue remains open: define source-authored formula annotations for named nd@1 binders without changing the frozen kernel formula grammar."
+  - "The PR is open for review/merge; both close on merge."
 
 ai_suggestions_pending:
   - "O77 - the presentation acceptance-preservation procedure now has a third release instance, but no new closure signal; it remains staged."
-  - "O78 - slot-indexed vs referent-indexed naming is reinforced by the #140 candidate-set repair, but still lacks a closure signal."
+  - "O78 - slot-indexed vs referent-indexed naming is reinforced by the candidate-set repair, but still lacks a closure signal."
   - "O79 - abstract decision procedures remain the mechanization boundary; @0.9 is a second design instance, not a researcher affirmation."
   - "O82 - structured-input/abstract-decision mechanization for binder lowering; one direct instance, staged."
   - "O83 - ambiguity advice quantified over the complete candidate set; one direct defect/fix instance, staged."

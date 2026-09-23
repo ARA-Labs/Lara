@@ -165,7 +165,7 @@ theorem equiv_nf {canon : String → String}
 point), and the M2b complexity development works throughout under the identity
 canonicalizer, where `nf` collapses to the identity and `≡` to plain equality.
 Owned here, next to `nf`/`equiv`, so the gadget and witness modules consume one
-copy instead of each re-proving the collapse (issue #211). -/
+copy instead of each re-proving the collapse. -/
 
 mutual
   theorem nfTerm_id (t : Term) : nfTerm id t = t := by

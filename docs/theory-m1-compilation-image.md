@@ -1,7 +1,7 @@
 # Theory M1: the compilation-image boundary
 
-_Status: proved for the theory spine on 2026-08-26 (issue #184,
-tracker #180). This document records the fixed-context theorem boundary after
+_Status: proved for the theory spine on 2026-08-26.
+This document records the fixed-context theorem boundary after
 M1 tested and refuted the proposed sufficiency direction._
 
 _In plain terms: compilation maps checked source programs to argumentation

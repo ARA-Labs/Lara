@@ -5,7 +5,7 @@ session:
   last_turn: "2026-09-06T18:12"
   turn_count: 4
   summary: >
-    Issue #231 closed: two drift guards added to the #224 strict-certificate
+    The issue closed: two drift guards added to the strict-certificate
     fixture in Lara/Examples/PWStructural.lean. Certifier blindness is caught
     by cert_reject_mismatched_certifier (six off-point negatives varying one
     of beta/hd/kappa on each side); the allowTrusted flip is caught by
@@ -13,14 +13,14 @@ session:
     ruleCertTgt. Three AxCheck rows registered; both mutations reproduced and
     reverted. Coverage 2492 -> 2495 (PW-T6 84 -> 87); build 148 jobs and the
     axiom audit green. No semantics module, corpus, or frozen contract
-    touched. Turn 2 reviewed the eleven open issues and closed #196 (PR #251):
+    touched. Turn 2 reviewed the eleven open issues and closed one:
     every framework has a preferred extension (preferred_exists), proved with
     no Nodup hypothesis and no Mathlib by comparing a longest admissible
     candidate to canonize F T as a sublist rather than a subset — refuting the
     issue's own cost estimate and leaving the anticipated Mathlib decision
     unforced. AxCheck rows 2495 -> 2500 (five new declarations); the whole-tree
     coverage gate reports 2341 covered declarations. C35 and C36 conditions
-    narrowed. Turn 3 closed #204: the certificate dependency report now has a
+    narrowed. Turn 3 closed the dependency-report item: the certificate dependency report now has a
     shipped consumer. The driver runs the existing `certDeps` mirror over the
     accepted, checked unit (`Lara.Driver.unitCertDeps`), the report rides out
     of the same single pass as the verdict, and a new `lara deps` subcommand
@@ -31,11 +31,11 @@ session:
     already pins. All local gates green (differential 620/0, deps golden PASS,
     148-job Lean build, axiom audit passed). C42 conditions narrowed. Turn 4
     (new conversation, running from the same post-turn-2 state) reviewed the
-    ten open issues, recommended #204 as the next real work item unaware it
-    was concurrently done in turn 3, then took #248 as a warm-up and found it
+    ten open issues, recommended the dependency-report item as the next real work item unaware it
+    was concurrently done in turn 3, then took the warm-up item and found it
     moot at birth: both PW-T8 cleanups (def Matched; the transportsB
-    unification) already landed in PR #247, merged seven minutes before the
-    issue was filed against PR #244's tree. #248 closed with the verification
+    unification) already landed in a merged PR seven minutes before the
+    issue was filed against its tree. The item closed with the verification
     in its closing comment; no code change, no PR.
 
 events_logged:
@@ -68,7 +68,7 @@ events_logged:
     id: "N313"
     routing: direct
     provenance: ai-suggested
-    summary: "#196 closed by longest-candidate + List.Sublist comparison instead of the ⊆-maximal-element route the issue budgeted; no Nodup, no Mathlib, so the anticipated dependency decision was not forced."
+    summary: "Closed by longest-candidate + List.Sublist comparison instead of the ⊆-maximal-element route the issue budgeted; no Nodup, no Mathlib, so the anticipated dependency decision was not forced."
   - turn: 2
     type: experiment
     id: "N314"
@@ -80,7 +80,7 @@ events_logged:
     id: "O141"
     routing: staged
     provenance: ai-suggested
-    summary: "An issue's recorded cost estimate encodes one proof route, not a lower bound; re-deriving the statement's geometry dissolved #196's budgeted Mathlib dependency."
+    summary: "An issue's recorded cost estimate encodes one proof route, not a lower bound; re-deriving the statement's geometry dissolved the issue's budgeted Mathlib dependency."
   - turn: 2
     type: observation
     id: "O142"
@@ -92,7 +92,7 @@ events_logged:
     id: "N315"
     routing: direct
     provenance: user
-    summary: "#204 surfaced by calling the pinned certDeps mirror from the driver and giving the report its own `lara deps` subcommand, rather than fusing a collector into inferSupport or widening the frozen verdict."
+    summary: "Surfaced by calling the pinned certDeps mirror from the driver and giving the report its own `lara deps` subcommand, rather than fusing a collector into inferSupport or widening the frozen verdict."
   - turn: 3
     type: experiment
     id: "N316"
@@ -122,7 +122,7 @@ events_logged:
     id: "N317"
     routing: direct
     provenance: ai-suggested
-    summary: "#248 closed as moot: both cleanups (def Matched restating the StatusBridge field; admitsB/matchedB unified on transportsB) landed in PR #247, merged 7 minutes before the issue was filed against #244's tree."
+    summary: "Closed as moot: both cleanups (def Matched restating the StatusBridge field; admitsB/matchedB unified on transportsB) landed in the PR, merged 7 minutes before the issue was filed against that tree."
   - turn: 4
     type: observation
     id: "O146"
@@ -132,11 +132,11 @@ events_logged:
 
 ai_actions:
   - turn: 1
-    action: "Added the #231 drift guards (betaOther/hdOther/kappaOther, cert_reject_mismatched_certifier, ruleCertTgt, cert_target_rule, cert_only_assurance) and a module-header paragraph describing them."
+    action: "Added the drift guards (betaOther/hdOther/kappaOther, cert_reject_mismatched_certifier, ruleCertTgt, cert_target_rule, cert_only_assurance) and a module-header paragraph describing them."
     provenance: ai-executed
     files_changed: ["lean/Lara/Examples/PWStructural.lean"]
   - turn: 1
-    action: "Registered three #231 audit rows in the PW-T6 Task 3 block."
+    action: "Registered three audit rows in the PW-T6 Task 3 block."
     provenance: ai-executed
     files_changed: ["lean/AxCheck.lean"]
   - turn: 1
@@ -150,7 +150,7 @@ ai_actions:
       - "docs/theory-pw-t6-structural-transport.md"
       - "ara/evidence/proofs/pw_t6_transport.md"
   - turn: 2
-    action: "Reviewed the eleven open GitHub issues, grouped them by why they exist (paper must-not claims, reviewer-visible asymmetries, recorded boundaries, engineering/later-paper), and recommended #196 then #215 as the next step."
+    action: "Reviewed the eleven open GitHub issues, grouped them by why they exist (paper must-not claims, reviewer-visible asymmetries, recorded boundaries, engineering/later-paper), and recommended then as the next step."
     provenance: ai-executed
     files_changed: []
   - turn: 2
@@ -167,11 +167,11 @@ ai_actions:
     files_changed:
       - "docs/theory-m2a-observation.md"
   - turn: 2
-    action: "Ran whole-tree lake build (148 jobs), the axiom audit over AxCheck.lean, and whole-tree AxCheck coverage; opened PR #251 on branch theory/m2a-preferred-nonempty."
+    action: "Ran whole-tree lake build (148 jobs), the axiom audit over AxCheck.lean, and whole-tree AxCheck coverage; opened the PR on branch theory/m2a-preferred-nonempty."
     provenance: ai-executed
     files_changed: []
   - turn: 3
-    action: "Triaged the ten open issues into four groups (gated future-work, deferred, recorded boundaries, actionable) and recommended #204 as the next step: its named gating milestone PW-T6 had closed, and it was the only issue where a proved Lean theorem had no production consumer."
+    action: "Triaged the ten open issues into four groups (gated future-work, deferred, recorded boundaries, actionable) and recommended as the next step: its named gating milestone PW-T6 had closed, and it was the only issue where a proved Lean theorem had no production consumer."
     provenance: ai-executed
     files_changed: []
   - turn: 3
@@ -203,11 +203,11 @@ ai_actions:
     provenance: ai-executed
     files_changed: []
   - turn: 4
-    action: "Reviewed the ten open issues and recommended #204 (surface certificate dependency reports through inferSupport/driver) as the next work item — its stated natural consumer PW-T6 (#191) closed 2026-09-03, so it is now unblocked — with #248 as an optional warm-up."
+    action: "Reviewed the ten open issues and recommended (surface certificate dependency reports through inferSupport/driver) as the next work item — its stated natural consumer PW-T6 closed 2026-09-03, so it is now unblocked — with as an optional warm-up."
     provenance: ai-executed
     files_changed: []
   - turn: 4
-    action: "Verified #248 against the tree (Status.lean:185 def Matched, StatusCheck.lean transportsB routing, AxCheck rows 3180-3192; git log -S dating both to 1a7240d) and closed the issue with the verification comment. No code change; no PR opened since there was no diff."
+    action: "Verified against the tree (Status.lean:185 def Matched, StatusCheck.lean transportsB routing, AxCheck rows 3180-3192; git log -S dating both to 1a7240d) and closed the issue with the verification comment. No code change; no PR opened since there was no diff."
     provenance: ai-executed
     files_changed: []
 
@@ -227,7 +227,7 @@ logic_revisions:
     entry: C35
     field: Conditions
     before: "Mutual exclusivity of the justified and defeated skeptical readings requires a non-empty extension set and conflict-freedom of every extension, which the interface does not require and which is therefore supplied per instance."
-    after: "Mutual exclusivity of the justified and defeated skeptical readings requires a non-empty extension set and conflict-freedom of every extension, which the interface does not require and which is therefore supplied per instance; at the preferred instance both halves are now discharged by theorem rather than by hypothesis (`preferredSem_specConflictFree` and `preferredSem_enumerate_ne_nil`, the latter from `preferred_exists`, #196)."
+    after: "Mutual exclusivity of the justified and defeated skeptical readings requires a non-empty extension set and conflict-freedom of every extension, which the interface does not require and which is therefore supplied per instance; at the preferred instance both halves are now discharged by theorem rather than by hypothesis (`preferredSem_specConflictFree` and `preferredSem_enumerate_ne_nil`, the latter from `preferred_exists`)."
     signal: artifact-commitment
     provenance: ai-suggested
     note: "The generic statement is unchanged — the interface still requires neither. What changed is that one instance now supplies the non-emptiness half from a theorem."
@@ -242,7 +242,7 @@ logic_revisions:
     entry: C36
     field: Conditions
     before: "Untested boundary: no claim is made that stable is the only semantics with conditional existence."
-    after: "Untested boundary: no claim is made that stable is the only semantics with conditional existence, but the boundary has narrowed — grounded enumerates a singleton over a duplicate-free carrier (`groundedSem_singleton`) and preferred is non-empty for every framework with no hypothesis at all (`preferred_exists`, #196), so only complete and semi-stable are unproved either way."
+    after: "Untested boundary: no claim is made that stable is the only semantics with conditional existence, but the boundary has narrowed — grounded enumerates a singleton over a duplicate-free carrier (`groundedSem_singleton`) and preferred is non-empty for every framework with no hypothesis at all (`preferred_exists`), so only complete and semi-stable are unproved either way."
     signal: artifact-commitment
     provenance: ai-suggested
     note: "Status untouched at supported; the Statement and the stable witness are unchanged. Complete and semi-stable are deliberately left unproved rather than asserted."
@@ -257,30 +257,30 @@ logic_revisions:
     entry: C42
     field: Conditions
     before: "Arises where a checker reaches a subsystem through a lower-level entry point than the sealed constructor — here the production oracle calls the backend directly rather than through the sealing function, so the sealed judgment is only ever built by tests. The failure is invisible to component-level tests, which exercise the sealing function, and to end-to-end acceptance tests, which do not observe the discarded value. Detected by locating the constructor's call sites in shipped code specifically."
-    after: "Arises where a checker reaches a subsystem through a lower-level entry point than the sealed constructor — here the production oracle calls the backend directly rather than through the sealing function, so the sealed judgment is only ever built by tests. The failure is invisible to component-level tests, which exercise the sealing function, and to end-to-end acceptance tests, which do not observe the discarded value. Detected by locating the constructor's call sites in shipped code specifically. Repair takes two independent steps and the first does not imply the second: B0 (#182) stopped the discard by retaining the report in `CertOutcome`, after which the accounting was *possible* on the shipped path but still had no consumer; #204 added one (`Lara.Driver.unitCertDeps`, the `lara deps` subcommand). Between them the claim held in a weaker form — the value was computed and retained and still unobservable."
+    after: "Arises where a checker reaches a subsystem through a lower-level entry point than the sealed constructor — here the production oracle calls the backend directly rather than through the sealing function, so the sealed judgment is only ever built by tests. The failure is invisible to component-level tests, which exercise the sealing function, and to end-to-end acceptance tests, which do not observe the discarded value. Detected by locating the constructor's call sites in shipped code specifically. Repair takes two independent steps and the first does not imply the second: B0 stopped the discard by retaining the report in `CertOutcome`, after which the accounting was *possible* on the shipped path but still had no consumer; added one (`Lara.Driver.unitCertDeps`, the `lara deps` subcommand). Between them the claim held in a weaker form — the value was computed and retained and still unobservable."
     signal: artifact-commitment
     provenance: ai-suggested
     note: "Statement and status untouched — the general lesson is unaffected by its instance being repaired. What the turn established is that the repair is two steps, which the claim's own history now shows and which its prior wording collapsed."
   - turn: 3
     entry: C42
     field: Proof
-    before: "[`src/Lara/Driver/Internal.hs` (`buildCertOk`), `src/Lara/SupportTerm.hs` (`CertOutcome`, `certAccepted`), `src/Lara/Strict/Deps.hs`, `test/StrictSpec.hs` (`prop_mixedBackendDepsCollected`), issue #204, trace N247]"
-    after: "[`src/Lara/Driver/Internal.hs` (`buildCertOk`, `unitCertDeps`, `runCheckDeps`), `src/Lara/SupportTerm.hs` (`CertOutcome`, `certAccepted`), `src/Lara/Strict/Deps.hs`, `test/StrictSpec.hs` (`prop_mixedBackendDepsCollected`), `test/CliSpec.hs` (`prop_cliDepsAcceptS5`, `prop_cliDepsDoorsAgree`), issue #204, trace N247, N315, N316]"
+    before: "[`src/Lara/Driver/Internal.hs` (`buildCertOk`), `src/Lara/SupportTerm.hs` (`CertOutcome`, `certAccepted`), `src/Lara/Strict/Deps.hs`, `test/StrictSpec.hs` (`prop_mixedBackendDepsCollected`), the issue, trace N247]"
+    after: "[`src/Lara/Driver/Internal.hs` (`buildCertOk`, `unitCertDeps`, `runCheckDeps`), `src/Lara/SupportTerm.hs` (`CertOutcome`, `certAccepted`), `src/Lara/Strict/Deps.hs`, `test/StrictSpec.hs` (`prop_mixedBackendDepsCollected`), `test/CliSpec.hs` (`prop_cliDepsAcceptS5`, `prop_cliDepsDoorsAgree`), the issue, trace N247, N315, N316]"
     signal: artifact-commitment
     provenance: ai-suggested
 
 key_context:
   - turn: 1
     excerpt: >
-      User: "let's do #231 — fixture drift guards, this is directly, proceed,
-      record ara via /research-manager, and open pr". Issue #231's acceptance
+      User: "let's do [redacted] — fixture drift guards, this is directly, proceed,
+      record ara via /research-manager, and open pr". The issue's acceptance
       criteria were treated literally: each mutation must break a *named
       audited* theorem, which is why both were reproduced against the built
       tree rather than argued for on inspection.
   - turn: 2
     excerpt: >
       User: "check the issues, what are why? what is our next step?" then
-      "let's checkout a new branch for 196. do we need a plan? or just start
+      "let's checkout a new branch for [redacted]. do we need a plan? or just start
       working". The plan-or-not question was answered by spiking the proof
       rather than by argument — the spike compiled and printed its axioms
       before any planning document could have been written, which is also what
@@ -288,16 +288,16 @@ key_context:
   - turn: 3
     excerpt: >
       User: "check the remaining issues, what is the next step" then "checkout
-      a new branch, let's do #204, it doesn't seem complex, just proceed,
-      record ara, and open an pr". #204 was recommended on the ground that its
-      own named gating milestone (PW-T6 #191, "the natural consumer and
+      a new branch, let's do [redacted], it doesn't seem complex, just proceed,
+      record ara, and open an pr". Was recommended on the ground that its
+      own named gating milestone (PW-T6, "the natural consumer and
       probably the right milestone to do this in") had closed, and that it was
       the only open issue where a proved theorem had zero production
       observable — verified before recommending, by finding
       `Lara.Strict.Deps` imported nowhere outside `test/StrictSpec.hs`.
   - turn: 4
     excerpt: >
-      User: "let's do Quick warm-up option: #248, proceed directly, record
+      User: "let's do Quick warm-up option: [redacted], proceed directly, record
       ara, open pr". The pre-execution read of StatusCheck.lean found
       transportsB and Matched already present, which redirected the turn
       from editing to git archaeology; the user's requested PR could not
@@ -305,8 +305,8 @@ key_context:
       verification comment instead.
 
 open_threads:
-  - "#204's issue text asked for the reports to reach 'the verdict, the audit record, the CLI' (Deps.hs's pre-repair boundary note). The CLI now has them; the verdict deliberately does not, and no audit-record consumer was built. If the audit record should carry the report, that is a separate decision about the audit format, not leftover #204 work."
-  - "#215 (relational parametricity over related backends) is the recommended next theory step and the only route to calling the backend theorem parametricity rather than representation independence; its cost is unknown until M4 F2's acceptance-profile theorem is tried against an arbitrary relation R. Whether #216 and #217 stay follow-ups or become one theory milestone depends on that answer."
+  - "The issue text asked for the reports to reach 'the verdict, the audit record, the CLI' (Deps.hs's pre-repair boundary note). The CLI now has them; the verdict deliberately does not, and no audit-record consumer was built. If the audit record should carry the report, that is a separate decision about the audit format, not leftover work."
+  - "Relational parametricity over related backends is the recommended next theory step and the only route to calling the backend theorem parametricity rather than representation independence; its cost is unknown until M4 F2's acceptance-profile theorem is tried against an arbitrary relation R. Whether stay follow-ups or become one theory milestone depends on that answer."
   - "Session record 2026-09-05_001 references N307-N310 and O137-O138, but exploration_tree.yaml stops at N306 and observations.yaml at O136 — those nodes were never appended. Dangling references; the researcher should decide whether to backfill them from the session record or renumber. This turn reserved those ids and started at N311/O139."
   - "O139 (mutation-blind point-mass judgments) has one application; a second fixture using the same shape, or an affirmation, would close it."
   - "PW-T6 limitations unchanged: bridge-global functional translation, total leaf map, no attack transport (T8), question keys frozen across the bridge."
@@ -316,7 +316,7 @@ ai_suggestions_pending:
   - "O144 heuristic — a frozen differential anchor prices a new observable in the other language's encoder."
   - "O145 heuristic — an accountability report inherits its theorem's scope; refuse to answer outside it."
   - "O139 heuristic — the two-shape guard pattern for point-mass fixture judgments."
-  - "O140 — the axiom profile of the #231 rows."
+  - "O140 — the axiom profile of the rows."
   - "O141 heuristic — read a budgeted dependency on an issue as a claim about the imagined route, and re-derive before paying it."
   - "O142 heuristic — spike the proof to answer plan-or-not."
   - "O146 heuristic — verify a recorded issue's premises against HEAD before executing it; kin to O141, the two may merge if either crystallizes."

@@ -1,7 +1,7 @@
 # Decision: what `location_match` measures once mutants carry more than one defect
 
-_Resolves the metric question of #123 (discriminating localization benchmark),
-Task 3 of the batch frozen as `m5-freeze-v5` (#156). The decision was required
+_Resolves the metric question of the discriminating localization benchmark,
+Task 3 of the batch frozen as `m5-freeze-v5`. The decision was required
 in `docs/` before any mutant was generated: it is a measurement contract, not an
 implementation detail. Companion
 to `src/Lara/Diagnostics.hs` (the shared location vocabulary) and
@@ -22,7 +22,8 @@ constituent against the single seeded `mutantSite` (manifest column 8,
 rejection can only fire at the mutated constituent, and the frozen snapshot
 reports 399/399. The number verifies the harness wiring; it cannot fall below
 100% for a reason that would interest a reader. The eng review (D10) flagged
-exactly this, and issue #123 exists to make the column a signal.
+exactly this, and the discriminating benchmark exists to make the column a
+signal.
 
 ## What the checker can and cannot be benchmarked on
 
@@ -117,7 +118,7 @@ budget comes from, in order of value:
    the declaration-index order the same way.
 
 **These families do not make the reported rate move, and saying otherwise
-would be wrong** (#167 review). Every published site — head and tail, on every
+would be wrong** (found in review). Every published site — head and tail, on every
 base the answer key is generated from — is gated against the checker before it
 can reach `MANIFEST.tsv`: `prop_siteMatchesChecker` pins every list's head to
 the constituent `runCheckLocated` actually reports, and
@@ -142,7 +143,7 @@ were wrong — not the number.
   seeded site, today's `Nothing`); likewise `imExpectedLocation` in
   `src/Lara/Measure.hs`. `detLocationMatch` becomes membership;
   `detLocationPrimary` is added beside it.
-  **Superseded by #169:** both fields are now `Maybe SeededSites`, a newtype
+  **Superseded:** both fields are now `Maybe SeededSites`, a newtype
   over `NonEmpty Constituent`. The widening above made `[]` mean "no seeded
   site" — the same state as the old `Nothing` — which also made an enumerator
   that accidentally published `[]` indistinguishable from one that seeds
@@ -160,19 +161,19 @@ were wrong — not the number.
   keeping the round-trip unambiguous.
 - `report.tsv` gains the `location_primary` column. The pinned
   `cut -f1-14 report.tsv` projection hash moves at the refreeze regardless; a
-  new hash is v5's deliverable (#156). Place the new column after
+  new hash is v5's deliverable. Place the new column after
   `location_match` and update the pinned `cut` range in the same change.
 - New families are new operators, appended per the enum-additivity rules in
   the batch plan: no existing enumerator output is reordered, no operator
   renamed (`Lara.Mutate.Seed` streams are string-keyed; reordering moves
   bytes). Existing mutant files stay byte-identical.
 - Cost: adds mutant families, hence regenerates the suite — this is precisely
-  the change #156 budgets. Nothing here forces an extra cycle.
+  the change the `m5-freeze-v5` batch budgets. Nothing here forces an extra cycle.
 
 ## The caveat, carried until the paper states it
 
-The batch plan records that the ≈100%-by-construction caveat currently lives
-only in issue #123's body. This document is now its canonical home, and the
+The batch plan records that the ≈100%-by-construction caveat previously had
+no home in `docs/`. This document is now its canonical home, and the
 Task-3 change must also place one sentence next to the headline number in
 `docs/m5-freeze-checklist.md` so the number is not quotable without it:
 
@@ -183,6 +184,6 @@ Task-3 change must also place one sentence next to the headline number in
 > moves; the ordering claim is `location_primary`, reported separately.
 
 The results prose lives in the paper repository, so this repo can only carry
-the obligation, not discharge it. That half is tracked in **#168** — #60, the
-M7 paper-package tracker it was previously parked on, closed 2026-08-24, which
-left the obligation recorded only in prose here (#167 review).
+the obligation, not discharge it. That half was previously parked on the
+M7 paper-package tracker, which closed 2026-08-24 and left the obligation
+recorded only in prose here (found in review).

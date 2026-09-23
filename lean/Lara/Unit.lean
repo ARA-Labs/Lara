@@ -64,7 +64,7 @@ def thetaWellSorted (sg : Sigma.Sigma) (r : Support.Rule) (env : Sigma.ParamSort
     -- domain is R3's business and this stage says nothing about it. Inspecting
     -- the term at such a key would make `wrong-subst-domain` mutants R2 instead
     -- of R3 and move the paper's per-class table -- the exact reclassification
-    -- #89 §2.3 rule 3 exists to prevent.
+    -- §2.3 rule 3 exists to prevent.
     if r.params.contains b.1 then
       match Sigma.sortOf sg b.2 with
       | none => false

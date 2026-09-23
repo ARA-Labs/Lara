@@ -171,7 +171,7 @@ ai_actions:
   - turn: 1
     action: >-
       Surveyed open issues, checked for open PRs and in-flight branches, verified
-      #306's stale lines exist and the paper repo is reachable, and reported the
+      The issue's stale lines exist and the paper repo is reachable, and reported the
       actionable set with a recommendation.
     provenance: ai-executed
     files_changed: []
@@ -225,7 +225,7 @@ ai_actions:
     - ara/evidence/proofs/pw_sorted_queries_307.md
   - turn: 3
     action: >-
-      Re-ran the local gate stack from a build with the four #307 oleans deleted
+      Re-ran the local gate stack from a build with the four oleans deleted
       first: lake build 173 jobs; axiom audit trio-clean with no native_decide;
       whole-tree AxCheck coverage 2934 declarations; check-lean-citations.py PASS
       420/29; check_ara_source_spans.py PASS 62; the three gate self-test suites OK.
@@ -279,7 +279,7 @@ key_context:
       half 2 had been marked optional and gate-separately on the issue.
   - turn: 3
     excerpt: >-
-      "address all, push and reply" — the whole #311 review taken as work to do,
+      "address all, push and reply" — the whole review taken as work to do,
       including the two process items (a tracking issue for the unscheduled
       parser, and the CI issue that was closed while CI still has not run).
   - turn: 3

@@ -14,10 +14,10 @@
 |---|--------|--------|---------|------|
 | 1 | Decidability of program + attack checking | **checker portion mechanized** | C02 | `Lara.Check.inferSupport_sound/complete`, `checkAttack_sound/complete`, and `checkProgram_sound/complete` exactly decide the frozen support, positional-attack, and raw-program judgments over the finite executable backend registry. `checkProgram` constructs the proof-bearing `CheckedProgram` boundary, with deterministic duplicate and located rejection behavior. This is Lean mechanization; the production Haskell M3 checker is not implemented here. |
 | 2 | Strict-backend isolation | **mechanized** (+Haskell conformance) | C03 | Theorem 3 (non-factivity, the factivity firewall). `lean/Lara/Strict.lean`: `no_truth_projection` — no uniform map from a checked `StrictJudgment B` to premise-free truth `B.models [] (enc goal)` — proved via the reference ND witness `nd_nonfactive_witness` (the backend accepts `p ⊢ p` yet `⊨_ND p` fails under the all-false valuation), so it bites even against a factive backend; `nd_relative_not_absolute` pairs the relative-consequence projection (`strict_step_sound`) against the failure of absolute truth. No `sorry`; AxCheck reports `propext`, `Classical.choice`, and `Quot.sound` for all three results. Also enforced structurally in both Haskell (sealed `StrictJudgment`, opaque `SExpr` cert, no backend formula exported) and Lean (`StrictJudgment` carries only source data). |
-| 3 | Dependency accountability (`leaves(w)`, `certDeps`) | **mechanized** | C08 | `Lara.Support.leaves_declared` proves the leaf half. Certificate half (#46/PR #47): the registry binds **one fixed backend core per registered `(name, version)`**, and digest resolution returns only theory *data* (`RegisteredBackend.resolveTheory : Digest → Option (List Form)`) — resolution cannot introduce behavior. The core carries the spec §5 `uses` report with obligation 4's three laws over the explicit full consulted context `Δ ++ T` — coverage (`uses_covers`: replay consults no premise *or theory entry* outside the report), validity (`uses_valid`: every reported slot names an entry of the consulted context), and semantic accounting (`uses_account`: the conclusion follows from just the reported entries). Because theory enters only as data in the quantified context, coverage specializes to `replay_theory_covers`/`certOkBOf_theory_covers`: a digest swap is observable only through reported theory slots, so hidden theory consultation through the digest mechanism is impossible (whatever a core consults beyond the context is extensionally constant — part of the audited backend identity `β`, the same per-backend trust base as its soundness law). The ND adapter discharges all three laws via `nd_relevance`/`infer_agree`/`fv_in_range`, with `ndUses_eq_infer_deps` tying the report to the running checker's output. `Lara.Support.certDeps` resolves every reported slot to a typed `CertDep` (premise occurrence or digest-addressed theory entry — the Haskell `Dependency` split, nothing filtered), with `cert_steps_accounted`, the collection identity `mem_certDeps_step`/`certStep_deps_subset`, `certDeps_resolved` (premise entries resolve to the corresponding premise subterm of their own reporting node), and `certDeps_theory_valid` (theory entries are genuine: `t < T.length` for the digest-resolved data). |
+| 3 | Dependency accountability (`leaves(w)`, `certDeps`) | **mechanized** | C08 | `Lara.Support.leaves_declared` proves the leaf half. Certificate half: the registry binds **one fixed backend core per registered `(name, version)`**, and digest resolution returns only theory *data* (`RegisteredBackend.resolveTheory : Digest → Option (List Form)`) — resolution cannot introduce behavior. The core carries the spec §5 `uses` report with obligation 4's three laws over the explicit full consulted context `Δ ++ T` — coverage (`uses_covers`: replay consults no premise *or theory entry* outside the report), validity (`uses_valid`: every reported slot names an entry of the consulted context), and semantic accounting (`uses_account`: the conclusion follows from just the reported entries). Because theory enters only as data in the quantified context, coverage specializes to `replay_theory_covers`/`certOkBOf_theory_covers`: a digest swap is observable only through reported theory slots, so hidden theory consultation through the digest mechanism is impossible (whatever a core consults beyond the context is extensionally constant — part of the audited backend identity `β`, the same per-backend trust base as its soundness law). The ND adapter discharges all three laws via `nd_relevance`/`infer_agree`/`fv_in_range`, with `ndUses_eq_infer_deps` tying the report to the running checker's output. `Lara.Support.certDeps` resolves every reported slot to a typed `CertDep` (premise occurrence or digest-addressed theory entry — the Haskell `Dependency` split, nothing filtered), with `cert_steps_accounted`, the collection identity `mem_certDeps_step`/`certStep_deps_subset`, `certDeps_resolved` (premise entries resolve to the corresponding premise subterm of their own reporting node), and `certDeps_theory_valid` (theory entries are genuine: `t < T.length` for the digest-resolved data). |
 | 4 | Compilation soundness + subargument closure | **mechanized (relational)** | C02 | `Lara.Compile.compile_nodes_checked`, `edge_iff`, and `closure_includes_direct`; closed examples exercise direct and strict-superset closure |
 | 5 | Grounded determinism + termination | **mechanized** (core) | C07 | `lean/Lara/Grounded.lean`: grounded extension = bounded characteristic-operator iteration; `grounded_stable` proves the ascending chain reaches the least fixed point within `\|Args\|` steps (deficit measure + strict-filter-length), so the labelling is a total, deterministic function and aggregation (`statusC`) is total. `Lara.Compile.toAF` instantiates the core for proof-bearing checked programs. |
-| 6 | **Status preservation (direct vs compiled)** | **source-vs-compiled half mechanized (oracle eliminated)** | C08 | `Lara.Compile.srcIn_iff_grounded`/`srcStatus_iff` compose source status with grounded execution under `Faithful`; the checker-built decider `edgeB` (from `containsB`/`attackClosureB`) discharges `Faithful` constructively via `edgeB_faithful`, so `checkedAF`, `srcIn_iff_checkedGrounded`, `srcStatus_checked`, and `srcStatus_iff_checked` hold over an accepted program with no oracle hypothesis (`SrcIn`/`SrcOut` are the Prop shadow of the same compiled `Edge`, not an independent calculus). Issue #17 closed this half; issue #18 subsequently supplies checked-unit attack completeness for result 7. |
+| 6 | **Status preservation (direct vs compiled)** | **source-vs-compiled half mechanized (oracle eliminated)** | C08 | `Lara.Compile.srcIn_iff_grounded`/`srcStatus_iff` compose source status with grounded execution under `Faithful`; the checker-built decider `edgeB` (from `containsB`/`attackClosureB`) discharges `Faithful` constructively via `edgeB_faithful`, so `checkedAF`, `srcIn_iff_checkedGrounded`, `srcStatus_checked`, and `srcStatus_iff_checked` hold over an accepted program with no oracle hypothesis (`SrcIn`/`SrcOut` are the Prop shadow of the same compiled `Edge`, not an independent calculus). The 2026-07-25 close closed this half; the 2026-07-26 close subsequently supplies checked-unit attack completeness for result 7. |
 | 7 | Rationality postulates (consistency under §8.1) | **mechanized for checked complete claims** | C09 | `checkUnit` constructs the proof-bearing `CheckedUnit` boundary after duplicate-rule, exact Path-B/R12, and detailed program checks. `coveredB_iff` and `checkUnit_sound` establish attack completeness for all ordered attackable contrary pairs, including self-pairs; `grounded_conflictFree`, exact `claimSupportFor`, and `contrary_claims_not_both_justified` prove computed `completeClaimFor` contrary claims are not jointly justified. This is the Lean reference PL result: no Path A, production Haskell checker, NL validation, or full holes computation is claimed. |
 | 8 | Strict-certificate soundness | **mechanized** (+Haskell conformance) | C03 | Theorem 1, `lean/Lara/Strict.lean`: backend-as-structure carrying obligation 3 as a field; `strict_step_sound` is its projection (needs **no** axioms) and `ndBackend` discharges the field via `nd_sound`. Its concrete projection `nd_strict_step_sound` uses the standard trio (`propext`, `Classical.choice`, `Quot.sound`). Excludes trusted-policy instances. |
 | 9 | Backend replacement | **mechanized** (Model A: uniform injective relabel) | C04 | Theorem 2, `lean/Lara/Erase.lean`: `backend_replacement` — two `CheckedProgram`s related by a uniform assurance relabel `mapAssur f` (`P₂.args = P₁.args.map (mapAssur f)`, `P₂.atts = P₁.atts.map (mapAssurAtt f)`) with `f` injective compile to a *definitionally equal* AF (`checkedAF_relabel`), hence agree on every grounded label (`labelC_relabel`) and every claim status. The node bijection is the identity on list positions (`toAF.args = List.range`); `containsB_mapAssur`/`mapAssur_injective` carry the payload-independence of the edge relation. Statement-model note: the doc's non-injective erase-to-a-single-`certified`-marker is *not* an isomorphism (it can merge distinct subterms and add subargument-closure edges — `containsB` keys on exact structural equality); injectivity-on-used-certs is the faithful backend-swap condition, and both programs being well-checked discharges "accept the same strict instances." **Now non-vacuous by construction** — `lean/Lara/EraseTransport.lean` proves well-checkedness transport (`hasSupport_mapAssur`, `hasAttack_mapAssur`, `mapCertProg`): a uniform relabel that preserves `AssuranceOk` acceptance (`hpres`, the formal content of "accept the same strict instances") maps a `CheckedProgram` over one backend to a `CheckedProgram` over the other, so `backend_replacement_transport` exhibits the second program rather than assuming it. No `sorry`; AxCheck reports only `propext` and `Quot.sound`. |
@@ -30,7 +30,7 @@ claims), 8, 9 (Model A), 10, 11, and 12 (presentation codec) are mechanized;
 result 6's source-vs-compiled half is mechanized with the `Faithful` oracle
 eliminated. Result 1 has an exact executable
 support/positional-attack/raw-program checker with relational adequacy.
-Result 3's certificate half (#46/PR #47) states obligation 4 over the explicit
+Result 3's certificate half states obligation 4 over the explicit
 full consulted context `Δ ++ T` for one fixed core per registered identity,
 with digests resolving only to theory data — so a digest swap is observable
 only through reported theory slots (`certOkBOf_theory_covers`) and hidden
@@ -74,7 +74,7 @@ substitutes for these Lean proofs.
 - `scripts/differential.sh` → positive anchors **41/41**, malformed negatives **9/9** — the registry
   restructure is behavior-preserving at the wire (the ND core resolved with digest data is
   definitionally the prior theory-closing adapter's acceptance).
-- Contract change (PR #47 round 3): `Backend` lost its `theory` field (it is now a theory-free core,
+- Contract change (third review round): `Backend` lost its `theory` field (it is now a theory-free core,
   fixed per registered identity); `RegisteredBackend` = `{core, resolveTheory : Digest → Option
   (List core.Form)}`. This closes the reviewer's registry-level counterexample class — a digest
   resolver can no longer manufacture per-digest function suites that close over undeclared theory.
@@ -104,10 +104,10 @@ substitutes for these Lean proofs.
   (`hpres`), so `backend_replacement_transport` produces the second `CheckedProgram` constructively —
   the earlier statement (both programs assumed well-checked) is now non-vacuous by construction. The
   two transport lemmas need only `hpres`, not injectivity (`hf` is required only for `mapCertProg`'s
-  `nodup`). Purely additive, Lean-only (issue #42). The `mapAssurDis_eq`/`mapAssurAtt_target` helpers
-  dropped in the PR-#41 review are re-added here as genuinely-used lemmas.
+  `nodup`). Purely additive, Lean-only. The `mapAssurDis_eq`/`mapAssurAtt_target` helpers
+  dropped in the earlier review round are re-added here as genuinely-used lemmas.
 
-### Verification run (2026-07-26, issue #18 close)
+### Verification run (2026-07-26, result 7 close)
 
 - `cd lean && lake build` → **`Build completed successfully (25 jobs).`**
 - `lake env lean AxCheck.lean` → **430 declaration reports**, no `sorryAx`, and the sorted-unique
@@ -121,9 +121,9 @@ substitutes for these Lean proofs.
   error ordering, alternate-reason and closure coverage, strict-root R12 ownership, computed support
   order, and self-conflict rejection/consistency.
 
-### Verification run (2026-07-25, issue #17 close)
+### Verification run (2026-07-25, result 6 close)
 
-Commands run at the #17 commit and their outcomes:
+Commands run at the result 6 close commit and their outcomes:
 
 - `cd lean && lake build` → **`Build completed successfully (19 jobs).`**
 - `lake env lean AxCheck.lean` → prints `#print axioms` for every audited theorem (including the new
@@ -155,8 +155,8 @@ the neural component (failed 1-2) — so LARA need not over-invest in baseline-b
 
 - Result 11 `implemented+tested` → C01's "trivial TCB addition" is empirically grounded, so `nf`/`≡`
   is frozen and the carve-out can be ported to Lean early.
-- Result 6 `source-vs-compiled half mechanized, oracle eliminated` → **N16 discharged semantically,
-  #17 closed.** Source `SrcStatus` equals `grounded(checkedAF P)` for an accepted program with no
+- Result 6 `source-vs-compiled half mechanized, oracle eliminated` → **N16 discharged semantically;
+  the result 6 source-vs-compiled half closed.** Source `SrcStatus` equals `grounded(checkedAF P)` for an accepted program with no
   `Faithful` hypothesis: the checker-built `edgeB` decides the frozen closure `Edge` exactly
   (`edgeB_faithful`), so the specialized wrappers (`srcIn_iff_checkedGrounded`,
   `srcStatus_iff_checked`) carry it.
@@ -166,4 +166,4 @@ the neural component (failed 1-2) — so LARA need not over-invest in baseline-b
   model, and `EraseTransport` constructs the relabeled `CheckedProgram` from acceptance preservation;
   the earlier statement-model blocker is closed.
 - Result 7's validator, attack-completeness checker invariant, and computed-claim status theorem are
-  mechanized at `CheckedUnit` (**N60 executed; #18 closed for the Lean reference PL**).
+  mechanized at `CheckedUnit` (**N60 executed; result 7 closed for the Lean reference PL**).

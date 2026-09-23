@@ -1,11 +1,11 @@
 /-
-# Theory M4, issue #215 — relational parametricity over related backends
+# Theory M4 — relational parametricity over related backends
 
 `Lara.Context.backend_replacement_congruence` quantifies over a *function*
 `f : Assurance → Assurance` and relates `F` to `mapAssurFrag f F`. This module
 replaces the function with a **relation** `R : Assurance → Assurance → Prop`,
 lifted structurally through support terms, attacks and fragments, and relates
-any two `R`-related fragments. That is the form #187's acceptance criterion
+any two `R`-related fragments. That is the form M4's acceptance criterion
 reserves the word *parametricity* for (`docs/theory-m4-contextual-adequacy.md`
 §6, "Must not claim").
 
@@ -85,21 +85,21 @@ profile, and nothing here reopens the full-abstraction gate descoped in
                     └─► congruence_correspondence   functional theorem,
                                                     via graphOf)
 
-  Composition (#277): dedupList_rel + the two RelFixesContext hypotheses
+  Composition: dedupList_rel + the two RelFixesContext hypotheses
       ──► relFixesContext_composed
       ──► obsGen_parametricity_composed (obsGen_parametricity at the composite)
         ├─► backend_replacement_parametricity_composed_sem
         └─► backend_replacement_parametricity_composed
       admissible_composed supplies admissibility from the halves unchanged.
 
-  Closed-link union (#277): occurrences_composed + mem_closedOccurrences
+  Closed-link union: occurrences_composed + mem_closedOccurrences
       closedOccRel ──► relInj_closedOccRel, relFrag_closedOccRel,
                       relFixesContext_closedOccRel
       ──► obsGen_parametricity_closed_local (instance of obsGen_parametricity)
         ├─► whole_program_parametricity_local_sem
         └─► whole_program_parametricity_local
 
-  Already-checked whole programs (#277), a separate carrier route:
+  Already-checked whole programs, a separate carrier route:
       coveredB_rel ──► edgeB_rel ──► checkedAF_rel
         ├─► whole_program_parametricity_sem
         └─► whole_program_parametricity
@@ -592,7 +592,7 @@ theorem relDis_lookup :
 `Erase.mapAssur_subterm` (`lean/Lara/Erase.lean:125`). Needed by
 `hasAttack_rel`'s `undercut`/`undermine` cases and by `attackClosureB_rel`.
 
-#215's plan typed the position as `List Nat` (recorded under "Deviations" in
+The plan typed the position as `List Nat` (recorded under "Deviations" in
 `ara/evidence/proofs/m4_relational_parametricity.md`); the repo's `Pos` is
 `List PosElem` (`lean/Lara/Attack.lean:56`), which is what is used here. -/
 theorem relTerm_subterm :
@@ -1008,7 +1008,7 @@ relational `attackOcc_mapAssurAtt` (`lean/Lara/Context/Equivalence.lean:248`).
 
 The functional version can *compute* the image occurrence (`mapAssur f t`);
 relationally the occurrence has to be produced, so this is stated
-existentially. `attackOcc_rel` below recovers the pointwise shape #215 asked
+existentially. `attackOcc_rel` below recovers the pointwise shape the plan asked
 for, at
 the cost of `RelInj` — which is what pins the produced occurrence down to the
 one the caller already has in hand. -/
@@ -1029,7 +1029,7 @@ theorem attackOcc_rel_exists
       obtain ⟨t₂, hsub, hrel⟩ := relTerm_subterm _ hu h
       exact ⟨t₂, hsub, hrel⟩
 
-/-- The pointwise form #215 specifies. `RelInj` is what the relational setting
+/-- The pointwise form the plan specifies. `RelInj` is what the relational setting
 costs here: the functional `attackOcc_mapAssurAtt` gets uniqueness of the image
 occurrence for free, because the image is a computed function value.
 
@@ -1482,13 +1482,13 @@ theorem compileUnit_link_rel (hR : RelInj R)
     (by rw [hsound₂.atts_eq, hsound₁.atts_eq]; exact hatts)
 
 /-- **Relational parametricity over related backends, for every projection at
-once (#215).**
+once.**
 
 Two fragments related by a partial-bijective, acceptance-preserving relation `R`
 on certificates are indistinguishable in every admissible context that `R` fixes
 — whatever is read off the resulting carrier. This is `obsGen_congr`
 (`lean/Lara/Context/Equivalence.lean:795`) with the *function* `f` replaced by a
-*relation*, which is the quantifier #187's acceptance criterion names.
+*relation*, which is the quantifier M4's acceptance criterion names.
 
 **Read the strength honestly.** `RelInj` makes `R` a partial injection;
 `relInj_necessary` shows it cannot be dropped. What the relational form buys is
@@ -1519,7 +1519,7 @@ theorem obsGen_parametricity {α : Type} (g : Invariants.StructuredAF → Atom �
   exact congrArg (fun G => F₁.exports.map (fun p => g G p))
     (compileUnit_link_rel hR hpres hadm hF hfix h₁ h₂).symm
 
-/-- **Relational parametricity at an arbitrary extension semantics (#215).** -/
+/-- **Relational parametricity at an arbitrary extension semantics.** -/
 theorem backend_replacement_parametricity_sem (sem : ExtensionSemantics)
     (hR : RelInj R)
     (hpres : RelPreserving R (certOkOf reg₁) (certOkOf reg₂))
@@ -1528,13 +1528,13 @@ theorem backend_replacement_parametricity_sem (sem : ExtensionSemantics)
     obsSem sem reg₁ C F₁ = obsSem sem reg₂ C F₂ :=
   obsGen_parametricity _ hR hpres hadm hF hfix
 
-/-- **Relational parametricity at the grounded reading (#215).** The `obs`-level
+/-- **Relational parametricity at the grounded reading.** The `obs`-level
 statement, matching `backend_replacement_congruence`'s conclusion shape.
 
 `obs` *is* `obsGen (Invariants.status canon)` — `Observation` abbreviates
 `ObservationOf Grounded.Status`, and `obs_eq_obsGen` records the collapse by
 `rfl` — so this is an instantiation, exactly as `backend_replacement_congruence`
-is an instantiation of `obsGen_congr`. Before #216 unified the two observation
+is an instantiation of `obsGen_congr`. Before the unification of the two observation
 types the same statement needed its own copy of the three-line argument against
 `obs_eq_of_ok`, because no equation between the two types was well-formed. -/
 theorem backend_replacement_parametricity (hR : RelInj R)
@@ -1736,7 +1736,7 @@ theorem relFixesContext_occRel
     ⟨rfl, hA α (mem_occursAtts hk hα)⟩))
 
 /-- **Representation independence under an acceptance hypothesis that ranges
-only over the fragment's own certificate occurrences (#215).**
+only over the fragment's own certificate occurrences.**
 
 Compare `backend_replacement_congruence`, whose `AssurPreserving f` obliges
 every rule and every assurance *in the type*. This obliges only the assurances
@@ -1767,7 +1767,7 @@ theorem backend_replacement_parametricity_local
 
 
 /-- **The occurrence-local congruence at an arbitrary extension semantics
-(#215).** The companion of `backend_replacement_parametricity_local` for
+The companion of `backend_replacement_parametricity_local` for
 `obsSem`, and the localized counterpart of `registry_swap_congruence_sem`
 (`lean/Lara/Context/Observation.lean:345`), whose own docstring records that its
 acceptance hypothesis is stated globally rather than over the fragment's
@@ -1776,7 +1776,7 @@ strengthening: `hC`/`hA` are new obligations that
 `registry_swap_congruence_sem` does not carry, so neither theorem implies the
 other.
 
-**Why there is no separate `registry_swap_parametricity`.** #215's plan
+**Why there is no separate `registry_swap_parametricity`.** The plan
 proposed one, stated as: the same hypotheses as this, concluding
 `obs reg₁ C F = obs reg₂ C F`. That is *character for character* the statement
 of `backend_replacement_parametricity_local` — `registry_swap_congruence`
@@ -1799,7 +1799,7 @@ theorem backend_replacement_parametricity_local_sem (sem : ExtensionSemantics)
 
 end OccurrenceLocal
 
-/-! ### Composition and whole programs (#277)
+/-! ### Composition and whole programs
 
 The composed form factors through `obsGen_parametricity`. Its admissibility
 can be assembled unchanged with `admissible_composed`, including both directed

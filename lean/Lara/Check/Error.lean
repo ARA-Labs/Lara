@@ -11,7 +11,7 @@ namespace Lara.Check
 open Lara Lara.Support
 
 /-- The frozen rejection classes decidable by the executable checker (spec
-§10.1). R2 entered the executable core at `lara-core@0.2` (#89): the declared
+§10.1). R2 entered the executable core at `lara-core@0.2`: the declared
 signature is now a `Unit` field and `checkUnit` stage 2 decides well-sortedness
 against it. -/
 inductive RejectClass where

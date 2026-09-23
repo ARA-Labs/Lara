@@ -1,4 +1,4 @@
-# Finite injective realization (#279)
+# Finite injective realization
 
 The requested unrestricted extension statement is false on `Assurance`.
 `not_every_relInj_has_total_extension` gives a kernel-checked counterexample:
@@ -16,8 +16,9 @@ countability machinery or Mathlib dependency is introduced.
 `relFrag_exists_injective_fixesContext` simultaneously fixes context material
 by using the concatenation of both occurrence lists. Acceptance preservation
 is independent and is not asserted by these structural theorems. This corrects
-C53's previous unrestricted-extension premise; historical #215 evidence is
-retained as the record of what was stated then.
+C53's previous unrestricted-extension premise; the historical parametricity
+record (`m4_relational_parametricity.md`) is retained
+as the record of what was stated then.
 
 Verification:
 

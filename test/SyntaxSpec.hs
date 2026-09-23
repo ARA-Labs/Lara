@@ -11,8 +11,8 @@
 --     and 'InferTheta' argument forms, 'SLeaf' discharge targets, and @open@
 --     holes — see "Lara.Syntax"'s current @0.7@ header):
 --     the property is exact @parse (print x) == Right x@, so a value the printer
---     cannot faithfully render must not be generated. Holes were excluded until
---     issue #127; they are generated now, and 'prop_programFormCoverage' pins
+--     cannot faithfully render must not be generated. Holes were once excluded;
+--     they are generated now, and 'prop_programFormCoverage' pins
 --     that they keep occurring.
 --   * __golden parse tests__ — the three committed example files parse to
 --     @Right@, and re-printing then re-parsing is fixed (@parse (print (parse
@@ -274,7 +274,7 @@ genSupportTerm =
 
 -- | Open obligations for an @open q@ line. Weighted so hole-bearing rule
 -- instances are common enough for 'prop_programRoundTrip' to exercise the
--- printer's @open@ path, which issue #127 showed it had been skipping.
+-- printer's @open@ path, which it had previously been skipping.
 genHoles :: Gen [ObligationId]
 genHoles =
   frequency
@@ -715,7 +715,7 @@ prop_spacedValueReferenceRoundTrip =
           Left err -> counterexample (show err) False
           Right program -> printProgram program === source
 
--- | Issue #127: @open@ lines survive the printer, on both the 'ExplicitTheta'
+-- | @open@ lines survive the printer, on both the 'ExplicitTheta'
 -- and 'InferTheta' argument paths, in the canonical printer's fixed body order
 -- — discharges, then opens, then the optional assurance. §3's
 -- @{ dischargeLine | openLine }@ repetition and App. A.1's assurance line both
@@ -761,7 +761,7 @@ prop_openHoleLinesRoundTrip =
                     === map ObligationId ["scope_match", "confound_control", "environment_match"]
               ]
 
--- | @lara-syntax\@0.7@ (App. F.3, #133): @open q@ is the sole hole spelling.
+-- | @lara-syntax\@0.7@ (App. F.3): @open q@ is the sole hole spelling.
 --
 -- The retired @open q as o@ form named one thing twice — §6.1 reads a hole's
 -- 'ObligationId' /as/ the question it leaves open (@holeNames@ in
@@ -915,7 +915,7 @@ prop_programFormCoverage =
             . cover 2 (any (declHasStep isStepIndex) ds) "attack path: StepIndex"
             . cover 2 (any (declHasStep (not . isStepIndex)) ds) "attack path: StepName"
             . cover 5 (any claimNlHasBrace ds) "nl string with value/{cell …}/{{}}"
-            -- Issue #127: the printer dropped `open` lines and the property
+            -- The printer dropped `open` lines and the property
             -- passed only because the generators never made a hole. This
             -- threshold is what stops that from reopening silently. Set at 2
             -- like the attack-path thresholds, not just under the generator's
@@ -947,7 +947,7 @@ prop_policyFormCoverage =
       cover 20 (not (null (policyMeasurands p))) "measurand table"
         . cover 20 (not (null (policyComparisonSchemes p))) "comparison-scheme"
         . cover 20 (any hasLabel (policyRules p)) "labelled rule premises"
-        -- The @lara-core\@0.2@ signature blocks (#89 §10). Without these three
+        -- The @lara-core\@0.2@ signature blocks (§10). Without these three
         -- the round-trip above would pass vacuously the moment the generator
         -- stopped emitting a signature — the trap the @0.3 surface hit and the
         -- reason this coverage block exists at all. `declared sort in a
@@ -1140,7 +1140,7 @@ programNegatives =
         ++ "  assurance = trusted\n"
     , "bare leaf"
     )
-    -- lara-syntax@0.7 (#135): App. A.1's ruling for @assurance@ now covers its
+    -- lara-syntax@0.7: App. A.1's ruling for @assurance@ now covers its
     -- two siblings. A bare @leaf(…)@ has no rule to attach a discharge or a
     -- hole to, so the parser rejects the line instead of dropping it.
   , ( "discharge on bare leaf"
@@ -1155,7 +1155,7 @@ programNegatives =
         ++ "  open q\n"
     , "open requires a rule application, not a bare leaf"
     )
-    -- lara-syntax@0.7 (#133): the retired two-name hole spelling is reported
+    -- lara-syntax@0.7: the retired two-name hole spelling is reported
     -- with its repair rather than silently accepted.
   , ( "legacy open-as suffix"
     , assuranceProgram
@@ -1259,7 +1259,7 @@ policyNegatives =
     , "policy p\nmeasurand acc : Num where bigger\n"
     , "polarity"
     )
-    -- The sort slot is open since lara-core@0.2 (#89 D-1): `Real` parses as a
+    -- The sort slot is open since lara-core@0.2 (D-1): `Real` parses as a
     -- declared sort name. What is NOT open is a polarity clause on a non-Num
     -- measurand, because only Num is ordered.
   , ( "polarity clause on a non-Num measurand"

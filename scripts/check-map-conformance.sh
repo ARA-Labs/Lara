@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Cross-driver conformance harness for the multi-artifact map (issue #303).
+# Cross-driver conformance harness for the multi-artifact map.
 #
 # The map's counterpart of scripts/differential.sh, and it exists for the same
 # reason: a second implementation is only evidence if it reaches its answer on
@@ -73,7 +73,7 @@
 #      required to contain both decisions, because a differential over refusals
 #      alone is satisfied by two decoders that refuse everything.
 #
-#   4. the reader's nesting bound (issue #331). Both readers cap S-expression
+#   4. the reader's nesting bound. Both readers cap S-expression
 #      nesting at the same `maxDepth`; the two cases straddling that bound are
 #      generated from the constant each reader declares in source, and the Lean
 #      map door must refuse the over-deep one FOR THE BOUND rather than at some
@@ -384,7 +384,7 @@ done <"$diff_dir/decisions.tsv"
 printf 'differential pass=%s fail=%s\n' "$differential_pass" "$differential_fail"
 
 # ---------------------------------------------------------------------------
-# The reader's nesting bound (issue #331): GENERATED, not committed.
+# The reader's nesting bound: GENERATED, not committed.
 #
 # The map's envelope goes through the same two S-expression readers as the inner
 # checker wire — `Lara.Wire.parseSExpr` and `Lara.Driver.parseWire` — and both

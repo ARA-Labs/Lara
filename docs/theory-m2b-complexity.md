@@ -7,7 +7,7 @@ genuinely checked unit) with polynomially bounded cost accounting. The complexit
 itself (e.g. NP-completeness) is deliberately **not** proved in Lean; the
 exact mechanized/paper split is the boundary recorded below._
 
-Issue #209 (parent tracker #180; successor to the closed #181).
+Successor to the closed M2b spike, on the theory spine.
 Branch `theory/m2b-realization-closure`. Gate history:
 [`docs/theory-m2b-complexity-spike.md`](theory-m2b-complexity-spike.md).
 
@@ -22,13 +22,13 @@ is preserved verbatim at git object
 numbering used below stays recoverable. Its predecessor is preserved at git
 object
 `17d07ffec693797b4b39599e787723328fa3f61f:plans/2026-08-29-m2b-restricted-class-complexity.md`.
-Lean module doc-comments cite this record and issue #209, never the deleted
+Lean module doc-comments cite this record, never the deleted
 plans.
 
 ## Module inventory
 
 All `sorry`-free, within the standard axiom trio, and registered in
-`lean/AxCheck.lean` (issue-#209 section):
+`lean/AxCheck.lean` ("M2b follow-up — realization closure" section):
 
 - `lean/Lara/Complexity/Numeral.lean` — verified decimal round-trip and
   `natRepr_inj` (D7).
@@ -49,7 +49,7 @@ All `sorry`-free, within the standard axiom trio, and registered in
 
 The formula-independent fixed context (`Lara/Complexity/Context.lean`) and
 the finite encodings (`Lara/Complexity/Encoding.lean`) predate this closure
-(issue #208) and were frozen and untouched throughout.
+and were frozen and untouched throughout.
 
 ## Inherited constraints (D1–D6)
 
@@ -121,14 +121,14 @@ rejected form requires a new review.
 Both records live in full in
 [`docs/theory-m2b-complexity-spike.md`](theory-m2b-complexity-spike.md):
 
-1. **2026-08-30 — INCONCLUSIVE** (PR #208). The closed three-node path and
+1. **2026-08-30 — INCONCLUSIVE**. The closed three-node path and
    two-cycle fixtures checked, but the family-wide checker equation
    `checkUnit_formula_ok` was not mechanized: the checker API exposes
    whole-program obligations, and the spike lacked compositional lifting
    lemmas for the mapped/flat-mapped formula lists. All compile-image,
    realizability, and size obligations were therefore not attempted, and
    the record explicitly bars treating itself as evidence (D2).
-2. **2026-08-31 — HARDNESS** (this branch, issue #209). Every mandatory
+2. **2026-08-31 — HARDNESS** (this branch). Every mandatory
    theorem named by the INCONCLUSIVE record's obstruction section exists
    `sorry`-free under the frozen context: `checkUnit_formula_ok`,
    `reduceIso` with the exact-edge theorem `coveredB_gadget`, and the
@@ -267,5 +267,5 @@ theorem a statement about the realizable class, not about all AFs.
 
 Proof-side refactoring deferrals (shared id-canon/pattern helpers, the
 checkUnit ok-assembly boilerplate, a possible correctness-half split of
-`Reduction.lean`) are tracked in issue #211 (referencing #209); they have
+`Reduction.lean`) are tracked as follow-ups; they have
 no corpus or freeze-tag impact.

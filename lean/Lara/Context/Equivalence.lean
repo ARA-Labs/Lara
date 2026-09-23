@@ -15,12 +15,12 @@ relabel preserves the whole profile rather than a declared interface, the
 question "what is the semantic interface of a fragment?" — the obstruction that
 keeps full abstraction gated — never has to be answered here.
 
-Naming discipline (issue #187): this is **contextual representation
+Naming discipline: this is **contextual representation
 independence**. It is not parametricity — that would need a relational
-quantification over related backends (issue #215) — and it is not full
+quantification over related backends — and it is not full
 abstraction, which needs a logical relation (Part B).
 
-## The projection layer (issue #216)
+## The projection layer
 
 The module also owns the layer that leaves the *reading* of the carrier open:
 `obsGen` (`:591`) is `obs` with `Invariants.status canon` replaced by an
@@ -822,7 +822,7 @@ fragment to its relabeling inside every admissible context satisfying
 hypothesis — which is why it is cited rather than re-derived
 (`whole_program_replacement`). It is the contextual-adequacy obligation
 `docs/theory-m3-source-updates.md` deferred to M4. It is **not** parametricity
-(no relational quantification over related backends — issue #215) and not full
+(no relational quantification over related backends) and not full
 abstraction (no logical relation — Part B).
 
 The admissibility hypothesis is not a technicality that better proof

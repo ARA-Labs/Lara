@@ -1,7 +1,7 @@
 # M4a checklist — compiler end to end on the worked-examples suite
 
-_Operational freeze/tracker for milestone **M4a** (GitHub #31, child of the #29
-M4 umbrella). Companion to `docs/worked-examples-plan.md` (the six-example
+_Operational freeze/tracker for milestone **M4a** (child of the M4
+umbrella). Companion to `docs/worked-examples-plan.md` (the six-example
 coverage design) and `docs/spec.md` (the frozen contract). Mirrors `docs/m1-freeze-checklist.md` in role: it records what M4a locks before frontend code lands, freezes the
 verdicts that already have oracles, and lists what stays provisional until the parser + elaborator exist.
 This is **Task A0** — a scope-lock/freeze doc, not a re-plan._
@@ -26,7 +26,7 @@ verdicts pin each example. It also produces the paper's motivating examples and 
 `docs/worked-examples-plan.md` §4 (each `.lara` → `.core.sexp` + `expected.json`).
 
 **M4a is not the walking skeleton.** The *untrusted* elaborator producing a certificate from a
-real/structured source, and the "no hand-authored certificate" clause, are **M4b (#32)**. A tiny `.lara`
+real/structured source, and the "no hand-authored certificate" clause, are **M4b**. A tiny `.lara`
 file *is* a hand-authored certificate; the worked-examples suite therefore satisfies the compiler + type
 checker (M4a) but not M4b's machine-producer clause.
 
@@ -39,15 +39,15 @@ checker (M4a) but not M4b's machine-producer clause.
 - Mechanizing **result 12** (`parse ∘ print == id`) in Lean, round-trip only (A3).
 - Located parse/elaborate errors + a negatives suite; the `.sexp` CLI regression test.
 
-### Out of scope (→ #32 / M5+ / TODOS)
+### Out of scope (→ M4b / M5+ / TODOS)
 
-- The untrusted elaborator + the "no hand-authored certificate" clause → **M4b (#32)**.
+- The untrusted elaborator + the "no hand-authored certificate" clause → **M4b**.
 - The `eraseCert` / stable-argument-id `CheckedProgram` representation and **result-9**
   backend-replacement mechanization → `TODOS.md` (split from A3; A3 is result 12 only).
 - A **strict-certificate worked example** was outside the original M4a scope and
   has since landed as `examples/S1/`: `lara-syntax@0.2` assurance + policy theory
   table → elaboration → `nd@1` replay.
-- `Lara.Json` LLM-producer surface (#30); PaperBench evaluation (M5); elaborator faithfulness
+- `Lara.Json` LLM-producer surface; PaperBench evaluation (M5); elaborator faithfulness
   measurement (M5).
 - Serializing gap-holes / located diagnostics into the frozen wire verdict (would reopen M3) — kept
   Haskell-side, outside the byte-differential.
@@ -259,7 +259,7 @@ original A2 suite was **defeasible-only** (`nd@1` inert); post-M4a example
 ## Exit checklist (A0)
 
 - [x] `docs/m4a-checklist.md` created, mirroring `m1-freeze-checklist.md`.
-- [x] M4a scope lock stated (in scope / out of scope → #32 / M5 / TODOS).
+- [x] M4a scope lock stated (in scope / out of scope → M4b / M5 / TODOS).
 - [x] A and B expected verdicts **frozen** from their inline oracles — four-state claim status +
       per-argument grounded label (§1).
 - [x] Coverage matrix confirmed against `worked-examples-plan.md` §1, with A/B appended and every

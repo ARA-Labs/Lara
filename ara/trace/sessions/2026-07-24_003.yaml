@@ -2,7 +2,7 @@ session:
   id: "2026-07-24_003"
   timestamp: "2026-07-24T21:09"
   ended: "2026-07-24T23:55"
-  summary: "README synced with frozen v0.1, restructured proof-assistant style, purpose/theory sections added (PR #19); ARA-ecosystem interview transcript retrieved for context; late-evening rit-vs-lara comparison discussion opened (new conversation, continues into 2026-07-25_001)."
+  summary: "README synced with frozen v0.1, restructured proof-assistant style, purpose/theory sections added; ARA-ecosystem interview transcript retrieved for context; late-evening rit-vs-lara comparison discussion opened (new conversation, continues into 2026-07-25_001)."
 
 events_logged:
   - type: observation
@@ -36,7 +36,7 @@ ai_actions:
   - action: "Restructured the README into the Lean/Agda/Rocq shape: CI/license/spec badges, feature-bullet overview, 'A taste of LARA' section using the spec §10 presentation example, 'Building from source' split (Haskell/Lean, verified CI runs both plus the AxCheck audit), a documentation link table, condensed 'Trusted computing base' section, and a License section. All prior content preserved in substance."
     provenance: ai-executed
     files_changed: ["README.md"]
-  - action: "Committed and opened PR #19 (docs/readme-proof-assistant-style), then added a purpose paragraph (target domain: research artifacts; checker validates certificates, not empirical truth — spec §1) and a 'Theoretical foundations' section naming the four lineages from novelty-and-related-work.md (Dung 1995 grounded semantics; ASPIC+ structured argumentation; argumentation schemes with critical questions; PCC/LCF trust discipline; LP as non-shipping seed), plus the novelty doc row in the documentation table."
+  - action: "Committed and opened the PR (docs/readme-proof-assistant-style), then added a purpose paragraph (target domain: research artifacts; checker validates certificates, not empirical truth — spec §1) and a 'Theoretical foundations' section naming the four lineages from novelty-and-related-work.md (Dung 1995 grounded semantics; ASPIC+ structured argumentation; argumentation schemes with critical questions; PCC/LCF trust discipline; LP as non-shipping seed), plus the novelty doc row in the documentation table."
     provenance: ai-executed
     files_changed: ["README.md"]
   - action: "Turn 6: added an epigraph to the README purpose section — the condensed [09:01] ARA-primitive quote (claims -> implementations -> grounded results + exploration trajectory), attributed to Amber Liu and linked to the reference note carrying the caption-provenance flag, followed by a one-sentence 'LARA is the checker side of that thesis' tie-in."

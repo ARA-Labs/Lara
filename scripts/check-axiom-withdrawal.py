@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check the runnable #350 Lean report against the proved demo outcomes.
+"""Check the runnable Lean report against the proved demo outcomes.
 
 `make lean-gate` builds the executable first. The theorem module proves the
 finite leaf check's connection to leaf_ok and refutes any withdrawn bridge;

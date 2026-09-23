@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Haskell/Lean differential gate for the possible-world outer runtime (#322).
+"""Haskell/Lean differential gate for the possible-world outer runtime.
 
 `lara pw` (Haskell, src/Lara/PW/Run.hs) and `pw-run` (Lean,
 lean/Lara/PW/RunMain.lean) implement the `pw-run 1` contract independently:
@@ -21,7 +21,7 @@ Four families:
 2. Mutations of those fixtures: every error stage and fault; stage order, and
    fault order within each stage; every field of a context's environment; the
    rule clause under a renaming symbol map; duplicate-report groups that agree
-   and that conflict, under both conflict modes (#326); map and acceptance
+   and that conflict, under both conflict modes; map and acceptance
    dependence; and the text boundary (quoted Unicode names, non-ASCII file
    paths and run directories, files that are not UTF-8). For each case both
    drivers must agree on the exit code and on stdout, and stdout must contain
@@ -32,9 +32,9 @@ Four families:
    there that one atom is masked, and every other atom, including the arity,
    must agree. A case may set `exact` to demand byte equality even so. The two
    nesting-depth cases do, because the shared reader's bound, message and
-   column are contract rather than runtime-specific text (#331), and the gate
+   column are contract rather than runtime-specific text, and the gate
    additionally checks that both readers declare the same bound in source.
-3. `.lara` world sources (fixtures/pw/source/*.sexp, #327). Only `lara pw`
+3. `.lara` world sources (fixtures/pw/source/*.sexp). Only `lara pw`
    can elaborate a `(lara PATH)` world, so this family runs `lara pw` on the
    run file, then runs `lara pw-input` and hands the derived document to both
    drivers: their bytes must equal `lara pw`'s on the original. The committed
@@ -49,7 +49,7 @@ Four families:
    worlds, and non-ASCII program paths and text. When `lara pw` refuses a
    world's source, `lara pw-input` must print the same envelope.
 
-4. Refused `.lara` documents (fixtures/pw/source-rejected/*.sexp, #350).
+4. Refused `.lara` documents (fixtures/pw/source-rejected/*.sexp).
    Haskell's run and derivation must fail with the committed `.expected`
    envelope. The Lean front door is pinned separately by `.lean.expected`:
    it cannot read even an admitted .lara source. These are distinct refusal
@@ -86,7 +86,7 @@ C_LOCALE = {'LC_ALL': 'C', 'LANG': 'C'}
 # decodes the run-file argument with the locale looks up the wrong bytes.
 LATIN1_LOCALES = pathlib.Path(tempfile.gettempdir()) / 'lara-pw-conf-locales'
 LATIN1 = {'LC_ALL': 'en_US.ISO-8859-1', 'LANG': 'en_US.ISO-8859-1', 'LOCPATH': str(LATIN1_LOCALES)}
-# The shared reader's nesting bound (#331). Declared here because the cases
+# The shared reader's nesting bound. Declared here because the cases
 # build their input from it; `check_depth_bound` is what keeps this copy honest.
 MAX_DEPTH = 10000
 DEPTH_BOUND_SOURCES = (
@@ -236,8 +236,8 @@ CASES = [
     ('syntax: empty input', None, [(None, '')], {}, 2, '(pw-error 1 wire syntax '),
     # The shared reader's nesting bound: one form deeper than it allows is a
     # located `syntax` refusal from BOTH readers, at the same column and with
-    # the same message, so the detail is compared rather than masked. Before
-    # #331 only Haskell bounded the nesting: Lean read the over-deep form and
+    # the same message, so the detail is compared rather than masked.
+    # Previously only Haskell bounded the nesting: Lean read the over-deep form and
     # refused it one layer later as `malformed run`, the same exit code under a
     # different category.
     ('syntax: nesting depth exceeded', None, [(None, '(' * (MAX_DEPTH + 2))], {'exact': True}, 2,
@@ -265,7 +265,7 @@ CASES = [
     ('missing world file', 'fields', [('worlds/src-s2.sexp', 'worlds/missing.sexp')], {}, 1, '(world-input s2 '),
     ('world file syntax', 'fields', [('worlds/src-s2.sexp', 'worlds/broken.sexp')], {'worlds/broken.sexp': '(check-input'}, 1, '(world-input s2 '),
     ('world not check-input', 'inline', [('(check-input', '(check-inputs', 1)], {}, 1, '(world-input w0 '),
-    # Duplicate-report groups (#326): a group whose members disagree is refused
+    # Duplicate-report groups: a group whose members disagree is refused
     # and named, whatever the conflict mode; a group whose members agree is
     # inert, so the run answers exactly as without it. l1 and l3 both report
     # p; l2 reports q. l3 is added to both worlds, since a context's leaf
@@ -477,7 +477,7 @@ SOURCE_CASES = [
     ('lara: run file does not decode', [('(edge e w0 w1 accepted)', '(edge e w0 w1 maybe)')], {}, 2, '(pw-error 1 wire malformed acceptance)'),
 ]
 # The two reruns above are the only *cross-driver* test of the locale encoding
-# `textBoundary` sets for .lara text — since #334 that boundary is the whole
+# `textBoundary` sets for .lara text — that boundary is now the whole
 # CLI's, and the solo door's own locale cases live in test/CliSpec.hs — so the
 # set is pinned the way LOCALE_CASES is: dropping an `also-under` must fail the
 # gate rather than silently retire the coverage.
@@ -596,7 +596,7 @@ def pw_subtree_strays(root):
     run, source = root / FIXTURES.relative_to(PW), root / SOURCES.relative_to(PW)
     owned = set(run.glob('*.sexp'))                  # check_fixtures
     owned |= set((run / 'worlds').glob('*.sexp'))    # the worlds those name
-    owned |= set(source.glob('*.sexp'))              # check_source_fixtures (#327)
+    owned |= set(source.glob('*.sexp'))              # check_source_fixtures
     owned |= set((root / REFUSED_SOURCES.relative_to(PW)).glob('*.sexp'))
     owned.add(root / 'declared.sexp')                # scripts/check-pw-example.py
     return sorted(p for p in root.rglob('*.sexp') if p not in owned)
@@ -615,7 +615,7 @@ def check_pw_subtree_total():
     discovered by no gate and pinned by no manifest — the exact state the anchor
     pin exists to prevent, relocated rather than removed.
 
-    The check must neither reject a family a runner does discover (#344: the
+    The check must neither reject a family a runner does discover (the
     `.lara` source family was flagged although `check_source_fixtures` runs it)
     nor be widened into accepting a file none discovers. So before judging the
     committed tree it judges a scratch one: one file in every owned position

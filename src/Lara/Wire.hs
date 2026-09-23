@@ -104,11 +104,12 @@
 -- query order of the unit.
 --
 -- @evidence-blocked@ is the public status of a query whose four-state label
--- could have been changed by §4.3 quarantine deleting material under it
--- (issue #76): the label is not the answer, it is a conditional diagnostic, and
+-- could have been changed by §4.3 quarantine deleting material under it.
+-- The label is not the answer, it is a conditional diagnostic, and
 -- it moves to the @conditional@ section. That section is present exactly when
 -- some status is @evidence-blocked@, and it lists those queries in query order,
--- so a verdict with nothing blocked is byte-identical to the pre-#76 format. The rejection payload is the class atom only —
+-- so a verdict with nothing blocked is byte-identical to the format from before
+-- @evidence-blocked@ existed. The rejection payload is the class atom only —
 -- located diagnostics live in the checker's result type ("Lara.Check",
 -- Task 1), not on the wire.
 module Lara.Wire
@@ -136,7 +137,7 @@ module Lara.Wire
   , decodeCheckInputFileBS
     -- * The shared @\<atom\>@ production
     --
-    -- | Additive exports (issue #303): the multi-artifact map's composite verdict
+    -- | Additive exports: the multi-artifact map's composite verdict
     -- ("Lara.Map.Wire") reports statuses against propositions, and there must
     -- be exactly one @\<atom\>@ syntax for a 'Prop' across every LARA grammar
     -- — a second spelling would be a second thing to keep in step with
@@ -299,7 +300,7 @@ skipSpace p =
 -- Part of the shared reader contract, not a Haskell-only boundary: Lean's
 -- @Lara.Driver.maxDepth@ carries the same value and its reader refuses at the
 -- same depth with the same message and column, so both runtimes reject an
--- over-deep input identically (#331). Exported so the gates that pin that
+-- over-deep input identically. Exported so the gates that pin that
 -- agreement name one constant rather than a second copy of the literal.
 maxDepth :: Int
 maxDepth = 10000
@@ -1333,7 +1334,7 @@ coreVersionText LaraCoreV02 = "lara-core@0.2"
 -- 'Published' is the ordinary four-state answer. 'EvidenceBlocked' carries the
 -- four-state label the checker computed on the program it actually saw, which —
 -- because §4.3 quarantine removed material under the claim — is a __conditional
--- diagnostic and not the answer__ (spec §4.3, issue #76; the rule is
+-- diagnostic and not the answer__ (spec §4.3; the rule is
 -- "Lara.Blocked", the metatheory @lean\/Lara\/Blocked.lean@).
 --
 -- Blockedness lives /inside/ the status rather than in a parallel list of
@@ -1366,9 +1367,10 @@ isPublished ps = case ps of
 -- On the wire the honest value is the headline: the @statuses@ section prints
 -- @evidence-blocked@ for a blocked query and the conditional label moves to a
 -- trailing @conditional@ section, which is emitted exactly when some query is
--- blocked. A verdict with nothing blocked is byte-identical to the pre-#76
--- format, and a consumer that has never heard of @evidence-blocked@ fails to
--- decode rather than silently reading a status that deletion inflated.
+-- blocked. A verdict with nothing blocked is byte-identical to the format
+-- from before @evidence-blocked@ existed, and a consumer that has never heard
+-- of @evidence-blocked@ fails to decode rather than silently reading a status
+-- that deletion inflated.
 data Outcome
   = Accept
       { verdictLabels :: [(Int, Label)]
@@ -1407,7 +1409,7 @@ encodeVerdict (Verdict replayId outcome) =
             ]
         ]
           -- The conditional section is a projection of the statuses, emitted
-          -- exactly when some query is blocked (spec §4.3, issue #76).
+          -- exactly when some query is blocked (spec §4.3).
           ++ [ tagged
                  TConditional
                  [ tagged TStatus [encodeAtom proposition, encodeStatusValue status]
@@ -1424,7 +1426,7 @@ encodeLabel label =
     LUndec -> TUndec
 
 -- | The public status token: @evidence-blocked@ hides the conditional label of a
--- quarantine-affected query (spec §4.3, issue #76).
+-- quarantine-affected query (spec §4.3).
 encodePublicStatusValue :: PublicStatus -> SExpr
 encodePublicStatusValue ps = case ps of
   Published status -> encodeStatusValue status
@@ -1545,7 +1547,7 @@ decodeVerdictM value = case value of
             ("expected gap|justified|contested|defeated, got " ++ show encodedStatus)
       ok (proposition, status)
 
-    -- The accept sections: the pre-#76 three, plus the @conditional@ section
+    -- The accept sections: the original three, plus the @conditional@ section
     -- that appears exactly when a query is @evidence-blocked@ (spec §4.3).
     acceptSections sections = case sections of
       [labelsSection, edgesSection, statusesSection] ->

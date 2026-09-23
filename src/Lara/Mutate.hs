@@ -1,5 +1,5 @@
 -- | The shared core of the seeded mutation generators for the M5 evaluation
--- corpus (tracker #48, T1; spec §10.1 mutation table; freeze
+-- corpus (T1; spec §10.1 mutation table; freeze
 -- @docs/m5-freeze-checklist.md@): the closed operator vocabulary, the 'Mutant'
 -- record every generator produces, and — re-exported from
 -- "Lara.Mutate.Outcome" — the specified-outcome type.
@@ -198,7 +198,7 @@ opName op = case op of
 -- list plus the families the later passes added (localization, signature,
 -- cycles, accept verdicts, codec corruption). Closed, like 'MutationOp' — a
 -- family is a fixed vocabulary, so it is a sum type with one spelling table
--- ('familyText'), not a bare 'String' (spec "symbolic core" rule, #169).
+-- ('familyText'), not a bare 'String' (spec "symbolic core" rule).
 --
 -- Test sites branch on family membership (the localization gate in
 -- @test\/MutationSpec.hs@), so a rename or a new registration must fail to
@@ -239,12 +239,12 @@ familyText f = case f of
 -- | Parse the @family@ manifest column back to its 'OpFamily' (inverse of
 -- 'familyText'). 'Nothing' on any spelling the table does not produce — a
 -- stale or hand-edited manifest row, which "Lara.Measure" drops rather than
--- carrying an unrecognized family into the measurement report (#171).
+-- carrying an unrecognized family into the measurement report.
 --
 -- Built by inverting 'familyText' rather than as a second case table, the way
 -- 'parseExpected' inverts 'expectedText': a hand-written inverse would be
--- exactly the duplicated spelling table #169 removed. Well defined because
--- 'familyText' is injective, which @test\/MutationSpec.hs@ asserts.
+-- exactly the duplicated spelling table the symbolic-core rule removed. Well
+-- defined because 'familyText' is injective, which @test\/MutationSpec.hs@ asserts.
 parseFamily :: String -> Maybe OpFamily
 parseFamily s = lookup s [(familyText f, f) | f <- [minBound .. maxBound]]
 
@@ -376,7 +376,7 @@ data Mutant = Mutant
   -- accept-verdict family), which render @-@.
   -- 'Lara.Diagnostics.SeededSites' is non-empty by construction, so "seeded
   -- at nothing" — which would silently leave the row out of the
-  -- @location-accuracy-rate@ denominator — cannot be built (#169).
+  -- @location-accuracy-rate@ denominator — cannot be built.
   , mutantBytes :: String
   }
   deriving (Eq, Show)

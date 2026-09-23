@@ -1,4 +1,4 @@
--- | The M5 T6 ablation baselines (tracker #48) as a standing test: the pure
+-- | The M5 T6 ablation baselines as a standing test: the pure
 -- ablation pass of "Lara.Measure" over both manifests (no subprocess, no
 -- timing).
 --
@@ -87,7 +87,7 @@ prop_fullPathGuard = once $ ioProperty $ do
 -- enforces it has to quantify over all 8 states — the named list is the
 -- reporting vocabulary, and enumerating only it left 5 states unenforced
 -- (including @ccTypedAttacks=False, ccConflictScan=True@, first reachable once
--- \#124 split the scan out of the typed-attack bundle). Three flags, no
+-- the scan was split out of the typed-attack bundle). Three flags, no
 -- fixtures: the manifest inputs already discovered carry the whole argument.
 allConfigs :: [(String, CheckConfig)]
 allConfigs =
@@ -386,7 +386,7 @@ prop_handWrittenHole =
 
 -- | The conflict scan's config branch pinned in every direction, on the
 -- 'CheckSpec' missing-conflict fixture (a self-contrary complete argument with
--- no declared attack). The scan is its own flag ('ccConflictScan', #124), so
+-- no declared attack). The scan is its own flag ('ccConflictScan'), so
 -- exactly one named ablation may switch it alone: 'noCQConfig' must still
 -- reject @MissingConflict@, 'noConflictScanConfig' must flip it to accept, and
 -- 'noTypedConfig' must flip it too — it drops the whole typed-attack bundle.

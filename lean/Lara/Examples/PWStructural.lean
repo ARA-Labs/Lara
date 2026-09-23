@@ -1,5 +1,5 @@
 /-
-# PW-T6 executable examples (issue #191, tracker #189)
+# PW-T6 executable examples
 
 Three instances of the structural-bridge contract, one boundary fact, and the
 translation-domain negative.
@@ -24,7 +24,7 @@ discharged non-vacuously here: `rule_ok` by the translated policy and
 is empty on both sides — the defeasible rule makes no `AssuranceOk.cert` arm
 reachable — so this bridge closes `cert_ok` vacuously.
 
-**The strict-certificate renaming bridge (#224).** The same renaming over a
+**The strict-certificate renaming bridge.** The same renaming over a
 *strict* rule with a live certifier allowlist and `allowTrusted` off, so the
 only reachable assurance is a backend-accepted certificate. The `CertOk`
 pair holds exactly at the fixture's encoded step on each side — the
@@ -34,7 +34,7 @@ acceptance at `([e], p)` is carried to acceptance at `([e_r], p_r)`. The
 transported derivation then runs the `AssuranceOk.cert` arm off the
 identity, with the frozen `(β, hd, κ)` triple preserved verbatim.
 
-**The strict fixture's drift guards (#231).** The transport theorem runs at
+**The strict fixture's drift guards.** The transport theorem runs at
 one certifier triple and one encoded step, so on its own it survives two
 mutations that would make the paragraph above false. Both are closed:
 `cert_reject_mismatched_certifier` pins that each component of `(β, hd, κ)`
@@ -92,7 +92,7 @@ theorem t7_t6_transport :
 /-- **The T6/T8 boundary, packaged at a live instance.** Exact checked-
 support transport holds across the accepted T7 edge — and grounded status
 still flips from `justified` to `defeated`. Support transport (T6) is
-necessary but not sufficient for status preservation (T8, #193): any
+necessary but not sufficient for status preservation (T8): any
 status-preservation theorem must quantify over the target's attackers, not
 over the transported term. -/
 theorem t7_t6_boundary :
@@ -153,7 +153,7 @@ def gammaRenTgt : LeafId → Option Atom :=
 
 /-- No certificate judgment on either side (the example rule is defeasible,
 so no `AssuranceOk.cert` arm is reachable). The strict-certificate bridge
-below (`bridgeCert`, #224) is where `cert_ok` is exercised off the
+below (`bridgeCert`) is where `cert_ok` is exercised off the
 identity. -/
 def certRen : BackendId → Digest → CertRef → List Atom → Atom → Prop :=
   fun _ _ _ _ _ => False
@@ -289,7 +289,7 @@ theorem ren_transport :
   cases hC'
   exact h
 
-/-! ### The strict-certificate renaming bridge (#224) -/
+/-! ### The strict-certificate renaming bridge -/
 
 /-- The allowlisted certifier backend of the strict renaming example. -/
 def βRen : BackendId := ⟨"smt", 1⟩
@@ -384,7 +384,7 @@ def bridgeCert :
 allowlist, source acceptance holds at the fixture's encoded step, both
 components of the step translate, and target acceptance holds at the
 translated step. A future edit that emptied either judgment under a real
-renaming breaks this theorem — the regression guard #224 asked for. -/
+renaming breaks this theorem — the regression guard this fixture exists to provide. -/
 theorem cert_accept_translated :
     ruleCert.mode = .strict ∧ (βRen, hdRen) ∈ ruleCert.certifiers ∧
       certCertSrc βRen hdRen κRen [.atom "e" .nil] (.atom "p" .nil) ∧
@@ -492,7 +492,7 @@ theorem cert_transport :
   cases hC'
   exact h
 
-/-! ### Fixture drift guards (#231)
+/-! ### Fixture drift guards
 
 `cert_transport` runs through both certificate judgments and the strict
 rule's `AssuranceOk.cert` arm, but it does so at exactly one certifier triple

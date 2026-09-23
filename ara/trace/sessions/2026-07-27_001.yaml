@@ -100,7 +100,7 @@ key_context:
       subagents with spec + quality + Lean-fidelity reviews, each task committed in plan order.
 
 open_threads:
-  - "Open PR closing issue #27 (M3 tracker) — final step of the /implement flow."
+  - "Open PR closing the issue (M3 tracker) — final step of the /implement flow."
   - "O15 numeric-literal divergence: any future differential work must avoid non-canonical numeric literals or handle the canonNum-vs-id gap; candidate to crystallize as a constraint once the M4 numeral-normalization extension point is scheduled."
   - "R6/R10/R11/R13 now covered; full R1-R14 mutation enumeration complete at the Unit boundary (R2/R8/R9 out-of-core, R14 codec-boundary)."
 

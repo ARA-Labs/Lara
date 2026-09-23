@@ -1,4 +1,4 @@
-# Accepted semantic negative (#273)
+# Accepted semantic negative
 
 `Lara.Examples.ContextSemantics.ctxEquivSem_semantic_negative` refutes
 `CtxEquivSem stableSem registryEx fullCycleFrag singletonCycleFrag` by applying
@@ -6,7 +6,7 @@ its universal context hypothesis to `semanticNegativeCtx`.
 
 Both fragments export `[pA]`, use `cyclePolicy`, and pass the link guard and
 whole-unit checker. The context has no declarations or arguments. The full
-cycle fragment moves #270's complete linked arguments and attacks to the fragment
+cycle fragment moves the admissible three-cycle's complete linked arguments and attacks to the fragment
 side; `semantic_negative_cycle_shape` checks that linking preserves both lists.
 The comparison fragment contains one unattacked argument for the same claim.
 
@@ -18,7 +18,8 @@ acceptance. `obsSem_semantic_negative_grounded` pins the cycle's grounded payloa
 to `observed contested` and its disagreement with stable at this context.
 
 This is a finite non-triviality witness. It does not prove grounded contextual
-equivalence of the fragments across every context, and does not resolve #268.
+equivalence of the fragments across every context, and does not resolve the
+equivalence-relation question.
 
 Verification:
 

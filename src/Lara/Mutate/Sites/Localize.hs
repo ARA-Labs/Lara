@@ -1,4 +1,4 @@
--- | The localization site enumerators (#123): the discriminating families of
+-- | The localization site enumerators: the discriminating families of
 -- @docs\/localization-metric-decision.md@ — mutants whose ground truth is a
 -- genuine prediction rather than an echo of the edit site.
 --
@@ -87,7 +87,7 @@ retractRuleSites u =
   -- A rule no retained argument instantiates has an empty manifestation set,
   -- and retracting it is an accepting no-op. 'seededSites' is that self-gate:
   -- the enumerator skips the rule instead of publishing ground truth seeded
-  -- at nothing (#169).
+  -- at nothing.
   , Just sites <- [seededSites [CArgument (checkedIx ci) | ci <- affected]]
   , policyStaysClean (dropRule rid u)
   ]

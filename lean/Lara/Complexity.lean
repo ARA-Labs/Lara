@@ -1,5 +1,5 @@
 /-
-Cost-instrumented grounded kernel (`Lara.Complexity`, issue #209).
+Cost-instrumented grounded kernel (`Lara.Complexity`).
 
 Mirrors of the proof-oriented grounded evaluator in `Lara.Grounded` —
 `anyAttackerC`, `defendedAuxC`/`defendedC`, `stepC`, `iterC`, `groundedC` —
@@ -34,7 +34,7 @@ Four layers are mechanized here:
   two quantifiers.
 
 On top of the same cost model, the **shared carrier-status evaluator**
-(issue #209) instruments the claim-status surface: `labelFromGroundedC`
+instruments the claim-status surface: `labelFromGroundedC`
 reads one label off a shared grounded result, counting exactly the attack
 queries of `Grounded.labelC`'s `out` scan; `statusSharedC` preserves
 `Grounded.statusC`'s observable guard order — empty support first, then an
@@ -469,7 +469,7 @@ fixed-size fixture makes no claim about asymptotic lower bounds. -/
 theorem groundedC_twoNodeAllAttacks_cost :
     (groundedC twoNodeAllAttacks).2 = 4 := by decide
 
-/-! ### The shared carrier-status evaluator (issue #209)
+/-! ### The shared carrier-status evaluator
 
 `Grounded.statusC` recomputes the grounded extension inside every per-member
 `labelC` read.  The evaluator below computes `groundedC F` **once** — and
@@ -690,7 +690,7 @@ theorem statusSharedC_cost_ge_grounded (F : AF) (c : Claim)
       simp only [hu, Bool.false_eq_true, if_false]
       exact Nat.le_add_right _ _
 
-/-! ### The carrier query (issue #209) -/
+/-! ### The carrier query -/
 
 open Invariants (eraseAF claim)
 

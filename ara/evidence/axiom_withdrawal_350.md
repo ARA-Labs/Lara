@@ -1,4 +1,4 @@
-# Axiom-withdrawal witness: issue #350
+# Axiom-withdrawal witness
 
 Executed 2026-09-20. Provenance: ai-executed.
 

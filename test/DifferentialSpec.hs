@@ -19,10 +19,10 @@
 --
 -- The deliberately malformed envelopes under @fixtures/malformed/@ are NOT
 -- part of these goldens: they are the negative half of
--- @scripts/differential.sh@ (PR #44 review C8), where both drivers must exit
+-- @scripts/differential.sh@ (review C8), where both drivers must exit
 -- 2 with empty stdout. One anchor, @non-canonical-theory-order.sexp@,
--- additionally pins a per-driver stderr substring there (issue #36
--- re-review): the theory-identity comparison is list-ordered on both
+-- additionally pins a per-driver stderr substring there (re-review): the
+-- theory-identity comparison is list-ordered on both
 -- drivers, so exit-2-only cannot distinguish the canonical-order rejection
 -- from 'TheoryIdentityMismatch' for that envelope.
 --
@@ -90,7 +90,7 @@ corpusGoldens =
         ++ " (statuses (status (atom p0) justified) (status (atom p1) justified)"
         ++ " (status (atom p2) justified)))"
     )
-  , -- Duplicate-report groups (spec §4.3, issue #38): a ≡-consistent group
+  , -- Duplicate-report groups (spec §4.3): a ≡-consistent group
     -- admits normally (justified); a ≢ group quarantines its members so the
     -- dependent claim loses support and surfaces as gap (accept, not reject);
     -- the same conflict escalated by policy is the R9 data-integrity reject.
@@ -102,7 +102,7 @@ corpusGoldens =
     , "(verdict accept (labels) (edges)"
         ++ " (statuses (status (atom effect (con up)) gap)))"
     )
-  , -- The §4.3 promotion hazard (issue #76): quarantining the sole attacker
+  , -- The §4.3 promotion hazard: quarantining the sole attacker
     -- leaves the target unattacked, so the pruned graph says @justified@ — which
     -- is published as @evidence-blocked@ with that label demoted to the
     -- @conditional@ section. The unaffected query keeps its ordinary status.
@@ -117,7 +117,7 @@ corpusGoldens =
     -- @aT@ also carried a closure edge onto @aW@), attack completeness has
     -- nothing to say (@notk@ vs @cw@ are not contraries), and only the
     -- lost-edge seed clause catches the promotion. Cross-driver anchor for
-    -- the retained-to-retained branch of the compact-index bridge (#80).
+    -- the retained-to-retained branch of the compact-index bridge.
     ( "fixtures/corpus/group-quarantine-lost-edge.sexp"
     , "(verdict accept (labels (0 in) (1 in)) (edges)"
         ++ " (statuses (status (atom cw) evidence-blocked))"
@@ -169,7 +169,7 @@ corpusGoldens =
   , ( "fixtures/corpus/strict-cert-accept.sexp"
     , "(verdict accept (labels (0 in)) (edges) (statuses (status (atom pp) justified)))"
     )
-  , -- Replay-preflight anchors (PR #44 review C3): the runtime preflight's
+  , -- Replay-preflight anchors (review C3): the runtime preflight's
     -- duplicate → unknown → unselected-certificate precedence, each rejecting
     -- as R13 before the checker runs. Every anchor's unit is checker-valid;
     -- only the replay-id backend selection differs, and lower-precedence
@@ -226,7 +226,7 @@ corpusGoldens =
         ++ " (num 0.05)) justified)))"
     )
   , ("fixtures/corpus/ra-premise-only-reject.sexp", "(verdict reject R13)")
-  , -- @insp\@1@ replay anchors (issue #260), hand-authored for the same reason
+  , -- @insp\@1@ replay anchors, hand-authored for the same reason
     -- the @ord\@1@ four are: they pin certificate shapes @scripts/gen-corpus.hs@
     -- has no vocabulary for.
     --
@@ -324,7 +324,7 @@ workedExampleGoldens =
     )
   , ("examples/R1/example.core.sexp", "(verdict reject R1)")
   , ("examples/R2/example.core.sexp", "(verdict reject R12)")
-    -- The signature negative (#89 D10). The directory is R2-sort, not R2: the
+    -- The signature negative (D10). The directory is R2-sort, not R2: the
     -- latter is the R12 Path-B demonstration and predates R2-the-class.
   , ("examples/R2-sort/example.core.sexp", "(verdict reject R2)")
   , ("examples/R3/example.core.sexp", "(verdict reject R10)")
@@ -371,22 +371,22 @@ workedExampleGoldens =
         ++ " (con wikitext103)) justified)"
         ++ " (status (atom num_lt (num 28.4) (num 31.6)) justified)))"
     )
-  , -- S6: the named-certificate-slot worked example (lara-syntax@0.6, #105).
+  , -- S6: the named-certificate-slot worked example (lara-syntax@0.6).
     -- Its artifact authors the ord@1 certificate as (prem base_cell)/(prem
     -- new_cell); the anchor carries only the LOWERED (prem 0)/(prem 1)
     -- payload, byte-identical to the numeric twin's, so this golden is the
-    -- committed half of the #105 byte-identity witness at the verdict level.
+    -- committed half of the byte-identity witness at the verdict level.
     ( "examples/S6/example.core.sexp"
     , "(verdict accept (labels (0 in)) (edges)"
         ++ " (statuses (status (atom num_lt (num 0.71) (num 0.74)) justified)))"
     )
-  , -- S7: the premise-LABEL worked example (lara-syntax@0.8, #131). Its
+  , -- S7: the premise-LABEL worked example (lara-syntax@0.8). Its
     -- artifact authors the two ord@1 certificates as (prem base)/(prem new)
     -- and (prem left)/(prem right) — the labels the rules declare for those
     -- slots — and the anchor carries only the LOWERED (prem 0)/(prem 1)
     -- payloads, byte-identical to the numeric twin's. The second argument is
-    -- the one #131 exists for: one leaf fills both of le_reflex's slots, so
-    -- the @0.6 leaf name is CertSlotMultiSlot there and only the labels
+    -- the one premise labels exist for: one leaf fills both of le_reflex's
+    -- slots, so the @0.6 leaf name is CertSlotMultiSlot there and only the labels
     -- resolve; ord@1 replays it at the tie 0.71 <= 0.71.
     ( "examples/S7/example.core.sexp"
     , "(verdict accept (labels (0 in) (1 in)) (edges)"
@@ -402,7 +402,7 @@ workedExampleGoldens =
     , "(verdict accept (labels (0 in)) (edges)"
         ++ " (statuses (status (atom holds (con safety_invariant) (con D)) justified)))"
     )
-  , -- S9 (issue #260): the @insp\@1@ static code-inspection example. Both
+  , -- S9: the @insp\@1@ static code-inspection example. Both
     -- certificate arities appear — a1's two-inventory @(inspectdiff …)@ and
     -- a3's one-inventory @(inspect …)@ negative existential — under one
     -- defeasible bridge (a2). All three arguments are unattacked, so the
@@ -416,7 +416,7 @@ workedExampleGoldens =
         ++ " (con repair_pass)) justified)"
         ++ " (status (atom code_absent (con solver_module) (con repair_pass)) justified)))"
     )
-  , -- agreement-map (D3, issue #64): the genuine-disagreement pair (P1) shares
+  , -- agreement-map (D3): the genuine-disagreement pair (P1) shares
     -- the same (S,B,Q,D) atoms ⇒ rebut 2-cycle ⇒ pa/pb undec, both contested;
     -- the setting-mismatch pair (P2) differs only in the setting index ⇒ zero
     -- attacks ⇒ pc/pd in, both justified.
@@ -428,7 +428,7 @@ workedExampleGoldens =
         ++ " (status (atom not_better (con magnitude_pruning) (con dense_baseline) (con accuracy) (con llama_openllm_s90)) justified)))"
     )
   , -- The same D3 demonstration as four INDEPENDENTLY CHECKABLE members
-    -- (#303, examples/agreement-map-multi/). Each one alone is an unattacked
+    -- (examples/agreement-map-multi/). Each one alone is an unattacked
     -- support argument and a justified claim: the two rebut edges above belong
     -- to the composite and are generated there by cross-member saturation, and
     -- no member declares or could declare them. These four anchors are the
@@ -800,7 +800,7 @@ prop_admissionOracle = once (ioProperty runChecks)
 -- /Haskell == Lean/. 'corpusGoldens' is the only place either driver is
 -- checked against /expected/ bytes, and it is a hand-maintained list, so a new
 -- anchor stays unpinned unless someone remembers. That is exactly how the four
--- @ord-*.sexp@ fixtures and @examples/S2@ shipped unpinned (PR #83 review).
+-- @ord-*.sexp@ fixtures and @examples/S2@ shipped unpinned (review).
 -- This closes the loop: adding an anchor without a golden now fails
 -- @cabal test@ with the missing paths named.
 prop_goldensCoverAnchors :: Property

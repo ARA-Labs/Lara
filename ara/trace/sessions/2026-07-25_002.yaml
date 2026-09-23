@@ -2,7 +2,7 @@ session:
   id: "2026-07-25_002"
   timestamp: "2026-07-25T04:02"
   ended: "2026-07-25T04:27"
-  summary: "Remediated every actionable PR #21 review finding while preserving exact ND wire compatibility."
+  summary: "Remediated every actionable review finding while preserving exact ND wire compatibility."
 
 events_logged:
   - type: experiment

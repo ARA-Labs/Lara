@@ -79,7 +79,7 @@ theorem getElem?_right : ∀ {as : List α} {bs : List β},
           simp only [List.getElem?_cons_succ] at hi ⊢
           exact getElem?_right hs hi
 
-/-- Positional lookup, left to right. The mirror of `getElem?_right`; the #215
+/-- Positional lookup, left to right. The mirror of `getElem?_right`; the
 carrier lemmas navigate forwards along the relation and need this direction. -/
 theorem getElem?_left : ∀ {as : List α} {bs : List β},
     Forall₂ Rel as bs → ∀ {i : Nat} {a : α}, as[i]? = some a →

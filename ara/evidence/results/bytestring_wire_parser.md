@@ -190,7 +190,7 @@ one `make bench` on an idle machine. The code change does not depend on it.
   `scripts/bench.hs`, `test/WireSpec.hs`, `lara.cabal`, and the plan.
   `lara.cabal` is the one file the plan did not anticipate: the `lara`
   executable had no `bytestring` dependency and now needs one.
-- [PR #118](https://github.com/ARA-Labs/lara/pull/118) at commit `a2904d7`,
+- At commit `a2904d7`,
   hosted CI run `32226016340` at head `37781e9`: the Haskell job's build,
   test, presentation parity, replay, tamper, policy-copy authenticity,
   Haskell-Lean differential, and semantic admission differential gates
@@ -202,12 +202,12 @@ verbatim reference-parser differential is the additional old-versus-new check
 that the oracle alone cannot give, because the oracle pins stdout and exit code
 but not codec error positions, which live only on stderr.
 
-## Consequence for issue #116
+## Consequence for the table-claim audit
 
 `src/evaluation.tex:77-79` claims decoding consumes "roughly seven eighths" of
 end-to-end time. That sentence was written against a 1317 µs parse row. At a
 parse to check + render ratio of 1.43×, parse is approximately 59% of end-to-end
-rather than 87%, so the sentence is false by a wide margin. Issue #116 closes as
+rather than 87%, so the sentence is false by a wide margin. The table-claim audit closes as
 option A — rewrite the paragraph around measured numbers — rather than option B,
 which would have spent a sentence conceding the split is an engineering
 artifact. The rewrite is gated on regenerating the table on an idle machine, not

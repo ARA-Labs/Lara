@@ -5,7 +5,7 @@ session:
   last_turn: "2026-09-02T23:50"
   turn_count: 5
   summary: >
-    PW0 possible-world outer-model gate implemented and opened as PR #221. Five
+    PW0 possible-world outer-model gate implemented and opened as the PR. Five
     modules land under Lara.PW and Lara.Examples.PW carrying T0-T5 and the T7
     non-preservation witness; the wrapper redefines nothing local and the diff
     is pure insertion. Two independent post-implementation reviews found three
@@ -16,15 +16,15 @@ session:
     comparison was then renamed compare -> crossCompare (N273) after measuring
     that the Ord.compare collision breaks `unfold` in any module that opens
     Lara.PW. Full build (127 jobs) and axiom audit (1612 declarations) clean.
-    After PR #221 merged, the researcher directed the PW track forward in
+    After the PR merged, the researcher directed the PW track forward in
     parallel with M4 (N275): T6 exact checked-support transport was mechanized
     directly against the frozen interface — three insertion-only modules, the
     three-clause StructuralBridge contract, support_transport with verbatim
     obligations, target-registry occurrence replay via B0, and
     Admits/admits_transport discharging PW0 limitation 1 — and opened as PR
-    #223 (N276). Build 130 jobs, audit 1707 declarations (78 PW-T6), clean.
+    (N276). Build 130 jobs, audit 1707 declarations (78 PW-T6), clean.
     C48 crystallized; O113 crystallized into the PW-T6 translation-form
-    constraint. Then, on the researcher's directive to implement and finish the M4 plan, Theory M4 Part A was executed end to end (F0-F3 plus review fixes) and pushed to PR #218: the fragment/linking calculus with a witnessed link guard, saturating linking, the structural merge proved semantically inert through a generic AF node-merging morphism, context composition, and the headline backend_replacement_congruence — an injective, acceptance-preserving certificate relabel is unobservable in every admissible context. The final review found both headline witnesses vacuous (assurance-free fixtures); repaired with a certificate-bearing split and a real backend swap. C49 crystallized. 1911 audited declarations, 204 M4.
+    constraint. Then, on the researcher's directive to implement and finish the M4 plan, Theory M4 Part A was executed end to end (F0-F3 plus review fixes) and pushed to the PR: the fragment/linking calculus with a witnessed link guard, saturating linking, the structural merge proved semantically inert through a generic AF node-merging morphism, context composition, and the headline backend_replacement_congruence — an injective, acceptance-preserving certificate relabel is unobservable in every admissible context. The final review found both headline witnesses vacuous (assurance-free fixtures); repaired with a certificate-bearing split and a real backend swap. C49 crystallized. 1911 audited declarations, 204 M4.
 
 events_logged:
   - turn: 1
@@ -80,13 +80,13 @@ events_logged:
     id: "N275"
     routing: direct
     provenance: user
-    summary: "PW track proceeds to T6 (#191) in parallel with M4 (PR #218)."
+    summary: "PW track proceeds to T6 in parallel with M4."
   - turn: 4
     type: experiment
     id: "N276"
     routing: direct
     provenance: ai-executed
-    summary: "T6 mechanized: three-clause contract, transport with verbatim obligations, occurrence replay, accept discharge; PR #223; build 130 jobs, audit 1707."
+    summary: "T6 mechanized: three-clause contract, transport with verbatim obligations, occurrence replay, accept discharge; the PR; build 130 jobs, audit 1707."
   - turn: 4
     type: observation
     id: "O114"
@@ -147,13 +147,13 @@ events_logged:
     id: "N281"
     routing: direct
     provenance: ai-executed
-    summary: "Surface-pair witness unreachable: every accepted surface fixture rests on native_decide, which the axiom discipline bans. Issue #227."
+    summary: "Surface-pair witness unreachable: every accepted surface fixture rests on native_decide, which the axiom discipline bans."
   - turn: 5
     type: decision
     id: "N282"
     routing: direct
     provenance: ai-executed
-    summary: "compose does not saturate; composition closed for hygiene, not linkability. sideOk_composed takes cross-coverage explicitly. Issue #229."
+    summary: "compose does not saturate; composition closed for hygiene, not linkability. SideOk_composed takes cross-coverage explicitly."
   - turn: 5
     type: dead_end
     id: "N283"
@@ -201,7 +201,7 @@ events_logged:
     id: "C49"
     routing: crystallized
     provenance: ai-suggested
-    summary: "Profile-preservation buys the context quantifier for free — crystallized via artifact commitment (merged branch, PR #218, docs depend on it)."
+    summary: "Profile-preservation buys the context quantifier for free — crystallized via artifact commitment (merged branch, the PR, docs depend on it)."
 
 ai_actions:
   - turn: 1
@@ -239,7 +239,7 @@ ai_actions:
       - "lean/Lara/PW/Compare.lean"
       - "lean/AxCheck.lean"
   - turn: 1
-    action: "Deleted the executed plan per repo rule, pushed the branch, opened PR #221."
+    action: "Deleted the executed plan per repo rule, pushed the branch, opened the PR."
     provenance: ai-executed
     files_changed:
       - "plans/2026-09-02-pw0-outer-model-gate.md"
@@ -276,8 +276,8 @@ ai_actions:
   - turn: 4
     action: >
       Ran the research-foresight world model over the ARA for the next-step
-      question, verified the live tracker (PR #218 open; #182 closed; #189 at
-      1/4 sub-issues), and reported that the #189 exit decision was the next
+      question, verified the live tracker (the M4 PR open; the B0 item closed; the PW tracker at
+      1/4 sub-issues), and reported that the exit decision was the next
       step with T6 as the recommended continuation.
     provenance: ai-executed
     files_changed: []
@@ -290,7 +290,7 @@ ai_actions:
       endobridge at T7, renaming bridge, domain negative), both roots wired,
       78 new audit rows. lake build 130 jobs and the hardened audit at 1707
       declarations both clean; diff pure insertion (2142 lines). Wrote
-      docs/theory-pw-t6-structural-transport.md; pushed and opened PR #223.
+      docs/theory-pw-t6-structural-transport.md; pushed and opened the PR.
     provenance: ai-executed
     files_changed:
       - "lean/Lara/PW/Translation.lean"
@@ -301,7 +301,7 @@ ai_actions:
       - "docs/theory-pw-t6-structural-transport.md"
 
   - turn: 5
-    action: "Executed Theory M4 Part A phases F0-F3 plus review fixes; five commits on plan/m4-context-calculus, pushed; PR #218 updated; issues #227, #228, #229 filed; #187 and #180 updated."
+    action: "Executed Theory M4 Part A phases F0-F3 plus review fixes; five commits on plan/m4-context-calculus, pushed; the PR updated; the issues filed; updated."
     provenance: ai-executed
     files_changed:
       - lean/Lara/Context/Fragment.lean
@@ -361,7 +361,7 @@ logic_revisions:
     provenance: ai-suggested
     note: >
       From O112. The committed, AxCheck-registered support_transport /
-      Admits / admits_transport theorems and PR #223 are the artifact
+      Admits / admits_transport theorems and the PR are the artifact
       commitment; status set to supported on the C47 precedent — the audited
       proof IS the evidence. The user has not yet commented on the result, so
       provenance stays ai-suggested.
@@ -412,7 +412,7 @@ key_context:
       shape disambiguates -- so the risk was narrower than first reported. What
       decided it was `unfold compare` failing with "ambiguous term" in any
       module that opens Lara.PW, since the T5 proofs unfold this definition and
-      T6 (#191) will be such a module; plus the fact that
+      T6 will be such a module; plus the fact that
       no paper display cites the key yet, which makes the rename free now and
       costly later.
 
@@ -430,7 +430,7 @@ key_context:
   - turn: 4
     excerpt: >
       The researcher's directive was "in parallel to M4" — a scheduling
-      decision, not a review waiver. The exit decision on #189 was taken
+      decision, not a review waiver. The exit decision on the PW tracker was taken
       forward by implementing T6 as a reviewable PR rather than by posting a
       tracker comment; the PR is the vehicle through which the decision can
       still be rejected. The plan-PR cadence was skipped this once because the
@@ -462,10 +462,10 @@ key_context:
       of result 9's model in the development.
 
 open_threads:
-  - "PR #223 (T6) awaits CI and human review; PR #218 (M4 Part A, five commits) pushed and awaiting review. CI has not run on any branch since 2026-08-25 (#225), so every gate was run locally."
-  - "M4 Part B (full abstraction) is gated and unentered; #187 stays open. The two F0 obstructions are unchanged: the semantic interface is wider than the declared imports, and completeness is policy-conditional."
-  - "#227 (native_decide-free surface fixture), #228 (private HasSupport inversion lemmas), #229 (compose does not saturate) are open follow-ups from this session."
-  - "T8 (#193) must quantify over the target's attackers; T9 (#190) needs the composition laws. Both stay on tracker #189, and both consume the PW-T6 translation-form constraint: choose the translation form first."
+  - "The PR (T6) awaits CI and human review; the PR (M4 Part A, five commits) pushed and awaiting review. CI has not run on any branch since 2026-08-25, so every gate was run locally."
+  - "M4 Part B (full abstraction) is gated and unentered; stays open. The two F0 obstructions are unchanged: the semantic interface is wider than the declared imports, and completeness is policy-conditional."
+  - "Three follow-ups (native_decide-free surface fixture, private HasSupport inversion lemmas, compose does not saturate) are open from this session."
+  - "T8 must quantify over the target's attackers; T9 needs the composition laws. Both stay on the tracker, and both consume the PW-T6 translation-form constraint: choose the translation form first."
   - "gap conflates out-of-vocabulary, ill-sorted, not-posed, and posed-but-unsupported until the M5 well-sortedness refinement of Query_κ lands."
 
 ai_suggestions_pending:

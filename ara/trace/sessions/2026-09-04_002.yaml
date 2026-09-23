@@ -6,9 +6,9 @@ session:
   turn_count: 1
   summary: >
     PW-T9 provenance closeout corrects the two-PR ownership split against
-    reviewed PR #233 head 3362f00. PR #233 owns bridge composition, indexed
+    the reviewed PR head 3362f00. The first PR owns bridge composition, indexed
     paths, path coherence, and checked path transport in addition to the
-    first-leg-first translation laws; PR #236 owns applicability factorization,
+    first-leg-first translation laws; the second PR owns applicability factorization,
     commuting/direct-path agreement, accepted-edge separation, expanded
     witnesses, durable records, and final audit wiring. All documented gates
     pass on the unchanged synchronized proof tree.
@@ -30,8 +30,8 @@ events_logged:
 ai_actions:
   - turn: 1
     action: >
-      Inspected reviewed PR #233 head 3362f00, corrected the active proof record
-      and session summaries to assign the bridge/path foundation to #233,
+      Inspected the reviewed PR head 3362f00, corrected the active proof record
+      and session summaries to assign the bridge/path foundation to the first PR,
       appended ownership correction N298 and verification N299, and reran every
       documented proof gate.
     provenance: ai-executed
@@ -51,11 +51,11 @@ key_context:
     excerpt: >
       The evidence record pinned reviewed head 3362f00 but attributed
       StructuralBridge.comp, BridgePath, path coherence, and path transport to
-      PR #236 even though those declarations already exist at that #233 head.
+      the second PR even though those declarations already exist at that head.
 
 open_threads:
-  - "PR #236 awaits approval and merge."
-  - "Issue #234 tracks the deferred translation-traversal refactor."
-  - "Issue #235 tracks standalone witnesses for trAtom_comp_none_left and the SymMap unit laws."
+  - "The PR awaits approval and merge."
+  - "Tracks the deferred translation-traversal refactor."
+  - "Tracks standalone witnesses for trAtom_comp_none_left and the SymMap unit laws."
 
 ai_suggestions_pending: []

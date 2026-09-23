@@ -5,12 +5,12 @@ session:
   last_turn: "2026-09-04T09:12"
   turn_count: 1
   summary: >
-    M4 Part A debt clearance on the researcher's direction: #219 (instances at
-    their structures), #220/#228 (Γ-transport, buildGamma, and HasSupport
-    inversion lemmas public at Support/Attack/Admission, private copies
-    deleted), #226 (conclusionCache/conflictCache bridge proved), #229
-    (composition non-closure for linkability witnessed), #222 closed as moot;
-    #227 left open with a sharper sizing. All M4 gates pass at commit 14b9e34.
+    M4 Part A debt clearance on the researcher's direction: instances at
+    their structures; Γ-transport, buildGamma, and HasSupport
+    inversion lemmas public at Support/Attack/Admission with private copies
+    deleted; the conclusionCache/conflictCache bridge proved;
+    composition non-closure for linkability witnessed; one debt closed as moot;
+    the surface-fixture item left open with a sharper sizing. All M4 gates pass at commit 14b9e34.
 
 events_logged:
   - turn: 1
@@ -18,7 +18,7 @@ events_logged:
     id: "N300"
     routing: direct
     provenance: user
-    summary: "Clear the M4 debts in one pass; owner-module placement over Update.lean; #229 option 2; #227 deferred as milestone-sized."
+    summary: "Clear the M4 debts in one pass; owner-module placement over Update.lean; option 2; deferred as milestone-sized."
   - turn: 1
     type: experiment
     id: "N301"
@@ -71,25 +71,25 @@ key_context:
   - turn: 1
     excerpt: >
       User: "how about we clear the debts from M4 first". Read as the concrete
-      follow-up issues (#219, #220, #222, #226, #227, #228, #229), not the
-      future-work items #215/#216/#217.
+      follow-up issues, not the
+      future-work items.
   - turn: 1
     excerpt: >
-      While building the #229 witness: neither half can declare the covering
+      While building the witness: neither half can declare the covering
       attack, because SideOk requires an attack's target among the side's own
       arguments and the target lives in the other half. The boundary is
-      structural, which sharpens #229's framing (staged as O130).
+      structural, which sharpens the issue's framing (staged as O130).
   - turn: 1
     excerpt: >
-      #227 sizing: surfaceEnv's encodeProp parses text, canon is canonNum, and
+      Surface-fixture sizing: SurfaceEnv's encodeProp parses text, canon is canonNum, and
       the registry carries the ND backend — none reduce under kernel decide.
       A witness needs a purpose-built environment, not only a smaller program.
 
 open_threads:
-  - "Open the PR for claude/m4-debts-clearance-af1b56 (closes #219, #220, #226, #228, #229); close #222 as moot; comment sizing on #227."
-  - "PR #236 awaits approval and merge."
-  - "Issue #234 tracks the deferred translation-traversal refactor."
-  - "Issue #235 tracks standalone witnesses for trAtom_comp_none_left and the SymMap unit laws."
+  - "Open the PR for claude/m4-debts-clearance-af1b56 (closes the cleared debts); close the moot one; comment the sizing."
+  - "The PR awaits approval and merge."
+  - "Tracks the deferred translation-traversal refactor."
+  - "Tracks standalone witnesses for trAtom_comp_none_left and the SymMap unit laws."
 
 ai_suggestions_pending:
-  - "O130: the general 'cross-half coverage is vacuous or via shared terms' statement is unproved; worth a theorem if #229 option 1 is ever weighed."
+  - "O130: the general 'cross-half coverage is vacuous or via shared terms' statement is unproved; worth a theorem if option 1 is ever weighed."

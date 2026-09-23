@@ -1,4 +1,4 @@
-# Non-empirical examples: issue #349
+# Non-empirical examples
 
 Executed 2026-09-20. Provenance: ai-executed.
 
@@ -39,5 +39,5 @@ caught the missing P1 entry in `DifferentialSpec.corpusGoldens`; the final
 full run passed after adding it. No kernel behavior changed.
 
 The Demo 2 decision and follow-up scope are in
-`docs/non-empirical-worlds-decision.md` and issue #350. These checks establish
+`docs/non-empirical-worlds-decision.md`. These checks establish
 behavior of the encoded examples, not faithfulness of philosophical prose.

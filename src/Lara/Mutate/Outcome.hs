@@ -6,7 +6,7 @@
 -- @Lara.Mutate@ namespace, which lets the root import it: 'Lara.Mutate.Mutant'
 -- carries an 'Expected' field, so the dependency runs one way. The root
 -- re-exports every name here, so importers say @Lara.Mutate@ as before; this
--- is the one sanctioned re-export in the namespace (ownership record D1, #157).
+-- is the one sanctioned re-export in the namespace (ownership record D1).
 --
 -- The split exists because the root's growth had concentrated in one place
 -- (@docs\/mutate-module-ownership-decision.md@, module size). The seam is
@@ -43,15 +43,15 @@ data Expected
   -- contrary pair between complete arguments and no attack covering it, so the
   -- full system rejects it at the seventh stage's completeness scan
   -- ('Lara.Check.ccConflictScan') — the executable witness of the
-  -- attack-completeness theorem (#124).
+  -- attack-completeness theorem.
   | ExpectCodecReject
   | ExpectAllContested
   | ExpectEvidenceBlocked
-  -- ^ the conservative-reporting outcome (spec §4.3, issue #76, spelled
+  -- ^ the conservative-reporting outcome (spec §4.3, spelled
   -- @accept-evidence-blocked@): the verdict accepts, but §4.3 quarantine edited
   -- the program under the queried claim, so its four-state label is only a
   -- conditional diagnostic and its public status is @evidence-blocked@. A
-  -- mutant of this class that reported an ordinary status would be the #76 bug
+  -- mutant of this class that reported an ordinary status would be that bug
   -- back again.
   | ExpectPrimaryStatus Status
   -- ^ the accept-family outcome: the verdict accepts and the queried claim's

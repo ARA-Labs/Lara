@@ -1,6 +1,6 @@
 # Theory M4 Part A: contextual adequacy of backend replacement
 
-_Status: mechanized on 2026-09-02 for Theory M4 (issue #187, tracker #180),
+_Status: mechanized on 2026-09-02 for Theory M4,
 phases F0–F3 of the since-deleted plan
 `plans/2026-09-02-theory-m4-full-abstraction.md`. This document is the durable
 claim-boundary record for **Part A**. The design freeze that released the
@@ -67,8 +67,8 @@ exercise the plumbing, not the theorem.
 
 **Stated over the grounded observation, and now also over an arbitrary one.**
 Everything above is phrased through `obs`, which reads `Invariants.status` — the
-grounded labelling and only that. `Lara.Context.Observation` (issue #216,
-`docs/theory-m4-generic-observation.md`) supplies the same results at an
+grounded labelling and only that. `Lara.Context.Observation`
+(`docs/theory-m4-generic-observation.md`) supplies the same results at an
 arbitrary `Semantics.ExtensionSemantics`, and does so without weakening them:
 the congruences carry no hypothesis beyond the ones stated here, because they
 transport along the carrier equality `compileUnit_link_relabel` supplies rather
@@ -124,7 +124,7 @@ boundary is a **theorem**, not a paragraph: `Examples.Linking` builds two
 contexts each admissible for one fragment (`hostile_left_admissible`,
 `hostile_right_admissible`), composes them (`hostile_compose_ok`), shows the
 composite passes the guard (`hostile_composite_links`), and proves it is not
-admissible (`hostile_composite_not_admissible`, issue #229). Neither half
+admissible (`hostile_composite_not_admissible`). Neither half
 could have covered the cross-boundary conflict on its own, since a side's
 attacks must have both endpoints among its own arguments. Giving `compose` the
 registry and Γ that saturation needs would change its F0-frozen, deliberately
@@ -158,7 +158,7 @@ surface layer reports off that framework agrees, for every carrier-local
 extension semantics (`Lara.Surface.observe_coherent`).
 
 **The worked pair is `Lara.Examples.SurfaceTransport.surfaceTransport_directAF_eq`**
-(`lean/Lara/Examples/SurfaceTransport.lean`, issue #227). Two accepted surface
+(`lean/Lara/Examples/SurfaceTransport.lean`). Two accepted surface
 programs, differing only in one `nd@1` certificate related by
 `Examples.Linking.certSwap`, present the same framework — and the statement is
 unconditional, because the two accepted units are produced by
@@ -174,11 +174,11 @@ satisfy every hypothesis:
 
 **The attack-bearing pair is
 `Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_directAF_eq`**
-(`lean/Lara/Examples/SurfaceTransportAttack.lean`, issue #258). The #227 pair
+(`lean/Lara/Examples/SurfaceTransportAttack.lean`). The earlier pair
 above declares no attacks, so both sides of its equality are the one-node,
 no-edge framework and `checkedAF_map`'s edge half —
 `coveredB_relabel hf P₁.atts source target`, `Context/Surface.lean:53` — is
-exercised only on `[]`. The #258 fixture declares three arguments and one
+exercised only on `[]`. The attack-bearing fixture declares three arguments and one
 rebut, so that call runs on a one-element list and the four attack-side
 `CoreObligations` fields (`attacksTyped`, `sourcesDeclared`,
 `targetsDeclared`, `attackComplete`) are real obligations rather than vacuous
@@ -261,8 +261,8 @@ The corollary and its instance are both sorry-free and inside the standard trio.
 ### The link corollary, witnessed
 
 The stronger sibling `surface_directAF_link` is witnessed by
-**`Lara.Examples.SurfaceTransport.surfaceTransport_link_directAF_eq`** (issue
-**#255**), on the same fixture. It does not take the argument and attack
+**`Lara.Examples.SurfaceTransport.surfaceTransport_link_directAF_eq`**,
+on the same fixture. It does not take the argument and attack
 correspondence as hypotheses; it *derives* them from `link_relabel_commutes`,
 so the work is exhibiting a context and a fragment for which
 
@@ -294,20 +294,20 @@ separate fixture because closing both at once buys nothing either issue asks
 for:
 
 * the attack-bearing fixture is `Lara/Examples/SurfaceTransportAttack.lean`
-  (issue **#258**), which closes the edge-free gap for
+  (§4), which closes the edge-free gap for
   `surface_directAF_relabel` above; and
-* the context-bearing fixture is the one described next (issue **#264**).
+* the context-bearing fixture is the one described next.
 
 ### The link corollary over a context that carries material
 
 **`Lara.Examples.SurfaceTransportContext.surfaceTransportContext_link_directAF_eq`**
-(issue **#264**) instantiates the same `surface_directAF_link` with a
+instantiates the same `surface_directAF_link` with a
 **non-empty** `C.frame.args`. The elaborated unit declares two core arguments
 and the link splits them across the boundary:
 
 * the context owns `a-ctx`, a plain defeasible `p ⊢ n` carrying `.none`, which
   `certSwap` fixes; and
-* the fragment owns `a-cert`, the #227 certified `p ⊢ q`, which `certSwap`
+* the fragment owns `a-cert`, a certified `p ⊢ q`, which `certSwap`
   moves.
 
 So `contextLink_fixesContext` is an equation over material the relabel could
@@ -330,11 +330,11 @@ nothing unless `contraryMatchB` holds, and `contraryMatchB` is
 whatever the caches contain. That is a statement about the policy rather than
 about the argument lists, so it survives the context gaining material.
 
-This fixture declares no attacks, which is the #258 degeneracy and not this
+This fixture declares no attacks, which is the earlier pair's degeneracy and not this
 one's to close; the no-contraries route above is precisely what keeps it
 `native_decide`-free.
 
-## 5. The M3 term-hole remainder (#217)
+## 5. The M3 term-hole remainder
 
 Part A originally supplied only **leaf-name openness**. An unresolved mandatory
 critical question cannot cross `Compile.CheckedProgram.complete`
@@ -355,7 +355,7 @@ acceptance, missing/duplicate/wrong-answer rejection, and a real attack whose
 endpoint includes a substituted discharge. See `docs/theory-term-level-holes.md`
 for the exact scope and theorem map.
 
-This closes **#217**, not the separately gated full-abstraction work in §7.
+This closes the term-hole remainder, not the separately gated full-abstraction work in §7.
 `Grounded.Claim.holes` and the frozen observation are unchanged; unresolved named
 holes are rejected before the old observation runs.
 
@@ -375,7 +375,7 @@ holes are rejected before the old observation runs.
   (`Examples.Linking.cert_registry_swap_witness`).
 - A composite's linkability is assembled from its halves (`sideOk_composed`,
   `admissible_composed`) — under explicit cross-coverage hypotheses, because
-  `compose` does not saturate (#229).
+  `compose` does not saturate (§2).
 - The calculus is mechanized, not sketched: fragments, interfaces, contexts, a
   **witnessed** link guard with three rejection classes, saturating linking,
   structural merge, context composition and its closure, and acceptance of a
@@ -394,7 +394,7 @@ holes are rejected before the old observation runs.
   semantics in the M2a interface**, with the same hypotheses and no additional
   one (`backend_replacement_congruence_sem`, `registry_swap_congruence_sem`,
   `backend_replacement_congruence_composed_sem`, `whole_program_replacement_sem`;
-  issue #216, `docs/theory-m4-generic-observation.md`). The generalization is
+  `docs/theory-m4-generic-observation.md`). The generalization is
   non-trivial: `Examples.ContextSemantics.obsSem_cycle_stable_ne_grounded`
   reaches an observation arm the grounded reading cannot reach, and
   `obsSem_sink_preferred_ne_grounded` has two semantics answer and disagree.
@@ -404,7 +404,7 @@ holes are rejected before the old observation runs.
 - **Not parametricity.** *This* theorem quantifies over a function
   `f : Assurance → Assurance`, not a relation. The relational form is
   `Context.backend_replacement_parametricity`
-  (`docs/theory-m4-relational-parametricity.md`, #215); it is a separate
+  (`docs/theory-m4-relational-parametricity.md`); it is a separate
   theorem, and `backend_replacement_congruence` keeps its own name and its own
   simpler hypotheses. The relational form is itself bounded: it requires the
   relation to be a partial bijection on certificates (`RelInj`), so it is not
@@ -426,21 +426,21 @@ holes are rejected before the old observation runs.
 - **The original Part A theorem is about leaf-name openness.** Term-level CQ
   holes now have their own substitution and transport theorems (§5); they do
   not alter the original theorem statements or assert full abstraction.
-- **No unrestricted implication between equivalence relations.** #268 now
+- **No unrestricted implication between equivalence relations.** A later separation result now
   refutes grounded `CtxEquiv` implying `CtxEquivSem sem` for every semantics
   allowed by the interface: `Examples.ContextualSeparation.counterexample`
   combines an all-context grounded proof with a selector-semantics distinction.
   This does not separate the standard non-grounded instances; the grounded
   instance still coincides by `ctxEquivSem_grounded_iff`.
-- **Not a certificate-bearing semantics-parametric witness.** #270 moves
+- **Not a certificate-bearing semantics-parametric witness.** A later change moves
   `congruence_witness_sem` to the admissible three-cycle, where grounded and
   stable observations differ. `registry_swap_witness_sem` remains on the
   chain where all five semantics agree. Both fragments contain only leaves;
-  **#269** remains the certificate-bearing instantiation.
+  the certificate-bearing instantiation remains.
 - **Not a claim that contexts are closed under composition for *linkability*.**
   They are closed for hygiene; a composite whose halves attack each other is not
   admissible, and `Examples.Linking.hostile_composite_not_admissible` exhibits
-  one (#229).
+  one (§2).
 - **Not a claim that a context may redefine the policy or the registry.** The
   policy is a rejection class (R-L3); the registry is a parameter of the
   calculus, so registry redefinition is unrepresentable rather than rejected.
@@ -486,7 +486,7 @@ occurrence profile, so "what is the interface" never has to be answered.
   contextual equivalence toward syntactic identity up to contrary-invisible
   decoration — i.e. toward `Erase.mapAssur` generalized. A full-abstraction
   theorem with a near-syntactic relation would be true but empty.
-- **It was the tracker's named drop.** #180 lists this as the highest-effort
+- **It was the theory spine's named drop.** The spine lists this as the highest-effort
   item with an explicit drop policy ("the first item removed if schedule or
   page pressure threatens mechanization quality"); the completeness gadget
   alone is priced against M2b's ~3,000-line checked-family construction
@@ -522,23 +522,23 @@ A future attempt should start here, not from scratch:
   by *both* fragments. Positive witness: `m2bPolicy`'s asymmetry
   (`Complexity/Context.lean`). Negative witness: `emptyDefeat`, seeded by
   `Examples/Realizability.lean`'s `oneSelfEdge_not_realizable`.
-- **Reopening triggers.** #215 (relational parametricity) landed without
+- **Reopening triggers.** Relational parametricity landed without
   reopening this gate: `RelTerm` lifts a relation on *certificates*
   structurally and is not the interface relation G1 would freeze, so it
-  amortized nothing here. #216 likewise: it generalized the observation
+amortized nothing here. The generic observation likewise: it generalized the observation
   *functions* over `sem` and the payload over `α`, and defined no relation
   between fragments at all — `LogRel` appears nowhere in `lean/`, as
   `docs/theory-m4-generic-observation.md` §7 records. Absent a consumer that
   needs a relation over the contrary-visible occurrence profile, the descope
   stands.
 
-**#187 is closed on Part A** with this boundary recorded; reopening goes
+**M4 is closed on Part A** with this boundary recorded; reopening goes
 through a fresh issue citing this section and answering G0's interface
 question first.
 
-### G0 follow-up (#305, 2026-09-09)
+### G0 follow-up (2026-09-09)
 
-The fresh issue ran the interface gate after #215 and #216 landed. The
+The follow-up ran the interface gate after relational parametricity and the generic observation landed. The
 [written G0 spike](theory-m4-g0-interface-spike.md) records **re-descoped**:
 an occurrence-profile candidate loses cross-boundary term identity, and a
 same-context copying check distinguishes two accepted certificate variants.
@@ -566,18 +566,18 @@ then checks them for `sorry` and permits only `propext`, `Classical.choice`, and
 required (D8), and there is no corpus regeneration or freeze-tag bump.
 
 The follow-ups the phases surfaced were filed rather than folded in, and then
-cleared in one pass after Part A closed: **#219** (the `DecidableEq` instances
-R-L3 needs now derive at their owning structures), **#220** and **#228** (the
+cleared in one pass after Part A closed: the `DecidableEq` instances
+R-L3 needs now derive at their owning structures; the
 Γ-transport, `buildGamma`, and `HasSupport` inversion lemmas are public at
 `Lara/Support.lean`, `Lara/Attack.lean`, and `Lara/Admission.lean`, and the
 private re-proofs in `Lara/Update.lean`, `Lara/Consistency.lean`, and
-`Lara/Context/Link.lean` are gone), **#226** (the `conclusionCache` /
+`Lara/Context/Link.lean` are gone; the `conclusionCache` /
 `conflictCache` agreement bridge is `Context.conclusionCache_eq_conflictCache`
-and `Context.link_cache_bridge`), and **#229** (the composition boundary is
-witnessed, §2). **#222** was closed without change: the list helpers it named
-never landed in `Lara/Context/Compose.lean`. **#227** (a `native_decide`-free
-surface fixture, §4) landed as `Lara/Examples/SurfaceTransport.lean`, and
-**#258** (the same witness with a non-empty attack set, §4) as
-`Lara/Examples/SurfaceTransportAttack.lean`. **#264** (the link witness over a
-context that declares an argument of its own, §4) landed as
+and `Context.link_cache_bridge`; and the composition boundary is
+witnessed, §2. One follow-up was closed without change: the list helpers it named
+never landed in `Lara/Context/Compose.lean`. A `native_decide`-free
+surface fixture (§4) landed as `Lara/Examples/SurfaceTransport.lean`, and
+the same witness with a non-empty attack set (§4) as
+`Lara/Examples/SurfaceTransportAttack.lean`. The link witness over a
+context that declares an argument of its own (§4) landed as
 `Lara/Examples/SurfaceTransportContext.lean`.

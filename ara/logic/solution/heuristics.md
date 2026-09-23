@@ -163,7 +163,7 @@
   constructor shape and no catch-all, so the compiler enforces exhaustiveness and a
   caller cannot bypass the rule. Crucially this has to reach the siblings whose
   rejection *already worked* — those are the ones most likely to be scoped out of the
-  fix, because no bug report names them. In the `lara-syntax@0.7` arg-body fold, `#135`
+  fix, because no bug report names them. In the `lara-syntax@0.7` arg-body fold, the report
   named only `addArgDischarge` and `addArgHole`; `setArgAssurance` kept `inst _ = inst`,
   leaving grammar Appendix A.1's long-settled ruling resting on a parser-side
   convention. Closing it cost one equation. Keep the caller's own shape check ahead of

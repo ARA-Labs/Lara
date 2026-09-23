@@ -24,11 +24,11 @@
 -- semantic object or be rejected with a located error. Two parser-side
 -- consequences live in this module:
 --
---   * #135 — @discharge@ and @open@ under a bare @leaf(…)@ are parse errors,
+--   * @\@0.7@ — @discharge@ and @open@ under a bare @leaf(…)@ are parse errors,
 --     not silently dropped lines. This extends App. A.1's existing ruling on
 --     @assurance@ to its two siblings, for the same reason: the checker has no
 --     rule to attach them to, and dropping them would mislead the author.
---   * #133 — a hole is spelled @open q@. The retired @open q as o@ form named
+--   * @\@0.7@ — a hole is spelled @open q@. The retired @open q as o@ form named
 --     the same thing twice (§6.1 reads a hole's 'ObligationId' /as/ the
 --     question it leaves open), so the second slot could only ever be
 --     redundant or misleading; a trailing @as …@ is now a located error
@@ -91,7 +91,7 @@
 --     rule or an 'ArgRef' target in an inferred rule.
 --
 -- On a rule application — explicit or inferred — a hole is authored and
--- printed as @open q@ (@\@0.7@, #133): one identifier, stored as its
+-- printed as @open q@ (@\@0.7@): one identifier, stored as its
 -- 'ObligationId'. §6.1 reads that id /as/ the question the hole leaves open
 -- (@holeNames@ in "Lara.SupportTerm"), so the single name is the whole
 -- content of the line and there is no second identity to record. The retired
@@ -99,7 +99,7 @@
 -- agree. The printer is total on every 'ArgInstantiation'.
 --
 -- On a bare @leaf(…)@ support term there is nowhere to attach a body line, so
--- @argBody@ rejects all three (@\@0.7@, #135): 'addArgDischarge', 'addArgHole'
+-- @argBody@ rejects all three (@\@0.7@): 'addArgDischarge', 'addArgHole'
 -- and 'setArgAssurance' return a @Left@ that @argBody@ turns into a located
 -- 'ParseError' at the keyword — extending to the first two what App. A.1
 -- already required for @assurance@. None of the three has a silent
@@ -1089,13 +1089,13 @@ inferredRuleP rid = do
 
 -- | Fold @discharge@\/@open@\/@assurance@ lines into the support payload.
 --
--- @\@0.7@ (#135): every body line must reach the AST or be rejected. A
+-- @\@0.7@: every body line must reach the AST or be rejected. A
 -- @discharge@ or @open@ line under a bare @leaf(…)@ has nothing to attach to,
 -- so it is a /located/ parse error at the keyword — the same ruling App. A.1
 -- already makes for @assurance@. 'peekIdent' has consumed the preceding
 -- trivia, so 'getPosition' here is the keyword's own line\/column.
 --
--- @\@0.7@ (#133): a hole is spelled @open q@ and nothing else. A trailing
+-- @\@0.7@: a hole is spelled @open q@ and nothing else. A trailing
 -- @as …@ is the retired @\@0.6@ spelling and is reported with its repair.
 argBody :: ArgInstantiation -> P ArgInstantiation
 argBody base = go base False
@@ -1138,7 +1138,8 @@ argBody base = go base False
 
 -- | Attach a @discharge@ line, or say why it cannot attach. The three
 -- equations are the three 'ArgInstantiation' shapes, so the function is total
--- without a catch-all: a caller cannot re-create #135 by falling through.
+-- without a catch-all: a caller cannot re-create the dropped-line bug by
+-- falling through.
 addArgDischarge
   :: ArgInstantiation -> QuestionId -> ArgRef -> Either String ArgInstantiation
 addArgDischarge (ExplicitTheta (SRule r th pr ds hs as)) q (ArgRef ref) =
@@ -1163,9 +1164,10 @@ addArgHole (ExplicitTheta (SLeaf _)) _ =
 --
 -- @argBody@ rejects the bare-leaf shape before parsing the value, so this
 -- @Left@ is not the reporting path in practice. It is here because App. A.1's
--- ruling must not depend on a parser-side convention any more than #135's
--- does: with a silent @inst@ fall-through, a future caller reaching this
--- helper directly would drop the author's @assurance@ exactly the way
+-- ruling must not depend on a parser-side convention any more than the
+-- dropped-line ruling's does: with a silent @inst@ fall-through, a future
+-- caller reaching this helper directly would drop the author's @assurance@
+-- exactly the way
 -- 'addArgDischarge' used to drop a @discharge@.
 setArgAssurance
   :: ArgInstantiation -> Assurance -> Either String ArgInstantiation
@@ -1385,7 +1387,7 @@ optionalSortArgs = do
 -- | @measurandLine ::= \"measurand\" ident \":\" sort [ \"where\" polarity ]@
 -- (grammar App. B.1).
 --
--- The sort slot is open (#89 D-1) — it is a sort position over the same
+-- The sort slot is open (D-1) — it is a sort position over the same
 -- vocabulary the policy's signature declares. The @where@ clause is optional
 -- and __@Num@-gated__: it presupposes an ordered domain, and only @Num@ is
 -- ordered, so a polarity on a non-@Num@ measurand is rejected here.
@@ -1937,7 +1939,7 @@ printRuleBody disch holes assurance =
     ++ openLines holes
     ++ assuranceLine assurance
 
--- | @open q@ per hole (@lara-syntax\@0.7@, #133). A hole has exactly one
+-- | @open q@ per hole (@lara-syntax\@0.7@). A hole has exactly one
 -- identity: §6.1 reads its 'ObligationId' /as/ the question it leaves open
 -- (@holeNames@ in "Lara.SupportTerm"), so one identifier is the whole content
 -- of the line and the retired @as o@ slot had nothing left to say.

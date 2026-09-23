@@ -1,4 +1,4 @@
-# M4 G0 finite checks (#305)
+# M4 G0 finite checks
 
 Run on base `7d0f738`, branch `theory/305-m4-g0-interface-spike`.
 Provenance: ai-executed. Toolchain: `leanprover/lean4:v4.32.0`.

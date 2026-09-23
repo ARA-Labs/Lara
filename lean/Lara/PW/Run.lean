@@ -1,12 +1,12 @@
 /-
-# PW outer runtime: the finite executable reference (#322)
+# PW outer runtime: the finite executable reference
 
 `pw-run 1` is the execution contract that the Haskell `lara pw` door and the
 Lean `pw-run` executable both implement. A run file supplies the host that
 `Lara.PW.Declared` leaves abstract: named worlds, each one checked by the
 unchanged local checker, candidate edges with an explicit acceptance flag, and
 source-claim comparisons. It embeds one `pw-surface 1` document verbatim, so
-bridge declarations and posed queries use the #314 contract unchanged.
+bridge declarations and posed queries use the `pw-surface 1` contract unchanged.
 
 **What is proved here.**
 
@@ -33,7 +33,7 @@ bridge declarations and posed queries use the #314 contract unchanged.
   result protocol has one spelling.
 * `addWorld_quarantine_empty` / `addWorld_checks_declared` — a world the loader
   accepts has an empty §4.3 quarantine set, so the leaf table and argument list
-  it checks are the declared ones (#326). Consistent duplicate-report groups
+  it checks are the declared ones. Consistent duplicate-report groups
   are inert; only a conflicting group is refused.
 
 **The finite model boundary.** A context is inhabited by the worlds the file
@@ -46,7 +46,7 @@ world with a conflicting group is refused, because §4.3 quarantine would make
 a public status conditional, which a Boolean status atom cannot say.
 
 **Sources.** A world's envelope is inline, or read from a file, or — the `lara`
-form (#327) — elaborated from a `.lara` presentation program by the Haskell
+form — elaborated from a `.lara` presentation program by the Haskell
 runtime. This module has no surface parser, so the executable reports a `lara`
 source as `world-input`; `lara pw-input` derives an equivalent run document
 with every source inline, and that document is what the differential compares.
@@ -607,7 +607,7 @@ theorem loadWorlds_nodup {inputs : List WorldInput} {ctxs : List LoadedCtx}
     ∀ c ∈ ctxs, (c.worlds.map (·.id)).Nodup := fun c hc =>
   (loadWorlds_ids (fun _ hc => absurd hc List.not_mem_nil) h c hc).1
 
-/-! ### Accepted worlds are unquarantined (#326)
+/-! ### Accepted worlds are unquarantined
 
 The loader passes the decoded leaves, arguments and attacks to `checkUnit`
 untouched, while the local driver first applies the §4.3 quarantine. The two

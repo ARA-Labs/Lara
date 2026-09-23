@@ -152,7 +152,7 @@ disagreement; dependent claims surface as `gap`).
   The harness labels the columns separately for exactly this reason, and an unforced lazy
   `runCheck` would instead read ~0 ns (D8/5A), so the forcing discipline is part of the protocol.
 
-## Naturalness boundary (user, 2026-08-25 — grounds: N215, `docs/naturalness-boundary.md`, issue #109)
+## Naturalness boundary (user, 2026-08-25 — grounds: N215, `docs/naturalness-boundary.md`)
 
 Where natural language may and may not enter the system, split by **trust direction** rather
 than by convenience. Fixed policy so that ease-of-use work cites it instead of re-deciding
@@ -169,12 +169,12 @@ than by convenience. Fixed policy so that ease-of-use work cites it instead of r
   being a per-feature call.
 
 - **Layer 2 — NL as input belongs exclusively to the untrusted producer** (`Lara.Json` / the
-  LLM elaborator, issue #30). Already pinned by the tree: `docs/spec.md` §1.1 places the
+  LLM elaborator). Already pinned by the tree: `docs/spec.md` §1.1 places the
   elaborator outside the TCB, §11 makes NL formalization the first of its six logged lowering
   tasks, and §3.1's claim triple carries `binding` as an untrusted, audited annotation. The two
   mechanisms any layer-2 feature inherits are **replay** (nothing a producer emits is believed
   until re-checked by trusted code) and the **binding audit** (prose-to-formal agreement is
-  confirmed by a human, not the checker — #121). Consequence: an NL-in feature cannot be made
+  confirmed by a human, not the checker). Consequence: an NL-in feature cannot be made
   safe by improving the producer.
 
 - **Layer 3 — NL as output is free and worth exploiting.** Verdicts, rejection reasons and
@@ -193,16 +193,16 @@ than by convenience. Fixed policy so that ease-of-use work cites it instead of r
   through `@0.10` satisfies it.
 
 - **Permissible is not the same as worth building** (ai-suggested). The rule licenses a
-  convenience; it does not schedule one. #151 is the worked case: the `nd@1` binder half is
+  convenience; it does not schedule one. The `nd@1` binder half is the worked case: it is
   squarely layer 3 and therefore permitted, yet correctly deferred, because the only sound
   implementation restructures a backend seam `ord@1` and `ra@1` share and the Lean side mirrors.
-  The same framing rejects that issue's option (c) on principle — a best-effort reconstruction
+  The same framing rejects its option (c) on principle — a best-effort reconstruction
   outside the adapter could print a *wrong* name, i.e. a layer-3 rendering that has stopped
   being faithful to the checked artifact.
 
 **Scope split.** The core paper may cite the design rule and layer 1 as a
 language-design commitment; layer-2 evaluation (how faithfully a producer lowers prose) is
-deferred, with #52 and #30.
+deferred.
 
 ## M2b restricted-class complexity constraints (2026-08-31 — grounds: O105, O106, N255, N264)
 
@@ -233,8 +233,8 @@ deferred, with #52 and #30.
   membership, and exact `Compile.AttackComplete`. A realization attempt over a
   formula-indexed family must first package compositional lifting lemmas for those
   obligations, or select a separately reviewed specialized construction; it may not
-  extrapolate acceptance from closed instances. Issue #209 discharges this
-  constraint through the compositional-lemma architecture in
+  extrapolate acceptance from closed instances. This constraint is discharged
+  through the compositional-lemma architecture in
   `lean/Lara/Complexity/Gadget.lean`; the durable account is
   `docs/theory-m2b-complexity.md`, and the retired execution plan is preserved
   at git object `8155ec7:plans/2026-08-30-m2b-realization-followup.md`.
@@ -252,7 +252,7 @@ deferred, with #52 and #30.
   Query tgt → Prop` repairs both, but `mem_compare_iff_sat_dia`,
   `compare_translationUndefined_iff`, and the executable `crossCompare` are all
   stated against the `Option` form, so adopting it re-opens the adequacy layer
-  and must be budgeted as such. T6 (#191, PR #223) deliberately stayed on the
+  and must be budgeted as such. T6 deliberately stayed on the
   bridge-global form — `Lara.PW.SymMap` is functional, and the frozen
   limitation is recorded in `docs/theory-pw-t6-structural-transport.md` §8.1
   with the sizing note at `docs/theory-pw0-outer-model.md` §6. T8/T9 designs
@@ -301,4 +301,4 @@ deferred, with #52 and #30.
   (`coveredB_relabel`) is exercised on an empty list and the AF equality holds
   for any two attack-free single-argument programs. Non-vacuity guards on the
   relabel do not establish non-degeneracy of the framework equality. Tracked
-  as issue #258; `surface_directAF_link` remains #255.
+  as open follow-up work; `surface_directAF_link` remains open.

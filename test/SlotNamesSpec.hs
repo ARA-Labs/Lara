@@ -1,5 +1,5 @@
--- | Premise-slot attribution on a backend rejection (#130,
--- "Lara.Elaborate.SlotNames").
+-- | Premise-slot attribution on a backend rejection
+-- ("Lara.Elaborate.SlotNames").
 --
 -- The contract under test is one stderr block: when a registered backend
 -- refuses a certificate, the reason names a @(prem i)@ and these lines say what

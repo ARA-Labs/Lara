@@ -1,6 +1,6 @@
--- | The accept-verdict mutation family (M5 tracker #48, T1 status/attack half).
+-- | The accept-verdict mutation family (M5, T1 status/attack half).
 --
--- The rejection operators of "Lara.Mutate.Suite" produce rejects; #48 also requires
+-- The rejection operators of "Lara.Mutate.Suite" produce rejects; T1 also requires
 -- generated mutants that exercise __every claim status and every attack kind__.
 -- This family supplies that half: six /accept-verdict/ operators over the nine
 -- @justified@ corpus units, each constructing an attack against @corpus-v1@'s
@@ -10,7 +10,7 @@
 -- This module is the family's __facade__ and its whole public surface: which
 -- operators run and in what order ('acceptMutants'), which bases they run on
 -- ('isJustified'), and whether the result is the mutant that was asked for
--- ('acceptStructureOk'). The parts it composes were split out at #143, along
+-- ('acceptStructureOk'). The parts it composes were split out along
 -- the seam @docs\/mutate-module-ownership-decision.md@ records:
 --
 -- * "Lara.Mutate.Accept.Ops" — the six constructions, and the injected
@@ -83,7 +83,7 @@ acceptMutants bases =
 isJustified :: CheckInput -> Bool
 isJustified input = case runCheck input of
   -- The conditional label of an @evidence-blocked@ query is not its status
-  -- (spec §4.3, issue #76): such a query is never counted justified.
+  -- (spec §4.3): such a query is never counted justified.
   Verdict _ (Accept _ _ statuses) -> case unitQueries (inputUnit input) of
     [q] -> lookup q statuses == Just (Published Justified)
     _ -> False
@@ -109,7 +109,7 @@ acceptStructureOk op expected input (Verdict _ outcome) = case outcome of
         _ -> Nothing
       statusOk = case expected of
         -- A blocked query has no four-state public status, so it can never
-        -- match the operator's specified one (spec §4.3, issue #76).
+        -- match the operator's specified one (spec §4.3).
         ExpectPrimaryStatus status -> (mq >>= (`lookup` statuses)) == Just (Published status)
         -- The quarantine class: the query must be published
         -- @evidence-blocked@, and its conditional label must be @justified@ —
@@ -119,7 +119,7 @@ acceptStructureOk op expected input (Verdict _ outcome) = case outcome of
           (mq >>= (`lookup` statuses)) == Just (EvidenceBlocked Justified)
         _ -> False
       -- Verdict labels are indexed by the __checked__ argument list, which a
-      -- §4.3 prune can make shorter than the declared one (issue #76). Looking
+      -- §4.3 prune can make shorter than the declared one. Looking
       -- the id up in the declared list would read the wrong label for any
       -- operator that quarantines a non-final argument.
       labelOf aid =

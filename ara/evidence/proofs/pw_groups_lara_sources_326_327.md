@@ -1,13 +1,13 @@
-# PW outer runtime: consistent groups and `.lara` world sources (#326, #327)
+# PW outer runtime: consistent groups and `.lara` world sources
 
-The user asked for #326 and #327 to be addressed together, directly, with a
+The user asked for the two follow-ups to be addressed together, directly, with a
 PR. The work is on branch `feat/pw-groups-and-lara-sources`, built on main
-`28cae19` (#328 merged). The decision record is `docs/theory-pw-outer-runtime.md`
+`28cae19` (after the prior merge). The decision record is `docs/theory-pw-outer-runtime.md`
 §1–§5, revised in place.
 
 ## What was decided
 
-- **#326 — consistent groups are inert.** A world whose duplicate-report
+- **Consistent groups are inert.** A world whose duplicate-report
   groups all agree is accepted and checked exactly as declared. A world with a
   group whose members are not pairwise `≡` is refused as
   `(world-groups W G)`, naming the first such group in declaration order,
@@ -16,7 +16,7 @@ PR. The work is on branch `feat/pw-groups-and-lara-sources`, built on main
   would refuse the unit (R9). The fifth-outer-observation option was not taken
   (it changes `Sorted.cmpVal` and every theorem over it). Consistent groups do
   not enter the context environment.
-- **#327 — `(lara PATH)` world sources and `lara pw-input`.** A world may be a
+- **`(lara PATH)` world sources and `lara pw-input`.** A world may be a
   `.lara` program with its co-located policy; `lara pw` elaborates it through
   the `.lara` door's own steps (`Lara.Source.Load`, `prepareSource`) and uses
   the envelope it binds, read back through the same `decodeCheckInput` as an
@@ -83,14 +83,14 @@ PW outer runtime conformance passed: 7 fixtures, 99 cases, 112 runs; 1 .lara sou
   from both doors. Each pre-envelope refusal is pinned to the text of the step
   that stopped, not only to the shared `world-input` constructor, so a
   policy-parse failure cannot pass a source-invalid case vacuously.
-- Review follow-up (#332): the locale encoding the PW doors set is __strict__
+- Review follow-up: the locale encoding the PW doors set is __strict__
   UTF-8, not `UTF-8//ROUNDTRIP`. With the permissive variant a `.lara` file
   carrying a non-UTF-8 byte decoded to surrogate escapes and elaborated, so
   `lara pw` accepted a world `lara check` refuses to read at all — and because
   both PW doors agreed, the cross-driver comparison could not see it. The gate
   now has a direct case for it. The converse asymmetry (`lara check` still
   reads `.lara` through the locale) is recorded in
-  `docs/theory-pw-outer-runtime.md` §2 and tracked by #334.
+  `docs/theory-pw-outer-runtime.md` §2 and tracked as follow-up work.
 - Every `fixtures/pw/run` fixture is also derived with `pw-input` and rerun on
   both drivers to its golden.
 
@@ -102,7 +102,7 @@ PW outer runtime conformance passed: 7 fixtures, 99 cases, 112 runs; 1 .lara sou
   trip and malformed matrix).
 - `scripts/differential.sh`: pass (positive anchors and negative
   `pass=66 fail=0`). This exposed a pre-existing gap: `fixtures/pw/**/*.sexp`
-  (from #314 and #322) were discovered by the anchor glob but absent from
+  (from the earlier declared-wire and outer-runtime work) were discovered by the anchor glob but absent from
   `fixtures/ANCHORS.tsv`, so the wire differential failed on main. Fixed by
   excluding `fixtures/pw/` from anchor discovery in `scripts/differential.sh`
   and `scripts/gen-anchor-manifest.sh`; PW fixtures have their own harness.

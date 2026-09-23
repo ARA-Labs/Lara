@@ -74,7 +74,7 @@ axiom-withdrawal-example:
 # check-axioms.sh's status, so a Lean failure that still emits some reports
 # (e.g. `#print axioms` naming a renamed or deleted theorem) would be masked and
 # the audit would go green over a silently reduced set. Coverage is a `find`,
-# not a list (#242): a new module must not be able to join the tree unaudited.
+# not a list: a new module must not be able to join the tree unaudited.
 axiom-audit:
 	cd lean && bash -c 'set -eo pipefail; \
 	  ../scripts/test-check-axioms.sh; \
@@ -141,13 +141,13 @@ ara-source-spans:
 	python3 scripts/check_ara_source_spans.py
 
 # Every session file under ara/trace/sessions/ has exactly one index row and no
-# id is listed twice (#337). Stdlib-only; reads ara/, changes nothing.
-# Needs PyYAML (the gate's one non-stdlib dependency, #338); CI runs the same
+# id is listed twice. Stdlib-only; reads ara/, changes nothing.
+# Needs PyYAML (the gate's one non-stdlib dependency); CI runs the same
 # script under `uv run --with pyyaml`.
 ara-session-index:
 	python3 scripts/check_ara_session_index.py
 
-# Check one multi-artifact map (#303). PHONY on purpose: a map is a RECHECK, not
+# Check one multi-artifact map. PHONY on purpose: a map is a RECHECK, not
 # a build, so this must run every time it is invoked — GNU Make guarantees that
 # for a phony target, and a map has no output file whose timestamp could stand
 # in for its members'. That matters because an edit which preserves a member's
@@ -179,14 +179,14 @@ map-check:
 map-conformance:
 	bash scripts/check-map-conformance.sh
 
-# The possible-world outer runtime (#322): `lara pw` and the Lean `pw-run`
+# The possible-world outer runtime: `lara pw` and the Lean `pw-run`
 # reference must print the same bytes and exit codes on every committed
 # fixtures/pw/run/ document and on every mutation case the script generates.
 # Pass UPDATE=1 to regenerate the committed goldens (only after both agree).
 pw-conformance:
 	python3 scripts/check-pw-conformance.py $(if $(UPDATE),--update,)
 
-# E1 checker-performance bench (issue #69): measures the production checker
+# E1 checker-performance bench: measures the production checker
 # on the frozen corpus units and the manifest-discovered harness, prints the
 # performance table, and writes the raw measurements/bench.json (gitignored).
 #
@@ -203,7 +203,7 @@ bench:
 	cd lean && lake build
 	cabal run exe:lara-bench -- --format=$(FORMAT) $(if $(OUT),--out $(OUT),)
 
-# Multi-artifact map bench (issue #319): a SECOND protocol, never a row of the
+# Multi-artifact map bench: a SECOND protocol, never a row of the
 # kernel table above. A map reads, parses and rechecks several members, then
 # links and checks again, so its cost scales with its member count rather than
 # with one unit's size, and folding it into `bench`'s rows would make a kernel

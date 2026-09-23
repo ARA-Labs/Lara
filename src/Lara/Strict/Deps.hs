@@ -58,12 +58,12 @@
 -- a theory dependency names an entry of a digest-addressed table that only the
 -- backend can resolve, so it must say which backend and which digest.
 --
--- == Where the report surfaces (\#204)
+-- == Where the report surfaces
 --
 -- Production 'Lara.SupportTerm.inferSupport' still reads only the acceptance
 -- projection 'Lara.SupportTerm.certAccepted' — that is design note D9 and it is
 -- unchanged: no checked-graph decision may consult dependency data. What
--- changed with \#204 is that the /report/ now has a shipped consumer. The
+-- changed is that the /report/ now has a shipped consumer. The
 -- driver runs this collector over the accepted unit's arguments
 -- ("Lara.Driver".'Lara.Driver.unitCertDeps', reached through
 -- 'Lara.Driver.runCheckDeps' and the @lara deps@ subcommand), so the
@@ -242,7 +242,7 @@ encodeAtomEnc (Prop (Pred p) ts) =
 -- premise dependency genuinely carries no backend identity — not an omission
 -- made to force the two languages to agree.
 --
--- This encoding was the @test\/StrictSpec.hs@ golden encoder before \#204. It is
+-- This encoding was the @test\/StrictSpec.hs@ golden encoder. It is
 -- in the library now because the shipped @lara deps@ report and the
 -- cross-language golden must be the /same/ text: a report format defined
 -- separately from the one @scripts\/check-backend-deps-golden.sh@ diffs against

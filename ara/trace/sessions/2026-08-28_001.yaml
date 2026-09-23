@@ -5,7 +5,7 @@ session:
   last_turn: "2026-08-28T19:57"
   turn_count: 2
   summary: >
-    M2a is in review as PR #199. The implementation makes extension semantics
+    M2a is in review as the PR. The implementation makes extension semantics
     explicit, proves grounded to be the singleton instance, witnesses all ten
     pairwise separations, transports observation from source to framework, and
     mirrors enumeration in Haskell. Two external review rounds strengthened the
@@ -13,7 +13,7 @@ session:
     added a reinstatement framework with multi-element extensions, automated
     Lean-to-Haskell golden parity, corrected deleted-plan and file-count prose,
     and removed schema-dropped trace fields. C35 matches the quantified theorem;
-    #200 tracks the separate stale-observation sweep. Lean, the axiom audit,
+    Tracks the separate stale-observation sweep. Lean, the axiom audit,
     Haskell, golden parity, and ARA validation pass.
 
 events_logged:
@@ -58,7 +58,7 @@ events_logged:
     id: "N236"
     routing: direct
     provenance: ai-executed
-    summary: "M2a complete; PR #199. M2b (#181) and M3 (#186) unblocked."
+    summary: "M2a complete; the PR in review. M2b and M3 unblocked."
   - turn: 1
     type: observation
     id: "O94"
@@ -83,13 +83,13 @@ events_logged:
     id: "N237"
     routing: direct
     provenance: ai-executed
-    summary: "PR #199 review strengthened the credulous theorem, added generated grounded conformance, and removed nine dropped-field warnings."
+    summary: "Review strengthened the credulous theorem, added generated grounded conformance, and removed nine dropped-field warnings."
   - turn: 2
     type: experiment
     id: "N238"
     routing: direct
     provenance: ai-executed
-    summary: "Second PR review added reinstatement and outsider mutation coverage, automated Lean/Haskell golden parity, corrected durable pointers, and tracked the stale sweep as #200."
+    summary: "Second PR review added reinstatement and outsider mutation coverage, automated Lean/Haskell golden parity, corrected durable pointers, and tracked the stale sweep."
 ai_actions:
   - turn: 1
     action: "Implemented M2a across nine commits, each spec- and quality-reviewed before commit."
@@ -116,7 +116,7 @@ ai_actions:
     files_changed: []
 
   - turn: 2
-    action: "Adjudicated all three PR #199 findings, strengthened the Lean contract and paper-facing prose, added a generated Haskell differential, and normalized new ARA node fields."
+    action: "Adjudicated all three review findings, strengthened the Lean contract and paper-facing prose, added a generated Haskell differential, and normalized new ARA node fields."
     provenance: ai-executed
     files_changed:
       - "lean/Lara/Examples/Semantics.lean"
@@ -128,7 +128,7 @@ ai_actions:
       - "ara/logic/claims.md"
       - "ara/trace/exploration_tree.yaml"
   - turn: 2
-    action: "Adjudicated the second PR #199 review round, added chain and outsider conformance coverage, wired a golden parity CI gate, corrected durable plan/count prose, and opened issue #200."
+    action: "Adjudicated the second review round, added chain and outsider conformance coverage, wired a golden parity CI gate, corrected durable plan/count prose, and opened the issue."
     provenance: ai-executed
     files_changed:
       - "lean/Lara/Examples/Semantics.lean"
@@ -222,7 +222,7 @@ logic_revisions:
       Untested boundary: nothing here establishes that the credulous reading
       fails to be functional for every semantics, only for those admitting two
       symmetric extensions; and the interface cannot detect a semantics declared
-      outside its module (#198).
+      outside its module.
     after: >
       Holds over a finite conclusion-labelled framework with a decidable attack
       relation, for the five semantics mechanized here (grounded, complete,
@@ -234,7 +234,7 @@ logic_revisions:
       of the justified and defeated skeptical readings requires a non-empty
       extension set and conflict-freedom of every extension, which the interface
       does not require and which is therefore supplied per instance. The
-      interface cannot detect a semantics declared outside its module (#198).
+      interface cannot detect a semantics declared outside its module.
     signal: empirical-resolution
     provenance: ai-suggested
   - turn: 2
@@ -309,14 +309,14 @@ key_context:
       outsider property make both mutations fail, while `make
       semantics-goldens` prevents the Lean transcript from going stale.
 open_threads:
-  - "PR #199 is open and unmerged. The four unchanged-behaviour gates were run locally; CI history in this repo has been unreliable for billing reasons (carried from 2026-08-26_001)."
-  - "M2b (#181) and M3 (#186) are now unblocked, along with the possible-world tracker (#189, with #190-#193). M2b needs a stated decision problem per semantics before it can bound the realizable class."
-  - "#196, #197, #198 are the M2a follow-ups: general non-emptiness of preferred, an enumerate-phrased SpecConflictFree that would drop Nodup from the exclusivity theorems, and the observation table's inability to see an ExtensionSemantics declared elsewhere."
+  - "The PR is open and unmerged. The four unchanged-behaviour gates were run locally; CI history in this repo has been unreliable for billing reasons (carried from 2026-08-26_001)."
+  - "M2b and M3 are now unblocked, along with the possible-world tracker. M2b needs a stated decision problem per semantics before it can bound the realizable class."
+  - "The M2a follow-ups: general non-emptiness of preferred, an enumerate-phrased SpecConflictFree that would drop Nodup from the exclusivity theorems, and the observation table's inability to see an ExtensionSemantics declared elsewhere."
   - "The paper-side obligation this repository cannot discharge: 'the paper statement matches Lean in quantifiers, hypotheses, observation and direction' lives outside this repository. docs/theory-m2a-observation.md §9 states what may and may not be written so that check has something exact to run against."
-  - "#200 tracks the stale-observation sweep: 55 unpromoted, unstale observations need mechanical flagging and researcher triage in a separate artifact-only diff."
-  - "#121's dependency is a person and it remains the one open issue whose resolution changes what the paper may claim (carried from 2026-08-25_001)."
+  - "Tracks the stale-observation sweep: 55 unpromoted, unstale observations need mechanical flagging and researcher triage in a separate artifact-only diff."
+  - "The issue's dependency is a person and it remains the one open issue whose resolution changes what the paper may claim (carried from 2026-08-25_001)."
 
-  - "PR #199 is awaiting re-review after both review rounds were implemented, mutation-checked, fully verified, and prepared for push."
+  - "The PR is awaiting re-review after both review rounds were implemented, mutation-checked, fully verified, and prepared for push."
 ai_suggestions_pending:
   - "O94: that in a machine-checked development the errors concentrate in causal prose rather than output claims, and the remedy is to state a theorem instead of a sentence. Drawn from eight review rounds in one milestone; not researcher-evaluated."
   - "O95: the gate-coupling constraint — anything printed during the Lean build shares a channel with the axiom audit. Recorded in docs/theory-m2a-observation.md §7; latent rather than active today."

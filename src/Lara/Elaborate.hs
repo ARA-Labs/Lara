@@ -69,11 +69,11 @@ module Lara.Elaborate
     -- * Surface provenance (plan D5)
   , GeneratedArg (..)
   , sourceResultGeneratedArgs
-    -- * Premise-slot attribution (#130)
+    -- * Premise-slot attribution
   , sourceResultSlotSources
   , sourceResultAuthoredSlots
   , slotMappingFor
-    -- * Formula attribution (#148)
+    -- * Formula attribution
   , sourceResultAuthoredFormulas
   ) where
 
@@ -244,7 +244,7 @@ sourceResultCheckedArgIds (SourceResult _ _ _ _ argIds _ _ _ _ _ _) = argIds
 sourceResultGeneratedArgs :: SourceResult -> [GeneratedArg]
 sourceResultGeneratedArgs (SourceResult _ _ _ _ _ _ generated _ _ _ _) = generated
 
--- | The __structural__ premise-slot mapping of a checker-side R13 (#130): what
+-- | The __structural__ premise-slot mapping of a checker-side R13: what
 -- the checked term put in each slot the refused certificate cites, read off the
 -- same decision that produced the verdict
 -- ("Lara.Driver.Internal".@backendRejectionSlots@). Empty for every other
@@ -256,7 +256,7 @@ sourceResultGeneratedArgs (SourceResult _ _ _ _ _ _ generated _ _ _ _) = generat
 sourceResultSlotSources :: SourceResult -> [SlotSource]
 sourceResultSlotSources (SourceResult _ _ _ _ _ _ _ slots _ _ _) = slots
 
--- | The __authored__ premise-slot spelling of every checked argument (#130),
+-- | The __authored__ premise-slot spelling of every checked argument,
 -- keyed by argument id: the leaf, prior-argument, and premise-label names the
 -- source actually used ("Lara.Elaborate.SlotNames").
 --
@@ -267,7 +267,7 @@ sourceResultSlotSources (SourceResult _ _ _ _ _ _ _ slots _ _ _) = slots
 sourceResultAuthoredSlots :: SourceResult -> [(ArgId, [AuthoredSlot])]
 sourceResultAuthoredSlots (SourceResult _ _ _ _ _ _ _ _ authored _ _) = authored
 
--- | The __authored__ spelling of every formula this source can name (#148):
+-- | The __authored__ spelling of every formula this source can name:
 -- the @lara-syntax\@0.10@ @(prop TEXT)@ annotations of its @nd\@1@ payloads,
 -- and the propositions of its declared leaves, each paired with the opaque
 -- 'Lara.Strict.ND.encodeAtomKey' framing a backend names it by
@@ -294,7 +294,7 @@ sourceResultCheckInput (SourceResult _ audit _ _ _ checkInput _ _ _ _ _)
 -- | The same envelope, read off the prepared source __before__ it is checked,
 -- under the same rule: exportable unless policy admission removed source
 -- material. For a consumer that will run the raw checker on the envelope
--- itself (@lara pw@'s @lara@ world sources, \#327), checking here as well would
+-- itself (@lara pw@'s @lara@ world sources), checking here as well would
 -- only compute a verdict nobody reads.
 preparedCheckInput :: SourceCheckInput -> Either AdmissionAudit CheckInput
 preparedCheckInput (SourceCheckInput _ _ _ _ _ audit checkInput _)
@@ -302,7 +302,7 @@ preparedCheckInput (SourceCheckInput _ _ _ _ _ audit checkInput _)
   | otherwise = Right checkInput
 
 -- | The certificate dependency report of the unit this source result accepted,
--- keyed by the checked unit's argument ids (\#204).
+-- keyed by the checked unit's argument ids.
 --
 -- @[]@ on rejection. On acceptance the ids are exactly
 -- 'sourceResultCheckedArgIds' — both read the same checked unit — so the report
@@ -378,7 +378,7 @@ runSourceCheck (SourceCheckInput program policy declared _ finalPrune audit chec
         (authoredSlotMap policy (unitArgs checked))
         -- Built from the __declared__ unit, not the checked one: a leaf a
         -- policy prune removed can still be named by a rejection reason, and
-        -- an entry the reason never mentions costs nothing (#148).
+        -- an entry the reason never mentions costs nothing.
         (authoredFormulaMap program declared)
         deps
 
@@ -414,7 +414,7 @@ sourceResultAuthorDiagnostics result = case sourceResultDiagnostics result of
       ++ slotLines result
       ++ formulaLines result diagnostics
 
--- | The authored spelling of every formula a rejection reason names (#148), in
+-- | The authored spelling of every formula a rejection reason names, in
 -- the order the reason names them, under the slot mapping it sits beside.
 --
 -- __The gap this closes.__ @lara-syntax\@0.9@ removed hand-computed de Bruijn
@@ -443,7 +443,7 @@ formulaLines :: SourceResult -> [String] -> [String]
 formulaLines result diagnostics =
   formulaMappingLines (unlines diagnostics) (sourceResultAuthoredFormulas result)
 
--- | The premise-slot mapping under a checker-side R13's reason line (#130), in
+-- | The premise-slot mapping under a checker-side R13's reason line, in
 -- the authored spelling where the source door has one.
 --
 -- __Why the mapping is worth printing at all.__ The backend's reason names a
@@ -489,7 +489,7 @@ slotMappingFor structural authored = case authored of
   _ -> slotMappingLines structural
 
 -- | The authored slot spelling of the argument this result's rejection located
--- at, when it located at one (#130).
+-- at, when it located at one.
 --
 -- Gated on 'StageSupport' + 'CArgument' for the same reason
 -- 'surfaceContextLines' is: that pair is exactly the checker-side backend

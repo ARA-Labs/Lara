@@ -5,7 +5,7 @@ session:
   last_turn: "2026-08-30T04:15"
   turn_count: 3
   summary: >
-    Theory M3 source-update dynamics implemented and opened as PR #201. Four
+    Theory M3 source-update dynamics implemented and opened as the PR. Four
     updates now have executable acceptance, preservation theorems, complete
     grounded and clean-base public matrices, generated goldens, a Haskell
     decider mirror, and durable paper boundaries. Mechanization refuted the
@@ -19,7 +19,7 @@ events_logged:
     id: N239
     routing: direct
     provenance: ai-executed
-    summary: "M3 mechanized 64 core and 80 public cells, passed all local gates, and opened PR #201."
+    summary: "M3 mechanized 64 core and 80 public cells, passed all local gates, and opened the PR."
   - turn: 1
     type: dead_end
     id: N240
@@ -117,7 +117,7 @@ ai_actions:
     action: >
       Executed the approved seven-step M3 plan with per-step implementation,
       specification review, quality review, traceable commits, holistic review,
-      full local gates, branch push, and PR #201 creation.
+      full local gates, branch push, and the PR creation.
     provenance: ai-executed
     files_changed:
       - "lean/Lara/Update.lean"
@@ -214,7 +214,7 @@ logic_revisions:
     after: "C37: Fresh accepted instance addition is a sink extension on the old grounded carrier"
     signal: artifact-commitment
     provenance: ai-suggested
-    note: "The typed matrix, sink theorems, durable documentation, and PR #201 depend on this result."
+    note: "The typed matrix, sink theorems, durable documentation, and the PR depend on this result."
   - turn: 1
     entry: C38
     field: created
@@ -254,7 +254,7 @@ logic_revisions:
     after: "C42: A sealed judgment reached only from tests is not evidence about the production path"
     signal: artifact-commitment
     provenance: ai-suggested
-    note: "The production oracle was widened to retain the report; onward work tracked as #204."
+    note: "The production oracle was widened to retain the report; onward work tracked as a follow-up."
   - turn: 2
     entry: C43
     field: created
@@ -312,13 +312,13 @@ key_context:
       one the split does not weaken.
 
 open_threads:
-  - "PR #201 review and hosted CI; issue #186 closes on merge."
+  - "Theory M3 PR review and hosted CI; the issue closes on merge."
   - "Paper repository must transcribe the generated M3 matrices and preserve the may-claim/must-not-claim boundary."
-  - "B0 PR review and hosted CI; issue #182 closes on merge."
+  - "B0 PR review and hosted CI; the issue closes on merge."
   - "Paper plan revision to the derived-fields CertOccurrence phrasing."
-  - "#204: surface the now-retained dependency reports through inferSupport and the driver output."
+  - "Surface the now-retained dependency reports through inferSupport and the driver output."
   - "Revisit in-kernel ord@1/ra@1 acceptance if Lean core gains reduction lemmas for the Slice-based String API."
-  - "M4 (#187) and PW-T6 (#191) are unblocked by B0's occurrence-level obligations."
+  - "M4 and PW-T6 are unblocked by B0's occurrence-level obligations."
   - "Lara.NDNamed.parseCanonNat_repr is private; promote it to Lara.Cell if in-kernel ord@1 work resumes."
 
 ai_suggestions_pending: []

@@ -1,5 +1,5 @@
 /-
-PW0 T3 — uniform-language reduction (issue #192).
+PW0 T3 — uniform-language reduction.
 
 With one shared language (a single context), total identity claim translation,
 and fixed accepted relations, the typed outer clauses reduce to ordinary

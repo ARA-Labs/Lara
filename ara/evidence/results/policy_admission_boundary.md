@@ -5,7 +5,7 @@
 The trusted `.lara` source boundary now enforces the policy admission table
 (`admit` / `quarantine` / `reject`) before core checking, with the
 invalid > R8 > R13 > R9 > core precedence, one canonical combined
-policy/group prune, and an exact canonical audit (issue #77, plan
+policy/group prune, and an exact canonical audit (plan
 `2026-08-05-policy-admission-calculus.md`). The dependent metatheory plan
 (`2026-08-05-policy-admission-metatheory.md`) is delivered in full:
 

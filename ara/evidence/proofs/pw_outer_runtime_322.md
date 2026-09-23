@@ -1,6 +1,6 @@
-# PW outer runtime and Haskell/Lean conformance (#322)
+# PW outer runtime and Haskell/Lean conformance
 
-The user asked for #322 to be finished directly and submitted as a PR. The
+The user asked for the outer-runtime work to be finished directly and submitted as a PR. The
 work is on branch `feat/pw-outer-runtime-322`. The decision record is
 `docs/theory-pw-outer-runtime.md`.
 
@@ -10,7 +10,7 @@ work is on branch `feat/pw-outer-runtime-322`. The decision record is
   - worlds, as check-input envelopes given inline or by file
   - candidate edges, each with its acceptance
   - source-claim comparisons
-  - an embedded `pw-surface 1` document, which the #314 decoder reads unchanged
+  - an embedded `pw-surface 1` document, which the declared-wire decoder reads unchanged
 - **`lara pw <file>`.** The Haskell runtime, in `src/Lara/PW/{Surface,Sorted,Wire,Run}.hs`. It checks every world with the unchanged local checker (`checkUnitWith fullConfig`) and prints a `pw-result 1` or `pw-error 1` envelope.
 - **`pw-run`.** The Lean reference executable, in `lean/Lara/PW/{Run,RunMain}.lean`. It uses `Declared.load`, `elabPosed`, `evalFinite` and `crossComparePosed` over a host built from the file.
 
@@ -44,7 +44,7 @@ An independent review compared the Haskell code with the Lean definitions line b
 - The gate compared mutation cases as parsed trees; it now compares bytes.
 - `lara pw` encoded stdout through the locale, so under `LC_ALL=C` it would crash on a Unicode name; it now forces UTF-8.
 
-### Second review round (PR #328)
+### Second review round
 
 Two further reviews found one real divergence the first review and the gate had missed. Under `LC_ALL=C`, a world file with a non-ASCII path made `lara pw` refuse the run (exit 1, `world-input … cannot encode character`) while `pw-run` completed it (exit 0). GHC encodes file paths with the locale's encoding, which is ASCII under `C`; Lean always uses UTF-8. The gate missed it because its only `LC_ALL=C` case used inline worlds. Fix: `lara pw` sets GHC's file-system encoding to `UTF-8//ROUNDTRIP`. The new `non-ascii world path` case fails on the pre-fix binary under `LC_ALL=C` and passes after the fix.
 
@@ -56,7 +56,7 @@ The same round:
 
 A re-review then found that fix incomplete. `getArgs` had already decoded the run-file argument with the locale, so under ISO-8859-1 a run file under `café/` was looked up as `cafÃ©/`, which regressed runs that had worked at 502a564. Under `LC_ALL=C`, a missing non-ASCII path also crashed stdout partway through the envelope. `lara pw` now turns the argument back into its original bytes and decodes them as UTF-8, and stdout writes escaped bytes back instead of failing. The gate builds an ISO-8859-1 locale with `localedef` and reruns every non-ASCII path case under it. Those cases fail on the intermediate binary and pass after the fix.
 
-The reader's Haskell-only nesting bound (10000) is a pre-existing divergence, now tracked as #331.
+The reader's Haskell-only nesting bound (10000) is a pre-existing divergence, now tracked as follow-up work.
 
 Commands and results are in `pw_outer_runtime_verification.txt`.
 

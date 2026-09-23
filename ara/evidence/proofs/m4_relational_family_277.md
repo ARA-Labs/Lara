@@ -1,4 +1,4 @@
-# Relational congruence family completion (#277)
+# Relational congruence family completion
 
 Provenance: ai-executed. Source: `lean/Lara/Context/Parametricity.lean`.
 

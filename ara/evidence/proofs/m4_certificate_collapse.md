@@ -1,4 +1,4 @@
-# Certificate collapse changes an accepted observation (#275)
+# Certificate collapse changes an accepted observation
 
 The source has two distinct defeasible wrappers around certificates that differ
 only in payload. A declared root undercut hits one wrapper. After payload

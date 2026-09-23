@@ -2,8 +2,8 @@
 
 ## Result
 
-Issue #307, PR #311 (branch `theory/307-sorted-queries-outer-surface`). The two
-deferrals held for the M5 surface machinery (#188): the `Query_κ`
+Branch `theory/307-sorted-queries-outer-surface`. The two
+deferrals held for the M5 surface machinery: the `Query_κ`
 well-sortedness row of `docs/theory-pw0-outer-model.md` §5, and the
 surface-syntax row of `docs/theory-pw-closeout.md` §3, which recorded *no*
 scheduling condition and mentioned the refinement in prose. Four new modules
@@ -122,7 +122,7 @@ context names, so a declaration reading `src → tgt` no longer elaborates
 identically against any environment. What is still unjoined is the declared
 `BridgeId` and `Naming.bridgeOf`, so a declared bridge cannot yet be *named* by
 a posed query — the two halves meet at the status-atom level (`Sorted.pose`)
-and not at the bridge level (#313).
+and not at the bridge level.
 
 One honest negative: `predMapOf_eq_none` implies `StructuralBridge.refl` is not
 in this surface's image, since `SymMap.id` is total and no finite entry list
@@ -158,7 +158,7 @@ named and located, where PW0 had no choice but to send it to a world.
 
 ## Gates
 
-Run locally (CI has not run since 2026-08-25; #225 reopened), from a build in
+Run locally (CI has not run since 2026-08-25; the hosted-CI breakage remains open), from a build in
 which the four new `.olean`s were deleted first, so nothing ran against a stale
 artifact.
 
@@ -180,8 +180,8 @@ ARA source spans: PASS (62 quotations)
 The axiom audit admits only `propext`, `Classical.choice` and `Quot.sound`, so
 no declaration here can reach a `sorryAx`, `ofReduceBool` or `nativeDecide`
 obligation. All four modules are inside the `lake build` closure through
-`lean/Lara.lean` (#259's discipline), which the deleted-olean rebuild confirms.
+`lean/Lara.lean` (the build-closure discipline), which the deleted-olean rebuild confirms.
 
 No Haskell change: the outer language has no Haskell runtime, and the surface
 is a structured AST with no parser or wire format — the same cut
-`Lara.Surface` makes. That gap is unscheduled work and is tracked as #314.
+`Lara.Surface` makes. That gap is unscheduled follow-up work.

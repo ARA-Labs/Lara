@@ -731,20 +731,20 @@ theorem obsSem_rejected_signature (sem : ExtensionSemantics) :
       = .rejected (.signature .malformedSigma) :=
   obsSem_rejected sem (by decide) rfl
 
-/-! ### A semantic negative with both links accepted (#273)
+/-! ### A semantic negative with both links accepted
 
 Move the complete three-cycle into one fragment and use an empty context, so
 there is no extra context argument. Compare it with a singleton supporting the
 same export under the same policy. Both pass the guard and checker; stable
 semantics distinguishes their payloads, not a failure arm or export interface.
 This is a non-triviality witness, not a separation of equivalence relations
-across semantics (the unbounded-context question in #268). -/
+across semantics (the unbounded-context question). -/
 
 /-- Empty context under the existing cyclic policy. -/
 def semanticNegativeCtx : Lara.Context.Context :=
   ⟨{ cycleCtx.frame with gammaFrag := [], ground := [], args := [], atts := [] }⟩
 
-/-- The complete carrier of #270, now entirely inside the fragment. -/
+/-- The complete carrier, now entirely inside the fragment. -/
 def fullCycleFrag : Fragment :=
   { cycleFrag with
     gammaFrag := cycleCtx.frame.gammaFrag ++ cycleFrag.gammaFrag

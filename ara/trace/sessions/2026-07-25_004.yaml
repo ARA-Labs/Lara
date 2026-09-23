@@ -2,7 +2,7 @@ session:
   id: "2026-07-25_004"
   timestamp: "2026-07-25T18:03"
   ended: "2026-07-25T18:03"
-  summary: "Planned Issue #18 attack completeness and result-7 consistency against the merged checker, edge-decider, Path-B, and grounded theorem surfaces."
+  summary: "Planned attack completeness and result-7 consistency against the merged checker, edge-decider, Path-B, and grounded theorem surfaces."
 
 events_logged:
   - type: decision
@@ -11,13 +11,13 @@ events_logged:
     summary: "Use compiled-edge coverage for attackable contrary pairs, with Path B supplying attackability and grounded conflict-freedom closing claim consistency."
 
 ai_actions:
-  - action: "Read GitHub issues #15–#18 and confirmed #16/#17 are closed while #18 is the final open M2 child."
+  - action: "Read the M2 GitHub issues and confirmed the edge-decider item is closed while attack completeness is the final open M2 child."
     provenance: ai-executed
     files_changed: []
   - action: "Traced the current CheckedProgram, executable checker cache, closure-edge decider, Path-B validator, grounded semantics, claim aggregation, AxCheck, and prior M2 plan conventions."
     provenance: ai-executed
     files_changed: []
-  - action: "Created and integrity-checked the complete Issue #18 implementation plan."
+  - action: "Created and integrity-checked the complete implementation plan."
     provenance: ai-executed
     files_changed:
       - "plans/2026-07-25-issue-18-attack-completeness-result-7.md"

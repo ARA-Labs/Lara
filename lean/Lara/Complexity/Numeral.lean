@@ -1,6 +1,6 @@
 /-
 Verified decimal round-trip and numeral injectivity for the M2b complexity
-spine (issue #209). This is a local copy of the `Lara.ND.decodeNat` pattern
+spine. This is a local copy of the `Lara.ND.decodeNat` pattern
 per decision D7 (module-ownership seam: no import of the ND backend).
 -/
 import Std.Data.String.ToNat
@@ -23,7 +23,7 @@ theorem natRepr_toList_inj {m n : Nat}
   natRepr_inj (String.toList_injective h)
 
 /-- Digit-list injectivity, the `Nat.toDigits` spelling of `natRepr_inj`
-(shared by the gadget and witness spelling-table proofs; issue #211). -/
+(shared by the gadget and witness spelling-table proofs). -/
 theorem toDigits_inj {m n : Nat}
     (h : Nat.toDigits 10 m = Nat.toDigits 10 n) : m = n :=
   natRepr_toList_inj (by rw [Nat.toList_repr, Nat.toList_repr]; exact h)

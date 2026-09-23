@@ -1,5 +1,5 @@
 /-
-# PW-T8 examples (issue #193)
+# PW-T8 examples
 
 Two halves.
 

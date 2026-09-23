@@ -2,11 +2,11 @@
 
 ## Result
 
-Issue #190 (tracker #189) is implemented as two stacked pull requests. PR #233
+The result is implemented as two stacked pull requests. The foundation pull request
 freezes the first-leg-first Kleisli laws and adds `StructuralBridge.comp`,
 `support_transport_comp`, indexed `BridgePath`, stepwise/folded path coherence,
 and `path_support_transport`, without changing the T6 structural contract.
-PR #236 adds applicability factorization, `Commutes`/direct-path agreement,
+The follow-up adds applicability factorization, `Commutes`/direct-path agreement,
 accepted-edge separation, expanded witnesses, durable records, and final audit
 wiring.
 The reviewed foundation head is `3362f00` (tree-identical to merged `54c2052`);
@@ -59,7 +59,7 @@ judgments through the composite bridge.
 
 ## Verification (2026-09-03)
 
-PR #233, after its foundation review fixes:
+Foundation pull request, after its foundation review fixes:
 
 ```
 $ cd lean && lake build
@@ -73,7 +73,7 @@ $ cd lean && (set -o pipefail; lake env lean AxCheck.lean | ../scripts/check-axi
 Axiom audit passed.
 ```
 
-PR #236, after review fixes and synchronization with reviewed PR #233:
+The follow-up, after review fixes and synchronization with the reviewed foundation:
 
 ```
 $ cd lean && lake build
@@ -91,8 +91,8 @@ The 33- and 67-declaration counts are the targeted PW-T9 two-file scope, not
 the repository-wide CI gate, which audits ten source files.
 
 The audit reports no `sorryAx`, no `ofReduceBool`, and no axioms outside
-`propext`, `Classical.choice`, and `Quot.sound`. The PR #236 diff against the
-synchronized PR #233 head leaves the frozen T6 modules
+`propext`, `Classical.choice`, and `Quot.sound`. The follow-up's diff against the
+synchronized foundation head leaves the frozen T6 modules
 `Lara/PW/Translation.lean`, `Lara/PW/Structural.lean`, and
 `Lara/PW/Support.lean` unchanged.
 
@@ -100,7 +100,7 @@ synchronized PR #233 head leaves the frozen T6 modules
 
 PW-T9 is exact structural-path composition for the existing bridge-global,
 functional partial translation. It does not prove grounded-status preservation;
-that requires attack correspondence (T8, #193). It does not define approximation
+that requires attack correspondence (T8). It does not define approximation
 bridges, their comparison spaces, or error/convergence laws. A failed
 intermediate translation remains incomparability at the outer comparison layer,
 never a fifth local status.

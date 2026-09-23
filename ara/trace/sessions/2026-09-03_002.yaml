@@ -5,18 +5,18 @@ session:
   last_turn: "2026-09-03T01:30"
   turn_count: 1
   summary: >
-    Parallel-to-M4 session. The CI outage (#225) was diagnosed to its root
+    Parallel-to-M4 session. The CI outage was diagnosed to its root
     cause — the job annotation reports failed payments / spending limit on
     the ARA-Labs org, so the fix is an org-admin billing action, not repo
     work — and the diagnosis posted to the issue. The researcher then
-    directed the parallel slot to #224: the strict-certificate renaming
+    directed the parallel slot to the strict-certificate renaming
     bridge lands in Lara.Examples.PWStructural (bridgeCert), discharging
     cert_ok non-vacuously off the identity with a point-mass CertOk pair at
     the fixture's encoded step, plus the cert_accept_translated regression
     guard and the transported cert-arm derivation cert_transport. Five new
     audit rows (1712 declarations, 83 PW-T6, standard trio); counts moved
     together in the T6 doc, the evidence file, and C48's Sources. Opened as
-    PR #230; #224 closes on merge.
+    The PR; closes on merge.
 
 events_logged:
   - turn: 1
@@ -24,13 +24,13 @@ events_logged:
     id: "N288"
     routing: direct
     provenance: user
-    summary: "Parallel slot to #224; #222 avoided as M4-hot (Compose.lean); CI #225 diagnosed to org billing."
+    summary: "Parallel slot; avoided as M4-hot (Compose.lean); CI diagnosed to org billing."
   - turn: 1
     type: experiment
     id: "N289"
     routing: direct
     provenance: ai-executed
-    summary: "cert_ok off-identity witness mechanized (bridgeCert, cert_accept_translated, cert_transport); audit 1712 (83 PW-T6); PR #230."
+    summary: "cert_ok off-identity witness mechanized (bridgeCert, cert_accept_translated, cert_transport); audit 1712 (83 PW-T6); the PR."
   - turn: 1
     type: observation
     id: "O123"
@@ -40,11 +40,11 @@ events_logged:
 
 ai_actions:
   - turn: 1
-    action: "Diagnosed CI outage via jobs-API annotation (billing block on ARA-Labs org); posted diagnosis to #225."
+    action: "Diagnosed CI outage via jobs-API annotation (billing block on ARA-Labs org); posted diagnosis."
     provenance: ai-executed
     files_changed: []
   - turn: 1
-    action: "Implemented the #224 strict-certificate fixtures and theorems; ran lake build (130 jobs) and the axiom audit (1712 declarations, PASS); updated counts in docs and ARA; opened PR #230."
+    action: "Implemented the strict-certificate fixtures and theorems; ran lake build (130 jobs) and the axiom audit (1712 declarations, PASS); updated counts in docs and ARA; opened the PR."
     provenance: ai-executed
     files_changed:
       - "lean/Lara/Examples/PWStructural.lean"
@@ -66,12 +66,12 @@ logic_revisions:
     after: "[`1712 audited declarations, 83 PW-T6` ← `ara/evidence/proofs/pw_t6_transport.md` «1712 audited declarations across the library, of which 83 are PW-T6 — every» [result]; `130-job build` ← `ara/evidence/proofs/pw_t6_transport.md` «Build completed successfully (130 jobs).                        EXIT: 0» [result]; `cert_ok inhabited off the identity` ← `ara/evidence/proofs/pw_t6_transport.md` «`cert_transport` running the transported derivation through the» [result]]"
     signal: empirical-resolution
     provenance: ai-suggested
-    note: "Audit re-run over the enlarged set; the evidence file's quoted lines changed with the #224 landing, so the Sources quotes move in lockstep."
+    note: "Audit re-run over the enlarged set; the evidence file's quoted lines changed with the landing, so the Sources quotes move in lockstep."
   - turn: 1
     entry: C48
     field: Proof
-    before: "[`Lara.PW.support_transport`, `support_transport_complete`, `supports_transport`, `transport_occurrences_accounted`, `Admits`, `admits_transport`, `instAPat_tr`, `equiv_tr`; `Lara.Examples.PW.t7_t6_boundary`, `ren_transport`, `ren_translationUndefined`; `ara/evidence/proofs/pw_t6_transport.md`; PR #223, commit 13ae1d7; axiom audit 1707 declarations PASS]"
-    after: "[`Lara.PW.support_transport`, `support_transport_complete`, `supports_transport`, `transport_occurrences_accounted`, `Admits`, `admits_transport`, `instAPat_tr`, `equiv_tr`; `Lara.Examples.PW.t7_t6_boundary`, `ren_transport`, `ren_translationUndefined`, `bridgeCert`, `cert_accept_translated`, `cert_transport`; `ara/evidence/proofs/pw_t6_transport.md`; PR #223, commit 13ae1d7, plus the #224 witness; axiom audit 1712 declarations PASS]"
+    before: "[`Lara.PW.support_transport`, `support_transport_complete`, `supports_transport`, `transport_occurrences_accounted`, `Admits`, `admits_transport`, `instAPat_tr`, `equiv_tr`; `Lara.Examples.PW.t7_t6_boundary`, `ren_transport`, `ren_translationUndefined`; `ara/evidence/proofs/pw_t6_transport.md`; the PR, commit 13ae1d7; axiom audit 1707 declarations PASS]"
+    after: "[`Lara.PW.support_transport`, `support_transport_complete`, `supports_transport`, `transport_occurrences_accounted`, `Admits`, `admits_transport`, `instAPat_tr`, `equiv_tr`; `Lara.Examples.PW.t7_t6_boundary`, `ren_transport`, `ren_translationUndefined`, `bridgeCert`, `cert_accept_translated`, `cert_transport`; `ara/evidence/proofs/pw_t6_transport.md`; the PR, commit 13ae1d7, plus the witness; axiom audit 1712 declarations PASS]"
     signal: empirical-resolution
     provenance: ai-suggested
     note: "The cert_ok clause C48's Statement asserts now has a non-vacuous conformance witness; Status stays supported (no change of strength, more evidence)."
@@ -80,15 +80,15 @@ key_context:
   - turn: 1
     excerpt: >
       User: "we are currently working on M4, other's working, so in parallel,
-      can I do anything?" — then selected "#224 PW-T6 witness (Recommended)"
+      can I do anything?" — then selected "PW-T6 witness (Recommended)"
       from the offered parallel-work options. The CI billing diagnosis was
       surfaced as an org-admin action item for the researcher.
 
 open_threads:
-  - "PR #230 awaits review/merge; #224 closes on merge."
-  - "#225: ARA-Labs org billing needs an org-admin fix (Settings → Billing & plans); after that, re-run CI on main to independently confirm the reported figures (build 130 jobs, audit now 1712 declarations)."
-  - "#184 (M1 image characterization) has every deliverable and acceptance box checked — flagged to the researcher as likely closable."
+  - "The PR awaits review/merge; it closes on merge."
+  - "ARA-Labs org billing needs an org-admin fix (Settings → Billing & plans); after that, re-run CI on main to independently confirm the reported figures (build 130 jobs, audit now 1712 declarations)."
+  - "The M1 item has every deliverable and acceptance box checked — flagged to the researcher as likely closable."
 
 ai_suggestions_pending:
   - "O123 (point-mass acceptance pairs as minimal inhabitation witnesses) staged, unconfirmed."
-  - "PR #230's evidence is author-reported from a local run while CI is dark (#225), same caveat as PR #223."
+  - "The PR's evidence is author-reported from a local run while CI is dark, same caveat as the PR."

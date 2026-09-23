@@ -1,4 +1,4 @@
--- | The shared IO loader for the corpus claim-support pass (#56): the one
+-- | The shared IO loader for the corpus claim-support pass: the one
 -- place that decodes a unit's @unit.core.sexp@, runs the T3 core, parses the
 -- @unit.lara@ surface, and reads the documented @strict_certifier@ header flag.
 --

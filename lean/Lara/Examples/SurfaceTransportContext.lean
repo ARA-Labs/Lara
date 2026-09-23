@@ -1,5 +1,5 @@
 /-
-# A context-bearing surface link fixture (#264)
+# A context-bearing surface link fixture
 
 `Lara.Examples.SurfaceTransport.surfaceTransport_link_directAF_eq` witnesses
 `Lara.Context.surface_directAF_link` over a context that declares **no
@@ -8,14 +8,14 @@ them — `FixesContext certSwap linkCtx` — is discharged by `⟨rfl, rfl⟩` b
 `linkCtx.frame.args = []`: the relabel leaves the context's own assurances
 alone for lack of any assurance to leave alone. `FixesContext` is precisely
 what separates a link-respecting relabel from an arbitrary one, so witnessing
-it only in that degenerate case is the gap `#264` records.
+it only in that degenerate case is the gap.
 
 This module closes it. The elaborated unit declares **two** core arguments,
 split so that
 
 * the **context** owns `a-ctx`, a plain defeasible argument `p ⊢ n` carrying
   `.none`, which `certSwap` fixes; and
-* the **fragment** owns `a-cert`, the `#227` certified argument `p ⊢ q`, which
+* the **fragment** owns `a-cert`, the `SurfaceTransport` certified argument `p ⊢ q`, which
   `certSwap` moves.
 
 So `FixesContext certSwap linkCtx` is now an equation over a one-element
@@ -51,7 +51,7 @@ the argument lists, so it survives the context gaining material.
 
 This fixture declares no attacks, so the attack half of
 `link_relabel_commutes` still runs on empty lists.
-`Lara.Examples.SurfaceTransportAttack` (#258) is the attack-bearing witness for
+`Lara.Examples.SurfaceTransportAttack` is the attack-bearing witness for
 the relabel corollary; combining a live edge *and* a context-owned argument in
 one link fixture is not needed by either issue, and the no-contraries route
 above is what keeps this one `native_decide`-free.
@@ -231,7 +231,7 @@ theorem context_freshness_wrapped :
 
 `a-ctx` resolves its premise against the declared leaf and carries
 `ChecksAssurance.none`, so it adds no lowering obligation. `a-cert` repeats
-`#227`'s derivation with `[builtCtx]` in scope as a prior — which is why
+`SurfaceTransport`'s derivation with `[builtCtx]` in scope as a prior — which is why
 `transport_lower_kernel` / `transport_lower_wrapped` are stated universally in
 the priors. -/
 
@@ -402,7 +402,7 @@ theorem context_hasSupport_ctx
     | succ n => simp at hw
   · intro j q w A O hj; simp at hj
 
-/-- **The fragment's certified argument is supported.** The `#227` derivation,
+/-- **The fragment's certified argument is supported.** The `SurfaceTransport` derivation,
 restated at this fixture's policy. -/
 theorem context_hasSupport_cert
     {reg : Lara.Support.BackendRegistry (fun source => source)}
@@ -673,7 +673,7 @@ theorem context_unit_wrapped_is_link :
 /-! #### Admissibility
 
 Both `SideOk` derivations now carry an argument. The context side is the one
-that was vacuous in `#255`. -/
+that was vacuous in the link fixture. -/
 
 theorem linkSideOk_ctx {reg : Lara.Support.BackendRegistry (fun source => source)}
     (F : Lara.Context.Fragment) (hgamma : F.gammaFrag = []) :
@@ -731,7 +731,7 @@ theorem contextLink_admissible :
   ruleIds := by decide
   policy := Lara.Policy.firstViolation_none_iff.mp (by decide)
 
-/-- **The relabel fixes the context.** Unlike `#255`'s `⟨rfl, rfl⟩`, the
+/-- **The relabel fixes the context.** Unlike the link fixture's `⟨rfl, rfl⟩`, the
 argument component is an equation over a non-empty list: `certSwap` has to
 leave `ctxCore`'s `.none` assurance alone, and it does. -/
 theorem contextLink_fixesContext : Lara.Context.FixesContext certSwap linkCtx where
@@ -758,13 +758,13 @@ theorem surfaceTransportContext_link_directAF_eq :
 
 /-! ### Non-vacuity
 
-The first two guards are the ones `#264` asks for — without them the fixture
-could silently regress to `#255`'s empty context, and `FixesContext` would go
-back to holding for want of anything to fix. The rest are `#227`/`#255`'s
+The first two guards are the ones the context-bearing brief asks for — without them the fixture
+could silently regress to the link fixture's empty context, and `FixesContext` would go
+back to holding for want of anything to fix. The rest are `SurfaceTransport`'s
 guards, restated here. -/
 
 /-- **The context declares an argument**, and it survives into the linked
-unit. This is the guard against regressing to the `#255` shape. -/
+unit. This is the guard against regressing to the link-fixture shape. -/
 theorem surfaceTransportContext_ctx_args_nonempty :
     linkCtx.frame.args ≠ [] ∧
       ctxCore ∈ (contextElaborated kernelCert kernelCoreAssur).unit.args := by

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Assert that ara/trace/sessions/session_index.yaml agrees with the session
-files it enumerates (#337, #338).
+files it enumerates.
 
 The index is the only enumeration of the trace, so its failure modes are
 silent to every consumer that reads it: a session file with no row is
@@ -27,7 +27,7 @@ session end; a claim entry is a mapping with an ``id`` or a bare id string;
 July 2026 shape (``session.timestamp``, no ``turn_count``) is accepted with
 that one field unchecked.
 
-The index rows are enumerated with the line grammar of #337 (rows begin at
+The index rows are enumerated with a strict line grammar (rows begin at
 column 0 with ``- id:``; any other column-0 content is rejected rather than
 guessed at), and both the index and the session files are then read with
 PyYAML under a loader that refuses duplicate mapping keys, because a duplicate

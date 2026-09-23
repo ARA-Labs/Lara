@@ -6,7 +6,7 @@ theorem-backed transition matrices. The intended reader is a maintainer checking
 what the paper may say without reconstructing the milestone from commit history.
 The Lean sources are authoritative.
 
-_Status: settled record (2026-08-29; theory spine, tracker #180). The
+_Status: settled record (2026-08-29; theory spine). The
 question it answers, in plain terms: if you edit one declaration of a checked
 source program — add a leaf, retract an argument, change an attack — what can
 happen to each claim's status, and which transitions are provably
@@ -315,7 +315,7 @@ The paper must not claim:
 M3 covers the first update fragment and one successful source edit at a time.
 It does not define update sequences, inverse operations, conflict resolution
 between edits, or algebraic laws for composition. M3 also does not prove
-contextual adequacy. Theory M4 (issue #187) retains that obligation: define
+contextual adequacy. Theory M4 retains that obligation: define
 fragments, imports, exports, holes, hygienic linking, ill-linked rejection, and
 contextual equivalence; then prove both directions of full abstraction against
 an independently defined logical relation. Backend representation independence
@@ -327,7 +327,7 @@ replacement a congruence: an injective, acceptance-preserving relabel of a
 fragment's certificates is unobservable in every admissible context whose own
 assurances it fixes (`Lara.Context.backend_replacement_congruence`;
 `docs/theory-m4-contextual-adequacy.md`). Two pieces of the sentence above
-were left open by that milestone. **Holes (#217)** are now supplied by the
+were left open by that milestone. **Holes** are now supplied by the
 additive `Lara.Context.Holes` calculus: named CQ-answer templates, typed context
 fillings, substitution into arguments and attack endpoints, checked linking,
 composition, and functional/relational backend transport. The original complete

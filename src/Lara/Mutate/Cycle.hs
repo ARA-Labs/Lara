@@ -94,7 +94,7 @@ cycleBytes n = case checkInput of
     queries = map holds ixes
     ixes = [0 .. n - 1]
     succIx i = (i + 1) `mod` n
-    -- The synthetic unit's own generated Σ (#89 §8): the operator that invents
+    -- The synthetic unit's own generated Σ (§8): the operator that invents
     -- a vocabulary is the site that knows its sorts, so `mutation-cycles-v1`
     -- declares one opaque sort for its cycle nodes rather than tripping the new
     -- stage-2 check on incidental Σ noise.
