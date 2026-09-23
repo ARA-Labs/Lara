@@ -20,8 +20,7 @@ two halves scheduled here are:
 
 The intended readers are the paper author, whoever cites limitation 2 in print,
 and whoever next touches `Lara/PW/`. They should cite the declarations below
-rather than re-deriving them; `docs/paper-lean-name-map.md` §PW-sorted carries
-the stable keys.
+rather than re-deriving them.
 
 **Nothing local was redefined, and nothing PW0 froze was edited.** `PW.Frame`,
 `PW.Sat`, `PW.crossCompare`, `PW.CrossResult` and `PW.IncomparabilityReason`
@@ -117,8 +116,7 @@ standard trio (`propext`, `Classical.choice`, `Quot.sound`), no
 `native_decide`. Rows that also name a *definition* — `structuralBridgeOf` in
 U4, `unelab` in U9, `SortedWorld` in S9 — name it for orientation; a definition
 carries no `#print axioms` line of its own and is audited transitively through
-the gated theorems that mention it. `docs/paper-lean-name-map.md` §PW-sorted
-states the same hedge.
+the gated theorems that mention it.
 
 | # | Result | Lean |
 |---|---|---|

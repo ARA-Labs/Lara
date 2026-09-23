@@ -220,7 +220,7 @@ observations:
 
     '
   context: 'rit-vs-lara comparison session (user framing: complementary siblings, both formalizing agent-native
-    research artifacts); recorded in docs/comparison-rit-lara.md §11.3-§11.4 but no code or milestone
+    research artifacts); no code or milestone
     depends on the integration yet.
 
     '
@@ -245,7 +245,7 @@ observations:
     '
   context: 'User directed (turn: "you should not just say what it claims in their write up ... I think
     there is a little discrepancy") a code-vs-write-up audit of rit; I read the live commit path and confirmed
-    five discrepancies, committed as docs/comparison-rit-lara.md §11.5 (ba6c45e), pushed to PR #22.
+    five discrepancies, committed as ba6c45e, pushed to PR #22.
 
     '
   potential_type: claim
@@ -271,7 +271,7 @@ observations:
     '
   context: 'User asked "what is the meaning of their formal verification if the roll-up runs over a DAG
     whose edges it never verifies", affirmed the answer ("this summary is very good, did you write it
-    down?"), prompting persistence into docs/comparison-rit-lara.md §11.6 + claim C20.
+    down?"), prompting persistence as claim C20.
 
     '
   potential_type: claim
@@ -294,7 +294,7 @@ observations:
 
     '
   context: 'Surfaced by the Task 1 fidelity review and confirmed during the Task 4 differential closeout
-    while choosing conformance fixtures; recorded in docs/m3-closeout-notes.md and referenced in the spec
+    while choosing conformance fixtures; referenced in the spec
     §8 status note.
 
     '
@@ -758,7 +758,7 @@ observations:
     failing Lean report can be CLEAN when it byte-matches the archived failing report. Claims about
     rit's shipping guarantee must therefore be scoped to the exact API and grounding tier.
   context: >
-    Source-verified while rewriting docs/comparison-rit-lara.md against rit commit 24a6140 (N104).
+    Source-verified against rit commit 24a6140 (N104).
     This narrows O12's K-tier integration wording and conflicts with C19 Conditions' unqualified
     statement that the per-fact re-extraction core holds.
   potential_type: claim
@@ -2558,8 +2558,7 @@ observations:
     caller must supply.
   context: >
     Found while deciding whether support_transport could conclude, rather
-    than assume, trSupport definedness (#191). Recorded as a Not-X note in
-    docs/paper-lean-name-map.md §PW-T6.
+    than assume, trSupport definedness (#191).
   potential_type: constraint
   bound_to: [N276]
   promoted: false

@@ -96,9 +96,7 @@ before the rewrite — the refusal behaviour did not move.
   `check_pw_subtree_total` skipped: that assertion fails on `fixtures/pw/source/lara.sexp`
   on `main` as well (the tree arrived in #332, after the assertion was written) and is
   unrelated to this change.
-- `scripts/check-lean-citations.py`: `Lean citations: PASS (420 citations, 29 allowlisted)`
-  after repointing the nine `lean/AxCheck.lean` line citations in
-  `docs/paper-lean-name-map.md` (+33, by name).
+- `scripts/check-lean-citations.py`: `Lean citations: PASS (420 citations, 29 allowlisted)`.
 - `scripts/check_ara_source_spans.py`: `ARA source spans: PASS (66 quotations)`.
 - Timing spot-check: `lara-driver` on the largest anchor
   (`corpus-units/adaptive-pruning/C04/unit.core.sexp`, 17 055 bytes) runs in 0.01 s total.

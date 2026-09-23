@@ -8,27 +8,26 @@ _The goal in one line: machine-check spec §9's twelve results in Lean 4 and
 keep the mechanized model tied to the Haskell checker by byte-exact
 differential testing. The per-result status table lives in
 `../lean/README.md`; this document is the plan and rationale that produced
-it. §0 below is venue motivation, not a prerequisite; skip to §1 for the
+it. §0 below is motivation, not a prerequisite; skip to §1 for the
 architecture._
 
-## 0. Why mechanize at all (POPL calibration)
+## 0. Why mechanize at all
 
-The POPL 2027+ call strongly encourages submission-time proof scripts when mechanized proofs are a
-main contribution. For LARA, one of the five headline contributions is a *semantics-preserving
+For LARA, one of the five headline contributions is a *semantics-preserving
 compilation* into structured argumentation. A paper proof of that is acceptable; a machine-checked one is
 the difference between "principled language result" and "trust the appendix." Property tests are
 **conformance evidence, not soundness** (`spec.md` §9 closing note) — the mechanized theorems carry
 soundness. Plan the project around a mechanized language result, not a checker demo.
 
 **External corroboration (deep-research, 2026-07-21, adversarially verified).** Three findings raise
-mechanization from "encouraged" to "load-bearing" for this paper:
+mechanization from "encouraged" to "load-bearing" for this project:
 
 - Mechanized metatheory *can be the entire evaluation* for a language-semantics paper — e.g. *Two
   Mechanisations of WebAssembly 1.0* (Watt et al., FM 2021) ships two independent mechanised
   semantics + a type-soundness result as its substance, with no performance numbers or user studies.
   This is exactly LARA's Axis (a) shape.
-- **POPL artifact evaluation explicitly excludes non-mechanized (paper) proofs from review** — the
-  committee "lacks time and expertise to check them" (POPL 2025 AEC). So an un-mechanized soundness
+- **Artifact evaluation can exclude non-mechanized (paper) proofs from review** — committees
+  lack the time and expertise to check them. So an un-mechanized soundness
   argument gets *no* artifact credit; only the mechanized development is checkable. This is the
   decisive reason to keep M2 on the critical path.
 - Artifact evaluation certifies **reproducibility, not claim-support** (SIGPLAN "Checklist
@@ -82,7 +81,7 @@ default, Rocq if a collaborator's expertise dominates). Rationale:
   maps, `OrderHom`) and finite-set machinery for the AF.
 - Lean's `Decidable` typeclass makes results 1 and 11 executable *and* proved-decidable in one
   artifact — which is what the differential-testing anchor (§3) needs.
-- Community familiarity for POPL reviewers is high.
+- Community familiarity among PL researchers is high.
 
 Decide before M1 freeze (`spec.md` §9 note: core 1–9 + reference-adapter 10 must be mechanized). Do
 **not** start proving until M1 freezes the definitions — a theorem about the model does not transfer
@@ -299,11 +298,9 @@ regression-compatibility evidence only, not new Lean acceptance-flow evidence.
   prover choice** (open question §8 #8 resolved). The ND adapter (result 10),
   executable support/attack/program checkers (result 1), and the source-vs-compiled
   bridge (result 6, `Faithful` now discharged by the checker-built `edgeB`) are now mechanized.
-- **Anonymizable from day one.** No author-identifying paths, comments, or repo metadata in the
-  proof development.
 - **No `sorry`/`admit` in main theorems** at M2 exit; a single replay command must check the whole
-  development. Record every prover axiom and every backend assumption explicitly (the POPL call asks
-  for non-standard axioms; the `sorry`-audit lesson from `prior-art-lessons.md` applies to proof
+  development. Record every prover axiom and every backend assumption explicitly (the
+  `sorry`-audit lesson from `prior-art-lessons.md` applies to proof
   holes too).
 - **Differential + property + golden + mutation tests remain conformance evidence** across the
   Haskell↔Lean boundary (`engineering-plan.md` §5); they do not replace the mechanized theorems.
@@ -375,5 +372,4 @@ The frozen contract, the five-condition gate assessment, the three known
 limitations (`accept` is an unconstrained `Prop`; `gap` conflates four
 conditions; `Context` fixes the checking environment, not a scientific state),
 and the T6 feasibility note are recorded in
-`docs/theory-pw0-outer-model.md`; stable citation keys are in
-`docs/paper-lean-name-map.md` §PW0.
+`docs/theory-pw0-outer-model.md`.

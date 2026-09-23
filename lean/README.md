@@ -166,7 +166,7 @@ checking (#38); these are language/reporting additions, not missing pieces of
 the existing Lean checker proofs. The shared serialized first-order core AST
 remains the Haskell↔Lean differential-testing anchor.
 
-### Theory spine (POPL 2028)
+### Theory spine
 
 `Lara/Invariants.lean` and `Lara/Examples/CompilerInvariants.lean` are the M0
 (#183) modules. They freeze the M1 carrier (`StructuredAF`, a

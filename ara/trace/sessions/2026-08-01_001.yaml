@@ -361,7 +361,7 @@ key_context:
     contrary (completeness forces the reverse edge -> cycle); introduced the one-directional refuted_by_metareview
     contrary instead. This asymmetry is load-bearing for defense.'
 - turn: 2
-  excerpt: 'User: "https://github.com/EYH0602/lara/pull/49 is merged, what is the next step?" then "check
+  excerpt: 'User: "https://github.com/ARA-Labs/lara/pull/49 is merged, what is the next step?" then "check
     out a new branch to do it" — T2 selected as next, executed end-to-end this turn.'
 - turn: 3
   excerpt: 'User: /implement plans/2026-08-01-m5-t1corpus-t3-measurement.md — autonomous execution of the

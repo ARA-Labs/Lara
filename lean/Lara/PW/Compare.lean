@@ -73,8 +73,7 @@ this interface. The repository declares no `Ord` instance anywhere, so nothing
 is given up by leaving `compare` to core.
 
 The theorem names below keep the `compare_*` prefix: they are namespace
-qualified, collide with nothing, and are the citation keys already registered
-in `docs/paper-lean-name-map.md`. -/
+qualified, collide with nothing, and are the citation keys the docs already use. -/
 def crossCompare {W Q : Type} (t : Option Q) (candidates : List W)
     (acceptB : W → Bool) (statusOf : W → Q → Status) : CrossResult Status :=
   match t with

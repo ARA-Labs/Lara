@@ -255,9 +255,9 @@ ai_actions:
     parseForm_of_maxDepth_lt, parseList_error_of_parseForm_error, parseList_of_maxDepth_lt,
     step_of_cons, skipSpace_eq_self, isBareChar_props, startsForm and its two lemmas, opens
     and opens_add, skipSpace_eq_self_startsForm, parseForm_nested_error,
-    parseWire_nested_error. lean/AxCheck.lean: 20 pins appended, which shifted the nine
-    AxCheck line citations in docs/paper-lean-name-map.md by 33 (repointed by name, along
-    with scripts/check-lean-citations.py''s own quoted example). docs/spec.md and
+    parseWire_nested_error. lean/AxCheck.lean: 20 pins appended, which shifted the AxCheck
+    line citations by 33 (repointed by name, including
+    scripts/check-lean-citations.py''s own quoted example). docs/spec.md and
     docs/rejection-surface.md record the proof-backed half of the #331 contract.'
   provenance: ai-executed
   files_changed:
@@ -265,7 +265,6 @@ ai_actions:
   - lean/AxCheck.lean
   - docs/spec.md
   - docs/rejection-surface.md
-  - docs/paper-lean-name-map.md
   - scripts/check-lean-citations.py
   - ara/evidence/proofs/lean_reader_nesting_bound_335.md
   - ara/evidence/README.md

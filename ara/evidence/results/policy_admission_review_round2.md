@@ -36,8 +36,8 @@ critical and four important findings. All five were repaired at their source
    `RawAttack.lookupArg_of_mem_nodup` and
    `Admission.retained_attack_source_retained`.
 4. **Important — all-admit theorem scope overstated**. The
-   `policy_all_admit_group_identity` docstring, the metatheory plan's paper claim
-   and theorem 10, and `docs/paper-lean-name-map.md` claimed verdict identity.
+   `policy_all_admit_group_identity` docstring and the metatheory plan's paper
+   claim and theorem 10 claimed verdict identity.
    The theorem proves the combined prune's component equalities plus
    `blockedQueries`; `policy_all_admit_checkUnit_identity` separately proves the
    checker's accept/reject outcome. The R13 preflight, the R9 group boundary, and

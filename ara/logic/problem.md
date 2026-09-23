@@ -36,7 +36,7 @@
   axiom. A recorded dead end can retract a prior conclusion — a non-monotonic phenomenon.
 - **Evidence**: empirical support is not deductive implication — the evidence→claim bridge must be a
   named, defeasible inference scheme open to undercutting, not a hidden axiom, and a missing
-  certificate is not a proof of underivability, only an explicit gap; `docs/comparison-rit-lara.md` §5.
+  certificate is not a proof of underivability, only an explicit gap.
 - **Implication**: The core cannot be a monotonic proof system; it needs a defeasible layer with
   typed defeat and a non-monotonic acceptance semantics.
 
@@ -66,8 +66,8 @@
 
 ### G3: A language-design paper's "experiment" is undefined when there is no benchmark
 - **Statement**: LARA's contribution is a calculus, not a system with runtime numbers, and
-  benchmarking has been ruled out of scope for the first submission. What, then, is the evaluation?
-- **Caused by**: the project being a POPL-track type-theory contribution.
+  benchmarking has been ruled out of scope for this work. What, then, is the evaluation?
+- **Caused by**: the project being a type-theory contribution.
 - **Existing attempts**: treat it like a systems paper (perf tables) — rejected.
 - **Why they fail**: perf/user-studies are not load-bearing for a calculus paper; a deep-research
   pass (trace N14) confirmed mechanized metatheory can *be* the evaluation, and POPL artifact

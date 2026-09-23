@@ -10,8 +10,6 @@ exact mechanized/paper split is the boundary recorded below._
 Issue #209 (parent tracker #180; successor to the closed #181).
 Branch `theory/m2b-realization-closure`. Gate history:
 [`docs/theory-m2b-complexity-spike.md`](theory-m2b-complexity-spike.md).
-Paper citation keys: the "M2b restricted-class complexity closure" section of
-[`docs/paper-lean-name-map.md`](paper-lean-name-map.md).
 
 This is the durable record of the M2b complexity closure: the frozen
 decisions (inherited D1–D6, new D7–D9), both gate decisions, the

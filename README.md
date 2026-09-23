@@ -1,6 +1,6 @@
 # LARA
 
-[![Haskell](https://github.com/EYH0602/lara/actions/workflows/haskell.yml/badge.svg)](https://github.com/EYH0602/lara/actions/workflows/haskell.yml)
+[![Haskell](https://github.com/ARA-Labs/lara/actions/workflows/haskell.yml/badge.svg)](https://github.com/ARA-Labs/lara/actions/workflows/haskell.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![spec](https://img.shields.io/badge/spec-v0.1%20frozen-brightgreen.svg)](docs/spec.md)
 
@@ -190,8 +190,10 @@ artifact, co-located policy, derived wire anchor, and expected verdict, are
 indexed in [`examples/README.md`](examples/README.md). For a prose-first
 reading, the demo write-ups reconstruct checked artifacts as a
 [paper/review/rebuttal exchange](docs/demos/d1-rebuttal-replay.md),
-[mechanical review comments](docs/demos/d2-mechanical-reviewer.md), and
-[cross-paper abstract excerpts](docs/demos/d3-agreement-map.md).
+[mechanical review comments](docs/demos/d2-mechanical-reviewer.md),
+[cross-paper abstract excerpts](docs/demos/d3-agreement-map.md), a
+[philosophy-of-mathematics debate](docs/demos/d4-philmath.md), and
+[withdrawing an assumed axiom](docs/demos/d5-axiom-withdrawal.md).
 
 ## How checking works
 
@@ -231,9 +233,8 @@ contested) from an **apparent one** (the slogans contradict, but the
 experiments measured different models, benchmarks, or settings, so no attack
 forms, and the checker names the bridging experiment that would connect
 them). The worked demo is the
-[cross-paper agreement map](docs/demos/d3-agreement-map.md); first-class
-multi-file composition is planned in
-[#303](https://github.com/ARA-Labs/lara/issues/303).
+[cross-paper agreement map](docs/demos/d3-agreement-map.md); for papers kept
+in separate files, a `.laramap` composes them (see [Example](#example)).
 
 ## Quick start
 
@@ -312,6 +313,9 @@ src/, app/, test/   Haskell: parser, elaborator, checker, compiler, grounded
 lean/               Lean 4 mechanized reference semantics + second driver (spec §9)
 examples/           worked .lara examples with co-located policies and verdicts
 corpus-units/, fixtures/, measurements/   the frozen M5 evaluation corpus
+scripts/            conformance gates, corpus/mutant generators, bench, replay
+bundles/, elaborator/   replay bundles and the untrusted Python elaborator
+containers/         pinned container for the performance bench
 docs/               spec, surface grammar, design decisions, plans, demos
 m0/, corpus/        the M0 semantic corpus study and its sampled ARA corpus
 ara/                this project's own Agent-Native Research Artifact
@@ -335,8 +339,7 @@ walking-skeleton replay pipeline, and the deterministic evaluation corpus
 (the [v6 snapshot](docs/m5-freeze-checklist.md#current-snapshot-evaluation-freeze-v6--issue-266):
 595 generated mutants + 60 corpus units, 655/655 rejection-class matches,
 655/655 cross-driver agreement, 60/60 replay; `m5-freeze-v6` publication awaits
-merge). Paper and submission-package work now lives in the paper repository;
-open follow-ups here are tracked as
+merge). Open follow-ups are tracked as
 [GitHub issues](https://github.com/ARA-Labs/lara/issues).
 
 ## License

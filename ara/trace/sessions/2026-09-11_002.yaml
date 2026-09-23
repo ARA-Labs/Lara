@@ -146,9 +146,8 @@ ai_actions:
   action: 'Branched feat/pw-outer-runtime-322. Implemented the Lean reference (Lara.PW.Run
     with 20 AxCheck-covered theorems, pw-run exe), the Haskell runtime (Lara.PW.{Surface,Sorted,Wire,Run},
     lara pw), fixtures with goldens, the differential gate (make pw-conformance, CI
-    step), PWSpec, and the decision record. Renumbered 10 AxCheck line citations shifted
-    by the new import (nine in docs/paper-lean-name-map.md, one in
-    scripts/check-lean-citations.py). An independent review found no runtime divergence;
+    step), PWSpec, and the decision record. Renumbered the AxCheck line citations shifted
+    by the new import (including one in scripts/check-lean-citations.py). An independent review found no runtime divergence;
     fixed its two gate/boundary findings.'
   provenance: ai-executed
   files_changed:
@@ -165,7 +164,6 @@ ai_actions:
   - scripts/check-pw-conformance.py
   - fixtures/pw/run/
   - docs/theory-pw-outer-runtime.md
-  - docs/paper-lean-name-map.md
   - .github/workflows/ci.yml
 - turn: 3
   action: 'Resolved the PR #328 reviews in commits 3b865cb, e4c5e67 and 676de58: rebased
@@ -185,7 +183,6 @@ ai_actions:
   - test/PWSpec.hs
   - fixtures/pw/run/renamed.sexp
   - docs/theory-pw-outer-runtime.md
-  - docs/paper-lean-name-map.md
   - scripts/check-lean-citations.py
   - ara/evidence/proofs/pw_outer_runtime_322.md
   - ara/evidence/proofs/pw_outer_runtime_verification.txt

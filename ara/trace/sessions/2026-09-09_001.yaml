@@ -338,8 +338,7 @@ logic_revisions:
   before: 'Seeded single-defect mutation corpus; ablation cells `noCQConfig` / `noTypedConfig` of `Lara.Check.CheckConfig`,
     each removing exactly one rejection arm. The surgical+monotone property is mechanically checked (`AblationSpec`,
     10 pure properties). Untested boundary: the discriminating form over human-authored NATURAL defects
-    — where the missed-defect rate is a discovery, not a construction — is deferred to #52 (ACL/EMNLP
-    follow-up); this claim says nothing about that regime.'
+    — where the missed-defect rate is a discovery, not a construction — is deferred to #52; this claim says nothing about that regime.'
   after: 'Seeded mutation corpus; ablation cells `noCQConfig`, `noTypedConfig`, and `noConflictScanConfig`
     of `Lara.Check.CheckConfig`. Each disables its documented obligations; `noTypedConfig` disables both
     typed attacks and conflict-scan completeness, so it maps to R10/R11/MissingConflict together. Surgicality

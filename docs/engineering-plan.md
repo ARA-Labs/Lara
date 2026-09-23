@@ -13,10 +13,10 @@ spine that drove this order — now a closed record, not a worklist — was:_
 | M4 — walking skeleton | one real claim end to end with no hand-authored certificate step |
 | M5 — evaluation corpus | gold annotations, mutation suite, baselines, ablations, and blinded held-out set frozen before final runs |
 | M6 — full evaluation | all four axes reported; at least five worked cases spanning every status/attack kind |
-| M7 — POPL package | paper, anonymized mechanization, implementation, corpus, and reproducibility scripts |
+| M7 — release package | paper, mechanization, implementation, corpus, and reproducibility scripts |
 
-M0–M5 are closed (tracker #48); M6's LLM-dependent axes (b)/(d) are deferred to the ACL/EMNLP
-follow-up (#52, #30); M7 closed 2026-08-24 (#60) because paper-writing moved to the paper repository.
+M0–M5 are closed (tracker #48); M6's LLM-dependent axes (b)/(d) are deferred to
+future work (#52, #30); M7 closed 2026-08-24 (#60) because paper-writing moved to the paper repository.
 
 _If you are new to the project, start with the top-level `../README.md` and
 spec §0 instead; this is a living engineering log for contributors, and §0

@@ -43,7 +43,6 @@ ai_actions:
       - "lean/Lara/Examples/PWCompose.lean"
       - "lean/AxCheck.lean"
       - "docs/theory-pw-t9-path-composition.md"
-      - "docs/paper-lean-name-map.md"
       - "ara/evidence/proofs/pw_t9_path_composition.md"
       - "ara/logic/solution/heuristics.md"
       - "ara/logic/solution/mechanization.md"

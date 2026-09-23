@@ -130,5 +130,4 @@ fallback, a contract change budgeted in `docs/theory-pw0-outer-model.md` §6);
 total leaf map; no attack transport (T8); no composition laws (T9); question
 keys frozen across the bridge (what makes obligations transport verbatim).
 
-Full record: `docs/theory-pw-t6-structural-transport.md`. Stable citation
-keys: `docs/paper-lean-name-map.md` §PW-T6.
+Full record: `docs/theory-pw-t6-structural-transport.md`.

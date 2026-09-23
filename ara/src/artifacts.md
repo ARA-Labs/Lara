@@ -47,7 +47,7 @@ verified to exist as of 2026-07-21. Run records (test output) live in `evidence/
   `docs/claim-support-calculus-decision.md`, `docs/substrate-decision.md`, `docs/gap-resolution.md`,
   `docs/engineering-plan.md`, `docs/mechanization-plan.md`, `docs/worked-examples-plan.md`,
   `docs/corpus-map.md`, `docs/novelty-and-related-work.md`, `docs/prior-art-lessons.md`,
-  `docs/study-plan.md`, `docs/comparison-rit-lara.md`, `plans/lara-related-work.bib`.
+  `plans/lara-related-work.bib`.
 - **Nature**: the design/theory content — the source of every claim, concept, and proof in this ARA.
 - **What it does / contains**: the frozen v0.1 calculus (spec), the settled decisions, the milestone
   spine (M0–M7), the 12 required metatheory results, and the trajectory the trace reconstructs.

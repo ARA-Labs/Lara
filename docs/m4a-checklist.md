@@ -2,8 +2,7 @@
 
 _Operational freeze/tracker for milestone **M4a** (GitHub #31, child of the #29
 M4 umbrella). Companion to `docs/worked-examples-plan.md` (the six-example
-coverage design) and `docs/spec.md` (the frozen contract). Mirrors `docs/m1-freeze-checklist.md` and
-`docs/m3-closeout-notes.md` in role: it records what M4a locks before frontend code lands, freezes the
+coverage design) and `docs/spec.md` (the frozen contract). Mirrors `docs/m1-freeze-checklist.md` in role: it records what M4a locks before frontend code lands, freezes the
 verdicts that already have oracles, and lists what stays provisional until the parser + elaborator exist.
 This is **Task A0** — a scope-lock/freeze doc, not a re-plan._
 
@@ -259,7 +258,7 @@ original A2 suite was **defeasible-only** (`nd@1` inert); post-M4a example
 
 ## Exit checklist (A0)
 
-- [x] `docs/m4a-checklist.md` created, mirroring `m1-freeze-checklist.md` / `m3-closeout-notes.md`.
+- [x] `docs/m4a-checklist.md` created, mirroring `m1-freeze-checklist.md`.
 - [x] M4a scope lock stated (in scope / out of scope → #32 / M5 / TODOS).
 - [x] A and B expected verdicts **frozen** from their inline oracles — four-state claim status +
       per-argument grounded label (§1).

@@ -21,7 +21,7 @@ events_logged:
     id: "N220"
     routing: direct
     provenance: user
-    summary: "Theory spine opens: POPL 2028 core mechanization, tracker #180, B0 + M0-M5. Backfilled -- had no trace record."
+    summary: "Theory spine opens: core mechanization, tracker #180, B0 + M0-M5. Backfilled -- had no trace record."
   - turn: 1
     type: decision
     id: "N221"
@@ -135,7 +135,6 @@ ai_actions:
     provenance: ai-executed
     files_changed:
       - "docs/theory-m0-compilation-invariants.md"
-      - "docs/paper-lean-name-map.md"
       - "lean/README.md"
       - "lean/Lara/Invariants.lean"
       - "lean/Lara/Examples/CompilerInvariants.lean"
@@ -145,15 +144,12 @@ ai_actions:
       attackClosureB_iff (the inner per-attack test only) to coveredB_iff;
       CheckedProgram.nodup recited at its field line 478 rather than the
       structure line 471; the canonical-scope pointer changed from a bare
-      relative path that does not resolve in this repo to the full lara-paper
+      relative path that does not resolve in this repo to the full
       URL #180-#184 already use; lean/README.md's verification snapshot
-      updated from 76 jobs / 760 reports to the measured 78 / 780;
-      closure_rejects_noncontaining_target added to the name-map declaration
-      index, which had omitted the only one of the AxCheck-gated theorems.
+      updated from 76 jobs / 760 reports to the measured 78 / 780.
     provenance: ai-executed
     files_changed:
       - "docs/theory-m0-compilation-invariants.md"
-      - "docs/paper-lean-name-map.md"
       - "lean/README.md"
   - turn: 1
     action: >
@@ -211,7 +207,6 @@ ai_actions:
       - "lean/Lara.lean"
       - "docs/theory-m1-compilation-image.md"
       - "docs/theory-m0-compilation-invariants.md"
-      - "docs/paper-lean-name-map.md"
       - "lean/README.md"
   - turn: 4
     action: >
@@ -322,9 +317,9 @@ open_threads:
   - "M1 (#184) is next and now carries three obligations: the realize construction, conclusion well-sortedness under Sigma, and the O91 problem -- sufficiency must construct undercut/undermine attacks that a conclusion labelling cannot see."
   - "Row 7 of the M0 invariant table (strict-chain well-formedness) still has no rejecting witness; it lands with B0 (#182)."
   - "The staging buffer has ~30 unpromoted, unstale observations, many idle since well before the N219 pivot. The stale sweep is overdue and was deliberately not run this turn -- see pm_reasoning_log."
-  - "#121's dependency is a person and it remains the one open issue whose resolution changes what the PLDI/POPL paper may claim (carried from 2026-08-25_001)."
+  - "#121's dependency is a person and it remains the one open issue whose resolution changes what the paper may claim (carried from 2026-08-25_001)."
   - "The first open thread above is historical: PR #194 merged as commit 153bc63 and #183 closed before turn 2 began."
-  - "N226 is an unapproved scope recommendation. The researcher must review the draft plan before implementation or edits to issue #184 and the lara-paper theory plan."
+  - "N226 is an unapproved scope recommendation. The researcher must review the draft plan before implementation or edits to issue #184 and the paper theory plan."
   - "The M1 counterexample is source-derived but not yet mechanized; O93 remains staged until implementation evidence or researcher affirmation supplies a closure signal."
   - "The N226 approval thread is closed by N227. M0 is editable, but the post-Task-4 gate must identify an independently necessary and constructively sufficient carrier field before any rewrite."
   - "O93 remains staged. The researcher approved the scope recommendation, not the counterexample as mechanized evidence; the planned Lean theorem remains its closure path."

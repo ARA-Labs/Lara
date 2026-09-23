@@ -1,6 +1,6 @@
 # D1 — Rebuttal replay: a paper + reviews + rebuttal as a sequence of checked programs
 
-Issue [#62](https://github.com/EYH0602/lara/issues/62) (tracker [#61](https://github.com/EYH0602/lara/issues/61)); case-study material for the M7 paper package [#60](https://github.com/EYH0602/lara/issues/60) (T3). This is the **paper + reviews** population size that `examples/README.md` names but no prior example exhibits.
+Issue [#62](https://github.com/ARA-Labs/lara/issues/62) (tracker [#61](https://github.com/ARA-Labs/lara/issues/61)); case-study material for the M7 paper package [#60](https://github.com/ARA-Labs/lara/issues/60) (T3). This is the **paper + reviews** population size that `examples/README.md` names but no prior example exhibits.
 
 _A demo write-up (2026-08-02) for the paper package: prose around a set of
 checked, committed examples. For readers without argumentation background:
@@ -180,6 +180,6 @@ examples/rebuttal-replay/
 
 Each `example.lara` carries a bottom-of-file golden-oracle comment (the expected labels + statuses); the `.core.sexp` wire anchor and `expected.json` located-diagnostic golden are **derived** by `scripts/gen-worked-examples.hs` and freshness-pinned by `test/WorkedExamplesSpec.hs`.
 
-## Scaled version (out of scope, post-PLDI)
+## Scaled version (out of scope)
 
-LLM elaboration of real OpenReview threads at scale, and correlation studies of LARA verdicts vs. human reviewer complaints, are the ACL/EMNLP follow-up (tracker #61). Here the reviews are **hand-lowered** per the corpus-unit discipline, grounded in the gaps the C04 annotation already documents.
+LLM elaboration of real OpenReview threads at scale, and correlation studies of LARA verdicts vs. human reviewer complaints, are deferred future work (tracker #61). Here the reviews are **hand-lowered** per the corpus-unit discipline, grounded in the gaps the C04 annotation already documents.

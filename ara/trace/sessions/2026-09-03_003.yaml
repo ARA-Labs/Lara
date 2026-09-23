@@ -6,7 +6,7 @@ session:
   turn_count: 1
   summary: >
     Scope-closure session: #184 (M1) closed on maintainer review with paper
-    integration deferred to lara-paper, and M4 Part B (full abstraction)
+    integration deferred, and M4 Part B (full abstraction)
     descoped by researcher decision after explicit pushback — PR #232 records
     the boundary in docs/theory-m4-contextual-adequacy.md §7, deletes the
     executed plan, and closes #187 on merge; reopening triggers (#215/#216)
@@ -36,7 +36,7 @@ events_logged:
 
 ai_actions:
   - turn: 1
-    action: "Verified #184 deliverables in Lean (realizable_invariant, oneSelfEdge_not_realizable, emptyUnitCheck_ok, AxCheck rows, name-map §M1) and canonical plan §M1 checkboxes; closed #184 with closure-basis comment"
+    action: "Verified #184 deliverables in Lean (realizable_invariant, oneSelfEdge_not_realizable, emptyUnitCheck_ok, AxCheck rows) and canonical plan §M1 checkboxes; closed #184 with closure-basis comment"
     provenance: ai-executed
     files_changed: []
   - turn: 1
@@ -67,7 +67,7 @@ key_context:
 
 open_threads:
   - "PR #232 awaits review/merge; #187 auto-closes on merge"
-  - "lara-paper: state M1 per its Paper direction and re-scope M4 to contextual representation independence (researcher-side)"
+  - "Paper side: state M1 per its Paper direction and re-scope M4 to contextual representation independence (researcher-side)"
   - "Next mechanization work: PW-T9 (#190) recommended, then PW-T8 (#193) — closes tracker #189"
 
 ai_suggestions_pending:

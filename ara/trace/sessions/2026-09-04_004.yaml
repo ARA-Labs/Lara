@@ -87,7 +87,7 @@ ai_actions:
       Executed the PW-T8 plan via /implement with per-task spec and quality
       reviews; pre-compiled every plan Lean block; created AFBisim.lean,
       Status.lean, Examples/PWStatus.lean; wired Lara.lean, AxCheck.lean, CI;
-      wrote the freeze record, name-map section, T6/T9 pointers; filed issues
+      wrote the freeze record, T6/T9 pointers; filed issues
       #238/#239; retired the plan; pushed and opened PR #240; wrote this ARA
       closeout.
     provenance: ai-executed
@@ -99,7 +99,6 @@ ai_actions:
       - "lean/AxCheck.lean"
       - ".github/workflows/ci.yml"
       - "docs/theory-pw-t8-status-preservation.md"
-      - "docs/paper-lean-name-map.md"
       - "docs/theory-pw-t6-structural-transport.md"
       - "docs/theory-pw-t9-path-composition.md"
       - "plans/2026-09-04-theory-pw-t8-status-preservation.md (deleted)"

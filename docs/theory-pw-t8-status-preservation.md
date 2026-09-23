@@ -11,8 +11,7 @@ layers over T6 and T9._
 The intended readers are the paper author, whoever takes decisions on tracker
 #189, and anyone extending or citing structural bridges to status. They should
 cite the declarations below rather than reconstructing the hypotheses from
-implementation details; `docs/paper-lean-name-map.md` §PW-T8 carries the
-stable keys.
+implementation details.
 
 T8 adds a status layer over the exact structural layer frozen by T6 and
 composed by T9. Its generic core is `Lara/PW/AFBisim.lean` (frameworks and
@@ -22,9 +21,7 @@ witnesses are in `Lara/Examples/PWStatus.lean`. All three modules only
 import: nothing in the checker, compilation, grounded labelling, local status,
 the PW0 outer model, T6, or T9 was modified.
 
-The design being mechanized is
-`lara-paper/plan/possible-world-semantics-brainstorm.md` §Status-Preserving
-Bridge and §T8 (external to this repository, as for PW0, T6 and T9). Its
+The design being mechanized is the status-preserving bridge (T8). Its
 vocabulary — `RobustlyJustified`, `PossiblyJustified`, `Comparable`,
 `Translatable`, `Reachable` — is quoted here for citation and is not
 defined by any Lean declaration; the Lean hypotheses those names correspond
@@ -475,5 +472,3 @@ These are design commitments with named homes, not oversights.
 T8 discharges T6 limitation 3 — the absence of attack transport — and T9
 limitation 4 — the absence of status preservation along paths — without
 weakening or deleting either historical limitation record.
-
-Full stable keys: `docs/paper-lean-name-map.md` §PW-T8.

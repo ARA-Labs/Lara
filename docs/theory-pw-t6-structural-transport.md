@@ -11,15 +11,12 @@ contexts); start from `theory-pw-closeout.md` for the subseries index and
 
 The intended readers are the paper author, whoever takes decisions on tracker
 #189, and whoever implements T8/T9. They should cite the declarations below
-rather than re-deriving them; `docs/paper-lean-name-map.md` §PW-T6 carries the
-stable keys.
+rather than re-deriving them.
 
 T6 adds a structural layer over the unchanged PW0 wrapper and the unchanged
 local checker: three new modules that only import. No local checking,
 compilation, grounded labelling, status, or PW0 definition was modified.
-The canonical design source is
-`lara-paper/plan/possible-world-semantics-brainstorm.md` §Structural Bridge /
-§T6; the sizing note it executes is `docs/theory-pw0-outer-model.md` §6.
+The sizing note it executes is `docs/theory-pw0-outer-model.md` §6.
 
 ## 1. What T6 froze
 
@@ -245,5 +242,3 @@ These are design commitments, not oversights; each has a named home.
    verbatim *because* of this. Relaxing it would make "mapped obligations" a
    genuine map and completeness conditional again — do not relax it without
    T8-level need.
-
-Full stable keys: `docs/paper-lean-name-map.md` §PW-T6.

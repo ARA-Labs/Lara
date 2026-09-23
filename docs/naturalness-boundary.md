@@ -155,12 +155,12 @@ faithful to the checked artifact.
 ## 7. Consequences
 
 - [#30](https://github.com/ARA-Labs/lara/issues/30) (`Lara.Json`, the LLM
-  producer surface) is the layer-2 instance. It stays `post-pldi`; this note is
+  producer surface) is the layer-2 instance. It stays deferred; this note is
   its upstream policy, so it starts from a settled boundary rather than
   reopening one.
-- **Venue split.** The PLDI/POPL core paper may cite the design rule and layer 1
+- **Scope split.** The core language may cite the design rule and layer 1
   as a language-design commitment. Layer-2 evaluation — how faithfully a
-  producer lowers prose — belongs to the ACL/EMNLP follow-up, along with #52.
+  producer lowers prose — is deferred future work, along with #52.
 - Future ease-of-use proposals cite this note. A proposal that keeps layer 1
   deterministic and lowers to identical bytes needs no re-litigation; one that
   does not is a change to *this* document first.

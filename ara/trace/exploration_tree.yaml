@@ -4,7 +4,6 @@ tree:
   support_level: explicit
   source_refs:
   - plans/research-proposal.md §1
-  - docs/comparison-rit-lara.md §1
   title: Can the evidence→claim support in a research artifact be made checkable, not just declared?
   description: 'LLM-produced research artifacts assert claims and gesture at evidence, but "this supports
     that" is never checked, and a holistic reviewer cannot say which premise is missing or which dead
@@ -63,7 +62,6 @@ tree:
           support_level: explicit
           source_refs:
           - docs/strict-backend-decision.md §1
-          - 'plans/popl-research-review.md §2 #1'
           - commit 4072f25
           title: PIVOT — LP realization does NOT guarantee ARA lowering; replace the built-in LP fragment
             with a backend-parametric strict seam
@@ -197,7 +195,7 @@ tree:
       source_refs:
       - design session 2026-07-21
       title: Use mechanization + test status as the 'experiments'; benchmarking out of scope for the first
-        submission
+        version
       choice: Evaluation = mechanized metatheory (spec §9 results) + worked examples spanning every status/attack
         + adversarial rejection-class conformance
       alternatives:
@@ -212,8 +210,8 @@ tree:
         - deep-research workflow (104 agents, 24/25 claims confirmed)
         - docs/mechanization-plan.md §0/§3
         - docs/worked-examples-plan.md §6
-        title: Deep-research the POPL evaluation norms (adversarially verified)
-        result: 'Mechanized metatheory can BE the evaluation (WebAssembly, FM 2021); POPL AEC excludes
+        title: Deep-research the PL evaluation norms (adversarially verified)
+        result: 'Mechanized metatheory can BE the evaluation (WebAssembly, FM 2021); PL artifact evaluation excludes
           non-mechanized proofs from review; untrusted-producer/checker judged by verified-success + adversarial
           zero-false-positive (Clover) + anti-memorization (LeanDojo), not user studies/latency; differential
           testing framed N+1 (JEST), not oracle-free voting (Csmith). Grounds C10, C11, C12.
@@ -310,7 +308,6 @@ tree:
         support_level: explicit
         source_refs:
         - docs/spec.md §8 (self-flagged open)
-        - plans/popl-research-review.md §6
         title: Two definitional points still open — status function not yet total
         hypothesis: The four-state status function is total and deterministic as specified.
         failure_mode: '(1) The hole-vs-complete-alternative case (what a claim''s status is when one argument
@@ -346,7 +343,6 @@ tree:
   - docs/strict-backend-decision.md §4.2
   - src/Lara/Kernel.hs
   - README.md
-  - 'plans/popl-research-review.md §2 #2'
   title: The existing LP checker trusts arbitrary constants — it is a non-conforming adapter seed, not
     the trusted core
   hypothesis: The Haskell Kernel + ConstantSpec (the original code) is LARA's trusted core.
@@ -958,7 +954,6 @@ tree:
   - ../rit/src/rit/formal/primitives.py
   - ../rit/src/rit/formal/grammar.py
   - ../rit/notes/DESIGN.md
-  - docs/comparison-rit-lara.md §11
   - commit d192047
   title: rit source verification pins its expressible fragment to arithmetic over extracted scalars
   result: 'rit has restructured since its README (formal/core/action/algorithms layout gone; package now
@@ -967,12 +962,11 @@ tree:
     (GROUNDS, ORDER, BEAT, BOUND, ENTAIL, CONTRADICT), all predicates over log-extracted naturals; grammar.py
     renders conclusions as decidable arithmetic proved `by decide`, with preconditions as documented (not
     proved) hypotheses checked by sha256 outside Lean. rit''s own source concedes "''why'' as VALUE (important/novel)
-    is NOT formalizable". Finding written into docs/comparison-rit-lara.md §11 and the novelty delta table,
+    is NOT formalizable". Finding written into the novelty delta table,
     committed on chore/update-comparison (d192047).
 
     '
   evidence:
-  - docs/comparison-rit-lara.md §11.1
   - docs/novelty-and-related-work.md §2 rit row
 - id: N47
   type: experiment
@@ -990,7 +984,6 @@ tree:
   - ../rit/src/rit/grounding/{__init__,provenance}.py
   - ../rit/README.md
   - ../rit/notes/DESIGN.md
-  - docs/comparison-rit-lara.md §11.5
   - commit ba6c45e
   title: rit's shipping commit path enforces strictly less than its write-up claims
   result: 'Audited rit''s live path (rit.py CLI -> action/push -> admit.gate -> grounding + formal/kernel)
@@ -1004,11 +997,10 @@ tree:
     run over a cfg block-CFG the push path never builds (only gate/entail is live, via derive.settle).
     What HOLDS: per-fact re-extraction (push writes axiom label_grounded = value from the binding; admit.gate
     re-extracts every binding via sha256 + regex), and kernel sorry/rogue-axiom rejection via #print axioms.
-    Committed as docs/comparison-rit-lara.md §11.5 (ba6c45e), pushed to PR #22.
+    Committed as ba6c45e, pushed to PR #22.
 
     '
   evidence:
-  - docs/comparison-rit-lara.md §11.5
   - ../rit/src/rit/admit/__init__.py:43-51 (per-file loop)
   - ../rit/src/rit/formal/uses.py:86-90 (used_constants stub)
   - ../rit/src/rit/grounding/__init__.py:52-55 (L1/L2 only)
@@ -1520,7 +1512,6 @@ tree:
       source_refs:
       - scripts/gen-corpus.hs
       - scripts/differential.sh
-      - docs/m3-closeout-notes.md
       also_depends_on:
       - N66
       title: Generate the differential corpus from Haskell Unit values + both-drivers harness, not a Lean
@@ -1538,7 +1529,6 @@ tree:
       - Hand-author every corpus fixture including the 120-arg stress — rejected as error-prone
       evidence:
       - 'scripts/differential.sh: pass=19 fail=0, byte-exact stdout + exit code'
-      - docs/m3-closeout-notes.md (deviation recorded)
       status: resolved
 - id: N68
   type: pivot
@@ -2067,7 +2057,7 @@ tree:
   to: 'M5 evaluation corpus, deterministic scope (tracker #48): T1 seeded mutation generators + T4 worked
     cases first'
   trigger: 'User directive to execute branch feat/m5-mutation-suite-worked-cases end to end (implement,
-    experiment, record, PR). Paper targets PLDI/POPL, so M5 is scoped to the LLM-independent axes; T1/T4
+    experiment, record, PR). M5 is scoped to the LLM-independent axes; T1/T4
     chosen together per #48 ("choose them while designing T1/T2 so mutation coverage and case selection
     agree").
 
@@ -2135,7 +2125,7 @@ tree:
   - 'scripts/gen-mutants.hs: «wrote 148 verified mutants to fixtures/mutants» [result]'
   - 'fixtures/mutants/MANIFEST.tsv per-class tally: 20/7/6/6/6/7/7/8/7/8/17 + 45 codec + 4 cycles [result]'
   - 'cabal test: «mutation suite: every mutant produces its specified outcome +++ OK» x3 [result]'
-  - PR https://github.com/EYH0602/lara/pull/49
+  - PR https://github.com/ARA-Labs/lara/pull/49
   status: resolved
 - id: N92
   type: decision
@@ -2313,26 +2303,25 @@ tree:
   source_refs:
   - 'GitHub issue #52'
   - 'GitHub issue #48'
-  - plans/popl-research-review.md §Phase-F
   - docs/m5-freeze-checklist.md
   title: 'Defer #52 (human-authored natural-defect ablation) from the T5 freeze; freeze the deterministic
     corpus now'
   choice: >
-    Freeze the LLM-independent evaluation corpus now and keep #52 in the ACL/EMNLP follow-up. The user
-    first directed "land #52 first, then freeze"; the manager surfaced that #52 is labelled post-pldi,
+    Freeze the LLM-independent evaluation corpus now and keep #52 deferred to LLM follow-up work. The user
+    first directed "land #52 first, then freeze"; the manager surfaced that #52 is labelled deferred,
     is gated on the LLM elaborator / D3 flip (the same boundary as #30 and axes b/d), and its
     human-authored NATURAL-defect certificate corpus does not exist in the repo (examples/ are golden,
     fixtures/mutants/ are seeded, no natural-defect corpus present). On that evidence the user reversed
     to "freeze now, defer #52." The in-scope way to get a harder-than-confirmatory number is the seeded
     discriminating localization benchmark (TODOS P3), not #52.
   alternatives:
-  - 'Land #52 first, then freeze (original user direction) — pulls post-pldi, LLM-gated substrate into
-    the PLDI paper''s freeze and blocks on a corpus that must be authored'
+  - 'Land #52 first, then freeze (original user direction) — pulls deferred, LLM-gated substrate into
+    the paper''s freeze and blocks on a corpus that must be authored'
   - 'Build the seeded multi-defect / off-site discriminating localization benchmark before freezing —
     in-scope and LLM-free, but delays the freeze'
   evidence:
-  - 'gh issue view 52 (labels: enhancement, post-pldi; body: "belongs to the ACL/EMNLP LLM follow-up
-    paper, not the PLDI/POPL paper")'
+  - 'gh issue view 52 (labels: enhancement, deferred; body: the issue belongs to LLM follow-up
+    work, outside the LLM-independent scope)'
   - 'find over repo: no human-authored natural-defect certificate corpus (examples/ golden, mutants/ seeded)'
   - 'AskUserQuestion answer "Freeze now, defer #52"'
   status: resolved
@@ -2361,7 +2350,7 @@ tree:
     anchors hash the DETERMINISTIC PROJECTION only (report.tsv cut -f1-14 = b241a576; ablation.tsv =
     e744bbd7); the two wall-clock timing columns are reported but excluded. Committed on branch
     m5-t5-freeze-protocol (51be992); tag m5-freeze-v1 is a post-merge step (goes on the merge commit,
-    per the M1 precedent). M5 is complete for the PLDI/POPL scope.
+    per the M1 precedent). M5 is complete for the LLM-independent scope.
   alternatives:
   - Record hashes-only without committing the numbers — no durable, directly-citable frozen snapshot
   - Un-ignore all of measurements/ — tracks regenerable timing-laden working output, not just the frozen snapshot
@@ -2383,12 +2372,12 @@ tree:
   - plans/research-proposal.md §7
   - TODOS.md
   - docs/m5-freeze-checklist.md
-  title: 'M5 complete → M7 (POPL paper package) next'
+  title: 'M5 complete → M7 (paper package) next'
   from: 'M5 — evaluation corpus (deterministic axes a + c): mutation suite, corpus units, measurement
     harness, ablations, freeze'
-  to: 'M7 — POPL package: write the paper from the frozen axis-(c) tables (measurements/frozen/)'
+  to: 'M7 — paper package: write the paper from the frozen axis-(c) tables (measurements/frozen/)'
   trigger: 'T5 freeze landed — the citable, reproducible axis-(c) numbers now exist; every M5 task is
-    closed for the PLDI/POPL scope. #52 and the LLM-producer axes (b/d, #30) remain the ACL/EMNLP follow-up.'
+    closed for the LLM-independent scope. #52 and the LLM-producer axes (b/d, #30) remain deferred LLM follow-up work.'
   status: open
   also_depends_on:
   - N99
@@ -2426,11 +2415,10 @@ tree:
   timestamp: 2026-08-03T13:30
   source_refs:
   - "issue #68"
-  - docs/paper-lean-name-map.md
   - "PR #72 (commit e43be03)"
   title: 'P1-P3 gate: read-only Lean name-map audit (#68) — equivalence confirmed two-sided'
   description: >
-    The PLDI revision plan gates paper items P1-P3 on a read-only audit mapping each paper
+    The paper revision plan gates paper items P1-P3 on a read-only audit mapping each paper
     statement to its Lean declaration, carrying the P1 contingency: does a true two-sided
     equivalence over an INDEPENDENT direct source semantics exist, or must the paper weaken
     "full equivalence"? Audited Grounded/Compile/Consistency/Policy/Unit/Strict/ND/RA.
@@ -2446,9 +2434,8 @@ tree:
     function into Bool, so the paper states totality + adequacy (replayFull_iff).
     Strict-chain hypothesis = Policy.WellFormed over Policy.StrictReachable, quoted
     verbatim. All ~60 mapped declaration names spot-checked; every headline theorem
-    already AxCheck-gated. Deliverable docs/paper-lean-name-map.md; PR #72.
+    already AxCheck-gated. Deliverable: PR #72.
   evidence:
-  - docs/paper-lean-name-map.md
   - "lean/AxCheck.lean (srcStatus_iff_checked :381, contrary_claims_not_both_justified :600)"
   status: resolved
   also_depends_on:
@@ -2487,7 +2474,6 @@ tree:
   - ../rit/src/rit/action/push.py
   - ../rit/src/rit/admit/__init__.py
   - ../rit/src/rit/grounding/__init__.py
-  - docs/comparison-rit-lara.md
   title: 'RIT paper/source and LARA guarantee-boundary audit'
   description: >
     Re-read the supplied 28-page rit paper and traced the current RIT CLI, gated Python API,
@@ -2495,7 +2481,7 @@ tree:
     with LARA's presentation AST, elaboration, replay identity, admission, open-obligation, strict
     backend, and grounded-status paths; then fresh-reader-tested the rewritten comparison.
   result: >
-    Rewrote docs/comparison-rit-lara.md with separate paper/source columns and an implementation
+    Rewrote the rit comparison with separate paper/source columns and an implementation
     order. Confirmed five load-bearing boundaries: rit CLI commit is non-blocking; CLI verify can
     report CLEAN for a reproducible compile failure; gate/audit replay L2 but trust stored L1 values;
     conflict receipts are best-effort; LARA currently all-admits presentation leaves and rejects open
@@ -2503,7 +2489,6 @@ tree:
     byte-to-leaf checker seam plus LARA's existing argumentation layer, after admission/hole
     conformance is repaired. Markdown fences and diff whitespace validated; no code changed.
   evidence:
-  - docs/comparison-rit-lara.md
   - "ComparisonReader fresh-reader report"
   status: resolved
   also_depends_on:
@@ -2570,8 +2555,6 @@ tree:
     - plans/2026-08-05-policy-admission-calculus.md
     - "issue #77"
     - "PR #79"
-    - /Users/yfhe/overleaf/ara/lara/src/language.tex
-    - /Users/yfhe/overleaf/ara/lara/src/metatheory.tex
     title: Formalize policy admission as context construction while repairing issue #77
     choice: >
       Execute the policyAdmission repair as both a source conformance fix and a small
@@ -2597,7 +2580,6 @@ tree:
   timestamp: 2026-08-05T01:54
   source_refs:
   - plans/2026-08-04-rit-informed-evidence-admission.md
-  - docs/comparison-rit-lara.md
   - src/Lara/Elaborate.hs
   - src/Lara/AST.hs
   - docs/spec.md
@@ -2620,7 +2602,6 @@ tree:
     passed; no checker code changed.
   evidence:
   - plans/2026-08-04-rit-informed-evidence-admission.md
-  - docs/comparison-rit-lara.md
   status: resolved
   also_depends_on:
   - N106
@@ -2820,7 +2801,7 @@ tree:
   - Preserve the broad source-differential claim despite only comparing admission/audit primitives
   - Keep unordered fixture alignment and normalize only one adapter's audit
   evidence:
-  - https://github.com/EYH0602/lara/pull/81#discussion_r3730226506
+  - https://github.com/ARA-Labs/lara/pull/81#discussion_r3730226506
   - fixtures/admission/MANIFEST
   - lean/Lara/Admission.lean
   - test/AdmissionSpec.hs
@@ -2880,9 +2861,8 @@ tree:
     hosted checks because Actions was in major outage incident qcvjkzcs7j74.
   evidence:
   - ara/evidence/results/policy_admission_boundary.md
-  - https://github.com/EYH0602/lara/pull/81
+  - https://github.com/ARA-Labs/lara/pull/81
   - https://www.githubstatus.com/incidents/qcvjkzcs7j74
-  - /Users/yfhe/overleaf/ara/lara/build/main.pdf
   status: resolved
 
 - id: N120
@@ -2927,7 +2907,6 @@ tree:
   - lean/AxCheck.lean
   - scripts/admission-differential.sh
   - plans/2026-08-05-policy-admission-metatheory.md
-  - docs/paper-lean-name-map.md
   status: resolved
 
 - id: N121
@@ -3510,7 +3489,7 @@ tree:
     anchors, and its S4 appendix listing showed the hand-written pre-@0.3
     expansion rather than the merged comparison block and named binding path.
   evidence:
-  - https://github.com/EYH0602/lara/pull/92
+  - https://github.com/ARA-Labs/lara/pull/92
   - test/Spec.hs
   - scripts/differential.sh
   - measurements/report.json
@@ -3582,7 +3561,7 @@ tree:
   - "Keep unconditional restore, lazy write ordering, representative-only negatives, and a directory blacklist (rejected: avoidable loss and drift risks)."
   evidence:
   - plans/2026-08-09-binding-audit-worklist.md
-  - https://github.com/EYH0602/lara/issues/87
+  - https://github.com/ARA-Labs/lara/issues/87
   status: resolved
 
 - id: N145
@@ -3699,8 +3678,7 @@ tree:
     - scripts/binding-audit.hs
     - test/BindingAuditSpec.hs
     - test/ClaimSupportSpec.hs
-    - https://github.com/EYH0602/lara/pull/96
-    - "/Users/yfhe/repos/ara/lara-binding-audit-review-74f4737.zip"
+    - https://github.com/ARA-Labs/lara/pull/96
   also_depends_on: [N147, N148]
   status: resolved
 - id: N150
@@ -3716,7 +3694,7 @@ tree:
   trigger: >
     User directive to implement plans/2026-08-10-sorts-in-checker.md. This also
     settles D-4, the plan's one open sign-off — the scheduling question of
-    whether the pass lands inside the #60 submission window. Decided in favour
+    whether the pass lands inside the #60 schedule window. Decided in favour
     of now; the regeneration's two measurement diffs came back empty, so the
     evaluation table the decision was protecting did not move.
   also_depends_on: [N140, N141]
@@ -4575,7 +4553,7 @@ tree:
     consistency beyond the plan's file map. PR #110 opened; merge gated on
     hosted Haskell + Lean CI.
   evidence:
-    - "https://github.com/EYH0602/lara/pull/110"
+    - "https://github.com/ARA-Labs/lara/pull/110"
     - plans/2026-08-12-named-cert-premise-slots.md
     - test/CertSlotsSpec.hs
     - examples/S6/example.core.sexp
@@ -4638,7 +4616,7 @@ tree:
     finding-specific replies and are resolved; GitHub still reports
     CHANGES_REQUESTED pending reviewer re-approval.
   evidence:
-    - "https://github.com/EYH0602/lara/pull/110"
+    - "https://github.com/ARA-Labs/lara/pull/110"
     - "commit 56f7c2b"
     - "Actions run 31769934475"
     - test/CertSlotsSpec.hs
@@ -4727,7 +4705,7 @@ tree:
     - lean/Lara/CertSlots.lean
     - src/Lara/Elaborate/CertSlots.hs
     - src/Lara/Syntax.hs
-    - "https://github.com/EYH0602/lara/actions/runs/31772295184"
+    - "https://github.com/ARA-Labs/lara/actions/runs/31772295184"
   also_depends_on: [N184]
   status: resolved
 
@@ -5553,7 +5531,7 @@ tree:
     The researcher asked whether #169 and #168 should land before the #156
     refreeze cycle. Answered by splitting them. #168 is not sequenceable here
     at all — its work is results prose in the paper repository, so it was
-    closed in favour of EYH0602/lara-paper#1 and the two in-repo pointers were
+    closed in favour of a paper-side handoff and the two in-repo pointers were
     retargeted. #169 lands first, because the decision turns on a property
     that is cheap to test rather than to argue: the family spellings are
     manifest column 3 and the ground-truth list is column 8, both inside the
@@ -5565,13 +5543,12 @@ tree:
     the tag rather than after, when it would cost a second corpus
     regeneration.
   alternatives:
-    - "Refreeze first, land #169 after — defensible, since the refactor is cleanup with no live defect and #156 is on the submission critical path. Rejected on the asymmetry of discovery: if byte-neutrality fails, finding out after the tag costs a full regeneration, while finding out before costs one --check run."
+    - "Refreeze first, land #169 after — defensible, since the refactor is cleanup with no live defect and #156 is on the critical path. Rejected on the asymmetry of discovery: if byte-neutrality fails, finding out after the tag costs a full regeneration, while finding out before costs one --check run."
     - "Land #169 and #168 together as one pre-refreeze batch — rejected: #168 cannot be discharged from this repository, so batching them would have parked a paper-repo obligation behind a code change indefinitely."
     - "Argue byte-neutrality from the code (familyText preserves the spellings; the wrapper renders identically) and skip the check — rejected: the argument is sound but is exactly the kind of claim the freeze discipline exists to verify rather than trust."
   evidence:
     - "issue #169; issue #156 (Task 4 refreeze cycle); plans/2026-08-24-m5-freeze-v5-batch.md"
     - "trace node N214 (the check itself)"
-    - "EYH0602/lara-paper#1 (the #168 handoff)"
   also_depends_on: [N210]
   status: resolved
 
@@ -5624,7 +5601,7 @@ tree:
     decision whose own recommendation is "do nothing until the paper package
     is out"; #126 is future-work gated on the possible-worlds design; #121 is
     blocked on a second author, not on code; #78 is a scope decision; #52 and
-    #30 are post-pldi. #109 was the one open item that could be finished
+    #30 are deferred. #109 was the one open item that could be finished
     alongside the freeze without touching a frozen input.
   choice: >
     Run #156 and #109 in this session as two independent PRs, docs first. The
@@ -5756,7 +5733,7 @@ tree:
 
 - id: N219
   type: pivot
-  title: "Code side closed; the remaining PLDI/POPL work is writing"
+  title: "Code side closed; the remaining work is writing"
   provenance: user
   timestamp: "2026-08-25T23:58"
   description: >
@@ -5764,14 +5741,14 @@ tree:
     complete. What remains open in this repository is not code work: #151 is a
     decision recommending no action until the paper package ships, #126 is
     gated on the possible-worlds design and may never fire, #78 is a scope
-    decision, #52 and #30 are post-pldi, and #176 is a small provenance
+    decision, #52 and #30 are deferred, and #176 is a small provenance
     cleanup. The one exception is #121, whose dependency is a person rather
     than code.
   from: "Evaluation-suite completion and corpus freezing"
   to: "Paper writing (paper repository)"
   trigger: >
     m5-freeze-v5 cut on 5dd326b; the batch #123/#124/#125 landed and frozen;
-    no schedulable code work remains against the PLDI/POPL scope.
+    no schedulable code work remains against the current scope.
   evidence:
     - "trace node N218 (the freeze this pivot rests on)"
     - "gh issue list ARA-Labs/lara after the merge: #176, #151, #126, #121, #78, #52, #30"
@@ -5780,22 +5757,22 @@ tree:
 
 - id: N220
   type: pivot
-  title: "Theory spine opens: POPL 2028 core mechanization (#180)"
+  title: "Theory spine opens: core mechanization (#180)"
   provenance: user
   timestamp: "2026-08-26T09:00"
   description: >
     A second, independent milestone series opened in this repository after the
-    PLDI/POPL code freeze. Its canonical design lives in the paper repository
-    (EYH0602/lara-paper, plan/theory-depth-plan.md); tracker #180 carries B0
+    code freeze. Its canonical design lives in the paper repository;
+    tracker #180 carries B0
     and M0-M5 as native sub-issues, with the possible-world wrapper (#192) on
     a separate tracker because it is gated by M2a and is not a committed
     addition to the core calculus. The work is metatheory about the existing
     checker, not new checker features: realizability of the compilation image
     (M1), an observation interface (M2a), hardness (M2b, M3).
-  from: "Paper writing on the frozen PLDI/POPL package (N219)"
-  to: "Core theory mechanization for POPL 2028"
+  from: "Paper writing on the frozen package (N219)"
+  to: "Core theory mechanization"
   trigger: >
-    N219 closed the code side against the PLDI/POPL scope, which left the
+    N219 closed the code side against the frozen scope, which left the
     metatheory questions the frozen calculus raises as the next schedulable
     work. This node exists because the theory spine had run through M0 with
     no trace record at all.
@@ -5953,7 +5930,7 @@ tree:
     record: that invalidates M0 and risks turning realizability into a
     definitional restatement.
   evidence:
-    - "issue #184 and EYH0602/lara-paper plan/theory-depth-plan.md, M1 target theorem"
+    - "issue #184, M1 target theorem"
     - "lean/Lara/Invariants.lean:121-128 (CompilerInvariant.ranged and conflictComplete)"
     - "lean/Lara/Attack.lean:538-570 (the three HasAttack constructors and their contrary/exception premises)"
     - "lean/Lara/Compile.lean:563-572 (every compiled edge exposes a typed declared attack)"
@@ -6223,7 +6200,7 @@ tree:
     Nine commits, 4819 insertions and 0 deletions across 12 files.
     Compile.lean, Grounded.lean, Invariants.lean and Realizability.lean are
     untouched; the four modified pre-existing code files gained only
-    registration lines, while `docs/paper-lean-name-map.md` gained its §7.
+    registration lines.
     All gates pass, including the five unchanged-behaviour gates —
     differential, admission-differential, replay-tamper, freeze-bundle and
     presentation-parity — which is what makes the additivity claim checkable
@@ -6589,7 +6566,7 @@ tree:
     - "commits ee9a8c6, 4bfe47b, 56e3ce3, 07a1146, 9573cd3, b314153"
     - "lean/Lara/BackendComposition.lean; lean/Lara/Examples/BackendComposition.lean"
     - "src/Lara/Strict/Deps.hs; src/Lara/SupportTerm.hs; src/Lara/Driver/Internal.hs; test/StrictSpec.hs"
-    - "docs/theory-b0-backend-compositionality.md; docs/paper-lean-name-map.md"
+    - "docs/theory-b0-backend-compositionality.md"
     - "local gates: lake build; AxCheck; test-check-axioms; cabal test; presentation-parity; semantics-goldens; update-goldens; backend-deps-golden; differential; admission-differential"
   status: resolved
   also_depends_on: [N243, N245, N246, N247]
@@ -6989,7 +6966,7 @@ tree:
     - "PW0 or a smaller open issue instead of M5."
   evidence:
     - "user selection: Full presentation AST"
-    - "issue #188 and EYH0602/lara-paper/plan/theory-depth-plan.md §M5"
+    - "issue #188"
     - "plans/2026-08-30-m5-surface-calculus.md"
   also_depends_on: [N268]
 
@@ -7197,7 +7174,6 @@ tree:
     - "measured before: `unfold compare` -> ambiguous term; `@compare` -> Ambiguous term; bare `compare` -> Ord.compare"
     - "measured after: `unfold crossCompare` resolves, leaving the match unreduced as the proof note documents"
     - "lean/Lara/PW/Compare.lean: crossCompare"
-    - "docs/paper-lean-name-map.md: Naming note"
     - "lake build 127 jobs PASS; axiom audit 1612 declarations PASS"
   status: resolved
   also_depends_on: [N271, N272]
@@ -7300,7 +7276,7 @@ tree:
     - "lean/Lara/PW/Structural.lean: StructuralBridge, support_transport, Admits, admits_transport"
     - "lean/Lara/PW/Translation.lean: instAPat_tr, equiv_tr, trSupport"
     - "lean/Lara/Examples/PWStructural.lean: t7_t6_boundary, ren_transport, ren_translationUndefined"
-    - "docs/theory-pw-t6-structural-transport.md; docs/paper-lean-name-map.md §PW-T6"
+    - "docs/theory-pw-t6-structural-transport.md"
     - "ara/evidence/proofs/pw_t6_transport.md"
     - "lake build: 130 jobs PASS; axiom audit: 1707 declarations PASS"
   status: resolved
@@ -7581,7 +7557,7 @@ tree:
 
 - id: N290
   type: decision
-  title: "#184 (M1) closed on maintainer review; paper integration deferred to lara-paper"
+  title: "#184 (M1) closed on maintainer review; paper integration deferred"
   provenance: user
   timestamp: "2026-09-03T00:20"
   choice: >
@@ -7589,16 +7565,15 @@ tree:
     non-sufficiency counterexample), verified present: realizable_invariant,
     compilerInvariant_iso, oneSelfEdge_not_realizable, emptyUnitCheck_ok in
     Lara/Realizability.lean and Examples/Realizability.lean, AxCheck coverage,
-    name-map §M1 rows, and every task box checked in the canonical
-    theory-depth-plan §M1. The researcher stated the maintainer review is done
+    and every task box checked in the canonical
+    M1 plan. The researcher stated the maintainer review is done
     and the paper side will integrate later. The generated-policy /
     realization-kit follow-up stays unopened by decision.
   alternatives:
-    - "Keep open until lara-paper states the M1 theorem — rejected: the remaining work is paper-side and the researcher chose to close now."
+    - "Keep open until the paper states the M1 theorem — rejected: the remaining work is paper-side and the researcher chose to close now."
   evidence:
     - "https://github.com/ARA-Labs/lara/issues/184 (closing comment, 2026-09-03)"
     - "lean/Lara/Realizability.lean; lean/Lara/Examples/Realizability.lean"
-    - "docs/paper-lean-name-map.md §M1"
   status: resolved
   also_depends_on: [N277]
 
@@ -8297,8 +8272,7 @@ tree:
     commit 1a7240d (PR #247, merged 2026-09-06 07:04 UTC — seven minutes
     before the issue was filed at 07:11 UTC) already contains both items:
     `def Matched` at Lara/PW/Status.lean:185 with the `StatusBridge.matched`
-    field restated through it, `matchedB_iff` reading `= true ↔ Matched`,
-    the `PW.Matched` row in docs/paper-lean-name-map.md, and
+    field restated through it, `matchedB_iff` reading `= true ↔ Matched`, and
     `transportsB`/`transportsB_iff` with both `admitsB` and `matchedB`
     routed through them and AxCheck covering all decider theorems. The
     issue's text describes PR #244's tree throughout — even its "moot"

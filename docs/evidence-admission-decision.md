@@ -3,7 +3,7 @@
 _Status: gated design record, 2026-08-06. This document freezes the design
 boundary and the paper claim for byte-level evidence admission, per the scope
 decision in issue #78. It authorizes no implementation: the layer is
-post-PLDI, blocked on the corpus inventory gate below plus explicit researcher
+deferred, blocked on the corpus inventory gate below plus explicit researcher
 approval. Nothing here is part of the frozen `lara-core@0.1` specification,
 and `docs/spec.md` intentionally does not specify this layer._
 
@@ -153,8 +153,7 @@ The gated implementation tasks (abstract calculus mechanization, `tsv-row@1`,
 integration, and the promotion-gate evaluation) are enumerated in
 `docs/evidence-admission-gated-tasks.md` and in issue #78, which closed
 2026-08-26 as not planned. Task 5 in particular changes replay identity and
-combined-report bytes — an M5-scale refreeze that must not happen inside the
-PLDI window.
+combined-report bytes — an M5-scale refreeze.
 
 ## 8. Versioning
 

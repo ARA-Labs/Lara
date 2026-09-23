@@ -4,8 +4,7 @@ _Status: mechanized on 2026-09-02 for Theory M4 (issue #187, tracker #180),
 phases F0–F3 of the since-deleted plan
 `plans/2026-09-02-theory-m4-full-abstraction.md`. This document is the durable
 claim-boundary record for **Part A**. The design freeze that released the
-theorem phases is `docs/theory-m4-context-calculus-decision.md`; the
-declaration index is `docs/paper-lean-name-map.md` §M4. Part B (full
+theorem phases is `docs/theory-m4-context-calculus-decision.md`. Part B (full
 abstraction) is **descoped** — §7._
 
 _In plain terms: a *fragment* is a piece of a checked program, a *context* is

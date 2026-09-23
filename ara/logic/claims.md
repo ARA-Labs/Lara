@@ -275,19 +275,19 @@ the result is stated but not yet proved or mechanized._
   and user studies are essentially never load-bearing. Mechanization can *be* the evaluation, and
   because artifact evaluation excludes non-mechanized proofs from review, an un-mechanized soundness
   argument earns no artifact credit.
-- **Conditions**: Holds for language-design / type-theory submissions at POPL/PLDI-class venues; this
+- **Conditions**: Holds for language-design / type-theory papers at top programming-languages venues; this
   claim is about *evaluation methodology*, grounded in a deep-research pass over accepted exemplars,
-  not about LARA's own internals. Benchmarking was decided out of scope for the first submission.
-- **Sources**: ["\"POPL artifact evaluation explicitly excludes non-mechanized (paper) proofs from review\" ← docs/mechanization-plan.md:30 «POPL artifact evaluation explicitly excludes non-mechanized (paper) proofs from review» [input]", "Two Mechanisations of WebAssembly 1.0 (FM 2021): two mechanised semantics + type-soundness as the whole evaluation ← docs/mechanization-plan.md:26 «Mechanized metatheory *can be the entire evaluation* for a language-semantics paper» [input]"]
+  not about LARA's own internals. Benchmarking was decided out of scope for this work.
+- **Sources**: ["\"Artifact evaluation can exclude non-mechanized (paper) proofs from review\" ← docs/mechanization-plan.md:29 «Artifact evaluation can exclude non-mechanized (paper) proofs from review» [input]", "Two Mechanisations of WebAssembly 1.0 (FM 2021): two mechanised semantics + type-soundness as the whole evaluation ← docs/mechanization-plan.md:25 «Mechanized metatheory *can be the entire evaluation* for a language-semantics paper» [input]"]
 - **Status**: supported
-- **Falsification criteria**: A recent accepted POPL/PLDI calculus paper whose evaluation rests on
+- **Falsification criteria**: A recent accepted programming-languages calculus paper whose evaluation rests on
   performance benchmarks or a user study with no mechanized metatheory or worked examples — i.e. an
   accepted counterexample to the methodology claim.
 - **Proof**: [E02]
 - **Evidence basis**: Deep-research report (adversarially verified, 24/25 claims confirmed) folded
   into `docs/mechanization-plan.md` §0 and `docs/worked-examples-plan.md` §6; exemplars: WebAssembly
   mechanisation (FM 2021), DSP/Baldur/LeanDojo/Clover, Csmith/JEST.
-- **Tags**: evaluation-methodology, mechanization, popl, meta-claim
+- **Tags**: evaluation-methodology, mechanization, meta-claim
 
 ## C11: An untrusted-producer / trusted-checker split is accepted when soundness rests entirely on the checker and rejection is adversarially validated
 - **Statement**: A hybrid where an untrusted LLM proposes certificates that a trusted core re-checks
@@ -344,7 +344,7 @@ the result is stated but not yet proved or mechanized._
   no such proof, so the two sides are still tied by cases and by the constant check; and the
   theorems are refusal statements, so accepting behaviour at or under the bound remains gate
   evidence alone.
-- **Sources**: ["\"treat the reference semantics as one fallible oracle among N\" ← docs/mechanization-plan.md:146 «fallible oracle among N» [input]", "\"JEST found 44 engine bugs and 27 spec bugs\" ← docs/mechanization-plan.md:147 «JEST found 44 engine bugs / 27 spec bugs» [input]", "436/436 positive anchors agree byte-exact across both drivers ← scripts/differential.sh «pass=436 fail=0» [result]", "673 positive anchors, 66 negative and 3 depth cases agree after the #331 bound ← trace N331_gate_controls:result «scripts/differential.sh pass=673 fail=0, negative pass=66 fail=0, depth-bound pass=3 fail=0» [result]", "the same 673/66/3 after the #335 reader totalization, unchanged ← ara/evidence/proofs/lean_reader_nesting_bound_335.md «`scripts/differential.sh`: `pass=673 fail=0`, `negative pass=66 fail=0`, `shared nesting bound: 10000`, `depth-bound pass=3 fail=0`» [result]"]
+- **Sources**: ["\"treat the reference semantics as one fallible oracle among N\" ← docs/mechanization-plan.md:145 «fallible oracle among N» [input]", "\"JEST found 44 engine bugs and 27 spec bugs\" ← docs/mechanization-plan.md:146 «JEST found 44 engine bugs / 27 spec bugs» [input]", "436/436 positive anchors agree byte-exact across both drivers ← scripts/differential.sh «pass=436 fail=0» [result]", "673 positive anchors, 66 negative and 3 depth cases agree after the #331 bound ← trace N331_gate_controls:result «scripts/differential.sh pass=673 fail=0, negative pass=66 fail=0, depth-bound pass=3 fail=0» [result]", "the same 673/66/3 after the #335 reader totalization, unchanged ← ara/evidence/proofs/lean_reader_nesting_bound_335.md «`scripts/differential.sh`: `pass=673 fail=0`, `negative pass=66 fail=0`, `shared nesting bound: 10000`, `depth-bound pass=3 fail=0`» [result]"]
 - **Status**: testing
 - **Falsification criteria**: A demonstration that the shared-core differential setup cannot localize
   whether a divergence is a Haskell-checker bug or a Lean-model bug (i.e. the N+1 framing gives no
@@ -483,7 +483,7 @@ the result is stated but not yet proved or mechanized._
   world-facing claim (causal, methodological, generalization) without a trusted human/LLM
   narrowing step — e.g., a checked scheme-instantiation or a verified prose-to-formal lowering
   admitted through its kernel gate.
-- **Proof**: [docs/comparison-rit-lara.md §11.1–§11.2 (source-verified addendum, commit d192047)]
+- **Proof**: [source-verified rit audit, commit d192047]
 - **Dependencies**: [C06]
 - **Tags**: related-work, novelty-defense, rit, expressiveness
 - **Last revised**: 2026-07-25 (2026-07-25_001#3)
@@ -512,7 +512,7 @@ the result is stated but not yet proved or mechanized._
   path, the whole-repo single-environment check, a kernel `getUsedConstants` read of claim→claim
   edges, a K-tier (`native_decide`-over-evidence) grounding, and the `tautological` falsifiability
   filter — i.e. the write-up's aggregate guarantees are in fact enforced, not merely documented.
-- **Proof**: [docs/comparison-rit-lara.md §11.5 (commit-path audit, commit ba6c45e); trace N47]
+- **Proof**: [rit commit-path audit, commit ba6c45e; trace N47]
 - **Dependencies**: [C18]
 - **Tags**: related-work, rit, verification-method, spec-vs-code, trust-architecture
 
@@ -540,7 +540,7 @@ the result is stated but not yet proved or mechanized._
   claim→claim dependency edge is detected at the commit gate — e.g. `admit.gate` deriving the
   true dependency cone from the proof terms and rejecting a grade computed over an incomplete
   declared cone. If the gate reads real edges, the laundering channel this claim names does not exist.
-- **Proof**: [docs/comparison-rit-lara.md §11.6 (conditional-roll-up + missing-edge analysis); trace N47]
+- **Proof**: [conditional-roll-up + missing-edge analysis; trace N47]
 - **Dependencies**: [C19]
 - **Tags**: rit, verification-method, trust-architecture, composition, roll-up
 
@@ -824,7 +824,7 @@ the result is stated but not yet proved or mechanized._
 ## C44: A universal lower bound is distinct from worst-case tightness
 - **Statement**: In the transparent grounded evaluator, every finite framework incurs at least `n²` attack queries. The two-node all-attacks regression refutes the rejected exact pointwise `n³` inequality at `n = 2`, but does not prove that the quadratic lower bound is asymptotically optimal. Quartic lower bounds are existential worst-case results requiring families whose successful defense scans run late, and an unrestricted witness does not establish tightness on the realizable class.
 - **Conditions**: Applies to the frozen attacker-first, defense-scan-second evaluator and attack-oracle query model over finite carriers. Restricted-class tightness uses the fixed-context realizable `quarticAF` family, and the carrier-status transfer applies after the nonempty-support guard. No unrestricted-AF witness establishes a result for the fixed-context realizable class without its own realization proof.
-- **Sources**: [`universal bounds` ← `docs/theory-m2b-complexity.md:210-211` «`groundedC_cost_le : cost ≤ n³(1 + n)` and `groundedC_cost_ge : n² ≤ cost` for every framework, `n = F.args.length`.» [result]; `realizable quartic witness` ← `docs/theory-m2b-complexity.md:216-223` «The three-block family `quarticAF k` / is realizable in the fixed context (`quartic_realizable`, with `quartic_size : size = 3k`), and for `2 ≤ k` pays at least `k⁴` attack queries (`quartic_cost_ge`) / Together with `groundedC_cost_le` this is worst-case Θ(n⁴) *over the fixed-context realizable class*» [result]; `carrier-status transfer` ← `docs/theory-m2b-complexity.md:233-236` «The quartic floor transfers to this surface: `carrierStatus_quartic_cost_ge` (the `d` claim has nonempty complete support, so the grounded branch runs and is fully counted).» [result]]
+- **Sources**: [`universal bounds` ← `docs/theory-m2b-complexity.md:208-209` «`groundedC_cost_le : cost ≤ n³(1 + n)` and `groundedC_cost_ge : n² ≤ cost` for every framework, `n = F.args.length`.» [result]; `realizable quartic witness` ← `docs/theory-m2b-complexity.md:214-221` «The three-block family `quarticAF k` / is realizable in the fixed context (`quartic_realizable`, with `quartic_size : size = 3k`), and for `2 ≤ k` pays at least `k⁴` attack queries (`quartic_cost_ge`) / Together with `groundedC_cost_le` this is worst-case Θ(n⁴) *over the fixed-context realizable class*» [result]; `carrier-status transfer` ← `docs/theory-m2b-complexity.md:231-234` «The quartic floor transfers to this surface: `carrierStatus_quartic_cost_ge` (the `d` claim has nonempty complete support, so the grounded branch runs and is fully counted).» [result]]
 - **Status**: supported
 - **Provenance**: user-revised
 - **Falsification**: Exhibit a finite carrier violating either proved universal grounded-cost bound, a fixed-context checker or compile-image counterexample to `quartic_realizable`, a qualifying quartic-family instance violating `quartic_cost_ge`, or a carrier-status execution that bypasses the stated nonempty-support condition.
@@ -836,7 +836,7 @@ the result is stated but not yet proved or mechanized._
 ## C45: Failure of one realization construction does not establish tractability
 - **Statement**: Rejecting an arbitrary-digraph realization kit does not by itself imply a tractability-inducing invariant; a restricted class may reject that construction and remain hard through a specialized reduction. Allowing the policy to vary with each source instance also changes the class whose restriction is being studied.
 - **Conditions**: Applies to complexity claims over M1 `Realizable` carriers. The present support is one formula-independent canon, signature, policy, and registry with a realization theorem for every output of a specialized 3SAT reduction. It does not establish that every failed realization construction preserves hardness; NP-membership bookkeeping remains paper-level.
-- **Sources**: [`renewed gate` ← `docs/theory-m2b-complexity.md:133-140` «2026-08-31 — HARDNESS / Every mandatory theorem named by the INCONCLUSIVE record's obstruction section exists `sorry`-free under the frozen context / the reduction target family is realizable with polynomially bounded carrier accounting» [result]; `mechanized reduction` ← `docs/theory-m2b-complexity.md:245-253` «`reduce_correct : Formula3.Satisfiable φ ↔ FixedCredComplete (reduceCode φ)` / `reduce_realizable : M2bPromise (reduceCode φ)` / `reduce_nodes` and `reduce_byteSize` — polynomial output size under the frozen D5 measures.» [result]; `paper boundary` ← `docs/theory-m2b-complexity.md:255-256` «Paper-level only: NP-completeness bookkeeping (encodings, machine model, membership in NP). It is deliberately not a Lean statement» [result]]
+- **Sources**: [`renewed gate` ← `docs/theory-m2b-complexity.md:131-138` «2026-08-31 — HARDNESS / Every mandatory theorem named by the INCONCLUSIVE record's obstruction section exists `sorry`-free under the frozen context / the reduction target family is realizable with polynomially bounded carrier accounting» [result]; `mechanized reduction` ← `docs/theory-m2b-complexity.md:243-251` «`reduce_correct : Formula3.Satisfiable φ ↔ FixedCredComplete (reduceCode φ)` / `reduce_realizable : M2bPromise (reduceCode φ)` / `reduce_nodes` and `reduce_byteSize` — polynomial output size under the frozen D5 measures.» [result]; `paper boundary` ← `docs/theory-m2b-complexity.md:253-254` «Paper-level only: NP-completeness bookkeeping (encodings, machine model, membership in NP). It is deliberately not a Lean statement» [result]]
 - **Status**: supported
 - **Provenance**: user-revised
 - **Falsification**: Prove that failure of the specified realization kit entails a tractability-inducing invariant and adequate algorithm, find a source formula whose `reduceCode` output violates the fixed `M2bPromise`, invalidate either direction of `reduce_correct`, or prove that synthesizing a fresh policy per source instance preserves the same fixed-context class.
@@ -848,7 +848,7 @@ the result is stated but not yet proved or mechanized._
 ## C46: Verified numeral decoding separates identifier injectivity from attack completeness
 - **Statement**: When generated decimal identifiers are inverted through a proved decoder round-trip, their atom representation is injective; identifier-collision obligations can be discharged independently of the generated attack-family completeness proof.
 - **Conditions**: Applies to the M2b gadget's decimal payloads and closed `GadgetLeaf` encoding under the fixed module-ownership boundary. It does not make `AttackComplete` automatic: the assembly still needs root-conclusion inversion, contrary characterization, and declared-attack witnesses.
-- **Sources**: [`decoder round-trip` ← `docs/theory-m2b-complexity.md:91-93` «`natRepr_inj : Nat.repr m = Nat.repr n → m = n` is proved by applying a decoder with a proven round-trip, never by induction over string representations.» [result]; `attack-completeness boundary` ← `docs/theory-m2b-complexity.md:177-187` «**Exact attack completeness** (`formulaAttacks_complete`, the highest-risk step) / `litAtom_inj` (which is two applications of `natRepr_inj` to the `lit` atom's decimal payloads) forces equal variable indices when two root conclusions collide.» [result]]
+- **Sources**: [`decoder round-trip` ← `docs/theory-m2b-complexity.md:89-91` «`natRepr_inj : Nat.repr m = Nat.repr n → m = n` is proved by applying a decoder with a proven round-trip, never by induction over string representations.» [result]; `attack-completeness boundary` ← `docs/theory-m2b-complexity.md:175-185` «**Exact attack completeness** (`formulaAttacks_complete`, the highest-risk step) / `litAtom_inj` (which is two applications of `natRepr_inj` to the `lit` atom's decimal payloads) forces equal variable indices when two root conclusions collide.» [result]]
 - **Status**: testing
 - **Provenance**: ai-suggested
 - **Falsification**: Exhibit distinct natural-number payloads with equal `Nat.repr`, a collision in `GadgetLeaf.encode`, or a proof dependency showing that decimal injectivity cannot be established before the attack-completeness characterization.

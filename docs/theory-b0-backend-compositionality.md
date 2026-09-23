@@ -57,8 +57,7 @@ only relative to a typing derivation. Storing them would let a caller forge an
 occurrence whose recorded premises disagree with the ones its rule actually
 instantiates.
 
-The mechanization wins; the paper plan is to be revised to the derived-fields
-phrasing. Tracked as EYH0602/lara-paper#2.
+The mechanization wins; the derived-fields phrasing is the authoritative one.
 
 ### `OccurrenceConsequence` and where heterogeneity lives
 

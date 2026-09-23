@@ -178,8 +178,8 @@ ai_actions:
   - turn: 2
     action: >-
       Mechanized both halves of issue 307 — four new Lean modules that only import,
-      with no edit to any PW0/T6/T8/T9 declaration — plus the frozen-contract record,
-      the two updated PW records, and the name-map section. Repointed ten
+      with no edit to any PW0/T6/T8/T9 declaration — plus the frozen-contract record
+      and the two updated PW records. Repointed ten
       AxCheck.lean citations the two new imports staled, by declaration name rather
       than line delta. Ran the local gate set from a build with the four new oleans
       deleted first. Opened PR 311.
@@ -194,7 +194,6 @@ ai_actions:
       - docs/theory-pw-sorted-queries.md
       - docs/theory-pw0-outer-model.md
       - docs/theory-pw-closeout.md
-      - docs/paper-lean-name-map.md
       - scripts/check-lean-citations.py
   - turn: 3
     action: >-
@@ -223,7 +222,6 @@ ai_actions:
     - lean/Lara.lean
     - docs/theory-pw-sorted-queries.md
     - docs/theory-pw-closeout.md
-    - docs/paper-lean-name-map.md
     - ara/evidence/proofs/pw_sorted_queries_307.md
   - turn: 3
     action: >-
@@ -303,8 +301,7 @@ open_threads:
     PR 311 was reviewed with changes requested; all 17 inline findings and the
     review body are addressed and pushed, awaiting re-review.
   - >-
-    Issue 306 (paper displays for PW, parametricity, generic observation, holes in
-    paper-lean-name-map.md) is still open and was the other actionable item.
+    Issue 306 (paper displays for PW, parametricity, generic observation) is still open and was the other actionable item.
   - >-
     Issue 314: the surface has no concrete parser or wire format, and no Haskell
     runtime to conform against. Unscheduled; now tracked rather than living only in

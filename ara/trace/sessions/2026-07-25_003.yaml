@@ -10,7 +10,6 @@ ai_actions:
   - action: "Merged origin/main through comparison PRs #22–#24 without altering their landed documentation or session record."
     provenance: ai-executed
     files_changed:
-      - "docs/comparison-rit-lara.md"
       - "docs/novelty-and-related-work.md"
       - "ara/logic/claims.md"
       - "ara/logic/related_work.md"

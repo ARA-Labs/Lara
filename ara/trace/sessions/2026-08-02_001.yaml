@@ -6,14 +6,14 @@ session:
   turn_count: 3
   summary: >
     Project-status turn then the M5 T5 freeze. Turn 1: assessed "are we done / can we write the paper" —
-    established that M5 T5 (freeze) was the only remaining gate for the PLDI/POPL paper, that the full
+    established that M5 T5 (freeze) was the only remaining gate for the paper, that the full
     4-axis evaluation is deliberately two papers, and that #52 is out of scope. Turn 2: created branch
     m5-t5-freeze-protocol; the user first chose "land #52 first" but reversed to "freeze now, defer #52"
-    after the manager surfaced that #52 is post-pldi, LLM-gated, and its natural-defect corpus does not
+    after the manager surfaced that #52 is deferred, LLM-gated, and its natural-defect corpus does not
     exist (N98). Executed T5 (N99): pinned frozen inputs by git-tree SHA + seed 20260801, gates green
     (seed byte-identical, differential 416/0 + 54/0, cabal test PASS), post-freeze measure.hs committed
     under measurements/frozen/ (418 records, class-match + lean_agree 418/418), docs/m5-freeze-checklist.md
-    written, tag m5-freeze-v1 deferred to merge. M5 complete for PLDI scope → pivot to M7 (N100).
+    written, tag m5-freeze-v1 deferred to merge. M5 complete for the deterministic scope → pivot to M7 (N100).
     Crystallized O32→C24 (surgical/monotone ablation) and O34→H07 (audit gate coverage) via
     artifact-commitment (#53 merged + post-freeze reproduction); staged O35 (freeze reproducibility-anchor
     heuristic). Freeze committed on branch 51be992; PR/push not yet done (held for user).
@@ -29,7 +29,7 @@ events_logged:
     id: "N98"
     routing: direct
     provenance: user-revised
-    summary: "Defer #52 from the T5 freeze — freeze deterministic corpus now; #52 stays ACL/EMNLP (user reversed after evidence)"
+    summary: "Defer #52 from the T5 freeze — freeze deterministic corpus now; #52 stays deferred (user reversed after evidence)"
   - turn: 2
     type: decision
     id: "N99"
@@ -41,7 +41,7 @@ events_logged:
     id: "N100"
     routing: direct
     provenance: ai-suggested
-    summary: "M5 complete (deterministic axes a+c) → M7 POPL paper package next; citable frozen tables exist"
+    summary: "M5 complete (deterministic axes a+c) → M7 paper package next; citable frozen tables exist"
   - turn: 2
     type: observation
     id: "O32"
@@ -114,13 +114,13 @@ key_context:
     excerpt: >
       User: "we just merged #53 — is our project largely finished, can we write the complete paper?"
       Manager assessment: M0–M4 + result 9 done, M2 all 12 results proved; M5 T1–T4/T6 done, only T5
-      (freeze) open; the complete 4-axis evaluation is deliberately two papers (PLDI = axes a+c;
-      ACL/EMNLP = axes b/d + LLM producer). T5 is a real gate: "final numbers come only from post-freeze
+      (freeze) open; the complete 4-axis evaluation is deliberately two papers (axes a+c now;
+      axes b/d + LLM producer later). T5 is a real gate: "final numbers come only from post-freeze
       runs," so pre-freeze tables are not citable.
   - turn: 2
     excerpt: >
       User initially answered "Land #52 first, then freeze." Manager read #52 in full (labelled
-      post-pldi; "belongs to the ACL/EMNLP follow-up, not the PLDI/POPL paper"; gated on LLM elaborator /
+      deferred; out of scope for the current paper; gated on LLM elaborator /
       D3) and verified the natural-defect corpus is absent from the repo, then surfaced the conflict.
       User reversed: "Freeze now, defer #52." This reversal is why N98 provenance is user-revised.
 
@@ -138,7 +138,7 @@ open_threads:
   - "Intervening turns (#55 freeze merge, #56/#58 claim-support aggregation, #57 ra@1 implementation, re-freeze v2) happened in conversations with no ara/ record — trace has a gap between N100 and N101"
   - "Push branch m5-t5-freeze-protocol and open the T5 PR (held for user)"
   - "After merge: apply annotated tag m5-freeze-v1 and fill the <FILL-AFTER-COMMIT> freeze SHA in docs/m5-freeze-checklist.md"
-  - "M7 (POPL paper package) — write from measurements/frozen/; check whether ara/PAPER.md has a draft skeleton"
+  - "M7 (paper package) — write from measurements/frozen/; check whether ara/PAPER.md has a draft skeleton"
   - "O33 (accept-justified is the alarming case) still staged — frozen run partially contradicts its 'both columns' wording; needs narrowing before adoption"
   - "In-scope harder-number option not yet built: seeded multi-defect/off-site discriminating localization benchmark (TODOS P3)"
 

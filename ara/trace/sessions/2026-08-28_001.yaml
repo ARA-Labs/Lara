@@ -106,7 +106,6 @@ ai_actions:
       - "test/Spec.hs"
       - "lara.cabal"
       - "docs/theory-m2a-observation.md"
-      - "docs/paper-lean-name-map.md"
   - turn: 1
     action: "Deleted the executed plan per CLAUDE.md, durable content having moved to docs/ first."
     provenance: ai-executed
@@ -126,7 +125,6 @@ ai_actions:
       - "test/SemanticsSpec.hs"
       - "lara.cabal"
       - "docs/theory-m2a-observation.md"
-      - "docs/paper-lean-name-map.md"
       - "ara/logic/claims.md"
       - "ara/trace/exploration_tree.yaml"
   - turn: 2
@@ -144,7 +142,6 @@ ai_actions:
       - "Makefile"
       - ".github/workflows/ci.yml"
       - "docs/theory-m2a-observation.md"
-      - "docs/paper-lean-name-map.md"
       - "ara/trace/exploration_tree.yaml"
       - "ara/trace/pm_reasoning_log.yaml"
       - "ara/trace/sessions/2026-08-28_001.yaml"
@@ -315,9 +312,9 @@ open_threads:
   - "PR #199 is open and unmerged. The four unchanged-behaviour gates were run locally; CI history in this repo has been unreliable for billing reasons (carried from 2026-08-26_001)."
   - "M2b (#181) and M3 (#186) are now unblocked, along with the possible-world tracker (#189, with #190-#193). M2b needs a stated decision problem per semantics before it can bound the realizable class."
   - "#196, #197, #198 are the M2a follow-ups: general non-emptiness of preferred, an enumerate-phrased SpecConflictFree that would drop Nodup from the exclusivity theorems, and the observation table's inability to see an ExtensionSemantics declared elsewhere."
-  - "The paper-side obligation this repository cannot discharge: 'the paper statement matches Lean in quantifiers, hypotheses, observation and direction' lives in lara-paper. docs/theory-m2a-observation.md §9 states what may and may not be written so that check has something exact to run against."
+  - "The paper-side obligation this repository cannot discharge: 'the paper statement matches Lean in quantifiers, hypotheses, observation and direction' lives outside this repository. docs/theory-m2a-observation.md §9 states what may and may not be written so that check has something exact to run against."
   - "#200 tracks the stale-observation sweep: 55 unpromoted, unstale observations need mechanical flagging and researcher triage in a separate artifact-only diff."
-  - "#121's dependency is a person and it remains the one open issue whose resolution changes what the PLDI/POPL paper may claim (carried from 2026-08-25_001)."
+  - "#121's dependency is a person and it remains the one open issue whose resolution changes what the paper may claim (carried from 2026-08-25_001)."
 
   - "PR #199 is awaiting re-review after both review rounds were implemented, mutation-checked, fully verified, and prepared for push."
 ai_suggestions_pending:

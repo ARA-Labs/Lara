@@ -59,7 +59,7 @@ ai_actions:
       - "fixtures/corpus/"
       - "scripts/differential.sh"
       - "scripts/gen-corpus.hs"
-      - "docs/{engineering-plan,m1-freeze-checklist,spec,m3-closeout-notes}.md"
+      - "docs/{engineering-plan,m1-freeze-checklist,spec}.md"
 
 claims_touched:
   - id: C12

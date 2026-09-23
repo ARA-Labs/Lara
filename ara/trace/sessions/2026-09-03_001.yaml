@@ -53,14 +53,13 @@ ai_actions:
   - turn: 1
     action: >
       Added a source-to-AxCheck coverage checker, regression tests, and CI wiring; corrected the
-      retained plan, theorem documentation, paper map, decision record, and contextual-adequacy
+      retained plan, theorem documentation, decision record, and contextual-adequacy
       account against all requested review findings.
     provenance: ai-executed
     files_changed:
       - scripts/check-axcheck-coverage.py
       - scripts/test_check_axcheck_coverage.py
       - .github/workflows/ci.yml
-      - docs/paper-lean-name-map.md
       - docs/theory-m3-source-updates.md
       - docs/theory-m4-context-calculus-decision.md
       - docs/theory-m4-contextual-adequacy.md

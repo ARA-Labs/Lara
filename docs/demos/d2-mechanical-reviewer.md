@@ -172,5 +172,5 @@ cabal test                                        # includes the freshness test
 
 This demo shows that LARA verdicts *are expressible as* review comments. Whether
 they *predict* human reviewer complaints (a correlation study against real
-OpenReview reviews) is an axis-(d) study deferred to the ACL/EMNLP follow-up
+OpenReview reviews) is an axis-(d) study deferred to future work
 (out of scope per #63).

@@ -9,11 +9,11 @@ session:
     moot; the two-sided source-vs-compiled equivalence exists oracle-free
     (Compile.srcStatus_iff_checked over the independent SrcIn/SrcOut/SrcStatus semantics);
     Grounded.status_preservation demoted to abstract-core-only; #68's "Compile.lean:606"
-    scope-note pointer is a typo (it is in Grounded.lean); deliverable
-    docs/paper-lean-name-map.md, all headline theorems AxCheck-gated. Turn 2: commit
+    scope-note pointer is a typo (it is in Grounded.lean);
+    all headline theorems AxCheck-gated. Turn 2: commit
     e43be03 + PR #72; paper-side side-by-side validation passed with zero wording changes
     (comment-only fixes, Overleaf commit 418e423, clean build). Note: this day's earlier
-    conversations (PLDI revision plan agreed in the paper repo; PRs #65-#67, #71 merged)
+    conversations (revision plan agreed in the paper repo; PRs #65-#67, #71 merged)
     ran outside this trace.
 
 events_logged:
@@ -22,7 +22,7 @@ events_logged:
     id: "N102"
     routing: direct
     provenance: ai-executed
-    summary: "#68 Lean audit: equivalence confirmed two-sided (srcStatus_iff_checked); contingency moot; name map written"
+    summary: "#68 Lean audit: equivalence confirmed two-sided (srcStatus_iff_checked); contingency moot"
   - turn: 2
     type: experiment
     id: "N103"
@@ -32,13 +32,13 @@ events_logged:
 
 ai_actions:
   - turn: 1
-    action: "Audited lean/Lara/{Grounded,Compile,Consistency,Policy,Unit,Strict,ND,RA}.lean; wrote docs/paper-lean-name-map.md; spot-checked ~60 declaration names and AxCheck coverage"
+    action: "Audited lean/Lara/{Grounded,Compile,Consistency,Policy,Unit,Strict,ND,RA}.lean; spot-checked ~60 declaration names and AxCheck coverage"
     provenance: ai-executed
-    files_changed: ["docs/paper-lean-name-map.md"]
+    files_changed: []
   - turn: 2
-    action: "Committed e43be03 on fix/68, opened PR #72; paper repo: fixed provenance line drifts (Backend :77, wfB_iff :620), annotated status_preservation abstract-core-only, recorded gate closure in plan/lean-name-map.md; latexmk clean; commit 418e423 pushed to Overleaf"
+    action: "Committed e43be03 on fix/68, opened PR #72; paper repo: fixed provenance line drifts (Backend :77, wfB_iff :620), annotated status_preservation abstract-core-only, recorded gate closure; latexmk clean; commit 418e423 pushed to Overleaf"
     provenance: ai-executed
-    files_changed: ["docs/paper-lean-name-map.md", "paper: src/metatheory.tex", "paper: src/semantics.tex", "paper: src/language.tex", "paper: plan/lean-name-map.md"]
+    files_changed: ["paper: src/metatheory.tex", "paper: src/semantics.tex", "paper: src/language.tex"]
 
 claims_touched: []
 
@@ -60,6 +60,6 @@ open_threads:
   - "PR #72 (fix/68) awaiting merge"
   - "Paper P6 overview expansion needs code-side pinned checker reports (#70, landed as PR #71) wired into src/overview.tex"
   - "E1 performance table: flip §7 opener to four questions when tables/performance.tex lands from make bench (#69)"
-  - "Earlier 2026-08-03 conversations (PLDI plan agreement, PRs #65-#67 #71) have no trace records here"
+  - "Earlier 2026-08-03 conversations (plan agreement, PRs #65-#67 #71) have no trace records here"
 
 ai_suggestions_pending: []

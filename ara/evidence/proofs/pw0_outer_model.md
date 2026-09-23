@@ -146,5 +146,4 @@ Lean files touched outside the five new modules are `Lara.lean` and
    is what makes `⟨b⟩` non-trivial within a context — but "world of this
    context" must not be read as "this artifact".
 
-Full record: `docs/theory-pw0-outer-model.md`. Stable citation keys:
-`docs/paper-lean-name-map.md` §PW0.
+Full record: `docs/theory-pw0-outer-model.md`.

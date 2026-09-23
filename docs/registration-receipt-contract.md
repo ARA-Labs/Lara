@@ -71,7 +71,6 @@ semantics, history rewrite, and availability before any code is written.
 3. No goal or attempt event automatically changes a LARA claim status.
 4. This contract adds no module, schema, or runtime dependency.
 
-Related records: `docs/comparison-rit-lara.md` §7 ("Deferred protocol")
-verifies the RIT-side motivation; `docs/evidence-admission-decision.md`
+Related record: `docs/evidence-admission-decision.md`
 records the gated evidence-admission layer this seam deliberately stays
 outside of.

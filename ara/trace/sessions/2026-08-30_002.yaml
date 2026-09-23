@@ -115,7 +115,7 @@ key_context:
 open_threads:
   - "Researcher review of plans/2026-08-30-m5-surface-calculus.md before implementation."
   - "Execute the ten M5 tasks through a task-by-task development workflow."
-  - "Keep M2b modules read-only and integrate shared AxCheck/name-map additions additively."
+  - "Keep M2b modules read-only and integrate shared AxCheck additions additively."
 
 ai_suggestions_pending:
   - >

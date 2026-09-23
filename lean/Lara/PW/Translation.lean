@@ -1,8 +1,7 @@
 /-
 # PW-T6 — the partial symbol translation (issue #191, tracker #189)
 
-The bridge-global typed partial claim translation of the possible-world design
-(`lara-paper/plan/possible-world-semantics-brainstorm.md` §Structural Bridge),
+The bridge-global typed partial claim translation of the possible-world design (its structural bridge),
 realized at the level the checker actually types: a partial map on predicate
 and constructor symbols, lifted structurally to terms, atoms, patterns,
 substitutions, rules, and support terms. Everything else — variables, numeric

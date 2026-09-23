@@ -220,12 +220,11 @@ ai_actions:
       - "lean/AxCheck.lean"
   - turn: 1
     action: >
-      Wrote the landing record, appended the paper-name-map keys, and added the
+      Wrote the landing record and added the
       mechanization-plan inventory section that lean/Lara.lean already pointed at.
     provenance: ai-executed
     files_changed:
       - "docs/theory-pw0-outer-model.md"
-      - "docs/paper-lean-name-map.md"
       - "docs/mechanization-plan.md"
   - turn: 1
     action: >
@@ -259,7 +258,6 @@ ai_actions:
       - "lean/Lara.lean"
       - "lean/AxCheck.lean"
       - "docs/theory-pw0-outer-model.md"
-      - "docs/paper-lean-name-map.md"
       - "docs/mechanization-plan.md"
 
   - turn: 3
@@ -292,8 +290,7 @@ ai_actions:
       endobridge at T7, renaming bridge, domain negative), both roots wired,
       78 new audit rows. lake build 130 jobs and the hardened audit at 1707
       declarations both clean; diff pure insertion (2142 lines). Wrote
-      docs/theory-pw-t6-structural-transport.md and the paper-name-map §PW-T6
-      block; pushed and opened PR #223.
+      docs/theory-pw-t6-structural-transport.md; pushed and opened PR #223.
     provenance: ai-executed
     files_changed:
       - "lean/Lara/PW/Translation.lean"
@@ -302,7 +299,6 @@ ai_actions:
       - "lean/Lara.lean"
       - "lean/AxCheck.lean"
       - "docs/theory-pw-t6-structural-transport.md"
-      - "docs/paper-lean-name-map.md"
 
   - turn: 5
     action: "Executed Theory M4 Part A phases F0-F3 plus review fixes; five commits on plan/m4-context-calculus, pushed; PR #218 updated; issues #227, #228, #229 filed; #187 and #180 updated."
@@ -320,7 +316,6 @@ ai_actions:
       - lean/Lara.lean
       - docs/theory-m4-context-calculus-decision.md
       - docs/theory-m4-contextual-adequacy.md
-      - docs/paper-lean-name-map.md
       - docs/theory-m3-source-updates.md
       - plans/2026-09-02-theory-m4-full-abstraction.md
 
@@ -417,7 +412,7 @@ key_context:
       shape disambiguates -- so the risk was narrower than first reported. What
       decided it was `unfold compare` failing with "ambiguous term" in any
       module that opens Lara.PW, since the T5 proofs unfold this definition and
-      T6 (#191) will be such a module; plus the name map's own statement that
+      T6 (#191) will be such a module; plus the fact that
       no paper display cites the key yet, which makes the rename free now and
       costly later.
 

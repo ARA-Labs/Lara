@@ -254,7 +254,6 @@ ai_actions:
       - "docs/spec.md"
       - "docs/m1-freeze-checklist.md"
       - "docs/m5-freeze-checklist.md"
-      - "docs/paper-lean-name-map.md"
       - "docs/engineering-plan.md"
       - "docs/rejection-surface.md"
       - "README.md"
@@ -787,7 +786,7 @@ turn_4:
   open_threads:
     - "N335 unresolved — O152's 'sits beside rather than replaces' rationale is contradicted by O155/N334. The researcher adjudicates whether O152 crystallizes with that clause dropped."
     - "The repo carries ~66 file:line docstring citations with no gate; two review rounds this turn found rot in them, and nothing prevents the next code movement from re-introducing it. A checker resolving each citation to its named declaration would be cheap and is the natural sibling of check_ara_source_spans.py."
-    - "10 pre-existing stale citations remain, outside this branch's files: docs/theory-m0-compilation-invariants.md:73, docs/paper-lean-name-map.md (Consistency.lean:165, Unit.lean:35, Policy.lean:448), docs/mutate-module-ownership-decision.md, lean/Lara/Invariants/Observation.lean and docs/theory-m4-generic-observation.md (both → Observation.lean:545), docs/superpowers/plans/2026-07-29-verdict-replay-identity.md."
+    - "7 pre-existing stale citations remain, outside this branch's files: docs/theory-m0-compilation-invariants.md:73, docs/mutate-module-ownership-decision.md, lean/Lara/Invariants/Observation.lean and docs/theory-m4-generic-observation.md (both → Observation.lean:545), docs/superpowers/plans/2026-07-29-verdict-replay-identity.md."
     - "obsGen_ext has no consumer anywhere — pre-existing at d250d52, so not this branch's regression, but it should either be deleted or have its retention recorded."
     - "PR for the §2A refactor not yet opened at the time of this record."
 

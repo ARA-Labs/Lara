@@ -114,8 +114,8 @@ proof-oriented executable reference semantics, not an optimized production evalu
 ## 7. Sequencing and artifact hygiene
 
 Mechanization starts at M1 freeze, parallel to the Haskell compiler (M3). The two carve-outs (`nf`/`≡`,
-the ND adapter) may be *ported* to the prover early as a low-risk warm-up seeding results 10/11. The
-proof development is anonymizable from day one; no `sorry`/`admit` in main theorems at M2 exit; a single
+the ND adapter) may be *ported* to the prover early as a low-risk warm-up seeding results 10/11. No
+`sorry`/`admit` in main theorems at M2 exit; a single
 replay command checks the whole development; every prover axiom and backend assumption is recorded.
 Differential + property + golden + mutation tests remain conformance evidence across the boundary.
 

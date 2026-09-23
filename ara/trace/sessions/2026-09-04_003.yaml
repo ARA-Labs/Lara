@@ -45,7 +45,7 @@ ai_actions:
       eight lemmas to their owning modules, deleted the private re-proofs,
       proved the cache bridge (five theorems) and the composition witness (six
       theorems plus a private helper), extended AxCheck.lean, updated the two
-      M4 docs records and the paper name map, ran every documented gate, and
+      M4 docs records, ran every documented gate, and
       committed as 14b9e34.
     provenance: ai-executed
     files_changed:
@@ -62,7 +62,6 @@ ai_actions:
       - "lean/AxCheck.lean"
       - "docs/theory-m4-context-calculus-decision.md"
       - "docs/theory-m4-contextual-adequacy.md"
-      - "docs/paper-lean-name-map.md"
       - "ara/evidence/proofs/m4_contextual_adequacy.md"
 
 claims_touched: []

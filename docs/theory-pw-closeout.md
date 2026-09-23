@@ -33,9 +33,6 @@ deliberately not built.
 | T9 — exact structural-path composition | #190 | #233, #236; #243 (executable witnesses, #235); #245 (traversal seam, #234) | `Lara/PW/Compose.lean`, `Lara/Examples/PWCompose.lean` | `docs/theory-pw-t9-path-composition.md` |
 | Sorted queries and the outer surface — `Query_κ` well-sortedness, the refined `gap` report, bridge and query authoring forms | #307 | #311 | `Lara/PW/{Sorted,Surface}.lean`, `Lara/Examples/{PWSorted,PWSurface}.lean` | `docs/theory-pw-sorted-queries.md` |
 
-Stable declaration names for all five are in `docs/paper-lean-name-map.md`
-§§PW0, PW-T6, PW-T8, PW-T9, PW-sorted.
-
 ## 2. Gate record
 
 The tracker set an **entry gate** (PW0 blocked by M2a #185; exact support

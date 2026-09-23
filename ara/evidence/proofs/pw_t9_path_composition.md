@@ -105,5 +105,4 @@ bridges, their comparison spaces, or error/convergence laws. A failed
 intermediate translation remains incomparability at the outer comparison layer,
 never a fifth local status.
 
-Full record: `docs/theory-pw-t9-path-composition.md`. Stable citation keys:
-`docs/paper-lean-name-map.md` §PW-T9.
+Full record: `docs/theory-pw-t9-path-composition.md`.

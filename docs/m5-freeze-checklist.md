@@ -418,11 +418,11 @@ of the proposal's blinded held-out freeze. Final numbers come only from
 post-freeze runs. T5 does not add checker or corpus content; it locks what T1–T4
 and T6 produced and records the reproducibility anchors.
 
-**Scope (matches the PLDI/POPL paper).** The frozen corpus covers the
+**Scope.** The frozen corpus covers the
 LLM-independent axes only: axis (a) mutation/differential testing and the
 checker side of axis (c). The human-authored natural-defect ablation (#52,
-`post-pldi`) and every LLM-producer / annotator axis (#30, axes b/d) are
-**deferred to the ACL/EMNLP follow-up** and are deliberately **not** in this
+deferred) and every LLM-producer / annotator axis (#30, axes b/d) are
+**deferred to future work** and are deliberately **not** in this
 freeze.
 
 ## Frozen inputs

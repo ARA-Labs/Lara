@@ -48,7 +48,7 @@ flowing cells → `num_lt` → bridge rule → comparative claim.
 
 ## Decision
 
-**Not before the PLDI submission. The demonstration lands in `examples/`, and
+**Not in this cycle. The demonstration lands in `examples/`, and
 the corpus extension is deferred to a `corpus-v2` cycle.**
 
 Concretely, what was built instead (this branch):
@@ -69,8 +69,8 @@ thing each, which is what makes them readable as a set.
    suite (the sweep derives mutants per corpus unit), invalidates
    `measurements/frozen/`, and forces a re-run of `scripts/measure.hs` plus the
    next freeze tag (v4 has since been cut for `lara-core@0.2`, so this would be
-   `m5-freeze-v5`). That is M5-scale work, and #60/#78 already ruled an
-   M5-scale refreeze out inside the PLDI window.
+   `m5-freeze-v5`). That is M5-scale work, and #60/#78 already ruled out an
+   M5-scale refreeze in this cycle.
 
 2. **The paper's claim does not rest on it.** The evaluation section reports
    axis (a) mutation/differential testing and checker-side axis (c). `ord@1`'s

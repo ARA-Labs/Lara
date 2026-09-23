@@ -1,6 +1,6 @@
 # Constraints, assumptions, limitations
 
-_Source: `docs/spec.md` §1, §11; `docs/comparison-rit-lara.md` §6–8; `docs/strict-backend-decision.md`
+_Source: `docs/spec.md` §1, §11; `docs/strict-backend-decision.md`
 §7. What LARA does and does not guarantee, stated plainly (the "state the trusted boundary bluntly"
 lesson from EG-VAR, `docs/prior-art-lessons.md`)._
 
@@ -56,7 +56,7 @@ The end-to-end guarantee is conditional on three unchecked things:
 - **Most of the checker is unimplemented.** Only `Lara.Prop` (`nf`/`≡`) is built and tested; the strict
   registry, ND adapter, policy/support-term/attack/compile/grounded layers, JSON codec, parser, and the
   Python elaborator are spec-only. The existing LP code is a non-conforming adapter seed.
-- **Benchmarking is out of scope for the first submission** — which raises the weight on metatheory +
+- **Benchmarking is out of scope for this work** — which raises the weight on metatheory +
   worked examples, so the differentiator (E3) and the rejection-class conformance must be airtight.
 
 ## What is out of scope by design
@@ -200,9 +200,9 @@ than by convenience. Fixed policy so that ease-of-use work cites it instead of r
   outside the adapter could print a *wrong* name, i.e. a layer-3 rendering that has stopped
   being faithful to the checked artifact.
 
-**Venue split.** The PLDI/POPL core paper may cite the design rule and layer 1 as a
-language-design commitment; layer-2 evaluation (how faithfully a producer lowers prose) belongs
-to the ACL/EMNLP follow-up with #52 and #30.
+**Scope split.** The core paper may cite the design rule and layer 1 as a
+language-design commitment; layer-2 evaluation (how faithfully a producer lowers prose) is
+deferred, with #52 and #30.
 
 ## M2b restricted-class complexity constraints (2026-08-31 — grounds: O105, O106, N255, N264)
 

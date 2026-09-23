@@ -2,7 +2,7 @@
 title: "LARA: A Proof-Carrying Language for Typed, Policy-Relative Claim Support"
 authors: ["yfhe"]
 year: 2026
-venue: "In preparation — target POPL 2028 (main-conference); see popl-research-review §1"
+venue: "In preparation"
 doi: "n/a — unpublished research artifact"
 ara_version: "1.0"
 domain: "Programming languages / type theory / formal methods (structured argumentation + proof-carrying certificates)"
@@ -33,7 +33,7 @@ abstract: "LARA is a small language of proof-carrying, policy-relative claim sup
 
 LARA lowers a research artifact into a checkable **claim-support graph**: for each claim it computes
 whether the argument from declared evidence to the claim is *justified / gap / defeated / contested*,
-and why. It is a POPL-track **language-design / type-theory** contribution, not an experimental
+and why. It is a **language-design / type-theory** contribution, not an experimental
 empirical paper — so its "experiments" are **mechanization status** (which of the 12 required
 metatheory results in the spec are paper-proved, sketched, mechanized, or still open) plus the
 Haskell checker's property / golden / mutation test results. That status is the empirical signal that

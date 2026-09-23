@@ -252,9 +252,9 @@ sessions:
   open_threads: 5
 - id: 2026-08-02_001
   date: '2026-08-02'
-  summary: 'M5 T5 freeze. Assessed project status (only T5 gated the PLDI paper; 4-axis eval is two papers).
+  summary: 'M5 T5 freeze. Assessed project status (only T5 gated the paper; 4-axis eval is two papers).
     Branch m5-t5-freeze-protocol: user reversed "land #52 first" → "freeze now, defer #52" after the
-    manager showed #52 is post-pldi/LLM-gated with no natural-defect corpus (N98). T5 executed (N99):
+    manager showed #52 is deferred/LLM-gated with no natural-defect corpus (N98). T5 executed (N99):
     git-tree-SHA input freeze + seed 20260801, gates green (byte-identical regen, differential 416/0+54/0,
     cabal test PASS), post-freeze measure.hs committed under measurements/frozen/ (418 records, class-match
     + lean_agree 418/418), docs/m5-freeze-checklist.md, tag m5-freeze-v1 deferred to merge. M5 complete →
@@ -272,7 +272,7 @@ sessions:
 - id: 2026-08-03_001
   date: '2026-08-03'
   summary: 'P1-P3 gate closed (#68): Lean name-map audit confirms the two-sided equivalence oracle-free
-    (srcStatus_iff_checked); contingency moot; docs/paper-lean-name-map.md landed via PR #72; paper
+    (srcStatus_iff_checked); contingency moot; audit landed via PR #72; paper
     side-by-side validation passed with comment-only fixes (Overleaf 418e423).'
   turn_count: 2
   events_count: 2

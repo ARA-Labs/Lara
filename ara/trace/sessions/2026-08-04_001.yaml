@@ -6,7 +6,7 @@ session:
   turn_count: 5
   summary: >
     Re-read the supplied rit paper and current source alongside LARA, then rewrote
-    docs/comparison-rit-lara.md. The comparison separates paper claims, CLI behavior, gated API
+    the rit comparison. The comparison separates paper claims, CLI behavior, gated API
     behavior, and LARA's actual presentation-to-core boundary. A follow-up executable plan classifies
     the byte-to-leaf admission judgment as the only RIT-derived calculus extension, preserves
     lara-core@0.1, and keeps goal/attempt history as an external protocol. Re-reading N93,
@@ -84,11 +84,10 @@ ai_actions:
   - turn: 1
     action: >
       Read rit.pdf, traced the RIT CLI/API/gate/grounding/dependency paths and LARA
-      elaboration/replay/check/driver paths, rewrote docs/comparison-rit-lara.md, ran a fresh-reader
+      elaboration/replay/check/driver paths, rewrote the rit comparison, ran a fresh-reader
       review, corrected its findings, and validated Markdown structure and diff whitespace.
     provenance: ai-executed
     files_changed:
-      - "docs/comparison-rit-lara.md"
       - "ara/staging/observations.yaml"
       - "ara/logic/claims.md (conflict flag only)"
       - "ara/trace/exploration_tree.yaml"
@@ -113,7 +112,7 @@ ai_actions:
     action: >
       Moved the implementation plan to plans/, updated every recorded path, ran Markdown/YAML checks
       and the full Haskell/Lean/differential/replay/tamper gate, committed the reviewed artifacts as
-      440db13, pushed docs/comparison-rit-lara, and opened PR #74.
+      440db13, pushed, and opened PR #74.
     provenance: ai-executed
     files_changed:
       - "ara/trace/pm_reasoning_log.yaml"
@@ -127,7 +126,6 @@ ai_actions:
       contracts plus diff whitespace.
     provenance: ai-executed
     files_changed:
-      - "docs/comparison-rit-lara.md"
       - "plans/2026-08-04-rit-informed-evidence-admission.md"
       - "ara/staging/observations.yaml"
       - "ara/trace/exploration_tree.yaml"
@@ -152,7 +150,7 @@ key_context:
   - turn: 1
     excerpt: >
       User requested a source-grounded judgment on what LARA can borrow from rit and a full rewrite of
-      docs/comparison-rit-lara.md. The resulting recommendation preserves LARA's argumentation core:
+      the rit comparison. The resulting recommendation preserves LARA's argumentation core:
       rit-style checkers establish what exact bytes say; LARA decides what those checked facts may
       support, what remains open, and what defeats the support.
   - turn: 2

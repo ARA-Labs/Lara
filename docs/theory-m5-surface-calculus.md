@@ -547,8 +547,7 @@ does not validate the shipped path; matching emitters without the independent
 surface theorems remain testing; and both are insufficient if the established
 core bytes, verdicts, or artifacts drift.
 
-The stable declaration map is in
-`docs/paper-lean-name-map.md`. `lean/AxCheck.lean` imports every
+`lean/AxCheck.lean` imports every
 theorem-bearing M5 module and audits the public theorem families against the
 standard Lean axiom trio: `propext`, `Classical.choice`, and
 `Quot.sound`. The complete evaluation command set is recorded below so this

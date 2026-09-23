@@ -144,12 +144,11 @@ ai_actions:
     provenance: ai-executed
     files_changed: []
   - turn: 1
-    action: "Moved the PW-T6 audit counts together to 2495 total / 87 PW-T6, dated the verification blocks 2026-09-06, recorded the mutation results, and added the guard rows to the name map."
+    action: "Moved the PW-T6 audit counts together to 2495 total / 87 PW-T6, dated the verification blocks 2026-09-06, and recorded the mutation results."
     provenance: ai-executed
     files_changed:
       - "docs/theory-pw-t6-structural-transport.md"
       - "ara/evidence/proofs/pw_t6_transport.md"
-      - "docs/paper-lean-name-map.md"
   - turn: 2
     action: "Reviewed the eleven open GitHub issues, grouped them by why they exist (paper must-not claims, reviewer-visible asymmetries, recorded boundaries, engineering/later-paper), and recommended #196 then #215 as the next step."
     provenance: ai-executed
@@ -163,17 +162,16 @@ ai_actions:
       - "lean/AxCheck.lean"
       - "lean/Lara.lean"
   - turn: 2
-    action: "Lifted the paper must-not on preferred non-emptiness (§9), recorded the corrected sizing in §10, noted the exclusivity discharge in §3, and added the §7 name-map row."
+    action: "Lifted the paper must-not on preferred non-emptiness (§9), recorded the corrected sizing in §10, and noted the exclusivity discharge in §3."
     provenance: ai-executed
     files_changed:
       - "docs/theory-m2a-observation.md"
-      - "docs/paper-lean-name-map.md"
   - turn: 2
     action: "Ran whole-tree lake build (148 jobs), the axiom audit over AxCheck.lean, and whole-tree AxCheck coverage; opened PR #251 on branch theory/m2a-preferred-nonempty."
     provenance: ai-executed
     files_changed: []
   - turn: 3
-    action: "Triaged the ten open issues into four groups (gated future-work, post-PLDI, recorded boundaries, actionable) and recommended #204 as the next step: its named gating milestone PW-T6 had closed, and it was the only issue where a proved Lean theorem had no production consumer."
+    action: "Triaged the ten open issues into four groups (gated future-work, deferred, recorded boundaries, actionable) and recommended #204 as the next step: its named gating milestone PW-T6 had closed, and it was the only issue where a proved Lean theorem had no production consumer."
     provenance: ai-executed
     files_changed: []
   - turn: 3
@@ -209,7 +207,7 @@ ai_actions:
     provenance: ai-executed
     files_changed: []
   - turn: 4
-    action: "Verified #248 against the tree (Status.lean:185 def Matched, StatusCheck.lean transportsB routing, name-map row, AxCheck rows 3180-3192; git log -S dating both to 1a7240d) and closed the issue with the verification comment. No code change; no PR opened since there was no diff."
+    action: "Verified #248 against the tree (Status.lean:185 def Matched, StatusCheck.lean transportsB routing, AxCheck rows 3180-3192; git log -S dating both to 1a7240d) and closed the issue with the verification comment. No code change; no PR opened since there was no diff."
     provenance: ai-executed
     files_changed: []
 

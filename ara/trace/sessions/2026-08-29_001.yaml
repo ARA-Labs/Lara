@@ -134,7 +134,6 @@ ai_actions:
       - "scripts/check-update-goldens.sh"
       - "test/update-matrices.golden"
       - "docs/theory-m3-source-updates.md"
-      - "docs/paper-lean-name-map.md"
   - turn: 1
     action: "Deleted the executed living plan after migrating its durable definitions, matrices, and paper claim boundary."
     provenance: ai-executed
@@ -161,7 +160,6 @@ ai_actions:
       - "Makefile"
       - "lara.cabal"
       - "docs/theory-b0-backend-compositionality.md"
-      - "docs/paper-lean-name-map.md"
   - turn: 2
     action: >
       Probed four String primitives directly to establish which are
@@ -317,7 +315,7 @@ open_threads:
   - "PR #201 review and hosted CI; issue #186 closes on merge."
   - "Paper repository must transcribe the generated M3 matrices and preserve the may-claim/must-not-claim boundary."
   - "B0 PR review and hosted CI; issue #182 closes on merge."
-  - "Paper plan revision to the derived-fields CertOccurrence phrasing (EYH0602/lara-paper#2)."
+  - "Paper plan revision to the derived-fields CertOccurrence phrasing."
   - "#204: surface the now-retained dependency reports through inferSupport and the driver output."
   - "Revisit in-kernel ord@1/ra@1 acceptance if Lean core gains reduction lemmas for the Slice-based String API."
   - "M4 (#187) and PW-T6 (#191) are unblocked by B0's occurrence-level obligations."

@@ -23,7 +23,7 @@ the two reasons, and `scripts/check_ara_source_spans.py` for the gate that does
 cover it.
 
 A citation may also be written with no file at all — the bare `` `foo` (:256) ``
-shape `docs/paper-lean-name-map.md` uses inside a table row — or as a line RANGE,
+shape the docs use inside a table row — or as a line RANGE,
 `Compile.lean:120-123`. Both are resolved rather than skipped.
 
 A file-less citation takes its file from the declaration the prose names beside
@@ -41,8 +41,8 @@ not.
 Three kinds of line are citable. A `def`/`theorem`/`abbrev`/`inductive`/
 `structure`/`instance`/`class` is one. A `name : type` FIELD of an open
 `structure` or `class` body is another, being a declaration of its enclosing
-structure and cited as one — `docs/paper-lean-name-map.md` cites the backend
-interface field by field. A `#print axioms Foo` command is the third: it is what
+structure and cited as one — the docs cite the backend interface field by
+field. A `#print axioms Foo` command is the third: it is what
 an `AxCheck` citation means to point at, and the name it must agree with is the
 audited `Foo`, not the command. Which theorems have to BE audited is not this
 gate's business — that is `scripts/check-axcheck-coverage.py`, which reads the
@@ -79,7 +79,7 @@ CITATION = re.compile(
 )
 
 # A `*.lean` path named with no line at all — `` `lean/AxCheck.lean` already
-# #print axioms-gates every headline row: `srcStatus_iff_checked` (:759) `` — is
+# #print axioms-gates every headline row: `srcStatus_iff_checked` (:760) `` — is
 # not a citation but a statement of what the surrounding block is about, and
 # BLOCK subjects are what a file-less citation resolves against in preference to
 # the declaration's home file, the block plainly meaning the file it names.
@@ -95,7 +95,7 @@ DECL = re.compile(DECL_PREFIX)
 DECL_NAME = re.compile(DECL_PREFIX + r"\s+(?P<name>[^\s:({\[]+)")
 
 # A `structure`/`class` opens a body whose fields are citable in their own right:
-# `docs/paper-lean-name-map.md` cites `Strict.Backend` field by field, and a field
+# the docs cite `Strict.Backend` field by field, and a field
 # is what the prose names there, so it is indexed as a declaration of its
 # enclosing structure rather than exempted as a non-declaration.
 STRUCTURE_OPEN = re.compile(

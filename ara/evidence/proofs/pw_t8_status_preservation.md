@@ -114,5 +114,4 @@ translation; non-injective bridges use `status_transport_of_corr`. T6
 limitations 1, 2, and 5 are inherited. Approximation bridges remain tracker
 #189.
 
-Full record: `docs/theory-pw-t8-status-preservation.md`. Stable citation keys:
-`docs/paper-lean-name-map.md` §PW-T8.
+Full record: `docs/theory-pw-t8-status-preservation.md`.

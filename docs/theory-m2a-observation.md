@@ -1,6 +1,6 @@
 # Theory M2a: semantics-parametric claim observation
 
-_Status: mechanized for the POPL 2028 theory spine on 2026-08-28 (issue #185,
+_Status: mechanized for the theory spine on 2026-08-28 (issue #185,
 tracker #180). This document records what the observation interface proves,
 what it refutes, and the six places where the plan's own prose was wrong._
 

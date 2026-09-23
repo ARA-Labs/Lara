@@ -84,7 +84,6 @@ ai_actions:
     provenance: ai-executed
     files_changed:
       - "ara/logic/claims.md"
-      - "docs/paper-lean-name-map.md"
       - "docs/theory-m2b-complexity-spike.md"
       - "docs/theory-m2b-complexity.md"
       - "lean/AxCheck.lean"

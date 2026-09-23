@@ -7,7 +7,7 @@ proves, and the boundary it leaves to later work._
 The intended readers are the paper author, whoever takes decisions on tracker
 #189, and anyone extending or citing structural bridges. They should cite the
 declarations below rather than reconstructing the contract from implementation
-details; `docs/paper-lean-name-map.md` §PW-T9 carries the stable keys.
+details.
 
 _Part of the possible-world spike (comparing artifacts across differing
 contexts); start from `theory-pw-closeout.md` for the subseries index — T9
@@ -276,5 +276,3 @@ axiom trio: `propext`, `Classical.choice`, and `Quot.sound`.
 Those mechanisms, rather than an example's reducibility or a property test,
 carry the audit contract. Final job and declaration counts belong to the
 controller's final gates; this freeze record does not predict or invent them.
-
-Full stable keys: `docs/paper-lean-name-map.md` §PW-T9.

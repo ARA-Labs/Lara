@@ -48,8 +48,7 @@ and [`localization-metric-decision.md`](localization-metric-decision.md)
 (mutation-benchmark contracts),
 [`ara-session-record-decision.md`](ara-session-record-decision.md) (the
 session-file schema, what `session_index.yaml` rows project from it, and why
-`logic_revisions` entries are append-only history),
-[`venue-decision.md`](venue-decision.md) (publication strategy).
+`logic_revisions` entries are append-only history).
 
 ## Plans, references, and operational notes
 
@@ -59,18 +58,15 @@ living contributor log), [`mechanization-plan.md`](mechanization-plan.md)
 [`performance.md`](performance.md) (the checker bench),
 [`rejection-surface.md`](rejection-surface.md) (what the checker refuses,
 with runnable anchors), [`corpus-map.md`](corpus-map.md) (the M0 ARA→LARA
-lowering map), [`paper-lean-name-map.md`](paper-lean-name-map.md) (paper
-display ↔ Lean declaration), [`prior-art-lessons.md`](prior-art-lessons.md)
-and [`comparison-rit-lara.md`](comparison-rit-lara.md) (firsthand reads of
-neighboring systems), [`study-plan.md`](study-plan.md) (dated onboarding
-reading list), [`worked-examples-plan.md`](worked-examples-plan.md)
+lowering map), [`prior-art-lessons.md`](prior-art-lessons.md)
+(firsthand reads of neighboring systems),
+[`worked-examples-plan.md`](worked-examples-plan.md)
 (historical; the live catalogue is
 [`../examples/README.md`](../examples/README.md)).
 
 ## Milestone records (closed engineering spine)
 
 [`m1-freeze-checklist.md`](m1-freeze-checklist.md),
-[`m3-closeout-notes.md`](m3-closeout-notes.md),
 [`m4a-checklist.md`](m4a-checklist.md), and
 [`m5-freeze-checklist.md`](m5-freeze-checklist.md) are the preserved trackers
 of the closed engineering milestones M1–M5 (M5's current evaluation-freeze
@@ -79,7 +75,7 @@ snapshot lives at the top of its file and is still updated per freeze cycle).
 ## Theory notes — two series, one prefix
 
 The `theory-*.md` files record mechanized results, and the prefix is
-load-bearing: **`theory-m0`…`theory-m5` are the POPL theory spine (tracker
+load-bearing: **`theory-m0`…`theory-m5` are the theory spine (tracker
 #180) and are unrelated to the engineering milestones of the same numbers
 above.**
 
@@ -110,9 +106,6 @@ above.**
   [`theory-pw-t8-status-preservation.md`](theory-pw-t8-status-preservation.md),
   and
   [`theory-pw-t9-path-composition.md`](theory-pw-t9-path-composition.md).
-
-Some theory notes cite design sources in the separate `lara-paper`
-repository; those links require access to that repo.
 
 ## Subdirectories
 

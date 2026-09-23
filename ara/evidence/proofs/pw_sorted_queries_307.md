@@ -51,9 +51,8 @@ Computing it is a change to the *local* layer, which the wrapper's gate-1
 discipline forbids.
 
 Net: four conflated conditions become **two reported ones plus a proved
-collapse**. `docs/theory-pw-sorted-queries.md` §4, the PW0 record's limitation
-2, and `docs/paper-lean-name-map.md`'s §PW-sorted **Not X** notes all say
-*narrowed*, not *closed*.
+collapse**. `docs/theory-pw-sorted-queries.md` §4 and the PW0 record's
+limitation 2 both say *narrowed*, not *closed*.
 
 ## What the two Σ-level conditions became
 

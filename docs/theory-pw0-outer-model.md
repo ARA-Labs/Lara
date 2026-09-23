@@ -13,13 +13,11 @@ statable. `theory-pw-closeout.md` indexes the four PW records._
 
 The intended readers are the paper author, whoever takes the exit decision on
 #192, and whoever implements T6 (#191). They should cite the declarations below
-rather than re-deriving them; `docs/paper-lean-name-map.md` §PW0 carries the
-stable keys.
+rather than re-deriving them.
 
 PW0 adds an outer comparison layer over **unchanged** local Lara judgments.
 No local checking, compilation, grounded labelling, or status behavior was
-redefined: the five new modules only import. The canonical design source is
-`lara-paper/plan/possible-world-semantics-brainstorm.md`.
+redefined: the five new modules only import.
 
 ## 1. What PW0 froze
 

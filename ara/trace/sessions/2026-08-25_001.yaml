@@ -108,7 +108,7 @@ events_logged:
     id: "N219"
     routing: direct
     provenance: user
-    summary: "Code side closed; remaining PLDI/POPL work is writing"
+    summary: "Code side closed; remaining work is writing"
   - turn: 3
     type: observation
     id: "O88"
@@ -203,7 +203,7 @@ ai_actions:
     files_changed: []
   - turn: 2
     action: >
-      Closed #168 in favour of EYH0602/lara-paper#1, raised in the paper
+      Closed #168 in favour of an issue raised in the paper
       repository with the canonical caveat wording, the two enforcing
       properties, and a warning not to copy m5-freeze-v4 counts while #156 is
       in flight. Re-pointed the two in-repo references off the closed tracker
@@ -355,7 +355,7 @@ open_threads:
   - "#121 is the only open item with a paper consequence and its dependency is a person, not code: either the blinded binding audit runs and the evaluation gains an exhaustive-audit sentence, or the paper states plainly that the checker does not certify binding faithfulness. Now on the critical path, since writing has started."
   - "#176 — frozen-tag hardcoded to m5-freeze-v2 in ClaimSupport.hs and BindingAudit.hs. Cheapest to land right after a re-cut rather than before one; recommendation in the issue is to drop the field for environment.git-rev."
   - "PR #177 (tag commit pinned in the checklist) is open and unreviewed."
-  - "EYH0602/lara-paper#1 — the results-prose caveat. Its warning not to copy m5-freeze-v4 counts is now actionable in the other direction: v5's numbers (541 mutants, 601 records, 436/436) are the ones the paper must quote."
+  - "The paper-side results-prose caveat issue. Its warning not to copy m5-freeze-v4 counts is now actionable in the other direction: v5's numbers (541 mutants, 601 records, 436/436) are the ones the paper must quote."
 
 ai_suggestions_pending:
   - "O85 — the generalized ground-truth-gating claim, offered as C23's replacement clause but not adopted."

@@ -139,7 +139,6 @@ ai_actions:
     provenance: ai-executed
     files_changed:
       - "plans/2026-08-09-binding-audit-worklist.md"
-      - "/Users/yfhe/.gstack/projects/EYH0602-lara/tasks-eng-review-20260809-114047.jsonl"
   - turn: 4
     action: >
       Implemented the approved worklist plan through three sequential

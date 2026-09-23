@@ -60,25 +60,25 @@ ai_actions:
     provenance: ai-executed
     files_changed: []
   - turn: 3
-    action: "Wrote docs/comparison-rit-lara.md §11 addendum (expressible fragment §11.1, silent narrowing §11.2, shadow-AF §11.3, composition §11.4) and sharpened the rit row in docs/novelty-and-related-work.md §2; committed d192047 on user-created branch chore/update-comparison."
+    action: "Wrote the rit comparison addendum (expressible fragment, silent narrowing, shadow-AF, composition) and sharpened the rit row in docs/novelty-and-related-work.md §2; committed d192047 on user-created branch chore/update-comparison."
     provenance: ai-executed
-    files_changed: ["docs/comparison-rit-lara.md", "docs/novelty-and-related-work.md"]
+    files_changed: ["docs/novelty-and-related-work.md"]
   - turn: 4
     action: "Pushed chore/update-comparison to origin and opened PR #22 (d192047 + 5307671)."
     provenance: ai-executed
     files_changed: []
   - turn: 4
-    action: "Read rit's live commit path (rit.py, action/push.py, admit/__init__.py, formal/{kernel,checker,uses,semantics,grammar,system}.py, gate/{solve,collision,grade}.py, grounding/{__init__,provenance}.py) + grep confirmations; wrote docs/comparison-rit-lara.md §11.5 (commit-path audit) plus a K-tier caveat in §11.4 and the header note; committed ba6c45e and pushed to PR #22."
+    action: "Read rit's live commit path (rit.py, action/push.py, admit/__init__.py, formal/{kernel,checker,uses,semantics,grammar,system}.py, gate/{solve,collision,grade}.py, grounding/{__init__,provenance}.py) + grep confirmations; wrote the rit commit-path audit plus a K-tier caveat; committed ba6c45e and pushed to PR #22."
     provenance: ai-executed
-    files_changed: ["docs/comparison-rit-lara.md"]
+    files_changed: []
   - turn: 5
     action: "PR #22 merged into main (squash 29c7570) but captured only d192047+5307671; §11.5 (ba6c45e) + C19 capture (3692817) were stranded. Synced main, branched chore/comparison-nitpick, cherry-picked ba6c45e+3692817, added a doc-consistency nitpick (§4 K-tier row + 'deepest difference' prose forward-pointed to §11.5, since they asserted K-tier as fact), committed 2321a87, pushed, opened PR #23."
     provenance: ai-executed
-    files_changed: ["docs/comparison-rit-lara.md"]
+    files_changed: []
   - turn: 6
-    action: "Answered 'what does rit's formal verification mean' (verifies nodes not the graph; roll-up is a conditional guarantee over an untrusted edge set; missing-edge laundering; division of labor with lara). User affirmed; persisted as docs/comparison-rit-lara.md §11.6 + claim C20 on PR #23."
+    action: "Answered 'what does rit's formal verification mean' (verifies nodes not the graph; roll-up is a conditional guarantee over an untrusted edge set; missing-edge laundering; division of labor with lara). User affirmed; persisted as claim C20 on PR #23."
     provenance: ai-executed
-    files_changed: ["docs/comparison-rit-lara.md", "ara/logic/claims.md"]
+    files_changed: ["ara/logic/claims.md"]
   - turn: 7
     action: "PR #23 merged into main (squash a5328b5) but again stranded its final commit (0427cf7 = §11.6 + C20) — same partial-squash as #22. Synced main, branched docs/comparison-formal-verification-meaning, cherry-picked 0427cf7 (clean; cc5307c), opened PR #24 with a note asking for a complete merge."
     provenance: ai-executed
@@ -99,8 +99,8 @@ logic_revisions:
   - turn: 3
     entry: related_work.md (rit additional-citation line)
     field: content
-    before: "- **`rit`** (sibling project) — Lean kernel + sha256-pinned facts + AND/OR claim DAG; monotonic, no `gap`/`contested`/`defeated` distinction (see `docs/comparison-rit-lara.md`)."
-    after: "- **`rit`** (sibling project) — Lean kernel + sha256-pinned facts + AND/OR claim DAG; monotonic, no `gap`/`contested`/`defeated` distinction. Source-verified 2026-07-25 (C18): its world-facing fragment is five object kinds / six relations over log-extracted naturals discharged `by decide`, so paper claims enter through a silent defeasible narrowing LARA types; its non-kernel disagreement machinery (collisions, tiers, weakest-link roll-up) is an unproven shadow argumentation framework whose open aggregation problem grounded semantics answers (see `docs/comparison-rit-lara.md` §11)."
+    before: "- **`rit`** (sibling project) — Lean kernel + sha256-pinned facts + AND/OR claim DAG; monotonic, no `gap`/`contested`/`defeated` distinction."
+    after: "- **`rit`** (sibling project) — Lean kernel + sha256-pinned facts + AND/OR claim DAG; monotonic, no `gap`/`contested`/`defeated` distinction. Source-verified 2026-07-25 (C18): its world-facing fragment is five object kinds / six relations over log-extracted naturals discharged `by decide`, so paper claims enter through a silent defeasible narrowing LARA types; its non-kernel disagreement machinery (collisions, tiers, weakest-link roll-up) is an unproven shadow argumentation framework whose open aggregation problem grounded semantics answers."
     signal: empirical-resolution
     provenance: ai-suggested
     note: "rit entry updated from README-derived to source-verified; cross-ref to C18 and comparison doc §11."

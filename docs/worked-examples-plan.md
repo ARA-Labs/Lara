@@ -181,7 +181,7 @@ compiling it.
   layers land.
 - **Paper mapping.** E3 is the figure that carries the contribution (the differentiator). E1/E2 are
   the pipeline walkthrough. R1–R3 are the "the checker actually refuses bad input" evidence. Together
-  these match the venue calibration's five headline items: a novel typed claim-support calculus, a
+  these match the project's five headline contributions: a novel typed claim-support calculus, a
   semantics-preserving compilation into structured argumentation, mechanized accountability and
   status theorems, an implementation with replayable diagnostics, and an evaluation showing
   localization on real research artifacts.
@@ -197,7 +197,7 @@ R-series rejections must be airtight.
 
 ## 6. External corroboration (deep-research, 2026-07-21, adversarially verified)
 
-The research pass on POPL/PLDI evaluation norms sharpens two things about this set:
+The research pass on PL-venue evaluation norms sharpens two things about this set:
 
 - **The R-series is not a footnote — it is the soundness evidence, and it must be *adversarial*.**
   Clover (arXiv 2310.17807) is the exemplar reviewers respect for a trusted-checker: it reports high

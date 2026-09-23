@@ -1,7 +1,7 @@
 /-
 PW0 — the typed possible-world outer model (issue #192, tracker #189).
 
-The design (lara-paper `plan/possible-world-semantics-brainstorm.md`) adds an
+The design adds an
 outer comparison layer over unchanged local Lara judgments. This module owns
 the *generic* half: a frame of scientific contexts, per-context worlds and
 queries, bridges with candidate and accepted relations and typed partial claim
@@ -145,8 +145,8 @@ context), so the `box`/`dia` arms fail to elaborate —
 
 Naming the index explicitly (`∀ {κ : F.K}, …`) or making it a normal explicit
 binder both fail the same way. Putting the formula first lets the match refine
-`κ` from the constructor. `docs/paper-lean-name-map.md` records that the paper
-writes `w ⊨ φ` where the Lean writes `Sat F V φ w`. -/
+`κ` from the constructor. The prose notation `w ⊨ φ` corresponds to
+`Sat F V φ w` here. -/
 def Sat (F : Frame) (V : Valuation F) : {κ : F.K} → Form F κ → F.World κ → Prop
   | _, .status s c, w => V w c s
   | _, .top, _ => True

@@ -482,9 +482,8 @@ calculus keeps them apart (see `examples/R1/example.lara`'s own closing "teachin
 which states this contrast directly).
 
 Most *scientific* problems — weak evidence, an unaddressed critical question, a contested field —
-land in the "valid but unsupported" bucket by design
-(`docs/comparison-rit-lara.md` §6.2: "a rejected extractor should not automatically become a
-counter-argument"). The natural assumption is the opposite of how the calculus is built, so this is
+land in the "valid but unsupported" bucket by design: a rejected extractor should not
+automatically become a counter-argument. The natural assumption is the opposite of how the calculus is built, so this is
 worth stating plainly rather than leaving a reader to infer it.
 
 The seeded mutation suite quantifies the split. Of 541 mutants, 483 reject across the R1–R14/codec
@@ -554,5 +553,3 @@ document should not be read as implying it does.
   of which are the anchors above.
 - `fixtures/mutants/README.md` and `MANIFEST.tsv` — the generated mutation suite that exercises every
   class at scale, differentially checked between the Haskell and Lean drivers.
-- `docs/comparison-rit-lara.md` §6.2 — the invalid/unsupported distinction as it bears on the `rit`
-  comparison.
