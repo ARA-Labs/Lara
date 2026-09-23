@@ -1,7 +1,3 @@
 [submodule "corpus/ara-paperbench"]
 	path = corpus/ara-paperbench
 	url = https://github.com/AmberLJC/ara-paperbench
-[submodule "lara-paper"]
-	path = lara-paper
-	url = https://github.com/EYH0602/lara-paper
-	branch = main
