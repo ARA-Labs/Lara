@@ -1,16 +1,21 @@
 cabal-version:      3.0
 name:               lara
 version:            0.1.0.0
-synopsis:           Experimental LP adapter seed for the LARA claim-support checker
-description:        The current package checks explicit Logic-of-Proofs derivations and
-                    is retained as an experimental optional strict adapter. It is not yet
-                    LARA's trusted core: the backend registry, natural-deduction reference
-                    adapter, claim-support calculus, and grounded argumentation layer remain to
-                    be implemented.
+synopsis:           A checker for the arguments behind research claims
+description:        LARA is a small language for writing down the argument
+                    behind a research claim: the evidence, the reasoning
+                    steps, and the caveats. A program then checks the
+                    argument automatically.
+                    .
+                    This package is the trusted Haskell checker: parser,
+                    elaborator, claim-support compiler, grounded evaluator,
+                    strict backends, and CLI. The language is specified in
+                    docs/spec.md (frozen v0.1; current core lara-core@0.2);
+                    the Lean mechanization lives in lean/.
 license:            MIT
 license-file:       LICENSE
-author:             yfhe
-maintainer:         yfhe.prsn@gmail.com
+author:             Yifeng He, Jiachen Liu
+maintainer:         Yifeng He <yfhe.prsn@gmail.com>
 build-type:         Simple
 extra-doc-files:    README.md
 
