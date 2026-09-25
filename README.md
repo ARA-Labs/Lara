@@ -243,8 +243,16 @@ in separate files, a `.laramap` composes them (see [Example](#example)).
 
 ## Quick start
 
-Haskell checker (GHC + cabal via [ghcup](https://www.haskell.org/ghcup/);
-developed on GHC 9.14.1 / cabal 3.16):
+To use the checker without building it, install the prebuilt `lara` binary
+(macOS Apple Silicon, Linux x86_64):
+
+```sh
+brew install ARA-Labs/tap/lara
+lara check <file.lara>
+```
+
+To build from source, install GHC and cabal via
+[ghcup](https://www.haskell.org/ghcup/) (developed on GHC 9.14.1 / cabal 3.16):
 
 ```sh
 cabal build all                          # library + CLI
