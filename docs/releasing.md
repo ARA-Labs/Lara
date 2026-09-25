@@ -16,9 +16,11 @@ workflow (`.github/workflows/release.yml`) attaches one tarball per platform:
 Each tarball holds one top-level directory with the stripped `lara` binary,
 `LICENSE`, `README.md`, and `examples/E1/` (the example `brew test` checks).
 Next to each tarball is a `.sha256` file. The binaries are built with the same
-GHC the required `Haskell` workflow uses (9.6), and they link only system
-libraries. The workflow's "Show dynamic libraries" step prints the linkage for
-each build.
+GHC the required `Haskell` workflow uses (9.6). The workflow's "Show dynamic
+libraries" step prints each build's linkage. The macOS binary links only
+`/usr/lib` system libraries. The Linux binary links glibc and `libgmp.so.10`
+dynamically. It needs glibc 2.35 or newer, because it is built on Ubuntu 22.04,
+and it needs a system GMP, which ships with any distribution that has GCC.
 
 These two targets match the ones the tap already serves for `ara`. On any other
 platform, build from source (`cabal install exe:lara`).
