@@ -1,0 +1,152 @@
+name: Release
+
+# Builds the `lara` binary for the platforms the Homebrew tap
+# (ARA-Labs/homebrew-tap, Formula/lara.rb) serves and attaches the tarballs and
+# their SHA-256 files to the GitHub release. See docs/releasing.md.
+#
+# - A pushed `v*` tag builds that tag and uploads to its release, creating the
+#   release if it does not exist yet.
+# - `workflow_dispatch` with a tag rebuilds an existing tag, e.g. to backfill
+#   binaries for a release cut before this workflow existed.
+# - A PR that edits this file runs the build and smoke test only; nothing is
+#   uploaded.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to build and upload (e.g. v0.1.0)'
+        required: true
+  pull_request:
+    branches: [main]
+    paths: ['.github/workflows/release.yml']
+
+permissions:
+  contents: read
+
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  build:
+    name: Build (${{ matrix.target }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            target: aarch64-apple-darwin
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name != 'pull_request' && env.TAG || '' }}
+
+      # Same GHC as the required Haskell workflow, so the released binary is
+      # built by the toolchain the gate tests.
+      - name: Set up GHC and cabal
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: '9.6'
+          cabal-version: '3.16.1.0'
+          cabal-update: false
+
+      - name: Update package index
+        shell: bash
+        run: |
+          cabal user-config update
+          cabal_config="$(cabal path --output-format=json | jq -r '."config-file"')"
+          perl -pi -e 's|url: http://hackage.haskell.org/|url: https://hackage.haskell.org/|' "$cabal_config"
+          for attempt in 1 2 3; do
+            if cabal update; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            sleep $((attempt * 5))
+          done
+
+      - name: Freeze dependencies
+        run: cabal freeze
+
+      - name: Cache cabal store
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cabal/store
+            ~/.local/state/cabal/store
+            dist-newstyle
+          key: release-${{ matrix.target }}-${{ hashFiles('cabal.project.freeze') }}
+          restore-keys: release-${{ matrix.target }}-
+
+      - name: Build
+        run: cabal build exe:lara
+
+      - name: Package
+        shell: bash
+        run: |
+          name="lara-${{ matrix.target }}"
+          mkdir -p "$name/examples/E1"
+          cp "$(cabal list-bin exe:lara)" "$name/lara"
+          strip "$name/lara"
+          cp LICENSE README.md "$name/"
+          # A self-contained example that `brew test lara` checks.
+          cp examples/E1/example.lara examples/E1/empirical-v1.policy.lara "$name/examples/E1/"
+          tar -cJf "$name.tar.xz" "$name"
+          shasum -a 256 "$name.tar.xz" > "$name.tar.xz.sha256"
+          cat "$name.tar.xz.sha256"
+
+      # The binary must link only against libraries every target system has.
+      - name: Show dynamic libraries
+        shell: bash
+        run: |
+          bin="lara-${{ matrix.target }}/lara"
+          if [ "$RUNNER_OS" = macOS ]; then otool -L "$bin"; else ldd "$bin"; fi
+
+      - name: Smoke test the packaged binary
+        shell: bash
+        run: |
+          dir="$RUNNER_TEMP/smoke"
+          mkdir -p "$dir"
+          tar -xJf "lara-${{ matrix.target }}.tar.xz" -C "$dir"
+          cd "$dir/lara-${{ matrix.target }}"
+          out="$(./lara check examples/E1/example.lara)"
+          echo "$out"
+          grep -q ' accept ' <<<"$out"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lara-${{ matrix.target }}
+          path: |
+            lara-${{ matrix.target }}.tar.xz
+            lara-${{ matrix.target }}.tar.xz.sha256
+          if-no-files-found: error
+
+  upload:
+    name: Upload to the GitHub release
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Upload tarballs and checksums
+        run: |
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --verify-tag --title "Lara $TAG" --generate-notes
+          fi
+          gh release upload "$TAG" dist/* --clobber
+          cat dist/*.sha256

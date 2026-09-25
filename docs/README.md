@@ -59,6 +59,7 @@ session-file schema, what `session_index.yaml` rows project from it, and why
 living contributor log), [`mechanization-plan.md`](mechanization-plan.md)
 (the Lean track; status table in [`../lean/README.md`](../lean/README.md)),
 [`performance.md`](performance.md) (the checker bench),
+[`releasing.md`](releasing.md) (release binaries and the Homebrew formula),
 [`rejection-surface.md`](rejection-surface.md) (what the checker refuses,
 with runnable anchors), [`corpus-map.md`](corpus-map.md) (the ARA→Lara
 lowering map), [`prior-art-lessons.md`](prior-art-lessons.md)
