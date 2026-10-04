@@ -55,7 +55,7 @@ done
 
 ### The separation results have no differential counterpart
 
-`Examples/` declares **797** theorems. Of those, **116** carry a negative or
+At the 2026-09-04 audit, `Examples/` declared **797** theorems. Of those, **116** carry a negative or
 separation morpheme in the name — `not`, `no`, `ne`, `non`, `never`, `fails`,
 `rejected`, `counter`, `strictly`, `absent`, `excluded`, `weaker`. Named
 instances, all in `Lara/Examples/Semantics.lean`:

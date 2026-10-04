@@ -51,7 +51,7 @@ flowing cells → `num_lt` → bridge rule → comparative claim.
 **Not in this cycle. The demonstration lands in `examples/`, and
 the corpus extension is deferred to a `corpus-v2` cycle.**
 
-Concretely, what was built instead (this branch):
+Concretely, what was built instead:
 
 - **S3** (`examples/S3/`) — the `num_le` tie. The family's second member had no
   worked example at all; it now has one, and it sits exactly on the boundary
@@ -68,8 +68,8 @@ thing each, which is what makes them readable as a set.
    `docs/m5-freeze-checklist.md`. Touching it regenerates the seeded mutant
    suite (the sweep derives mutants per corpus unit), invalidates
    `measurements/frozen/`, and forces a re-run of `scripts/measure.hs` plus the
-   next freeze tag (v4 has since been cut for `lara-core@0.2`, so this would be
-   `m5-freeze-v5`). That is M5-scale work, and the settled scope decisions ruled out an
+   next freeze tag (v4 was cut for `lara-core@0.2`, and v5 and v6 have been cut since, so this
+   would be the v7 snapshot). That is M5-scale work, and the settled scope decisions ruled out an
    M5-scale refreeze in this cycle.
 
 2. **The paper's claim does not rest on it.** The evaluation section reports

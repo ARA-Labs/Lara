@@ -129,7 +129,7 @@ Both records live in full in
    lemmas for the mapped/flat-mapped formula lists. All compile-image,
    realizability, and size obligations were therefore not attempted, and
    the record explicitly bars treating itself as evidence (D2).
-2. **2026-08-31 — HARDNESS** (this branch). Every mandatory
+2. **2026-08-31 — HARDNESS**. Every mandatory
    theorem named by the INCONCLUSIVE record's obstruction section exists
    `sorry`-free under the frozen context: `checkUnit_formula_ok`,
    `reduceIso` with the exact-edge theorem `coveredB_gadget`, and the

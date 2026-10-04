@@ -43,11 +43,10 @@ is a rule mode, strict certificates are opaque backend payloads, and attacks are
 > family needs a declared contrary pair where `ord@1`'s does not, is recorded in
 > `insp1-code-inspection-decision.md`. No corpus regeneration or freeze-tag bump is owed: the
 > adapter is additive at the registry, no existing unit selects it, and no corpus, wire, or
-> replay-identity bytes change. A mutation base for `S9` is deliberately **not** included: it would
-> grow the seeded suite 541 → 568, and `fixtures/mutants/` is frozen input row 1 of
-> `m5-freeze-checklist.md`, so it costs a v5 → v6 re-cut plus a full axis-(c) re-run that this
-> amendment did not budget. Tracked in the `m5-freeze-checklist.md` post-v5 addendum; the mutant
-> bytes are unchanged here.
+> replay-identity bytes change. A mutation base for `S9` was not included in this
+> amendment, because `fixtures/mutants/` is frozen input row 1 of `m5-freeze-checklist.md` and a
+> new base costs a re-cut plus a full axis-(c) re-run. The later v6 snapshot added it, with an S2
+> base (541 → 595 mutants).
 
 > **Portfolio and wire amendment (2026-09-07).** Two stale claims are corrected. (1) The
 > §5.2 shipped-adapter clause of the M0-frozen blockquote above is amended: v0.1 ships `ra@1`
@@ -796,8 +795,9 @@ backend. Conversely, a backend returns only acceptance, dependencies, and diagno
 therefore establishes that the conclusion is a backend consequence of the encoded premises and
 declared theory, not that any premise is true.
 
-An unwitnessed strict instance is accepted only when its policy entry explicitly says
-`assurance = trusted-policy`. This is an indefeasible trusted domain law, not a logical theorem.
+An unwitnessed strict instance is accepted only when its policy rule explicitly allows it
+(`allow-trusted = true`) and the argument carries `assurance = trusted` (the *trusted-policy*
+instances of §9). This is an indefeasible trusted domain law, not a logical theorem.
 Reports distinguish it from `certified(beta, theory-digest)`.
 
 ### 5.1 Required reference backend
@@ -853,7 +853,7 @@ amendment and its completion):
    must trace to a consulted premise slot, so a certificate can never cite a self-supplied theory
    entry as measured evidence (`docs/ord1-corpus-extension-decision.md`). Shipped as **`ord@1`**
    (`Lara.Strict.Ord`; §9 result 10 discharged in `lean/Lara/Ord.lean`). No corpus unit
-   exercises it — a corpus extension is deferred to `corpus-v2`; the worked examples S2–S4 carry
+   exercises it — a corpus extension is deferred to `corpus-v2`; the worked examples S2–S7 carry
    the demonstration.
 3. a **static code-inspection checker** — certifies structural facts about referenced source
    (plan-vs-shipped diffs, negative existentials over code) as a closed four-predicate family —
@@ -1500,11 +1500,10 @@ the two implementations are cross-checked byte-for-byte through the `Lara.Wire` 
    `trusted-policy` instances.
 9. Backend replacement: source-identical programs whose backend certificates accept the same strict
    instances compile to AFs isomorphic under certificate erasure and produce equal claim statuses.
-   *(The frozen relational layers are sufficient for the proof, but the current Lean
-   `CheckedProgram` representation cannot state the required payload-varying node bijection: nodes
-   are certificate-bearing `SupportTerm`s with no stable argument id or erased skeleton. The next
-   mechanization step is an argument-id/`eraseCert` compile-boundary representation, followed by
-   checking transport, graph isomorphism, and grounded-status invariance.)*
+   *(Mechanized as Model A: `Erase.backend_replacement` proves status invariance under a uniform
+   injective certificate relabel, and `EraseTransport.backend_replacement_transport` constructs the
+   relabeled well-checked program. Erasing every certificate to one marker is not an isomorphism,
+   because it can merge distinct subterms; see `strict-backend-decision.md`, Theorem 2.)*
 10. Reference-backend soundness and dependency exactness for the natural-deduction adapter; each
     additional shipped adapter must discharge the same obligations.
 11. Support adequacy: `w supports c` is decidable, being normalized structural identity of `concl(w)`
@@ -1518,7 +1517,7 @@ Additional adapter soundness may be imported from a separately verified checker 
 explicit theorem and encoding correspondence. Tests of executable checkers are conformance evidence,
 not substitutes for these theorems.
 
-For the Lean reference-PL implementation, the evidence is 70 traceability IDs and six author flows,
+For the Lean reference-PL implementation, the evidence at that milestone was 70 traceability IDs and six author flows,
 `lake build` (25 jobs), and 430 AxCheck reports with no `sorryAx` and only
 `propext`, `Classical.choice`, and `Quot.sound`; the multiline CI axiom parser is
 also repaired and negative-tested. Passing `cabal build`/`cabal test` (one

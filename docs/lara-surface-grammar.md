@@ -13,7 +13,8 @@ concrete `.lara` syntax: what the parser accepts, what the printer emits, and
 how each surface form lowers to the abstract syntax the checker consumes. Its
 audience is implementers of the parser/printer/elaborator and readers writing
 or reviewing `.lara` files by hand. The main body defines the grammar; the
-appendices (D–I) each specify one later, additive surface version, and the
+appendices (A–I) each specify one later surface version (`@0.2` through `@0.10`; most are
+additive, and F, `@0.7`, only removes syntax), and the
 version paragraphs below record what changed when. If you are new to Lara,
 read the [README](../README.md) and a worked example
 ([`examples/README.md`](../examples/README.md)) first; this document assumes
@@ -346,9 +347,10 @@ statusDecl ::= "status" ident
 
 Notes:
 
-- `use backends [ … ]` may be empty (`[]`); `nd@1` is the only registry entry in
-  v0.1 and is **inert** for the defeasible-only worked-examples suite (plan A2
-  honesty note).
+- `use backends [ … ]` may be empty (`[]`); `nd@1` was the only registry entry when
+  the base grammar was frozen (the registry now also holds `ra@1`, `ord@1`,
+  and `insp@1`), and is **inert** for the defeasible-only worked-examples suite
+  (plan A2 honesty note).
 - Field order inside `claim`/`leaf` is the canonical printer order shown; the
   parser accepts that order for v0.1.
 - Every `decl` is order-free at the top level except that a name must be in scope
@@ -1499,14 +1501,17 @@ A `(prem s)` node is *symbolic* iff `s` is not a canonical natural. If
 non-canonical-numeral error fires before name resolution.
 
 Only the declared *reference positions* of a schema'd backend payload are
-lowered. Each supported backend exports one flat schema — head keyword, arity,
-0-based reference positions — and the closed aggregate table lives in
+lowered. Each supported backend exports one flat schema per certificate shape
+— head keyword, arity, 0-based reference positions; `insp@1` has two, told
+apart by head and arity — and the closed aggregate table lives in
 `Lara.Elaborate.CertSlots`; the elaborator learns no other backend grammar:
 
 | backend | head | arity | reference positions | untouched positions |
 | --- | --- | --- | --- | --- |
 | `ord@1` | `ordcmp` | 2 | 0, 1 | — |
 | `ra@1` | `radrop` | 3 | 0, 1 | 2 (the `frac` witness) |
+| `insp@1` | `inspect` | 1 | 0 | — |
+| `insp@1` | `inspectdiff` | 2 | 0, 1 | — |
 
 There is zero concrete-syntax change: the wire S-expression sub-grammar already
 admits an identifier atom, and the printer prints the stored payload verbatim,

@@ -53,7 +53,7 @@ stdout" means the input was well-formed enough to reach the seven-stage checker 
 then refused it for a specific, named reason.
 
 There is a third, narrower case worth knowing about: an `R8`-admission-`reject`-classed leaf (a
-`certified` leaf without a listed checker witness, or a duplicate table key escalated to `reject`) is
+leaf whose `(kind, provenance)` key matches a `reject` row of the policy's admission table) is
 caught by `Lara.Admission` *before* the checker runs, on the `.lara` path. It also exits **1**, but —
 unlike a normal checker rejection — prints **no verdict on stdout**, only a located `lara: …` message
 on stderr (`app/Main.hs`, the `SourceRejected` branch). It is exit-1-like in code but stdout-silent
@@ -225,7 +225,7 @@ behavior. A raw `.sexp` never runs the presentation lowering, so even named-look
 atoms there remain backend decode/replay input rather than `CertNd*` source
 errors. If a successfully lowered term later fails replay, the R13 diagnostic is
 phrased over its numeric de Bruijn image; no source map restores the authored
-binder names or proposition spellings. §1.5's slot mapping is
+binder names (§1.6 restores proposition spellings). §1.5's slot mapping is
 the premise-list half of that attribution, which has closed.
 
 ### 1.5 The premise-slot mapping under an R13
@@ -382,10 +382,20 @@ reproduce the class shown.
 | R13 backend | certificate replay rejects; unknown backend/version; theory digest not allowlisted. Since `lara-syntax@0.6`, a malformed premise-slot spelling under a matching `ord@1`/`ra@1`/`insp@1` schema on the `.lara` door rejects at elaboration instead of here (§1.2; grammar Appendix E). At `@0.9`/`@0.10` the same source-boundary migration applies only to `nd@1` payloads containing one of D7's five named markers (§1.4; grammar Appendices H and I); marker-free and raw `.sexp` payloads remain backend-owned — acceptance unchanged. The reason is followed by the slot → source mapping on both doors (§1.5) | `fixtures/corpus/ord-lt-boundary-reject.sexp` | `reject R13`, stderr: `certificate replay: ord@1 (theory t0) rejected the certificate: the claimed comparison does not hold: 5 < 5 is false` then `  slot 0 = leaf e0` |
 | R14 codec | wire program fails to decode: malformed S-expression, S-expression nesting deeper than the readers' shared `maxDepth` (see the bound note below), unknown fields, presentation parse error | `fixtures/mutants/malformed/A--codec-core-version-0.sexp` | exit 2, stderr: `lara: codec error at replay-id: unsupported core version: "lara-core@0.1"`, **nothing on stdout** |
 
+The checker also emits four named rejection kinds outside R1–R14. They are part of the wire
+`REJECTION` grammar (`Lara.Wire`) and of `checkUnit`'s seven-stage order (`Lara.Check`):
+
+| Kind | Trigger | Anchor | Verified output |
+| --- | --- | --- | --- |
+| `duplicate-rule` | two policy rules share an id (stage 1) | `fixtures/corpus/reject-duplicate-rule.sexp` | `reject duplicate-rule` |
+| `duplicate-argument` | two arguments share an id (stage 4) | `fixtures/corpus/reject-duplicate-argument.sexp` | `reject duplicate-argument` |
+| `incomplete-argument` | a submitted argument still has an open mandatory obligation (an `open q` hole) | `fixtures/corpus/reject-incomplete-argument.sexp`; `fixtures/mutants/A--hole-obligation-0.sexp` | `reject incomplete-argument` |
+| `missing-conflict` | a conflict the policy's contraries license has no covering attack (stage 7) | `fixtures/corpus/reject-missing-conflict.sexp`; `fixtures/mutants/A--drop-covering-attack-0.sexp` | `reject missing-conflict` |
+
 One class is not individually anchored above, because it is a source-boundary rejection rather
 than a checker verdict:
 
-- **R8 admission** (a `reject`-classed leaf, or a `certified` leaf missing its checker witness) — see
+- **R8 admission** (a leaf whose key matches a `reject` admission row) — see
   §1's third case above; it is distinct from both the R1–R14 checker classes above it in the table
   and from quarantine below it.
 
@@ -445,7 +455,7 @@ try) and `parseWire_nested_error` (an input opening more than `maxDepth` lists b
 is refused with the depth message at line 1, column `maxDepth + 2`). No refusal behaviour changed;
 the three gates above pass unmodified.
 
-The full mutation manifest (`fixtures/mutants/MANIFEST.tsv`, 541 mutants) exercises every class at
+The full mutation manifest (`fixtures/mutants/MANIFEST.tsv`, 595 mutants) exercises every class at
 scale and is the authoritative cross-check if an anchor above ever drifts; each row names its
 `expected` outcome (`reject-R1`, …, `codec-reject`) and `expected-location`.
 
@@ -462,7 +472,8 @@ Two constructs are **deliberately not rejection classes**, per spec §10.1:
 The natural reading of a paper's *evidence* not supporting its *claim* is "the checker should reject
 it." That is wrong, and it is the headline of this document.
 
-- **invalid** — malformed, or a certificate that does not replay: an `R1`–`R14` rejection (§2).
+- **invalid** — malformed, or a certificate that does not replay: an `R1`–`R14` rejection, or one
+  of the four named checker kinds (§2).
 - **valid but unsupported** — accepted, with status `gap` / `defeated` / `contested`.
 
 ```
@@ -480,13 +491,13 @@ built, which is different from `examples/R1`'s argument that cites a leaf which 
 calculus keeps them apart (see `examples/R1/example.lara`'s own closing "teaching point" comment,
 which states this contrast directly).
 
-Most *scientific* problems — weak evidence, an unaddressed critical question, a contested field —
-land in the "valid but unsupported" bucket by design: a rejected extractor should not
+Most *scientific* problems — weak evidence, a claim whose argument could not be completed and so
+was not submitted, a contested field — land in the "valid but unsupported" bucket by design: a rejected extractor should not
 automatically become a counter-argument. The natural assumption is the opposite of how the calculus is built, so this is
 worth stating plainly rather than leaving a reader to infer it.
 
-The seeded mutation suite quantifies the split. Of 541 mutants, 483 reject across the R1–R14/codec
-classes and 58 are *accept* mutants; of those, 49 have a ground-truth **status change**
+The seeded mutation suite quantifies the split. Of 595 mutants, 537 reject (across the R-classes,
+the `incomplete-argument` and `missing-conflict` kinds, and codec) and 58 are *accept* mutants; of those, 49 have a ground-truth **status change**
 (`accept-defeated` 18, `accept-contested` 9, `accept-gap` 9, `accept-evidence-blocked` 9,
 `accept-all-contested` 4) and the remaining 9 (`accept-justified`) exercise mutations the checker
 correctly absorbs without a status change. Both halves are byte-identical across the Haskell and Lean
@@ -523,7 +534,11 @@ drivers (`scripts/differential.sh`).
 
 Renaming a leaf id does **not** produce R1 in the surface language.
 
-`.lara` rule premises resolve by *matching the leaf's proposition* against the instantiated premise
+This holds for the explicit-θ `rule(…)` form. With the `@0.5` `from [e1]` form, premises are cited
+by name, so a stale id is an elaboration error (exit 2, "reference 'e1' names neither a declared
+leaf nor prior argument") rather than R1.
+
+In the explicit-θ form, `.lara` rule premises resolve by *matching the leaf's proposition* against the instantiated premise
 pattern, not by citing leaf ids directly — so a renamed leaf whose proposition is unchanged still
 resolves, and the unit accepts. Producing R1 needs a support term that names a missing id explicitly
 (`by leaf(e_missing)` as in `examples/R1`, or a discharge referencing a missing id). This is easy to
@@ -548,7 +563,7 @@ document should not be read as implying it does.
 
 - `docs/spec.md` §10.1 — the frozen class table this document adds anchors and prose to.
 - `examples/README.md` — the worked-example suite (`A`, `B`, `E1`–`E5`, `R1`–`R3`, `R2-sort`,
-  `S1`–`S7`, plus the demo directories), several
+  `S1`–`S9`, `P1`, plus the demo directories), several
   of which are the anchors above.
 - `fixtures/mutants/README.md` and `MANIFEST.tsv` — the generated mutation suite that exercises every
   class at scale, differentially checked between the Haskell and Lean drivers.
