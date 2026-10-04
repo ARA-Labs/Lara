@@ -5,17 +5,19 @@ inputs and measurements the paper's numbers reproduce from. A *corpus unit*
 is a checked program lowered from a real research artifact; a *mutant* is a
 unit with a known seeded defect that the checker must reject with the right
 rejection class at the right location. The section directly below is the
-current snapshot; the freeze protocol and the historical record follow it._
+current snapshot; the freeze protocol and the historical record follow it.
+Commit hashes and `m5-freeze-*` tags below belong to the pre-release
+development history and do not resolve in this repository (see
+[the docs index](README.md))._
 
 ## Current snapshot: evaluation freeze v6
 
 Recorded 2026-09-09. The committed `measurements/frozen/` snapshot now describes
 **595 mutants + 60 corpus units = 655 measured inputs**. It was measured from
 clean input commit `bc888a5d4b60438565bcf0922a8a3f04cfc645b8` (`git-dirty: false`).
-The publication tag **`m5-freeze-v6` is pending merge**: cut an annotated tag on
-the eventual merge commit after verifying the anchors and gates below, following
-the v3–v5 procedure. The latest published tag remains `m5-freeze-v5`; its
-numbers and reproduction recipe are preserved in the historical record below.
+The v6 inputs and outputs shipped in the v0.1.0 release; no `m5-freeze-v6` tag
+exists in this repository, and the v5 numbers and reproduction recipe are
+preserved in the historical record below.
 
 ### Scope and additive class deltas
 
@@ -106,7 +108,9 @@ The positive differential grows 625 → 669 and the negative 56 → 66, exactly
 44 verdict additions and 10 codec additions. These are fresh local checks;
 CI status belongs to the PR, not this measurement record.
 
-Reproduce from the clean input commit now, or from `m5-freeze-v6` once published:
+Reproduce from the clean input commit (development history; in this repository,
+run the same commands from `v0.1.0`, whose `fixtures/mutants/` and
+`corpus-units/` tree hashes match the table below):
 
 ```sh
 git checkout bc888a5d4b60438565bcf0922a8a3f04cfc645b8

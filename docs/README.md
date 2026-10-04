@@ -12,6 +12,15 @@ Per-module API documentation is not in `docs/`: it is generated from the
 source comments by `make docs` (Haddock for `src/`, doc-gen4 for `lean/`), and
 the `>>>` examples inside Haddock comments are run by `make doctest`.
 
+**Commit and tag anchors.** This repository's `main` starts from a fresh root
+at the v0.1.0 release; the development history before it is not included.
+Records written before the release cite commits, git objects, and tags of that
+history (the evaluation-freeze tags `m5-freeze-v1` through `m5-freeze-v6`, and
+`spec-v0.1`). They are kept as the provenance of each record, but they do not
+resolve here: the only tag in this repository is `v0.1.0`. The frozen content
+those anchors pinned is checked in, and its tree hashes are in
+[`m5-freeze-checklist.md`](m5-freeze-checklist.md).
+
 ## Entry points
 
 | Doc | What it is |

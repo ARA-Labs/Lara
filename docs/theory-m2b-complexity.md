@@ -17,7 +17,8 @@ compositional-lemma architecture that closed the family-wide realization
 theorem, the cost results with their quantifier boundary, and the exact
 mechanized/paper-level split. The implementation plan that produced it
 (`plans/2026-08-30-m2b-realization-followup.md`) was deleted at closeout; it
-is preserved verbatim at git object
+is preserved verbatim, in the pre-release development history that this
+repository does not include, at git object
 `8155ec7:plans/2026-08-30-m2b-realization-followup.md`, so the "Task N"
 numbering used below stays recoverable. Its predecessor is preserved at git
 object

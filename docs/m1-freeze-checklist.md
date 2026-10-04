@@ -51,7 +51,7 @@ v0.1-lock pass; **Defer** = explicitly out of v0.1 (recorded, not an open gap).
 | 8 | Support-term `w` AST + typing (`⊢ w : supports(p) ▷ O`, `leaves`, `certDeps`) | §6, **§6.1** | **Frozen (def)** | ✅ typing rules, exact executable Lean checker (`Lara.Check.inferSupport`), and the `certDeps` layer over `Backend.uses` landed | §9 r1 support/program checker ✅; r3 both halves ✅; r11 relational ✅ |
 | 9 | Typed positional attacks (rebut / undercut / undermine, `w@π`) | §7, **§7.1** | **Frozen (def)** | ✅ typing rules, exact executable Lean checker (`Lara.Check.checkAttack`), and relational compile-facing soundness landed | §9 r1 positional checker ✅; r4 (with item 11) ✅ |
 | 10 | Holes (open obligations) | §4.2, §6.1, §10.1 | **Frozen** | ✅ absorbed by the §6.1 `D ⊎ H` fix + §4.2 marker; mis-declared holes = R5, open mandatory = gap-routed (not rejection) | §9 r1 (mechanized invariants, row 8) |
-| 11 | Compilation `compile(P) = AF` + subargument closure | §8 (**compilation rules**) | **Frozen (def)** | ✅ generic `checkProgram`/`CheckedProgram` remains unchanged; detailed acceptance adds exact conflict coverage and retained checker nodes — pending: r9 | §9 r4 both halves ✅; r6 source-vs-compiled half ✅; r7 attack completeness ✅; r9 pending |
+| 11 | Compilation `compile(P) = AF` + subargument closure | §8 (**compilation rules**) | **Frozen (def)** | ✅ generic `checkProgram`/`CheckedProgram` remains unchanged; detailed acceptance adds exact conflict coverage and retained checker nodes; r9 landed as Model A (uniform injective assurance relabel) | §9 r4 both halves ✅; r6 source-vs-compiled half ✅; r7 attack completeness ✅; r9 ✅ (`Erase.backend_replacement`, `EraseTransport.backend_replacement_transport`) |
 | 12 | Grounded labelling + four-state aggregation | §8, §8.2 | **Frozen** | none | §9 r5 ✅; r6 source-vs-compiled half ✅; r7/C09 computed-complete-claim consistency ✅ for the Lean reference PL |
 | 13 | Abstract syntax + wire schema (S-expression codec `Lara.Wire`; future JSON producer surface — **amended 2026-09-07**), **versioning** | §2, **§2.1** | **Frozen** | ✅ `lara-core@0.1` / `lara-syntax@0.1` + the replay-identity tuple. Declared deferral: the complete presentation grammar lands with `Lara.Syntax` (M3) under `lara-syntax@0.1`, gated by r12 | §9 r12 — presentation half ✅ (`parse ∘ print` at `lara-syntax@0.10`, spec §2.1); wire-decode boundary ✅ (`WireSpec` malformed-input matrix) |
 | 14 | Specified rejection behavior (located, per rejection class) — **amended 2026-09-07, amended 2026-09-11** | **§10.1** | **Frozen** | ✅ R1–R14 enumerated with locations; quarantine and cycles deliberately non-classes; mapped onto the mutation list | §9 r1 (decidability); M5 mutation-suite spine |
@@ -118,7 +118,9 @@ From the M0 gate verdict (`annotation-summary.md` §3), the ~90% PASS came with 
    the typed premise/theory `CertDep` report: `cert_steps_accounted`,
    `mem_certDeps_step`/`certStep_deps_subset`, `certDeps_resolved`,
    `certDeps_theory_valid`.
-4. **r9 backend replacement — representation blocker**: the relational §6.1/§8 layers are frozen,
+4. **r9 backend replacement — done (Model A)**: `Erase.backend_replacement` proves status
+   invariance under a uniform injective assurance relabel rather than a one-marker `eraseCert`, which
+   merges occurrences and so is not an isomorphism. The original blocker, kept as history: the relational §6.1/§8 layers are frozen,
    but `CheckedProgram` stores certificate-bearing `SupportTerm` nodes and has no stable argument
    ids or certificate-erased skeleton. Payload-different programs therefore lack the node bijection
    needed to state the promised AF isomorphism faithfully. Add argument identity plus `eraseCert`
@@ -239,9 +241,10 @@ Row 7 and M2 backlog item 5 are amended again: the third §5.2 portfolio member 
   shipped adapter now carries an outstanding r10 debt.
 - **Conformance evidence** is `test/InspSpec.hs`, four hand-authored wire anchors under
   `fixtures/corpus/insp-*.sexp`, and the worked example `examples/S9` (both certificate arities
-  under one defeasible bridge). A mutation base for `S9` is *not* included: it would grow the
-  seeded suite 541 → 568 and so cost an evaluation-corpus freeze-tag bump, which the portfolio
-  completion did not budget — see the `m5-freeze-checklist.md` post-v5 addendum.
+  under one defeasible bridge). A mutation base for `S9` was *not* included at portfolio completion,
+  because it would cost an evaluation-corpus freeze-tag bump the completion did not budget. The
+  later v6 snapshot added it, together with an S2 base (541 → 595 mutants; see
+  `m5-freeze-checklist.md`).
 - **No freeze-tag bump or corpus regeneration is owed.** The adapter is additive at the registry,
   no existing unit selects it, and no corpus, wire, mutant, or replay-identity bytes change.
 

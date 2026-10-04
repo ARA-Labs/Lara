@@ -2,9 +2,10 @@
 
 _How the metatheory gets machine-checked, and how the mechanized model stays tied to the Haskell
 checker. Expands `engineering-plan.md` §4 (the parallel mechanization track) with a concrete
-architecture. The theorem list is `spec.md` §9 (results 1–12)._
+architecture. The theorem list is `spec.md` §9 (results 1–12), extended by result 13
+(well-sortedness, `lara-core@0.2`) and result 14 (the surface calculus)._
 
-_The goal in one line: machine-check spec §9's twelve results in Lean 4 and
+_The goal in one line: machine-check spec §9's results in Lean 4 and
 keep the mechanized model tied to the Haskell checker by byte-exact
 differential testing. The per-result status table lives in
 `../lean/README.md`; this document is the plan and rationale that produced
@@ -78,7 +79,8 @@ only if the LP adapter ships (gated by corpus open question §8 #1).
 default, Rocq if a collaborator's expertise dominates). Rationale:
 
 - Mathlib has the order-theory / fixpoint infrastructure for result 5 (complete lattices, monotone
-  maps, `OrderHom`) and finite-set machinery for the AF.
+  maps, `OrderHom`) and finite-set machinery for the AF. (In the event result 5 was proved in core
+  Lean 4 without it; the project has no Mathlib dependency.)
 - Lean's `Decidable` typeclass makes results 1 and 11 executable *and* proved-decidable in one
   artifact — which is what the differential-testing anchor (§3) needs.
 - Community familiarity among PL researchers is high.
@@ -162,8 +164,9 @@ right precedent:
   fixpoints. `Args` is finite, so define Dung's characteristic function `D_AF` on `Finset Args`,
   prove monotone, and compute the least fixpoint by **bounded iteration from ∅ with fuel `|Args|`**
   (the chain strictly grows until it stabilizes, `spec.md` §8). Determinism and termination are then
-  immediate, and the function is executable for the differential anchor. Mathlib `OrderHom` +
-  `Finset` carry the monotonicity lemma.
+  immediate, and the function is executable for the differential anchor. The plan was for Mathlib
+  `OrderHom` + `Finset` to carry the monotonicity lemma; the landed proof (`grounded_stable`,
+  `lean/Lara/Grounded.lean`) needs neither.
 - **Result 8 + 10 (strict soundness, modularly).** Make the backend a **structure carrying its own
   soundness obligation as a field**:
 
@@ -187,10 +190,11 @@ right precedent:
   acceptance profiles produce, after `eraseCert`, isomorphic AFs; the grounded lfp is invariant under
   that isomorphism. Structural induction on support checking + graph iso + lfp-invariance
   (`spec.md` §5.3). This is the proof that backend internals are outside claim-status semantics —
-  high reviewer value. **Current representation blocker (2026-07-24):**
-  `Compile.CheckedProgram` stores certificate-bearing `SupportTerm` nodes but no stable argument id
-  or certificate-erased skeleton. Add that compile-boundary identity/bijection before stating the
-  payload-varying graph isomorphism; queue order is not the blocker.
+  high reviewer value. **Landed as Model A:** erasing every certificate to one marker is not an
+  isomorphism (collapsing distinct subterms can merge occurrences), so `Erase.backend_replacement`
+  proves status invariance under a uniform *injective* assurance relabel instead, and
+  `EraseTransport.backend_replacement_transport` constructs the relabeled well-checked program
+  (status table row 9).
 - **Result 4 (compilation soundness + subargument closure).** The fiddly one. Positions `π` are
   paths; an attack on `w@π` compiles to edges onto *every* argument containing that occurrence
   (`spec.md` §8). Mechanize `w@π` as a partial subterm lookup and prove (a) every compiled edge has a
@@ -280,7 +284,7 @@ production Haskell checker, or an optimized grounded evaluator:
 `Lara.Grounded` remains the proof-oriented reference implementation.
 
 **Reference-PL verification.** All 70 traceability IDs and six author flows pass;
-`lake build` completes 25 jobs; AxCheck emits 430 reports with no `sorryAx` and
+`lake build` completed 25 jobs; AxCheck emitted 430 reports (counts at that milestone) with no `sorryAx` and
 only `propext`, `Classical.choice`, and `Quot.sound`; and the multiline CI axiom
 parser is repaired and negative-tested. `cabal build` and `cabal test` pass (one
 suite, 30 QuickCheck groups, 100 cases each), but these are

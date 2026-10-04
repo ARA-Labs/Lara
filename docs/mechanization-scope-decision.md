@@ -48,14 +48,14 @@ and easy to check, but it only says the flag is absent — it does not answer
 conflict scan — the stage the split made separately ablatable — is itself fully
 mechanized *and* axiom-checked. Six `AxCheck.lean` entries cover it:
 
-| `AxCheck.lean` | theorem |
-| --- | --- |
-| `:811` | `Lara.Compile.conflictAttackableB_iff` |
-| `:813` | `Lara.Compile.complete_conflict_edge` |
-| `:814` | `Lara.Check.missingConflict_no_rejectClass` |
-| `:817` | `Lara.Check.conflictCache_terms` |
-| `:819` | `Lara.Check.firstMissingConflict_none_iff` |
-| `:852` | `Lara.Examples.check_unit_missing_conflict_wrapped` |
+| Theorem audited in `AxCheck.lean` |
+| --- |
+| `Lara.Compile.conflictAttackableB_iff` |
+| `Lara.Compile.complete_conflict_edge` |
+| `Lara.Check.missingConflict_no_rejectClass` |
+| `Lara.Check.conflictCache_terms` |
+| `Lara.Check.firstMissingConflict_none_iff` |
+| `Lara.Examples.check_unit_missing_conflict_wrapped` |
 
 So the semantics the flag switches off is proved, `sorry`-free and within the
 standard axiom trio, *regardless of what the Haskell-side switch does*. A split

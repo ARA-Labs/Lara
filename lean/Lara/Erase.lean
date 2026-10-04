@@ -1,7 +1,7 @@
 /-
 # Result 9 — backend replacement (Theorem 2), Model A
 
-Mechanizes spec §9 result 9 / `docs/strict-backend-decision.md:274` (Theorem 2:
+Mechanizes spec §9 result 9 / `docs/strict-backend-decision.md` (Theorem 2:
 "backend replacement preserves claim status") under the *uniform injective
 certificate relabel* model.
 
@@ -15,7 +15,7 @@ and `P₂.atts = P₁.atts.map (mapAssurAtt f)` with `f` injective — compile t
 This models a genuine backend swap: a source step certifies to one payload per
 backend, so a shared source subterm carries the same payload at every
 occurrence, and distinct source certificates stay distinct after the swap
-(injectivity). Note the doc's non-injective erase-to-a-single-`certified`-marker
+(injectivity). Note the doc's original non-injective erase-to-a-single-`certified`-marker
 is *not* an isomorphism: collapsing distinct subterms can merge occurrences and
 add subargument-closure edges. Injectivity-on-used-certs is the faithful
 condition; both programs being well-checked `CheckedProgram`s discharges the
