@@ -1,7 +1,7 @@
 # Decision: what the required CI gates
 
-_Records which checks run on every push and PR in GitHub Actions, which run only
-on request, and why. The workflows are `Haskell` (`.github/workflows/haskell.yml`,
+_Records which checks run on every push to `main` and every PR into it in GitHub
+Actions, which run only on request, and why. The workflows are `Haskell` (`.github/workflows/haskell.yml`,
 required) and `Lean` (`.github/workflows/lean.yml`, optional); the Makefile's
 `lean-gate`, `cross-check` and `local-gates` targets are the local entry
 points._
@@ -9,9 +9,9 @@ points._
 ## The rule
 
 **The required `Haskell` workflow gates the Haskell compiler only.** That is:
-`cabal build`, `cabal test`, the Python unit tests, the ARA checks, the
-walking-skeleton golden, replay and tamper gates, and the mutation-suite
-freshness check. No step in it installs Lean or runs `lake`.
+`cabal build`, `cabal test`, the Haddock build, the Python unit tests, the
+ARA checks, the policy-copy authenticity check, the walking-skeleton golden,
+replay and tamper gates, and the mutation-suite freshness check. No step in it installs Lean or runs `lake`.
 
 It was previously the two-job `CI` workflow (`ci.yml`). It is named for what it
 gates, next to `Lean`, rather than for a step (`cabal build` undersells the ARA
@@ -25,7 +25,7 @@ an old `CI` run needs a fresh run before a publication bench.
 
 | Check | Local | On GitHub |
 |---|---|---|
-| `lake build`, PW example, `AxCheck.lean` axiom audit, semantics registry | `make lean-gate` | Lean workflow, when a reviewer adds the `lean` label to a PR (or `gh workflow run lean.yml --ref <branch>`) |
+| `lake build`, PW example, axiom-withdrawal example, `AxCheck.lean` axiom audit, semantics registry | `make lean-gate` | Lean workflow, when a reviewer adds the `lean` label to a PR (or `gh workflow run lean.yml --ref <branch>`) |
 | Haskell-Lean cross-checks: presentation parity, surface conformance and its gate test, semantics / certDeps / update-matrix goldens, update differential, wire differential, admission differential, map conformance, PW conformance | `make cross-check` | not run |
 
 `make local-gates` runs both.

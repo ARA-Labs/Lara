@@ -46,7 +46,7 @@ large held-out reserve.
 | `extra` | 3 | 20 | andes, expbench, venn |
 | `speedrun` | 1 | 10 | nanogpt-speedrun |
 
-`paperbench` `resnet-ara-example` (in the format repo, not paperbench) is the reference worked example
+`resnet-ara-example` (in the format repo, not paperbench) is the reference worked example
 for the map below; its `trace/exploration_tree.yaml` is the only YAML trace read in full so far
 (paperbench traces ship as `.html` + `.yaml`).
 

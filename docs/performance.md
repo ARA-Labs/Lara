@@ -90,7 +90,8 @@ manifest-discovered harness. Its protocols are deliberately aligned with
 
 ## Current Native Snapshot
 
-Measured at commit `7183c48` on 2026-08-23.
+Measured on 2026-08-23 at commit `7183c48` of the pre-release development
+history, which is not part of the published `main`.
 
 _Setting: 564-record harness; Apple M5 Pro, 64 GB RAM, darwin/aarch64, GHC
 9.14.1, Lean 4.32.0; medians over 5 sections of 100 batched runs each._
@@ -180,7 +181,8 @@ protocols time different work, on different inputs.
 
 ### Map snapshot
 
-Measured at commit `ad513b5` on 2026-09-11 with
+Measured on 2026-09-11 at pre-release commit `ad513b5` (not on the published
+`main`) with
 `make bench-map FORMAT=markdown`. The one-minute load average was 0.6 on 128
 cores. The CPU and RAM fields were supplied through `LARA_BENCH_HOST_CPU` and
 `LARA_BENCH_HOST_RAM_BYTES`, because at that commit the environment probe
@@ -216,7 +218,7 @@ and the commit that produced it. Tracking a rendered table therefore guarantees
 that, sooner or later, the copy in the tree disagrees with the code beside it.
 
 That is exactly what happened. `tables/performance.tex` was generated at
-`0aa97ef`, before the two later
+pre-release commit `0aa97ef`, before the two later
 wire optimizations, and
 then sat in the repository reporting a `parse` row that no longer described the
 shipped decoder — a byte-identical hand-synced duplicate of the paper

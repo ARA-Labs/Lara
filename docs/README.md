@@ -51,7 +51,12 @@ and [`localization-metric-decision.md`](localization-metric-decision.md)
 (mutation-benchmark contracts),
 [`ara-session-record-decision.md`](ara-session-record-decision.md) (the
 session-file schema, what `session_index.yaml` rows project from it, and why
-`logic_revisions` entries are append-only history).
+`logic_revisions` entries are append-only history),
+[`multi-artifact-composition-decision.md`](multi-artifact-composition-decision.md)
+(the `.laramap` contract: linking members and generating cross-paper attacks),
+[`non-empirical-worlds-decision.md`](non-empirical-worlds-decision.md)
+(non-empirical settings), and
+[`ci-scope-decision.md`](ci-scope-decision.md) (what the required CI gates).
 
 ## Plans, references, and operational notes
 
@@ -107,7 +112,3 @@ side result
   points above).
 - `references/` — long-form reading notes on external sources feeding the
   related-work and annotation vocabulary.
-- `slides/` — presentation material: a project keynote and a teaching deck
-  on argumentation background.
-- `superpowers/` — dated implementation plans and specs produced by skill
-  workflows for individual features.

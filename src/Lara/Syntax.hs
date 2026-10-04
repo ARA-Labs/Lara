@@ -1,5 +1,5 @@
 -- | The concrete @.lara@ surface syntax: parser and label-preserving printer
--- (@lara-syntax\@0.7@, over the frozen @0.1@ grammar in
+-- (@lara-syntax\@0.10@, over the frozen @0.1@ grammar in
 -- @docs/lara-surface-grammar.md@).
 --
 -- == Live surface versions
@@ -33,6 +33,12 @@
 --     question it leaves open), so the second slot could only ever be
 --     redundant or misleading; a trailing @as …@ is now a located error
 --     carrying its repair.
+--
+-- @\@0.8@ through @\@0.10@ (grammar Apps. G–I: premise-label citation, named
+-- @nd\@1@ proof terms, source-authored formula annotations) extend only the
+-- certificate-term language. The parser carries a certificate as an opaque
+-- @SExpr@ and "Lara.Elaborate" lowers it, so their one touchpoint here is
+-- 'parseProp', which decodes an App. I @(prop TEXT)@ annotation.
 --
 -- Nothing here touches @lara-core@, 'Lara.AST', or the wire: the surface
 -- version never reaches the kernel, so every derived byte is unchanged.

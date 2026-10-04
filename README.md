@@ -207,8 +207,8 @@ could. The contract is in
 [`docs/multi-artifact-composition-decision.md`](docs/multi-artifact-composition-decision.md).
 
 More worked examples, each a self-contained directory with its surface
-artifact, co-located policy, derived wire anchor, and expected verdict, are
-indexed in [`examples/README.md`](examples/README.md). For a prose-first
+artifact and co-located policy (and, for single-artifact examples, a derived
+wire anchor and expected verdict), are indexed in [`examples/README.md`](examples/README.md). For a prose-first
 reading, the demo write-ups reconstruct checked artifacts as a
 [paper/review/rebuttal exchange](docs/demos/d1-rebuttal-replay.md),
 [mechanical review comments](docs/demos/d2-mechanical-reviewer.md),
@@ -268,7 +268,7 @@ lara check <file.lara>
 ```
 
 To build from source, install GHC and cabal via
-[ghcup](https://www.haskell.org/ghcup/) (developed on GHC 9.14.1 / cabal 3.16):
+[ghcup](https://www.haskell.org/ghcup/) (developed on GHC 9.14.1 / cabal 3.16; CI and the release binaries use GHC 9.6):
 
 ```sh
 cabal build all                          # library + CLI
@@ -289,10 +289,11 @@ Lean mechanization (elan / lean / lake on `PATH`; toolchain pinned in
 cd lean && lake build
 ```
 
-The required Haskell workflow gates the checker on every push. The Lean side — the build, the
-`AxCheck.lean` axiom audit, and the Haskell-Lean conformance gates — runs with
-`make lean-gate` and `make cross-check`, and on a PR in the optional Lean
-workflow when a reviewer adds the `lean` label
+The required `Haskell` workflow builds and tests the checker on every push
+to `main` and every PR into it. The Lean side runs outside it: `make lean-gate`
+(the build, the `AxCheck.lean` axiom audit, and the Lean examples) also runs on
+a PR in the optional Lean workflow when a reviewer adds the `lean` label, while
+`make cross-check` (the Haskell-Lean conformance gates) runs only locally
 ([why](docs/ci-scope-decision.md)).
 
 ## Syntax versions
@@ -329,7 +330,7 @@ Start with the [documentation index](docs/README.md) for reading paths and theor
 | [`docs/multi-artifact-composition-decision.md`](docs/multi-artifact-composition-decision.md) | The `.laramap` **map**: what composing independently checkable artifacts means, the manifest and composite-verdict grammars, why a map is a recheck rather than a build, and what v1 refuses |
 | [`docs/substrate-decision.md`](docs/substrate-decision.md) | Why the core is Haskell and the front-end Python |
 | [`docs/mechanization-plan.md`](docs/mechanization-plan.md), [`lean/README.md`](lean/README.md) | The Lean 4 development: what is mechanized, per-result pointers |
-| [`docs/performance.md`](docs/performance.md) | What the checker-performance bench measures, how to run it, and a dated snapshot (checking a corpus unit costs ~200 µs; one pass over all 564 harness records, under 200 ms) |
+| [`docs/performance.md`](docs/performance.md) | What the checker-performance bench measures, how to run it, and dated snapshots from a retired harness, kept as upper bounds |
 | [`docs/engineering-plan.md`](docs/engineering-plan.md) | The engineering plan: build order and the module dependency graph |
 | [`m0/annotation-summary.md`](m0/annotation-summary.md) | The semantic corpus study that froze the scheme vocabulary, leaf grain, adapter portfolio, and defeat conventions |
 | [`examples/README.md`](examples/README.md) | Index of the worked examples (A/B, E-series, R-series, S-series, running example, and the D3 agreement map in both its single-file and four-artifact forms) |

@@ -1,7 +1,8 @@
 # Releasing Lara
 
 _Operational note: how a Lara release is cut and how it reaches Homebrew.
-Status: in use since v0.1.0 (2026-09-25)._
+Status: in use since 2026-09-25; the v0.1.0 binaries were built then, after
+the tag._
 
 ## What a release ships
 
