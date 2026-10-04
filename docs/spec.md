@@ -168,6 +168,7 @@ trusted code before it is believed. The M1 freeze fixes this boundary (open ques
 | 7 | Compiler `compile(P) = AF` with subargument closure | `Lara.Compile` | §9 result 4 |
 | 8 | Status engine: grounded labelling + four-state aggregation | `Lara.Grounded` | §9 results 5, 6, 7 |
 | 9 | Diagnostics / located rejection | `Lara.Diagnostics` | §1; §10 |
+| 10 | Signature well-formedness and well-sortedness (R2, since `lara-core@0.2`), and the seven-stage `checkUnit` orchestrator that sequences rows 3–9 | `Lara.Sigma`, `Lara.Sigma.WellSorted`, `Lara.Check` | §9 result 13 |
 
 Trusted **inputs** (versioned data, not executable TCB, but part of the trust base and replay
 identity): the proposition signature `Sigma`, the claim-support policy `Pi`, the backend registry
@@ -543,7 +544,8 @@ total because an omitted table, an empty table, and every unmatched key default 
 table keys are source invalidity rather than first- or last-row-wins. Duplicate `LeafId` declarations
 are likewise source invalidity. A `certified` leaf is additionally
 admitted only if it carries a checker witness `(name, version)` listed in `Pi` and a replayable
-reference. The outcomes:
+reference. *(Not enforced in v0.1: `Policy` carries no witness list and no checker stage tests this
+requirement; R8 is currently raised only by a `reject` admission row.)* The outcomes:
 
 - `admit` — the leaf enters `Gamma` and is usable by the leaf rule.
 - `quarantine` — the leaf stays out of `Gamma`; its declaration is retained and reported for
@@ -689,9 +691,13 @@ An `arg` declaration names a support term (Section 6). Multiple independent supp
 claim are separate `arg` declarations — never merged into one term — so that defeat can eliminate
 one while the other survives.
 
-An open mandatory obligation excludes that incomplete argument from the compiled argumentation
-framework and contributes a located `gap` explanation. Other complete support arguments for the same
-claim remain eligible.
+In v0.1 a submitted argument that still carries an open mandatory obligation makes the unit
+invalid: `checkUnit` rejects it with the named kind `incomplete-argument` (§10.1). An honest gap is
+expressed by *not submitting* the incomplete argument: a claim with no complete checked support
+reports `gap`, and other complete support arguments for the same claim remain eligible. The status
+function of §8 is stated over `holes(P, p)` so that a later core version could accept partial
+alternatives without changing it; under the v0.1 checker every accepted unit has empty root holes
+(`evidence-admission-decision.md` §6 records this as the v0.1 contract).
 
 ### 4.5 Reference policy scheme vocabulary (M0-frozen)
 
@@ -1552,8 +1558,10 @@ undercut d1 a1.rule
 status c1
 ```
 
-This example is intentionally incomplete and should report the located obligation `external_validity`. The worked
-examples (three complete + three rejected, with matching JSON encodings) are M3/M5 golden-test
+This example is intentionally incomplete: `a1` leaves `external_validity` open, so the v0.1 checker
+rejects the unit with `incomplete-argument` (§4.4). Dropping `a1` instead makes `c1` report `gap`;
+`examples/running-example/run1/` is that shape. The worked examples under `examples/` (each with a
+derived `example.core.sexp` wire anchor and `expected.json` golden) are the M3/M5 golden-test
 artifacts built against this frozen spec (`engineering-plan.md` §5).
 
 ### 10.1 Rejection classes (v0.1-frozen)
@@ -1586,7 +1594,10 @@ well-sorted; it is simply not in scope, which is policy well-formedness. One cla
 R2 stays purely about sorts.
 
 
-Every ill-formed construct fails in exactly one located class. The enumeration is frozen so the
+Every ill-formed construct fails in exactly one located class. Besides R1–R14, the checker emits four
+named kinds from its fixed stage order: `duplicate-rule`, `duplicate-argument`,
+`incomplete-argument` (an open mandatory obligation, §4.4), and `missing-conflict` (a licensed
+conflict with no covering attack); `docs/rejection-surface.md` §2 anchors each. The enumeration is frozen so the
 diagnostics surface (`Lara.Diagnostics`), the golden negative examples, and the M5 mutation suite
 share one spine: every class must be exercised by at least one rejected example and one mutation.
 
@@ -1599,7 +1610,7 @@ share one spine: every class must be exercised by at least one rejected example 
 | **R5** question-accounting | a declared question in neither discharge map nor hole set, or a discharge/hole naming an undeclared question (`D ⊎ H` violation) | the instance | §4.2, §6.1 |
 | **R6** discharge | discharging term's conclusion `≢` instantiated answer pattern | position `π.q` | §4.2, §6.1 |
 | **R7** assurance | `trusted` without `allow-trusted`; `cert` without matching certifier entry; any assurance on a defeasible rule; strict rule with a discharge map or holes | the instance | §4, §5, §6.1 |
-| **R8** admission | leaf `reject`-classed by the admission table; `certified` leaf without a listed checker witness | the leaf declaration | §4.3 |
+| **R8** admission | leaf `reject`-classed by the admission table; `certified` leaf without a listed checker witness (not enforced in v0.1, §4.3) | the leaf declaration | §4.3 |
 | **R9** data-integrity | duplicate-report group with `≢` members, escalated to `reject` by policy | the group declaration | §4.3 |
 | **R10** attack-position | attack position undefined (`u@π` lookup fails) or wrong occurrence kind for the attack kind | the attack declaration | §7.1 |
 | **R11** attack-relation | no declared contrary pair matches (rebut/undermine); no declared exception matches (undercut); target rule strict | the attack declaration | §7.1 |

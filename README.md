@@ -20,8 +20,7 @@ claim the checker reports one of four statuses, and why:
 
 - **justified** — the claim has a complete supporting argument that survives
   every declared attack;
-- **gap** — the argument is incomplete, and the checker names exactly which
-  piece is missing;
+- **gap** — no complete supporting argument has been declared for the claim;
 - **defeated** — an argument existed, but something also declared in the file
   knocks it down;
 - **contested** — support and attack are in a standoff, so neither side wins.
@@ -86,8 +85,8 @@ arithmetic and the comparative claim are **justified**.
 
 The checker also does not search for missing pieces or guess. Everything is
 what the producer wrote down; the value is that "what you wrote down" is now
-something a machine can check, and honest incompleteness (**gap**) is a
-located, first-class outcome rather than a rejection.
+something a machine can check, and a claim with no complete argument is
+reported as **gap**, a first-class outcome rather than a rejection.
 
 When claims, evidence, and dead ends are explicit objects, the *support* of
 each claim becomes something a small trusted kernel can type, compile, and
@@ -144,7 +143,7 @@ arg s1 : supports(c2) by lt_recheck from [base, ours]
   assurance = cert(ord@1, sha256:empv3-t0, (ordcmp (prem base) (prem ours)))
 
 # A defeasible step: the scheme's critical questions must each be
-# discharged by a declared leaf, or reported as located holes.
+# discharged by a declared leaf.
 arg a1 : supports(c1) by controlled_experiment from [e1]
   discharge randomization     with e2
   discharge adequate_power    with e3
@@ -161,8 +160,9 @@ status c2
 Arguments come in two strengths. A *defeasible* step like `a1` ("the
 experiment suggests the method works") must answer every critical question its
 reasoning scheme requires (was it randomized, was the sample adequate, does
-it generalize), either with a declared piece of evidence or by admitting the
-answer is missing. A *strict* step like `s1` ("0.71 is less than 0.74") must
+it generalize) with a declared piece of evidence. An argument that leaves a
+required question open is rejected, so an author who cannot answer one leaves
+the argument out, and the claim reports **gap**. A *strict* step like `s1` ("0.71 is less than 0.74") must
 instead carry a certificate that a small dedicated backend re-checks from
 scratch: the checker does not trust the author's arithmetic, it redoes it.
 
@@ -192,7 +192,7 @@ own limitations note, `d1`, undermines the experiment argument `a1` and
 nothing knocks `d1` down). Run 1 of the same example
 ([`run1/`](examples/running-example/run1/)) omits the leaf that discharges
 external validity: no complete support argument for `c1` can be declared, and
-the verdict reports **gap**, naming the missing piece.
+the verdict reports **gap**.
 
 One artifact is one paper, and a **map** is several of them. A `.laramap`
 manifest names independently authored, independently checkable `.lara` members
