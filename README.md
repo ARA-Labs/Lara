@@ -61,17 +61,33 @@ you declare:
   own limitations.
 
 An untrusted producer (human or LLM) writes the file; a small trusted checker
-validates it. Two things the checker deliberately does **not** do:
+validates it. Lara verifies the numerical consequences of the declared
+evidence and checks the arguments that connect that evidence to claims. Both
+checks are conditional on the reported measurements and on how they are bound
+to their sources: Lara does not rerun the experiment, and it does not establish
+that a measurement is true. If the file says "the experiment reported 0.74,"
+Lara takes 0.74 as given, records where it came from, and checks everything
+built on it.
 
-- **It does not judge whether the evidence is true.** If the file says "the
-  experiment reported 0.74," Lara takes that as given, while recording where
-  the number came from. What it checks is whether the argument built on the
-  evidence is well formed, complete relative to the declared policy, and
-  actually yields the reported status. It audits reasoning, not reality.
-- **It does not search for missing pieces or guess.** Everything is what the
-  producer wrote down; the value is that "what you wrote down" is now
-  something a machine can check, and honest incompleteness (**gap**) is a
-  located, first-class outcome rather than a rejection.
+| | Checked by Lara | Taken as given |
+|---|---|---|
+| **Arithmetic on results** | Comparisons and calculations over declared result cells, recomputed exactly by a strict backend: `ord@1` re-checks an ordering such as `0.71 < 0.74`, `ra@1` recomputes a relative drop. The certificate must cite the premise cells it computes on. | The reported values themselves |
+| **Results to claim** | The argument from results to an empirical claim is well formed under the declared, versioned policy, answers that policy's critical questions, and survives every declared attack, including an attack on whether two results are comparable at all | That the policy's reasoning schemes and critical questions suit the field |
+| **Evidence** | Each leaf declares its kind, provenance, and source references; the policy can reject or quarantine leaves by kind and provenance | Where a measurement came from, that it was extracted faithfully from the raw evidence, that the evaluator was correct, and that the experiment reproduces |
+| **Claim text** | The formal spelling of each claim | That the formal spelling says what the natural-language text says; the claim's `binding` records who vouched for that |
+
+[`examples/S4/`](examples/S4/) shows the split. `ord@1` certifies
+`num_lt(0.71, 0.74)`, which stays **justified**, while an audit finding that
+the two accuracy cells came from different evaluation settings **defeats** the
+claim that one system is better. [`examples/S5/`](examples/S5/) makes the same
+comparison on perplexity, where lower is better: the metric direction declared
+in the policy selects `num_lt(28.4, 31.6)` as the goal, and both the
+arithmetic and the comparative claim are **justified**.
+
+The checker also does not search for missing pieces or guess. Everything is
+what the producer wrote down; the value is that "what you wrote down" is now
+something a machine can check, and honest incompleteness (**gap**) is a
+located, first-class outcome rather than a rejection.
 
 When claims, evidence, and dead ends are explicit objects, the *support* of
 each claim becomes something a small trusted kernel can type, compile, and
