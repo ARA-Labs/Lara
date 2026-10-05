@@ -417,6 +417,7 @@ import Lara.Context.Parametricity
 import Lara.Context.FiniteExtension
 import Lara.Context.Surface
 import Lara.Examples.Linking
+import Lara.Examples.LinkHoles
 import Lara.Examples.ContextSemantics
 import Lara.Examples.ContextualSeparation
 import Lara.Context.Holes.Transport

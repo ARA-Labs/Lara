@@ -83,6 +83,7 @@ import Lara.Context.Holes.Transport
 import Lara.Examples.TermHoles
 import Lara.Context.Surface
 import Lara.Examples.Linking
+import Lara.Examples.LinkHoles
 import Lara.Examples.CertificateCollapse
 import Lara.Examples.BackendComposition
 import Lara.Surface.Syntax
@@ -3178,6 +3179,19 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Examples.Linking.admissible_split
 #print axioms Lara.Examples.Linking.admissible_composite
 #print axioms Lara.Examples.Linking.link_checked_split
+
+-- Examples.LinkHoles: linking with located holes, and hole erasure observable (issue #13)
+#print axioms Lara.Examples.LinkHoles.tMix_hole
+#print axioms Lara.Examples.LinkHoles.holeFrag_sideOkHoles
+#print axioms Lara.Examples.LinkHoles.holeFrag_not_sideOk
+#print axioms Lara.Examples.LinkHoles.admissible_hole
+#print axioms Lara.Examples.LinkHoles.link_checked_hole
+#print axioms Lara.Examples.LinkHoles.link_hole_accepted
+#print axioms Lara.Examples.LinkHoles.obs_holeFrag_eq
+#print axioms Lara.Examples.LinkHoles.obs_holeFrag
+#print axioms Lara.Examples.LinkHoles.erasure_keeps_complete_args
+#print axioms Lara.Examples.LinkHoles.erasure_changes_live_attacks
+#print axioms Lara.Examples.LinkHoles.hole_erasure_observable
 #print axioms Lara.Examples.Linking.compose_triple_ok
 #print axioms Lara.Examples.Linking.compose_triple_ok'
 #print axioms Lara.Examples.Linking.compose_assoc_witness
