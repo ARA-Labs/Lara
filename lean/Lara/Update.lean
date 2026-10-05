@@ -120,9 +120,9 @@ rerun.  An admit-to-reject constructor is deliberately absent:
 `Admission.source_reject_no_checked_unit` proves that source rejection has no
 checked-unit target.
 
-`addInstance` is the deliberate wire-carrier exception: its `name : String`
-mirrors the pre-parse `argsRaw` representation rather than introducing a
-second identifier type. -/
+`addInstance` and `dischargeOpen` are the deliberate wire-carrier exception:
+their `name : String` mirrors the pre-parse `argsRaw` representation rather
+than introducing a second identifier type. -/
 inductive SourceUpdate where
   | addLeaf     (id : LeafId) (a : Atom) (m : Admission.LeafMeta)
   | tighten     (key : LeafKind × Provenance)
