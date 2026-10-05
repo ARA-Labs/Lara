@@ -10073,3 +10073,59 @@ tree:
   status: resolved
   also_depends_on:
   - N350_scope
+
+- id: N351_located_gap
+  type: decision
+  title: Accept open mandatory questions as located holes (lara-core@0.3) across both runtimes
+  provenance: user-revised
+  timestamp: 2026-10-05T19:00+00:00
+  choice: >-
+    Finished PR #12 under the approved plan (D1-D11): Haskell checker cache partitions complete nodes
+    from located holes; verdict gains an optional (holes (arg NAT ID (obligations ID+) (attacks NAT*)))
+    section reported in original declaration space (D5); evidence-blocked computed over a reference
+    carrier that excludes typed holes and a checked carrier of retained complete nodes (D7); Lean driver
+    emits the same bytes; map composite bumped to map-verdict@2 with a holes section keyed by member
+    alias and argument id (user decision 2026-10-05); generated cross-member attacks never touch a hole.
+  alternatives:
+  - keep rejecting incomplete arguments (the lara-core@0.2 contract)
+  - make holes nodes of the conservative-reporting reference framework (counterexample in decision record §7)
+  evidence:
+  - docs/located-gap-decision.md
+  - docs/multi-artifact-composition-decision.md
+  - src/Lara/Driver/Internal.hs
+  - src/Lara/Blocked.hs
+  - lean/Lara/Driver.lean
+  status: resolved
+  also_depends_on: []
+- id: N351_d7_fixture
+  type: dead_end
+  title: First D7 anchor used a hole rule whose premise pattern did not match the quarantined leaf
+  provenance: ai-executed
+  timestamp: 2026-10-05T18:30+00:00
+  hypothesis: A quarantined attacker built from holeRule "h" over a mismatched leaf is a typed hole and blocks nothing.
+  failure_mode: >-
+    Its inference fails (R4) under the full declared Gamma, so it is unclassified, stays a conservative
+    reference node, and the target was published evidence-blocked.
+  lesson: >-
+    A D7 witness must be a typed hole under the full declared Gamma; the mismatched variant is kept as a
+    separate test pinning that unclassified quarantined terms still block.
+  status: resolved
+  also_depends_on:
+  - N351_located_gap
+- id: N351_v7
+  type: experiment
+  title: Regenerate under lara-core@0.3 and cut evaluation freeze v7
+  provenance: ai-executed
+  timestamp: 2026-10-05T19:40+00:00
+  result: >-
+    Exactly the 18 hole-obligation mutants move reject-IncompleteArgument -> accept-located-hole, each with
+    one hole at the seeded argument; corpus status diff empty; class match 655/655; Haskell-Lean agreement
+    655/655; no-cq changes all 18 located-hole verdicts with 17 status shifts (gap->justified 11);
+    make local-gates and cabal test all pass.
+  evidence:
+  - ara/evidence/results/located_gap_v7.md
+  - measurements/frozen/lara-core-0.3-regeneration-diffs.md
+  - docs/m5-freeze-checklist.md
+  status: resolved
+  also_depends_on:
+  - N351_located_gap

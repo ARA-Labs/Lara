@@ -1698,3 +1698,10 @@ entries:
     No logic revision or new generalized observation.
   - No closure signal for earlier staged observations. Preserve the prior turn's session facts and the
     historical deferral node; N350_scope resumes N349_worlds explicitly.
+
+- turn: 2026-10-05_001#1
+  notes:
+  - Revised C24 via empirical resolution (freeze v7): no-cq became a node-promotion switch, so the monotone reject-flip framing no longer covers it. Status settles to testing after revision; no verbal affirmation, so not supported.
+  - Staged O181 (node completeness load-bearing for status) rather than crystallizing; single seeded run, no closure signal. Considered folding it into C16, rejected - C16 is a corpus-composition claim.
+  - Recorded the mismatched D7 fixture as a dead_end; its lesson is kept as a separate test.
+  - No change to C16/C21/C25 - located holes are consistent with gap routing and conservative reporting; considered C25 (evidence-blocked) near-miss, D7 narrows the reference carrier but C25's statement is not about carriers.

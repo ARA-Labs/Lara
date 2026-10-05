@@ -1,0 +1,93 @@
+session:
+  id: 2026-10-05_001
+  date: '2026-10-05'
+  started: 2026-10-05T17:00+00:00
+  last_turn: 2026-10-05T19:50+00:00
+  turn_count: 1
+  summary: 'Finished the located-gap feature (lara-core@0.3, PR #12): Haskell mirror, Lean driver, map-verdict@2,
+    mutant and ablation semantics, full regeneration, freeze v7.'
+events_logged:
+- turn: 1
+  type: decision
+  id: N351_located_gap
+  routing: direct
+  provenance: user-revised
+  summary: located holes accepted end to end; map-verdict@2
+- turn: 1
+  type: dead_end
+  id: N351_d7_fixture
+  routing: direct
+  provenance: ai-executed
+  summary: mismatched hole fixture was unclassified, kept as a separate test
+- turn: 1
+  type: experiment
+  id: N351_v7
+  routing: direct
+  provenance: ai-executed
+  summary: 'freeze v7: 18 holes accept, 655/655 agreement, no-cq 17 status shifts'
+- turn: 1
+  type: observation
+  id: O181
+  routing: staged
+  provenance: ai-suggested
+  summary: node completeness load-bearing for status (gap->justified 11/18)
+ai_actions:
+- turn: 1
+  action: 'Implemented Stages 3-7 of the located-gap plan, regenerated all fixtures, cut freeze v7, opened
+    issues #13-#16'
+  provenance: ai-executed
+  files_changed:
+  - src/Lara/
+  - lean/Lara/Driver.lean
+  - lean/Lara/Map/
+  - fixtures/
+  - examples/
+  - corpus-units/
+  - measurements/frozen/
+  - docs/
+claims_touched:
+- id: C24
+  action: revised
+  turn: 1
+logic_revisions:
+- turn: 1
+  entry: C24
+  field: title+Statement
+  before: '## C24: A single-rule ablation admits exactly its mapped defect class — surgical and monotone,
+    confirmatory by construction on a seeded corpus
+
+    - **Statement**: Disabling one checker rule makes the checker admit exactly the defect class that
+    rule is responsible for and no other: the previously-rejected certificates in that class flip to accept
+    while every other input''s verdict stays byte-identical (surgical), and no certificate the full checker
+    accepts changes (monotone). On a seeded corpus where each mutant carries one defect mapped to one
+    rule, this demonstrates each rule is load-bearing for its class — it is confirmatory by construction
+    and does not measure how many real, unplanted defects the rule would catch.'
+  after: Single-switch ablation changes exactly its mapped class; rejection-relaxing switches flip rejects
+    to accepts (monotone); node promotion changes exactly hole-reporting verdicts with both runs accepting.
+  signal: empirical-resolution
+  provenance: ai-suggested
+  note: no-cq no longer flips rejections at lara-core@0.3; v7 evidence
+- turn: 1
+  entry: C24
+  field: Status
+  before: supported
+  after: testing
+  signal: empirical-resolution
+  provenance: ai-suggested
+  note: revised marker settles to testing; prior and v7 evidence still apply
+- turn: 1
+  entry: C24
+  field: Sources/Proof
+  before: v6 backend_mutation_v6.md quotes
+  after: v7 located_gap_v7.md quotes
+  signal: empirical-resolution
+  provenance: ai-suggested
+key_context:
+- turn: 1
+  excerpt: 'User goal: check the progress of this WIP PR, finish it and make the PR ready for review.'
+open_threads:
+- 'PR #12 review and merge; m5-freeze-v7 tag on the merge commit'
+- 'Follow-ups #13 (composition over holes), #14 (in-place discharge), #15 (re-lower corpus), #16 (nested
+  hole locations)'
+ai_suggestions_pending:
+- O181 candidate claim on node completeness and status

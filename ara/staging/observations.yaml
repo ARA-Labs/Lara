@@ -3944,3 +3944,21 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+- id: O181
+  timestamp: "2026-10-05T19:45"
+  provenance: ai-suggested
+  content: >-
+    Node completeness is load-bearing for published status, not only for acceptance: promoting the 18
+    seeded located holes to AF nodes shifts a queried status in 17 of them, 11 from gap to justified.
+    Without the completeness partition, an argument with an open mandatory question would publish its
+    claim as justified.
+  context: >-
+    Freeze v7 no-cq ablation (ara/evidence/results/located_gap_v7.md). One seeded corpus; confirmatory by
+    construction (C24). Candidate refinement of C16 / a new claim about holes vs status.
+  potential_type: claim
+  bound_to:
+  - N351_v7
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
