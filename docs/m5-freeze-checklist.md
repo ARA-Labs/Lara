@@ -10,14 +10,112 @@ Commit hashes and `m5-freeze-*` tags below belong to the pre-release
 development history and do not resolve in this repository (see
 [the docs index](README.md))._
 
-## Current snapshot: evaluation freeze v7
+## Current snapshot: evaluation freeze v8
+
+Recorded 2026-10-05. The committed `measurements/frozen/` snapshot describes
+**600 mutants + 60 corpus units = 660 measured inputs** under `lara-core@0.3`,
+as amended in place by the located-gap follow-ups (D12 in
+`docs/located-gap-decision.md`). It was measured from clean input commit
+`59a94c866c2214ef1042c3b83fb6480da3bcf17d` (`git-dirty: false`) on the PR
+branch that introduced the core bump; no `m5-freeze-v8` tag exists in this
+repository. The v7 snapshot, cut earlier on the same branch, is preserved in
+the historical record below.
+
+### Scope and class deltas
+
+v8 is a **corpus re-cut**. Two changes move measured bytes; the seed
+(`20260801`), the operators and the sample are unchanged. The full record is
+`measurements/frozen/corpus-relowering-v8-diffs.md`:
+
+- **Hole rows locate their obligations** (issue #16): each obligation names the
+  rule occurrences that leave it open. No outcome moves.
+- **The corpus declares its incomplete arguments** (issue #15): all 48 `gap`
+  units carry one located hole and stay `gap`; the corpus `MANIFEST.tsv` gains
+  a `located_holes` column, and those units are measured as
+  `accept-located-hole`. Two of them also declare their dead-end undercut
+  against the hole, which is inert.
+- **Mutants:** the re-lowered bases add 5 mutants (2 `reject-R10`,
+  3 `reject-R4`), and `hole-obligation` now seeds only complete arguments.
+
+| Outcome | v7 | Change | v8 |
+| --- | ---: | ---: | ---: |
+| `accept-gap` | 57 | −48 | 9 |
+| `accept-located-hole` | 18 | +48 | 66 |
+| `reject-R10` | 11 | +2 | 13 |
+| `reject-R4` | 34 | +3 | 37 |
+
+All other outcome counts are unchanged.
+
+### Frozen inputs and deterministic outputs
+
+| Input | Count | Git tree SHA |
+| --- | --- | --- |
+| `fixtures/mutants/` | 600 (543 verdict/status anchors + 57 codec negatives) | `706fa15eb809b4810825bf798b8f20c5c649ce7e` |
+| `corpus-units/` | 60 measured units (48 with a located hole) | `2ac98f01fbc98f7fa6cd7292986c90045b8dde92` |
+| `examples/` | worked examples | `278e931bdcf4e888b6183e1f851a5b249792acff` |
+
+| Output | SHA-256 |
+| --- | --- |
+| `report.tsv`, `cut -f1-15` | `e263e7db188b3aca4e7e3db55c88bf7573817c47228d20c986d15d4b0f08c8f3` |
+| `ablation.tsv`, full | `ab2042f1e132372ea9ca9da11ec342e0298d742f4e6d58f7db754fc29d8cb444` |
+
+Environment: GHC **9.10.3**, Lean **4.32.0** (commit `8c9756b28d64dab099da31a4c09229a9e6a2ef35`),
+Linux/x86_64. Timing columns are machine-dependent and excluded from the hash.
+
+### Measured results
+
+| Metric | v8 result |
+| --- | --- |
+| Class match | 660 / 660 |
+| Haskell–Lean agreement | 660 / 660 |
+| Location match and primary | 485 / 485 each (175 not applicable) |
+| Corpus replay | 60 / 60 |
+| `no-cq` (hole promotion) | 66 / 66 located-hole verdicts change, 0 reject flips either way; 65 shift a status: `gap→justified` 57, `gap→defeated` 6, `gap→contested` 2, `justified→contested` 1 |
+| `no-cq` on the corpus alone | 48 / 48 change: `gap→justified` 46, `gap→defeated` 2 |
+| `no-typed` missed rejections | 39: 13 R10 + 21 R11 + 5 MissingConflict |
+| `no-conflict-scan` missed rejections | 5, all MissingConflict |
+| Claim support | 171 leaves, 38 load-bearing; 5 typed attacks, 4 dead-end-sourced; binding-audit worklist unchanged |
+
+The corpus row is the headline the re-lowering buys: on the real sample,
+without node completeness, 46 of the 48 claims whose argument leaves a
+mandatory question open would publish as `justified`.
+
+### Verification and reproduction
+
+| Gate | Result on the v8 input tree |
+| --- | --- |
+| `cabal build all` / `cabal test all --test-show-details=direct` | pass, apart from the two frozen-deliverable re-diffs, which pass once this snapshot is committed |
+| `cabal exec -- runghc scripts/gen-mutants.hs` | 600 verified mutants |
+| `make local-gates` | pass |
+| `bash scripts/differential.sh` (inside `local-gates`) | 683 verdict anchors, 66 codec negatives; zero failures |
+| `bash scripts/admission-differential.sh` | 20 / 20 |
+| `bash scripts/replay.sh bundles/walking-skeleton` | byte-identical verdict |
+| `bash scripts/test-replay-tamper.sh` | both tamper classes detected |
+| `python3 -m unittest scripts/test_freeze_bundle.py -v` | pass |
+
+Reproduce from the clean input commit:
+
+```sh
+git checkout 59a94c866c2214ef1042c3b83fb6480da3bcf17d
+cabal build all
+(cd lean && lake build)
+cabal exec -- runghc scripts/gen-mutants.hs --check
+bash scripts/differential.sh
+ELAN_TOOLCHAIN=leanprover/lean4:v4.32.0 make measure
+cabal exec -- runghc scripts/claim-support.hs
+cut -f1-15 measurements/report.tsv | sha256sum
+sha256sum measurements/ablation.tsv
+```
+
+## Historical record: evaluation freeze v7
 
 Recorded 2026-10-05. The committed `measurements/frozen/` snapshot describes
 **595 mutants + 60 corpus units = 655 measured inputs** under `lara-core@0.3`
 (located gaps, `docs/located-gap-decision.md`). It was measured from clean
 input commit `be82e970f3d26647a9c8accb084c452544851d6f` (`git-dirty: false`) on
 the PR branch that introduced the core bump; no `m5-freeze-v7` tag exists in
-this repository. The v6 snapshot is preserved in the historical record below.
+this repository. v7 was superseded before it landed by v8, cut on the same
+branch.
 
 ### Scope and class deltas
 

@@ -1,6 +1,6 @@
 {
   "environment": {
-    "git-rev": "be82e970f3d26647a9c8accb084c452544851d6f",
+    "git-rev": "59a94c866c2214ef1042c3b83fb6480da3bcf17d",
     "git-dirty": false,
     "ghc": "9.10.3",
     "lean": "",
@@ -29,19 +29,19 @@
     "note": "All load-bearing leaves are agent-produced (provenance ai-executed); none human/paper-authored. `paper-anchored` counts those additionally citing a direct paper-document locator (an E<n># experiment pointer, or a Table/Figure/Appendix/Theorem/Lemma/Corollary/Proposition/Equation/Section/paper locator)."
   },
   "all-leaves": {
-    "total": 169,
+    "total": 171,
     "provenance": {
-      "ai-executed": 169
+      "ai-executed": 171
     },
     "kind": {
       "attested": 106,
-      "observed": 63
+      "observed": 65
     },
     "paper-anchored": 51
   },
   "dead-end-attacks": {
-    "typed-attacks-total": 3,
-    "dead-end-sourced": 2
+    "typed-attacks-total": 5,
+    "dead-end-sourced": 4
   },
   "strict-certificates": {
     "load-bearing-strict-steps": 1,
@@ -681,8 +681,8 @@
       ],
       "load-bearing-leaves": 0,
       "load-bearing-paper-anchored": 0,
-      "typed-attacks": 0,
-      "dead-end-attacks": 0,
+      "typed-attacks": 1,
+      "dead-end-attacks": 1,
       "strict-steps": 0,
       "strict-certified": 0
     },
@@ -693,8 +693,8 @@
       ],
       "load-bearing-leaves": 0,
       "load-bearing-paper-anchored": 0,
-      "typed-attacks": 0,
-      "dead-end-attacks": 0,
+      "typed-attacks": 1,
+      "dead-end-attacks": 1,
       "strict-steps": 0,
       "strict-certified": 0
     },

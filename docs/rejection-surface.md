@@ -481,7 +481,7 @@ try) and `parseWire_nested_error` (an input opening more than `maxDepth` lists b
 is refused with the depth message at line 1, column `maxDepth + 2`). No refusal behaviour changed;
 the three gates above pass unmodified.
 
-The full mutation manifest (`fixtures/mutants/MANIFEST.tsv`, 595 mutants) exercises every class at
+The full mutation manifest (`fixtures/mutants/MANIFEST.tsv`, 600 mutants) exercises every class at
 scale and is the authoritative cross-check if an anchor above ever drifts; each row names its
 `expected` outcome (`reject-R1`, …, `codec-reject`) and `expected-location`.
 
@@ -533,7 +533,10 @@ drivers (`scripts/differential.sh`). The 18 `hole-obligation` mutants, which rej
 `incomplete-argument` in that snapshot, keep their mutation unchanged under `lara-core@0.3`. At
 freeze v7 all 18 accept with exactly one located hole at the seeded argument (none is masked by a
 later defect), so the split is 519 rejecting and 76 accepting mutants
-(`measurements/frozen/lara-core-0.3-regeneration-diffs.md`).
+(`measurements/frozen/lara-core-0.3-regeneration-diffs.md`). Freeze v8 re-lowered the corpus
+units, which are mutation bases, to declare their located holes; that adds 5 rejecting mutants
+(2 `R10`, 3 `R4`), for 524 rejecting and 76 accepting out of 600
+(`measurements/frozen/corpus-relowering-v8-diffs.md`).
 
 ## 4. Relationship to `rit` (the question that prompted this)
 
