@@ -405,12 +405,14 @@ question `q1` open, and one query `c`. Both drivers print (wrapped here)
 ```
 (verdict (replay-id …) accept (labels) (edges)
   (statuses (status (atom c) gap))
-  (holes (arg 0 a (obligations q1) (attacks))))
+  (holes (arg 0 a (obligations (obligation q1 (pos))) (attacks))))
 ```
 
 with exit **0**, pinned byte for byte by `test/DifferentialSpec.hs` and `scripts/differential.sh`.
 `fixtures/corpus/hole-attack-inert.sexp` pins a hole's typed outgoing attack, listed on its row and
-contributing no edge. What did not
+contributing no edge, and `fixtures/corpus/accept-nested-hole-sites.sexp` pins obligations located at
+nested rule occurrences — inherited through a premise, through a discharge, and one question open at
+three sites (`located-gap-decision.md` D12). What did not
 move: R5 still rejects a question in neither the discharge map nor the open set `H`, and a hole's premises, discharges and outgoing attacks are still type-checked, so an
 ill-typed attack *from* a hole rejects with its R-class. Because the checker no longer stops at the
 first incomplete argument, a later support or attack defect in the same unit is reported instead of

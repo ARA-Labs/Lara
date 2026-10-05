@@ -670,7 +670,9 @@ VERDICT ::= (verdict REPLAY-ID accept
           | (verdict REPLAY-ID reject REJECTION)
 CONDITIONAL-SEC ::= (conditional (status ATOM CORE-STATUS)+)
 HOLES-SEC ::= (holes HOLE+)
-HOLE ::= (arg NAT ID (obligations ID+) (attacks NAT*))
+HOLE ::= (arg NAT ID (obligations OBL+) (attacks NAT*))
+OBL ::= (obligation ID POS+)
+POS ::= (pos ((prem NAT) | (ques ID))*)
 STATUS ::= CORE-STATUS | evidence-blocked
 CORE-STATUS ::= gap | justified | contested | defeated
 LABEL ::= in | out | undec
@@ -690,6 +692,14 @@ there is none:
   deduplicated union order (`collectObligations` in `lean/Lara/Support.lean`: premise obligations,
   then discharge obligations, then the instance's own open mandatory questions, each question kept
   at its last occurrence);
+- each `OBL` pairs one obligation with its **sites**: the positions `π` (§7, relative to the hole's
+  root term, `(pos)` being the root) such that `a@π` is a rule instance whose open set `H` contains
+  the question and whose rule declares it mandatory — exactly the occurrences that contribute it to
+  the root obligation set (§6.1). Sites follow the same traversal as the obligations (premise
+  subterms in index order, then discharge subterms in discharge-map order, then the instance itself)
+  and are distinct. They are read from the checked term, never by re-running inference
+  (`lean/Lara/Check/HoleSites.lean`; `located-gap-decision.md` D12). The multi-artifact map verdict
+  (§12) does not carry sites;
 - `attacks` lists, by original attack declaration index and in that order, the surviving
   successfully typed raw attacks whose source is this hole, under raw endpoint alignment and before
   live-source filtering. These attacks produce no edge. An empty `(attacks)` is canonical;
@@ -698,7 +708,8 @@ there is none:
   Quarantined declarations are absent from it: they stay in the admission audit.
 
 Identifiers use the existing atom printer, quoting and Unicode included. A standalone decoder checks
-row shape, canonical naturals, nonempty obligation lists, unique hole indices, unique hole ids, and
+row shape, canonical naturals, nonempty obligation lists, unique obligation ids within a row, a
+nonempty and repeat-free site list per obligation, unique hole indices, unique hole ids, and
 the fixed section order; it does not bound hole indices by the number of `labels` entries, because a
 hole index is a declaration position, not an AF node. Agreement of a hole's index with its id, and
 the validity of its attack references, are relative to the supplied input and its admission maps
@@ -805,7 +816,9 @@ from a complete source covers (`missing-conflict`).
 A claim whose only candidate supports are holes reports `gap`, as a claim with no submitted
 support always did. A claim with complete support takes its status from the labels, and holes
 concluding the same proposition are reported beside it as incomplete alternatives. Holes are
-reported by original declaration index, `ArgId`, and exact mandatory obligations; labels, edges and
+reported by original declaration index, `ArgId`, and exact mandatory obligations, each obligation
+located at the rule occurrences inside the hole that leave it open (positions as in §7, relative to
+the hole's root); labels, edges and
 complete support use AF indices. Positions the core computes are local to the post-admission unit
 it checked; the driver maps them back through admission's retained-argument and retained-attack
 maps and the complete-node-to-declaration map of the partition (`located-gap-decision.md` §3).
@@ -1699,7 +1712,8 @@ status c1
 This example is intentionally incomplete: `a1` leaves the mandatory question `external_validity`
 open, so `a1` is a hole (§4.4). Under `lara-core@0.3` the unit is accepted rather than rejected:
 `a1` is not an AF node, `c1` has no complete support and reports `gap`, and the verdict's `holes`
-section reports `a1` at its declaration index with obligations `(external_validity)`. The undercut
+section reports `a1` at its declaration index with the one obligation `external_validity`, located
+at `a1`'s root: `(obligation external_validity (pos))`. The undercut
 `d1 a1.rule` is a typed attack from a complete source onto the root of a hole; it is kept, but no
 complete argument contains `a1`'s root, so it produces no edge. Before `@0.3` the checker rejected
 this unit with `incomplete-argument`, and the only accepted way to express the gap was to omit `a1`,
@@ -1707,7 +1721,8 @@ which loses the information about which question is missing. `examples/running-e
 carries the `@0.3` shape of the same situation: it declares run 2's support argument `a1`
 (`controlled_experiment` from `e1`, discharging `randomization` with `e2` and `adequate_power` with
 `e3`) without the leaf `e6`, so the mandatory question `external_validity` stays open, and its
-verdict reports `a1` in the `holes` section with obligations `(external_validity)` beside `c1`'s
+verdict reports `a1` in the `holes` section with the obligation `external_validity` at its root
+beside `c1`'s
 `gap` status. The worked examples under `examples/` (each with a
 derived `example.core.sexp` wire anchor and `expected.json` golden) are the M3/M5 golden-test
 artifacts built against this frozen spec (`engineering-plan.md` §5).

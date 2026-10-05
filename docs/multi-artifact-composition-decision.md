@@ -660,7 +660,9 @@ the hole sources by original attack declaration index. A map has no
 reader-facing attack index — the linked attack list mixes transported and
 generated attacks and is never printed — and every such attack is inert, so the
 map row carries none. A reader who needs them reads the member's own solo
-verdict.
+verdict. The same holds for obligation sites (`located-gap-decision.md` D12):
+the solo row locates each obligation at its rule occurrences, the map row
+names the obligations only.
 
 **Statuses are unchanged in form.** A map status is read off the linked
 unit's complete support. A claim whose own member supports it only by a hole

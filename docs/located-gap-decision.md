@@ -7,7 +7,8 @@ It does not change the four core statuses, the grounded labelling, support-term
 typing (spec §6.1), attack typing (spec §7.1), or any R-class or named kind
 other than retiring the named `incomplete-argument` kind. `docs/spec.md` §4.3, §4.4, §8, §10 and §10.1
 state the normative rules; this record keeps the reasons and the rejected
-alternatives._
+alternatives. Amended 2026-10-05 by D12, before `@0.3` shipped: hole rows
+locate each obligation at its rule occurrences._
 
 Background for cold readers: an *argument* is a declared support term for a
 claim. A defeasible step must answer each of its rule's *critical questions*,
@@ -178,6 +179,46 @@ outgoing conflict with no covering attack, `addInstance` can reject before a
 later `addAttack` could supply the cover. Discharging a hole in place, and
 atomic multi-edit completion, are out of scope. See §6 below.
 
+**D12 — Each obligation is located at its rule occurrences (issue #16).** A
+hole row reports every root obligation together with its *sites*: the
+positions, inside the hole's own support term, of the rule instances that leave
+the question open with the question mandatory for their rule. These are
+exactly the occurrences that contribute the question to the root obligation
+set, so an obligation inherited through a premise or a discharge points at the
+step that needs the answer instead of at the wrapper argument. The row becomes
+`(obligation ID POS+)` inside `obligations` (§4 below); `POS` is the attack
+position encoding of spec §7, relative to the hole's root term.
+
+- *No version bump.* `lara-core@0.3` has not shipped (no release or tag
+  carries it), so the `@0.3` hole row is amended in place rather than moved to
+  a new core version or given an additive optional field. A consumer that
+  read the bare-id `@0.3` rows from a development build fails to decode the
+  new rows rather than misreading them.
+- *Order and content.* The obligation list keeps exactly the content and the
+  order it had: the core's deduplicated union order. A row's sites follow the
+  traversal `collectObligations` uses — premise subterms in index order, then
+  discharge subterms in discharge-map order, then the instance itself
+  (post-order) — and are distinct.
+- *Computed from the cache.* Sites are read off the checked hole's term and the
+  rule lookup (`Lara.Check.openSites`, Haskell `Lara.SupportTerm.openSites`);
+  no driver re-runs support inference for them (§7, "Re-infer completeness
+  while compiling").
+- *Mechanized.* `lean/Lara/Check/HoleSites.lean` proves soundness
+  (`openSites_sound`: every site is a rule occurrence leaving the question
+  open, mandatory for its rule), completeness (`openSites_complete`, with no
+  typing premise), that the questions with a site are exactly the root
+  obligations (`mem_obligations_iff_sites`), and that no site repeats under
+  typing (`openSites_nodup`, `sitesFor_nodup`). `obligationSites_adequate`
+  packages these per row and `Lara.Driver.holeRows_obligations` ties every
+  emitted row to them.
+- *Map layer unchanged.* `map-verdict@2` hole rows stay
+  `(hole ALIAS ARG-ID (obligations ID+))`. Sites are reported by the core
+  verdict only; a map consumer that needs them runs the member's unit through
+  the core driver.
+- *Surface.* On the `.lara` path a site is a core position relative to the
+  lowered term, the same convention as attack positions. The surface's own
+  diagnostics and the surface-conformance contract are unchanged.
+
 ## 3. Index convention
 
 Three index spaces appear in verdicts and their reports:
@@ -222,7 +263,9 @@ VERDICT ::= (verdict REPLAY-ID accept
               (statuses (status ATOM STATUS)*)
               CONDITIONAL-SEC? HOLES-SEC?)
 HOLES-SEC ::= (holes HOLE+)
-HOLE ::= (arg NAT ID (obligations ID+) (attacks NAT*))
+HOLE ::= (arg NAT ID (obligations OBL+) (attacks NAT*))
+OBL  ::= (obligation ID POS+)
+POS  ::= (pos ((prem NAT) | (ques ID))*)
 ```
 
 - The hole's `NAT` is its original argument declaration index; `ID` is its
@@ -232,6 +275,12 @@ HOLE ::= (arg NAT ID (obligations ID+) (attacks NAT*))
   `collectObligations` builds: premise obligations, then discharge obligations,
   then the instance's own open mandatory questions, each question kept at its
   last occurrence.
+- Each `OBL` names one obligation and its sites (D12): every position, relative
+  to the hole's root term and in the attack position encoding of spec §7, of a
+  rule instance that leaves the question open with the question mandatory for
+  its rule. `(pos)` is the hole's root. Sites follow the `collectObligations`
+  traversal (premises in index order, then discharges in discharge-map order,
+  then the instance itself) and are distinct.
 - `attacks` lists the original declaration indices of the surviving,
   successfully typed raw attacks whose source is this hole. It uses raw
   endpoint alignment and is taken before live-source filtering. An empty
@@ -246,8 +295,9 @@ HOLE ::= (arg NAT ID (obligations ID+) (attacks NAT*))
   equivalence. That selection does not change the global hole list.
 
 A standalone verdict decoder checks row shape, canonical naturals, nonempty
-obligation lists, unique hole indices, unique hole ids, and the fixed section
-order. It does not bound hole indices by the number of AF labels: a hole index
+obligation lists, unique obligation ids within a row, a nonempty site list per
+obligation, no repeated site within an obligation, unique hole indices, unique
+hole ids, and the fixed section order. It does not bound hole indices by the number of AF labels: a hole index
 is a declaration position, not a node. Agreement between a hole's index and its
 id, and validity of its attack references, depend on the supplied input and its
 admission maps, so only a decoder that holds the input can check them.
@@ -265,8 +315,8 @@ map accepts it. The composite verdict moved to `map-verdict@2` for this
 - An optional, nonempty trailing `(holes (hole ALIAS ARG-ID (obligations ID+))+)`
   section reports every handle whose linked argument is a hole, by member alias
   and member-local argument id, with the exact obligations in core order, in
-  the same member-then-declaration order as `nodes`. It carries no index and no
-  attack list.
+  the same member-then-declaration order as `nodes`. It carries no index, no
+  attack list and no obligation sites (D12).
 - The cross-member saturation generates no attack sourced at or aimed at a hole
   (D4, D6); `Lara.Map.crossPairs_endpoints_complete` states it, and
   `batch_generated_live` ties it to the accepted linked unit.
@@ -388,10 +438,9 @@ The located report is diagnostic data beside the unchanged status.
 
 ## 8. Non-goals and cost
 
-This record does not locate each open question at its nested rule occurrence
-(issue #16); a hole row names the argument and its obligation set. Linking and
-composition were first left hole-free here; issue #13 extended them to units
-with holes (D9). This record does not add in-place
+Obligation sites (D12, issue #16) are reported by the core verdict only, not by
+the map layer. Linking and composition were first left hole-free here; issue
+#13 extended them to units with holes (D9). This record does not add in-place
 discharge (D11, issue #14; atomic multi-edit completion is issue #11), or
 re-lower the frozen `corpus-units` to declare their incomplete arguments
 (`corpus-units/LOWERING.md`, issue #15).
