@@ -323,7 +323,8 @@ side's saturation cache — built under the linked Γ before checking — is the
 restriction of the checker's conflict cache to that side's arguments: `(w, A)`
 is in the side's inferred cache exactly when `w` is one of that side's
 arguments and the accepted unit carries a checked node for `w` whose recorded
-conclusion is `A`. -/
+conclusion is `A`. The cache holds only complete terms, so no premise excludes
+holes: a cached term is in `Check.completeArgs` of the linked declarations. -/
 theorem link_cache_bridge {canon : String → String} {reg : BackendRegistry canon}
     {C : Context} {F : Fragment} {unit : Lara.Unit} {Gamma : LeafId → Option Atom}
     {ground : List Atom} {checked : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg)}
@@ -338,16 +339,24 @@ theorem link_cache_bridge {canon : String → String} {reg : BackendRegistry can
   have hsound := Check.Unit.checkUnit_sound hcheck
   have hpol : checked.policy = F.policy := by
     rw [hsound.policy_eq, hunit]; rfl
-  have hargs : checked.program.args = dedupList (C.frame.args ++ F.args) := by
-    rw [hsound.args_eq, hunit]; rfl
-  have hsub : ∀ v ∈ side, v ∈ checked.program.args := by
+  have hargs : checked.program.args = Check.completeArgs checked.policy.ruleLookup
+      Gamma reg (dedupList (C.frame.args ++ F.args)) := by
+    rw [hsound.args_eq, hpol, hunit]; rfl
+  have hdecl : ∀ v ∈ side, v ∈ dedupList (C.frame.args ++ F.args) := by
     intro v hv
-    rw [hargs, mem_dedupList, List.mem_append]
+    rw [mem_dedupList, List.mem_append]
     rcases hside with rfl | rfl
     · exact Or.inl hv
     · exact Or.inr hv
-  rw [← hpol, mem_conclusionCache_of_sub hsub,
-    conclusionCache_eq_conflictCache checked unit.atts, List.mem_map]
+  -- A cached side term is complete, hence an AF argument of the linked program.
+  have hcache : (w, A) ∈ conclusionCache checked.policy.ruleLookup Gamma reg side ↔
+      w ∈ side ∧ (w, A) ∈ conclusionCache checked.policy.ruleLookup Gamma reg
+        checked.program.args := by
+    rw [mem_conclusionCache, mem_conclusionCache, hargs, Check.mem_completeArgs_iff]
+    constructor
+    · rintro ⟨hw, hsup⟩; exact ⟨hw, ⟨hdecl w hw, A, hsup⟩, hsup⟩
+    · rintro ⟨hw, -, hsup⟩; exact ⟨hw, hsup⟩
+  rw [← hpol, hcache, conclusionCache_eq_conflictCache checked unit.atts, List.mem_map]
   constructor
   · rintro ⟨hw, n, hn, hpair⟩
     exact ⟨hw, n, hn, congrArg Prod.fst hpair, congrArg Prod.snd hpair⟩
@@ -710,6 +719,18 @@ theorem link_attackComplete
   · exact covered_mono hmid
       (hF.attack_complete source hs target ht Cs Ct hsSup htSup hcm hca)
 
+/-- Two complete sides make every linked declaration complete. -/
+theorem linkedUnit_args_complete
+    (hC : SideOk canon reg (linkGamma C F) F.policy C.frame.args C.frame.atts)
+    (hF : SideOk canon reg (linkGamma C F) F.policy F.args F.atts) :
+    ∀ w ∈ (linkedUnit reg C F).args, ∃ A,
+      HasSupport canon (linkedUnit reg C F).policy.ruleLookup (linkGamma C F)
+        (certOkOf reg) w A [] := by
+  intro w hw
+  rcases List.mem_append.mp (mem_dedupList.mp hw) with h | h
+  · exact hC.support w h
+  · exact hF.support w h
+
 /-- **A well-linked composition is accepted (T1/T2).** Every premise of
 `Check.Unit.checkUnit_complete` is discharged from the two sides' linkability
 plus the guard except four explicit checker premises. `hargs` comes from the
@@ -736,11 +757,8 @@ theorem link_checked {unit : Lara.Unit} {Gamma : LeafId → Option Atom}
     have hgamma : Gamma = linkGamma C F := (congrArg Prod.snd hpair).symm
     subst hunit; subst hgamma
     refine Check.Unit.checkUnit_complete hsignature hscope hruleIds hpolicy
-      (dedupList_nodup _) ?_ ?_ ?_ ?_ (link_attackComplete hC hF)
-    · intro w hw
-      rcases List.mem_append.mp (mem_dedupList.mp hw) with h | h
-      · exact hC.support w h
-      · exact hF.support w h
+      (dedupList_nodup _) (linkedUnit_args_complete hC hF) ?_ ?_ ?_
+      (link_attackComplete hC hF)
     · intro k hk
       rcases List.mem_append.mp hk with h | h
       · rcases List.mem_append.mp h with h' | h'
@@ -762,6 +780,28 @@ theorem link_checked {unit : Lara.Unit} {Gamma : LeafId → Option Atom}
   · rw [Bool.not_eq_true] at hok
     rw [link_eq_none hok] at hlink
     exact absurd hlink (by simp)
+
+/-- **The accepted link is hole-free and exact (D9).** Linking results stay on
+the `SideOk.support` domain: when both sides are complete, the AF arguments
+of the accepted link are exactly the deduplicated sides, its attacks are the
+two sides' attacks followed by the saturation, and it locates no hole. -/
+theorem link_accepted_raw {unit : Lara.Unit} {Gamma : LeafId → Option Atom}
+    {ground : List Atom} {checked : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg)}
+    (hlink : link reg C F = some (unit, Gamma))
+    (hcheck : Check.Unit.checkUnit Gamma reg ground unit = .ok checked)
+    (hC : SideOk canon reg (linkGamma C F) F.policy C.frame.args C.frame.atts)
+    (hF : SideOk canon reg (linkGamma C F) F.policy F.args F.atts) :
+    checked.program.args = dedupList (C.frame.args ++ F.args) ∧
+      checked.program.atts =
+        C.frame.atts ++ F.atts ++ crossAtts reg (linkGamma C F) C F ∧
+      checked.program.holes = [] ∧ checked.holes = [] := by
+  obtain ⟨-, hunit, hgamma⟩ := link_some_inv hlink
+  subst hunit; subst hgamma
+  have hsound := Check.Unit.checkUnit_sound hcheck
+  have hcomplete := linkedUnit_args_complete hC hF
+  exact ⟨hsound.args_eq_of_complete hcomplete,
+    hsound.atts_eq_of_complete hcomplete,
+    hsound.holes_eq_nil_of_complete hcomplete⟩
 
 end Linked
 

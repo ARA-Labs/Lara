@@ -11,8 +11,8 @@ reserves the word *parametricity* for (`docs/theory-m4-contextual-adequacy.md`
 
 **The relation is not arbitrary, and cannot be.** `RelInj` below requires `R` to
 reflect and preserve equality on the assurances it relates — i.e. to be a
-partial bijection. Three consumers force it: the structural merge `dedupList`,
-the coverage decider `coveredB`, and `checkUnit_complete`'s `Nodup` premise.
+partial bijection. Its consumers: `dedupList`, `coveredB`, the `Nodup` premise of
+`checkUnit_complete_holes`, and the live-attack filter of `checkUnit_rel_program`.
 `relInj_necessary` witnesses the failure directly rather than leaving it
 asserted. So the honest name is *parametricity over partial-bijective
 certificate relations*.
@@ -226,8 +226,8 @@ structure RelFrag (R : Assurance → Assurance → Prop) (F₁ F₂ : Fragment) 
 
 /-- **`R` reflects and preserves equality on what it relates.** Equivalently:
 `R` is the graph of a partial injection. `relInj_necessary` is the witness that
-this cannot be dropped; `dedupList`, `coveredB` and `checkUnit_complete`'s
-`Nodup` premise are the three consumers. -/
+this cannot be dropped; its consumers are `dedupList`, `coveredB`, `Nodup` in
+`checkUnit_complete_holes`, and the live filter of `checkUnit_rel_program`. -/
 def RelInj (R : Assurance → Assurance → Prop) : Prop :=
   ∀ α₁ α₂ β₁ β₂, R α₁ β₁ → R α₂ β₂ → (α₁ = α₂ ↔ β₁ = β₂)
 
@@ -1091,24 +1091,22 @@ theorem attackComplete_rel
     (hpres : RelPreserving R (certOkOf reg₁) (certOkOf reg₂))
     (hargs : Forall₂ (RelTerm R) args₁ args₂)
     (hatts : Forall₂ (RelAtt R) atts₁ atts₂)
-    (hcomplete : ∀ w ∈ args₁, ∃ A, HasSupport canon Pi Gamma (certOkOf reg₁) w A [])
+    (htyped : ∀ w ∈ args₁, ∃ A O, HasSupport canon Pi Gamma (certOkOf reg₁) w A O)
     (h : AttackComplete canon Pi Gamma (certOkOf reg₁) dp args₁ atts₁) :
     AttackComplete canon Pi Gamma (certOkOf reg₂) dp args₂ atts₂ := by
   intro source₂ hs₂ target₂ ht₂ Cs Ct hsSup htSup hcm hca
   obtain ⟨source₁, hs₁, hrels⟩ := Forall₂.mem_right hargs hs₂
   obtain ⟨target₁, ht₁, hrelt⟩ := Forall₂.mem_right hargs ht₂
-  obtain ⟨Cs₀, hCs₀⟩ := hcomplete source₁ hs₁
-  obtain ⟨Ct₀, hCt₀⟩ := hcomplete target₁ ht₁
-  have hCsEq : Cs₀ = Cs :=
-    (hasSupport_unique (hasSupport_rel hpres hrels hCs₀) hsSup).1
-  have hCtEq : Ct₀ = Ct :=
-    (hasSupport_unique (hasSupport_rel hpres hrelt hCt₀) htSup).1
+  obtain ⟨Cs₀, Os₀, hCs₀⟩ := htyped source₁ hs₁
+  obtain ⟨Ct₀, Ot₀, hCt₀⟩ := htyped target₁ ht₁
+  obtain ⟨hCsEq, hOsEq⟩ := hasSupport_unique (hasSupport_rel hpres hrels hCs₀) hsSup
+  obtain ⟨hCtEq, hOtEq⟩ := hasSupport_unique (hasSupport_rel hpres hrelt hCt₀) htSup
+  subst hCsEq hOsEq hCtEq hOtEq
   exact covered_rel hR hatts hrels hrelt
-    (h source₁ hs₁ target₁ ht₁ Cs₀ Ct₀ hCs₀ hCt₀
-      (by rw [hCsEq, hCtEq]; exact hcm) (conflictAttackable_rel hrelt hca))
+    (h source₁ hs₁ target₁ ht₁ Cs₀ Ct₀ hCs₀ hCt₀ hcm (conflictAttackable_rel hrelt hca))
 
 /-- Distinctness survives the relation — `RelInj`'s second consumer, the
-`Nodup` premise of `Check.Unit.checkUnit_complete`. -/
+`Nodup` premise of `Check.Unit.checkUnit_complete_holes`. -/
 theorem nodup_rel (hR : RelInj R) :
     ∀ {l₁ l₂ : List SupportTerm}, Forall₂ (RelTerm R) l₁ l₂ →
       l₁.Nodup → l₂.Nodup := by
@@ -1125,7 +1123,7 @@ theorem nodup_rel (hR : RelInj R) :
 
 /-- **Acceptance transports along a partial-bijective, acceptance-preserving
 certificate relation.** The relational `checkUnit_map`
-(`lean/Lara/Context/Equivalence.lean:401`). -/
+(`lean/Lara/Context/Equivalence.lean:392`). -/
 theorem checkUnit_rel {ground : List Atom}
     {unit₁ unit₂ : Lara.Unit}
     {accepted₁ : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg₁)}
@@ -1138,46 +1136,85 @@ theorem checkUnit_rel {ground : List Atom}
     ∃ accepted₂, Check.Unit.checkUnit Gamma reg₂ ground unit₂ = .ok accepted₂ := by
   have hsound := Check.Unit.checkUnit_sound h₁
   have hpolEq := hsound.policy_eq
-  have hruleIds := hsound.ruleIds_nodup
-  have hpolWf := hsound.policy_wf
-  have hargsEq := hsound.args_eq
-  have hattsEq := hsound.atts_eq
-  have hattackComplete := hsound.attack_complete
   have hscope : Policy.firstOutOfScope? unit₂.policy = none := by
     rw [hpolicy, ← hpolEq]; exact accepted₁.scopes_wf
-  refine Check.Unit.checkUnit_complete
+  refine Check.Unit.checkUnit_complete_holes
     (signatureStage_rel hsigma hpolicy (relTerms_iff_forall₂.mpr hargs) ▸
-      signatureStage_of_ok h₁)
-    hscope (by rw [hpolicy, ← hpolEq]; exact hruleIds)
-    (by rw [hpolicy, ← hpolEq]; exact hpolWf)
-    (nodup_rel hR hargs (hargsEq ▸ accepted₁.program.nodup))
+      hsound.signature_ok)
+    hscope (by rw [hpolicy, ← hpolEq]; exact hsound.ruleIds_nodup)
+    (by rw [hpolicy, ← hpolEq]; exact hsound.policy_wf)
+    (nodup_rel hR hargs hsound.raw_nodup)
     ?_ ?_ ?_ ?_ ?_
   · intro w₂ hw₂
     obtain ⟨w₁, hw₁, hrel⟩ := Forall₂.mem_right hargs hw₂
-    obtain ⟨A, hA⟩ := accepted₁.program.complete w₁ (by rw [hargsEq]; exact hw₁)
-    rw [hpolicy, ← hpolEq]
-    exact ⟨A, hasSupport_rel hpres hrel hA⟩
+    obtain ⟨A, O, hA⟩ := hsound.raw_support w₁ hw₁
+    rw [hpolicy]
+    exact ⟨A, O, hasSupport_rel hpres hrel hA⟩
   · intro k₂ hk₂
     obtain ⟨k₁, hk₁, hrel⟩ := Forall₂.mem_right hatts hk₂
-    rw [hpolicy, ← hpolEq]
-    exact hasAttack_rel hpres hrel
-      (accepted₁.program.typed k₁ (by rw [hattsEq]; exact hk₁))
+    rw [hpolicy]
+    exact hasAttack_rel hpres hrel (hsound.raw_typed k₁ hk₁)
   · intro k₂ hk₂
     obtain ⟨k₁, hk₁, hrel⟩ := Forall₂.mem_right hatts hk₂
-    obtain ⟨v₂, hv₂, hvrel⟩ := Forall₂.mem_left hargs
-      (hargsEq ▸ accepted₁.program.source_declared k₁ (by rw [hattsEq]; exact hk₁))
+    obtain ⟨v₂, hv₂, hvrel⟩ := Forall₂.mem_left hargs (hsound.raw_source k₁ hk₁)
     rw [(relTerm_inj hR (relAtt_source hrel) hvrel).mp rfl]
     exact hv₂
   · intro k₂ hk₂
     obtain ⟨k₁, hk₁, hrel⟩ := Forall₂.mem_right hatts hk₂
-    obtain ⟨v₂, hv₂, hvrel⟩ := Forall₂.mem_left hargs
-      (hargsEq ▸ accepted₁.program.target_declared k₁ (by rw [hattsEq]; exact hk₁))
+    obtain ⟨v₂, hv₂, hvrel⟩ := Forall₂.mem_left hargs (hsound.raw_target k₁ hk₁)
     rw [(relTerm_inj hR (relAtt_target hrel) hvrel).mp rfl]
     exact hv₂
-  · rw [hpolicy, ← hpolEq]
-    exact attackComplete_rel hR hpres hargs hatts
-      (hargsEq ▸ accepted₁.program.complete)
-      (by rw [← hargsEq, ← hattsEq]; exact accepted₁.attack_complete)
+  · rw [hpolicy]
+    exact attackComplete_rel hR hpres hargs hatts hsound.raw_support
+      hsound.raw_attack_complete
+
+/-- **The relation relates the compiled programs, holes included.** The
+relational `checkUnit_map_program`: related declarations type with one
+conclusion and obligation set, so the complete arguments, the located holes
+and the live attacks of two accepted related units are related in order. No
+declaration needs to be complete. -/
+theorem checkUnit_rel_program {ground : List Atom}
+    {unit₁ unit₂ : Lara.Unit}
+    {accepted₁ : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg₁)}
+    {accepted₂ : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg₂)}
+    (hR : RelInj R)
+    (hpres : RelPreserving R (certOkOf reg₁) (certOkOf reg₂))
+    (hpolicy : unit₂.policy = unit₁.policy)
+    (hargs : Forall₂ (RelTerm R) unit₁.args unit₂.args)
+    (hatts : Forall₂ (RelAtt R) unit₁.atts unit₂.atts)
+    (h₁ : Check.Unit.checkUnit Gamma reg₁ ground unit₁ = .ok accepted₁)
+    (h₂ : Check.Unit.checkUnit Gamma reg₂ ground unit₂ = .ok accepted₂) :
+    Forall₂ (RelTerm R) accepted₁.program.args accepted₂.program.args ∧
+      Forall₂ (RelTerm R) accepted₁.program.holes accepted₂.program.holes ∧
+      Forall₂ (RelAtt R) accepted₁.program.atts accepted₂.program.atts := by
+  have hs₁ := Check.Unit.checkUnit_sound h₁
+  have hs₂ := Check.Unit.checkUnit_sound h₂
+  -- Related declarations type with one obligation set.
+  have hsame : ∀ w₁ w₂, w₁ ∈ unit₁.args → RelTerm R w₁ w₂ → ∃ A O,
+      HasSupport canon unit₁.policy.ruleLookup Gamma (certOkOf reg₁) w₁ A O ∧
+      HasSupport canon unit₂.policy.ruleLookup Gamma (certOkOf reg₂) w₂ A O := by
+    intro w₁ w₂ hw hrel
+    obtain ⟨A, O, hO⟩ := hs₁.raw_support w₁ hw
+    exact ⟨A, O, hO, by rw [hpolicy]; exact hasSupport_rel hpres hrel hO⟩
+  have hargsRel : Forall₂ (RelTerm R) accepted₁.program.args accepted₂.program.args := by
+    rw [hs₁.args_eq, hs₂.args_eq]
+    refine Forall₂.filter hargs fun w₁ w₂ hw hrel => ?_
+    obtain ⟨_, O, hO₁, hO₂⟩ := hsame w₁ w₂ hw hrel
+    rw [Check.argComplete_of_hasSupport hO₁, Check.argComplete_of_hasSupport hO₂]
+  refine ⟨hargsRel, ?_, ?_⟩
+  · rw [hs₁.holes_eq, hs₂.holes_eq]
+    refine Forall₂.filter hargs fun w₁ w₂ hw hrel => ?_
+    obtain ⟨_, O, hO₁, hO₂⟩ := hsame w₁ w₂ hw hrel
+    rw [Check.argHole_of_hasSupport hO₁, Check.argHole_of_hasSupport hO₂]
+  · rw [hs₁.atts_eq, hs₂.atts_eq]
+    refine Forall₂.filter hatts fun k₁ k₂ _ hrel => ?_
+    refine decide_eq_decide.mpr ⟨fun h => ?_, fun h => ?_⟩
+    · obtain ⟨v₂, hv₂, hvrel⟩ := Forall₂.mem_left hargsRel h
+      rw [(relTerm_inj hR (relAtt_source hrel) hvrel).mp rfl]
+      exact hv₂
+    · obtain ⟨v₁, hv₁, hvrel⟩ := Forall₂.mem_right hargsRel h
+      rw [(relTerm_inj hR (relAtt_source hrel) hvrel).mpr rfl]
+      exact hv₁
 
 end AcceptedUnit
 
@@ -1387,7 +1424,7 @@ theorem nodes_conclusion_rel
           exact congrArg some (hasSupport_unique hvb hva).1
 
 /-- **The two accepted units present the same carrier.** The relational
-`compileUnit_map` (`lean/Lara/Context/Equivalence.lean:511`). This is where the
+`compileUnit_map` (`lean/Lara/Context/Equivalence.lean:551`). This is where the
 relation is erased: from here down both branches run one and the same
 framework. -/
 theorem compileUnit_rel
@@ -1424,7 +1461,7 @@ end Carrier
 /-! ### The headline
 
 Proved once over an arbitrary projection `g`, exactly as `obsGen_congr`
-(`lean/Lara/Context/Equivalence.lean:795`) is, so that the semantics-parametric
+(`lean/Lara/Context/Equivalence.lean:877`) is, so that the semantics-parametric
 form is an instantiation rather than a second proof.
 
 One bookkeeping difference from the functional development is worth naming.
@@ -1457,7 +1494,7 @@ theorem exists_accepted_rel (hR : RelInj R)
     hR hpres hF.sigma hF.policy hargs hatts h₁
 
 /-- **The two links present the same carrier.** The relational
-`compileUnit_link_relabel` (`lean/Lara/Context/Equivalence.lean:723`). -/
+`compileUnit_link_relabel` (`lean/Lara/Context/Equivalence.lean:808`). -/
 theorem compileUnit_link_rel (hR : RelInj R)
     (hpres : RelPreserving R (certOkOf reg₁) (certOkOf reg₂))
     (hadm : Admissible reg₁ C F₁) (hF : RelFrag R F₁ F₂)
@@ -1476,10 +1513,24 @@ theorem compileUnit_link_rel (hR : RelInj R)
   intro acc₂ h₂
   have hsound₁ := Check.Unit.checkUnit_sound h₁
   have hsound₂ := Check.Unit.checkUnit_sound h₂
+  -- Both links are hole-free: the original by `Admissible`, the related one
+  -- because the relation carries complete support to complete support.
+  have hcomplete₁ := linkedUnit_args_complete hadm.ctx hadm.frag
+  have hcomplete₂ : ∀ w ∈ (linkedUnit reg₂ C F₂).args, ∃ A,
+      HasSupport canon (linkedUnit reg₂ C F₂).policy.ruleLookup
+        (linkGamma C F₁) (certOkOf reg₂) w A [] := by
+    intro w₂ hw₂
+    obtain ⟨w₁, hw₁, hrel⟩ := Forall₂.mem_right hargs hw₂
+    obtain ⟨A, hA⟩ := hcomplete₁ w₁ hw₁
+    show ∃ A, HasSupport canon F₂.policy.ruleLookup _ _ _ _ _
+    rw [hF.policy]
+    exact ⟨A, hasSupport_rel hpres hrel hA⟩
   exact compileUnit_rel hR hpres
     (by rw [hsound₁.policy_eq, hsound₂.policy_eq]; exact hF.policy)
-    (by rw [hsound₂.args_eq, hsound₁.args_eq]; exact hargs)
-    (by rw [hsound₂.atts_eq, hsound₁.atts_eq]; exact hatts)
+    (by rw [hsound₂.args_eq_of_complete hcomplete₂,
+      hsound₁.args_eq_of_complete hcomplete₁]; exact hargs)
+    (by rw [hsound₂.atts_eq_of_complete hcomplete₂,
+      hsound₁.atts_eq_of_complete hcomplete₁]; exact hatts)
 
 /-- **Relational parametricity over related backends, for every projection at
 once.**
@@ -1487,7 +1538,7 @@ once.**
 Two fragments related by a partial-bijective, acceptance-preserving relation `R`
 on certificates are indistinguishable in every admissible context that `R` fixes
 — whatever is read off the resulting carrier. This is `obsGen_congr`
-(`lean/Lara/Context/Equivalence.lean:795`) with the *function* `f` replaced by a
+(`lean/Lara/Context/Equivalence.lean:877`) with the *function* `f` replaced by a
 *relation*, which is the quantifier M4's acceptance criterion names.
 
 **Read the strength honestly.** `RelInj` makes `R` a partial injection;
@@ -1741,7 +1792,7 @@ only over the fragment's own certificate occurrences.**
 Compare `backend_replacement_congruence`, whose `AssurPreserving f` obliges
 every rule and every assurance *in the type*. This obliges only the assurances
 `F` carries. That gap is what the docstrings of `registry_swap_congruence`
-(`Context/Equivalence.lean:890`) and `registry_swap_congruence_sem`
+(`Context/Equivalence.lean:972`) and `registry_swap_congruence_sem`
 (`Context/Observation.lean:345`) record as the hypothesis they do not carry, and
 it is the reason the relational form is more than a restatement.
 

@@ -618,6 +618,7 @@ open Lara
 #print axioms Lara.Support.mem_questionNames
 #print axioms Lara.Support.leaves_declared
 #print axioms Lara.Support.hasSupport_unique
+#print axioms Lara.Support.hasSupport_obligations_indep
 #print axioms Lara.Support.hasSupport_inst_root
 #print axioms Lara.Support.hasSupport_leaf_gamma
 #print axioms Lara.Support.hasSupport_mono_gamma
@@ -997,6 +998,7 @@ open Lara
 #print axioms Lara.Grounded.statusC_all_out_not_justified
 #print axioms Lara.Consistency.wellFormed_contrary_target_attackable
 #print axioms Lara.Consistency.mem_claimSupportFor_iff
+#print axioms Lara.Consistency.completeClaimFor_gap_of_only_holes
 #print axioms Lara.Consistency.contrary_args_not_both_grounded
 #print axioms Lara.Consistency.contrary_claims_not_both_justified
 
@@ -1132,6 +1134,7 @@ open Lara
 #print axioms Lara.Check.checkProgramDetailed_complete_holes
 #print axioms Lara.Check.Unit.termsWellSorted_filter
 #print axioms Lara.Check.Unit.checkUnit_complete_holes
+#print axioms Lara.Check.Unit.CheckUnitSound.raw_attack_complete
 #print axioms Lara.Check.Unit.CheckUnitSound.args_eq_of_complete
 #print axioms Lara.Check.Unit.CheckUnitSound.atts_eq_of_complete
 #print axioms Lara.Check.Unit.CheckUnitSound.holes_eq_nil_of_complete
@@ -2774,6 +2777,8 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.fragmentAF_eq
 #print axioms Lara.Context.link_attackComplete
 #print axioms Lara.Context.link_checked
+#print axioms Lara.Context.linkedUnit_args_complete
+#print axioms Lara.Context.link_accepted_raw
 
 -- Context.Merge: the structural merge is semantically inert (F1)
 #print axioms Lara.Context.posOf_lt
@@ -2840,6 +2845,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.attackComplete_map
 #print axioms Lara.Context.signatureStage_of_ok
 #print axioms Lara.Context.checkUnit_map
+#print axioms Lara.Context.checkUnit_map_program
 #print axioms Lara.Context.nodes_conclusion_map
 #print axioms Lara.Context.compileUnit_map
 -- The projection layer: `obsGen` is `obs` with the per-export reading
@@ -2852,6 +2858,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.obs_eq_of_ok
 #print axioms Lara.Context.exists_accepted_of_admissible
 #print axioms Lara.Context.exists_accepted_relabel
+#print axioms Lara.Context.link_relabel_program
 #print axioms Lara.Context.compileUnit_link_relabel
 #print axioms Lara.Context.obsGen_congr
 #print axioms Lara.Context.backend_replacement_congruence
@@ -2906,6 +2913,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Forall₂.getElem?_none
 #print axioms Lara.Forall₂.mem_right
 #print axioms Lara.Forall₂.mem_left
+#print axioms Lara.Forall₂.filter
 
 -- Context.Parametricity: the relational form of the M4 congruence.
 -- `R` replaces the function `f`; `RelInj` is what the structural merge and the
@@ -2980,6 +2988,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.attackComplete_rel
 #print axioms Lara.Context.nodup_rel
 #print axioms Lara.Context.checkUnit_rel
+#print axioms Lara.Context.checkUnit_rel_program
 #print axioms Lara.Context.relTerms_getElem?_none
 #print axioms Lara.Context.relDis_lookup_none
 #print axioms Lara.Context.relTerm_subterm_none
@@ -3695,6 +3704,8 @@ fixture would be worthless. -/
 #print axioms Lara.Examples.SurfaceTransport.transport_cert_accepted_wrapped_raw
 #print axioms Lara.Examples.SurfaceTransport.transport_args_kernel
 #print axioms Lara.Examples.SurfaceTransport.transport_args_wrapped
+#print axioms Lara.Examples.SurfaceTransport.transport_complete_kernel
+#print axioms Lara.Examples.SurfaceTransport.transport_complete_wrapped
 #print axioms Lara.Examples.SurfaceTransport.transport_coreObligations_kernel
 #print axioms Lara.Examples.SurfaceTransport.transport_coreObligations_wrapped
 #print axioms Lara.Examples.SurfaceTransport.transport_checks_kernel
@@ -3754,6 +3765,8 @@ fixture would be worthless. -/
 #print axioms Lara.Examples.SurfaceTransportAttack.attack_cert_not_attackable
 #print axioms Lara.Examples.SurfaceTransportAttack.attack_hasAttack
 #print axioms Lara.Examples.SurfaceTransportAttack.attack_attackComplete
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_complete_kernel
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_complete_wrapped
 #print axioms Lara.Examples.SurfaceTransportAttack.attack_coreObligations_kernel
 #print axioms Lara.Examples.SurfaceTransportAttack.attack_coreObligations_wrapped
 #print axioms Lara.Examples.SurfaceTransportAttack.attack_checks_kernel
@@ -3798,6 +3811,8 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.SurfaceTransportContext.context_hasSupport_cert
 #print axioms Lara.Examples.SurfaceTransportContext.context_args_kernel
 #print axioms Lara.Examples.SurfaceTransportContext.context_args_wrapped
+#print axioms Lara.Examples.SurfaceTransportContext.context_complete_kernel
+#print axioms Lara.Examples.SurfaceTransportContext.context_complete_wrapped
 #print axioms Lara.Examples.SurfaceTransportContext.context_coreObligations_kernel
 #print axioms Lara.Examples.SurfaceTransportContext.context_coreObligations_wrapped
 #print axioms Lara.Examples.SurfaceTransportContext.context_checks_kernel

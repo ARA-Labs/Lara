@@ -100,7 +100,7 @@ rejecting counterexample. "Layer" is the classification M0 owes its dependents:
 | 4 | Conclusion and claim ownership | adequacy | `Invariants.support_compileUnit` (`:246`) — carrier support agrees with `Consistency.claimSupportFor` (`Consistency.lean:63`); lifted to status by `Invariants.status_compileUnit` (`:257`) | none: a violation is not a framework but a disagreement between two projections, excluded by the theorem |
 | 5 | Subargument closure | source | `Compile.Covered` (`Compile.lean:542`), decided by `Compile.coveredB_iff` (`:553`) over the per-attack closure test `Compile.attackClosureB_iff` (`:459`); `Compile.closure_includes_direct` (`:707`) shows closure extends, never replaces, the direct attack | `Examples.CompilerInvariants.closure_rejects_noncontaining_target` (`:133`) — in the running fixture node `0` is in range and is the attack's own source, yet receives no edge, because it does not contain the attacked occurrence. Closure adds edges onto containing arguments only |
 | 6 | Positional attack coherence | source | `Compile.AttackOcc` (`Compile.lean:76`), `attackOcc_unique` (`:82`), `target_contains_occ` (`:97`) | the inversion theorems *are* the rejections: `Attack.undercut_target_rule` (`Lara/Attack.lean:622`) and `Attack.undermine_target_leaf` (`:632`) exclude the mismatched position kinds; `rebut_top_defeasible` (`:590`) and `undercut_pos_defeasible` (`:603`) exclude strict occurrences |
-| 7 | Strict-chain well-formedness | source | `Support.cert_steps_accounted` (`Lara/Support.lean:1304`) over `Support.CertStepIn` (`:1105`) | **open — B0.** The backend-leakage rejection is B0's deliverable; this row closes when B0 lands |
+| 7 | Strict-chain well-formedness | source | `Support.cert_steps_accounted` (`Lara/Support.lean:1361`) over `Support.CertStepIn` (`:1162`) | **open — B0.** The backend-leakage rejection is B0's deliverable; this row closes when B0 lands |
 | 8 | Declared-identity preservation | source | `Compile.CheckedProgram.nodup` (`Compile.lean:588`); `Unit.CheckedUnit.nodes_terms` (`Lara/Unit.lean:205`) aligns the cache with the argument list | none at the carrier level, deliberately: two nodes *may* share a conclusion. Term-level identity is a source invariant and is not observable after labelling |
 
 ### Recorded obligations
@@ -169,7 +169,7 @@ The full declaration map and prohibited paper claims are recorded in
   freezes; the freeze is this document.
 - `Lara.Erase` is unrelated despite the name: it is the backend-relabel
   development for result 9, not an erasure to a naked framework.
-- `Consistency.contrary_args_not_both_grounded` (`Consistency.lean:106`) derives
+- `Consistency.contrary_args_not_both_grounded` (`Consistency.lean:118`) derives
   the same forced edge inline that `compileUnit_conflictComplete` now derives as
   a named invariant. The duplication is left in place: `Lara.Consistency` is a
   frozen headline result and `Lara.Invariants` imports it, so factoring the

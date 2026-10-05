@@ -1009,7 +1009,13 @@ private theorem attackComplete_of_firstMissingConflict_none
   simpa [hsourceTerm, htargetTerm] using hcovered
 
 /-- Detailed checker: run the exact legacy prefix, then reject only the first
-uncovered attackable contrary pair between complete nodes. -/
+uncovered attackable contrary pair between complete nodes. The scan reads the
+raw attack list `atts`, not `base.program.atts`. The result is the same: each
+source bucket filters on `k.source = node.term` with `node` complete, so the raw
+bucket and the live bucket are the same list (`attackComplete_iff_complete_live`).
+The live list is not cheaper to scan: it is a `liveAttacks` filter that every
+bucket and every `coveredB` pair forces again, and under `decide` that
+re-evaluation made `Examples/ContextSemantics` time out. -/
 def checkProgramDetailed {canon : String → String}
     (Pi : RuleId → Option Rule) (Gamma : LeafId → Option Atom)
     (reg : BackendRegistry canon) (dp : DefeatPolicy)
@@ -1018,17 +1024,19 @@ def checkProgramDetailed {canon : String → String}
   match checkProgramBase Pi Gamma reg dp args atts with
   | .error e => .error e
   | .ok base =>
-      let cache := conflictCache Pi base.program.atts base.nodes
+      let cache := conflictCache Pi atts base.nodes
       match hmissing : firstMissingConflict? dp cache with
       | some missing => .error (.missingConflict missing)
       | none =>
           .ok
             { program := base.program
-            , attack_complete :=
-                attackComplete_of_firstMissingConflict_none cache
-                  ((conflictCache_terms Pi base.program.atts base.nodes).trans
-                    base.nodes_terms)
-                  hmissing
+            , attack_complete := by
+                rw [base.attacks_eq]
+                exact attackComplete_iff_complete_live.mpr
+                  (attackComplete_of_firstMissingConflict_none cache
+                    ((conflictCache_terms Pi atts base.nodes).trans
+                      base.nodes_terms)
+                    hmissing)
             , arguments_eq := base.arguments_eq
             , holes_eq := base.holes_eq
             , attacks_eq := base.attacks_eq
@@ -1292,13 +1300,12 @@ theorem checkProgramDetailed_complete_holes {canon : String → String}
     checkProgramBase_complete hnodup hsupport htyped hsource htarget
   have hcomplete :
       Compile.AttackComplete canon Pi Gamma (certOkOf reg) dp
-        base.program.args base.program.atts := by
-    rw [base.attacks_eq, attackComplete_iff_complete_live, base.arguments_eq,
-      attackComplete_completeArgs_iff]
+        base.program.args atts := by
+    rw [base.arguments_eq, attackComplete_completeArgs_iff]
     exact hattackComplete
-  let cache := conflictCache Pi base.program.atts base.nodes
+  let cache := conflictCache Pi atts base.nodes
   have hterms : cache.map (·.term) = base.program.args :=
-    (conflictCache_terms Pi base.program.atts base.nodes).trans
+    (conflictCache_terms Pi atts base.nodes).trans
       base.nodes_terms
   have hmissing : firstMissingConflict? dp cache = none := by
     apply (firstMissingConflict_none_iff dp cache).mpr

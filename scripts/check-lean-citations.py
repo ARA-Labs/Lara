@@ -79,7 +79,7 @@ CITATION = re.compile(
 )
 
 # A `*.lean` path named with no line at all — `` `lean/AxCheck.lean` already
-# #print axioms-gates every headline row: `srcStatus_iff_checked` (:759) `` — is
+# #print axioms-gates every headline row: `srcStatus_iff_checked` (:760) `` — is
 # not a citation but a statement of what the surrounding block is about, and
 # BLOCK subjects are what a file-less citation resolves against in preference to
 # the declaration's home file, the block plainly meaning the file it names.
@@ -148,7 +148,7 @@ ALLOWLIST: dict[str, str] = {
     "lean/Lara/Erase.lean:267": "cites the one-rewrite proof step itself, which is the point being made",
     "lean/Lara/Observation.lean:545": "cites the prose paragraph on List.nodup_range, not a declaration",
     "lean/Lara/Consistency.lean:42": "pre-existing: cites a proof step inside statusC_justified_iff",
-    "lean/Lara/Consistency.lean:165": "pre-existing: cites a continuation line of a theorem statement",
+    "lean/Lara/Consistency.lean:177": "pre-existing: cites a continuation line of a theorem statement",
     "lean/Lara/Unit.lean:35": "pre-existing: cites a blank separator line",
     "lean/Lara/Policy.lean:448": "pre-existing: cites a docstring opening, not the declaration below it",
     "lean/Lara/Admission.lean:764": "pre-existing: cites a proof step",

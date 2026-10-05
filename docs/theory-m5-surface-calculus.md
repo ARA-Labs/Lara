@@ -245,11 +245,15 @@ derivations, the left-to-right argument and attack derivations, exact output
 component equalities, and `CoreObligations env output`. `CoreObligations`
 contains declarative signature/policy sorting, scope and rule-ID conditions,
 argument uniqueness, `HasSupport` derivations (including certificate/backend
-acceptance), typed attacks, endpoint membership, and `AttackComplete`. It does
-not contain `checkUnit` success, `exceptIsOk`, or an equivalent wrapper.
+acceptance) at whatever root obligation set each declaration has, typed
+attacks, endpoint membership, and `AttackComplete`. A declaration with open
+mandatory questions types and becomes a located hole, so the support field
+asks only for typing; examples that need every declaration complete prove that
+stronger fact separately. It does not contain `checkUnit` success, `exceptIsOk`,
+or an equivalent wrapper.
 
 `CoreObligations.checkUnit_complete` feeds those fields to
-`Check.Unit.checkUnit_complete` and derives a concrete accepted carrier.
+`Check.Unit.checkUnit_complete_holes` and derives a concrete accepted carrier.
 `CoreObligations.of_checkUnit_ok` is the converse extraction used by the
 executable checker. Thus `Checks` is not defined as successful `elaborate` or
 successful core execution, and no derivation constructor calls `elaborate`.

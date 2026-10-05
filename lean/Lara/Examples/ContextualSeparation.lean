@@ -54,13 +54,16 @@ private theorem accepted_status (C : Lara.Context.Context)
     Invariants.status id (Invariants.compileUnit u) p = Grounded.Status.justified := by
   have hs := Check.Unit.checkUnit_sound hc
   have hp : u.policy = policy := hs.policy_eq
-  have ht : SupportTerm.leaf l ∈ u.program.args := by
-    rw [hs.args_eq]
-    exact mem_dedupList.mpr (List.mem_append_right _ hm)
-  rw [← u.nodes_terms, List.mem_map] at ht
-  obtain ⟨n, hn, hnt⟩ := ht
   have hsup : HasSupport id u.policy.ruleLookup (linkGamma C (fragment pA))
       (certOkOf registryEx) (.leaf l) p [] := .leaf (linkGamma_extends_right hok l p hg)
+  -- The leaf is complete, so it is an AF argument of the link.
+  have ht : SupportTerm.leaf l ∈ u.program.args := by
+    rw [hs.args_eq, Check.mem_completeArgs_iff]
+    refine ⟨mem_dedupList.mpr (List.mem_append_right _ hm), p, ?_⟩
+    rw [hp] at hsup
+    exact hsup
+  rw [← u.nodes_terms, List.mem_map] at ht
+  obtain ⟨n, hn, hnt⟩ := ht
   have heq : n.conclusion = p :=
     (hasSupport_unique (hnt ▸ n.valid) hsup).1
   obtain ⟨i, hi, hni⟩ := List.mem_iff_getElem.mp hn

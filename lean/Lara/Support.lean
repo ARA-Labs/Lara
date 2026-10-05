@@ -747,6 +747,63 @@ theorem hasSupport_unique {canon Pi Gamma CertOk} {w : SupportTerm}
               getElem?_none_of_ge DOs' j (by have := hside'.lenDOs; omega)]
       exact ⟨hC, by simp only [collectObligations]; rw [hOs, hDOs]⟩
 
+/-- **Obligations are structural.** Two derivations of one term under the same
+rules have the same obligation set, whatever leaf environments and certificate
+predicates they use: obligations are collected from the rules and the open
+question lists alone. So whether a typed term is complete or a hole does not
+depend on Γ or on the backends. -/
+theorem hasSupport_obligations_indep {canon : String → String}
+    {Pi : RuleId → Option Rule} {Gamma₁ Gamma₂ : LeafId → Option Atom}
+    {CertOk₁ CertOk₂ : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    {w : SupportTerm} {C₁ : Atom} {O₁ : List QuestionId}
+    (h₁ : HasSupport canon Pi Gamma₁ CertOk₁ w C₁ O₁) :
+    ∀ {C₂ O₂}, HasSupport canon Pi Gamma₂ CertOk₂ w C₂ O₂ → O₁ = O₂ := by
+  induction h₁ with
+  | leaf hΓ =>
+    intro C₂ O₂ h₂
+    cases h₂ with
+    | leaf hΓ' => rfl
+  | @inst rn θ ws D H α r As Cs Os DCs DOs C hside hprems hdis ihprems ihdis =>
+    intro C₂ O₂ h₂
+    cases h₂ with
+    | @inst _ _ _ _ _ _ r' As' Cs' Os' DCs' DOs' _ hside' hprems' hdis' =>
+      have hr : r' = r := Option.some.inj (hside'.rule.symm.trans hside.rule)
+      subst hr
+      have hOs : Os = Os' := by
+        apply ext_getElem?
+        intro i
+        by_cases hi : i < ws.length
+        · obtain ⟨w', hw⟩ := getElem?_some_of_lt ws i hi
+          obtain ⟨A, hA⟩ := getElem?_some_of_lt Cs i
+            (by have := hside.lenCs; omega)
+          obtain ⟨O', hO⟩ := getElem?_some_of_lt Os i
+            (by have := hside.lenOs; omega)
+          obtain ⟨A', hA'⟩ := getElem?_some_of_lt Cs' i
+            (by have := hside'.lenCs; omega)
+          obtain ⟨O'', hO'⟩ := getElem?_some_of_lt Os' i
+            (by have := hside'.lenOs; omega)
+          rw [hO, hO', ihprems i w' A O' hw hA hO (hprems' i w' A' O'' hw hA' hO')]
+        · rw [getElem?_none_of_ge Os i (by have := hside.lenOs; omega),
+              getElem?_none_of_ge Os' i (by have := hside'.lenOs; omega)]
+      have hDOs : DOs = DOs' := by
+        apply ext_getElem?
+        intro j
+        by_cases hj : j < D.length
+        · obtain ⟨qw, hqw⟩ := getElem?_some_of_lt D j hj
+          obtain ⟨q, w'⟩ := qw
+          obtain ⟨A, hA⟩ := getElem?_some_of_lt DCs j
+            (by have := hside.lenDCs; omega)
+          obtain ⟨O', hO⟩ := getElem?_some_of_lt DOs j
+            (by have := hside.lenDOs; omega)
+          obtain ⟨A', hA'⟩ := getElem?_some_of_lt DCs' j
+            (by have := hside'.lenDCs; omega)
+          obtain ⟨O'', hO'⟩ := getElem?_some_of_lt DOs' j
+            (by have := hside'.lenDOs; omega)
+          rw [hO, hO', ihdis j q w' A O' hqw hA hO (hdis' j q w' A' O'' hqw hA' hO')]
+        · rw [getElem?_none_of_ge DOs j (by have := hside.lenDOs; omega),
+              getElem?_none_of_ge DOs' j (by have := hside'.lenDOs; omega)]
+      simp only [collectObligations]; rw [hOs, hDOs]
+
 /-! ### Generic facts about the judgment
 
 These are the inversion and weakening lemmas every downstream module needs

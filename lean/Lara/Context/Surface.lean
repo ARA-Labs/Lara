@@ -79,8 +79,9 @@ theorem surface_directAF_relabel
 
 /-- **The link instance.** When the two surface programs elaborate to the two
 sides of a link — a fragment and its relabeling, in one admissible context —
-the argument and attack correspondence is exactly what `link_relabel_commutes`
-already establishes, so the surface frameworks coincide. -/
+the argument and attack correspondence is exactly what `link_relabel_program`
+already establishes, so the surface frameworks coincide. Admissibility keeps
+both links hole-free, whichever Γ each surface program elaborates. -/
 theorem surface_directAF_link
     {env₁ env₂ : Surface.Env canon} {input₁ input₂ : Surface.Input}
     {output₁ output₂ : Surface.Elaborated canon}
@@ -99,14 +100,8 @@ theorem surface_directAF_link
     (hunit₁ : output₁.unit = linkedUnit env₁.registry C F)
     (hunit₂ : output₂.unit = linkedUnit env₂.registry C (mapAssurFrag f F)) :
     Surface.directAF hsurface₂ = Surface.directAF hsurface₁ := by
-  have hsound₁ := Check.Unit.checkUnit_sound hchecked₁
-  have hsound₂ := Check.Unit.checkUnit_sound hchecked₂
-  obtain ⟨hargs, hatts⟩ :=
-    link_relabel_commutes hf hpres hfix.args hfix.atts hadm.ctx.support hadm.frag.support
-  refine surface_directAF_relabel hsurface₁ hchecked₁ hsurface₂ hchecked₂ hf ?_ ?_
-  · rw [hsound₂.args_eq, hsound₁.args_eq, hunit₁, hunit₂]
-    exact hargs
-  · rw [hsound₂.atts_eq, hsound₁.atts_eq, hunit₁, hunit₂]
-    exact hatts
+  obtain ⟨hargs, hatts⟩ := link_relabel_program hf hpres hadm hfix
+    (by rw [← hunit₁]; exact hchecked₁) (by rw [← hunit₂]; exact hchecked₂)
+  exact surface_directAF_relabel hsurface₁ hchecked₁ hsurface₂ hchecked₂ hf hargs hatts
 
 end Lara.Context

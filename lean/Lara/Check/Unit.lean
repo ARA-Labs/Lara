@@ -365,6 +365,21 @@ theorem checkUnit_complete {canon : String → String}
     (fun w hw => let ⟨C, hC⟩ := hsupport w hw; ⟨C, [], hC⟩)
     htyped hsource htarget hattackComplete
 
+/-- The raw declarations of an accepted unit are attack complete: the checker
+established it over the complete arguments and live attacks, and attack
+completeness reads only complete sources and targets. -/
+theorem CheckUnitSound.raw_attack_complete {canon : String → String}
+    {Gamma : LeafId → Option Atom} {reg : BackendRegistry canon}
+    {ground : List Atom} {unit : Lara.Unit}
+    {accepted : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg)}
+    (hs : CheckUnitSound canon Gamma reg ground unit accepted) :
+    Compile.AttackComplete canon unit.policy.ruleLookup Gamma (certOkOf reg)
+      unit.policy.defeat unit.args unit.atts := by
+  have hcomplete := hs.attack_complete
+  rw [hs.atts_eq, attackComplete_iff_complete_live, hs.args_eq, hs.policy_eq,
+    attackComplete_completeArgs_iff] at hcomplete
+  exact hcomplete
+
 /-! ### Hole-free specializations
 
 Each states the stronger all-complete premise explicitly and recovers the exact

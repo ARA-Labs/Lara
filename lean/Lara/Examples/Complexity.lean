@@ -780,7 +780,7 @@ private theorem quartic_compile_nodes (k : Nat) :
     hsound.policy_eq
   have hterms : (quarticAccepted k).nodes.map (·.term) = quarticArgs k := by
     rw [(quarticAccepted k).nodes_terms]
-    exact hsound.args_eq
+    exact hsound.args_eq_of_complete (quartic_supported k)
   show (quarticAccepted k).nodes.map (·.conclusion) = _
   have hlen : (quarticAccepted k).nodes.length = (quarticLeaves k).length := by
     have h := congrArg List.length hterms
@@ -922,9 +922,9 @@ private theorem quartic_compile_attack (k : Nat) (i j : Nat) :
       = quarticAttack k i j := by
   have hsound := Check.Unit.checkUnit_sound (quartic_checkUnit_ok k)
   have hargs : (quarticAccepted k).program.args = quarticArgs k :=
-    hsound.args_eq
+    hsound.args_eq_of_complete (quartic_supported k)
   have hatts : (quarticAccepted k).program.atts = quarticAtts k :=
-    hsound.atts_eq
+    hsound.atts_eq_of_complete (quartic_supported k)
   show Compile.edgeB (quarticAccepted k).program i j = _
   unfold Compile.edgeB
   rw [hargs, hatts, quarticArgs]

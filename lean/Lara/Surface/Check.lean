@@ -2573,7 +2573,9 @@ def assemble (env : Env canon) (input : Input) : Except Error (Elaborated canon)
 /-- Declarative core-acceptance obligations carried by a surface derivation.
 No field invokes `checkUnit` or stores executable success: these are exactly
 the independent signature, policy, support/certificate, attack, endpoint, and
-conflict-completeness premises consumed by `Check.Unit.checkUnit_complete`. -/
+conflict-completeness premises consumed by `Check.Unit.checkUnit_complete_holes`.
+Every declaration must type, at whatever root obligation set it has: a
+declaration with open mandatory questions is a located hole, not a failure. -/
 structure CoreObligations (env : Env canon) (output : Elaborated canon) : Prop where
   sigmaWellFormed : Sigma.sigmaWellFormed output.unit.sigma = true
   policyWellSorted : Lara.policyWellSorted output.unit.sigma output.unit.policy = true
@@ -2584,9 +2586,9 @@ structure CoreObligations (env : Env canon) (output : Elaborated canon) : Prop w
   ruleIdsNodup : (output.unit.policy.rules.map (·.id)).Nodup
   policyWellFormed : Policy.WellFormed canon output.unit.policy
   argsNodup : output.unit.args.Nodup
-  supports : ∀ term ∈ output.unit.args, ∃ conclusion,
+  supports : ∀ term ∈ output.unit.args, ∃ conclusion obligations,
     Support.HasSupport canon output.unit.policy.ruleLookup output.gamma
-      (Support.certOkOf env.registry) term conclusion []
+      (Support.certOkOf env.registry) term conclusion obligations
   attacksTyped : ∀ attack ∈ output.unit.atts,
     Attack.HasAttack canon output.unit.policy.ruleLookup output.gamma
       (Support.certOkOf env.registry) output.unit.policy.defeat attack
@@ -2613,7 +2615,7 @@ theorem CoreObligations.checkUnit_complete
     ∃ checked,
       Check.Unit.checkUnit output.gamma env.registry output.ground output.unit =
         .ok checked :=
-  Check.Unit.checkUnit_complete h.signatureStage_none h.scopesWellFormed
+  Check.Unit.checkUnit_complete_holes h.signatureStage_none h.scopesWellFormed
     h.ruleIdsNodup h.policyWellFormed h.argsNodup h.supports h.attacksTyped
     h.sourcesDeclared h.targetsDeclared h.attackComplete
 
@@ -2628,56 +2630,22 @@ theorem CoreObligations.of_checkUnit_ok
       output.unit = .ok checked) : CoreObligations env output := by
   have hsound := Check.Unit.checkUnit_sound hchecked
   have sigmaEq := hsound.sigma_eq
-  have sigmaWf := hsound.sigma_wf
-  have policySorted := hsound.policy_sorted
-  have groundSorted := hsound.ground_sorted
-  have argsSorted := hsound.args_sorted
   have policyEq := hsound.policy_eq
-  have ruleIds := hsound.ruleIds_nodup
-  have policyWf := hsound.policy_wf
-  have argumentsEq := hsound.args_eq
-  have attacksEq := hsound.atts_eq
-  have attackComplete := hsound.attack_complete
-  have nodeTerms := hsound.nodes_terms
-  refine
-    { sigmaWellFormed := ?_
-      policyWellSorted := ?_
-      groundWellSorted := ?_
-      argsWellSorted := ?_
-      scopesWellFormed := ?_
-      ruleIdsNodup := ?_
-      policyWellFormed := ?_
-      argsNodup := ?_
-      supports := ?_
-      attacksTyped := ?_
-      sourcesDeclared := ?_
-      targetsDeclared := ?_
-      attackComplete := ?_ }
-  · simpa only [sigmaEq] using sigmaWf
-  · simpa only [sigmaEq, policyEq] using policySorted
-  · simpa only [sigmaEq] using groundSorted
-  · simpa only [sigmaEq, policyEq, argumentsEq] using argsSorted
-  · simpa only [policyEq] using checked.scopes_wf
-  · simpa only [policyEq] using ruleIds
-  · simpa only [policyEq] using policyWf
-  · simpa only [argumentsEq] using checked.program.nodup
-  · intro term member
-    obtain ⟨conclusion, valid⟩ := checked.program.complete term (by
-      simpa only [argumentsEq] using member)
-    exact ⟨conclusion, by simpa only [policyEq] using valid⟩
-  · intro attack member
-    have valid := checked.program.typed attack (by
-      simpa only [attacksEq] using member)
-    simpa only [policyEq] using valid
-  · intro attack member
-    have declared := checked.program.source_declared attack (by
-      simpa only [attacksEq] using member)
-    simpa only [argumentsEq] using declared
-  · intro attack member
-    have declared := checked.program.target_declared attack (by
-      simpa only [attacksEq] using member)
-    simpa only [argumentsEq] using declared
-  · simpa only [policyEq, argumentsEq, attacksEq] using attackComplete
+  exact
+    { sigmaWellFormed := by simpa only [sigmaEq] using hsound.sigma_wf
+      policyWellSorted := by
+        simpa only [sigmaEq, policyEq] using hsound.policy_sorted
+      groundWellSorted := by simpa only [sigmaEq] using hsound.ground_sorted
+      argsWellSorted := hsound.raw_sorted
+      scopesWellFormed := by simpa only [policyEq] using checked.scopes_wf
+      ruleIdsNodup := by simpa only [policyEq] using hsound.ruleIds_nodup
+      policyWellFormed := by simpa only [policyEq] using hsound.policy_wf
+      argsNodup := hsound.raw_nodup
+      supports := hsound.raw_support
+      attacksTyped := hsound.raw_typed
+      sourcesDeclared := hsound.raw_source
+      targetsDeclared := hsound.raw_target
+      attackComplete := hsound.raw_attack_complete }
 
 /-- The independent surface judgment. Its derivations reconstruct the
 presentation program syntax-directly; the output equalities identify each

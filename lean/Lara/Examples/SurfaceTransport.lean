@@ -548,6 +548,23 @@ theorem transport_args_wrapped :
     (transportElaborated wrappedCert wrappedCoreAssur).unit.args
       = [transportCore wrappedCoreAssur] := rfl
 
+/-- Every declaration of the kernel fixture is complete. `CoreObligations`
+asks only that each declaration type; the transport instantiation needs this
+stronger fact. -/
+theorem transport_complete_kernel :
+    ∀ term ∈ (transportElaborated kernelCert kernelCoreAssur).unit.args, ∃ conclusion,
+      Lara.Support.HasSupport (fun source => source)
+        (transportElaborated kernelCert kernelCoreAssur).unit.policy.ruleLookup
+        (transportElaborated kernelCert kernelCoreAssur).gamma
+        (Lara.Support.certOkOf transportEnv.registry) term conclusion [] := by
+  intro term hterm
+  rw [transport_args_kernel] at hterm
+  simp only [List.mem_singleton] at hterm
+  subst hterm
+  exact ⟨.atom "q" .nil,
+    transport_hasSupport kernelCert kernelCoreAssur rfl (by decide)
+      transport_cert_accepted⟩
+
 theorem transport_coreObligations_kernel :
     CoreObligations transportEnv (transportElaborated kernelCert kernelCoreAssur) where
   sigmaWellFormed := by decide
@@ -560,14 +577,9 @@ theorem transport_coreObligations_kernel :
     intro p _ ab hab
     simp [transportElaborated, toCorePolicy, transportPolicy] at hab
   argsNodup := by decide
-  supports := by
-    intro term hterm
-    rw [transport_args_kernel] at hterm
-    simp only [List.mem_singleton] at hterm
-    subst hterm
-    exact ⟨.atom "q" .nil,
-      transport_hasSupport kernelCert kernelCoreAssur rfl (by decide)
-        transport_cert_accepted⟩
+  supports := fun term hterm =>
+    let ⟨conclusion, h⟩ := transport_complete_kernel term hterm
+    ⟨conclusion, [], h⟩
   attacksTyped := by intro attack hattack; simp [transportElaborated] at hattack
   sourcesDeclared := by intro attack hattack; simp [transportElaborated] at hattack
   targetsDeclared := by intro attack hattack; simp [transportElaborated] at hattack
@@ -575,6 +587,23 @@ theorem transport_coreObligations_kernel :
     intro source _ target _ sourceConclusion targetConclusion _ _ hmatch
     obtain ⟨ab, hab, _⟩ := hmatch
     simp [transportElaborated, toCorePolicy, transportPolicy] at hab
+
+/-- Every declaration of the wrapped fixture is complete. `CoreObligations`
+asks only that each declaration type; the transport instantiation needs this
+stronger fact. -/
+theorem transport_complete_wrapped :
+    ∀ term ∈ (transportElaborated wrappedCert wrappedCoreAssur).unit.args, ∃ conclusion,
+      Lara.Support.HasSupport (fun source => source)
+        (transportElaborated wrappedCert wrappedCoreAssur).unit.policy.ruleLookup
+        (transportElaborated wrappedCert wrappedCoreAssur).gamma
+        (Lara.Support.certOkOf transportEnvWrapped.registry) term conclusion [] := by
+  intro term hterm
+  rw [transport_args_wrapped] at hterm
+  simp only [List.mem_singleton] at hterm
+  subst hterm
+  refine ⟨.atom "q" .nil,
+    transport_hasSupport wrappedCert wrappedCoreAssur rfl (by decide) ?_⟩
+  exact transport_cert_accepted_wrapped_raw
 
 theorem transport_coreObligations_wrapped :
     CoreObligations transportEnvWrapped
@@ -589,14 +618,9 @@ theorem transport_coreObligations_wrapped :
     intro p _ ab hab
     simp [transportElaborated, toCorePolicy, transportPolicy] at hab
   argsNodup := by decide
-  supports := by
-    intro term hterm
-    rw [transport_args_wrapped] at hterm
-    simp only [List.mem_singleton] at hterm
-    subst hterm
-    refine ⟨.atom "q" .nil,
-      transport_hasSupport wrappedCert wrappedCoreAssur rfl (by decide) ?_⟩
-    exact transport_cert_accepted_wrapped_raw
+  supports := fun term hterm =>
+    let ⟨conclusion, h⟩ := transport_complete_wrapped term hterm
+    ⟨conclusion, [], h⟩
   attacksTyped := by intro attack hattack; simp [transportElaborated] at hattack
   sourcesDeclared := by intro attack hattack; simp [transportElaborated] at hattack
   targetsDeclared := by intro attack hattack; simp [transportElaborated] at hattack
@@ -718,8 +742,10 @@ theorem surfaceTransport_directAF_eq :
   refine Lara.Context.surface_directAF_relabel
     transport_checks_kernel hchecked₁ transport_checks_wrapped hchecked₂
     certSwap_injective ?_ ?_
-  · rw [hs₂.args_eq, hs₁.args_eq]; rfl
-  · rw [hs₂.atts_eq, hs₁.atts_eq]; rfl
+  · rw [hs₂.args_eq_of_complete transport_complete_wrapped,
+      hs₁.args_eq_of_complete transport_complete_kernel]; rfl
+  · rw [hs₂.atts_eq_of_complete transport_complete_wrapped,
+      hs₁.atts_eq_of_complete transport_complete_kernel]; rfl
 
 /-! ### Non-vacuity
 

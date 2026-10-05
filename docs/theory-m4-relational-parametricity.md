@@ -23,7 +23,7 @@ statement and its proof.
 ## 1. The theorem
 
 M4 Part A's headline, `Lara.Context.backend_replacement_congruence`
-(`lean/Lara/Context/Equivalence.lean:831`), quantifies over a **function**
+(`lean/Lara/Context/Equivalence.lean:913`), quantifies over a **function**
 `f : Assurance → Assurance` and relates `F` to `mapAssurFrag f F`. M4's
 acceptance criterion reserves the word *parametricity* for a **relational**
 quantifier. This is that theorem with the function replaced by a relation:
@@ -82,17 +82,17 @@ the semantics-parametric form is an instantiation and not a second proof.
 | `link_rel_commutes` | `link_relabel_commutes` (`lean/Lara/Context/Equivalence.lean:319`) | `RelInj`, `RelPreserving` |
 | `termWellSorted_rel`, `argsWellSorted_rel`, `signatureStage_rel` | `termWellSorted_mapAssur`, `argsWellSorted_map`, `signatureStage_map` (`lean/Lara/Context/Equivalence.lean:207-234`) | nothing |
 | `attackOcc_rel`, `contains_rel`, `covered_rel` | `attackOcc_mapAssurAtt`, `contains_mapAssur`, `covered_mapAssur` (`lean/Lara/Context/Equivalence.lean:248-268`) | **`RelInj`** (see §3.1) |
-| `attackComplete_rel` | `attackComplete_map` (`lean/Lara/Context/Equivalence.lean:357`) | `RelInj`, `RelPreserving` |
-| `checkUnit_rel` | `checkUnit_map` (`lean/Lara/Context/Equivalence.lean:401`) | **`RelInj`**, `RelPreserving` |
+| `attackComplete_rel` | `attackComplete_map` (`lean/Lara/Context/Equivalence.lean:360`) | `RelInj`, `RelPreserving` |
+| `checkUnit_rel` | `checkUnit_map` (`lean/Lara/Context/Equivalence.lean:392`) | **`RelInj`**, `RelPreserving` |
 | `containsB_rel`, `containsBList_rel`, `containsBDis_rel` | `containsB_mapAssur` etc. (`lean/Lara/Erase.lean:150-176`) | **`RelInj`** |
 | `attackClosureB_rel` | `attackClosureB_mapAssur` (`lean/Lara/Erase.lean:179`) | **`RelInj`** |
 | `coveredB_rel` | `coveredB_relabel` (`lean/Lara/Erase.lean:198`) | **`RelInj`** |
-| `nodes_conclusion_rel` | `nodes_conclusion_map` (`lean/Lara/Context/Equivalence.lean:466`) | `RelPreserving` |
-| `compileUnit_rel` | `compileUnit_map` (`lean/Lara/Context/Equivalence.lean:511`) | `RelInj`, `RelPreserving` |
-| `exists_accepted_rel` | `exists_accepted_relabel` (`lean/Lara/Context/Equivalence.lean:705`) | both |
-| `compileUnit_link_rel` | `compileUnit_link_relabel` (`lean/Lara/Context/Equivalence.lean:723`) | both |
-| `obsGen_parametricity` | `obsGen_congr` (`lean/Lara/Context/Equivalence.lean:795`) | both |
-| `backend_replacement_parametricity_local` | `registry_swap_congruence` (`lean/Lara/Context/Equivalence.lean:890`) | `R := occRel F`, so both are discharged internally — a **trade**, not a strengthening: acceptance weakens to `occurrences F`, but `hC`/`hA` are new (§6) |
+| `nodes_conclusion_rel` | `nodes_conclusion_map` (`lean/Lara/Context/Equivalence.lean:506`) | `RelPreserving` |
+| `compileUnit_rel` | `compileUnit_map` (`lean/Lara/Context/Equivalence.lean:551`) | `RelInj`, `RelPreserving` |
+| `exists_accepted_rel` | `exists_accepted_relabel` (`lean/Lara/Context/Equivalence.lean:745`) | both |
+| `compileUnit_link_rel` | `compileUnit_link_relabel` (`lean/Lara/Context/Equivalence.lean:808`) | both |
+| `obsGen_parametricity` | `obsGen_congr` (`lean/Lara/Context/Equivalence.lean:877`) | both |
+| `backend_replacement_parametricity_local` | `registry_swap_congruence` (`lean/Lara/Context/Equivalence.lean:972`) | `R := occRel F`, so both are discharged internally — a **trade**, not a strengthening: acceptance weakens to `occurrences F`, but `hC`/`hA` are new (§6) |
 | `backend_replacement_parametricity_local_sem` | `registry_swap_congruence_sem` (`lean/Lara/Context/Observation.lean:345`) | ″ |
 
 `Lara.Forall₂` (`lean/Lara/ListRel.lean`) is the pointwise list relation the
@@ -233,7 +233,7 @@ claim that the local theorem itself witnesses nonexistence of every such map.
 actually relates, where `AssurPreserving f` obliges every rule and every
 assurance in the type. The gap is exactly the one the codebase already flagged,
 twice, in the docstrings of `registry_swap_congruence`
-(`lean/Lara/Context/Equivalence.lean:890`) and `registry_swap_congruence_sem`
+(`lean/Lara/Context/Equivalence.lean:972`) and `registry_swap_congruence_sem`
 (`lean/Lara/Context/Observation.lean:345`):
 
 > The hypothesis `hpres` is stated **globally**, over every rule and every
