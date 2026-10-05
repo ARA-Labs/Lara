@@ -31,7 +31,9 @@ milestone spine above is now a closed record, not a worklist. The
 `refreeze-batch` evaluation-suite extensions landed together and were frozen by
 the shared refreeze cycle as **`m5-freeze-v5`** (541 mutants + 60 corpus units
 = 601 measured inputs); the later v6 snapshot adds the S2 and S9 mutation bases
-(595 mutants + 60 corpus units = 655 measured inputs). The protocol and every
+(595 mutants + 60 corpus units = 655 measured inputs), and the current v8
+snapshot re-lowers the corpus to declare its located holes (600 mutants + 60
+corpus units = 660 measured inputs). The protocol and every
 anchor are in `docs/m5-freeze-checklist.md`.
 
 **Surface update (2026-08-22):** `lara-syntax@0.9` adds named `nd@1` proof
