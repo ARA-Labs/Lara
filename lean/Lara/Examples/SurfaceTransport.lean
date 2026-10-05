@@ -983,9 +983,9 @@ accepts the kernel certificate. Discharging this genuinely needs
 theorem transportLink_admissible :
     Lara.Context.Admissible registryEx linkCtx (linkFrag kernelCoreAssur) where
   guard := by decide
-  ctx := linkSideOk_ctx (reg := registryEx) (linkFrag kernelCoreAssur)
-  frag := linkSideOk_frag (reg := registryEx) kernelCoreAssur rfl (by decide)
-    transport_cert_accepted
+  ctx := (linkSideOk_ctx (reg := registryEx) (linkFrag kernelCoreAssur)).toHoles
+  frag := (linkSideOk_frag (reg := registryEx) kernelCoreAssur rfl (by decide)
+    transport_cert_accepted).toHoles
   signature :=
     Lara.Context.signatureStage_link (by decide) (by decide) (by decide)
       (by decide) (by decide) (by decide)

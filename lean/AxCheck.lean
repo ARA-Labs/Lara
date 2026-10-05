@@ -2872,6 +2872,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.composeOk_assoc_right
 #print axioms Lara.Context.compose_assoc_fields
 #print axioms Lara.Context.compose_assoc_mem
+#print axioms Lara.Context.sideOkHoles_composed
 #print axioms Lara.Context.sideOk_composed
 
 -- Context.Equivalence: contextual representation independence (F2)
@@ -2937,6 +2938,9 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.admissible_composed
 #print axioms Lara.Context.backend_replacement_congruence_composed
 #print axioms Lara.Context.whole_program_replacement
+#print axioms Lara.Context.compileUnit_eq_of_program
+#print axioms Lara.Context.obsGen_hole_blind
+#print axioms Lara.Context.obs_hole_blind
 
 -- Invariants.Observation: the semantics-parametric carrier projection.
 -- `Invariants.status` reads the grounded labelling off a `StructuredAF`; these

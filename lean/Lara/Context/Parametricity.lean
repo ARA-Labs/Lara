@@ -824,7 +824,7 @@ theorem conclusionCache_rel
     (hpres : RelPreserving R (certOkOf reg₁) (certOkOf reg₂)) :
     ∀ {args₁ args₂ : List SupportTerm},
       RelTerms R args₁ args₂ →
-      (∀ w ∈ args₁, ∃ C, HasSupport canon Pi Gamma (certOkOf reg₁) w C []) →
+      (∀ w ∈ args₁, ∃ C O, HasSupport canon Pi Gamma (certOkOf reg₁) w C O) →
       Forall₂ (RelEntry R)
         (conclusionCache Pi Gamma reg₁ args₁)
         (conclusionCache Pi Gamma reg₂ args₂) := by
@@ -835,23 +835,35 @@ theorem conclusionCache_rel
       intro args₂ h hsup
       cases h with
       | cons hw hws =>
-          obtain ⟨Cw, hCw⟩ := hsup w List.mem_cons_self
-          have h₁ : conclusionOf Pi Gamma reg₁ w = some Cw :=
-            conclusionOf_eq_some_iff.mpr hCw
-          have h₂ : conclusionOf Pi Gamma reg₂ _ = some Cw :=
-            conclusionOf_eq_some_iff.mpr (hasSupport_rel hpres hw hCw)
+          obtain ⟨Cw, Ow, hCw⟩ := hsup w List.mem_cons_self
           have IH := ih hws (fun v hv => hsup v (List.mem_cons_of_mem _ hv))
-          simp only [conclusionCache, List.filterMap_cons, h₁, h₂,
-            Option.map_some]
-          exact .cons ⟨hw, rfl⟩ IH
+          cases Ow with
+          | nil =>
+              have h₁ : conclusionOf Pi Gamma reg₁ w = some Cw :=
+                conclusionOf_eq_some_iff.mpr hCw
+              have h₂ : conclusionOf Pi Gamma reg₂ _ = some Cw :=
+                conclusionOf_eq_some_iff.mpr (hasSupport_rel hpres hw hCw)
+              simp only [conclusionCache, List.filterMap_cons, h₁, h₂,
+                Option.map_some]
+              exact .cons ⟨hw, rfl⟩ IH
+          | cons q qs =>
+              -- A located hole has no cache entry, and neither has its image.
+              have h₁ : conclusionOf Pi Gamma reg₁ w = none :=
+                conclusionOf_eq_none_of_not_complete (by
+                  rw [Check.argComplete_of_hasSupport hCw]; rfl)
+              have h₂ : conclusionOf Pi Gamma reg₂ _ = none :=
+                conclusionOf_eq_none_of_not_complete (by
+                  rw [Check.argComplete_of_hasSupport (hasSupport_rel hpres hw hCw)]; rfl)
+              simp only [conclusionCache, List.filterMap_cons, h₁, h₂, Option.map_none]
+              exact IH
 
 theorem crossAtts_rel {C : Context} {F₁ F₂ : Fragment}
     (hpres : RelPreserving R (certOkOf reg₁) (certOkOf reg₂))
     (hF : RelFrag R F₁ F₂) (hfix : RelFixesContext R C)
-    (hCsup : ∀ w ∈ C.frame.args, ∃ A,
-      HasSupport canon F₁.policy.ruleLookup (linkGamma C F₁) (certOkOf reg₁) w A [])
-    (hFsup : ∀ w ∈ F₁.args, ∃ A,
-      HasSupport canon F₁.policy.ruleLookup (linkGamma C F₁) (certOkOf reg₁) w A []) :
+    (hCsup : ∀ w ∈ C.frame.args, ∃ A O,
+      HasSupport canon F₁.policy.ruleLookup (linkGamma C F₁) (certOkOf reg₁) w A O)
+    (hFsup : ∀ w ∈ F₁.args, ∃ A O,
+      HasSupport canon F₁.policy.ruleLookup (linkGamma C F₁) (certOkOf reg₁) w A O) :
     Forall₂ (RelAtt R)
       (crossAtts reg₁ (linkGamma C F₁) C F₁)
       (crossAtts reg₂ (linkGamma C F₁) C F₂) := by
@@ -926,10 +938,10 @@ theorem linkGround_rel (hF : RelFrag R F₁ F₂) :
 theorem link_rel_commutes (hR : RelInj R)
     (hpres : RelPreserving R (certOkOf reg₁) (certOkOf reg₂))
     (hF : RelFrag R F₁ F₂) (hfix : RelFixesContext R C)
-    (hCsup : ∀ w ∈ C.frame.args, ∃ A,
-      HasSupport canon F₁.policy.ruleLookup (linkGamma C F₁) (certOkOf reg₁) w A [])
-    (hFsup : ∀ w ∈ F₁.args, ∃ A,
-      HasSupport canon F₁.policy.ruleLookup (linkGamma C F₁) (certOkOf reg₁) w A []) :
+    (hCsup : ∀ w ∈ C.frame.args, ∃ A O,
+      HasSupport canon F₁.policy.ruleLookup (linkGamma C F₁) (certOkOf reg₁) w A O)
+    (hFsup : ∀ w ∈ F₁.args, ∃ A O,
+      HasSupport canon F₁.policy.ruleLookup (linkGamma C F₁) (certOkOf reg₁) w A O) :
     Forall₂ (RelTerm R)
         (linkedUnit reg₁ C F₁).args (linkedUnit reg₂ C F₂).args ∧
       Forall₂ (RelAtt R)
@@ -1513,24 +1525,14 @@ theorem compileUnit_link_rel (hR : RelInj R)
   intro acc₂ h₂
   have hsound₁ := Check.Unit.checkUnit_sound h₁
   have hsound₂ := Check.Unit.checkUnit_sound h₂
-  -- Both links are hole-free: the original by `Admissible`, the related one
-  -- because the relation carries complete support to complete support.
-  have hcomplete₁ := linkedUnit_args_complete hadm.ctx hadm.frag
-  have hcomplete₂ : ∀ w ∈ (linkedUnit reg₂ C F₂).args, ∃ A,
-      HasSupport canon (linkedUnit reg₂ C F₂).policy.ruleLookup
-        (linkGamma C F₁) (certOkOf reg₂) w A [] := by
-    intro w₂ hw₂
-    obtain ⟨w₁, hw₁, hrel⟩ := Forall₂.mem_right hargs hw₂
-    obtain ⟨A, hA⟩ := hcomplete₁ w₁ hw₁
-    show ∃ A, HasSupport canon F₂.policy.ruleLookup _ _ _ _ _
-    rw [hF.policy]
-    exact ⟨A, hasSupport_rel hpres hrel hA⟩
+  -- Either link may carry located holes: the relation relates complete
+  -- arguments, holes and live attacks in order (`checkUnit_rel_program`).
+  obtain ⟨hpargs, -, hpatts⟩ :=
+    checkUnit_rel_program (unit₁ := linkedUnit reg₁ C F₁) (unit₂ := linkedUnit reg₂ C F₂)
+      hR hpres hF.policy hargs hatts h₁ h₂
   exact compileUnit_rel hR hpres
     (by rw [hsound₁.policy_eq, hsound₂.policy_eq]; exact hF.policy)
-    (by rw [hsound₂.args_eq_of_complete hcomplete₂,
-      hsound₁.args_eq_of_complete hcomplete₁]; exact hargs)
-    (by rw [hsound₂.atts_eq_of_complete hcomplete₂,
-      hsound₁.atts_eq_of_complete hcomplete₁]; exact hatts)
+    hpargs hpatts
 
 /-- **Relational parametricity over related backends, for every projection at
 once.**

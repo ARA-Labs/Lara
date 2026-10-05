@@ -745,9 +745,9 @@ theorem linkSideOk_frag {reg : Lara.Support.BackendRegistry (fun source => sourc
 theorem contextLink_admissible :
     Lara.Context.Admissible registryEx linkCtx (linkFrag kernelCoreAssur) where
   guard := by decide
-  ctx := linkSideOk_ctx (reg := registryEx) (linkFrag kernelCoreAssur) rfl
-  frag := linkSideOk_frag (reg := registryEx) kernelCoreAssur rfl (by decide)
-    transport_cert_accepted
+  ctx := (linkSideOk_ctx (reg := registryEx) (linkFrag kernelCoreAssur) rfl).toHoles
+  frag := (linkSideOk_frag (reg := registryEx) kernelCoreAssur rfl (by decide)
+    transport_cert_accepted).toHoles
   signature :=
     Lara.Context.signatureStage_link (by decide) (by decide) (by decide)
       (by decide) (by decide) (by decide)

@@ -80,8 +80,9 @@ theorem surface_directAF_relabel
 /-- **The link instance.** When the two surface programs elaborate to the two
 sides of a link — a fragment and its relabeling, in one admissible context —
 the argument and attack correspondence is exactly what `link_relabel_program`
-already establishes, so the surface frameworks coincide. Admissibility keeps
-both links hole-free, whichever Γ each surface program elaborates. -/
+already establishes, so the surface frameworks coincide. Either link may carry
+located holes, whichever Γ each surface program elaborates: the relabel keeps
+each declaration's obligation set, so holes stay holes (issue #13). -/
 theorem surface_directAF_link
     {env₁ env₂ : Surface.Env canon} {input₁ input₂ : Surface.Input}
     {output₁ output₂ : Surface.Elaborated canon}

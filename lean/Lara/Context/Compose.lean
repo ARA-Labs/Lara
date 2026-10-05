@@ -227,7 +227,8 @@ theorem compose_assoc_mem :
 `compose` does **not** saturate. Saturation is `link`'s job, and `link` covers
 the conflicts between the *whole* context and the fragment — not the conflicts
 between the two halves of a composite. So a composite of two contexts that
-attack each other across their own boundary is not `SideOk`, and therefore not
+attack each other across their own boundary is not `SideOkHoles` (a fortiori
+not `SideOk`), and therefore not
 admissible: the missing edges are exactly the ones no later step emits.
 
 That is a real boundary of the calculus, not an oversight of this lemma, and it
@@ -236,14 +237,16 @@ Making `compose` saturate would give it a registry and a Γ — which it does no
 have, by design, since a context is data — so the alternative is tracked
 separately rather than folded in here. -/
 
-/-- **Composite linkability, from the halves.** The four quadrants of
-`AttackComplete` over the composite: two within-side, discharged by each half's
-own `SideOk`, and two cross-boundary, which the halves must already cover
-because nothing downstream will. -/
-theorem sideOk_composed {canon : String → String} {reg : BackendRegistry canon}
+/-- **Composite linkability, from the halves, with located holes (issue #13).**
+The four quadrants of `AttackComplete` over the composite: two within-side,
+discharged by each half's own `SideOkHoles`, and two cross-boundary, which the
+halves must already cover because nothing downstream will. Each half may carry
+holes; the cross-coverage premises, like `AttackComplete`, range over complete
+endpoints only. -/
+theorem sideOkHoles_composed {canon : String → String} {reg : BackendRegistry canon}
     {Gamma : LeafId → Option Atom} {P : Policy.Policy} {C D : Context}
-    (hC : SideOk canon reg Gamma P C.frame.args C.frame.atts)
-    (hD : SideOk canon reg Gamma P D.frame.args D.frame.atts)
+    (hC : SideOkHoles canon reg Gamma P C.frame.args C.frame.atts)
+    (hD : SideOkHoles canon reg Gamma P D.frame.args D.frame.atts)
     (hcross : ∀ source ∈ C.frame.args, ∀ target ∈ D.frame.args,
       ∀ Cs Ct, HasSupport canon P.ruleLookup Gamma (certOkOf reg) source Cs [] →
         HasSupport canon P.ruleLookup Gamma (certOkOf reg) target Ct [] →
@@ -256,7 +259,7 @@ theorem sideOk_composed {canon : String → String} {reg : BackendRegistry canon
         Attack.ContraryMatch canon P.defeat Cs Ct →
         Compile.ConflictAttackable P.ruleLookup target →
         Compile.Covered (C.frame.atts ++ D.frame.atts) source target) :
-    SideOk canon reg Gamma P (composedContext C D).frame.args
+    SideOkHoles canon reg Gamma P (composedContext C D).frame.args
       (composedContext C D).frame.atts where
   support := by
     intro w hw
@@ -298,5 +301,31 @@ theorem sideOk_composed {canon : String → String} {reg : BackendRegistry canon
     · exact covered_mono hboth (hcross' source hsD target htC Cs Ct hsSup htSup hcm hca)
     · exact covered_mono hright
         (hD.attack_complete source hsD target htD Cs Ct hsSup htSup hcm hca)
+
+/-- **Composite linkability, from the halves.** The hole-free corollary of
+`sideOkHoles_composed`: two hole-free halves make a hole-free composite. -/
+theorem sideOk_composed {canon : String → String} {reg : BackendRegistry canon}
+    {Gamma : LeafId → Option Atom} {P : Policy.Policy} {C D : Context}
+    (hC : SideOk canon reg Gamma P C.frame.args C.frame.atts)
+    (hD : SideOk canon reg Gamma P D.frame.args D.frame.atts)
+    (hcross : ∀ source ∈ C.frame.args, ∀ target ∈ D.frame.args,
+      ∀ Cs Ct, HasSupport canon P.ruleLookup Gamma (certOkOf reg) source Cs [] →
+        HasSupport canon P.ruleLookup Gamma (certOkOf reg) target Ct [] →
+        Attack.ContraryMatch canon P.defeat Cs Ct →
+        Compile.ConflictAttackable P.ruleLookup target →
+        Compile.Covered (C.frame.atts ++ D.frame.atts) source target)
+    (hcross' : ∀ source ∈ D.frame.args, ∀ target ∈ C.frame.args,
+      ∀ Cs Ct, HasSupport canon P.ruleLookup Gamma (certOkOf reg) source Cs [] →
+        HasSupport canon P.ruleLookup Gamma (certOkOf reg) target Ct [] →
+        Attack.ContraryMatch canon P.defeat Cs Ct →
+        Compile.ConflictAttackable P.ruleLookup target →
+        Compile.Covered (C.frame.atts ++ D.frame.atts) source target) :
+    SideOk canon reg Gamma P (composedContext C D).frame.args
+      (composedContext C D).frame.atts :=
+  (sideOkHoles_composed hC.toHoles hD.toHoles hcross hcross').toSideOk (by
+    intro w hw
+    rcases (composed_args (C := C) (D := D)).mp hw with h | h
+    · exact hC.support w h
+    · exact hD.support w h)
 
 end Lara.Context

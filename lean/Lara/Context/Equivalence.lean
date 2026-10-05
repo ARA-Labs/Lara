@@ -36,6 +36,7 @@ exists for; `docs/theory-m4-generic-observation.md` §2 records the choice.
 -/
 
 import Lara.Context.Compose
+import Lara.Context.LinkHoles
 import Lara.EraseTransport
 
 namespace Lara.Context
@@ -153,9 +154,10 @@ end Relabel
 /-! ### The cache under a relabel
 
 The saturation reads a cache, so the commutation above only bites once the two
-caches correspond. They do exactly when every declared argument is complete
-checked support — which is the `SideOk.support` field, and which
-`Compile.CheckedProgram.complete` forces on any accepted program anyway. -/
+caches correspond. They do whenever every declared argument types — the
+`SideOkHoles.support` field. A complete term moves to a complete term with the
+same conclusion; a located hole moves to a hole with the same obligation set,
+and neither has a cache entry (issue #13). -/
 
 section Cache
 
@@ -170,26 +172,37 @@ abbrev AssurPreserving (f : Assurance → Assurance)
   ∀ (r : Rule) (As : List Atom) (C : Atom) (α : Assurance),
     AssuranceOk CertOk₁ r As C α → AssuranceOk CertOk₂ r As C (f α)
 
-/-- On a list whose terms all check, the cache is the list — so a relabel moves
-it entrywise. -/
+/-- On a list whose terms all type — complete or located holes — a relabel
+moves the cache entrywise: complete terms keep their conclusion, and holes have
+no entry on either side. -/
 theorem conclusionCache_map
     (hpres : AssurPreserving f (certOkOf reg₁) (certOkOf reg₂)) :
     ∀ (args : List SupportTerm),
-      (∀ w ∈ args, ∃ C, HasSupport canon Pi Gamma (certOkOf reg₁) w C []) →
+      (∀ w ∈ args, ∃ C O, HasSupport canon Pi Gamma (certOkOf reg₁) w C O) →
       conclusionCache Pi Gamma reg₂ (args.map (mapAssur f))
         = (conclusionCache Pi Gamma reg₁ args).map (relabelEntry f)
   | [], _ => rfl
   | w :: ws, hsup => by
-      obtain ⟨Cw, hCw⟩ := hsup w List.mem_cons_self
-      have h₁ : conclusionOf Pi Gamma reg₁ w = some Cw :=
-        conclusionOf_eq_some_iff.mpr hCw
-      have h₂ : conclusionOf Pi Gamma reg₂ (mapAssur f w) = some Cw :=
-        conclusionOf_eq_some_iff.mpr (hasSupport_mapAssur hpres hCw)
+      obtain ⟨Cw, Ow, hCw⟩ := hsup w List.mem_cons_self
       have IH := conclusionCache_map hpres ws
         (fun v hv => hsup v (List.mem_cons_of_mem _ hv))
       simp only [conclusionCache] at IH ⊢
-      simp only [List.map_cons, List.filterMap_cons, h₁, h₂, Option.map_some, IH]
-      rfl
+      cases Ow with
+      | nil =>
+          have h₁ : conclusionOf Pi Gamma reg₁ w = some Cw :=
+            conclusionOf_eq_some_iff.mpr hCw
+          have h₂ : conclusionOf Pi Gamma reg₂ (mapAssur f w) = some Cw :=
+            conclusionOf_eq_some_iff.mpr (hasSupport_mapAssur hpres hCw)
+          simp only [List.map_cons, List.filterMap_cons, h₁, h₂, Option.map_some, IH]
+          rfl
+      | cons q qs =>
+          have h₁ : conclusionOf Pi Gamma reg₁ w = none :=
+            conclusionOf_eq_none_of_not_complete (by
+              rw [Check.argComplete_of_hasSupport hCw]; rfl)
+          have h₂ : conclusionOf Pi Gamma reg₂ (mapAssur f w) = none :=
+            conclusionOf_eq_none_of_not_complete (by
+              rw [Check.argComplete_of_hasSupport (hasSupport_mapAssur hpres hCw)]; rfl)
+          simp only [List.map_cons, List.filterMap_cons, h₁, h₂, Option.map_none, IH]
 
 end Cache
 
@@ -290,14 +303,15 @@ variable {canon : String → String} {reg₁ reg₂ : BackendRegistry canon}
 
 /-- **The saturation commutes with the relabel.** The context's cache is
 unchanged because the relabel fixes the context's material; the fragment's
-cache moves entrywise; and `crossAttsFrom_map` does the rest. -/
+cache moves entrywise; and `crossAttsFrom_map` does the rest. Either side may
+carry located holes: they have no cache entry before or after. -/
 theorem crossAtts_relabel
     (hpres : AssurPreserving f (certOkOf reg₁) (certOkOf reg₂))
     (hfixArgs : C.frame.args.map (mapAssur f) = C.frame.args)
-    (hCsup : ∀ w ∈ C.frame.args, ∃ A,
-      HasSupport canon F.policy.ruleLookup (linkGamma C F) (certOkOf reg₁) w A [])
-    (hFsup : ∀ w ∈ F.args, ∃ A,
-      HasSupport canon F.policy.ruleLookup (linkGamma C F) (certOkOf reg₁) w A []) :
+    (hCsup : ∀ w ∈ C.frame.args, ∃ A O,
+      HasSupport canon F.policy.ruleLookup (linkGamma C F) (certOkOf reg₁) w A O)
+    (hFsup : ∀ w ∈ F.args, ∃ A O,
+      HasSupport canon F.policy.ruleLookup (linkGamma C F) (certOkOf reg₁) w A O) :
     crossAtts reg₂ (linkGamma C F) C (mapAssurFrag f F)
       = (crossAtts reg₁ (linkGamma C F) C F).map (mapAssurAtt f) := by
   have hcc : conclusionCache F.policy.ruleLookup (linkGamma C F) reg₂ C.frame.args
@@ -321,10 +335,10 @@ theorem link_relabel_commutes
     (hpres : AssurPreserving f (certOkOf reg₁) (certOkOf reg₂))
     (hfixArgs : C.frame.args.map (mapAssur f) = C.frame.args)
     (hfixAtts : C.frame.atts.map (mapAssurAtt f) = C.frame.atts)
-    (hCsup : ∀ w ∈ C.frame.args, ∃ A,
-      HasSupport canon F.policy.ruleLookup (linkGamma C F) (certOkOf reg₁) w A [])
-    (hFsup : ∀ w ∈ F.args, ∃ A,
-      HasSupport canon F.policy.ruleLookup (linkGamma C F) (certOkOf reg₁) w A []) :
+    (hCsup : ∀ w ∈ C.frame.args, ∃ A O,
+      HasSupport canon F.policy.ruleLookup (linkGamma C F) (certOkOf reg₁) w A O)
+    (hFsup : ∀ w ∈ F.args, ∃ A O,
+      HasSupport canon F.policy.ruleLookup (linkGamma C F) (certOkOf reg₁) w A O) :
     (linkedUnit reg₂ C (mapAssurFrag f F)).args
         = (linkedUnit reg₁ C F).args.map (mapAssur f) ∧
       (linkedUnit reg₂ C (mapAssurFrag f F)).atts
@@ -440,41 +454,52 @@ units related by an injective, acceptance-preserving relabel compile related
 programs: the relabel carries each declaration's conclusion and obligation set
 to its image, so it maps complete arguments to complete arguments, located
 holes to located holes, and live attacks to live attacks. No declaration needs
-to be complete (the arbitrary-obligation transport D9 keeps beside linking). -/
-theorem checkUnit_map_program {ground : List Atom} {unit₁ unit₂ : Lara.Unit}
-    {accepted₁ : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg₁)}
-    {accepted₂ : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg₂)}
+to be complete: this is the arbitrary-obligation transport, which issue #13
+carries through linking (`link_relabel_program`).
+The two units may be checked under different leaf environments and ground
+lists: obligation sets depend on neither (`hasSupport_obligations_indep`). -/
+theorem checkUnit_map_program {Gamma₁ Gamma₂ : LeafId → Option Atom}
+    {ground₁ ground₂ : List Atom} {unit₁ unit₂ : Lara.Unit}
+    {accepted₁ : Lara.Unit.CheckedUnit canon Gamma₁ (certOkOf reg₁)}
+    {accepted₂ : Lara.Unit.CheckedUnit canon Gamma₂ (certOkOf reg₂)}
     (hf : Function.Injective f)
     (hpres : AssurPreserving f (certOkOf reg₁) (certOkOf reg₂))
     (hpolicy : unit₂.policy = unit₁.policy)
     (hargs : unit₂.args = unit₁.args.map (mapAssur f))
     (hatts : unit₂.atts = unit₁.atts.map (mapAssurAtt f))
-    (h₁ : Check.Unit.checkUnit Gamma reg₁ ground unit₁ = .ok accepted₁)
-    (h₂ : Check.Unit.checkUnit Gamma reg₂ ground unit₂ = .ok accepted₂) :
+    (h₁ : Check.Unit.checkUnit Gamma₁ reg₁ ground₁ unit₁ = .ok accepted₁)
+    (h₂ : Check.Unit.checkUnit Gamma₂ reg₂ ground₂ unit₂ = .ok accepted₂) :
     accepted₂.program.args = accepted₁.program.args.map (mapAssur f) ∧
       accepted₂.program.holes = accepted₁.program.holes.map (mapAssur f) ∧
       accepted₂.program.atts = accepted₁.program.atts.map (mapAssurAtt f) := by
   have hs₁ := Check.Unit.checkUnit_sound h₁
   have hs₂ := Check.Unit.checkUnit_sound h₂
-  -- A declaration and its image type with one obligation set.
-  have hsame : ∀ w ∈ unit₁.args, ∃ A O,
-      HasSupport canon unit₁.policy.ruleLookup Gamma (certOkOf reg₁) w A O ∧
-      HasSupport canon unit₂.policy.ruleLookup Gamma (certOkOf reg₂)
+  -- A declaration and its image type with one obligation set: obligations
+  -- depend neither on Γ nor on certificates (`hasSupport_obligations_indep`).
+  have hsame : ∀ w ∈ unit₁.args, ∃ O, (∃ A,
+      HasSupport canon unit₁.policy.ruleLookup Gamma₁ (certOkOf reg₁) w A O) ∧
+      ∃ A, HasSupport canon unit₂.policy.ruleLookup Gamma₂ (certOkOf reg₂)
         (mapAssur f w) A O := by
     intro w hw
     obtain ⟨A, O, hO⟩ := hs₁.raw_support w hw
-    exact ⟨A, O, hO, by rw [hpolicy]; exact hasSupport_mapAssur hpres hO⟩
+    obtain ⟨A₂, O₂, hO₂⟩ := hs₂.raw_support (mapAssur f w)
+      (by rw [hargs]; exact List.mem_map_of_mem hw)
+    rw [hpolicy] at hO₂
+    have hOeq : O = O₂ :=
+      hasSupport_obligations_indep (hasSupport_mapAssur hpres hO) hO₂
+    subst hOeq
+    exact ⟨O, ⟨A, hO⟩, A₂, by rw [hpolicy]; exact hO₂⟩
   have hcomplete : ∀ w ∈ unit₁.args,
-      Check.argComplete unit₂.policy.ruleLookup Gamma reg₂ (mapAssur f w) =
-        Check.argComplete unit₁.policy.ruleLookup Gamma reg₁ w := by
+      Check.argComplete unit₂.policy.ruleLookup Gamma₂ reg₂ (mapAssur f w) =
+        Check.argComplete unit₁.policy.ruleLookup Gamma₁ reg₁ w := by
     intro w hw
-    obtain ⟨_, O, hO₁, hO₂⟩ := hsame w hw
+    obtain ⟨O, ⟨_, hO₁⟩, _, hO₂⟩ := hsame w hw
     rw [Check.argComplete_of_hasSupport hO₁, Check.argComplete_of_hasSupport hO₂]
   have hhole : ∀ w ∈ unit₁.args,
-      Check.argHole unit₂.policy.ruleLookup Gamma reg₂ (mapAssur f w) =
-        Check.argHole unit₁.policy.ruleLookup Gamma reg₁ w := by
+      Check.argHole unit₂.policy.ruleLookup Gamma₂ reg₂ (mapAssur f w) =
+        Check.argHole unit₁.policy.ruleLookup Gamma₁ reg₁ w := by
     intro w hw
-    obtain ⟨_, O, hO₁, hO₂⟩ := hsame w hw
+    obtain ⟨O, ⟨_, hO₁⟩, _, hO₂⟩ := hsame w hw
     rw [Check.argHole_of_hasSupport hO₁, Check.argHole_of_hasSupport hO₂]
   have hargsEq : accepted₂.program.args = accepted₁.program.args.map (mapAssur f) := by
     rw [hs₂.args_eq, hs₁.args_eq, hargs, Check.completeArgs, Check.completeArgs,
@@ -592,12 +617,17 @@ structure FixesContext (f : Assurance → Assurance) (C : Context) : Prop where
 /-- **A context admissible for a fragment**: the guard passes and both sides'
 declared material is well-formed relative to the linked environment. This is
 what "compatible well-formed context" means, and it is exactly the input
-`link_checked` needs — nothing here mentions the conclusion. -/
+`link_checked_holes` needs — nothing here mentions the conclusion.
+
+Since issue #13 both sides are `SideOkHoles`: either may carry located holes,
+so every contextual-equivalence result stated over `Admissible` covers contexts
+and fragments with open mandatory questions. A hole-free side enters through
+`SideOk.toHoles`. -/
 structure Admissible {canon : String → String} (reg : BackendRegistry canon)
     (C : Context) (F : Fragment) : Prop where
   guard : linkOk C F = true
-  ctx : SideOk canon reg (linkGamma C F) F.policy C.frame.args C.frame.atts
-  frag : SideOk canon reg (linkGamma C F) F.policy F.args F.atts
+  ctx : SideOkHoles canon reg (linkGamma C F) F.policy C.frame.args C.frame.atts
+  frag : SideOkHoles canon reg (linkGamma C F) F.policy F.args F.atts
   signature : Check.Unit.signatureStage (linkGround C F) (linkedUnit reg C F) = none
   scope : Policy.firstOutOfScope? F.policy = none
   ruleIds : (F.policy.rules.map (·.id)).Nodup
@@ -738,7 +768,7 @@ theorem exists_accepted_of_admissible {reg : BackendRegistry canon}
     (hadm : Admissible reg C F) :
     ∃ acc, Check.Unit.checkUnit (linkGamma C F) reg (linkGround C F)
       (linkedUnit reg C F) = .ok acc :=
-  link_checked (link_eq_some hadm.guard) hadm.signature hadm.scope hadm.ruleIds
+  link_checked_holes (link_eq_some hadm.guard) hadm.signature hadm.scope hadm.ruleIds
     hadm.policy hadm.ctx hadm.frag
 
 /-- The relabeled link is accepted too. -/
@@ -758,10 +788,12 @@ theorem exists_accepted_relabel
     hf hpres rfl rfl hargs hatts h₁
 
 /-- **The two accepted links compile the same programs up to the relabel.**
-`Admissible` keeps the original link hole-free; the relabeled link is hole-free
-too, because obligations do not depend on Γ or certificates
-(`hasSupport_obligations_indep`). Each side may be checked under its own Γ and
-ground list, so this serves both the context calculus and the surface. -/
+Either side may carry located holes: a relabel carries each declaration's
+obligation set to its image, so complete arguments map to complete arguments
+and live attacks to live attacks (`checkUnit_map_program`), and the linked
+units themselves are related (`link_relabel_commutes`). Each side may be
+checked under its own Γ and ground list, so this serves both the context
+calculus and the surface. -/
 theorem link_relabel_program
     {Gamma₁ Gamma₂ : LeafId → Option Atom} {ground₁ ground₂ : List Atom}
     (hf : Function.Injective f)
@@ -776,31 +808,10 @@ theorem link_relabel_program
       acc₂.program.atts = acc₁.program.atts.map (mapAssurAtt f) := by
   obtain ⟨hargs, hatts⟩ :=
     link_relabel_commutes hf hpres hfix.args hfix.atts hadm.ctx.support hadm.frag.support
-  have hsound₁ := Check.Unit.checkUnit_sound h₁
-  have hsound₂ := Check.Unit.checkUnit_sound h₂
-  have hlinked := linkedUnit_args_complete hadm.ctx hadm.frag
-  -- Each side types every declaration under its own Γ; the linked Γ makes it
-  -- complete, so it is complete under that Γ as well.
-  have hcomplete₁ : ∀ w ∈ (linkedUnit reg₁ C F).args, ∃ A,
-      HasSupport canon (linkedUnit reg₁ C F).policy.ruleLookup Gamma₁
-        (certOkOf reg₁) w A [] := by
-    intro w hw
-    obtain ⟨A, O, hA⟩ := hsound₁.raw_support w hw
-    obtain ⟨_, hlink⟩ := hlinked w hw
-    exact ⟨A, (hasSupport_obligations_indep hlink hA).symm ▸ hA⟩
-  have hcomplete₂ : ∀ w ∈ (linkedUnit reg₂ C (mapAssurFrag f F)).args, ∃ A,
-      HasSupport canon (linkedUnit reg₂ C (mapAssurFrag f F)).policy.ruleLookup
-        Gamma₂ (certOkOf reg₂) w A [] := by
-    intro w hw
-    obtain ⟨A, O, hA⟩ := hsound₂.raw_support w hw
-    rw [hargs] at hw
-    obtain ⟨w₀, hw₀, rfl⟩ := List.mem_map.mp hw
-    obtain ⟨_, hlink⟩ := hlinked w₀ hw₀
-    exact ⟨A, (hasSupport_obligations_indep (hasSupport_mapAssur hpres hlink) hA).symm ▸ hA⟩
-  exact ⟨by rw [hsound₂.args_eq_of_complete hcomplete₂,
-      hsound₁.args_eq_of_complete hcomplete₁]; exact hargs,
-    by rw [hsound₂.atts_eq_of_complete hcomplete₂,
-      hsound₁.atts_eq_of_complete hcomplete₁]; exact hatts⟩
+  obtain ⟨hpargs, -, hpatts⟩ :=
+    checkUnit_map_program (unit₁ := linkedUnit reg₁ C F)
+      (unit₂ := linkedUnit reg₂ C (mapAssurFrag f F)) hf hpres rfl hargs hatts h₁ h₂
+  exact ⟨hpargs, hpatts⟩
 
 /-- **The two links present the same carrier.** This is the whole content of
 the congruence; `obs` reads statuses off it, and the surface corollary reads
@@ -1013,16 +1024,17 @@ theorem fixesContext_composed {C D : Context}
 
 /-- **Admissibility of a composite, assembled from its halves.** This is the
 piece that makes "stable under embedding into a larger context" a statement
-with content: the composite's `SideOk` is built by `sideOk_composed` from the
-two halves plus their cross-coverage, rather than assumed. The cross-coverage
+with content: the composite's side condition is built by `sideOkHoles_composed`
+from the two halves plus their cross-coverage, rather than assumed. Either half,
+and the fragment, may carry located holes. The cross-coverage
 hypotheses are not slack — `compose` does not saturate, so conflicts *between*
 the halves are covered by their own declared attacks or by nothing at all. -/
 theorem admissible_composed {C D : Context} {F : Fragment}
     {reg : BackendRegistry canon}
     (guard : linkOk (composedContext C D) F = true)
-    (hC : SideOk canon reg (linkGamma (composedContext C D) F) F.policy
+    (hC : SideOkHoles canon reg (linkGamma (composedContext C D) F) F.policy
       C.frame.args C.frame.atts)
-    (hD : SideOk canon reg (linkGamma (composedContext C D) F) F.policy
+    (hD : SideOkHoles canon reg (linkGamma (composedContext C D) F) F.policy
       D.frame.args D.frame.atts)
     (hcross : ∀ source ∈ C.frame.args, ∀ target ∈ D.frame.args,
       ∀ Cs Ct, HasSupport canon F.policy.ruleLookup
@@ -1040,7 +1052,7 @@ theorem admissible_composed {C D : Context} {F : Fragment}
         ContraryMatch canon F.policy.defeat Cs Ct →
         ConflictAttackable F.policy.ruleLookup target →
         Covered (C.frame.atts ++ D.frame.atts) source target)
-    (hF : SideOk canon reg (linkGamma (composedContext C D) F) F.policy
+    (hF : SideOkHoles canon reg (linkGamma (composedContext C D) F) F.policy
       F.args F.atts)
     (hsig : Check.Unit.signatureStage (linkGround (composedContext C D) F)
       (linkedUnit reg (composedContext C D) F) = none)
@@ -1049,7 +1061,7 @@ theorem admissible_composed {C D : Context} {F : Fragment}
     (hpolicy : Policy.WellFormed canon F.policy) :
     Admissible reg (composedContext C D) F where
   guard := guard
-  ctx := sideOk_composed hC hD hcross hcross'
+  ctx := sideOkHoles_composed hC hD hcross hcross'
   frag := hF
   signature := hsig
   scope := hscope
@@ -1091,5 +1103,88 @@ theorem whole_program_replacement {Pi : RuleId → Option Rule}
   Erase.backend_replacement hf hargs hatts c
 
 end Closure
+
+
+/-! ### Hole blindness: what a fragment's holes can and cannot change (issue #13)
+
+An admissible link's carrier reads the complete arguments and the live attacks
+only (`link_accepted_holes`). So two fragments with one interface whose complete
+views and live attacks agree are observationally equal in every context
+admissible for both, whatever located holes and hole-sourced attacks each
+carries. The premise on live attacks is not removable: an attack from a complete
+source aimed inside a hole is live and can carry the only cover of a conflict
+(D6), so deleting a hole together with the attacks aimed at it can turn an
+observed link into a rejected one
+(`Lara.Examples.LinkHoles.hole_erasure_observable`). -/
+
+section HoleBlind
+
+variable {canon : String → String} {reg : BackendRegistry canon}
+
+/-- Two accepted units under one environment whose compiled arguments and
+attacks agree present one carrier. -/
+theorem compileUnit_eq_of_program {Gamma : LeafId → Option Atom}
+    {acc₁ acc₂ : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg)}
+    (hpol : acc₂.policy = acc₁.policy)
+    (hargs : acc₂.program.args = acc₁.program.args)
+    (hatts : acc₂.program.atts = acc₁.program.atts) :
+    Invariants.compileUnit acc₂ = Invariants.compileUnit acc₁ :=
+  compileUnit_map (f := id) (fun _ _ h => h) (fun _ _ _ _ h => h) hpol
+    (by rw [mapAssur_id_eq, List.map_id]; exact hargs)
+    (by rw [mapAssurAtt_id_eq, List.map_id]; exact hatts)
+
+/-- **Hole blindness, for every projection.** Two fragments sharing their
+policy, leaf declarations, ground list and exports, whose complete arguments and
+live attacks agree under the linked environment, are observed identically in
+every context admissible for both. Their located holes, and the attacks sourced
+at those holes, may differ arbitrarily. -/
+theorem obsGen_hole_blind {α : Type} (g : Invariants.StructuredAF → Atom → α)
+    {C : Context} {F₁ F₂ : Fragment}
+    (hadm₁ : Admissible reg C F₁) (hadm₂ : Admissible reg C F₂)
+    (hpolicy : F₂.policy = F₁.policy) (hgamma : F₂.gammaFrag = F₁.gammaFrag)
+    (hexports : F₂.exports = F₁.exports)
+    (hargs : Check.completeArgs F₁.policy.ruleLookup (linkGamma C F₁) reg F₂.args
+      = Check.completeArgs F₁.policy.ruleLookup (linkGamma C F₁) reg F₁.args)
+    (hatts : Check.liveAttacks
+        (Check.completeArgs F₁.policy.ruleLookup (linkGamma C F₁) reg F₂.args) F₂.atts
+      = Check.liveAttacks
+        (Check.completeArgs F₁.policy.ruleLookup (linkGamma C F₁) reg F₁.args) F₁.atts) :
+    obsGen g reg C F₁ = obsGen g reg C F₂ := by
+  have hΓ : linkGamma C F₂ = linkGamma C F₁ := by simp only [linkGamma, hgamma]
+  obtain ⟨acc₁, h₁⟩ := exists_accepted_of_admissible hadm₁
+  obtain ⟨acc₂, h₂⟩ := exists_accepted_of_admissible hadm₂
+  have hp₁ := link_accepted_holes (link_eq_some hadm₁.guard) h₁ hadm₁.ctx hadm₁.frag
+  have hp₂ := link_accepted_holes (link_eq_some hadm₂.guard) h₂ hadm₂.ctx hadm₂.frag
+  have hpol₁ : acc₁.policy = F₁.policy := (Check.Unit.checkUnit_sound h₁).policy_eq
+  have hpol₂ : acc₂.policy = F₁.policy :=
+    (Check.Unit.checkUnit_sound h₂).policy_eq.trans hpolicy
+  rw [obsGen_eq_of_ok g hadm₁.guard h₁, obsGen_eq_of_ok g hadm₂.guard h₂, hexports]
+  refine congrArg ObservationOf.observed
+    (congrArg (fun G => F₁.exports.map (fun p => g G p)) ?_)
+  rw [hpolicy] at hp₂
+  revert acc₂ hp₂ hpol₂
+  rw [hΓ]
+  intro acc₂ _ hp₂ hpol₂
+  obtain ⟨hargs₁, -, hatts₁⟩ := hp₁
+  obtain ⟨hargs₂, -, hatts₂⟩ := hp₂
+  refine (compileUnit_eq_of_program (hpol₂.trans hpol₁.symm) ?_ ?_).symm
+  · rw [hargs₂, hargs₁, hargs]
+  · rw [hatts₂, hatts₁, hatts, crossAtts_completeArgs hpolicy hargs]
+
+/-- **Hole blindness at the grounded reading.** -/
+theorem obs_hole_blind {C : Context} {F₁ F₂ : Fragment}
+    (hadm₁ : Admissible reg C F₁) (hadm₂ : Admissible reg C F₂)
+    (hpolicy : F₂.policy = F₁.policy) (hgamma : F₂.gammaFrag = F₁.gammaFrag)
+    (hexports : F₂.exports = F₁.exports)
+    (hargs : Check.completeArgs F₁.policy.ruleLookup (linkGamma C F₁) reg F₂.args
+      = Check.completeArgs F₁.policy.ruleLookup (linkGamma C F₁) reg F₁.args)
+    (hatts : Check.liveAttacks
+        (Check.completeArgs F₁.policy.ruleLookup (linkGamma C F₁) reg F₂.args) F₂.atts
+      = Check.liveAttacks
+        (Check.completeArgs F₁.policy.ruleLookup (linkGamma C F₁) reg F₁.args) F₁.atts) :
+    obs reg C F₁ = obs reg C F₂ :=
+  obsGen_hole_blind _ hadm₁ hadm₂ hpolicy hgamma hexports hargs hatts
+
+end HoleBlind
 
 end Lara.Context

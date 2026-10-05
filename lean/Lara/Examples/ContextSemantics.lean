@@ -252,8 +252,8 @@ theorem cycle_sideOk_frag (reg : BackendRegistry id) :
 /-- The three-cycle is admissible against every registry; it contains only leaves. -/
 theorem cycle_admissible (reg : BackendRegistry id) : Admissible reg cycleCtx cycleFrag where
   guard := cycle_link_ok
-  ctx := cycle_sideOk_ctx reg
-  frag := cycle_sideOk_frag reg
+  ctx := (cycle_sideOk_ctx reg).toHoles
+  frag := (cycle_sideOk_frag reg).toHoles
   signature :=
     signatureStage_link (by decide) (by decide) (by decide) (by decide)
       (by decide) (by decide)

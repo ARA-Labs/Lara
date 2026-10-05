@@ -344,8 +344,8 @@ theorem sideOk_frag (reg : BackendRegistry id) :
 input the congruence theorem quantifies over is inhabited. -/
 theorem admissible_split (reg : BackendRegistry id) : Admissible reg ctxEx fragEx where
   guard := link_guard_ok
-  ctx := sideOk_ctx reg
-  frag := sideOk_frag reg
+  ctx := (sideOk_ctx reg).toHoles
+  frag := (sideOk_frag reg).toHoles
   signature :=
     signatureStage_link (by decide) (by decide) (by decide) (by decide)
       (by decide) (by decide)
@@ -428,10 +428,11 @@ private theorem sideOk_frag_composite :
 both explicit cross-coverage premises are discharged rather than assumed. -/
 theorem admissible_composite :
     Admissible registryEx (composedContext leftHalf rightHalf) fragEx :=
-  admissible_composed compose_links sideOk_left_composite sideOk_right_composite
+  admissible_composed compose_links sideOk_left_composite.toHoles
+    sideOk_right_composite.toHoles
     (by intro source hs target ht; simp [rightHalf] at ht)
     (by intro source hs; simp [rightHalf] at hs)
-    sideOk_frag_composite
+    sideOk_frag_composite.toHoles
     (signatureStage_link (by decide) (by decide) (by decide) (by decide)
       (by decide) (by decide))
     (by decide) (by decide) (Policy.firstViolation_none_iff.mp (by decide))
@@ -533,8 +534,8 @@ theorem hostile_composite_links :
 theorem hostile_left_admissible (reg : BackendRegistry id) :
     Admissible reg ctxEx thirdFrag where
   guard := by decide
-  ctx := sideOk_singleLeaf (l := l2) (p := pB) (by decide) (by decide)
-  frag := sideOk_singleLeaf (l := l3) (p := pC) (by decide) (by decide)
+  ctx := (sideOk_singleLeaf (l := l2) (p := pB) (by decide) (by decide)).toHoles
+  frag := (sideOk_singleLeaf (l := l3) (p := pC) (by decide) (by decide)).toHoles
   signature :=
     signatureStage_link (by decide) (by decide) (by decide) (by decide)
       (by decide) (by decide)
@@ -546,8 +547,8 @@ theorem hostile_left_admissible (reg : BackendRegistry id) :
 theorem hostile_right_admissible (reg : BackendRegistry id) :
     Admissible reg hostileHalf thirdFrag where
   guard := by decide
-  ctx := sideOk_singleLeaf (l := l1) (p := pA) (by decide) (by decide)
-  frag := sideOk_singleLeaf (l := l3) (p := pC) (by decide) (by decide)
+  ctx := (sideOk_singleLeaf (l := l1) (p := pA) (by decide) (by decide)).toHoles
+  frag := (sideOk_singleLeaf (l := l3) (p := pC) (by decide) (by decide)).toHoles
   signature :=
     signatureStage_link (by decide) (by decide) (by decide) (by decide)
       (by decide) (by decide)
@@ -555,11 +556,12 @@ theorem hostile_right_admissible (reg : BackendRegistry id) :
   ruleIds := by decide
   policy := Policy.firstViolation_none_iff.mp (by decide)
 
-/-- **The composite is not well-formed as a side.** Its arguments include both
-leaves, `q` is contrary to `p`, a leaf is always attackable at its root, and
-the composite's attack list is the two halves' — empty. -/
+/-- **The composite is not well-formed as a side**, not even as a side with
+located holes. Its arguments include both leaves, `q` is contrary to `p`, a leaf
+is always attackable at its root, and the composite's attack list is the two
+halves' — empty. -/
 theorem hostile_composite_not_sideOk (reg : BackendRegistry id) :
-    ¬ SideOk id reg (linkGamma (composedContext ctxEx hostileHalf) thirdFrag)
+    ¬ SideOkHoles id reg (linkGamma (composedContext ctxEx hostileHalf) thirdFrag)
       unitPolicyEx (composedContext ctxEx hostileHalf).frame.args
       (composedContext ctxEx hostileHalf).frame.atts := by
   intro h
@@ -891,10 +893,10 @@ theorem certSideOk_frag {β : BackendId} {reg : BackendRegistry id}
 fragment's certificate. -/
 theorem certAdmissible : Admissible registryEx certCtx certFrag where
   guard := certLinkOk
-  ctx := certSideOk_ctx registryEx
-  frag := certSideOk_frag (by decide)
+  ctx := (certSideOk_ctx registryEx).toHoles
+  frag := (certSideOk_frag (by decide)
     ((certOkBOf_iff registryEx ndId digestA slot1Cert [pA] pB).mp
-      registry_exact_digest_accepts)
+      registry_exact_digest_accepts)).toHoles
   signature :=
     signatureStage_link (by decide) (by decide) (by decide) (by decide)
       (by decide) (by decide)
