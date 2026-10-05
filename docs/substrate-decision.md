@@ -14,7 +14,9 @@ core before it is believed.
 - **Trusted core** (claim-support checker, strict-backend registry and selected adapters,
   argumentation/defeat layer): **Haskell**.
 - **Untrusted front-end** (LLM elaborator, LLM-as-judge, model-checker dispatch, reporting): **Python** (added at Phase 3).
-- **Interface**: JSON over stdio. The language boundary *is* the trust boundary — Python emits
+- **Interface**: JSON over stdio, as decided here; the shipped wire is instead the `Lara.Wire`
+  S-expression codec over stdio, and there is no JSON checker-input codec (`spec.md` §1).
+  The language boundary *is* the trust boundary — Python emits
   claim-support programs, opaque strict-certificate payloads, and leaf atoms; the Haskell checker decides
   validity. Nothing above the leaves runs Python.
 

@@ -48,6 +48,9 @@ jobs:
       - name: PW file-driven authoring and execution
         run: make pw-example
 
+      - name: Axiom-withdrawal example
+        run: make axiom-withdrawal-example
+
       - name: Axiom audit (no `sorry`, only standard axioms)
         run: make axiom-audit
 

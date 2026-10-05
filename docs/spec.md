@@ -43,11 +43,10 @@ is a rule mode, strict certificates are opaque backend payloads, and attacks are
 > family needs a declared contrary pair where `ord@1`'s does not, is recorded in
 > `insp1-code-inspection-decision.md`. No corpus regeneration or freeze-tag bump is owed: the
 > adapter is additive at the registry, no existing unit selects it, and no corpus, wire, or
-> replay-identity bytes change. A mutation base for `S9` is deliberately **not** included: it would
-> grow the seeded suite 541 → 568, and `fixtures/mutants/` is frozen input row 1 of
-> `m5-freeze-checklist.md`, so it costs a v5 → v6 re-cut plus a full axis-(c) re-run that this
-> amendment did not budget. Tracked in the `m5-freeze-checklist.md` post-v5 addendum; the mutant
-> bytes are unchanged here.
+> replay-identity bytes change. A mutation base for `S9` was not included in this
+> amendment, because `fixtures/mutants/` is frozen input row 1 of `m5-freeze-checklist.md` and a
+> new base costs a re-cut plus a full axis-(c) re-run. The later v6 snapshot added it, with an S2
+> base (541 → 595 mutants).
 
 > **Portfolio and wire amendment (2026-09-07).** Two stale claims are corrected. (1) The
 > §5.2 shipped-adapter clause of the M0-frozen blockquote above is amended: v0.1 ships `ra@1`
@@ -169,6 +168,7 @@ trusted code before it is believed. The M1 freeze fixes this boundary (open ques
 | 7 | Compiler `compile(P) = AF` with subargument closure | `Lara.Compile` | §9 result 4 |
 | 8 | Status engine: grounded labelling + four-state aggregation | `Lara.Grounded` | §9 results 5, 6, 7 |
 | 9 | Diagnostics / located rejection | `Lara.Diagnostics` | §1; §10 |
+| 10 | Signature well-formedness and well-sortedness (R2, since `lara-core@0.2`), and the seven-stage `checkUnit` orchestrator that sequences rows 3–9 | `Lara.Sigma`, `Lara.Sigma.WellSorted`, `Lara.Check` | §9 result 13 |
 
 Trusted **inputs** (versioned data, not executable TCB, but part of the trust base and replay
 identity): the proposition signature `Sigma`, the claim-support policy `Pi`, the backend registry
@@ -544,7 +544,8 @@ total because an omitted table, an empty table, and every unmatched key default 
 table keys are source invalidity rather than first- or last-row-wins. Duplicate `LeafId` declarations
 are likewise source invalidity. A `certified` leaf is additionally
 admitted only if it carries a checker witness `(name, version)` listed in `Pi` and a replayable
-reference. The outcomes:
+reference. *(Not enforced in v0.1: `Policy` carries no witness list and no checker stage tests this
+requirement; R8 is currently raised only by a `reject` admission row.)* The outcomes:
 
 - `admit` — the leaf enters `Gamma` and is usable by the leaf rule.
 - `quarantine` — the leaf stays out of `Gamma`; its declaration is retained and reported for
@@ -690,9 +691,13 @@ An `arg` declaration names a support term (Section 6). Multiple independent supp
 claim are separate `arg` declarations — never merged into one term — so that defeat can eliminate
 one while the other survives.
 
-An open mandatory obligation excludes that incomplete argument from the compiled argumentation
-framework and contributes a located `gap` explanation. Other complete support arguments for the same
-claim remain eligible.
+In v0.1 a submitted argument that still carries an open mandatory obligation makes the unit
+invalid: `checkUnit` rejects it with the named kind `incomplete-argument` (§10.1). An honest gap is
+expressed by *not submitting* the incomplete argument: a claim with no complete checked support
+reports `gap`, and other complete support arguments for the same claim remain eligible. The status
+function of §8 is stated over `holes(P, p)` so that a later core version could accept partial
+alternatives without changing it; under the v0.1 checker every accepted unit has empty root holes
+(`evidence-admission-decision.md` §6 records this as the v0.1 contract).
 
 ### 4.5 Reference policy scheme vocabulary (M0-frozen)
 
@@ -796,8 +801,9 @@ backend. Conversely, a backend returns only acceptance, dependencies, and diagno
 therefore establishes that the conclusion is a backend consequence of the encoded premises and
 declared theory, not that any premise is true.
 
-An unwitnessed strict instance is accepted only when its policy entry explicitly says
-`assurance = trusted-policy`. This is an indefeasible trusted domain law, not a logical theorem.
+An unwitnessed strict instance is accepted only when its policy rule explicitly allows it
+(`allow-trusted = true`) and the argument carries `assurance = trusted` (the *trusted-policy*
+instances of §9). This is an indefeasible trusted domain law, not a logical theorem.
 Reports distinguish it from `certified(beta, theory-digest)`.
 
 ### 5.1 Required reference backend
@@ -853,7 +859,7 @@ amendment and its completion):
    must trace to a consulted premise slot, so a certificate can never cite a self-supplied theory
    entry as measured evidence (`docs/ord1-corpus-extension-decision.md`). Shipped as **`ord@1`**
    (`Lara.Strict.Ord`; §9 result 10 discharged in `lean/Lara/Ord.lean`). No corpus unit
-   exercises it — a corpus extension is deferred to `corpus-v2`; the worked examples S2–S4 carry
+   exercises it — a corpus extension is deferred to `corpus-v2`; the worked examples S2–S7 carry
    the demonstration.
 3. a **static code-inspection checker** — certifies structural facts about referenced source
    (plan-vs-shipped diffs, negative existentials over code) as a closed four-predicate family —
@@ -1500,11 +1506,10 @@ the two implementations are cross-checked byte-for-byte through the `Lara.Wire` 
    `trusted-policy` instances.
 9. Backend replacement: source-identical programs whose backend certificates accept the same strict
    instances compile to AFs isomorphic under certificate erasure and produce equal claim statuses.
-   *(The frozen relational layers are sufficient for the proof, but the current Lean
-   `CheckedProgram` representation cannot state the required payload-varying node bijection: nodes
-   are certificate-bearing `SupportTerm`s with no stable argument id or erased skeleton. The next
-   mechanization step is an argument-id/`eraseCert` compile-boundary representation, followed by
-   checking transport, graph isomorphism, and grounded-status invariance.)*
+   *(Mechanized as Model A: `Erase.backend_replacement` proves status invariance under a uniform
+   injective certificate relabel, and `EraseTransport.backend_replacement_transport` constructs the
+   relabeled well-checked program. Erasing every certificate to one marker is not an isomorphism,
+   because it can merge distinct subterms; see `strict-backend-decision.md`, Theorem 2.)*
 10. Reference-backend soundness and dependency exactness for the natural-deduction adapter; each
     additional shipped adapter must discharge the same obligations.
 11. Support adequacy: `w supports c` is decidable, being normalized structural identity of `concl(w)`
@@ -1518,7 +1523,7 @@ Additional adapter soundness may be imported from a separately verified checker 
 explicit theorem and encoding correspondence. Tests of executable checkers are conformance evidence,
 not substitutes for these theorems.
 
-For the Lean reference-PL implementation, the evidence is 70 traceability IDs and six author flows,
+For the Lean reference-PL implementation, the evidence at that milestone was 70 traceability IDs and six author flows,
 `lake build` (25 jobs), and 430 AxCheck reports with no `sorryAx` and only
 `propext`, `Classical.choice`, and `Quot.sound`; the multiline CI axiom parser is
 also repaired and negative-tested. Passing `cabal build`/`cabal test` (one
@@ -1553,8 +1558,10 @@ undercut d1 a1.rule
 status c1
 ```
 
-This example is intentionally incomplete and should report the located obligation `external_validity`. The worked
-examples (three complete + three rejected, with matching JSON encodings) are M3/M5 golden-test
+This example is intentionally incomplete: `a1` leaves `external_validity` open, so the v0.1 checker
+rejects the unit with `incomplete-argument` (§4.4). Dropping `a1` instead makes `c1` report `gap`;
+`examples/running-example/run1/` is that shape. The worked examples under `examples/` (each with a
+derived `example.core.sexp` wire anchor and `expected.json` golden) are the M3/M5 golden-test
 artifacts built against this frozen spec (`engineering-plan.md` §5).
 
 ### 10.1 Rejection classes (v0.1-frozen)
@@ -1587,7 +1594,10 @@ well-sorted; it is simply not in scope, which is policy well-formedness. One cla
 R2 stays purely about sorts.
 
 
-Every ill-formed construct fails in exactly one located class. The enumeration is frozen so the
+Every ill-formed construct fails in exactly one located class. Besides R1–R14, the checker emits four
+named kinds from its fixed stage order: `duplicate-rule`, `duplicate-argument`,
+`incomplete-argument` (an open mandatory obligation, §4.4), and `missing-conflict` (a licensed
+conflict with no covering attack); `docs/rejection-surface.md` §2 anchors each. The enumeration is frozen so the
 diagnostics surface (`Lara.Diagnostics`), the golden negative examples, and the M5 mutation suite
 share one spine: every class must be exercised by at least one rejected example and one mutation.
 
@@ -1600,7 +1610,7 @@ share one spine: every class must be exercised by at least one rejected example 
 | **R5** question-accounting | a declared question in neither discharge map nor hole set, or a discharge/hole naming an undeclared question (`D ⊎ H` violation) | the instance | §4.2, §6.1 |
 | **R6** discharge | discharging term's conclusion `≢` instantiated answer pattern | position `π.q` | §4.2, §6.1 |
 | **R7** assurance | `trusted` without `allow-trusted`; `cert` without matching certifier entry; any assurance on a defeasible rule; strict rule with a discharge map or holes | the instance | §4, §5, §6.1 |
-| **R8** admission | leaf `reject`-classed by the admission table; `certified` leaf without a listed checker witness | the leaf declaration | §4.3 |
+| **R8** admission | leaf `reject`-classed by the admission table; `certified` leaf without a listed checker witness (not enforced in v0.1, §4.3) | the leaf declaration | §4.3 |
 | **R9** data-integrity | duplicate-report group with `≢` members, escalated to `reject` by policy | the group declaration | §4.3 |
 | **R10** attack-position | attack position undefined (`u@π` lookup fails) or wrong occurrence kind for the attack kind | the attack declaration | §7.1 |
 | **R11** attack-relation | no declared contrary pair matches (rebut/undermine); no declared exception matches (undercut); target rule strict | the attack declaration | §7.1 |

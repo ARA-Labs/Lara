@@ -70,13 +70,17 @@ calculus tracker.
 
 The spike closes with open *limitations*, all of them recorded design
 commitments with named homes — §4 of the PW0 document, §8 of T6, §9 of T8, §7
-of T9. Two are live issues rather than accepted boundaries:
+of T9. Two follow-ups were open when the spike closed, and both have since
+landed:
 
-- **T6 fixture drift guards** — guard the T6 strict-certificate fixture against certifier and
-  assurance drift. Follow-up coverage, not a soundness defect in
+- **T6 fixture drift guards** — the T6 strict-certificate fixture is guarded
+  against certifier and assurance drift by `cert_reject_mismatched_certifier`,
+  `cert_target_rule`, and `cert_only_assurance` (`Lara/Examples/PWStructural.lean`;
+  T6 §7). This was follow-up coverage, not a soundness defect in
   `support_transport`.
-- **T8 decider naming** — name the T8 `matched` clause and unify the two totality deciders.
-  Readability only; see §5.
+- **T8 decider naming** — the `matched` clause is named `PW.Matched`
+  (`Lara/PW/Status.lean`), and `admitsB`/`matchedB` are one `transportsB` test
+  (`Lara/PW/StatusCheck.lean`). Readability only; see §5.
 
 ## 5. The T8 checker landed off its plan, deliberately
 

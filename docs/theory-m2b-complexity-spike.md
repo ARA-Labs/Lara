@@ -65,7 +65,9 @@ unchanged in statement and still check.
 **Scope.** HARDNESS here names the gate outcome only: the reduction target
 family is realizable in the fixed M2b context with polynomially bounded
 carrier accounting.  No NP-hardness claim is made — the 3SAT reduction
-correctness (`reduce_correct`) is Phase 2's Task 12 and does not yet exist.
+correctness (`reduce_correct`) was Phase 2's Task 12 and did not yet exist
+when this record was written; it has since landed
+(`lean/Lara/Complexity/Reduction.lean`, see `theory-m2b-complexity.md`).
 Nothing in this record merges the proved universal quadratic query lower bound
 with the existential worst-case quartic family; neither bound is part of this gate.
 

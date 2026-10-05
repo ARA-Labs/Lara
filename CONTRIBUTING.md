@@ -9,7 +9,7 @@ Two toolchains:
 
 - **Haskell** (checker, CLI, tests): GHC + cabal via
   [ghcup](https://www.haskell.org/ghcup/); developed on GHC 9.14.1 /
-  cabal 3.16.
+  cabal 3.16; CI and the release binaries build with GHC 9.6.
 - **Lean 4** (mechanized reference semantics): [elan](https://github.com/leanprover/elan)
   with the toolchain pinned in [`lean/lean-toolchain`](lean/lean-toolchain).
 
@@ -21,11 +21,12 @@ cd lean && lake build    # proofs
 
 ## Verification gates
 
-The required `Haskell` CI workflow builds and tests the checker on every
-push. The Lean side — the build, the `AxCheck.lean` axiom audit, and the
-Haskell–Lean conformance gates — runs with `make lean-gate` and
-`make cross-check`, and on a PR in the optional Lean workflow when a reviewer
-adds the `lean` label ([scope decision](docs/ci-scope-decision.md)).
+The required `Haskell` workflow builds and tests the checker on every push
+to `main` and every PR into it. The Lean side runs outside it: `make lean-gate`
+(the build, the `AxCheck.lean` axiom audit, and the Lean examples) also runs on
+a PR in the optional Lean workflow when a reviewer adds the `lean` label, while
+`make cross-check` (the Haskell-Lean conformance gates) runs only locally
+([scope decision](docs/ci-scope-decision.md)).
 
 Before asking for review on any change that touches `lean/`, a wire contract,
 or a golden either side emits, run:

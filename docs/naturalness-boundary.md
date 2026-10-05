@@ -96,8 +96,8 @@ One constraint, and one clarification:
   — a suggested fix the tool applies, a generated prose form the author is meant
   to paste back — it is a layer-1 or layer-2 change and must be argued there.
 - **"Free" describes the prose, not the templates.** The rejection surface is
-  normative and pinned (`docs/rejection-surface.md`; surface grammar H.5 fixes
-  the eight `CertNd*` templates verbatim), and `scripts/differential.sh`
+  normative and pinned (`docs/rejection-surface.md`; surface grammar H.5 and I.2 fix
+  the nine `CertNd*` templates verbatim), and `scripts/differential.sh`
   byte-compares the two drivers' stdout and exit code. Improving a message is a
   surface change with a gate, not an unconstrained edit.
 

@@ -12,6 +12,15 @@ Per-module API documentation is not in `docs/`: it is generated from the
 source comments by `make docs` (Haddock for `src/`, doc-gen4 for `lean/`), and
 the `>>>` examples inside Haddock comments are run by `make doctest`.
 
+**Commit and tag anchors.** This repository's `main` starts from a fresh root
+at the v0.1.0 release; the development history before it is not included.
+Records written before the release cite commits, git objects, and tags of that
+history (the evaluation-freeze tags `m5-freeze-v1` through `m5-freeze-v6`, and
+`spec-v0.1`). They are kept as the provenance of each record, but they do not
+resolve here: the only tag in this repository is `v0.1.0`. The frozen content
+those anchors pinned is checked in, and its tree hashes are in
+[`m5-freeze-checklist.md`](m5-freeze-checklist.md).
+
 ## Entry points
 
 | Doc | What it is |
@@ -51,7 +60,12 @@ and [`localization-metric-decision.md`](localization-metric-decision.md)
 (mutation-benchmark contracts),
 [`ara-session-record-decision.md`](ara-session-record-decision.md) (the
 session-file schema, what `session_index.yaml` rows project from it, and why
-`logic_revisions` entries are append-only history).
+`logic_revisions` entries are append-only history),
+[`multi-artifact-composition-decision.md`](multi-artifact-composition-decision.md)
+(the `.laramap` contract: linking members and generating cross-paper attacks),
+[`non-empirical-worlds-decision.md`](non-empirical-worlds-decision.md)
+(non-empirical settings), and
+[`ci-scope-decision.md`](ci-scope-decision.md) (what the required CI gates).
 
 ## Plans, references, and operational notes
 
@@ -107,7 +121,3 @@ side result
   points above).
 - `references/` — long-form reading notes on external sources feeding the
   related-work and annotation vocabulary.
-- `slides/` — presentation material: a project keynote and a teaching deck
-  on argumentation background.
-- `superpowers/` — dated implementation plans and specs produced by skill
-  workflows for individual features.

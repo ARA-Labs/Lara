@@ -104,6 +104,10 @@ artifacts aimed at the design question above:
 The E1–E3 / R1–R3 examples and strict-certificate S1 now live alongside A and B
 as sibling per-example directories (`examples/E1/`, …, `examples/S1/`), each
 with the same `example.lara` + policy + `example.core.sexp` layout.
+`R2-sort/` is the signature negative beside them: an ill-sorted
+`num_lt(sys_new, accuracy)` under `ord-v1`'s declared `pred num_lt(Num, Num)`,
+rejected as `R2` at the signature stage rather than surfacing later as an
+`ord@1` replay failure.
 
 - **A** overlaps E3 (`defeat-suite`) on attack coverage but foregrounds *self-attack from a single
   artifact* — the specific intuition to dislodge. Its `distribution_shift` undercut is literally the

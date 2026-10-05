@@ -306,6 +306,19 @@ the same `justified`, `defeated`, `contested`, or `gap` status.
 5. Claim aggregation is a deterministic function of corresponding support sets, equal holes, and
    corresponding labels. Statuses are equal. QED.
 
+**Mechanized form (Model A).** Step 2 does not hold as stated. Replacing every
+certificate by one `certified` marker can collapse distinct subterms, which
+merges occurrences and adds subargument-closure edges, so the one-marker
+`eraseCert` is not a bijection in general. The mechanized theorem
+(`Erase.backend_replacement`, `lean/Lara/Erase.lean`) relabels assurances by one
+uniform *injective* map instead: a source step certifies to one payload per
+backend, so a shared subterm carries the same payload everywhere and distinct
+certificates stay distinct. Under that relabel the two programs compile to the
+same AF and every claim status agrees.
+`EraseTransport.backend_replacement_transport` constructs the relabeled
+well-checked program. The conclusion above stands; only the erasure in step 2
+changes.
+
 This theorem is the formal reason not to make LP syntax foundational to **claim-status semantics**:
 status cannot distinguish LP from another adapter with the same strict acceptance profile. Replay,
 certificate-size, backend-theory, and dependency reports may differ and remain visible for audit.

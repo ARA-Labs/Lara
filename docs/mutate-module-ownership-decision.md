@@ -1,7 +1,8 @@
 # Decision: module ownership in the `Lara.Mutate` namespace
 
 _Records the settled ownership contract for the seeded mutation generators
-after the seven-module split. The implementation plan that
+after the seven-module split (the namespace has since grown to sixteen
+modules; the graph and tables below cover all of them). The implementation plan that
 produced the split was deleted when the work landed, per the `plans/` rule; this
 record carries its durable decisions — which module owns what, what the root may
 and may not re-export, and which alternatives were rejected. Companion
@@ -12,7 +13,7 @@ code)._
 Background for cold readers: `Lara.Mutate` generates *mutants* (deliberately
 broken variants of valid corpus units) so the evaluation can measure that the
 checker rejects each seeded defect with the right rejection class at the right
-location. This record fixes which of its seven modules owns what.
+location. This record fixes which of its modules owns what.
 
 ## The namespace
 
@@ -25,7 +26,7 @@ Lara.Mutate                 core; imports only Outcome
 ├── Seed ─────────────────→ core
 ├── Sites ────────────────→ core + Sites.Cert + Sites.Conflict + Sites.Nav
 │   ├── Sites.Cert ───────→ core + Sites.Nav
-│   ├── Sites.Conflict ───→ core (no sibling; mirrors the checker)
+│   ├── Sites.Conflict ───→ core + Sites.Nav (mirrors the checker)
 │   ├── Sites.Localize ───→ core + Sites + Sites.Nav (imports the facade; not re-exported)
 │   └── Sites.Nav ────────→ (no sibling; structural only)
 ├── Suite ────────────────→ core + Seed + Sites + Sites.Localize + Sorts
@@ -34,7 +35,7 @@ Lara.Mutate                 core; imports only Outcome
 ├── Accept ───────────────→ core + Accept.Ops + Accept.Build
 │   ├── Accept.Ops ───────→ core + Accept.Build
 │   └── Accept.Build ─────→ core
-└── Sorts ────────────────→ core
+└── Sorts ────────────────→ Sites.Nav (not core)
 ```
 
 The graph is acyclic **because nothing the root imports imports it back**.
@@ -46,7 +47,7 @@ property of the whole arrangement, and it is what D1 below protects.
 
 | Module | Exported names |
 |---|---|
-| `Lara.Mutate` | `MutationOp(..)`, `opName`, `OpFamily(..)`, `opFamily`, `familyText`, `codecDiagnostics`, `Mutant(..)`, `mutantFileName`, `mutationSeed`, `mutationBases`, plus `Expected(..)`, `expectedText`, `parseExpected`, `statusText` re-exported from `Outcome` |
+| `Lara.Mutate` | `MutationOp(..)`, `opName`, `OpFamily(..)`, `opFamily`, `familyText`, `parseFamily`, `codecDiagnostics`, `Mutant(..)`, `mutantFileName`, `mutationSeed`, `mutationBases`, plus `Expected(..)`, `expectedText`, `parseExpected`, `statusText` re-exported from `Outcome` |
 | `Lara.Mutate.Outcome` (internal) | `Expected(..)`, `expectedText`, `parseExpected`, `statusText` |
 | `Lara.Mutate.Manifest` | `mutantPath`, `manifestFor` |
 | `Lara.Mutate.Seed` (internal) | `streamForKey`, `streamFor`, `pickWithStream`, `pickSome` |
@@ -54,13 +55,17 @@ property of the whole arrangement, and it is what D1 below protects.
 | `Lara.Mutate.Sites.Cert` (internal) | `certTheorySwapSites`, `certPayloadSites`, `certWrongFractionSites`, `bumpWitness` |
 | `Lara.Mutate.Sites.Conflict` (internal) | `dropCoveringAttackSites` |
 | `Lara.Mutate.Sites.Localize` (internal) | `retractRuleSites`, `twinSupportDefectSites`, `crossStageDefectSites` |
-| `Lara.Mutate.Sites.Nav` (internal) | `occurrences`, `rewriteAt`, `rewriteArg`, `ruleSites`, `leafSites`, `ruleOf`, `inequivLeaf` |
-| `Lara.Mutate.Suite` | `mutantsForBase`, `corpusBudget`, `corpusMutants`, `corpusSweepReport`, `dropCoveringAttackSites` (re-export, tests only) |
+| `Lara.Mutate.Sites.Nav` (internal) | `CheckedIx(..)`, `DeclaredIx(..)`, `occurrences`, `rewriteAt`, `rewriteArg`, `setAttackAt`, `dropAttackAt`, `argSites`, `ruleSites`, `leafSites`, `attackSites`, `ruleOf`, `inequivLeaf` |
+| `Lara.Mutate.Suite` | `mutantsForBase`, `corpusBudget`, `corpusMutants`, `corpusSweepReport`, `SiteOp(..)`, `siteOps`, `dropCoveringAttackSites` (re-export, tests only) |
 | `Lara.Mutate.Codec` | `codecMutantsForBase` |
 | `Lara.Mutate.Cycle` | `cycleMutants` |
+| `Lara.Mutate.Accept` | `acceptMutants`, `acceptStructureOk` |
+| `Lara.Mutate.Accept.Ops` (internal) | `opDropSupport`, `opAttachUndercut`, `opQuarantineAttacker`, `opAttachUndermine`, `opAttachRebutCycle`, `opAttachReinstate` |
+| `Lara.Mutate.Accept.Build` (internal) | `acceptMutant`, `acceptMutantBlocked`, `acceptMutantWith`, `theQuery`, `theSupport`, `argConclusion`, `exceptionProp`, `firstPremiseLeaf`, `attackerArg`, `defenderArg`, `groundPat`, `propArgs`, `propPred`, `attackEndpoints` |
+| `Lara.Mutate.Sorts` | `undeclaredPredSites`, `wrongPredAritySites`, `wrongArgSortSites`, `undeclaredConSites`, `wrongThetaSortSites`, `outOfScopeVarSites`, `duplicateSortSites`, `shadowBaseSortSites`, `duplicateConSites`, `duplicatePredSites`, `conUndeclaredSortSites`, `predUndeclaredSortSites` |
 
 `Outcome`, `Seed`, `Sites`, `Sites.Cert`, `Sites.Conflict`, `Sites.Localize`,
-and `Sites.Nav` are in `other-modules`: their names had to become
+`Sites.Nav`, `Accept.Ops`, and `Accept.Build` are in `other-modules`: their names had to become
 module-visible so `Suite`, `Cycle`, `Sites`, and the root could consume them,
 but keeping them out of `exposed-modules` means the package's public surface
 does not grow — with one deliberate exception. The
@@ -71,9 +76,10 @@ sees only the seeded subset and the rendered bytes. Since `Sites.Conflict` is an
 `other-module`, the name is re-exported from `Suite`, which *is* exposed. That
 grows the public API by exactly one name, recorded here rather than left to be
 discovered. Any further such re-export should be weighed against a test-only
-`.Internal` module instead. `Sites` is the only importer of its
-three children, and it re-exports their enumerators, so `Suite` still sees one
-module. `splitMix64`
+`.Internal` module instead. `Sites` is the only importer of `Sites.Cert` and
+`Sites.Conflict`, and it re-exports their enumerators, so `Suite` sees one
+module for them. `Sites.Nav` is the shared navigation layer: `Sites.Cert`,
+`Sites.Conflict`, `Sites.Localize`, and `Sorts` import it too. `splitMix64`
 and `stringSeed` stay private inside `Seed` — the old "exposed for tests"
 heading was stale, no test or script imported either name.
 
@@ -85,14 +91,18 @@ heading was stale, no test or script imported either name.
 | `Outcome` | `Lara.AST` |
 | `Seed` | `Data.Bits`, `Data.Char`, `Data.Word`, `Lara.Mutate` |
 | `Manifest` | `Lara.Diagnostics`, `Lara.Mutate` |
-| `Sites` | `Data.List`, `Lara.AST`, `Lara.Diagnostics`, `Lara.Prop`, `Lara.Sigma`, `Lara.SupportTerm`, `Lara.Mutate`, `Lara.Mutate.Sites.Cert`, `Lara.Mutate.Sites.Conflict`, `Lara.Mutate.Sites.Nav` |
-| `Sites.Cert` | `Data.Ratio`, `Lara.AST`, `Lara.Diagnostics`, `Lara.Strict`, `Lara.Strict.Cell`, `Lara.Strict.RA`, `Lara.Mutate`, `Lara.Mutate.Sites.Nav` |
-| `Sites.Conflict` | `Lara.AST`, `Lara.Attack`, `Lara.Blocked`, `Lara.Check`, `Lara.Compile`, `Lara.Diagnostics`, `Lara.Driver`, `Lara.Policy`, `Lara.Prop`, `Lara.SupportTerm`, `Lara.Mutate` |
+| `Sites` | `Data.List`, `Lara.AST`, `Lara.Blocked`, `Lara.Diagnostics`, `Lara.Prop`, `Lara.Sigma`, `Lara.SupportTerm`, `Lara.Mutate`, `Lara.Mutate.Sites.Cert`, `Lara.Mutate.Sites.Conflict`, `Lara.Mutate.Sites.Nav` |
+| `Sites.Cert` | `Data.Ratio`, `Lara.AST`, `Lara.Blocked`, `Lara.Diagnostics`, `Lara.Strict`, `Lara.Strict.Cell`, `Lara.Strict.RA`, `Lara.Mutate`, `Lara.Mutate.Sites.Nav` |
+| `Sites.Conflict` | `Lara.AST`, `Lara.Attack`, `Lara.Blocked`, `Lara.Check`, `Lara.Compile`, `Lara.Diagnostics`, `Lara.Driver`, `Lara.Policy`, `Lara.Prop`, `Lara.SupportTerm`, `Lara.Mutate`, `Lara.Mutate.Sites.Nav` |
 | `Sites.Localize` | `Data.List`, `Data.List.NonEmpty`, `Data.Maybe`, `Lara.AST`, `Lara.Blocked`, `Lara.Diagnostics`, `Lara.Policy`, `Lara.Sigma.WellSorted`, `Lara.Mutate`, `Lara.Mutate.Sites`, `Lara.Mutate.Sites.Nav` |
-| `Sites.Nav` | `Data.List`, `Lara.AST`, `Lara.Prop` |
+| `Sites.Nav` | `Data.List`, `Lara.AST`, `Lara.Blocked`, `Lara.Prop` |
 | `Suite` | `Lara.AST`, `Lara.Diagnostics`, `Lara.Replay`, `Lara.Wire`, `Lara.Mutate`, `Lara.Mutate.Seed`, `Lara.Mutate.Sites`, `Lara.Mutate.Sites.Localize`, `Lara.Mutate.Sorts` |
 | `Codec` | `Lara.Strict`, `Lara.Wire`, `Lara.Mutate` |
 | `Cycle` | `Lara.AST`, `Lara.Prop`, `Lara.Replay`, `Lara.Sigma`, `Lara.Wire`, `Lara.Mutate`, `Lara.Mutate.Seed` |
+| `Accept` | `Data.List`, `Lara.AST`, `Lara.Driver`, `Lara.Replay`, `Lara.Wire`, `Lara.Mutate`, `Lara.Mutate.Accept.Build`, `Lara.Mutate.Accept.Ops` |
+| `Accept.Ops` | `Lara.AST`, `Lara.Prop`, `Lara.Replay`, `Lara.Sigma`, `Lara.Mutate`, `Lara.Mutate.Accept.Build` |
+| `Accept.Build` | `Data.List`, `Lara.AST`, `Lara.Prop`, `Lara.Replay`, `Lara.SupportTerm`, `Lara.Wire`, `Lara.Mutate` |
+| `Sorts` | `Lara.AST`, `Lara.Blocked`, `Lara.Diagnostics`, `Lara.Prop`, `Lara.Sigma`, `Lara.Sigma.WellSorted`, `Lara.Mutate.Sites.Nav` |
 
 ## D1 — Hard split, not a re-export façade
 

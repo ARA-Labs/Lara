@@ -27,12 +27,12 @@ below records the current state atop a stack of dated updates._
 **Milestone update (2026-08-24): no milestone is open in this repository.** M7
 (the paper package) was closed as completed — paper-writing and
 submission-package work is tracked in the paper repository, not here. The
-milestone spine above is now a closed record, not a worklist. Remaining
-engineering work is the open GitHub issues, chiefly the
-`refreeze-batch` evaluation-suite extensions,
-which landed together and were frozen by the shared refreeze cycle as
-**`m5-freeze-v5`** — 541 mutants + 60 corpus units = 601 measured inputs. The
-protocol and every anchor are in `docs/m5-freeze-checklist.md`.
+milestone spine above is now a closed record, not a worklist. The
+`refreeze-batch` evaluation-suite extensions landed together and were frozen by
+the shared refreeze cycle as **`m5-freeze-v5`** (541 mutants + 60 corpus units
+= 601 measured inputs); the later v6 snapshot adds the S2 and S9 mutation bases
+(595 mutants + 60 corpus units = 655 measured inputs). The protocol and every
+anchor are in `docs/m5-freeze-checklist.md`.
 
 **Surface update (2026-08-22):** `lara-syntax@0.9` adds named `nd@1` proof
 terms as a presentation-only lowering to the unchanged de Bruijn kernel;
@@ -52,8 +52,8 @@ spellings and adds none — and `@0.8` lets a certificate premise reference cite
 the citing rule's declared premise label, so the core and the wire are
 untouched; `@0.9` adds named `nd@1` proof terms lowered to the same de Bruijn
 kernel and `@0.10` adds source-authored formula annotations for them, again
-without a core or wire change), and the deterministic evaluation corpus is frozen at tag
-`m5-freeze-v5` (`m5-freeze-checklist.md`). Layers added beyond the M3 spine:
+without a core or wire change), and the deterministic evaluation corpus is frozen at the
+v6 snapshot (`m5-freeze-checklist.md`). Layers added beyond the M3 spine:
 `Lara.Admission` (the `.lara` source-boundary admission judgment,
 `policy-admission-calculus-decision.md`), the `ord@1`, `ra@1`, and `insp@1`
 strict backends beside `nd@1`, `Lara.Mutate` + `Lara.Measure` (the seeded mutation suite and the
@@ -151,7 +151,7 @@ in parallel with M0 without violating the constraint:
 
 These are the only Haskell allowed to start before M0 exits. Everything else waits.
 
-## 2. M0 — semantic corpus study (the current work)
+## 2. M0 — semantic corpus study (closed)
 
 Exit criteria:
 
@@ -165,8 +165,8 @@ Exit criteria:
   whole reasoning steps as opaque leaves.
 
 M0 is a **data/annotation task, not a coding task.** Its deliverable is the answer set for open
-questions #2/#3/#5/#7 (§6's decision gates), which unlocks the module backlog below. It has no code
-dependency and should start immediately.
+questions #2/#3/#5/#7 (§6's decision gates), which unlocks the module backlog below. It had no code
+dependency, so it ran first.
 
 ## 3. Post-corpus Haskell build order (the M3 spine)
 
@@ -246,4 +246,5 @@ Property/golden/mutation/differential tests are **conformance evidence, not soun
 | open question #8 — TCB + Lean/Rocq | mechanization track start | before M1 freeze |
 | open question #7 — behavioral routing | TL-1 (optional) | corpus sampling |
 
-Carve-out layers 1–2 clear no gate — they are frozen and may start now.
+Carve-out layers 1–2 cleared no gate. Every gate above is resolved; the table is kept as the
+record of what blocked what.

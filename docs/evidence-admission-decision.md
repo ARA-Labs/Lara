@@ -4,7 +4,8 @@ _Status: gated design record, 2026-08-06. This document freezes the design
 boundary and the paper claim for byte-level evidence admission, per the
 2026-08-26 scope decision. It authorizes no implementation: the layer is
 deferred, blocked on the corpus inventory gate below plus explicit researcher
-approval. Nothing here is part of the frozen `lara-core@0.1` specification,
+approval. Nothing here is part of the frozen core specification (`lara-core@0.1` when
+this was recorded, `lara-core@0.2` now),
 and `docs/spec.md` intentionally does not specify this layer._
 
 Vocabulary for cold readers: a *leaf* is a declared piece of evidence; a
@@ -129,8 +130,9 @@ evidence-checked identity, and the two identities are reported separately.
 - **`PEIncompleteArgument` is the v0.1 contract, not a bug.** A submitted
   argument with an open mandatory obligation rejects; an accepted gap is
   represented as *no submitted argument* (`corpus-units/LOWERING.md`).
-  Accepting partial alternatives is a `lara-core@0.2` design with a full
-  refreeze, outside this record.
+  Accepting partial alternatives would be a later core version with a full
+  refreeze, outside this record. (`lara-core@0.2` shipped as the many-sorted
+  signature, not this.)
 - **Quarantine is unavailability, not falsity.** No admission outcome
   creates an attack or directly sets a four-state status.
 - **Goal/attempt history stays outside the calculus.** The registration
@@ -157,7 +159,8 @@ combined-report bytes — an M5-scale refreeze.
 
 ## 8. Versioning
 
-`lara-core@0.1` — checker, wire grammar, fixtures, proof statements — is
-preserved unchanged. Evidence admission, if built, is an independently
+The frozen core (`lara-core@0.1` when this was recorded; `lara-core@0.2`, the
+many-sorted signature, since) — checker, wire grammar, fixtures, proof
+statements — is preserved unchanged. Evidence admission, if built, is an independently
 versioned source layer (`lara-evidence@0.1`) so concrete checker evolution
 never silently changes the argumentation calculus.

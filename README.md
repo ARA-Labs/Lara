@@ -20,8 +20,7 @@ claim the checker reports one of four statuses, and why:
 
 - **justified** — the claim has a complete supporting argument that survives
   every declared attack;
-- **gap** — the argument is incomplete, and the checker names exactly which
-  piece is missing;
+- **gap** — no complete supporting argument has been declared for the claim;
 - **defeated** — an argument existed, but something also declared in the file
   knocks it down;
 - **contested** — support and attack are in a standoff, so neither side wins.
@@ -61,17 +60,33 @@ you declare:
   own limitations.
 
 An untrusted producer (human or LLM) writes the file; a small trusted checker
-validates it. Two things the checker deliberately does **not** do:
+validates it. Lara verifies the numerical consequences of the declared
+evidence and checks the arguments that connect that evidence to claims. Both
+checks are conditional on the reported measurements and on how they are bound
+to their sources: Lara does not rerun the experiment, and it does not establish
+that a measurement is true. If the file says "the experiment reported 0.74,"
+Lara takes 0.74 as given, records where it came from, and checks everything
+built on it.
 
-- **It does not judge whether the evidence is true.** If the file says "the
-  experiment reported 0.74," Lara takes that as given, while recording where
-  the number came from. What it checks is whether the argument built on the
-  evidence is well formed, complete relative to the declared policy, and
-  actually yields the reported status. It audits reasoning, not reality.
-- **It does not search for missing pieces or guess.** Everything is what the
-  producer wrote down; the value is that "what you wrote down" is now
-  something a machine can check, and honest incompleteness (**gap**) is a
-  located, first-class outcome rather than a rejection.
+| | Checked by Lara | Taken as given |
+|---|---|---|
+| **Arithmetic on results** | Comparisons and calculations over declared result cells, recomputed exactly by a strict backend: `ord@1` re-checks an ordering such as `0.71 < 0.74`, `ra@1` recomputes a relative drop. The certificate must cite the premise cells it computes on. | The reported values themselves |
+| **Results to claim** | The argument from results to an empirical claim is well formed under the declared, versioned policy, answers that policy's critical questions, and survives every declared attack, including an attack on whether two results are comparable at all | That the policy's reasoning schemes and critical questions suit the field |
+| **Evidence** | Each leaf declares its kind, provenance, and source references; the policy can reject or quarantine leaves by kind and provenance | Where a measurement came from, that it was extracted faithfully from the raw evidence, that the evaluator was correct, and that the experiment reproduces |
+| **Claim text** | The formal spelling of each claim | That the formal spelling says what the natural-language text says; the claim's `binding` records who vouched for that |
+
+[`examples/S4/`](examples/S4/) shows the split. `ord@1` certifies
+`num_lt(0.71, 0.74)`, which stays **justified**, while an audit finding that
+the two accuracy cells came from different evaluation settings **defeats** the
+claim that one system is better. [`examples/S5/`](examples/S5/) makes the same
+comparison on perplexity, where lower is better: the metric direction declared
+in the policy selects `num_lt(28.4, 31.6)` as the goal, and both the
+arithmetic and the comparative claim are **justified**.
+
+The checker also does not search for missing pieces or guess. Everything is
+what the producer wrote down; the value is that "what you wrote down" is now
+something a machine can check, and a claim with no complete argument is
+reported as **gap**, a first-class outcome rather than a rejection.
 
 When claims, evidence, and dead ends are explicit objects, the *support* of
 each claim becomes something a small trusted kernel can type, compile, and
@@ -128,7 +143,7 @@ arg s1 : supports(c2) by lt_recheck from [base, ours]
   assurance = cert(ord@1, sha256:empv3-t0, (ordcmp (prem base) (prem ours)))
 
 # A defeasible step: the scheme's critical questions must each be
-# discharged by a declared leaf, or reported as located holes.
+# discharged by a declared leaf.
 arg a1 : supports(c1) by controlled_experiment from [e1]
   discharge randomization     with e2
   discharge adequate_power    with e3
@@ -145,8 +160,9 @@ status c2
 Arguments come in two strengths. A *defeasible* step like `a1` ("the
 experiment suggests the method works") must answer every critical question its
 reasoning scheme requires (was it randomized, was the sample adequate, does
-it generalize), either with a declared piece of evidence or by admitting the
-answer is missing. A *strict* step like `s1` ("0.71 is less than 0.74") must
+it generalize) with a declared piece of evidence. An argument that leaves a
+required question open is rejected, so an author who cannot answer one leaves
+the argument out, and the claim reports **gap**. A *strict* step like `s1` ("0.71 is less than 0.74") must
 instead carry a certificate that a small dedicated backend re-checks from
 scratch: the checker does not trust the author's arithmetic, it redoes it.
 
@@ -176,7 +192,7 @@ own limitations note, `d1`, undermines the experiment argument `a1` and
 nothing knocks `d1` down). Run 1 of the same example
 ([`run1/`](examples/running-example/run1/)) omits the leaf that discharges
 external validity: no complete support argument for `c1` can be declared, and
-the verdict reports **gap**, naming the missing piece.
+the verdict reports **gap**.
 
 One artifact is one paper, and a **map** is several of them. A `.laramap`
 manifest names independently authored, independently checkable `.lara` members
@@ -191,8 +207,8 @@ could. The contract is in
 [`docs/multi-artifact-composition-decision.md`](docs/multi-artifact-composition-decision.md).
 
 More worked examples, each a self-contained directory with its surface
-artifact, co-located policy, derived wire anchor, and expected verdict, are
-indexed in [`examples/README.md`](examples/README.md). For a prose-first
+artifact and co-located policy (and, for single-artifact examples, a derived
+wire anchor and expected verdict), are indexed in [`examples/README.md`](examples/README.md). For a prose-first
 reading, the demo write-ups reconstruct checked artifacts as a
 [paper/review/rebuttal exchange](docs/demos/d1-rebuttal-replay.md),
 [mechanical review comments](docs/demos/d2-mechanical-reviewer.md),
@@ -252,7 +268,7 @@ lara check <file.lara>
 ```
 
 To build from source, install GHC and cabal via
-[ghcup](https://www.haskell.org/ghcup/) (developed on GHC 9.14.1 / cabal 3.16):
+[ghcup](https://www.haskell.org/ghcup/) (developed on GHC 9.14.1 / cabal 3.16; CI and the release binaries use GHC 9.6):
 
 ```sh
 cabal build all                          # library + CLI
@@ -273,10 +289,11 @@ Lean mechanization (elan / lean / lake on `PATH`; toolchain pinned in
 cd lean && lake build
 ```
 
-The required Haskell workflow gates the checker on every push. The Lean side — the build, the
-`AxCheck.lean` axiom audit, and the Haskell-Lean conformance gates — runs with
-`make lean-gate` and `make cross-check`, and on a PR in the optional Lean
-workflow when a reviewer adds the `lean` label
+The required `Haskell` workflow builds and tests the checker on every push
+to `main` and every PR into it. The Lean side runs outside it: `make lean-gate`
+(the build, the `AxCheck.lean` axiom audit, and the Lean examples) also runs on
+a PR in the optional Lean workflow when a reviewer adds the `lean` label, while
+`make cross-check` (the Haskell-Lean conformance gates) runs only locally
 ([why](docs/ci-scope-decision.md)).
 
 ## Syntax versions
@@ -313,7 +330,7 @@ Start with the [documentation index](docs/README.md) for reading paths and theor
 | [`docs/multi-artifact-composition-decision.md`](docs/multi-artifact-composition-decision.md) | The `.laramap` **map**: what composing independently checkable artifacts means, the manifest and composite-verdict grammars, why a map is a recheck rather than a build, and what v1 refuses |
 | [`docs/substrate-decision.md`](docs/substrate-decision.md) | Why the core is Haskell and the front-end Python |
 | [`docs/mechanization-plan.md`](docs/mechanization-plan.md), [`lean/README.md`](lean/README.md) | The Lean 4 development: what is mechanized, per-result pointers |
-| [`docs/performance.md`](docs/performance.md) | What the checker-performance bench measures, how to run it, and a dated snapshot (checking a corpus unit costs ~200 µs; one pass over all 564 harness records, under 200 ms) |
+| [`docs/performance.md`](docs/performance.md) | What the checker-performance bench measures, how to run it, and dated snapshots from a retired harness, kept as upper bounds |
 | [`docs/engineering-plan.md`](docs/engineering-plan.md) | The engineering plan: build order and the module dependency graph |
 | [`m0/annotation-summary.md`](m0/annotation-summary.md) | The semantic corpus study that froze the scheme vocabulary, leaf grain, adapter portfolio, and defeat conventions |
 | [`examples/README.md`](examples/README.md) | Index of the worked examples (A/B, E-series, R-series, S-series, running example, and the D3 agreement map in both its single-file and four-artifact forms) |

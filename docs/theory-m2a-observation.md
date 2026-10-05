@@ -73,8 +73,8 @@ and its characterization (`mem_subseqs`, `sublist_ext`, `subseqs_ext`,
 Core Lean at `leanprover/lean4:v4.32.0` has no `List.sublists`, and this project
 carries no Mathlib dependency today, so the module is a hand-rolled stand-in for
 Mathlib's `List.sublists`. That is a statement about the current build, not a
-closed door: `lean/lakefile.toml` records Mathlib as a planned dependency for
-result 5, and a later milestone that takes it on could replace this module. See
+closed door: result 5, once the planned reason for Mathlib, was proved in core
+Lean 4, but a later milestone that takes Mathlib on could replace this module. See
 §10, whose first follow-up needs exactly that machinery. `candidates` stays in
 `Lara/Semantics.lean` because it takes an `AF`.
 

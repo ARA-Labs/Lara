@@ -88,7 +88,8 @@ from `2026-07-27_001` ends "… rather than a voting tie, consistent with the N+
 frame.", while the `before:` in `2026-09-11_002` ends "… The production Lean
 driver now uses `canonNum`, and the numeric/multi-blocked differential fixture
 prevents that defect from recurring." The claim changed between the two
-sessions and nobody went back to update the July entry. Every existing
+sessions and nobody went back to update the July entry. Every existing entry
+stays as it was written.
 The append-only reading is the one the artifact already follows. Adopting the
 other reading would mean going back and updating entries like this one.
 
