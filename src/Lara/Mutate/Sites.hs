@@ -74,7 +74,7 @@ import Lara.Blocked (prune, pruneChecked)
 import Lara.Diagnostics (Constituent (..))
 import Lara.Prop (equiv)
 import Lara.Sigma (declarePred)
-import Lara.SupportTerm (instAPat, instAPats)
+import Lara.SupportTerm (instAPat, instAPats, openSites)
 
 import Lara.Mutate (Expected (..))
 import Lara.Mutate.Sites.Cert
@@ -86,9 +86,11 @@ import Lara.Mutate.Sites.Conflict (dropCoveringAttackSites)
 import Lara.Mutate.Sites.Nav
   ( CheckedIx (..)
   , DeclaredIx (..)
+  , argSites
   , attackSites
   , inequivLeaf
   , leafSites
+  , occurrences
   , ruleOf
   , ruleSites
   , rewriteArg
@@ -209,14 +211,19 @@ openObligationSites u =
 -- __declared__ index, the space hole rows are reported in. Only mandatory
 -- discharges are sites: holing an optional question's discharge contributes
 -- no obligation ('Lara.SupportTerm.openMandatory') and the argument would
--- stay complete.
+-- stay complete. Only complete arguments are sites: the operator seeds the
+-- defect that turns a complete argument into a hole, so an argument that is
+-- already a located hole in the base (a re-lowered corpus unit, issue #15)
+-- would carry pre-existing obligations besides the seeded one.
 holeObligationSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
 holeObligationSites u =
   [ ( ExpectLocatedHole
     , CArgument (declaredIx di)
     , rewriteArg di (rewriteAt pos (holeDischarge q))
     )
-  | (_, di, pos, SRule rn _ _ d _ _) <- ruleSites pruned
+  | (_, di, w) <- argSites pruned
+  , null (openSites (ruleOf checked) w)
+  , (pos, SRule rn _ _ d _ _) <- occurrences w
   , Just r <- [ruleOf checked rn]
   , (q, _) <- take 1 [entry | entry@(q, _) <- d, mandatoryIn r q]
   ]
