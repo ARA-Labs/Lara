@@ -182,9 +182,13 @@ Since `lara-core@0.3` an accepted unit may also carry *located* holes
 `O ≠ []`. They are reported beside the framework and are not AF arguments, so
 `complete` still holds of every argument the framework contains; it no longer
 holds of every declared argument. They are not context holes either — no
-context fills them — and the linking, composition and contextual-equivalence
-results of this record stay stated over the hole-free `SideOk.support` domain
-(`Context/Link.lean`), where every declared argument is complete.
+context fills them. Since issue #13 the linking, composition and
+contextual-equivalence results of this record are stated over `SideOkHoles`
+(`Context/Link.lean`). That condition asks each declared argument only to
+type, so a side may carry located holes. `Admissible` carries such sides, and
+`Context/LinkHoles.lean` shows that the accepted link's holes and hole reports
+are the sides' own. The hole-free `SideOk` theorems are corollaries
+(`docs/located-gap-decision.md` D9).
 
 Consequence for the original closeout: M3's contextual-adequacy debt was
 discharged **partially**, with term-level holes retained.

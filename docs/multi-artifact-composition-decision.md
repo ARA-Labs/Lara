@@ -626,8 +626,10 @@ widened:
   containing that root, and such an argument inherits the hole's obligations
   and is itself a hole (located-gap D6), so it adds no edge; a generated
   undermine targets a leaf, which is never a hole;
-- the generator stays the one `Lara.Map.batch_checked` is proved about, over
-  the hole-free `SideOk` domain located-gap D9 keeps for linking results.
+- the generator stays the one `Lara.Map.batch_checked_holes` is proved about.
+  Since issue #13 that theorem takes members that may carry holes
+  (`SideOkHoles`, located-gap D9), and `batch_checked` is its hole-free
+  corollary.
 
 `Lara.Map.crossPairs_endpoints_complete` and its driver instance
 `Lara.Map.Driver.generatedAttacksOf_endpoints_complete` mechanize the
@@ -635,6 +637,23 @@ consequence: both endpoints of every generated attack type with an empty
 obligation set. A member's own *declared* attacks that touch a hole are
 transported unchanged and go through the ordinary checker (D8): typed, and
 inert when sourced at a hole.
+
+**What is proved about a map with holes (issue #13).** The driver's acceptance
+of a linked unit with holes is now covered by a composition theorem, not only
+by `checkUnit`. `Lara.Map.Driver.linkedUnitOf_checked_holes` accepts the Lean
+driver's linked unit whenever each member satisfies `SideOkHoles` in its own
+environment. `Lara.Map.Driver.generatedAttacksOf_live` reads
+`crossPairs_endpoints_complete` through the checker: every generated attack is
+compiled, and neither of its endpoints is a hole.
+`Lara.Map.Driver.linkedUnitOf_hole_report` says each hole of the accepted
+unit is some member's declaration. Any member that declares it gives it, in
+that member's own environment, exactly the reported conclusion and obligation
+set. The hole rows read their obligations from those records, so a row repeats
+the member's solo report: linking adds and drops no obligation.
+`Lara.Map.batch_member_hole_reported` gives the converse at the batch level,
+where every member hole is reported. These are statements about the accepted
+unit. The `holes` wire section, its order and its handle selection are
+unchanged, and the parity script still covers them.
 
 **No attack list on a hole row.** The solo verdict's hole row lists the attacks
 the hole sources by original attack declaration index. A map has no
@@ -850,8 +869,9 @@ preserves mtime.
 `lean/Lara/Map/Qualify.lean` (the rename's injectivity, its disjointness across
 aliases, and its transport through `HasSupport`, `HasAttack`, `CheckedProgram`,
 `edgeB`, `checkedAF`, `labelC` and `statusC`) and `lean/Lara/Map/Link.lean` (the
-N-member fold, proved to preserve `Lara.Context.SideOk`, closed through
-`Lara.Context.link_checked`, and with both of that theorem's hygiene premises
+N-member fold, proved to preserve `Lara.Context.SideOk` and, since issue #13,
+`Lara.Context.SideOkHoles`, closed through `Lara.Context.link_checked` and
+`Lara.Context.link_checked_holes`, and with both of that theorem's hygiene premises
 proved rather than assumed). The two are discharged from different things, and
 the difference matters: `foldHygiene_of_distinct_aliases` discharges
 `FoldHygiene` from **alias distinctness alone**, while

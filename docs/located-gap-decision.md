@@ -135,10 +135,32 @@ claim's formal, but where claims share an equivalent formal the id selection
 can miss alternatives that the core's conclusion-equivalence selection
 includes.
 
-**D9 — Composition results keep their hole-free domain.** Linking, composition
-and contextual-equivalence results stay stated over the existing hole-free
-`SideOk.support` premise (`lean/Lara/Context/Link.lean`). General acceptance
-and arbitrary-obligation transport are preserved. Possible-world status results
+**D9 — Composition results cover holes.** Linking, composition and
+contextual-equivalence results are stated over `SideOkHoles`
+(`lean/Lara/Context/Link.lean`, issue #13): each declared argument of a side
+must type, as a complete argument or as a hole. The hole-free `SideOk`
+theorems (`link_checked`, `link_accepted_raw`, `batch_checked`,
+`linkedUnitOf_checked`) are now corollaries. `link_checked_holes` accepts the
+link. `link_accepted_holes` (`lean/Lara/Context/LinkHoles.lean`) says what the
+accepted link is. Its AF arguments are the sides' merged complete arguments,
+and its holes are the sides' merged holes. Its compiled attacks are each side's
+live attacks, then the saturation. `link_classify`, `link_hole_report` and
+`link_side_hole_reported` show that a declaration keeps its side's
+classification, conclusion and obligation set. `link_hole_source_inert` (D4)
+and `link_shared_occurrence_edge` (D6) carry the attack rules through the link.
+`crossAtts_endpoints_complete` says the saturation never touches a hole.
+`Admissible` now takes `SideOkHoles` sides, so every congruence stated over it
+covers fragments and contexts with holes: backend replacement, registry swap,
+relational parametricity and `surface_directAF_link`. `obsGen_hole_blind`
+bounds what holes can change: two fragments with the same interface, the same
+complete arguments and the same live attacks are observed alike in every
+context admissible for both. Its live-attack premise is needed: deleting a
+hole together with an attack aimed inside it can remove the only cover of a
+conflict, so the link is rejected
+(`Lara.Examples.LinkHoles.hole_erasure_observable`). The map layer has
+matching statements: `batch_checked_holes`, `batch_hole_report` and
+`linkedUnitOf_hole_report`. General acceptance and arbitrary-obligation
+transport are preserved. Possible-world status results
 remain about complete support; they do not claim a correspondence between hole
 reports. The hole term ledger is part of the duplicate-world identity in both
 runtimes, so two worlds that differ only in their holes are not merged.
@@ -365,8 +387,9 @@ The located report is diagnostic data beside the unchanged status.
 ## 8. Non-goals and cost
 
 This record does not locate each open question at its nested rule occurrence
-(issue #16); a hole row names the argument and its obligation set. It does not
-extend linking or composition to units with holes (D9, issue #13), add in-place
+(issue #16); a hole row names the argument and its obligation set. Linking and
+composition were first left hole-free here; issue #13 extended them to units
+with holes (D9). This record does not add in-place
 discharge (D11, issue #14; atomic multi-edit completion is issue #11), or
 re-lower the frozen `corpus-units` to declare their incomplete arguments
 (`corpus-units/LOWERING.md`, issue #15).
