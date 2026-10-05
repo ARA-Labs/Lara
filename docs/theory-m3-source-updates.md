@@ -231,6 +231,17 @@ justified       | R tighten_public_justified_to_justified     | R tighten_public
 refuted         | U tighten_public_justified_source_justified | R tighten_public_defeated_to_defeated  | U tighten_public_defeated_not_contested | R tighten_public_defeated_to_gap  | R tighten_public_defeated_to_evidenceBlocked 
 both            | U tighten_public_justified_source_justified | R tighten_public_contested_to_defeated | R tighten_public_contested_to_contested | R tighten_public_contested_to_gap | R tighten_public_contested_to_evidenceBlocked
 gap             | U tighten_public_gap_fixed                  | U tighten_public_gap_fixed             | U tighten_public_gap_fixed              | R tighten_public_gap_to_gap       | U tighten_public_gap_fixed                   
+
+completion witnesses (atomic batches and in-place discharge)
+addInstance b alone | rejected missing-conflict | sequential_completion_fails
+addAttack b->a alone | rejected endpoint-not-declared | sequential_completion_fails
+atomic [addInstance b, addAttack b->a] | accepted | sequential_completion_fails
+atomic [addInstance b] | rejected missing-conflict; source kept | partial_batch_rejected
+atomic [addAttack b->a, addInstance b] | rejected at edit 0: endpoint-not-declared | batch_edits_checked_in_order
+atomic beside hole h | accepted; holes 1 -> 1, h kept | atomic_keeps_old_hole
+dischargeOpen h eps q1 | accepted; holes 1 -> 0; p gap -> justified | discharge_hole_becomes_node
+dischargeOpen h 0 q1 alone | rejected missing-conflict | discharge_needs_attack
+atomic [dischargeOpen h 0 q1, addAttack h->a] | accepted; holes 1 -> 0; q gap -> justified | discharge_needs_attack
 ```
 <!-- END GENERATED UPDATE MATRICES -->
 

@@ -402,6 +402,7 @@ import Lara.Examples.Realizability
 import Lara.Examples.BackendComposition
 import Lara.Examples.Semantics
 import Lara.Examples.Update
+import Lara.Examples.UpdateCompletion
 import Lara.ListRel
 import Lara.Context.Fragment
 import Lara.Context.Link

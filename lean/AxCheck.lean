@@ -67,6 +67,7 @@ import Lara.Update
 import Lara.Update.Discharge
 import Lara.Update.Completion
 import Lara.Examples.Update
+import Lara.Examples.UpdateCompletion
 import Lara.Invariants.Merge
 import Lara.Context.Fragment
 import Lara.Context.Link
@@ -1814,6 +1815,28 @@ outside the public audit surface. -/
 #print axioms Lara.Update.claimSupportFor_ne_nil_of_arg
 #print axioms Lara.Update.dischargeOpen_hole_becomes_node
 
+-- Completion fixtures (lean/Lara/Examples/UpdateCompletion.lean).
+#print axioms Lara.Examples.UpdateCompletion.stateWith
+#print axioms Lara.Examples.UpdateCompletion.coverAttack
+#print axioms Lara.Examples.UpdateCompletion.baseState
+#print axioms Lara.Examples.UpdateCompletion.completedState
+#print axioms Lara.Examples.UpdateCompletion.sequential_completion_fails
+#print axioms Lara.Examples.UpdateCompletion.completion_theorem_applies
+#print axioms Lara.Examples.UpdateCompletion.partial_batch_rejected
+#print axioms Lara.Examples.UpdateCompletion.batch_edits_checked_in_order
+#print axioms Lara.Examples.UpdateCompletion.holeState
+#print axioms Lara.Examples.UpdateCompletion.holeCompletedState
+#print axioms Lara.Examples.UpdateCompletion.atomic_keeps_old_hole
+#print axioms Lara.Examples.UpdateCompletion.gapState
+#print axioms Lara.Examples.UpdateCompletion.tMixDischarged
+#print axioms Lara.Examples.UpdateCompletion.gapDischargedState
+#print axioms Lara.Examples.UpdateCompletion.discharge_hole_becomes_node
+#print axioms Lara.Examples.UpdateCompletion.useState
+#print axioms Lara.Examples.UpdateCompletion.useCover
+#print axioms Lara.Examples.UpdateCompletion.tUseDischarged
+#print axioms Lara.Examples.UpdateCompletion.useDischargedState
+#print axioms Lara.Examples.UpdateCompletion.discharge_needs_attack
+#print axioms Lara.Examples.UpdateCompletion.completionWitnessReport
 
 /-! ### M3 — public transition API and matrix boundaries -/
 
