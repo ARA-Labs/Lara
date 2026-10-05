@@ -68,6 +68,14 @@
         "obligations": [
           "variance_reported"
         ],
+        "sites": [
+          {
+            "question": "variance_reported",
+            "at": [
+              "rule"
+            ]
+          }
+        ],
         "attacks": []
       }
     ]

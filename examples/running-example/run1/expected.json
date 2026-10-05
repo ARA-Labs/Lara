@@ -44,6 +44,14 @@
         "obligations": [
           "external_validity"
         ],
+        "sites": [
+          {
+            "question": "external_validity",
+            "at": [
+              "rule"
+            ]
+          }
+        ],
         "attacks": []
       }
     ]
