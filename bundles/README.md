@@ -31,10 +31,14 @@ bundle today is `bundles/walking-skeleton/` (§2).
   source binding; the §4.3 duplicate-report situation (one measurand cell
   reported in two places) is **logged in provenance only** — no implementation
   layer carries duplicate-report groups (issue #38).
-- **Hole lowering (verified against the TCB).** An argument with an open
-  mandatory critical question is a whole-unit checker **rejection**
-  (`Lara.Check.checkArguments` → `PEIncompleteArgument`, src/Lara/Check.hs;
-  see also the E2 header comment), not an accept-with-holes. The B1 gate
+- **Hole lowering (verified against the TCB at the B1 freeze).** Under
+  `lara-core@0.2`, the core this bundle was built against, an argument with an
+  open mandatory critical question was a whole-unit checker **rejection**
+  (`PEIncompleteArgument`), not an accept-with-holes. Since `lara-core@0.3`
+  such an argument is accepted as a located hole (spec §4.4,
+  `docs/located-gap-decision.md`); the frozen B1 lowering and its pinned
+  provenance strings below are unchanged, and re-lowering to declare the
+  incomplete argument is tracked in issue #15. The B1 gate
   requires the emitted `.lara` to be *accepted*. The elaborator therefore
   lowers an explicit hole (§11 task 4) by **not emitting the incomplete
   argument** — the E2 mechanism: the claim's complete-support set is empty and

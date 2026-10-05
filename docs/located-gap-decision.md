@@ -230,6 +230,29 @@ is a declaration position, not a node. Agreement between a hole's index and its
 id, and validity of its attack references, depend on the supplied input and its
 admission maps, so only a decoder that holds the input can check them.
 
+### Map layer (`map-verdict@2`)
+
+A multi-artifact map (spec §12) links its members into one unit and runs the
+ordinary checker on it, so a member's hole is a hole of the linked unit and the
+map accepts it. The composite verdict moved to `map-verdict@2` for this
+(`docs/multi-artifact-composition-decision.md` D14):
+
+- `nodes`, `labels` and `edges` share the AF index space; a node's index is
+  reached through the checked unit's AF-to-declaration map, never the linked
+  declaration position.
+- An optional, nonempty trailing `(holes (hole ALIAS ARG-ID (obligations ID+))+)`
+  section reports every handle whose linked argument is a hole, by member alias
+  and member-local argument id, with the exact obligations in core order, in
+  the same member-then-declaration order as `nodes`. It carries no index and no
+  attack list.
+- The cross-member saturation generates no attack sourced at or aimed at a hole
+  (D4, D6), and stays the generator the hole-free linking theorems are about
+  (D9); `Lara.Map.crossPairs_endpoints_complete` states it.
+
+D9's restriction is about the mechanized linking and composition results, which
+stay over hole-free sides; the map *driver* accepts linked units with holes,
+because acceptance is decided by `checkUnit` and not by those theorems.
+
 ## 5. Conservative reporting with holes
 
 Spec §4.3 publishes `evidence-blocked` for a queried claim whose complete
@@ -341,11 +364,12 @@ The located report is diagnostic data beside the unchanged status.
 
 ## 8. Non-goals and cost
 
-This record does not locate each open question at its nested rule occurrence;
-a hole row names the argument and its obligation set. It does not extend
-linking or composition to units with holes (D9), add in-place discharge (D11),
-or re-lower the frozen `corpus-units` to declare their incomplete arguments
-(`corpus-units/LOWERING.md`).
+This record does not locate each open question at its nested rule occurrence
+(issue #16); a hole row names the argument and its obligation set. It does not
+extend linking or composition to units with holes (D9, issue #13), add in-place
+discharge (D11, issue #14; atomic multi-edit completion is issue #11), or
+re-lower the frozen `corpus-units` to declare their incomplete arguments
+(`corpus-units/LOWERING.md`, issue #15).
 
 The version bump changes every committed verdict and check-input byte that
 carries the replay identity. The cutover therefore regenerates the mutation

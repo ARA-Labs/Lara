@@ -1849,11 +1849,40 @@ to the calculus — members are merged into one unit, cross-member attacks are c
 contraries, and that unit goes through the ordinary §8 pipeline, so a map can accept nothing a
 hand-written equivalent unit would not.
 
-**Two versioned schemas**, versioned independently of `lara-core@0.2`: `lara-map@1`, the declarative
-manifest; and `map-verdict@1`, the composite verdict, whose leading `(scope map)` marker keeps it
-distinguishable from a §10 `(verdict …)`, and whose statuses are the plain §8 four-state ones — a
-map refuses any member carrying a nonempty §4.3 admission or group-pruning audit, so
-`evidence-blocked` is unreachable by construction.
+**Two versioned schemas**, versioned independently of the core (now `lara-core@0.3`): `lara-map@1`,
+the declarative manifest; and `map-verdict@2`, the composite verdict, whose leading `(scope map)`
+marker keeps it distinguishable from a §10 `(verdict …)`, and whose statuses are the plain §8
+four-state ones — a map refuses any member carrying a nonempty §4.3 admission or group-pruning
+audit, so `evidence-blocked` is unreachable by construction.
+
+**The composite verdict (`map-verdict@2`).** The grammar is:
+
+```text
+MAP-VERDICT ::= (map-verdict@2 (scope map) (schema lara-map-verdict@2)
+                  (core lara-core@0.3) (policy POLICY-ID)
+                  (backends (backend BACKEND-ID VERSION)*)
+                  (members (member ALIAS PATH (artifact DIGEST))+)
+                  (nodes (node ALIAS ARG-ID NAT)*)
+                  (labels (NAT LABEL)*)
+                  (edges (NAT NAT)*)
+                  (statuses (status ALIAS CLAIM-NAME <atom> STATUS)*)
+                  MAP-HOLES?)
+MAP-HOLES   ::= (holes (hole ALIAS ARG-ID (obligations QUESTION-ID+))+)
+```
+
+Every `NAT` in `nodes`, `labels` and `edges` is an **AF index** of the linked unit: the three
+sections share one index space, which is not the linked declaration position once a member declares
+a located hole (§4.4), because a hole is declared but is never an AF node. `nodes` lists every
+`(member alias, member-local argument id)` handle whose linked argument is complete, in member order
+and then that member's declaration order, and covers every labelled index; a merged argument has one
+row per handle. `holes` lists every handle whose linked argument is a located hole, in the same
+handle order, with that hole's exact mandatory root obligations in core order (§4.4); it is omitted
+when the linked unit has no hole and is never present but empty. No handle appears in both sections.
+Holes are reported by member handle only: a hole has no AF index, and its linked declaration
+position is an artifact of the merge. The map's own cross-member saturation never generates an
+attack sourced at or aimed at a hole; a member's declared attacks touching one are carried into the
+linked unit and treated by §7.1 and §8 like any other (`docs/located-gap-decision.md` D4, D6).
+`map-verdict@1`, whose `nodes` used linked declaration positions, is refused.
 
 **Errors.** Map failures use their own versioned error sum with its own two-exit-code split
 (ill-formed map vs. checked-and-rejected map). No map fault is classified as a §10.1 R-code; where a
@@ -1865,6 +1894,9 @@ rejection unchanged.
 replay-identity, or golden byte, and no `Lara.Wire` encoder. The only core-side edit is two additive
 exports of an existing `Lara.Wire` production (§5's `<atom>` form), so `fixtures/`, `corpus/`,
 `corpus-units/`, and the differential goldens are bit-identical across this change.
+The move to `map-verdict@2` rides on the `lara-core@0.3` cutover and changes only the map's own
+goldens (`examples/agreement-map-multi/map.verdict.sexp` and `test/fixtures/map/**/map.verdict.sexp`);
+the manifest grammar and the parity envelope are unchanged.
 
 `docs/multi-artifact-composition-decision.md` is authoritative for this section and carries the
 detail that would rot if duplicated here: the two grammars, the shared-contract equality rules,

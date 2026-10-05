@@ -398,9 +398,9 @@ The checker also emits three named rejection kinds outside R1–R14. They are pa
 rejected any unit containing an argument that type-checks with an open mandatory obligation. Such an
 argument is now accepted as a *located hole* (spec §4.4): it stays out of the argumentation
 framework, the claim it alone supports reports `gap`, and the verdict's `holes` section names it.
-Its former anchor, `fixtures/corpus/reject-incomplete-argument.sexp` — one argument `a` whose rule
-leaves the mandatory question `q1` open, and one query `c` — is therefore an *accept* anchor: by
-the spec §4.3 verdict grammar its verdict is (wrapped here)
+Its former anchor, `fixtures/corpus/reject-incomplete-argument.sexp`, is renamed
+`fixtures/corpus/accept-located-hole.sexp` — one argument `a` whose rule leaves the mandatory
+question `q1` open, and one query `c`. Both drivers print (wrapped here)
 
 ```
 (verdict (replay-id …) accept (labels) (edges)
@@ -408,8 +408,9 @@ the spec §4.3 verdict grammar its verdict is (wrapped here)
   (holes (arg 0 a (obligations q1) (attacks))))
 ```
 
-with exit **0**. This output is *predicted* from the grammar, not yet verified live: it is
-re-verified against the binary when the fixtures are regenerated for `lara-core@0.3`. What did not
+with exit **0**, pinned byte for byte by `test/DifferentialSpec.hs` and `scripts/differential.sh`.
+`fixtures/corpus/hole-attack-inert.sexp` pins a hole's typed outgoing attack, listed on its row and
+contributing no edge. What did not
 move: R5 still rejects a question in neither the discharge map nor the open set `H`, and a hole's premises, discharges and outgoing attacks are still type-checked, so an
 ill-typed attack *from* a hole rejects with its R-class. Because the checker no longer stops at the
 first incomplete argument, a later support or attack defect in the same unit is reported instead of

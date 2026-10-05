@@ -246,7 +246,7 @@ examples/agreement-map-multi/
   paper-c/  …
   paper-d/  …
   map.core.sexp                   the map-check-input@1 parity envelope (derived)
-  map.verdict.sexp                the map-verdict@1 composite verdict (derived, golden)
+  map.verdict.sexp                the map-verdict@2 composite verdict (derived, golden)
 ```
 
 Each `paper-*/` directory is an ordinary paper artifact with its own declared

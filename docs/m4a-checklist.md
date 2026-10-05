@@ -207,7 +207,8 @@ A0 records these; it does not resolve them. Resolution owners are noted.
    gap as arising from an **open mandatory CQ** (`open external_validity`; spelled
    `open external_validity as o1` at the time, retired at `lara-syntax@0.7` — grammar Appendix F.3). The M4a plan
    (decision #8 / Task A2) re-words this: a declared argument with an open mandatory CQ is an
-   `IncompleteArgument` **rejection** (`Check.hs:179`), *not* a gap; the intended `gap` must instead come
+   `IncompleteArgument` **rejection** (`Check.hs:179`; retired at `lara-core@0.3`, which accepts it
+   as a located hole), *not* a gap; the intended `gap` must instead come
    from a claim with **empty complete support** (`statusC = Gap iff null claimSupport`,
    `Grounded.hs:127`), keeping `runUnit` unchanged. The "incomplete attempt" teaching moves to a
    Haskell-only `Lara.Reporting` `incompleteAlternative` golden. **The intended status stays `gap`**;

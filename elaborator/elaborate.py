@@ -796,9 +796,11 @@ def derive(src: Source, policy: Policy) -> tuple[list[ClaimDerivation], dict]:
                         }
                     )
             prov4.extend(inst.discharges)
-            # Hole lowering (README §1): an open mandatory question is a whole-
-            # unit rejection, so the incomplete argument is NOT emitted; the
-            # claim's complete-support set stays empty (-> gap).
+            # Hole lowering (README §1): under lara-core@0.2, the frozen B1
+            # target, an open mandatory question was a whole-unit rejection, so
+            # the incomplete argument is NOT emitted; the claim's complete-
+            # support set stays empty (-> gap). lara-core@0.3 would accept it
+            # as a located hole; the frozen lowering is kept as is.
             inst.emitted = not holes
 
         # ---- Task 6: typed-attack extraction over the whole trace ----------
