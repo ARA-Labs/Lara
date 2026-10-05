@@ -79,7 +79,7 @@ CITATION = re.compile(
 )
 
 # A `*.lean` path named with no line at all — `` `lean/AxCheck.lean` already
-# #print axioms-gates every headline row: `srcStatus_iff_checked` (:762) `` — is
+# #print axioms-gates every headline row: `srcStatus_iff_checked` (:764) `` — is
 # not a citation but a statement of what the surrounding block is about, and
 # BLOCK subjects are what a file-less citation resolves against in preference to
 # the declaration's home file, the block plainly meaning the file it names.
@@ -155,7 +155,7 @@ ALLOWLIST: dict[str, str] = {
     "lean/Lara/Driver.lean:1": "cites the module header block",
     "lean/Lara/Support.lean:60": "cites the module header's Forall₂ design bullet, not a declaration",
     "lean/Lara/Context/Observation.lean:97": "cites the `open` line itself, which is what the comparison is about",
-    "lean/Lara/Context/Equivalence.lean:43": "cites the `open` line itself, which is what the comparison is about",
+    "lean/Lara/Context/Equivalence.lean:44": "cites the `open` line itself, which is what the comparison is about",
     "lean/Lara/Admission.lean:16": "cites the module header's validated-versus-verified sentence, which is the claim being made",
     "lean/Lara/Grounded.lean:288": "cites the `Classical.byContradiction` use site held up as the house idiom",
     "lean/Lara/Context/Surface.lean:53": "cites the `coveredB_relabel` proof step, which is the step being exercised",

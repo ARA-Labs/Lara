@@ -134,7 +134,7 @@ set_option autoImplicit false
 namespace Lara.Context
 
 -- The open list matches `lean/Lara/Context/Observation.lean:97`, NOT
--- `lean/Lara/Context/Equivalence.lean:43`. `Lara.Check` and `Lara.Semantics`
+-- `lean/Lara/Context/Equivalence.lean:44`. `Lara.Check` and `Lara.Semantics`
 -- are both required: `backend_replacement_parametricity_sem` binds
 -- `(sem : ExtensionSemantics)`, which lives in `lean/Lara/Semantics.lean`.
 open Lara.Support Lara.Attack Lara.Compile Lara.Check Lara.Erase Lara.Semantics
@@ -232,7 +232,7 @@ def RelInj (R : Assurance → Assurance → Prop) : Prop :=
   ∀ α₁ α₂ β₁ β₂, R α₁ β₁ → R α₂ β₂ → (α₁ = α₂ ↔ β₁ = β₂)
 
 /-- **Acceptance transports along `R`.** The relational form of
-`AssurPreserving` (`lean/Lara/Context/Equivalence.lean:168`).
+`AssurPreserving` (`lean/Lara/Context/Equivalence.lean:170`).
 
 The quantifier is guarded by `R α β`, and that guard is the point: where
 `AssurPreserving f` obliges every assurance in the type, this obliges only the
@@ -934,7 +934,7 @@ theorem linkGround_rel (hF : RelFrag R F₁ F₂) :
   simp only [linkGround, hF.ground]
 
 /-- **The linked units are related.** The relational `link_relabel_commutes`
-(`lean/Lara/Context/Equivalence.lean:319`). -/
+(`lean/Lara/Context/Equivalence.lean:333`). -/
 theorem link_rel_commutes (hR : RelInj R)
     (hpres : RelPreserving R (certOkOf reg₁) (certOkOf reg₂))
     (hF : RelFrag R F₁ F₂) (hfix : RelFixesContext R C)
@@ -997,7 +997,7 @@ theorem argsWellSorted_rel {args₁ args₂ : List SupportTerm}
   simp only [argsWellSorted, termsWellSorted_rel h]
 
 /-- The signature stage of a related unit. The relational `signatureStage_map`
-(`lean/Lara/Context/Equivalence.lean:234`). -/
+(`lean/Lara/Context/Equivalence.lean:247`). -/
 theorem signatureStage_rel {ground : List Atom}
     {unit₁ unit₂ : Lara.Unit}
     (hsigma : unit₂.sigma = unit₁.sigma) (hpolicy : unit₂.policy = unit₁.policy)
@@ -1016,7 +1016,7 @@ theorem relAtt_target {k₁ k₂ : Attack.Attack}
   cases hk <;> assumption
 
 /-- **The attacked occurrence transports, and its image is exhibited.** The
-relational `attackOcc_mapAssurAtt` (`lean/Lara/Context/Equivalence.lean:248`).
+relational `attackOcc_mapAssurAtt` (`lean/Lara/Context/Equivalence.lean:261`).
 
 The functional version can *compute* the image occurrence (`mapAssur f t`);
 relationally the occurrence has to be produced, so this is stated
@@ -1056,7 +1056,7 @@ theorem attackOcc_rel (hR : RelInj R)
   obtain ⟨t₂', hocc, hrel⟩ := attackOcc_rel_exists hk h
   rwa [(relTerm_inj hR ht hrel).mp rfl]
 
-/-- The relational `contains_mapAssur` (`lean/Lara/Context/Equivalence.lean:262`).
+/-- The relational `contains_mapAssur` (`lean/Lara/Context/Equivalence.lean:275`).
 `RelInj` enters for the same reason as in `attackOcc_rel`. -/
 theorem contains_rel (hR : RelInj R)
     {v₁ v₂ t₁ t₂ : SupportTerm}
@@ -1067,7 +1067,7 @@ theorem contains_rel (hR : RelInj R)
   exact ⟨π, by rwa [(relTerm_inj hR ht hrel).mp rfl]⟩
 
 /-- **Declared coverage survives the relation.** The relational
-`covered_mapAssur` (`lean/Lara/Context/Equivalence.lean:268`). -/
+`covered_mapAssur` (`lean/Lara/Context/Equivalence.lean:281`). -/
 theorem covered_rel
     {atts₁ atts₂ : List Attack.Attack} {s₁ s₂ t₁ t₂ : SupportTerm}
     (hR : RelInj R)
@@ -1135,7 +1135,7 @@ theorem nodup_rel (hR : RelInj R) :
 
 /-- **Acceptance transports along a partial-bijective, acceptance-preserving
 certificate relation.** The relational `checkUnit_map`
-(`lean/Lara/Context/Equivalence.lean:392`). -/
+(`lean/Lara/Context/Equivalence.lean:406`). -/
 theorem checkUnit_rel {ground : List Atom}
     {unit₁ unit₂ : Lara.Unit}
     {accepted₁ : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg₁)}
@@ -1436,7 +1436,7 @@ theorem nodes_conclusion_rel
           exact congrArg some (hasSupport_unique hvb hva).1
 
 /-- **The two accepted units present the same carrier.** The relational
-`compileUnit_map` (`lean/Lara/Context/Equivalence.lean:551`). This is where the
+`compileUnit_map` (`lean/Lara/Context/Equivalence.lean:576`). This is where the
 relation is erased: from here down both branches run one and the same
 framework. -/
 theorem compileUnit_rel
@@ -1473,7 +1473,7 @@ end Carrier
 /-! ### The headline
 
 Proved once over an arbitrary projection `g`, exactly as `obsGen_congr`
-(`lean/Lara/Context/Equivalence.lean:877`) is, so that the semantics-parametric
+(`lean/Lara/Context/Equivalence.lean:888`) is, so that the semantics-parametric
 form is an instantiation rather than a second proof.
 
 One bookkeeping difference from the functional development is worth naming.
@@ -1506,7 +1506,7 @@ theorem exists_accepted_rel (hR : RelInj R)
     hR hpres hF.sigma hF.policy hargs hatts h₁
 
 /-- **The two links present the same carrier.** The relational
-`compileUnit_link_relabel` (`lean/Lara/Context/Equivalence.lean:808`). -/
+`compileUnit_link_relabel` (`lean/Lara/Context/Equivalence.lean:819`). -/
 theorem compileUnit_link_rel (hR : RelInj R)
     (hpres : RelPreserving R (certOkOf reg₁) (certOkOf reg₂))
     (hadm : Admissible reg₁ C F₁) (hF : RelFrag R F₁ F₂)
@@ -1540,7 +1540,7 @@ once.**
 Two fragments related by a partial-bijective, acceptance-preserving relation `R`
 on certificates are indistinguishable in every admissible context that `R` fixes
 — whatever is read off the resulting carrier. This is `obsGen_congr`
-(`lean/Lara/Context/Equivalence.lean:877`) with the *function* `f` replaced by a
+(`lean/Lara/Context/Equivalence.lean:888`) with the *function* `f` replaced by a
 *relation*, which is the quantifier M4's acceptance criterion names.
 
 **Read the strength honestly.** `RelInj` makes `R` a partial injection;
@@ -1794,7 +1794,7 @@ only over the fragment's own certificate occurrences.**
 Compare `backend_replacement_congruence`, whose `AssurPreserving f` obliges
 every rule and every assurance *in the type*. This obliges only the assurances
 `F` carries. That gap is what the docstrings of `registry_swap_congruence`
-(`Context/Equivalence.lean:972`) and `registry_swap_congruence_sem`
+(`Context/Equivalence.lean:983`) and `registry_swap_congruence_sem`
 (`Context/Observation.lean:345`) record as the hypothesis they do not carry, and
 it is the reason the relational form is more than a restatement.
 

@@ -697,7 +697,7 @@ is ever applied, so no projection can influence — or observe — the rejection
 The `hlink` hypothesis is `linkFault C F = none` rather than `linkOk C F = true`
 because that is the form the definitional match needs; `obsGen_eq_of_ok` takes
 the `linkOk` spelling instead and converts, which is also the spelling its
-grounded instance `obs_eq_of_ok` (`lean/Lara/Context/Equivalence.lean:726`)
+grounded instance `obs_eq_of_ok` (`lean/Lara/Context/Equivalence.lean:756`)
 exposes. -/
 theorem obsGen_rejected {α : Type} (g : Invariants.StructuredAF → Atom → α)
     {canon : String → String} {reg : BackendRegistry canon}
@@ -709,7 +709,7 @@ theorem obsGen_rejected {α : Type} (g : Invariants.StructuredAF → Atom → α
   simp only [obsGen, hlink, h]
 
 /-- **An accepted link observes through its carrier**, generically. This is
-`obs_eq_of_ok` (`lean/Lara/Context/Equivalence.lean:726`) with the projection
+`obs_eq_of_ok` (`lean/Lara/Context/Equivalence.lean:756`) with the projection
 left open — and it carries the proof that theorem used to run, `obs_eq_of_ok`
 now being this one instantiated: `linkOk` is `Option.isNone` of `linkFault`, so
 the guard hypothesis rewrites into the shape the match wants, and the two
@@ -838,13 +838,13 @@ theorem compileUnit_link_relabel
 An injective, acceptance-preserving relabel of a fragment's certificates is
 unobservable in every admissible context whose own assurances the relabel fixes
 — and *whatever* is read off the resulting carrier. This is
-`backend_replacement_congruence` (`lean/Lara/Context/Equivalence.lean:913`) with
+`backend_replacement_congruence` (`lean/Lara/Context/Equivalence.lean:924`) with
 `Invariants.status canon` replaced by an arbitrary `g`. It carries the proof
 that theorem used to carry; that theorem is now this one instantiated.
 
 **Why the generalization is free.** The argument produces an accepted link on
 each side and then appeals to `compileUnit_link_relabel`
-(`lean/Lara/Context/Equivalence.lean:808`), whose conclusion is
+(`lean/Lara/Context/Equivalence.lean:819`), whose conclusion is
 `Invariants.compileUnit acc₂ = Invariants.compileUnit acc₁` — an equation
 between carriers, not a pointwise agreement between them:
 
@@ -973,7 +973,7 @@ of *this* theorem, not a gap in the development: a display of this result must
 say "agrees globally", not "agrees on the fragment's occurrences".
 
 The occurrence-local hypothesis is a separate theorem rather than a missing one.
-`backend_replacement_parametricity_local` (`Parametricity.lean:1807`) and its
+`backend_replacement_parametricity_local` (`Parametricity.lean:1809`) and its
 companion `backend_replacement_parametricity_local_sem` oblige acceptance only
 for `α ∈ occurrences F`, by replacing the relabel function with a relation
 inhabited exactly there. They are a **trade, not a strengthening**: they add
