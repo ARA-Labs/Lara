@@ -24,3 +24,6 @@ observation-gap	observation-gap.lara	observation-gap.policy.lara	accept	rule-bin
 observation-defeated	observation-defeated.lara	observation.policy.lara	accept	surface-attacks
 observation-contested	observation-contested.lara	observation-contested.policy.lara	accept	surface-attacks
 observation-no-extension	observation-no-extension.lara	observation-no-extension.policy.lara	accept	surface-attacks
+located-gap-root	located-gap-root.lara	located-gap.policy.lara	accept	open-obligation
+located-gap-premise	located-gap-premise.lara	located-gap.policy.lara	accept	open-obligation
+located-gap-discharge	located-gap-discharge.lara	located-gap.policy.lara	accept	open-obligation

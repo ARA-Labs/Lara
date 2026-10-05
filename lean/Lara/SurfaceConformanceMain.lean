@@ -74,7 +74,8 @@ private def mainRule (binder : String := "X") : Rule :=
     certifiers := [⟨⟨"nd"⟩, 1, theory⟩]
     questions := [] }
 
-private def passRule : Rule :=
+/-- `pass(X)`; its question `cq` is optional unless `mandatory` is set. -/
+private def passRule (mandatory : Bool := false) : Rule :=
   let x : Param := ⟨"X"⟩
   { id := passId
     params := [x]
@@ -84,7 +85,8 @@ private def passRule : Rule :=
     conclusion := apat "score" [.var x]
     allowTrusted := false
     certifiers := []
-    questions := [⟨question, apat "score" [.var x], .optional⟩] }
+    questions := [⟨question, apat "score" [.var x],
+      if mandatory then .mandatory else .optional⟩] }
 
 private def verdictRule : Rule :=
   let y : Param := ⟨"Y"⟩
@@ -139,10 +141,11 @@ private def bridgeRule (reversed : Bool := false) : Rule :=
     questions := [] }
 
 private def surfacePolicy (mainBinder : String := "X")
-    (reversed : Bool := false) (prune : Bool := false) : Policy :=
+    (reversed : Bool := false) (prune : Bool := false)
+    (mandatory : Bool := false) : Policy :=
   { id := policyId
     sigma := surfaceSigma
-    rules := [mainRule mainBinder, passRule, verdictRule,
+    rules := [mainRule mainBinder, passRule mandatory, verdictRule,
       recheckRule reversed, bridgeRule reversed]
     contraries := [⟨apat "verdict" [.lit (.num "1")],
       apat "verdict" [.lit (.num "0")]⟩]
@@ -429,6 +432,46 @@ private def admissionPruneOpenProgram : Program :=
     , .arg ⟨⟨"arg-pruned"⟩, .supportsClaim ⟨"claim-main"⟩,
         .inferTheta passId [⟨"drop"⟩] [] [⟨"cq"⟩] .none⟩ ]
 
+/-- A mandatory question left open at the root: a located hole, and the claim's
+only alternative, so the claim is `gap`. -/
+private def locatedGapRootProgram : Program :=
+  focusedProgram "located_gap_root" "sha256:located-gap-root"
+    [ claim "claim-main" "mandatory question left open"
+        (atom "score" [.num "7"]) "root hole witness"
+    , leaf "keep" (atom "evidence" [.num "7"]) .observed .user
+    , .arg ⟨⟨"arg-open"⟩, .supportsClaim ⟨"claim-main"⟩,
+        .inferTheta passId [⟨"keep"⟩] [] [⟨"cq"⟩] .none⟩
+    , .status ⟨"claim-main"⟩ ]
+
+/-- A complete-looking wrapper whose premise is the root hole inherits its
+obligation: both arguments are holes. -/
+private def locatedGapPremiseProgram : Program :=
+  focusedProgram "located_gap_premise" "sha256:located-gap-premise"
+    [ claim "claim-main" "open question inherited through a premise"
+        (atom "score" [.num "7"]) "premise hole witness"
+    , leaf "keep" (atom "evidence" [.num "7"]) .observed .user
+    , .arg ⟨⟨"arg-open"⟩, .supportsClaim ⟨"claim-main"⟩,
+        .inferTheta passId [⟨"keep"⟩] [] [⟨"cq"⟩] .none⟩
+    , .arg ⟨⟨"arg-wrap"⟩, .supportsClaim ⟨"claim-main"⟩,
+        .inferTheta mainId [⟨"arg-open"⟩] [] [] .trusted⟩
+    , .status ⟨"claim-main"⟩ ]
+
+/-- Discharging `cq` with the root hole re-opens `cq` through the discharge;
+a leaf discharge gives a complete alternative beside the two holes. -/
+private def locatedGapDischargeProgram : Program :=
+  focusedProgram "located_gap_discharge" "sha256:located-gap-discharge"
+    [ claim "claim-main" "open question inherited through a discharge"
+        (atom "score" [.num "7"]) "discharge hole witness"
+    , leaf "keep" (atom "evidence" [.num "7"]) .observed .user
+    , leaf "proof" (atom "score" [.num "7"]) .observed .user
+    , .arg ⟨⟨"arg-open"⟩, .supportsClaim ⟨"claim-main"⟩,
+        .inferTheta passId [⟨"keep"⟩] [] [⟨"cq"⟩] .none⟩
+    , .arg ⟨⟨"arg-discharged"⟩, .supportsClaim ⟨"claim-main"⟩,
+        .inferTheta passId [⟨"keep"⟩] [(question, ⟨"arg-open"⟩)] [] .none⟩
+    , .arg ⟨⟨"arg-done"⟩, .supportsClaim ⟨"claim-main"⟩,
+        .inferTheta passId [⟨"keep"⟩] [(question, ⟨"proof"⟩)] [] .none⟩
+    , .status ⟨"claim-main"⟩ ]
+
 private structure Case where
   id : String
   programFile : String
@@ -499,6 +542,15 @@ private def caseById (id : String) : Option Case :=
       "observation-no-extension.policy.lara", "accept",
       ⟨observationNoExtensionProgram,
         observationPolicy [observationContrary "1" "1"]⟩⟩
+  | "located-gap-root" => some ⟨id, "located-gap-root.lara",
+      "located-gap.policy.lara", "accept",
+      ⟨locatedGapRootProgram, surfacePolicy (mandatory := true)⟩⟩
+  | "located-gap-premise" => some ⟨id, "located-gap-premise.lara",
+      "located-gap.policy.lara", "accept",
+      ⟨locatedGapPremiseProgram, surfacePolicy (mandatory := true)⟩⟩
+  | "located-gap-discharge" => some ⟨id, "located-gap-discharge.lara",
+      "located-gap.policy.lara", "accept",
+      ⟨locatedGapDischargeProgram, surfacePolicy (mandatory := true)⟩⟩
   | _ => none
 
 private def conformanceEnv : Lara.Surface.Env Lara.Driver.dcanon where
@@ -764,25 +816,42 @@ private def observationCells (input : Lara.Surface.Input)
         | none => "missing"
         | some observation => observationText observation
 
+/-! The `authored_open` column: every question an author left open anywhere in
+a retained argument, mandatory or optional, flattened recursively in term
+order without deduplication. It is syntax/provenance data and does not decide
+hole-hood. -/
+
 mutual
-  private def coreHoles : Support.SupportTerm → List Support.QuestionId
+  private def authoredOpen : Support.SupportTerm → List Support.QuestionId
     | .leaf _ => []
     | .inst _ _ premises discharges holes _ =>
-        holes ++ corePremiseHoles premises ++ coreDischargeHoles discharges
-  private def corePremiseHoles : List Support.SupportTerm → List Support.QuestionId
+        holes ++ authoredOpenPremises premises ++ authoredOpenDischarges discharges
+  private def authoredOpenPremises :
+      List Support.SupportTerm → List Support.QuestionId
     | [] => []
-    | premise :: rest => coreHoles premise ++ corePremiseHoles rest
-  private def coreDischargeHoles :
+    | premise :: rest => authoredOpen premise ++ authoredOpenPremises rest
+  private def authoredOpenDischarges :
       List (Support.QuestionId × Support.SupportTerm) → List Support.QuestionId
     | [] => []
-    | discharge :: rest => coreHoles discharge.2 ++ coreDischargeHoles rest
+    | discharge :: rest => authoredOpen discharge.2 ++ authoredOpenDischarges rest
 end
 
-private def obligationCells
+private def authoredOpenCells
     (output : Lara.Surface.Elaborated Driver.dcanon) : List String :=
   (output.argIds.zip output.unit.args).flatMap fun entry =>
-    (coreHoles entry.2).map fun obligation =>
+    (authoredOpen entry.2).map fun obligation =>
       entry.1.val ++ ":" ++ obligation.name
+
+/-- The `located_holes` column: the accepted unit's located holes in retained
+declaration order, one `arg-id:question-id` atom per exact mandatory
+obligation in the core's deduplicated order (`Surface.coreHoleReport`). -/
+private def locatedHoleCells {Gamma : Support.LeafId → Option Atom}
+    {CertOk : Support.BackendId → Support.Digest → Support.CertRef →
+      List Atom → Atom → Prop}
+    (output : Lara.Surface.Elaborated Driver.dcanon)
+    (checked : Lara.Unit.CheckedUnit Driver.dcanon Gamma CertOk) : List String :=
+  (Surface.coreHoleReport output checked).flatMap fun entry =>
+    entry.2.map fun obligation => entry.1.val ++ ":" ++ obligation.name
 
 private def attackCells (output : Lara.Surface.Elaborated Driver.dcanon) : Option (List String) :=
   output.resolvedAttacks.mapM (renderAttack output)
@@ -846,14 +915,15 @@ private structure OutputRow where
   ast : String
   outcome : String
   core : String
-  obligations : String
+  authoredOpen : String
+  locatedHoles : String
   attacks : String
   observations : String
 
 private def renderOutput (row : OutputRow) : String :=
   String.intercalate "\t"
-    [row.caseId, row.ast, row.outcome, row.core, row.obligations,
-      row.attacks, row.observations]
+    [row.caseId, row.ast, row.outcome, row.core, row.authoredOpen,
+      row.locatedHoles, row.attacks, row.observations]
 
 mutual
   private def payloadHasBinderFrom (names : List String) : Sx → Bool
@@ -1094,12 +1164,17 @@ private def evaluateCase (row : ManifestRow) : Except String OutputRow := do
       let attacks ← match attackCells output with
         | some cells => .ok cells
         | none => .error (row.caseId ++ ": resolved attack endpoint is absent from argIds")
+      let holes ← match Check.Unit.checkUnit output.gamma conformanceEnv.registry
+          output.ground output.unit with
+        | .ok checked => .ok (locatedHoleCells output checked)
+        | .error _ => .error (row.caseId ++ ": accepted surface unit fails the core check")
       .ok
         { caseId := row.caseId
           ast := ast
           outcome := "accept"
           core := coreFingerprint output
-          obligations := renderList (obligationCells output)
+          authoredOpen := renderList (authoredOpenCells output)
+          locatedHoles := renderList holes
           attacks := renderList attacks
           observations := renderList (observationCells spec.input output
             (Surface.check_sound conformanceEnv spec.input output hchecked)) }
@@ -1114,7 +1189,8 @@ private def evaluateCase (row : ManifestRow) : Except String OutputRow := do
         .error (row.caseId ++ ": expected " ++ row.expected ++ " but got " ++ outcome)
       .ok
         { caseId := row.caseId, ast := ast, outcome := outcome, core := "-"
-          obligations := "-", attacks := "-", observations := "-" }
+          authoredOpen := "-", locatedHoles := "-", attacks := "-",
+          observations := "-" }
   | .ok _, .error _ => .error (row.caseId ++ ": check accepted but elaborate rejected")
   | .error surfaceError, .ok output =>
       match Check.Unit.checkUnit output.gamma conformanceEnv.registry output.ground output.unit with
@@ -1125,7 +1201,7 @@ private def evaluateCase (row : ManifestRow) : Except String OutputRow := do
           surfaceErrorText surfaceError ++ ") but direct core check accepted")
 
 private def outputHeader : String :=
-  "case_id\tast_fingerprint\toutcome\tcore_fingerprint\tobligations\tattacks\tobservations"
+  "case_id\tast_fingerprint\toutcome\tcore_fingerprint\tauthored_open\tlocated_holes\tattacks\tobservations"
 
 def emitManifest (path : String) : IO _root_.Unit := do
   let contents ← (do

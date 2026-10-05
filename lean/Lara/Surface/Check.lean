@@ -2031,7 +2031,10 @@ def keptReconstructed (canon : String → String) (policy : Presentation.Policy)
         (admissionGroups program)
   pairs.filter fun pair => !Lara.Groups.usesLeaf removed pair.core
 
-/-- The root holes of a core support term. -/
+/-- The questions authored open at the root of a core support term. This is
+the authored diagnostic ledger, optional questions included; it is not the
+located-hole classification, which reads the core's mandatory, transitive
+obligation set. -/
 def rootHoles : Lara.Support.SupportTerm → List Lara.Support.QuestionId
   | .leaf _ => []
   | .inst _ _ _ _ holes _ => holes
@@ -2047,19 +2050,36 @@ def argSupportsClaim (claim : Presentation.PropId) : Presentation.ArgConcl → B
   | .supportsDerived id => decide (id = claim)
   | .challenges _ => false
 
-/-- The claim map: for each declared claim (including comparison-generated
-sub-claims), the positions of its complete supporting arguments and of its
-hole-bearing supporting alternatives, in the unit's argument order. -/
-def claimsOf (pairs : List ReconstructedArgument) (program : Presentation.Program) :
-    List (Presentation.PropId × Lara.Grounded.Claim) :=
+/-- The claim alternative ledger: for each declared claim (including
+comparison-generated sub-claims), the retained declaration positions of the
+arguments whose authored conclusion supports it, in the unit's argument order.
+It is syntax: whether an alternative is complete support or a located hole is
+the core's classification, applied by `claimsOf`. -/
+def claimAlternativesOf (pairs : List ReconstructedArgument)
+    (program : Presentation.Program) : List (Presentation.PropId × List Nat) :=
   (program.decls.filterMap fun
     | .claim claim => some claim
     | _ => none).map fun claim =>
-      let supporting := pairs.zipIdx.filter fun (pair, _) =>
-        argSupportsClaim claim.id pair.argument.concl
-      (claim.id,
-        { support := (supporting.filter fun (pair, _) => rootHoles pair.core = []).map (·.2)
-          holes := (supporting.filter fun (pair, _) => rootHoles pair.core != []).map (·.2) })
+      (claim.id, (pairs.zipIdx.filter fun (pair, _) =>
+        argSupportsClaim claim.id pair.argument.concl).map (·.2))
+
+/-- Classify one claim's alternatives by a declaration partition (spec §4.4,
+D5, D8). An alternative at the declaration of AF node `n` contributes the
+compact AF index `n` to `support`; one at a located hole contributes its
+declaration position to `holes`. On an accepted unit `nodeDecls` and
+`holeDecls` are the checked cache's maps, so the classification is the core's
+mandatory, transitive obligation set and not the authored root open set. -/
+def classifyClaim (nodeDecls holeDecls : List Nat) (alternatives : List Nat) :
+    Lara.Grounded.Claim :=
+  { support := alternatives.filterMap fun i => nodeDecls.idxOf? i
+    holes := alternatives.filter fun i => holeDecls.contains i }
+
+/-- The claim map: each claim's alternatives classified by one declaration
+partition. -/
+def claimsOf (nodeDecls holeDecls : List Nat)
+    (ledger : List (Presentation.PropId × List Nat)) :
+    List (Presentation.PropId × Lara.Grounded.Claim) :=
+  ledger.map fun row => (row.1, classifyClaim nodeDecls holeDecls row.2)
 
 /-- The authored obligations of the source program's arguments. -/
 def authoredObligationsOf (program : Presentation.Program) :
@@ -2559,7 +2579,9 @@ def assemble (env : Env canon) (input : Input) : Except Error (Elaborated canon)
               policy := toCorePolicy input.policy
               args := (keptReconstructed canon input.policy semantic pairs).map (·.core)
               atts := resolved }
-          claims := claimsOf (keptReconstructed canon input.policy semantic pairs) semantic
+          claimAlternatives :=
+            claimAlternativesOf (keptReconstructed canon input.policy semantic pairs)
+              semantic
           argIds := keptIds
           authoredObligations := authoredObligationsOf input.program
           openQuestions :=
@@ -2692,8 +2714,9 @@ structure Checks (env : Env canon) (input : Input) (output : Elaborated canon) :
       output.argIds ∧
     (keptReconstructed canon input.policy output.semanticProgram pairs).map (·.core) =
       output.unit.args ∧
-    claimsOf (keptReconstructed canon input.policy output.semanticProgram pairs)
-      output.semanticProgram = output.claims ∧
+    claimAlternativesOf
+        (keptReconstructed canon input.policy output.semanticProgram pairs)
+      output.semanticProgram = output.claimAlternatives ∧
     openQuestionsOf (keptReconstructed canon input.policy output.semanticProgram pairs) =
       output.openQuestions
   gamma : surfaceGamma canon input.policy output.semanticProgram = output.gamma
@@ -2859,7 +2882,7 @@ theorem assemble_complete (env : Env canon) (input : Input) (output : Elaborated
   have hauthored := h.authoredObligations
   apply congrArg Except.ok
   cases output with
-  | mk gamma ground unit claims argIds authoredObligations openQuestions
+  | mk gamma ground unit claimAlternatives argIds authoredObligations openQuestions
       resolvedAttacks semanticProgram =>
     cases unit with
     | mk sigma policy args atts =>

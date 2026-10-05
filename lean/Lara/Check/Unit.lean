@@ -481,6 +481,22 @@ theorem CheckUnitSound.hole_reports_exact
   rw [← hs.policy_eq] at hw
   exact ⟨hs.partition.hole_decls h hh, hasSupport_unique h.valid hw⟩
 
+/-- The AF-node-to-declaration map is the complete-position view of the raw
+declarations: it is determined by the classification alone. -/
+theorem CheckUnitSound.nodeDecls_eq
+    (hs : CheckUnitSound canon Gamma reg ground unit accepted) :
+    accepted.nodeDecls = completeDecls unit.policy.ruleLookup Gamma reg unit.args := by
+  rw [← hs.policy_eq]
+  exact hs.partition.nodeDecls_eq
+
+/-- The hole positions are the hole-position view of the raw declarations. -/
+theorem CheckUnitSound.holeIndices_eq
+    (hs : CheckUnitSound canon Gamma reg ground unit accepted) :
+    accepted.holes.map (·.index) =
+      holeDecls unit.policy.ruleLookup Gamma reg unit.args := by
+  rw [← hs.policy_eq]
+  exact hs.partition.holeIndices_eq
+
 /-- **Attacks sourced at a hole are inert (D4).** Such a raw attack is not
 compiled, and no edge leaves its source. -/
 theorem CheckUnitSound.hole_inert_source

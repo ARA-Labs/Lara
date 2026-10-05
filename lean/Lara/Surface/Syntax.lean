@@ -25,7 +25,12 @@ structure Elaborated (canon : String → String) where
   gamma : Support.LeafId → Option Atom
   ground : List Atom
   unit : Lara.Unit
-  claims : List (Presentation.PropId × Grounded.Claim)
+  /-- Per declared claim, the retained declaration positions of its
+  supporting alternatives (`Surface.claimAlternativesOf`). The carrier is built
+  before core checking, so it records alternatives only; the checked cache
+  classifies them into complete support and located holes
+  (`Surface.claimsOf`). -/
+  claimAlternatives : List (Presentation.PropId × List Nat)
   argIds : List Presentation.ArgId
   authoredObligations : List (Presentation.ArgId × List Presentation.ObligationId)
   openQuestions : List (Presentation.ArgId × List Support.QuestionId)

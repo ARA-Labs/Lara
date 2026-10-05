@@ -430,6 +430,8 @@ import Lara.Examples.SurfaceTransport
 import Lara.Examples.SurfaceTransportAttack
 -- The context-bearing surface-link witness, for the same reason.
 import Lara.Examples.SurfaceTransportContext
+-- The kernel-checked located-hole claim map, for the same reason.
+import Lara.Examples.SurfaceHoles
 import Lara.PW.Outer
 import Lara.PW.Uniform
 import Lara.PW.Compare

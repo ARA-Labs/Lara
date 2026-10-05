@@ -1,0 +1,18 @@
+artifact located_gap_root at sha256:located-gap-root
+policy surface-policy
+use backends []
+
+claim claim-main
+  nl      = "mandatory question left open"
+  formal  = score(7)
+  binding = { author = author, rationale = "root hole witness", audit-status = reviewed }
+
+leaf keep : evidence(7)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+arg arg-open : supports(claim-main) by pass from [keep]
+  open cq
+
+status claim-main

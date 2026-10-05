@@ -314,7 +314,7 @@ def contextElaborated (certificate : Cert) (coreAssur : Lara.Support.Assurance) 
       policy := toCorePolicy contextPolicy
       args := (contextKept certificate coreAssur).map (·.core)
       atts := [] }
-  claims := claimsOf (contextKept certificate coreAssur)
+  claimAlternatives := claimAlternativesOf (contextKept certificate coreAssur)
     (contextProgram (.cert certificate))
   argIds := (contextKept certificate coreAssur).map (·.argument.id)
   authoredObligations := authoredObligationsOf (contextProgram (.cert certificate))

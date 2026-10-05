@@ -128,7 +128,12 @@ See §5 below.
 **D8 — The surface classifies by the core obligation set.** A `.lara` argument
 is a hole exactly when its core obligation set is nonempty, mandatory and
 transitive. Questions authored at an argument's root, optional ones included,
-remain separate diagnostic data and do not decide hole-hood.
+remain separate diagnostic data and do not decide hole-hood. A surface claim
+selects its alternatives, holes as well as complete support, by authored claim
+id; outside the derived-support role a selected hole always concludes the
+claim's formal, but where claims share an equivalent formal the id selection
+can miss alternatives that the core's conclusion-equivalence selection
+includes.
 
 **D9 — Composition results keep their hole-free domain.** Linking, composition
 and contextual-equivalence results stay stated over the existing hole-free

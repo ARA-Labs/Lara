@@ -359,7 +359,7 @@ def attackElaborated (certificate : Cert) (coreAssur : Lara.Support.Assurance) :
       policy := toCorePolicy attackPolicy
       args := (attackKept certificate coreAssur).map (·.core)
       atts := [coreAttack coreAssur] }
-  claims := claimsOf (attackKept certificate coreAssur)
+  claimAlternatives := claimAlternativesOf (attackKept certificate coreAssur)
     (attackProgram (.cert certificate))
   argIds := (attackKept certificate coreAssur).map (·.argument.id)
   authoredObligations := authoredObligationsOf (attackProgram (.cert certificate))
@@ -987,13 +987,31 @@ theorem surfaceTransportAttack_relabel_moves_atts :
     and_true] at h
   exact absurd h.1 (by decide)
 
-/-- **The witnessed framework has an edge.** Node 1 is `a-s` and node 2 is
-`a-t` in retained declaration order, and the framework the surface layer
-exposes puts an attack between them — on both sides of the relabel. -/
+/-- **The witnessed framework has an edge.** Every retained argument is
+complete, so the direct complete-argument list is the retained list: node 1 is
+`a-s` and node 2 is `a-t` in retained declaration order, and the framework the
+surface layer exposes puts an attack between them — on both sides of the
+relabel. -/
 theorem surfaceTransportAttack_directAF_edge :
     (Lara.Surface.directAF attack_checks_kernel).attack 1 2 = true ∧
       (Lara.Surface.directAF attack_checks_wrapped).attack 1 2 = true := by
-  constructor <;> decide
+  have hkernel : Lara.Surface.directArgs transportEnv
+      (attackElaborated kernelCert kernelCoreAssur) =
+        (attackElaborated kernelCert kernelCoreAssur).unit.args :=
+    Lara.Check.completeArgs_eq_self attack_complete_kernel
+  have hwrapped : Lara.Surface.directArgs transportEnvWrapped
+      (attackElaborated wrappedCert wrappedCoreAssur) =
+        (attackElaborated wrappedCert wrappedCoreAssur).unit.args :=
+    Lara.Check.completeArgs_eq_self attack_complete_wrapped
+  constructor
+  · show Lara.Surface.directAttack _ _ 1 2 = true
+    unfold Lara.Surface.directAttack
+    rw [hkernel]
+    decide
+  · show Lara.Surface.directAttack _ _ 1 2 = true
+    unfold Lara.Surface.directAttack
+    rw [hwrapped]
+    decide
 
 /-- **The relabel actually moved the elaborated unit.** -/
 theorem surfaceTransportAttack_relabel_moves :

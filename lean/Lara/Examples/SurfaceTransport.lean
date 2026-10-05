@@ -367,7 +367,7 @@ theorem transport_checksProgram_wrapped :
 
 Every field is *defined* as the expression the corresponding `Checks` field
 compares against, so those comparisons close by `rfl`. This is the
-`manualAllFormsElaborated` trick from `Examples/Surface.lean:2408`; it is what
+`manualAllFormsElaborated` trick from `Examples/Surface.lean:2407`; it is what
 keeps `gamma`, `ground`, `sigma`, `unitPolicy`, `unitAttacks` and
 `authoredObligations` free. -/
 
@@ -387,7 +387,7 @@ def transportElaborated (certificate : Cert) (coreAssur : Lara.Support.Assurance
       policy := toCorePolicy transportPolicy
       args := (transportKept certificate coreAssur).map (·.core)
       atts := [] }
-  claims := claimsOf (transportKept certificate coreAssur)
+  claimAlternatives := claimAlternativesOf (transportKept certificate coreAssur)
     (transportProgram (.cert certificate))
   argIds := (transportKept certificate coreAssur).map (·.argument.id)
   authoredObligations := authoredObligationsOf (transportProgram (.cert certificate))

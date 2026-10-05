@@ -257,6 +257,20 @@ theorem liveAttacks_snoc_unused_source {live : List SupportTerm}
     liveAttacks live (atts ++ [k]) = liveAttacks live atts := by
   simp [liveAttacks, h]
 
+/-- The executable coverage check from a live source is unchanged by live
+filtering. -/
+theorem coveredB_liveAttacks {live : List SupportTerm} {atts : List Attack}
+    {source target : SupportTerm} (hsource : source ∈ live) :
+    Compile.coveredB (liveAttacks live atts) source target =
+      Compile.coveredB atts source target := by
+  unfold Compile.coveredB liveAttacks
+  rw [List.any_filter]
+  congr 1
+  funext k
+  by_cases hk : k.source = source
+  · simp [hk, hsource]
+  · simp [hk]
+
 /-- Coverage from a live source is unchanged by live filtering: every attack
 that can cover an edge from that source is itself live. -/
 theorem covered_liveAttacks_iff {live : List SupportTerm} {atts : List Attack}
@@ -322,5 +336,178 @@ structure DeclPartition {canon : String → String}
   disjoint : ∀ i ∈ nodeDecls, ¬ ∃ h ∈ holes, h.index = i
   nodeDecls_sorted : nodeDecls.Pairwise (· < ·)
   holes_sorted : (holes.map (·.index)).Pairwise (· < ·)
+
+/-! ### Declaration positions
+
+The partition's index lists are determined by the classification: AF node
+positions are exactly the complete declarations, hole positions exactly the
+holes, both ascending. Callers that never saw the checker's cache (the surface
+observation, a renamed unit) recover the cached maps from this. -/
+
+/-- The ascending positions of the declarations satisfying `p`. -/
+def declPositions (p : SupportTerm → Bool) (args : List SupportTerm) :
+    List Nat :=
+  (List.range args.length).filter fun i => (args[i]?.map p).getD false
+
+/-- The positions of the complete declarations: the AF-node-to-declaration
+map, as a specification view. -/
+def completeDecls {canon : String → String}
+    (Pi : RuleId → Option Rule) (Gamma : LeafId → Option Atom)
+    (reg : BackendRegistry canon) (args : List SupportTerm) : List Nat :=
+  declPositions (argComplete Pi Gamma reg) args
+
+/-- The positions of the located holes, as a specification view. -/
+def holeDecls {canon : String → String}
+    (Pi : RuleId → Option Rule) (Gamma : LeafId → Option Atom)
+    (reg : BackendRegistry canon) (args : List SupportTerm) : List Nat :=
+  declPositions (argHole Pi Gamma reg) args
+
+theorem mem_declPositions_iff {p : SupportTerm → Bool}
+    {args : List SupportTerm} {i : Nat} :
+    i ∈ declPositions p args ↔ ∃ w, args[i]? = some w ∧ p w = true := by
+  unfold declPositions
+  rw [List.mem_filter, List.mem_range]
+  constructor
+  · rintro ⟨hi, hp⟩
+    rw [List.getElem?_eq_getElem hi] at hp ⊢
+    exact ⟨_, rfl, by simpa using hp⟩
+  · rintro ⟨w, hw, hp⟩
+    exact ⟨lt_of_getElem?_some hw, by simp [hw, hp]⟩
+
+theorem declPositions_map {p : SupportTerm → Bool}
+    (f : SupportTerm → SupportTerm) (args : List SupportTerm) :
+    declPositions p (args.map f) = declPositions (p ∘ f) args := by
+  simp [declPositions, List.getElem?_map, Option.map_map]
+
+/-- The position view reads only the predicate on the listed declarations. -/
+theorem declPositions_congr {p q : SupportTerm → Bool}
+    {args : List SupportTerm} (h : ∀ w ∈ args, p w = q w) :
+    declPositions p args = declPositions q args := by
+  unfold declPositions
+  apply List.filter_congr
+  intro i _
+  cases hi : args[i]? with
+  | none => rfl
+  | some w => simp [h w (List.mem_of_getElem? hi)]
+
+theorem declPositions_sorted (p : SupportTerm → Bool)
+    (args : List SupportTerm) : (declPositions p args).Pairwise (· < ·) :=
+  (List.pairwise_lt_range).filter _
+
+theorem declPositions_cons (p : SupportTerm → Bool) (w : SupportTerm)
+    (args : List SupportTerm) :
+    declPositions p (w :: args) =
+      (if p w then [0] else []) ++ (declPositions p args).map Nat.succ := by
+  unfold declPositions
+  rw [List.length_cons, List.range_succ_eq_map, List.filter_cons, List.filter_map]
+  cases hp : p w <;> simp [hp, Function.comp_def]
+
+/-- One position per selected declaration. -/
+theorem declPositions_length (p : SupportTerm → Bool) :
+    ∀ args : List SupportTerm,
+      (declPositions p args).length = (args.filter p).length
+  | [] => rfl
+  | w :: args => by
+      rw [declPositions_cons, List.filter_cons]
+      cases hp : p w <;> simp [declPositions_length p args]
+
+/-- Two strictly ascending lists with the same members are equal. -/
+theorem eq_of_pairwise_lt_of_mem_iff :
+    ∀ {l₁ l₂ : List Nat}, l₁.Pairwise (· < ·) → l₂.Pairwise (· < ·) →
+      (∀ x, x ∈ l₁ ↔ x ∈ l₂) → l₁ = l₂
+  | [], [], _, _, _ => rfl
+  | a :: _, [], _, _, h => absurd ((h a).mp (by simp)) (by simp)
+  | [], b :: _, _, _, h => absurd ((h b).mpr (by simp)) (by simp)
+  | a :: as, b :: bs, h₁, h₂, h => by
+      rw [List.pairwise_cons] at h₁ h₂
+      have hab : a = b := by
+        rcases List.mem_cons.mp ((h a).mp (by simp)) with hab | ha
+        · exact hab
+        · rcases List.mem_cons.mp ((h b).mpr (by simp)) with hba | hb
+          · exact hba.symm
+          · exact absurd (Nat.lt_trans (h₂.1 a ha) (h₁.1 b hb)) (Nat.lt_irrefl b)
+      subst hab
+      refine congrArg _ (eq_of_pairwise_lt_of_mem_iff h₁.2 h₂.2 fun x => ?_)
+      constructor
+      · intro hx
+        rcases List.mem_cons.mp ((h x).mp (by simp [hx])) with hxa | hx'
+        · exact absurd (hxa ▸ h₁.1 x hx) (Nat.lt_irrefl x)
+        · exact hx'
+      · intro hx
+        rcases List.mem_cons.mp ((h x).mpr (by simp [hx])) with hxa | hx'
+        · exact absurd (hxa ▸ h₂.1 x hx) (Nat.lt_irrefl x)
+        · exact hx'
+
+section PartitionPositions
+
+variable {canon : String → String} {Pi : RuleId → Option Rule}
+  {Gamma : LeafId → Option Atom} {reg : BackendRegistry canon}
+  {args : List SupportTerm}
+  {nodes : List (Compile.CheckedNode canon Pi Gamma (certOkOf reg))}
+  {nodeDecls : List Nat}
+  {holes : List (Compile.CheckedHole canon Pi Gamma (certOkOf reg))}
+
+theorem DeclPartition.mem_nodeDecls_iff
+    (hp : DeclPartition args nodes nodeDecls holes) {i : Nat} :
+    i ∈ nodeDecls ↔ ∃ w, args[i]? = some w ∧ argComplete Pi Gamma reg w = true := by
+  constructor
+  · intro hi
+    obtain ⟨n, hn⟩ := List.mem_iff_getElem?.mp hi
+    have hmap := congrArg (·[n]?) hp.node_decls
+    simp only [List.getElem?_map, hn, Option.map_some] at hmap
+    cases hnode : nodes[n]? with
+    | none => rw [hnode] at hmap; cases hmap
+    | some node =>
+      rw [hnode, Option.map_some] at hmap
+      exact ⟨node.term, Option.some.inj hmap, by
+        rw [argComplete_of_hasSupport node.valid]; rfl⟩
+  · rintro ⟨w, hw, hcomplete⟩
+    rcases (hp.cover i).mp (lt_of_getElem?_some hw) with hnode | ⟨h, hh, rfl⟩
+    · exact hnode
+    · have hat := hp.hole_decls h hh
+      rw [hw, Option.some.injEq] at hat
+      subst hat
+      rw [argComplete_of_hasSupport h.valid] at hcomplete
+      cases hO : h.obligations with
+      | nil => exact absurd hO h.nonempty
+      | cons q qs => rw [hO] at hcomplete; cases hcomplete
+
+theorem DeclPartition.mem_holeIndices_iff
+    (hp : DeclPartition args nodes nodeDecls holes) {i : Nat} :
+    i ∈ holes.map (·.index) ↔
+      ∃ w, args[i]? = some w ∧ argHole Pi Gamma reg w = true := by
+  constructor
+  · intro hi
+    obtain ⟨h, hh, rfl⟩ := List.mem_map.mp hi
+    refine ⟨h.term, hp.hole_decls h hh, ?_⟩
+    rw [argHole_of_hasSupport h.valid]
+    cases hO : h.obligations with
+    | nil => exact absurd hO h.nonempty
+    | cons q qs => rfl
+  · rintro ⟨w, hw, hhole⟩
+    rcases (hp.cover i).mp (lt_of_getElem?_some hw) with hnode | ⟨h, hh, rfl⟩
+    · obtain ⟨w', hw', hcomplete⟩ := hp.mem_nodeDecls_iff.mp hnode
+      rw [hw, Option.some.injEq] at hw'
+      subst hw'
+      obtain ⟨C, hC⟩ := argComplete_iff.mp hcomplete
+      rw [argHole_of_hasSupport hC] at hhole
+      cases hhole
+    · exact List.mem_map.mpr ⟨h, hh, rfl⟩
+
+/-- **The AF-node map is the complete-position view.** -/
+theorem DeclPartition.nodeDecls_eq
+    (hp : DeclPartition args nodes nodeDecls holes) :
+    nodeDecls = completeDecls Pi Gamma reg args :=
+  eq_of_pairwise_lt_of_mem_iff hp.nodeDecls_sorted (declPositions_sorted _ _)
+    fun _ => hp.mem_nodeDecls_iff.trans mem_declPositions_iff.symm
+
+/-- **The hole positions are the hole-position view.** -/
+theorem DeclPartition.holeIndices_eq
+    (hp : DeclPartition args nodes nodeDecls holes) :
+    holes.map (·.index) = holeDecls Pi Gamma reg args :=
+  eq_of_pairwise_lt_of_mem_iff hp.holes_sorted (declPositions_sorted _ _)
+    fun _ => hp.mem_holeIndices_iff.trans mem_declPositions_iff.symm
+
+end PartitionPositions
 
 end Lara.Check

@@ -1,0 +1,29 @@
+artifact located_gap_discharge at sha256:located-gap-discharge
+policy surface-policy
+use backends []
+
+claim claim-main
+  nl      = "open question inherited through a discharge"
+  formal  = score(7)
+  binding = { author = author, rationale = "discharge hole witness", audit-status = reviewed }
+
+leaf keep : evidence(7)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+leaf proof : score(7)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+arg arg-open : supports(claim-main) by pass from [keep]
+  open cq
+
+arg arg-discharged : supports(claim-main) by pass from [keep]
+  discharge cq with arg-open
+
+arg arg-done : supports(claim-main) by pass from [keep]
+  discharge cq with proof
+
+status claim-main

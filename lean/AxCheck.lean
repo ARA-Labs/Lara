@@ -62,6 +62,7 @@ import Lara.Examples.Semantics
 import Lara.Examples.SurfaceTransport
 import Lara.Examples.SurfaceTransportAttack
 import Lara.Examples.SurfaceTransportContext
+import Lara.Examples.SurfaceHoles
 import Lara.Update
 import Lara.Examples.Update
 import Lara.Invariants.Merge
@@ -1127,6 +1128,18 @@ open Lara
 #print axioms Lara.Check.covered_liveAttacks_iff
 #print axioms Lara.Check.attackComplete_iff_complete_live
 #print axioms Lara.Check.attackComplete_completeArgs_iff
+#print axioms Lara.Check.coveredB_liveAttacks
+#print axioms Lara.Check.mem_declPositions_iff
+#print axioms Lara.Check.declPositions_map
+#print axioms Lara.Check.declPositions_congr
+#print axioms Lara.Check.declPositions_sorted
+#print axioms Lara.Check.declPositions_cons
+#print axioms Lara.Check.declPositions_length
+#print axioms Lara.Check.eq_of_pairwise_lt_of_mem_iff
+#print axioms Lara.Check.DeclPartition.mem_nodeDecls_iff
+#print axioms Lara.Check.DeclPartition.mem_holeIndices_iff
+#print axioms Lara.Check.DeclPartition.nodeDecls_eq
+#print axioms Lara.Check.DeclPartition.holeIndices_eq
 #print axioms Lara.Check.CheckedArguments.holes_terms
 #print axioms Lara.Check.CheckedArguments.partition
 #print axioms Lara.Check.CheckedArguments.typed
@@ -1140,6 +1153,8 @@ open Lara
 #print axioms Lara.Check.Unit.CheckUnitSound.holes_eq_nil_of_complete
 #print axioms Lara.Check.Unit.CheckUnitSound.holes_iff
 #print axioms Lara.Check.Unit.CheckUnitSound.hole_reports_exact
+#print axioms Lara.Check.Unit.CheckUnitSound.nodeDecls_eq
+#print axioms Lara.Check.Unit.CheckUnitSound.holeIndices_eq
 #print axioms Lara.Check.Unit.CheckUnitSound.hole_inert_source
 #print axioms Lara.Check.Unit.gap_of_only_holes
 
@@ -2091,10 +2106,18 @@ outside the public audit surface. -/
 -- extension semantics satisfying `Observation.AttackExtensional sem.spec`.
 #print axioms Lara.Surface.directAF_args
 #print axioms Lara.Surface.directAF_attack_iff
-#print axioms Lara.Surface.directClaims_eq_claims
+#print axioms Lara.Surface.claimsOf_support_lt
+#print axioms Lara.Surface.claimAlternativesOf_sorted
+#print axioms Lara.Surface.directDecls_eq_checked
+#print axioms Lara.Surface.directClaims_eq_coreClaims
 #print axioms Lara.Surface.directClaim_eq_coreClaim?
 #print axioms Lara.Surface.directClaim_support_bound
 #print axioms Lara.Surface.direct_compiled_agree
+-- Surface/core located-hole coherence (D8, D10).
+#print axioms Lara.Surface.claimAlternatives_coherent
+#print axioms Lara.Surface.claimAlternatives_holes_sound
+#print axioms Lara.Surface.claimAlternatives_holes_complete
+#print axioms Lara.Surface.coreHoleReport_obligations
 #print axioms Lara.Surface.observe_coherent
 #print axioms Lara.Surface.observe_grounded_coherent
 #print axioms Lara.Surface.observe_complete_coherent
@@ -3793,6 +3816,15 @@ fixture would be worthless. -/
 #print axioms Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_directAF_edge
 #print axioms Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_relabel_moves
 #print axioms Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_inputs_differ
+
+-- Kernel-checked located-hole claim map (root, premise and discharge holes;
+-- optional-only completeness; complete-plus-hole status; only-hole gap).
+#print axioms Lara.Examples.SurfaceHoles.holesCheck_ok
+#print axioms Lara.Examples.SurfaceHoles.holes_partition
+#print axioms Lara.Examples.SurfaceHoles.holes_claims
+#print axioms Lara.Examples.SurfaceHoles.holes_complete_alternative_status
+#print axioms Lara.Examples.SurfaceHoles.holes_only_incomplete_gap
+#print axioms Lara.Examples.SurfaceHoles.holes_optional_only
 
 /-! ### The context-bearing surface link fixture
 

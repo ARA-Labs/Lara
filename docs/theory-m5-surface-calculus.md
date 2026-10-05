@@ -342,18 +342,54 @@ The separately quotable projections are exact:
 
 ## Direct and Compiled Observation
 
-`directAF hsurface` is indexed by a surface derivation. It uses
-`List.range output.argIds.length` as its carrier and computes attacks from
-`output.resolvedAttacks` and the retained surface argument order. It does not
-call `elaborate`, `Compile.edgeB`, or `Compile.checkedAF`.
+`directAF hsurface` is indexed by a surface derivation. Its carrier is the
+index range of `directArgs`, the retained declarations whose core support
+typing has an empty obligation set, in retained order; both attack endpoints
+index that list, and attacks are computed from `output.resolvedAttacks`. A
+located hole is never a node, so a leading hole cannot become node zero. It
+does not call `elaborate`, `Compile.edgeB`, or `Compile.checkedAF`.
+
+`Elaborated` is built before core checking, so it carries only the claim
+alternative ledger `output.claimAlternatives`
+(`claimAlternativesOf`): for each declared claim, the retained declaration
+positions of the arguments whose authored conclusion supports it.
+`claimsOf nodeDecls holeDecls` classifies a ledger by a declaration partition
+(D8): an alternative at the declaration of AF node `n` contributes `n` to
+`support`, and one at a located hole contributes its retained declaration
+position to `holes`. The authored root open set decides nothing; it stays in
+`openQuestions` and `authoredObligations` as diagnostic data.
 
 The two claim APIs are independently defined and optional. `directClaims`
-re-runs source reconstruction over the semantic program and does not read
-`output.claims`; `directClaim hsurface claimId` looks up that reconstructed
-ledger. `coreClaim? output claimId` separately looks up the retained core-side
-ledger. `directClaims_eq_claims` and `directClaim_eq_coreClaim?` prove their
-agreement for an accepted surface derivation. A missing ID remains `none` on
-both sides and is never manufactured into an empty-support gap claim.
+re-runs source reconstruction over the semantic program and classifies its
+ledger by the direct partition (`directNodeDecls`, `directHoleDecls`); it
+reads neither `output.claimAlternatives` nor a checked cache.
+`coreClaim? output checked claimId` classifies `output.claimAlternatives` by
+the accepted unit's cached `nodeDecls` and hole positions.
+`directDecls_eq_checked`, `directClaims_eq_coreClaims` and
+`directClaim_eq_coreClaim?` prove their agreement for an accepted surface
+derivation. A missing ID remains `none` on both sides and is never
+manufactured into an empty-support gap claim.
+
+`claimAlternatives_coherent` states the surface/core hole correspondence
+(D10): each claim's holes are the cached holes sitting at its alternatives, in
+declaration order, each the retained declaration at its position with an
+`ArgId` and exactly the core's obligation set; its support is the AF index of
+every alternative that is a node. The global hole list `checked.holes` also
+holds holes whose conclusion no claim names. Like `support`, a claim's holes
+are selected by authored claim id, not by conclusion equivalence:
+`claimAlternatives_holes_sound` shows every selected hole concludes the
+claim's formal (excluding the derived-support role, which is never compared
+with a formal), and `claimAlternatives_holes_complete` shows conclusion
+equivalence selects nothing more when every argument supports a formal-bearing
+claim and claim formals are pairwise inequivalent. With shared formals the id
+selection can miss alternatives the core's conclusion-equivalence selection
+includes. `coreHoleReport` renders that
+global list as `(ArgId, obligations)` rows, and
+`coreHoleReport_obligations` shows it drops none. The kernel-checked
+`Lara.Examples.SurfaceHoles` fixture exercises a root, a premise and a
+discharge hole (each with exactly one deduplicated mandatory obligation), an
+optional-only alternative that stays complete support, a claim with both
+complete and incomplete alternatives, and a claim with only a hole (`gap`).
 
 For a surface derivation `hsurface : Checks env input output` and a concrete
 successful core check `hchecked`:
@@ -377,7 +413,7 @@ theorem observe_coherent
         .ok checked)
     (claimId : Presentation.PropId) :
   Surface.observe sem hsurface claimId =
-    (coreClaim? output claimId).map
+    (coreClaim? output checked claimId).map
       (Semantics.observe sem (Compile.checkedAF checked.program))
 ```
 
@@ -447,19 +483,29 @@ The two emitters are independent:
 - Lean constructs matching `Presentation.Program`/`Policy` values directly
   and runs the verified surface checker, elaborator, and observation functions.
 
-Each emits the same seven-column canonical table:
+Each emits the same eight-column canonical table:
 
 ```text
 case_id  ast_fingerprint  outcome  core_fingerprint
-obligations  attacks  observations
+authored_open  located_holes  attacks  observations
 ```
 
-The `obligations` column has retained, post-admission semantics: it walks the
-holes of retained `output.unit.args` in retained argument order and renders
-`arg-id:question-id`. It is deliberately not the pre-prune
+The `authored_open` column has retained, post-admission semantics: it walks
+every authored open question of retained `output.unit.args` recursively, in
+retained argument order and term order, mandatory and optional alike, and
+renders `arg-id:question-id`. It is deliberately not the pre-prune
 `output.authoredObligations` ledger used by `obligations_preserved`. The real
 `admission-prune-accept` row proves the distinction: the quarantined argument
 is removed, while the retained open argument emits exactly `arg-open:cq`.
+
+The `located_holes` column is the accepted unit's located holes (D5, D8), in
+retained declaration order, one `arg-id:question-id` atom per exact mandatory
+obligation in the core's deduplicated order. In `admission-prune-accept` the
+open `cq` is optional, so `authored_open` is `arg-open:cq` while
+`located_holes` is empty. The `located-gap-root`, `located-gap-premise` and
+`located-gap-discharge` rows leave a mandatory question open at the root,
+inherit it through a premise, and inherit it through a discharge beside a
+complete alternative.
 
 The AST fingerprint prevents output agreement over different inputs. The gate
 `scripts/check-surface-conformance.sh` rejects an empty or malformed
@@ -535,13 +581,14 @@ M5 succeeds only when all three evidence layers pass:
 2. **Cross-language conformance evidence.** The independent Haskell
    production-path emitter and Lean verified-model emitter must produce the
    same nonempty, ordered canonical rows for the finite manifest, including
-   AST fingerprints, outcomes, core images, obligations, attacks, and
-   observations. This connects the model to exercised shipped behavior; it
-   remains finite conformance evidence, not parser or Haskell correctness.
+   AST fingerprints, outcomes, core images, authored open questions,
+   located holes, attacks, and observations. This connects the model to
+   exercised shipped behavior; it remains finite conformance evidence, not
+   parser or Haskell correctness.
 3. **Regression evidence.** The pre-existing core bytes, verdicts,
    differential anchors, semantics/backend goldens, and generated core
    artifacts must remain unchanged. The M5 surface fixtures and their own
-   seven-column golden intentionally advance together; the adapted before/after
+   eight-column golden intentionally advance together; the adapted before/after
    patch comparison below proves their generators introduce no further drift.
    This demonstrates that the repair did not silently change the frozen core
    contract.
