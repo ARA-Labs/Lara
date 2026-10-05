@@ -131,7 +131,7 @@ import Lara.AST
 import Lara.Prop (Prop)
 import Lara.Replay (CoreVersion)
 import Lara.Wire
-  ( Tag (TDupArgument, TDupRule, TIncompleteArgument, TMissingConflict)
+  ( Tag (TDupArgument, TDupRule, TMissingConflict)
   , rejectClassTag
   , tagToString
   )
@@ -948,7 +948,6 @@ rejectionText rejection =
   tagToString $ case rejection of
     DuplicateRule -> TDupRule
     DuplicateArgument -> TDupArgument
-    IncompleteArgument -> TIncompleteArgument
     MissingConflict -> TMissingConflict
     RejectClass rejectClass -> rejectClassTag rejectClass
 

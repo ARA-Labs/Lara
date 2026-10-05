@@ -919,6 +919,5 @@ data Rejection
   = RejectClass RejectClass
   | DuplicateRule -- ^ duplicate policy rule identifier
   | DuplicateArgument -- ^ two structurally identical argument terms
-  | IncompleteArgument -- ^ an argument with open root obligations
   | MissingConflict -- ^ an undeclared contrary pair between complete arguments
   deriving (Eq, Ord, Show)

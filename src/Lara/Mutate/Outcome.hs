@@ -31,12 +31,14 @@ import Lara.AST
 data Expected
   = ExpectClass RejectClass
   | ExpectIncompleteArgument
-  -- ^ the structural obligation-gate reject ('Lara.AST.IncompleteArgument', a
-  -- 'Rejection' with no R-class by design): the mutant is schema-valid — R5
-  -- coverage holds because the open question is covered by a declared hole —
-  -- and the full system rejects it only at the obligation gate
-  -- ('Lara.Check.ccObligationGate'), i.e. an argument reaching the root with
-  -- an open mandatory obligation.
+  -- ^ the retired obligation-gate reject (@reject-IncompleteArgument@): the
+  -- mutant is schema-valid — R5 coverage holds because the open question is
+  -- covered by a declared hole — and up to @lara-core\@0.2@ the full system
+  -- rejected it at the support stage. Since @lara-core\@0.3@ such an argument
+  -- is an accepted located hole and no verdict carries this kind, so
+  -- 'Lara.Measure.classMatches' never matches it: a mutant still specified this
+  -- way reports a mismatch until its expectation is migrated to the
+  -- accept-with-hole outcome.
   | ExpectMissingConflict
   -- ^ the structural completeness reject ('Lara.AST.MissingConflict', a
   -- 'Rejection' with no R-class by design): the mutant declares an attackable
@@ -64,7 +66,7 @@ data Expected
 expectedText :: Expected -> String
 expectedText e = case e of
   ExpectClass c -> "reject-" ++ show c
-  ExpectIncompleteArgument -> "reject-" ++ show IncompleteArgument
+  ExpectIncompleteArgument -> "reject-IncompleteArgument"
   ExpectMissingConflict -> "reject-" ++ show MissingConflict
   ExpectCodecReject -> "codec-reject"
   ExpectAllContested -> "accept-all-contested"

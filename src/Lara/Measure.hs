@@ -303,7 +303,8 @@ classMatches :: Expected -> Outcome -> Bool
 classMatches e outcome = case e of
   ExpectCodecReject -> False -- decoded cleanly; expected a codec failure
   ExpectClass c -> outcome == Reject (RejectClass c)
-  ExpectIncompleteArgument -> outcome == Reject IncompleteArgument
+  -- retired kind: no verdict carries it since @lara-core\@0.3@
+  ExpectIncompleteArgument -> False
   ExpectMissingConflict -> outcome == Reject MissingConflict
   ExpectAllContested -> allContested outcome
   ExpectEvidenceBlocked -> evidenceBlocked outcome

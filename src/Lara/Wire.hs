@@ -94,8 +94,8 @@
 -- \<conditional-sec\> ::= (conditional (status \<atom\> CORE-STATUS)+)
 -- STATUS    ::= CORE-STATUS | evidence-blocked
 -- CORE-STATUS ::= gap | justified | contested | defeated
--- REJECTION ::= duplicate-rule | duplicate-argument | incomplete-argument
---             | missing-conflict | R1 | R2 | R3 | R4 | R5 | R6 | R7
+-- REJECTION ::= duplicate-rule | duplicate-argument | missing-conflict
+--             | R1 | R2 | R3 | R4 | R5 | R6 | R7
 --             | R9 | R10 | R11 | R12 | R13
 -- @
 --
@@ -449,7 +449,7 @@ data Tag
   | TIn | TOut | TUndec | TGap | TJustified | TContested | TDefeated
   | TEvidenceBlocked
     -- rejection outcomes
-  | TDupRule | TDupArgument | TIncompleteArgument | TMissingConflict
+  | TDupRule | TDupArgument | TMissingConflict
   | TR1 | TR2 | TR3 | TR4 | TR5 | TR6 | TR7 | TR9 | TR10 | TR11 | TR12 | TR13
   deriving (Eq, Ord, Show, Enum, Bounded)
 
@@ -487,7 +487,6 @@ tagToString t = case t of
   TGap -> "gap"; TJustified -> "justified"; TContested -> "contested"
   TDefeated -> "defeated"; TEvidenceBlocked -> "evidence-blocked"
   TDupRule -> "duplicate-rule"; TDupArgument -> "duplicate-argument"
-  TIncompleteArgument -> "incomplete-argument"
   TMissingConflict -> "missing-conflict"
   TR1 -> "R1"; TR2 -> "R2"; TR3 -> "R3"; TR4 -> "R4"; TR5 -> "R5"; TR6 -> "R6"
   TR7 -> "R7"; TR9 -> "R9"; TR10 -> "R10"; TR11 -> "R11"; TR12 -> "R12"
@@ -1447,7 +1446,6 @@ encodeRejection r =
         ( case r of
             DuplicateRule -> TDupRule
             DuplicateArgument -> TDupArgument
-            IncompleteArgument -> TIncompleteArgument
             MissingConflict -> TMissingConflict
             RejectClass c -> rejectClassTag c
         )
@@ -1598,7 +1596,6 @@ decodeVerdictM value = case value of
       SAtom text -> case parseTag text of
         Just TDupRule -> ok DuplicateRule
         Just TDupArgument -> ok DuplicateArgument
-        Just TIncompleteArgument -> ok IncompleteArgument
         Just TMissingConflict -> ok MissingConflict
         Just tag
           | Just rejectionClass <- tagRejectClass tag ->

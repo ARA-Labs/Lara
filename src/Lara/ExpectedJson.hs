@@ -556,7 +556,6 @@ rejectionClass :: Rejection -> String
 rejectionClass r = tagToString $ case r of
   DuplicateRule -> TDupRule
   DuplicateArgument -> TDupArgument
-  IncompleteArgument -> TIncompleteArgument
   MissingConflict -> TMissingConflict
   -- Reuse the wire tag table as the single source of truth so every
   -- 'RejectClass' (incl. R9) is covered and the two can never drift.
