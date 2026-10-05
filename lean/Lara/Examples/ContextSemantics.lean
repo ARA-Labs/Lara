@@ -104,9 +104,9 @@ open Lara.Examples.Linking
 
 A `DefeatPolicy`'s contrary list is a list of **(source-pattern,
 target-pattern)** pairs, exactly as `Lara.Examples.dpEx`
-(`lean/Lara/Examples.lean:1494`) is: `dpEx = ⟨[(apB, apA)], []⟩` is what makes
+(`lean/Lara/Examples.lean:1501`) is: `dpEx = ⟨[(apB, apA)], []⟩` is what makes
 the saturated attack `Lara.Examples.kAtk = .undermine (.leaf l2) (.leaf l1) []`
-(`lean/Lara/Examples.lean:1466`), and `l2` concludes `q` while `l1` concludes
+(`lean/Lara/Examples.lean:1473`), and `l2` concludes `q` while `l1` concludes
 `p`, so `(apB, apA)` reads *q attacks p*. `cyclePolicy` follows the shape of
 `Linking.symPolicy` (`lean/Lara/Examples/Linking.lean:589`), changing only
 `unitPolicyEx`'s `defeat` field, and reuses `Linking.apS`

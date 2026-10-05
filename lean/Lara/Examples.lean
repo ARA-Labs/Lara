@@ -31,6 +31,13 @@ What is exercised, per the review findings on the M1 lock pass:
   a concrete edge decider (`closure_grounded_verdict`): the attacker is `in`,
   the target and the wrapper are both `out`, and the wrapper's claim is
   `defeated` purely through the closure edge.
+* **§4.4 located holes** — `check_program_incomplete_is_hole`: an argument
+  with an open mandatory question is accepted as a hole, outside `Args(P)`,
+  and `check_program_incomplete_hole_report` reports its index and exact
+  obligations; `check_program_hole_attack_closes_onto_complete`: an attack
+  naming a hole still closes onto a complete argument sharing the attacked
+  occurrence; `check_program_hole_rebut_no_edge`: rebutting the whole hole
+  adds no edge.
 
 Everything here is a tiny closed fixture; proofs are `rfl`/`decide`-style
 where the definitions are executable and small explicit derivations where the
@@ -1527,10 +1534,14 @@ theorem PExCheck_ok : PExCheck = .ok PEx := by
 
 @[simp] theorem PEx_args :
     PEx.args = [.leaf l2, .leaf l1, vWrap] :=
-  (checkProgram_sound PExCheck_ok).1
+  (checkProgram_sound PExCheck_ok).1.trans (by decide)
+
+@[simp] theorem PEx_holes : PEx.holes = [] :=
+  (checkProgram_sound PExCheck_ok).2.1.trans (by decide)
 
 @[simp] theorem PEx_atts : PEx.atts = [kAtk] :=
-  (checkProgram_sound PExCheck_ok).2.1
+  (checkProgram_sound PExCheck_ok).2.2.1.trans
+    (by rw [PEx_args]; decide)
 
 /-! ### Proof-bearing program checker matrix -/
 
@@ -1638,12 +1649,37 @@ theorem check_program_duplicate_crossing_first_pair :
       [.leaf l1, .leaf l2, .leaf l2, .leaf l1] [] =
       .error (.duplicateArgument 0 3) := by rfl
 
-theorem check_program_incomplete_exact :
-    checkProgram PiEx ΓEx registryEx dpEx [tMix] [] =
-      .error (.incompleteArgument 0 [q1]) := by rfl
+/-- **Located holes (spec §4.4):** an argument that leaves a mandatory question
+open is accepted, stays out of `Args(P)`, and is kept in `Holes(P)`; the unit
+is no longer rejected. -/
+theorem check_program_incomplete_is_hole :
+    ∃ P : CheckedProgram id PiEx ΓEx (certOkOf registryEx) dpEx,
+      checkProgram PiEx ΓEx registryEx dpEx [tMix] [] = .ok P ∧
+      P.args = [] ∧ P.holes = [tMix] ∧ P.atts = [] := by
+  have hok : (checkProgram PiEx ΓEx registryEx dpEx [tMix] []).isOk = true := by
+    decide
+  cases hc : checkProgram PiEx ΓEx registryEx dpEx [tMix] [] with
+  | error e => rw [hc] at hok; contradiction
+  | ok P =>
+      have hs := checkProgram_sound hc
+      refine ⟨P, rfl, ?_, ?_, ?_⟩
+      · exact hs.1.trans (by decide)
+      · exact hs.2.1.trans (by decide)
+      · rw [hs.2.2.1, hs.1.trans (by decide : completeArgs PiEx ΓEx registryEx
+          [tMix] = [])]
+        decide
 
-theorem check_program_incomplete_not_rejection_class :
-    (ProgramError.incompleteArgument 0 [q1]).rejectClass = none := by rfl
+/-- The accepted hole is reported at its declaration index with exactly the
+mandatory root obligations; the optional `q2` is not among them. -/
+theorem check_program_incomplete_hole_report :
+    (checkProgramDetailed PiEx ΓEx registryEx dpEx [tMix] []).toOption.map
+      (fun acc => acc.holes.map fun h => (h.index, h.obligations)) =
+        some [(0, [q1])] := by rfl
+
+/-- A hole is a located-gap diagnostic, not a status: a claim whose only
+candidate support is the hole has empty complete support. -/
+theorem check_program_incomplete_no_complete_support :
+    completeArgs PiEx ΓEx registryEx [tMix] = [] := by decide
 
 theorem check_program_support_error_wrapped :
     checkProgram PiEx ΓEx registryEx dpEx [.leaf l1, badSource] [] =
@@ -1721,6 +1757,70 @@ This is the strict-superset behavior of subargument closure. -/
 theorem closure_edge_wrapper : Edge PEx (.leaf l2) vWrap :=
   ⟨by simp, by simp, kAtk, by simp, rfl,
     .leaf l1, rfl, ⟨[.prem 0], by simp [vWrap, Attack.subterm]⟩⟩
+
+/-! ### Attacks that name a hole (spec §4.4, §8)
+
+A hole is a declared argument, so an attack may name one as its target. The
+attacked occurrence is still a subterm of the hole, and every *complete*
+argument containing that occurrence is reached by the closure. -/
+
+/-- A hole with a complete premise `leaf l1` beside the open `tMix`; the open
+question propagates to its root. -/
+def tHolePair : SupportTerm := .inst rPairId [] [.leaf l1, tMix] [] [] .none
+
+/-- `leaf l2` undermines the complete premise inside the hole. -/
+def kHoleUnder : Attack.Attack := .undermine (.leaf l2) tHolePair [.prem 0]
+
+/-- **D6 witness.** The attack targets a hole, yet the closure edge lands on
+the complete argument `leaf l1` that shares the attacked occurrence. -/
+theorem check_program_hole_attack_closes_onto_complete :
+    ∃ P : CheckedProgram id PiEx ΓEx (certOkOf registryEx) dpEx,
+      checkProgram PiEx ΓEx registryEx dpEx
+        [.leaf l2, .leaf l1, tHolePair] [kHoleUnder] = .ok P ∧
+      P.args = [.leaf l2, .leaf l1] ∧ P.holes = [tHolePair] ∧
+      P.atts = [kHoleUnder] ∧ kHoleUnder.target ∈ P.holes ∧
+      kHoleUnder.target ∉ P.args ∧ Compile.edgeB P 0 1 = true := by
+  have hok : (checkProgram PiEx ΓEx registryEx dpEx
+      [.leaf l2, .leaf l1, tHolePair] [kHoleUnder]).isOk = true := by decide
+  cases hc : checkProgram PiEx ΓEx registryEx dpEx
+      [.leaf l2, .leaf l1, tHolePair] [kHoleUnder] with
+  | error e => rw [hc] at hok; contradiction
+  | ok P =>
+      have hs := checkProgram_sound hc
+      have hargs : P.args = [.leaf l2, .leaf l1] := hs.1.trans (by decide)
+      have hholes : P.holes = [tHolePair] := hs.2.1.trans (by decide)
+      have hatts : P.atts = [kHoleUnder] := by
+        rw [hs.2.2.1, hargs]; decide
+      refine ⟨P, rfl, hargs, hholes, hatts, ?_, ?_, ?_⟩
+      · rw [hholes]; decide
+      · rw [hargs]; decide
+      · unfold Compile.edgeB; rw [hargs, hatts]; decide
+
+/-- Rebutting the whole hole adds no edge: the only complete argument,
+`leaf l2`, does not contain the hole. -/
+theorem check_program_hole_rebut_no_edge :
+    ∃ P : CheckedProgram id PiEx ΓEx (certOkOf registryEx) dpEx,
+      checkProgram PiEx ΓEx registryEx dpEx [.leaf l2, tMix] [kRebut] = .ok P ∧
+      P.args = [.leaf l2] ∧ P.holes = [tMix] ∧ P.atts = [kRebut] ∧
+      ∀ i j, Compile.edgeB P i j = false := by
+  have hok : (checkProgram PiEx ΓEx registryEx dpEx
+      [.leaf l2, tMix] [kRebut]).isOk = true := by decide
+  cases hc : checkProgram PiEx ΓEx registryEx dpEx
+      [.leaf l2, tMix] [kRebut] with
+  | error e => rw [hc] at hok; contradiction
+  | ok P =>
+      have hs := checkProgram_sound hc
+      have hargs : P.args = [.leaf l2] := hs.1.trans (by decide)
+      have hholes : P.holes = [tMix] := hs.2.1.trans (by decide)
+      have hatts : P.atts = [kRebut] := by
+        rw [hs.2.2.1, hargs]; decide
+      refine ⟨P, rfl, hargs, hholes, hatts, ?_⟩
+      intro i j
+      rcases i with _ | _ | i <;> rcases j with _ | _ | j <;>
+        simp only [Compile.edgeB, hargs, hatts, kRebut, tMix,
+          List.getElem?_cons_zero, List.getElem?_cons_succ,
+          List.getElem?_nil, Compile.coveredB, List.any_cons, List.any_nil,
+          Compile.attackClosureB, Compile.containsB] <;> decide
 
 /-! ### Decidable structural closure (`containsB`/`attackClosureB`, Task 1)
 

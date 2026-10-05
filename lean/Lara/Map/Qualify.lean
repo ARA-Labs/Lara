@@ -439,16 +439,24 @@ def mapLeafProg (P : CheckedProgram canon Pi Gamma CertOk dp)
     obtain ⟨k, hk, rfl⟩ := List.mem_map.mp hk'
     rw [mapLeafAtt_source]
     exact List.mem_map.mpr ⟨k.source, P.source_declared k hk, rfl⟩
+  holes := P.holes.map (mapLeaf r)
   target_declared := by
     intro k' hk'
     obtain ⟨k, hk, rfl⟩ := List.mem_map.mp hk'
     rw [mapLeafAtt_target]
-    exact List.mem_map.mpr ⟨k.target, P.target_declared k hk, rfl⟩
+    exact (P.target_declared k hk).imp
+      (fun h => List.mem_map.mpr ⟨k.target, h, rfl⟩)
+      (fun h => List.mem_map.mpr ⟨k.target, h, rfl⟩)
 
 @[simp] theorem mapLeafProg_args (P : CheckedProgram canon Pi Gamma CertOk dp)
     (hr : Function.Injective r)
     (hΓ : ∀ l p, Gamma l = some p → Gamma' (r l) = some p) :
     (mapLeafProg P hr hΓ).args = P.args.map (mapLeaf r) := rfl
+
+@[simp] theorem mapLeafProg_holes (P : CheckedProgram canon Pi Gamma CertOk dp)
+    (hr : Function.Injective r)
+    (hΓ : ∀ l p, Gamma l = some p → Gamma' (r l) = some p) :
+    (mapLeafProg P hr hΓ).holes = P.holes.map (mapLeaf r) := rfl
 
 @[simp] theorem mapLeafProg_atts (P : CheckedProgram canon Pi Gamma CertOk dp)
     (hr : Function.Injective r)

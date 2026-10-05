@@ -894,6 +894,7 @@ open Lara
 #print axioms Lara.Examples.PExCheck_success
 #print axioms Lara.Examples.PExCheck_ok
 #print axioms Lara.Examples.PEx_args
+#print axioms Lara.Examples.PEx_holes
 #print axioms Lara.Examples.PEx_atts
 #print axioms Lara.Examples.supportTerm_nested_structural_equality
 #print axioms Lara.Examples.supportTerm_certificate_payload_distinct
@@ -905,8 +906,11 @@ open Lara
 #print axioms Lara.Examples.check_program_certificate_payload_distinct
 #print axioms Lara.Examples.check_program_duplicate_first_pair
 #print axioms Lara.Examples.check_program_duplicate_crossing_first_pair
-#print axioms Lara.Examples.check_program_incomplete_exact
-#print axioms Lara.Examples.check_program_incomplete_not_rejection_class
+#print axioms Lara.Examples.check_program_incomplete_is_hole
+#print axioms Lara.Examples.check_program_incomplete_hole_report
+#print axioms Lara.Examples.check_program_incomplete_no_complete_support
+#print axioms Lara.Examples.check_program_hole_attack_closes_onto_complete
+#print axioms Lara.Examples.check_program_hole_rebut_no_edge
 #print axioms Lara.Examples.check_program_support_error_wrapped
 #print axioms Lara.Examples.check_program_first_argument_failure
 #print axioms Lara.Examples.check_program_undeclared_source
@@ -1157,6 +1161,7 @@ open Lara
 #print axioms Lara.Erase.hasSupport_mapAssur
 #print axioms Lara.Erase.hasAttack_mapAssur
 #print axioms Lara.Erase.mapCertProg_args
+#print axioms Lara.Erase.mapCertProg_holes
 #print axioms Lara.Erase.mapCertProg_atts
 #print axioms Lara.Erase.backend_replacement_transport
 
@@ -3971,6 +3976,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Map.hasSupport_mapLeaf
 #print axioms Lara.Map.hasAttack_mapLeaf
 #print axioms Lara.Map.mapLeafProg_args
+#print axioms Lara.Map.mapLeafProg_holes
 #print axioms Lara.Map.mapLeafProg_atts
 #print axioms Lara.Map.edgeB_mapLeaf
 #print axioms Lara.Map.checkedAF_mapLeaf

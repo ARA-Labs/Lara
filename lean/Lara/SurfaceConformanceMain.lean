@@ -1044,7 +1044,6 @@ private def unitErrorText : Check.Unit.UnitError → String
   | .scopeViolation _ => "scope"
   | .policyViolation _ => "policy"
   | .program (.duplicateArgument _ _) => "duplicate-argument"
-  | .program (.incompleteArgument _ _) => "incomplete-argument"
   | .program (.missingConflict _) => "missing-conflict"
   | .program (.rejection _ error) => rejectClassText error.rejectClass
 

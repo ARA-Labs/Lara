@@ -256,7 +256,7 @@ theorem detailed_sound_fixture :
     Compile.AttackComplete id noRules ΓStress (certOkOf registryEx)
       ⟨[], []⟩ stressAcceptance.program.args
       stressAcceptance.program.atts :=
-  (checkProgramDetailed_sound stressDetailed_ok).2.2.1
+  (checkProgramDetailed_sound stressDetailed_ok).2.2.2.1
 
 theorem detailed_complete_fixture :
     ∃ accepted,

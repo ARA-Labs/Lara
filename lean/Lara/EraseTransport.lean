@@ -189,17 +189,26 @@ def mapCertProg (P₁ : CheckedProgram canon Pi Gamma CertOk₁ dp)
     obtain ⟨k, hk, rfl⟩ := List.mem_map.mp hk'
     rw [mapAssurAtt_source]
     exact List.mem_map.mpr ⟨k.source, P₁.source_declared k hk, rfl⟩
+  holes := P₁.holes.map (mapAssur f)
   target_declared := by
     intro k' hk'
     obtain ⟨k, hk, rfl⟩ := List.mem_map.mp hk'
     rw [mapAssurAtt_target]
-    exact List.mem_map.mpr ⟨k.target, P₁.target_declared k hk, rfl⟩
+    exact (P₁.target_declared k hk).imp
+      (fun h => List.mem_map.mpr ⟨k.target, h, rfl⟩)
+      (fun h => List.mem_map.mpr ⟨k.target, h, rfl⟩)
 
 @[simp] theorem mapCertProg_args (P₁ : CheckedProgram canon Pi Gamma CertOk₁ dp)
     (hf : Function.Injective f)
     (hpres : ∀ (r : Rule) (As : List Atom) (C : Atom) (α : Assurance),
       AssuranceOk CertOk₁ r As C α → AssuranceOk CertOk₂ r As C (f α)) :
     (mapCertProg P₁ hf hpres).args = P₁.args.map (mapAssur f) := rfl
+
+@[simp] theorem mapCertProg_holes (P₁ : CheckedProgram canon Pi Gamma CertOk₁ dp)
+    (hf : Function.Injective f)
+    (hpres : ∀ (r : Rule) (As : List Atom) (C : Atom) (α : Assurance),
+      AssuranceOk CertOk₁ r As C α → AssuranceOk CertOk₂ r As C (f α)) :
+    (mapCertProg P₁ hf hpres).holes = P₁.holes.map (mapAssur f) := rfl
 
 @[simp] theorem mapCertProg_atts (P₁ : CheckedProgram canon Pi Gamma CertOk₁ dp)
     (hf : Function.Injective f)
