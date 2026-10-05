@@ -1143,6 +1143,25 @@ open Lara
 #print axioms Lara.Check.DeclPartition.mem_holeIndices_iff
 #print axioms Lara.Check.DeclPartition.nodeDecls_eq
 #print axioms Lara.Check.DeclPartition.holeIndices_eq
+-- Located obligation sites (Lara.Check.HoleSites, located-gap decision D12)
+#print axioms Lara.Check.mem_prefixSites
+#print axioms Lara.Check.mem_ownSites
+#print axioms Lara.Check.mem_openSitesList
+#print axioms Lara.Check.mem_openSitesDis
+#print axioms Lara.Check.mem_openSites_inst
+#print axioms Lara.Check.mem_sitesFor
+#print axioms Lara.Check.lookupDis_mem
+#print axioms Lara.Check.lookupDis_of_nodup
+#print axioms Lara.Check.openSites_sound
+#print axioms Lara.Check.openSites_complete
+#print axioms Lara.Check.mem_openSites_iff
+#print axioms Lara.Check.mem_obligations_iff_sites
+#print axioms Lara.Check.sitesFor_ne_nil
+#print axioms Lara.Check.openSites_nodup
+#print axioms Lara.Check.sitesFor_nodup
+#print axioms Lara.Check.obligationSites_questions
+#print axioms Lara.Check.obligationSites_adequate
+#print axioms Lara.Check.holeObligationSites_adequate
 #print axioms Lara.Check.CheckedArguments.holes_terms
 #print axioms Lara.Check.CheckedArguments.partition
 #print axioms Lara.Check.CheckedArguments.typed
