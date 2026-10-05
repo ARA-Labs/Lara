@@ -65,6 +65,7 @@ import Lara.Examples.SurfaceTransportContext
 import Lara.Examples.SurfaceHoles
 import Lara.Update
 import Lara.Update.Discharge
+import Lara.Update.Completion
 import Lara.Examples.Update
 import Lara.Invariants.Merge
 import Lara.Context.Fragment
@@ -1715,6 +1716,22 @@ outside the public audit surface. -/
 
 /-! ### Completion updates — in-place discharge (D13) and atomic batches (D14) -/
 
+#print axioms Lara.Update.AtomicEdit
+#print axioms Lara.Update.DischargeOpen
+#print axioms Lara.Update.dischargeOpenB
+#print axioms Lara.Update.dischargeOpenB_iff
+#print axioms Lara.Update.dischargeRows
+#print axioms Lara.Update.AtomicEdit.applyRaw
+#print axioms Lara.Update.applyBatchFrom
+#print axioms Lara.Update.applyBatch
+#print axioms Lara.Update.applyUpdate_dischargeOpen_notDischargeable
+#print axioms Lara.Update.applyUpdate_atomic_batchRejected
+#print axioms Lara.Update.applyUpdate_dischargeOpen_ok_iff
+#print axioms Lara.Update.applyUpdate_dischargeOpen_target
+#print axioms Lara.Update.applyUpdate_atomic_ok_iff
+#print axioms Lara.Update.applyUpdate_atomic_target
+#print axioms Lara.Update.usesLeaf_true_iff
+
 -- Term-level discharge (lean/Lara/Update/Discharge.lean).
 #print axioms Lara.Update.Discharge.replaceDis
 #print axioms Lara.Update.Discharge.closeOpen
@@ -1758,6 +1775,44 @@ outside the public audit surface. -/
 #print axioms Lara.Update.Discharge.mem_leavesDis_iff
 #print axioms Lara.Update.Discharge.leaves_dischargeAt
 #print axioms Lara.Update.Discharge.dischargeAt_ne
+
+-- Batch and pipeline-level discharge metatheory (lean/Lara/Update/Completion.lean).
+#print axioms Lara.Update.applyOrKeep
+#print axioms Lara.Update.applyOrKeep_of_error
+#print axioms Lara.Update.applyOrKeep_of_ok
+#print axioms Lara.Update.atomic_rejected_iff
+#print axioms Lara.Update.atomic_partial_rejected
+#print axioms Lara.Update.applyBatchFrom_append
+#print axioms Lara.Update.leafEdits
+#print axioms Lara.Update.instanceEdits
+#print axioms Lara.Update.attackEdits
+#print axioms Lara.Update.withLeaves
+#print axioms Lara.Update.applyBatchFrom_leafEdits
+#print axioms Lara.Update.applyBatchFrom_instanceEdits
+#print axioms Lara.Update.applyBatchFrom_attackEdits
+#print axioms Lara.Update.completionEdits
+#print axioms Lara.Update.completionState
+#print axioms Lara.Update.atomic_completion_complete
+#print axioms Lara.Update.dischargeRows_map_fst
+#print axioms Lara.Update.dischargeCompletionEdits
+#print axioms Lara.Update.dischargeCompletionState
+#print axioms Lara.Update.atomic_discharge_completion_complete
+#print axioms Lara.Update.AtomicEdit.Additive
+#print axioms Lara.Update.AtomicEdit.applyRaw_prefix
+#print axioms Lara.Update.applyBatchFrom_prefix
+#print axioms Lara.Update.applyUpdate_atomic_raw_prefix
+#print axioms Lara.Update.AtomicEdit.AdmittedAdditive
+#print axioms Lara.Update.atomic_additive_checked_prefix
+#print axioms Lara.Update.dischargeTerm
+#print axioms Lara.Update.lookupArg_dischargeRows
+#print axioms Lara.Update.retarget
+#print axioms Lara.Update.resolveAttacks_dischargeRows
+#print axioms Lara.Update.dischargeOpen_raw_identities
+#print axioms Lara.Update.dischargeOpen_resolved
+#print axioms Lara.Update.dischargeOpen_others_persist
+#print axioms Lara.Update.dischargeOpen_row_kept
+#print axioms Lara.Update.claimSupportFor_ne_nil_of_arg
+#print axioms Lara.Update.dischargeOpen_hole_becomes_node
 
 
 /-! ### M3 — public transition API and matrix boundaries -/

@@ -8,6 +8,7 @@ an edit.
 import Lara.Admission
 import Lara.Consistency
 import Lara.Semantics
+import Lara.Update.Discharge
 
 namespace Lara.Update
 
@@ -95,12 +96,24 @@ inductive UpdateRejection where
   | keyNotAdmitted : LeafKind × Provenance → UpdateRejection
   | endpointNotDeclared : RawAttack.RawAttack → UpdateRejection
   | instanceNotFresh : String → SupportTerm → UpdateRejection
+  | notDischargeable : String → Attack.Pos → QuestionId → UpdateRejection
+  | batchEdit : Nat → UpdateRejection → UpdateRejection
   | argumentIdsNotUnique
   | attackResolutionFailed
   | sourceInvalid : Admission.SourceInvalid → UpdateRejection
   | sourceRejected : Admission.AdmissionRejection → UpdateRejection
   | unitRejected : Check.Unit.UnitError → UpdateRejection
 deriving DecidableEq
+
+/-- One raw edit of an atomic batch (D14).  The vocabulary is the additive
+constructors plus in-place discharge: an atomic batch completes a gap, so it
+carries no `tighten`.  It is a separate type, not a nested `SourceUpdate`, so a
+batch cannot contain a batch. -/
+inductive AtomicEdit where
+  | addLeaf       (id : LeafId) (a : Atom) (m : Admission.LeafMeta)
+  | addInstance   (name : String) (w : SupportTerm)
+  | addAttack     (k : RawAttack.RawAttack)
+  | dischargeOpen (name : String) (π : Attack.Pos) (q : QuestionId) (v : SupportTerm)
 
 /-- A source edit that may preserve acceptance after the full pipeline is
 rerun.  An admit-to-reject constructor is deliberately absent:
@@ -115,6 +128,11 @@ inductive SourceUpdate where
   | tighten     (key : LeafKind × Provenance)
   | addAttack   (k : RawAttack.RawAttack)
   | addInstance (name : String) (w : SupportTerm)
+  /-- Answer the open question `q` of the rule occurrence at `π` inside the
+  declared argument `name`, with the discharge `v` (D13). -/
+  | dischargeOpen (name : String) (π : Attack.Pos) (q : QuestionId) (v : SupportTerm)
+  /-- Apply a batch of raw edits, then admit and check once (D14). -/
+  | atomic      (edits : List AtomicEdit)
 
 /-! ### Constructor side conditions -/
 
@@ -182,7 +200,79 @@ theorem instanceFreshB_iff (σ : SourceState) (name : String) (w : SupportTerm) 
     instanceFreshB σ name w = true ↔ InstanceFresh σ name w := by
   simp [instanceFreshB, InstanceFresh]
 
+/-- The `dischargeOpen` site precondition: the declared argument `name` exists
+and its occurrence at `π` is a rule instance whose open set contains `q`.
+The argument is the row raw endpoint resolution reads (`RawAttack.lookupArg`). -/
+def DischargeOpen (σ : SourceState) (name : String) (π : Attack.Pos)
+    (q : QuestionId) : Prop :=
+  ∃ w, RawAttack.lookupArg σ.argsRaw name = some w ∧ Discharge.OpenAt w π q
+
+/-- Executable decider for `DischargeOpen`. -/
+def dischargeOpenB (σ : SourceState) (name : String) (π : Attack.Pos)
+    (q : QuestionId) : Bool :=
+  match RawAttack.lookupArg σ.argsRaw name with
+  | some w => Discharge.openAtB w π q
+  | none => false
+
+/-- `dischargeOpenB` decides the exact discharge-site precondition. -/
+theorem dischargeOpenB_iff (σ : SourceState) (name : String) (π : Attack.Pos)
+    (q : QuestionId) :
+    dischargeOpenB σ name π q = true ↔ DischargeOpen σ name π q := by
+  unfold dischargeOpenB DischargeOpen
+  cases h : RawAttack.lookupArg σ.argsRaw name with
+  | none => simp
+  | some w =>
+      simp only [Option.some.injEq, exists_eq_left']
+      exact Discharge.openAtB_iff w π q
+
+/-- Rewrite the raw argument rows named `name` in place: each keeps its name
+and its position, and its term is discharged at `π`.  Raw names are unique on
+every source that reaches admission, so exactly one row changes there. -/
+def dischargeRows (argsRaw : List (String × SupportTerm)) (name : String)
+    (π : Attack.Pos) (q : QuestionId) (v : SupportTerm) :
+    List (String × SupportTerm) :=
+  argsRaw.map fun row =>
+    if row.1 = name then (row.1, (Discharge.dischargeAt q v π row.2).getD row.2)
+    else row
+
 /-! ### Editing and executable revalidation -/
+
+/-- Apply one raw edit of a batch, checking its syntactic side condition
+against the state the earlier edits of the batch produced.  No admission or
+checking happens here. -/
+def AtomicEdit.applyRaw (σ : SourceState) : AtomicEdit → Except UpdateRejection SourceState
+  | .addLeaf id a m =>
+      if addLeafFreshB σ id then
+        .ok { σ with metas := σ.metas ++ [{ m with id := id }]
+                     leaves := σ.leaves ++ [(id, a)] }
+      else .error (.leafNotFresh id)
+  | .addInstance name w =>
+      if instanceFreshB σ name w then
+        .ok { σ with argsRaw := σ.argsRaw ++ [(name, w)] }
+      else .error (.instanceNotFresh name w)
+  | .addAttack k =>
+      if endpointDeclaredB σ k then
+        .ok { σ with rawAtts := σ.rawAtts ++ [k] }
+      else .error (.endpointNotDeclared k)
+  | .dischargeOpen name π q v =>
+      if dischargeOpenB σ name π q then
+        .ok { σ with argsRaw := dischargeRows σ.argsRaw name π q v }
+      else .error (.notDischargeable name π q)
+
+/-- Apply a batch's raw edits in order, numbering them from `index`.  The first
+failing edit rejects the whole batch, tagged with its position. -/
+def applyBatchFrom (σ : SourceState) (index : Nat) :
+    List AtomicEdit → Except UpdateRejection SourceState
+  | [] => .ok σ
+  | e :: es =>
+      match e.applyRaw σ with
+      | .error reason => .error (.batchEdit index reason)
+      | .ok σ' => applyBatchFrom σ' (index + 1) es
+
+/-- The raw final state of a batch, or the first edit rejection. -/
+def applyBatch (σ : SourceState) (edits : List AtomicEdit) :
+    Except UpdateRejection SourceState :=
+  applyBatchFrom σ 0 edits
 
 /-- Change an existing key to quarantine, or append an explicit quarantine row
 when the key was previously admitted by the default. -/
@@ -244,6 +334,16 @@ def applyUpdate {canon : String → String} (reg : BackendRegistry canon)
         acceptEdited reg { σ with argsRaw := σ.argsRaw ++ [(name, w)] }
       else
         .error (.instanceNotFresh name w)
+  | .dischargeOpen name π q v =>
+      if dischargeOpenB σ name π q then
+        acceptEdited reg
+          { σ with argsRaw := dischargeRows σ.argsRaw name π q v }
+      else
+        .error (.notDischargeable name π q)
+  | .atomic edits =>
+      match applyBatch σ edits with
+      | .error reason => .error reason
+      | .ok edited => acceptEdited reg edited
 
 /-- A failed leaf-freshness check selects the constructor-specific rejection. -/
 theorem applyUpdate_addLeaf_notFresh {canon : String → String}
@@ -275,6 +375,23 @@ theorem applyUpdate_addInstance_notFresh {canon : String → String}
     (name : String) (w : SupportTerm)
     (h : instanceFreshB σ name w = false) :
     applyUpdate reg σ (.addInstance name w) = .error (.instanceNotFresh name w) := by
+  simp [applyUpdate, h]
+
+/-- A failed discharge-site check selects the constructor rejection. -/
+theorem applyUpdate_dischargeOpen_notDischargeable {canon : String → String}
+    (reg : BackendRegistry canon) (σ : SourceState)
+    (name : String) (π : Attack.Pos) (q : QuestionId) (v : SupportTerm)
+    (h : dischargeOpenB σ name π q = false) :
+    applyUpdate reg σ (.dischargeOpen name π q v) =
+      .error (.notDischargeable name π q) := by
+  simp [applyUpdate, h]
+
+/-- A batch whose raw edits fail is rejected with the first edit failure,
+before admission runs. -/
+theorem applyUpdate_atomic_batchRejected {canon : String → String}
+    (reg : BackendRegistry canon) (σ : SourceState) (edits : List AtomicEdit)
+    {reason : UpdateRejection} (h : applyBatch σ edits = .error reason) :
+    applyUpdate reg σ (.atomic edits) = .error reason := by
   simp [applyUpdate, h]
 
 
@@ -371,7 +488,9 @@ private theorem quarantined_append_fresh (canon : String → String)
 
   unfold Groups.consistentB
   rw [memberProps_append_fresh leaves fresh a g (hfresh g hg)]
-private theorem usesLeaf_true_iff (qs : List LeafId) (w : SupportTerm) :
+
+/-- A term uses a listed leaf exactly when one of its leaves is listed. -/
+theorem usesLeaf_true_iff (qs : List LeafId) (w : SupportTerm) :
     Groups.usesLeaf qs w = true ↔
       ∃ l, l ∈ Support.leaves w ∧ l ∈ qs := by
   revert qs
@@ -1742,6 +1861,102 @@ private theorem applyUpdate_addInstance_target {canon : String → String}
   split at h
   · exact acceptEdited_ok_target h
   · contradiction
+
+/-- A successful revalidation is exactly an accepted run of the edited
+state. -/
+private theorem accepted_of_acceptEdited {canon : String → String}
+    {reg : BackendRegistry canon} {edited target : SourceState}
+    (h : acceptEdited reg edited = .ok target) :
+    Accepted reg edited := by
+  unfold acceptEdited at h
+  split at h
+  · rename_i hids
+    split at h
+    · contradiction
+    · rename_i resolved hresolve
+      simp only at h
+      split at h
+      · contradiction
+      · contradiction
+      · rename_i result hadmission
+        split at h
+        · contradiction
+        · rename_i checked hcheck
+          exact ⟨{ resolved := resolved, resolve_eq := hresolve, ids_nodup := hids },
+            result, checked, hadmission, hcheck⟩
+  · contradiction
+
+private theorem acceptEdited_of_accepted {canon : String → String}
+    {reg : BackendRegistry canon} {edited : SourceState}
+    (h : Accepted reg edited) : acceptEdited reg edited = .ok edited := by
+  obtain ⟨declared, admission, checked, hadmission, hcheck⟩ := h
+  exact (acceptEdited_of_results reg edited declared.ids_nodup declared
+    admission checked hadmission hcheck).1
+
+/-- Revalidation returns the edited state exactly when it is accepted. -/
+private theorem acceptEdited_ok_iff {canon : String → String}
+    {reg : BackendRegistry canon} {edited target : SourceState} :
+    acceptEdited reg edited = .ok target ↔ target = edited ∧ Accepted reg edited :=
+  ⟨fun h => ⟨acceptEdited_ok_target h, accepted_of_acceptEdited h⟩,
+    fun ⟨htarget, haccepted⟩ => by subst htarget; exact acceptEdited_of_accepted haccepted⟩
+
+/-- **In-place discharge is a site check plus acceptance.** `dischargeOpen`
+succeeds exactly when the site precondition holds and the source with the
+discharged argument rewritten in place is `Accepted`; it then returns that
+source. -/
+theorem applyUpdate_dischargeOpen_ok_iff {canon : String → String}
+    {reg : BackendRegistry canon} {source target : SourceState}
+    {name : String} {π : Attack.Pos} {q : QuestionId} {v : SupportTerm} :
+    applyUpdate reg source (.dischargeOpen name π q v) = .ok target ↔
+      DischargeOpen source name π q ∧
+      target = { source with argsRaw := dischargeRows source.argsRaw name π q v } ∧
+      Accepted reg { source with argsRaw := dischargeRows source.argsRaw name π q v } := by
+  simp only [applyUpdate]
+  by_cases hsite : dischargeOpenB source name π q = true
+  · rw [if_pos hsite, acceptEdited_ok_iff]
+    exact ⟨fun ⟨ht, ha⟩ => ⟨(dischargeOpenB_iff _ _ _ _).mp hsite, ht, ha⟩,
+      fun ⟨_, ht, ha⟩ => ⟨ht, ha⟩⟩
+  · rw [if_neg hsite]
+    constructor
+    · intro h; cases h
+    · rintro ⟨hopen, _⟩
+      exact absurd ((dischargeOpenB_iff _ _ _ _).mpr hopen) hsite
+
+theorem applyUpdate_dischargeOpen_target {canon : String → String}
+    {reg : BackendRegistry canon} {source target : SourceState}
+    {name : String} {π : Attack.Pos} {q : QuestionId} {v : SupportTerm}
+    (h : applyUpdate reg source (.dischargeOpen name π q v) = .ok target) :
+    target = { source with argsRaw := dischargeRows source.argsRaw name π q v } :=
+  (applyUpdate_dischargeOpen_ok_iff.mp h).2.1
+
+/-- **A batch is accepted iff its raw final state is.** An atomic batch
+succeeds exactly when every raw edit's syntactic side condition holds against
+the state the earlier edits produced and the final raw state is `Accepted`; it
+then returns that final state. -/
+theorem applyUpdate_atomic_ok_iff {canon : String → String}
+    {reg : BackendRegistry canon} {source target : SourceState}
+    {edits : List AtomicEdit} :
+    applyUpdate reg source (.atomic edits) = .ok target ↔
+      applyBatch source edits = .ok target ∧ Accepted reg target := by
+  simp only [applyUpdate]
+  cases hbatch : applyBatch source edits with
+  | error reason =>
+      simp only
+      constructor
+      · intro h; cases h
+      · rintro ⟨h, _⟩; cases h
+  | ok edited =>
+      simp only [acceptEdited_ok_iff, Except.ok.injEq]
+      constructor
+      · rintro ⟨rfl, ha⟩; exact ⟨rfl, ha⟩
+      · rintro ⟨rfl, ha⟩; exact ⟨rfl, ha⟩
+
+theorem applyUpdate_atomic_target {canon : String → String}
+    {reg : BackendRegistry canon} {source target : SourceState}
+    {edits : List AtomicEdit}
+    (h : applyUpdate reg source (.atomic edits) = .ok target) :
+    applyBatch source edits = .ok target :=
+  (applyUpdate_atomic_ok_iff.mp h).1
 
 /-! ### Core observations and successful transitions -/
 
