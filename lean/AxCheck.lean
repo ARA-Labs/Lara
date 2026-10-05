@@ -714,7 +714,6 @@ open Lara
 -- Proof-bearing whole-program construction: deterministic duplicate boundary,
 -- aligned checked-source cache, strengthened R1 endpoint boundary, and exact
 -- relational soundness/completeness.
-#print axioms Lara.Check.incompleteArgument_no_rejectClass
 #print axioms Lara.Check.firstDuplicate_none_iff
 #print axioms Lara.Check.CheckedArguments.cache_nodup
 #print axioms Lara.Check.lookupChecked_term
@@ -723,7 +722,6 @@ open Lara
 #print axioms Lara.Check.checkProgram_complete
 #print axioms Lara.Check.checkProgram_accepted_source_declared
 #print axioms Lara.Check.checkProgram_accepted_target_declared
-#print axioms Lara.Check.checkProgram_nodes_complete
 
 -- Spec §8 compile freeze: result 4 both halves (no untyped node or attack),
 -- subargument closure extends the direct attack, and the N16 bridge at both
@@ -1074,6 +1072,68 @@ open Lara
 #print axioms Lara.Examples.GroundedConsistency.self_claim_support_includes_node
 #print axioms Lara.Examples.GroundedConsistency.computed_self_claim_not_justified
 #print axioms Lara.Examples.GroundedConsistency.computed_self_claim_result7
+
+-- lara-core@0.3 located gaps (spec §4.4, §8; docs/located-gap-decision.md).
+-- Accepted units may carry typed arguments with open mandatory obligations as
+-- located holes. The checker partitions its retained cache once into complete
+-- nodes and holes and proves agreement with the inference-based specification
+-- views; attacks sourced at holes are typed then inert (D4); attacks on a
+-- complete occurrence shared with a hole keep their closure edges (D6); a
+-- claim with no complete support is `gap`; and status depends only on the
+-- complete arguments and their complete-to-complete closure coverage.
+#print axioms Lara.Unit.CheckedUnit.holes_terms
+#print axioms Lara.Compile.lookupDis_some_getElem?
+#print axioms Lara.Compile.hasSupport_subterm
+#print axioms Lara.Compile.complete_contains_complete
+#print axioms Lara.Compile.complete_not_contains_hole
+#print axioms Lara.Compile.CheckedProgram.target_declared_of_holes_nil
+#print axioms Lara.Compile.no_edge_of_not_arg
+#print axioms Lara.Compile.closure_reaches_shared_occurrence
+#print axioms Lara.Compile.hole_occurrence_reaches_no_arg
+#print axioms Lara.Compile.checkedAF_eq_of_coverage
+#print axioms Lara.Compile.status_independent_of_holes
+#print axioms Lara.Compile.checkedAF_independent_of_holes
+#print axioms Lara.Check.argComplete_iff
+#print axioms Lara.Check.argHole_iff
+#print axioms Lara.Check.argComplete_of_hasSupport
+#print axioms Lara.Check.argHole_of_hasSupport
+#print axioms Lara.Check.mem_completeArgs_iff
+#print axioms Lara.Check.mem_holeArgs_iff
+#print axioms Lara.Check.completeArgs_holeArgs_disjoint
+#print axioms Lara.Check.mem_completeArgs_or_holeArgs
+#print axioms Lara.Check.completeArgs_append
+#print axioms Lara.Check.holeArgs_append
+#print axioms Lara.Check.completeArgs_congr
+#print axioms Lara.Check.completeArgs_subset
+#print axioms Lara.Check.completeArgs_sublist
+#print axioms Lara.Check.completeArgs_length_le
+#print axioms Lara.Check.completeArgs_eq_self
+#print axioms Lara.Check.holeArgs_eq_nil
+#print axioms Lara.Support.hasSupport_congr_gamma_on
+#print axioms Lara.Check.argComplete_congr_gamma_on
+#print axioms Lara.Check.argHole_congr_gamma_on
+#print axioms Lara.Check.mem_liveAttacks_iff
+#print axioms Lara.Check.liveAttacks_eq_self
+#print axioms Lara.Check.liveAttacks_congr
+#print axioms Lara.Check.liveAttacks_append
+#print axioms Lara.Check.liveAttacks_snoc_unused_source
+#print axioms Lara.Check.covered_liveAttacks_iff
+#print axioms Lara.Check.attackComplete_iff_complete_live
+#print axioms Lara.Check.attackComplete_completeArgs_iff
+#print axioms Lara.Check.CheckedArguments.holes_terms
+#print axioms Lara.Check.CheckedArguments.partition
+#print axioms Lara.Check.CheckedArguments.typed
+#print axioms Lara.Check.checkProgram_complete_holes
+#print axioms Lara.Check.checkProgramDetailed_complete_holes
+#print axioms Lara.Check.Unit.termsWellSorted_filter
+#print axioms Lara.Check.Unit.checkUnit_complete_holes
+#print axioms Lara.Check.Unit.CheckUnitSound.args_eq_of_complete
+#print axioms Lara.Check.Unit.CheckUnitSound.atts_eq_of_complete
+#print axioms Lara.Check.Unit.CheckUnitSound.holes_eq_nil_of_complete
+#print axioms Lara.Check.Unit.CheckUnitSound.holes_iff
+#print axioms Lara.Check.Unit.CheckUnitSound.hole_reports_exact
+#print axioms Lara.Check.Unit.CheckUnitSound.hole_inert_source
+#print axioms Lara.Check.Unit.gap_of_only_holes
 
 -- Result 9 (backend replacement / Theorem 2, Model A): uniform injective
 -- certificate relabel preserves the compiled AF and every claim status.

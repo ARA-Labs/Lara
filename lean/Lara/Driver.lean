@@ -86,7 +86,7 @@ inductive Tag where
   | checkInput | replayId | core | backends | backend | artifact
   | verdict | accept | reject | labels | edges | statuses | status | conditional
   | inL | outL | undecL | gap | justified | contested | defeated | evidenceBlocked
-  | dupRule | dupArgument | incompleteArgument | missingConflict
+  | dupRule | dupArgument | missingConflict
   | groups | group | quarantine
   -- the many-sorted signature Sigma (spec §2, §3.4; lara-core@0.2)
   | sigma | sorts | cons | preds | «pred»
@@ -123,7 +123,6 @@ def tagToString : Tag → String
   | .gap => "gap" | .justified => "justified" | .contested => "contested"
   | .defeated => "defeated" | .evidenceBlocked => "evidence-blocked"
   | .dupRule => "duplicate-rule" | .dupArgument => "duplicate-argument"
-  | .incompleteArgument => "incomplete-argument"
   | .missingConflict => "missing-conflict"
   | .groups => "groups" | .group => "group" | .quarantine => "quarantine"
   | .sigma => "sigma" | .sorts => "sorts" | .cons => "cons"
@@ -1481,14 +1480,13 @@ def checkClassStr : RejectClass → String
   | .R12 => tagToString .r12 | .R13 => tagToString .r13
 
 /-- The closed wire `REJECTION` vocabulary, mirroring `Lara.Wire`'s rejection
-spellings: either a checker rejection class or one of the four unit-level
+spellings: either a checker rejection class or one of the three unit-level
 failure keywords. Concrete spellings live in exactly one place,
 `wireRejectionString`. -/
 inductive WireRejection where
   | rejectClass : RejectClass → WireRejection
   | duplicateRule
   | duplicateArgument
-  | incompleteArgument
   | missingConflict
 
 /-- The on-the-wire spelling of a rejection — the single source of truth. -/
@@ -1496,7 +1494,6 @@ def wireRejectionString : WireRejection → String
   | .rejectClass cls => checkClassStr cls
   | .duplicateRule => tagToString .dupRule
   | .duplicateArgument => tagToString .dupArgument
-  | .incompleteArgument => tagToString .incompleteArgument
   | .missingConflict => tagToString .missingConflict
 
 /-- The wire rejection for a `checkUnit` failure — the wire `REJECTION`
@@ -1510,7 +1507,6 @@ def rejectWire : UnitError → WireRejection
     match e with
     | .rejection _ ce => .rejectClass ce.rejectClass
     | .duplicateArgument _ _ => .duplicateArgument
-    | .incompleteArgument _ _ => .incompleteArgument
     | .missingConflict _ => .missingConflict
 
 def encodeReplayId (rid : ReplayId) : Sx :=

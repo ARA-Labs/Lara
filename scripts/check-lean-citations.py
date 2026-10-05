@@ -79,7 +79,7 @@ CITATION = re.compile(
 )
 
 # A `*.lean` path named with no line at all — `` `lean/AxCheck.lean` already
-# #print axioms-gates every headline row: `srcStatus_iff_checked` (:760) `` — is
+# #print axioms-gates every headline row: `srcStatus_iff_checked` (:758) `` — is
 # not a citation but a statement of what the surrounding block is about, and
 # BLOCK subjects are what a file-less citation resolves against in preference to
 # the declaration's home file, the block plainly meaning the file it names.
@@ -159,18 +159,18 @@ ALLOWLIST: dict[str, str] = {
     "lean/Lara/Admission.lean:16": "cites the module header's validated-versus-verified sentence, which is the claim being made",
     "lean/Lara/Grounded.lean:288": "cites the `Classical.byContradiction` use site held up as the house idiom",
     "lean/Lara/Context/Surface.lean:53": "cites the `coveredB_relabel` proof step, which is the step being exercised",
-    "lean/Lara/Check/Unit.lean:132": "cites `checkUnit`'s `ground : List Atom` parameter, not the function",
-    "lean/Lara/Check/Unit.lean:151": "cites the `sigma := unit.sigma` retention line quoted verbatim beside it",
-    "lean/Lara/Check/Unit.lean:243": "cites `checkUnit_complete`'s `Nodup` premise, not the theorem",
-    "lean/Lara/Compile.lean:407": "cites `ConflictAttackable`'s `.leaf` arm, which is the arm being quoted",
-    "lean/Lara/Compile.lean:606": "the stale scope-note pointer being corrected named this continuation line",
+    "lean/Lara/Check/Unit.lean:155": "cites `checkUnit`'s `ground : List Atom` parameter, not the function",
+    "lean/Lara/Check/Unit.lean:174": "cites the `sigma := unit.sigma` retention line quoted verbatim beside it",
+    "lean/Lara/Check/Unit.lean:352": "cites `checkUnit_complete`'s `Nodup` premise, not the theorem",
+    "lean/Lara/Compile.lean:514": "cites `ConflictAttackable`'s `.leaf` arm, which is the arm being quoted",
+    "lean/Lara/Compile.lean:778": "the stale scope-note pointer being corrected named this continuation line",
     "lean/Lara/Attack.lean:85": "cites the `ContraryMatch` docstring's quantified-variable sentence",
     "lean/Lara/Attack.lean:550": "cites `HasAttack.rebut`'s `r.mode = .defeasible` hypothesis, not the inductive",
     # Range starts. A range is resolved at its first line only, so what is
     # exempted here is that line: the block's opening, not its extent.
     "lean/Lara/Compile.lean:43": "cites the module header's identical-terms-identical-edges paragraph, which is the claim being made",
-    "lean/Lara/Compile.lean:632": "cites `edgeB_iff`'s `DisNodup` discharge steps, quoted as the pattern to follow",
-    "lean/Lara/Compile.lean:668": "cites the `mutual` block opening `SrcIn`/`SrcOut`, which is what makes the judgment mutual",
+    "lean/Lara/Compile.lean:804": "cites `edgeB_iff`'s `DisNodup` discharge steps, quoted as the pattern to follow",
+    "lean/Lara/Compile.lean:840": "cites the `mutual` block opening `SrcIn`/`SrcOut`, which is what makes the judgment mutual",
     "lean/Lara/Examples.lean:368": "cites the `ord@1` registry-behaviour comment, which says in words what the citation quotes",
     "lean/Lara/Grounded.lean:7": "cites the module header's scope paragraph",
     "lean/Lara/Grounded.lean:629": "cites the `status_preservation` docstring, not the theorem below it",

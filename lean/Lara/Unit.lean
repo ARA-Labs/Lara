@@ -9,6 +9,13 @@ invariant. It retains the policy-derived lookup used to check the program,
 unique rule identifiers, Path-B well-formedness, attack completeness, and the
 exact checked-node cache produced by the executable checker. No support
 re-inference is needed downstream.
+
+Since `lara-core@0.3` it also carries the located holes and the
+AF-to-checked-declaration map `nodeDecls`. The structure records them but does
+not constrain how they relate to the checked declarations: the meaning of
+`nodeDecls`, of `holes` and of each `CheckedHole.index` comes from
+`Lara.Check.Unit.CheckUnitSound.partition`, which relates them to the unit's
+raw argument list, not from an invariant inside this structure.
 -/
 
 import Lara.Compile
@@ -196,11 +203,22 @@ structure CheckedUnit
   nodes :
     List (Compile.CheckedNode canon policy.ruleLookup Gamma CertOk)
   nodes_terms : nodes.map (·.term) = program.args
+  /-- The AF-to-checked-declaration map: entry `n` is the index, in the
+  checked declaration list, of AF node `n` (spec §4.4). -/
+  nodeDecls : List Nat
+  /-- The located holes (spec §4.4), in checked declaration order, each with
+  its checked declaration index, cached conclusion and nonempty mandatory root
+  obligations. They are never AF nodes. -/
+  holes :
+    List (Compile.CheckedHole canon policy.ruleLookup Gamma CertOk)
+  holes_terms : holes.map (·.term) = program.holes
   /-- Every θ in the argument list is sort-respecting at the parameters its
   rule declares — the per-instance half of stage 2. Required, and not merely
   thorough: θ's range terms are *authored*, not drawn from Γ, and a rule
   instance's conclusion is θ-instantiated, so an ill-sorted range value would
-  produce an ill-sorted argument conclusion no other stage sees. -/
+  produce an ill-sorted argument conclusion no other stage sees. This field
+  covers the complete arguments `program.args`; well-sortedness of every
+  declared argument, holes included, is `CheckUnitSound.raw_sorted`. -/
   args_well_sorted : argsWellSorted sigma policy program.args = true
 
 end Unit

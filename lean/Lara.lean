@@ -82,6 +82,10 @@
 --     missing conflict.
 --     CheckedUnit carries detailed attack completeness and exact retained
 --     checker nodes; support is not re-inferred — Lara.Unit / Lara.Check.Unit
+--   * located holes (lara-core@0.3, spec §4.4): typed arguments with open
+--     mandatory obligations are accepted, kept out of the AF and located;
+--     the specification views and the exact declaration partition —
+--     Lara.Check.Holes
 --   * downstream-only accepted-unit consistency (result 7 / C09): Path-B
 --     attackability, generic grounded conflict-freedom, self-conflict, exact
 --     completeClaimFor projection from retained nodes, and the computed-claim

@@ -552,7 +552,7 @@ theorem coveredB_trAttack {m : SymMap} {lm : LeafId → LeafId}
 /-- `Contains` commutes with translation. The `DisNodup` side conditions
 come from the checked programs' `complete` field via `hasSupport_disNodup`
 at use sites, exactly as `edgeB_iff` discharges them
-(`Lara/Compile.lean:632-634`). -/
+(`Lara/Compile.lean:804-806`). -/
 theorem Contains_trSupport {m : SymMap} {lm : LeafId → LeafId}
     (hsym : m.Injective) (hlm : Function.Injective lm)
     {v v' t t' : SupportTerm} (hdn : DisNodup v) (hdn' : DisNodup v')

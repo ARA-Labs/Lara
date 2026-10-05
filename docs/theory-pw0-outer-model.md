@@ -159,7 +159,7 @@ preservation needs strictly more than support transport, which fixes the
 boundary between T6 (exact support transport, future) and T8.
 
 The witness exists at all only because the missing-conflict search is
-directional: `firstMissingConflict?` (`Lara/Check/Program.lean:294-317`) tests
+directional: `firstMissingConflict?` (`Lara/Check/Program.lean:610-633`) tests
 `contraryMatchB canon dp source.conclusion target.conclusion` in one direction,
 so the contrary pair demands the edge `q → p` and no reverse edge. A forced
 symmetric edge would leave `p` *contested* rather than defeated.

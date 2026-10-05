@@ -313,7 +313,7 @@ end Lifting
 
 /-! ### Why the relation must reflect equality
 
-`coveredB` decides `k.source = source` (`lean/Lara/Compile.lean:441`), so an
+`coveredB` decides `k.source = source` (`lean/Lara/Compile.lean:548`), so an
 attack declared against one of two collapsed arguments covers *both* after the
 collapse. This is the concrete form of the failure `Lara.Erase`'s header records
 for the non-injective erase-to-`certified` map. -/

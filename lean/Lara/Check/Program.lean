@@ -8,12 +8,20 @@ coverage, in that fixed order. Its argument pass retains the checked support
 result for every source declaration; both typed-attack checking and the final
 conflict scan derive their nodes from that cache and never re-infer support.
 `ProgramAcceptance` carries the additional attack-completeness witness and
-retained nodes needed by the public `checkUnit` boundary. Open obligations are
-a program-boundary gap, not a frozen rejection class, and therefore have a
-separate `ProgramError` constructor.
+retained nodes needed by the public `checkUnit` boundary.
+
+Since `lara-core@0.3` an open mandatory obligation is not a rejection (spec
+§4.4). The support stage rejects only on an inference failure; the retained
+cache is then partitioned once into complete nodes, which become the AF, and
+located holes, which do not. Every raw attack is still typed against every
+checked declaration; only attacks whose source is complete compile, and the
+conflict scan runs over complete nodes alone. The specification views of that
+partition (`completeArgs`, `holeArgs`, `liveAttacks`) and its exact shape
+(`DeclPartition`) live in `Lara.Check.Holes`; the checker never evaluates the
+views and instead proves that its cache-derived partition agrees with them.
 -/
 
-import Lara.Compile
+import Lara.Check.Holes
 import Lara.Check.Attack
 
 namespace Lara.Check
@@ -35,22 +43,15 @@ deriving DecidableEq
 inductive ProgramError where
   | rejection : DeclLoc → CheckError → ProgramError
   | duplicateArgument : Nat → Nat → ProgramError
-  | incompleteArgument : Nat → List QuestionId → ProgramError
   | missingConflict : MissingConflict → ProgramError
 deriving DecidableEq
 
 /-- Only wrapped frozen checker failures have an R-class.  Structural
-duplicates and valid-but-incomplete arguments are program-boundary outcomes. -/
+duplicates and missing conflicts are program-boundary outcomes. -/
 def ProgramError.rejectClass : ProgramError → Option RejectClass
   | .rejection _ e => some e.rejectClass
   | .duplicateArgument _ _ => none
-  | .incompleteArgument _ _ => none
   | .missingConflict _ => none
-
-theorem incompleteArgument_no_rejectClass (i : Nat)
-    (obligations : List QuestionId) :
-    (ProgramError.incompleteArgument i obligations).rejectClass = none :=
-  rfl
 
 theorem missingConflict_no_rejectClass (missing : MissingConflict) :
     (ProgramError.missingConflict missing).rejectClass = none :=
@@ -114,15 +115,13 @@ theorem firstDuplicate_none_iff (args : List SupportTerm) :
     firstDuplicate args = none ↔ args.Nodup :=
   firstDuplicateFrom_none_iff 0 args
 
-/-! ### Checked argument cache -/
+/-! ### Checked argument cache and its partition -/
 
 structure CheckedArguments {canon : String → String}
     (Pi : RuleId → Option Rule) (Gamma : LeafId → Option Atom)
     (reg : BackendRegistry canon) (args : List SupportTerm) where
   cache : List (CheckedSupport canon Pi Gamma reg)
   aligned : cache.map (·.term) = args
-  complete :
-    ∀ entry ∈ cache, entry.result.obligations = []
 
 /-- Repackage a complete support-check result as the exact public node view.
 This is a lossless conversion: the conclusion and validity proof are the ones
@@ -138,23 +137,340 @@ def CheckedSupport.toCheckedNode {canon : String → String}
   , conclusion := entry.result.conclusion
   , valid := by simpa [hcomplete] using entry.valid }
 
-/-- The retained indexed node view, derived directly from the argument cache.
-No support term is checked again and no conclusion is recomputed. -/
+/-- The node view of one cache entry, present exactly when it is complete. -/
+def CheckedSupport.toNode? {canon : String → String}
+    {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
+    {reg : BackendRegistry canon}
+    (entry : CheckedSupport canon Pi Gamma reg) :
+    Option (Compile.CheckedNode canon Pi Gamma (certOkOf reg)) :=
+  if h : entry.result.obligations = [] then some (entry.toCheckedNode h)
+  else none
+
+/-- Repackage an incomplete support-check result, at checked declaration
+`index`, as a located hole. The conclusion and obligations are the cached
+ones. -/
+def CheckedSupport.toHole {canon : String → String}
+    {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
+    {reg : BackendRegistry canon}
+    (entry : CheckedSupport canon Pi Gamma reg) (index : Nat)
+    (hopen : entry.result.obligations ≠ []) :
+    Compile.CheckedHole canon Pi Gamma (certOkOf reg) :=
+  { index := index
+  , term := entry.term
+  , conclusion := entry.result.conclusion
+  , obligations := entry.result.obligations
+  , valid := entry.valid
+  , nonempty := hopen }
+
+/-- Checked declaration indices of the complete entries, from offset `i`. -/
+def nodeDeclsFrom {canon : String → String}
+    {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
+    {reg : BackendRegistry canon} :
+    Nat → List (CheckedSupport canon Pi Gamma reg) → List Nat
+  | _, [] => []
+  | i, entry :: entries =>
+      if entry.result.obligations = [] then i :: nodeDeclsFrom (i + 1) entries
+      else nodeDeclsFrom (i + 1) entries
+
+/-- The located holes among the entries, from offset `i`. -/
+def holesFrom {canon : String → String}
+    {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
+    {reg : BackendRegistry canon} :
+    Nat → List (CheckedSupport canon Pi Gamma reg) →
+      List (Compile.CheckedHole canon Pi Gamma (certOkOf reg))
+  | _, [] => []
+  | i, entry :: entries =>
+      if h : entry.result.obligations = [] then holesFrom (i + 1) entries
+      else entry.toHole i h :: holesFrom (i + 1) entries
+
+/-- The retained AF node view, derived directly from the argument cache. No
+support term is checked again and no conclusion is recomputed. Only complete
+entries become nodes. -/
 def CheckedArguments.nodes {canon : String → String}
     {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
     {reg : BackendRegistry canon} {args : List SupportTerm}
     (checked : CheckedArguments Pi Gamma reg args) :
     List (Compile.CheckedNode canon Pi Gamma (certOkOf reg)) :=
-  checked.cache.attach.map fun entry =>
-    entry.val.toCheckedNode (checked.complete entry.val entry.property)
+  checked.cache.filterMap (·.toNode?)
 
-/-- The cache-derived node view preserves argument order and identity exactly. -/
-theorem CheckedArguments.nodes_terms {canon : String → String}
+/-- The AF-to-checked-declaration map: entry `n` is the checked declaration
+index of AF node `n`. -/
+def CheckedArguments.nodeDecls {canon : String → String}
+    {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
+    {reg : BackendRegistry canon} {args : List SupportTerm}
+    (checked : CheckedArguments Pi Gamma reg args) : List Nat :=
+  nodeDeclsFrom 0 checked.cache
+
+/-- The located holes, in checked declaration order, with their cached
+conclusions and obligations. -/
+def CheckedArguments.holes {canon : String → String}
     {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
     {reg : BackendRegistry canon} {args : List SupportTerm}
     (checked : CheckedArguments Pi Gamma reg args) :
-    (checked.nodes.map (·.term)) = args := by
-  simp [CheckedArguments.nodes, CheckedSupport.toCheckedNode, checked.aligned]
+    List (Compile.CheckedHole canon Pi Gamma (certOkOf reg)) :=
+  holesFrom 0 checked.cache
+
+section CachePartition
+
+variable {canon : String → String} {Pi : RuleId → Option Rule}
+  {Gamma : LeafId → Option Atom} {reg : BackendRegistry canon}
+
+private theorem filterMap_toNode?_terms :
+    ∀ (cache : List (CheckedSupport canon Pi Gamma reg)),
+      (cache.filterMap (·.toNode?)).map (·.term) =
+        (cache.map (·.term)).filter (argComplete Pi Gamma reg)
+  | [] => rfl
+  | e :: es => by
+      have ih := filterMap_toNode?_terms es
+      have hac := argComplete_of_hasSupport (reg := reg) e.valid
+      by_cases hob : e.result.obligations = []
+      · have hnode : e.toNode? = some (e.toCheckedNode hob) := by
+          simp [CheckedSupport.toNode?, hob]
+        simp only [List.filterMap_cons, hnode, List.map_cons, List.filter_cons,
+          hac, hob, List.isEmpty_nil, if_true, ih]
+        rfl
+      · have hnode : e.toNode? = none := by
+          simp [CheckedSupport.toNode?, hob]
+        have hfalse : e.result.obligations.isEmpty = false := by
+          cases h : e.result.obligations with
+          | nil => exact absurd h hob
+          | cons _ _ => rfl
+        simp only [List.filterMap_cons, hnode, List.map_cons, List.filter_cons,
+          hac, hfalse, ih]
+        rfl
+
+private theorem holesFrom_terms :
+    ∀ (i : Nat) (cache : List (CheckedSupport canon Pi Gamma reg)),
+      (holesFrom i cache).map (·.term) =
+        (cache.map (·.term)).filter (argHole Pi Gamma reg)
+  | _, [] => rfl
+  | i, e :: es => by
+      have ih := holesFrom_terms (i + 1) es
+      have hah := argHole_of_hasSupport (reg := reg) e.valid
+      by_cases hob : e.result.obligations = []
+      · simp only [holesFrom, hob, dif_pos, List.map_cons, List.filter_cons,
+          hah, List.isEmpty_nil, Bool.not_true, ih]
+        rfl
+      · have htrue : (!e.result.obligations.isEmpty) = true := by
+          cases h : e.result.obligations with
+          | nil => exact absurd h hob
+          | cons _ _ => rfl
+        simp only [holesFrom, hob, dif_neg, not_false_eq_true, List.map_cons,
+          List.filter_cons, hah, htrue, if_true, ih]
+        rfl
+
+private theorem nodeDeclsFrom_ge :
+    ∀ (i : Nat) (cache : List (CheckedSupport canon Pi Gamma reg)) (j : Nat),
+      j ∈ nodeDeclsFrom i cache → i ≤ j
+  | _, [], _, h => by simp [nodeDeclsFrom] at h
+  | i, e :: es, j, h => by
+      unfold nodeDeclsFrom at h
+      split at h
+      · rcases List.mem_cons.mp h with rfl | h
+        · exact Nat.le_refl _
+        · have := nodeDeclsFrom_ge (i + 1) es j h
+          omega
+      · have := nodeDeclsFrom_ge (i + 1) es j h
+        omega
+
+private theorem holesFrom_ge :
+    ∀ (i : Nat) (cache : List (CheckedSupport canon Pi Gamma reg)),
+      ∀ h ∈ holesFrom i cache, i ≤ h.index
+  | _, [], _, hh => by simp [holesFrom] at hh
+  | i, e :: es, h, hh => by
+      unfold holesFrom at hh
+      split at hh
+      · have := holesFrom_ge (i + 1) es h hh
+        omega
+      · rcases List.mem_cons.mp hh with rfl | hh
+        · exact Nat.le_refl _
+        · have := holesFrom_ge (i + 1) es h hh
+          omega
+
+private theorem nodeDeclsFrom_sorted :
+    ∀ (i : Nat) (cache : List (CheckedSupport canon Pi Gamma reg)),
+      (nodeDeclsFrom i cache).Pairwise (· < ·)
+  | _, [] => by simp [nodeDeclsFrom]
+  | i, e :: es => by
+      unfold nodeDeclsFrom
+      split
+      · refine List.pairwise_cons.mpr ⟨fun j hj => ?_, nodeDeclsFrom_sorted _ es⟩
+        have := nodeDeclsFrom_ge (i + 1) es j hj
+        omega
+      · exact nodeDeclsFrom_sorted _ es
+
+private theorem holesFrom_sorted :
+    ∀ (i : Nat) (cache : List (CheckedSupport canon Pi Gamma reg)),
+      ((holesFrom i cache).map (·.index)).Pairwise (· < ·)
+  | _, [] => by simp [holesFrom]
+  | i, e :: es => by
+      unfold holesFrom
+      split
+      · exact holesFrom_sorted _ es
+      · rw [List.map_cons]
+        refine List.pairwise_cons.mpr ⟨fun j hj => ?_, holesFrom_sorted _ es⟩
+        obtain ⟨h, hh, rfl⟩ := List.mem_map.mp hj
+        have := holesFrom_ge (i + 1) es h hh
+        simp only [CheckedSupport.toHole]
+        omega
+
+private theorem partition_cover :
+    ∀ (i : Nat) (cache : List (CheckedSupport canon Pi Gamma reg)) (j : Nat),
+      (j ∈ nodeDeclsFrom i cache ∨ ∃ h ∈ holesFrom i cache, h.index = j) ↔
+        i ≤ j ∧ j < i + cache.length
+  | i, [], j => by simp [nodeDeclsFrom, holesFrom]
+  | i, e :: es, j => by
+      have ih := partition_cover (i + 1) es j
+      simp only [List.length_cons]
+      by_cases hob : e.result.obligations = []
+      · simp only [nodeDeclsFrom, holesFrom, hob, if_true, dif_pos,
+          List.mem_cons]
+        constructor
+        · rintro ((rfl | hj) | hh)
+          · omega
+          · have := ih.mp (Or.inl hj); omega
+          · have := ih.mp (Or.inr hh); omega
+        · intro hj
+          by_cases hji : j = i
+          · exact Or.inl (Or.inl hji)
+          · rcases ih.mpr (by omega) with hj | hh
+            · exact Or.inl (Or.inr hj)
+            · exact Or.inr hh
+      · simp only [nodeDeclsFrom, holesFrom, hob, if_false, dif_neg,
+          not_false_eq_true, List.mem_cons, exists_eq_or_imp]
+        constructor
+        · rintro (hj | (hidx | hh))
+          · have := ih.mp (Or.inl hj); omega
+          · simp only [CheckedSupport.toHole] at hidx; omega
+          · have := ih.mp (Or.inr hh); omega
+        · intro hj
+          by_cases hji : j = i
+          · exact Or.inr (Or.inl (by simp [CheckedSupport.toHole, hji]))
+          · rcases ih.mpr (by omega) with hj | hh
+            · exact Or.inl hj
+            · exact Or.inr (Or.inr hh)
+
+private theorem partition_disjoint :
+    ∀ (i : Nat) (cache : List (CheckedSupport canon Pi Gamma reg)),
+      ∀ j ∈ nodeDeclsFrom i cache, ¬ ∃ h ∈ holesFrom i cache, h.index = j
+  | _, [], j, hj => by simp [nodeDeclsFrom] at hj
+  | i, e :: es, j, hj => by
+      by_cases hob : e.result.obligations = []
+      · simp only [nodeDeclsFrom, hob, if_true, List.mem_cons] at hj
+        simp only [holesFrom, hob, dif_pos]
+        rcases hj with rfl | hj
+        · rintro ⟨h, hh, hidx⟩
+          have := holesFrom_ge (j + 1) es h hh
+          omega
+        · exact partition_disjoint (i + 1) es j hj
+      · simp only [nodeDeclsFrom, hob, if_false] at hj
+        simp only [holesFrom, hob, dif_neg, not_false_eq_true, List.mem_cons,
+          exists_eq_or_imp, not_or]
+        refine ⟨?_, partition_disjoint (i + 1) es j hj⟩
+        have := nodeDeclsFrom_ge (i + 1) es j hj
+        simp only [CheckedSupport.toHole]
+        omega
+
+private theorem nodeDeclsFrom_lookup :
+    ∀ (i : Nat) (cache : List (CheckedSupport canon Pi Gamma reg))
+      (pre : List SupportTerm), pre.length = i →
+      (nodeDeclsFrom i cache).map (fun j => (pre ++ cache.map (·.term))[j]?) =
+        (cache.filterMap (·.toNode?)).map (some ·.term)
+  | _, [], _, _ => by simp [nodeDeclsFrom]
+  | i, e :: es, pre, hpre => by
+      have ih := nodeDeclsFrom_lookup (i + 1) es (pre ++ [e.term])
+        (by simp [hpre])
+      have hsplit : pre ++ (e :: es).map (·.term) =
+          (pre ++ [e.term]) ++ es.map (·.term) := by simp
+      rw [hsplit]
+      by_cases hob : e.result.obligations = []
+      · have hnode : e.toNode? = some (e.toCheckedNode hob) := by
+          simp [CheckedSupport.toNode?, hob]
+        simp only [nodeDeclsFrom, hob, if_true, List.map_cons,
+          List.filterMap_cons, hnode, ih]
+        congr 1
+        rw [List.getElem?_append_left (by simp [hpre]),
+          List.getElem?_append_right (by omega)]
+        simp [hpre, CheckedSupport.toCheckedNode]
+      · have hnode : e.toNode? = none := by
+          simp [CheckedSupport.toNode?, hob]
+        simp only [nodeDeclsFrom, hob, if_false, List.filterMap_cons, hnode,
+          ih]
+
+private theorem holesFrom_lookup :
+    ∀ (i : Nat) (cache : List (CheckedSupport canon Pi Gamma reg))
+      (pre : List SupportTerm), pre.length = i →
+      ∀ h ∈ holesFrom i cache,
+        (pre ++ cache.map (·.term))[h.index]? = some h.term
+  | _, [], _, _, h, hh => by simp [holesFrom] at hh
+  | i, e :: es, pre, hpre, h, hh => by
+      have ih := holesFrom_lookup (i + 1) es (pre ++ [e.term])
+        (by simp [hpre])
+      have hsplit : pre ++ (e :: es).map (·.term) =
+          (pre ++ [e.term]) ++ es.map (·.term) := by simp
+      rw [hsplit]
+      unfold holesFrom at hh
+      split at hh
+      · exact ih h hh
+      · rcases List.mem_cons.mp hh with rfl | hh
+        · rw [List.getElem?_append_left (by simp [hpre, CheckedSupport.toHole]),
+            List.getElem?_append_right (by simp [hpre, CheckedSupport.toHole])]
+          simp [hpre, CheckedSupport.toHole]
+        · exact ih h hh
+
+/-- The cache-derived node view is exactly the complete arguments, in
+declaration order. -/
+theorem CheckedArguments.nodes_terms {args : List SupportTerm}
+    (checked : CheckedArguments Pi Gamma reg args) :
+    checked.nodes.map (·.term) = completeArgs Pi Gamma reg args := by
+  have h := filterMap_toNode?_terms checked.cache
+  rw [checked.aligned] at h
+  exact h
+
+/-- The cache-derived hole view is exactly the holes, in declaration order. -/
+theorem CheckedArguments.holes_terms {args : List SupportTerm}
+    (checked : CheckedArguments Pi Gamma reg args) :
+    checked.holes.map (·.term) = holeArgs Pi Gamma reg args := by
+  have h := holesFrom_terms 0 checked.cache
+  rw [checked.aligned] at h
+  exact h
+
+/-- **The cache partition.** Nodes, holes and the AF-to-declaration map
+derived from the cache partition the checked declarations exactly. -/
+theorem CheckedArguments.partition {args : List SupportTerm}
+    (checked : CheckedArguments Pi Gamma reg args) :
+    DeclPartition args checked.nodes checked.nodeDecls checked.holes := by
+  have hlen : checked.cache.length = args.length := by
+    simpa using congrArg List.length checked.aligned
+  refine
+    { node_decls := ?_
+    , hole_decls := ?_
+    , cover := ?_
+    , disjoint := partition_disjoint 0 checked.cache
+    , nodeDecls_sorted := nodeDeclsFrom_sorted 0 checked.cache
+    , holes_sorted := holesFrom_sorted 0 checked.cache }
+  · have h := nodeDeclsFrom_lookup 0 checked.cache [] rfl
+    simpa [CheckedArguments.nodeDecls, CheckedArguments.nodes,
+      checked.aligned] using h
+  · intro h hh
+    have := holesFrom_lookup 0 checked.cache [] rfl h hh
+    simpa [checked.aligned] using this
+  · intro i
+    show i < args.length ↔ i ∈ nodeDeclsFrom 0 checked.cache ∨
+      ∃ h ∈ holesFrom 0 checked.cache, h.index = i
+    rw [partition_cover 0 checked.cache i, hlen]
+    omega
+
+/-- Every cached declaration type-checks; holes included. -/
+theorem CheckedArguments.typed {args : List SupportTerm}
+    (checked : CheckedArguments Pi Gamma reg args) :
+    ∀ w ∈ args, ∃ C O, HasSupport canon Pi Gamma (certOkOf reg) w C O := by
+  intro w hw
+  rw [← checked.aligned] at hw
+  obtain ⟨entry, _, rfl⟩ := List.mem_map.mp hw
+  exact ⟨_, _, entry.valid⟩
+
+end CachePartition
 
 /-! ### Indexed conflict scan cache -/
 
@@ -399,34 +715,26 @@ theorem CheckedArguments.cache_nodup {canon : String → String}
   rw [checked.aligned]
   exact h
 
+/-- The support stage. It rejects only on an inference failure; an entry with
+a nonempty obligation set is retained and later classified as a hole. -/
 private def checkArguments {canon : String → String}
     (Pi : RuleId → Option Rule) (Gamma : LeafId → Option Atom)
     (reg : BackendRegistry canon) :
     (i : Nat) → (args : List SupportTerm) →
       Except ProgramError (CheckedArguments Pi Gamma reg args)
-  | _, [] => .ok ⟨[], rfl, by simp⟩
+  | _, [] => .ok ⟨[], rfl⟩
   | i, w :: ws =>
       match hresult : inferSupport Pi Gamma reg .root w with
       | .error e => .error (.rejection (.argument i) e)
       | .ok result =>
-          match hobligations : result.obligations with
-          | _ :: _ =>
-              .error (.incompleteArgument i result.obligations)
-          | [] =>
-              match checkArguments Pi Gamma reg (i + 1) ws with
-              | .error e => .error e
-              | .ok rest =>
-                  let entry : CheckedSupport canon Pi Gamma reg :=
-                    ⟨w, result, inferSupport_sound hresult⟩
-                  .ok
-                    { cache := entry :: rest.cache
-                    , aligned := by simp [entry, rest.aligned]
-                    , complete := by
-                        intro candidate hcandidate
-                        simp only [List.mem_cons] at hcandidate
-                        rcases hcandidate with rfl | htail
-                        · exact hobligations
-                        · exact rest.complete candidate htail }
+          match checkArguments Pi Gamma reg (i + 1) ws with
+          | .error e => .error e
+          | .ok rest =>
+              let entry : CheckedSupport canon Pi Gamma reg :=
+                ⟨w, result, inferSupport_sound hresult⟩
+              .ok
+                { cache := entry :: rest.cache
+                , aligned := by simp [entry, rest.aligned] }
 
 def lookupChecked {canon : String → String}
     {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
@@ -544,14 +852,24 @@ private structure ProgramBase {canon : String → String}
     (reg : BackendRegistry canon) (dp : DefeatPolicy)
     (args : List SupportTerm) (atts : List Attack) where
   program : Compile.CheckedProgram canon Pi Gamma (certOkOf reg) dp
-  arguments_eq : program.args = args
-  attacks_eq : program.atts = atts
+  arguments_eq : program.args = completeArgs Pi Gamma reg args
+  holes_eq : program.holes = holeArgs Pi Gamma reg args
+  attacks_eq : program.atts = liveAttacks program.args atts
   nodes : List (Compile.CheckedNode canon Pi Gamma (certOkOf reg))
   nodes_terms : nodes.map (·.term) = program.args
+  nodeDecls : List Nat
+  holes : List (Compile.CheckedHole canon Pi Gamma (certOkOf reg))
+  holes_terms : holes.map (·.term) = program.holes
+  partition : DeclPartition args nodes nodeDecls holes
+  raw_nodup : args.Nodup
+  raw_support :
+    ∀ w ∈ args, ∃ C O, HasSupport canon Pi Gamma (certOkOf reg) w C O
+  raw_attacks : CheckedAttacks Pi Gamma reg dp args atts
 
 /-- The shared prefix of the legacy and detailed checkers. It retains the
-checked argument cache through typed-attack validation, but exposes no new
-public acceptance behavior by itself. -/
+checked argument cache through typed-attack validation, and partitions it once
+into complete nodes and located holes. Every raw attack is typed against every
+checked declaration before attacks sourced at holes are dropped. -/
 private def checkProgramBase {canon : String → String}
     (Pi : RuleId → Option Rule) (Gamma : LeafId → Option Atom)
     (reg : BackendRegistry canon) (dp : DefeatPolicy)
@@ -568,35 +886,53 @@ private def checkProgramBase {canon : String → String}
               checkedArgs.aligned 0 atts with
           | .error e => .error e
           | .ok checkedAttacks =>
+              let live := checkedArgs.nodes.map (·.term)
+              have hlive : live = completeArgs Pi Gamma reg args :=
+                checkedArgs.nodes_terms
+              have hnodup : args.Nodup :=
+                (firstDuplicate_none_iff args).mp hduplicate
               let program :
                   Compile.CheckedProgram canon Pi Gamma (certOkOf reg) dp :=
-                { args := args
-                , nodup := (firstDuplicate_none_iff args).mp hduplicate
+                { args := live
+                , nodup := by
+                    rw [hlive]
+                    exact hnodup.sublist (completeArgs_sublist args)
                 , complete := by
                     intro w hw
-                    have hcache : w ∈ checkedArgs.cache.map (·.term) := by
-                      rw [checkedArgs.aligned]
-                      exact hw
-                    obtain ⟨entry, hentry, hterm⟩ :=
-                      List.mem_map.mp hcache
-                    refine ⟨entry.result.conclusion, ?_⟩
-                    have hobligations :=
-                      checkedArgs.complete entry hentry
-                    simpa [hterm, hobligations] using entry.valid
-                , atts := atts
-                , typed := checkedAttacks.typed
-                , source_declared := checkedAttacks.source_declared
-                , target_declared := checkedAttacks.target_declared }
+                    obtain ⟨node, _, rfl⟩ := List.mem_map.mp hw
+                    exact ⟨node.conclusion, node.valid⟩
+                , atts := liveAttacks live atts
+                , typed := fun k hk =>
+                    checkedAttacks.typed k (mem_liveAttacks_iff.mp hk).1
+                , source_declared := fun k hk =>
+                    (mem_liveAttacks_iff.mp hk).2
+                , holes := checkedArgs.holes.map (·.term)
+                , target_declared := by
+                    intro k hk
+                    have hmem : k.target ∈ args :=
+                      checkedAttacks.target_declared k
+                        (mem_liveAttacks_iff.mp hk).1
+                    rw [hlive, checkedArgs.holes_terms]
+                    exact mem_completeArgs_or_holeArgs hmem
+                      (checkedArgs.typed k.target hmem) }
               .ok
                 { program := program
-                , arguments_eq := rfl
+                , arguments_eq := hlive
+                , holes_eq := checkedArgs.holes_terms
                 , attacks_eq := rfl
                 , nodes := checkedArgs.nodes
-                , nodes_terms := by
-                    simpa [program] using checkedArgs.nodes_terms }
+                , nodes_terms := rfl
+                , nodeDecls := checkedArgs.nodeDecls
+                , holes := checkedArgs.holes
+                , holes_terms := rfl
+                , partition := checkedArgs.partition
+                , raw_nodup := hnodup
+                , raw_support := checkedArgs.typed
+                , raw_attacks := checkedAttacks }
 
-/-- Legacy projection of the shared checker prefix. Its signature and
-observable success/error behavior are unchanged. -/
+/-- Legacy projection of the shared checker prefix. Its signature is
+unchanged. Since `lara-core@0.3` it accepts programs with located holes, which
+up to `lara-core@0.2` it rejected as `incompleteArgument`. -/
 def checkProgram {canon : String → String}
     (Pi : RuleId → Option Rule) (Gamma : LeafId → Option Atom)
     (reg : BackendRegistry canon) (dp : DefeatPolicy)
@@ -608,8 +944,9 @@ def checkProgram {canon : String → String}
   | .ok base => .ok base.program
 
 /-- Named successful result of the detailed checker. Unlike the legacy
-projection, it retains executable checked nodes and the independently proved
-conflict-completeness postcondition. -/
+projection, it retains executable checked nodes, the located holes and their
+partition of the declarations, the raw facts the checker established, and the
+independently proved conflict-completeness postcondition. -/
 structure ProgramAcceptance {canon : String → String}
     (Pi : RuleId → Option Rule) (Gamma : LeafId → Option Atom)
     (reg : BackendRegistry canon) (dp : DefeatPolicy)
@@ -618,10 +955,21 @@ structure ProgramAcceptance {canon : String → String}
   attack_complete :
     Compile.AttackComplete canon Pi Gamma (certOkOf reg) dp
       program.args program.atts
-  arguments_eq : program.args = args
-  attacks_eq : program.atts = atts
+  arguments_eq : program.args = completeArgs Pi Gamma reg args
+  holes_eq : program.holes = holeArgs Pi Gamma reg args
+  attacks_eq : program.atts = liveAttacks program.args atts
   nodes : List (Compile.CheckedNode canon Pi Gamma (certOkOf reg))
   nodes_terms : nodes.map (·.term) = program.args
+  nodeDecls : List Nat
+  holes : List (Compile.CheckedHole canon Pi Gamma (certOkOf reg))
+  holes_terms : holes.map (·.term) = program.holes
+  partition : DeclPartition args nodes nodeDecls holes
+  raw_nodup : args.Nodup
+  raw_support :
+    ∀ w ∈ args, ∃ C O, HasSupport canon Pi Gamma (certOkOf reg) w C O
+  raw_typed : ∀ k ∈ atts, HasAttack canon Pi Gamma (certOkOf reg) dp k
+  raw_source : ∀ k ∈ atts, k.source ∈ args
+  raw_target : ∀ k ∈ atts, k.target ∈ args
 
 private theorem attackComplete_of_firstMissingConflict_none
     {canon : String → String} {Pi : RuleId → Option Rule}
@@ -661,7 +1009,7 @@ private theorem attackComplete_of_firstMissingConflict_none
   simpa [hsourceTerm, htargetTerm] using hcovered
 
 /-- Detailed checker: run the exact legacy prefix, then reject only the first
-uncovered attackable contrary pair. -/
+uncovered attackable contrary pair between complete nodes. -/
 def checkProgramDetailed {canon : String → String}
     (Pi : RuleId → Option Rule) (Gamma : LeafId → Option Atom)
     (reg : BackendRegistry canon) (dp : DefeatPolicy)
@@ -670,62 +1018,61 @@ def checkProgramDetailed {canon : String → String}
   match checkProgramBase Pi Gamma reg dp args atts with
   | .error e => .error e
   | .ok base =>
-      let cache := conflictCache Pi atts base.nodes
+      let cache := conflictCache Pi base.program.atts base.nodes
       match hmissing : firstMissingConflict? dp cache with
       | some missing => .error (.missingConflict missing)
       | none =>
           .ok
             { program := base.program
-            , attack_complete := by
-                have hraw :=
-                  attackComplete_of_firstMissingConflict_none cache
-                    ((conflictCache_terms Pi atts base.nodes).trans
-                      (base.nodes_terms.trans base.arguments_eq))
-                    hmissing
-                simpa [base.arguments_eq, base.attacks_eq] using hraw
+            , attack_complete :=
+                attackComplete_of_firstMissingConflict_none cache
+                  ((conflictCache_terms Pi base.program.atts base.nodes).trans
+                    base.nodes_terms)
+                  hmissing
             , arguments_eq := base.arguments_eq
+            , holes_eq := base.holes_eq
             , attacks_eq := base.attacks_eq
             , nodes := base.nodes
-            , nodes_terms := base.nodes_terms }
+            , nodes_terms := base.nodes_terms
+            , nodeDecls := base.nodeDecls
+            , holes := base.holes
+            , holes_terms := base.holes_terms
+            , partition := base.partition
+            , raw_nodup := base.raw_nodup
+            , raw_support := base.raw_support
+            , raw_typed := base.raw_attacks.typed
+            , raw_source := base.raw_attacks.source_declared
+            , raw_target := base.raw_attacks.target_declared }
 
 private theorem checkArguments_complete {canon : String → String}
     (Pi : RuleId → Option Rule) (Gamma : LeafId → Option Atom)
     (reg : BackendRegistry canon) :
     ∀ (i : Nat) (args : List SupportTerm),
-      (∀ w ∈ args, ∃ C,
-        HasSupport canon Pi Gamma (certOkOf reg) w C []) →
+      (∀ w ∈ args, ∃ C O,
+        HasSupport canon Pi Gamma (certOkOf reg) w C O) →
       ∃ checked, checkArguments Pi Gamma reg i args = .ok checked := by
   intro i args
   induction args generalizing i with
   | nil =>
       intro _
-      exact ⟨⟨[], rfl, by simp⟩, rfl⟩
+      exact ⟨⟨[], rfl⟩, rfl⟩
   | cons w ws ih =>
-      intro hcomplete
-      obtain ⟨C, hw⟩ := hcomplete w (by simp)
+      intro htyped
+      obtain ⟨C, O, hw⟩ := htyped w (by simp)
       have hinfer := inferSupport_complete hw .root
       obtain ⟨rest, hrest⟩ := ih (i + 1) (by
         intro x hx
-        exact hcomplete x (by simp [hx]))
+        exact htyped x (by simp [hx]))
       simp only [checkArguments]
       split
       · rename_i e herror
         rw [hinfer] at herror
         contradiction
-      · rename_i result hok
-        have hresult : result = ⟨C, []⟩ :=
-          Except.ok.inj (hok.symm.trans hinfer)
-        subst result
-        simp only
-        split
+      · split
         · rename_i e herror
           rw [hrest] at herror
           contradiction
-        · rename_i tail hoktail
-          have htail : tail = rest :=
-            Except.ok.inj (hoktail.symm.trans hrest)
-          subst tail
-          exact ⟨_, rfl⟩
+        · exact ⟨_, rfl⟩
 
 private theorem checkAttacks_complete {canon : String → String}
     (Pi : RuleId → Option Rule) (Gamma : LeafId → Option Atom)
@@ -801,8 +1148,8 @@ private theorem checkProgramBase_complete {canon : String → String}
     {reg : BackendRegistry canon} {dp : DefeatPolicy}
     {args : List SupportTerm} {atts : List Attack}
     (hnodup : args.Nodup)
-    (hcomplete : ∀ w ∈ args, ∃ C,
-      HasSupport canon Pi Gamma (certOkOf reg) w C [])
+    (hsupport : ∀ w ∈ args, ∃ C O,
+      HasSupport canon Pi Gamma (certOkOf reg) w C O)
     (htyped : ∀ k ∈ atts,
       HasAttack canon Pi Gamma (certOkOf reg) dp k)
     (hsource : ∀ k ∈ atts, k.source ∈ args)
@@ -811,7 +1158,7 @@ private theorem checkProgramBase_complete {canon : String → String}
   have hduplicate : firstDuplicate args = none :=
     (firstDuplicate_none_iff args).mpr hnodup
   obtain ⟨checkedArgs, hargs⟩ :=
-    checkArguments_complete Pi Gamma reg 0 args hcomplete
+    checkArguments_complete Pi Gamma reg 0 args hsupport
   obtain ⟨checkedAttacks, hatts⟩ :=
     checkAttacks_complete Pi Gamma reg dp args checkedArgs.cache
       checkedArgs.aligned 0 atts htyped hsource htarget
@@ -838,18 +1185,22 @@ private theorem checkProgramBase_complete {canon : String → String}
         subst foundAttacks
         exact ⟨_, rfl⟩
 
-/-- Every successful result exposes all compile-boundary invariants, and its
-raw declaration lists are exactly those supplied to the checker. -/
+/-- Every successful result exposes all compile-boundary invariants: the AF
+arguments are the complete declarations, the holes are the typed incomplete
+ones, the AF attacks are those with a complete source, and every raw
+declaration and raw attack is checked. -/
 theorem checkProgram_sound {canon : String → String}
     {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
     {reg : BackendRegistry canon} {dp : DefeatPolicy}
     {args : List SupportTerm} {atts : List Attack}
     {program : Compile.CheckedProgram canon Pi Gamma (certOkOf reg) dp}
     (h : checkProgram Pi Gamma reg dp args atts = .ok program) :
-    program.args = args ∧ program.atts = atts ∧
+    program.args = completeArgs Pi Gamma reg args ∧
+      program.holes = holeArgs Pi Gamma reg args ∧
+      program.atts = liveAttacks program.args atts ∧
       args.Nodup ∧
-      (∀ w ∈ args, ∃ C,
-        HasSupport canon Pi Gamma (certOkOf reg) w C []) ∧
+      (∀ w ∈ args, ∃ C O,
+        HasSupport canon Pi Gamma (certOkOf reg) w C O) ∧
       (∀ k ∈ atts,
         HasAttack canon Pi Gamma (certOkOf reg) dp k) ∧
       (∀ k ∈ atts, k.source ∈ args) ∧
@@ -861,30 +1212,30 @@ theorem checkProgram_sound {canon : String → String}
     have hprogram : program = base.program :=
       Except.ok.inj h |>.symm
     subst program
-    have hargs := base.arguments_eq
-    have hatts := base.attacks_eq
-    refine ⟨hargs, hatts, ?_, ?_, ?_, ?_, ?_⟩
-    · simpa [hargs] using base.program.nodup
-    · intro w hw
-      apply base.program.complete w
-      simpa [hargs] using hw
-    · intro k hk
-      apply base.program.typed k
-      simpa [hatts] using hk
-    · intro k hk
-      have hk' : k ∈ base.program.atts := by
-        simpa [hatts] using hk
-      have := base.program.source_declared k hk'
-      simpa [hargs] using this
-    · intro k hk
-      have hk' : k ∈ base.program.atts := by
-        simpa [hatts] using hk
-      have := base.program.target_declared k hk'
-      simpa [hargs] using this
+    exact ⟨base.arguments_eq, base.holes_eq, base.attacks_eq, base.raw_nodup,
+      base.raw_support, base.raw_attacks.typed,
+      base.raw_attacks.source_declared, base.raw_attacks.target_declared⟩
 
-/-- Exact completeness for the dependent output: every raw declaration list
-satisfying the strengthened relational compile boundary produces some checked
-program carrying those declarations. -/
+/-- Exact completeness of the legacy projection with located holes: every raw
+declaration list whose arguments all type, complete or not, and whose attacks
+all type with declared endpoints, produces a checked program. -/
+theorem checkProgram_complete_holes {canon : String → String}
+    {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
+    {reg : BackendRegistry canon} {dp : DefeatPolicy}
+    {args : List SupportTerm} {atts : List Attack}
+    (hnodup : args.Nodup)
+    (hsupport : ∀ w ∈ args, ∃ C O,
+      HasSupport canon Pi Gamma (certOkOf reg) w C O)
+    (htyped : ∀ k ∈ atts,
+      HasAttack canon Pi Gamma (certOkOf reg) dp k)
+    (hsource : ∀ k ∈ atts, k.source ∈ args)
+    (htarget : ∀ k ∈ atts, k.target ∈ args) :
+    ∃ program, checkProgram Pi Gamma reg dp args atts = .ok program := by
+  obtain ⟨base, hbase⟩ :=
+    checkProgramBase_complete hnodup hsupport htyped hsource htarget
+  exact ⟨base.program, by simp [checkProgram, hbase]⟩
+
+/-- The all-complete corollary of `checkProgram_complete_holes`. -/
 theorem checkProgram_complete {canon : String → String}
     {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
     {reg : BackendRegistry canon} {dp : DefeatPolicy}
@@ -896,10 +1247,10 @@ theorem checkProgram_complete {canon : String → String}
       HasAttack canon Pi Gamma (certOkOf reg) dp k)
     (hsource : ∀ k ∈ atts, k.source ∈ args)
     (htarget : ∀ k ∈ atts, k.target ∈ args) :
-    ∃ program, checkProgram Pi Gamma reg dp args atts = .ok program := by
-  obtain ⟨base, hbase⟩ :=
-    checkProgramBase_complete hnodup hcomplete htyped hsource htarget
-  exact ⟨base.program, by simp [checkProgram, hbase]⟩
+    ∃ program, checkProgram Pi Gamma reg dp args atts = .ok program :=
+  checkProgram_complete_holes hnodup
+    (fun w hw => let ⟨C, hC⟩ := hcomplete w hw; ⟨C, [], hC⟩)
+    htyped hsource htarget
 
 /-- A successful detailed result exposes its named semantic and executable
 postconditions without recovering anything from the legacy projection. -/
@@ -909,24 +1260,26 @@ theorem checkProgramDetailed_sound {canon : String → String}
     {args : List SupportTerm} {atts : List Attack}
     {accepted : ProgramAcceptance Pi Gamma reg dp args atts}
     (_h : checkProgramDetailed Pi Gamma reg dp args atts = .ok accepted) :
-    accepted.program.args = args ∧
-    accepted.program.atts = atts ∧
+    accepted.program.args = completeArgs Pi Gamma reg args ∧
+    accepted.program.holes = holeArgs Pi Gamma reg args ∧
+    accepted.program.atts = liveAttacks accepted.program.args atts ∧
     Compile.AttackComplete canon Pi Gamma (certOkOf reg) dp
       accepted.program.args accepted.program.atts ∧
-    accepted.nodes.map (·.term) = accepted.program.args :=
-  ⟨accepted.arguments_eq, accepted.attacks_eq, accepted.attack_complete,
-    accepted.nodes_terms⟩
+    accepted.nodes.map (·.term) = accepted.program.args ∧
+    DeclPartition args accepted.nodes accepted.nodeDecls accepted.holes :=
+  ⟨accepted.arguments_eq, accepted.holes_eq, accepted.attacks_eq,
+    accepted.attack_complete, accepted.nodes_terms, accepted.partition⟩
 
-/-- Exact completeness of the detailed checker. The original compile-boundary
-conditions reach the retained base result; attack completeness then proves
-that the diagnostic scan has no witness. -/
-theorem checkProgramDetailed_complete {canon : String → String}
+/-- Exact completeness of the detailed checker with located holes. Every
+argument must type, complete or not; attack completeness is required only
+between complete arguments, which is all `AttackComplete` ever asks for. -/
+theorem checkProgramDetailed_complete_holes {canon : String → String}
     {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
     {reg : BackendRegistry canon} {dp : DefeatPolicy}
     {args : List SupportTerm} {atts : List Attack}
     (hnodup : args.Nodup)
-    (hcomplete : ∀ w ∈ args, ∃ C,
-      HasSupport canon Pi Gamma (certOkOf reg) w C [])
+    (hsupport : ∀ w ∈ args, ∃ C O,
+      HasSupport canon Pi Gamma (certOkOf reg) w C O)
     (htyped : ∀ k ∈ atts,
       HasAttack canon Pi Gamma (certOkOf reg) dp k)
     (hsource : ∀ k ∈ atts, k.source ∈ args)
@@ -936,21 +1289,27 @@ theorem checkProgramDetailed_complete {canon : String → String}
     ∃ accepted,
       checkProgramDetailed Pi Gamma reg dp args atts = .ok accepted := by
   obtain ⟨base, hbase⟩ :=
-    checkProgramBase_complete hnodup hcomplete htyped hsource htarget
-  let cache := conflictCache Pi atts base.nodes
-  have hterms : cache.map (·.term) = args :=
-    (conflictCache_terms Pi atts base.nodes).trans
-      (base.nodes_terms.trans base.arguments_eq)
+    checkProgramBase_complete hnodup hsupport htyped hsource htarget
+  have hcomplete :
+      Compile.AttackComplete canon Pi Gamma (certOkOf reg) dp
+        base.program.args base.program.atts := by
+    rw [base.attacks_eq, attackComplete_iff_complete_live, base.arguments_eq,
+      attackComplete_completeArgs_iff]
+    exact hattackComplete
+  let cache := conflictCache Pi base.program.atts base.nodes
+  have hterms : cache.map (·.term) = base.program.args :=
+    (conflictCache_terms Pi base.program.atts base.nodes).trans
+      base.nodes_terms
   have hmissing : firstMissingConflict? dp cache = none := by
     apply (firstMissingConflict_none_iff dp cache).mpr
     intro source hsourceCache target htargetCache hcontrary hattackable
-    have hsourceMem : source.term ∈ args := by
+    have hsourceMem : source.term ∈ base.program.args := by
       rw [← hterms]
       exact List.mem_map.mpr ⟨source, hsourceCache, rfl⟩
-    have htargetMem : target.term ∈ args := by
+    have htargetMem : target.term ∈ base.program.args := by
       rw [← hterms]
       exact List.mem_map.mpr ⟨target, htargetCache, rfl⟩
-    exact hattackComplete source.term hsourceMem target.term htargetMem
+    exact hcomplete source.term hsourceMem target.term htargetMem
       source.conclusion target.conclusion source.valid target.valid
       hcontrary hattackable
   unfold checkProgramDetailed
@@ -969,6 +1328,26 @@ theorem checkProgramDetailed_complete {canon : String → String}
       contradiction
     · exact ⟨_, rfl⟩
 
+/-- The all-complete corollary of `checkProgramDetailed_complete_holes`. -/
+theorem checkProgramDetailed_complete {canon : String → String}
+    {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
+    {reg : BackendRegistry canon} {dp : DefeatPolicy}
+    {args : List SupportTerm} {atts : List Attack}
+    (hnodup : args.Nodup)
+    (hcomplete : ∀ w ∈ args, ∃ C,
+      HasSupport canon Pi Gamma (certOkOf reg) w C [])
+    (htyped : ∀ k ∈ atts,
+      HasAttack canon Pi Gamma (certOkOf reg) dp k)
+    (hsource : ∀ k ∈ atts, k.source ∈ args)
+    (htarget : ∀ k ∈ atts, k.target ∈ args)
+    (hattackComplete :
+      Compile.AttackComplete canon Pi Gamma (certOkOf reg) dp args atts) :
+    ∃ accepted,
+      checkProgramDetailed Pi Gamma reg dp args atts = .ok accepted :=
+  checkProgramDetailed_complete_holes hnodup
+    (fun w hw => let ⟨C, hC⟩ := hcomplete w hw; ⟨C, [], hC⟩)
+    htyped hsource htarget hattackComplete
+
 theorem checkProgram_accepted_source_declared {canon : String → String}
     {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
     {reg : BackendRegistry canon} {dp : DefeatPolicy}
@@ -976,7 +1355,7 @@ theorem checkProgram_accepted_source_declared {canon : String → String}
     {program : Compile.CheckedProgram canon Pi Gamma (certOkOf reg) dp}
     (h : checkProgram Pi Gamma reg dp args atts = .ok program) :
     ∀ k ∈ atts, k.source ∈ args := by
-  rcases checkProgram_sound h with ⟨_, _, _, _, _, hsource, _⟩
+  rcases checkProgram_sound h with ⟨_, _, _, _, _, _, hsource, _⟩
   exact hsource
 
 theorem checkProgram_accepted_target_declared {canon : String → String}
@@ -986,21 +1365,7 @@ theorem checkProgram_accepted_target_declared {canon : String → String}
     {program : Compile.CheckedProgram canon Pi Gamma (certOkOf reg) dp}
     (h : checkProgram Pi Gamma reg dp args atts = .ok program) :
     ∀ k ∈ atts, k.target ∈ args := by
-  rcases checkProgram_sound h with ⟨_, _, _, _, _, _, htarget⟩
+  rcases checkProgram_sound h with ⟨_, _, _, _, _, _, _, htarget⟩
   exact htarget
-
-/-- An accepted AF node always has empty obligations; incompleteness can only
-leave through `ProgramError.incompleteArgument`, never through a checked
-program. -/
-theorem checkProgram_nodes_complete {canon : String → String}
-    {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
-    {reg : BackendRegistry canon} {dp : DefeatPolicy}
-    {args : List SupportTerm} {atts : List Attack}
-    {program : Compile.CheckedProgram canon Pi Gamma (certOkOf reg) dp}
-    (h : checkProgram Pi Gamma reg dp args atts = .ok program) :
-    ∀ w ∈ args, ∃ C,
-      HasSupport canon Pi Gamma (certOkOf reg) w C [] := by
-  rcases checkProgram_sound h with ⟨_, _, _, hcomplete, _⟩
-  exact hcomplete
 
 end Lara.Check

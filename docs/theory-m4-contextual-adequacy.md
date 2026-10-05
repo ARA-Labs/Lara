@@ -338,7 +338,7 @@ one's to close; the no-contraries route above is precisely what keeps it
 
 Part A originally supplied only **leaf-name openness**. An unresolved mandatory
 critical question cannot cross `Compile.CheckedProgram.complete`
-(`Compile.lean:480`), and its discharge lives inside a support term rather than
+(`Compile.lean:590`), and its discharge lives inside a support term rather than
 in a name environment. Merely extending Γ therefore cannot provide it.
 
 The additive `Lara.Context.Holes` calculus now supplies the term-level remainder.

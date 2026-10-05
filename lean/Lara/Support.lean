@@ -792,6 +792,66 @@ theorem hasSupport_mono_gamma {canon : String → String}
   | leaf hGamma => exact .leaf (hext _ _ hGamma)
   | inst hside hprems hdis ihprems ihdis => exact .inst hside ihprems ihdis
 
+private theorem mem_leavesList_of_getElem? :
+    ∀ {ws : List SupportTerm} {i : Nat} {w : SupportTerm} {l : LeafId},
+      ws[i]? = some w → l ∈ leaves w → l ∈ leavesList ws := by
+  intro ws
+  induction ws with
+  | nil => intro i w l h; simp at h
+  | cons u us ih =>
+    intro i w l h hl
+    cases i with
+    | zero =>
+      simp only [List.getElem?_cons_zero, Option.some.injEq] at h
+      subst h
+      simp [leavesList, hl]
+    | succ i =>
+      simp only [List.getElem?_cons_succ] at h
+      simp [leavesList, ih h hl]
+
+private theorem mem_leavesDis_of_getElem? :
+    ∀ {D : List (QuestionId × SupportTerm)} {j : Nat} {q : QuestionId}
+      {w : SupportTerm} {l : LeafId},
+      D[j]? = some (q, w) → l ∈ leaves w → l ∈ leavesDis D := by
+  intro D
+  induction D with
+  | nil => intro j q w l h; simp at h
+  | cons d ds ih =>
+    intro j q w l h hl
+    obtain ⟨q', w'⟩ := d
+    cases j with
+    | zero =>
+      simp only [List.getElem?_cons_zero, Option.some.injEq, Prod.mk.injEq] at h
+      obtain ⟨_, rfl⟩ := h
+      simp [leavesDis, hl]
+    | succ j =>
+      simp only [List.getElem?_cons_succ] at h
+      simp [leavesDis, ih h hl]
+
+/-- The support judgment reads `Gamma` only at the term's own leaves. -/
+theorem hasSupport_congr_gamma_on {canon : String → String}
+    {Pi : RuleId → Option Rule} {Gamma Gamma' : LeafId → Option Atom}
+    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    {w : SupportTerm} {C : Atom} {O : List QuestionId}
+    (h : HasSupport canon Pi Gamma CertOk w C O)
+    (hagree : ∀ l ∈ leaves w, Gamma l = Gamma' l) :
+    HasSupport canon Pi Gamma' CertOk w C O := by
+  induction h with
+  | leaf hΓ =>
+    exact .leaf ((hagree _ (by simp [leaves])).symm.trans hΓ)
+  | @inst rn θ ws D H α r As Cs Os DCs DOs C hside hprems hdis ihprems ihdis =>
+    refine .inst hside ?_ ?_
+    · intro i w A O hw hA hO
+      exact ihprems i w A O hw hA hO fun l hl =>
+        hagree l (by
+          simp only [leaves]
+          exact List.mem_append_left _ (mem_leavesList_of_getElem? hw hl))
+    · intro j q w A O hw hA hO
+      exact ihdis j q w A O hw hA hO fun l hl =>
+        hagree l (by
+          simp only [leaves]
+          exact List.mem_append_right _ (mem_leavesDis_of_getElem? hw hl))
+
 /-- `Supports` respects `≡`: one term cannot support two `≢` claims. With
 uniqueness this is result 11's functionality at claim level. -/
 theorem supports_resp_equiv {canon Pi Gamma CertOk} {w : SupportTerm}

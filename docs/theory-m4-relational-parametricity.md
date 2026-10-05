@@ -118,12 +118,12 @@ conveniences — each one is a place where the calculus itself compares terms:
 1. **`dedupList`** — the structural merge (`Context/Fragment.lean:68`) decides
    `x ∈ rest`, so a relation collapsing two distinct arguments changes the
    merged argument *list*, hence the node count of the compiled AF.
-2. **`coveredB`** (`Compile.lean:441`) — decides `k.source = source`, so a
+2. **`coveredB`** (`Compile.lean:548`) — decides `k.source = source`, so a
    collapsing relation adds edges. `Lara/Erase.lean`'s own header already
    records this for the non-injective erase-to-`certified` map: "collapsing
    distinct subterms can merge occurrences and add subargument-closure edges."
 3. **`checkUnit_complete`'s `Nodup` premise** on the merged argument list
-   (`Check/Unit.lean:243`), discharged here by `nodup_rel`.
+   (`Check/Unit.lean:352`), discharged here by `nodup_rel`.
 
 This is **witnessed, not asserted**. `Context.relInj_necessary` is
 `coveredB_rel` with `hR` deleted and the conclusion negated: it exhibits a

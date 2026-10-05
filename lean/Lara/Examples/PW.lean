@@ -42,7 +42,7 @@ Two spellings are forced and worth stating once. `sigma_eq`/`policy_eq` are
 closed by `rfl`, not `decide`: `Lara.Policy.Policy` has no `DecidableEq`
 instance (nor does `Attack.DefeatPolicy`), so `decide` reports "failed to
 synthesize"; `checkUnit` retains `sigma := unit.sigma` and
-`policy := unit.policy` verbatim (`Check/Unit.lean:151`), so `rfl` closes
+`policy := unit.policy` verbatim (`Check/Unit.lean:174`), so `rfl` closes
 both. And index constructors are spelled `OneBridge.it` / `OneCtx.it` rather
 than `.it` wherever the expected type is a `frame.B` / `frame.K` projection —
 dotted notation resolves against the projection head, not through it.
