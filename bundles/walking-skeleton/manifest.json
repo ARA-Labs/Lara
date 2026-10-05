@@ -7,7 +7,7 @@
     "source": "source.yaml",
     "verdict": "verdict.txt"
   },
-  "checker-source-revision": "430fcd2d68c7f4ae396ad0226d7b455a8f71d733",
+  "checker-source-revision": "362afb4d17a3585916cecfbf139f165f219929a8",
   "format": "lara-replay-bundle@1",
   "frozen-verdict": {
     "exit-code": 0
