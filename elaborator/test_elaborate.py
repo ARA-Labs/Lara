@@ -191,14 +191,22 @@ class SuccessRun(unittest.TestCase):
         discharges = [e for e in entries if e["decision"] == "discharge"]
         holes = [e for e in entries if e["decision"] == "hole"]
         # c_me: randomization answered, power and external validity are holes;
-        # the incomplete argument is NOT emitted (hole -> gap lowering).
+        # the incomplete argument IS emitted with both questions open, and
+        # lara-core@0.3 reports it as a located hole (the claim stays gap).
         self.assertEqual([h["question"] for h in holes], ["adequate_power", "external_validity"])
         for h in holes:
+            self.assertEqual(h["arg"], "a_me")
             self.assertEqual(h["claim"], "c_me")
             self.assertEqual(h["source-node"], "dd_me_pool")
-            self.assertEqual(h["lowered"], "gap")
-            self.assertIn("PEIncompleteArgument", h["reason"])
-        self.assertNotIn("arg a_me", self.emitted)
+            self.assertEqual(h["lowered"], "located-hole")
+            self.assertIn("located hole", h["reason"])
+        self.assertIn(
+            "arg a_me : supports(c_me) by controlled_experiment(kv_quant, latency, mobile_edge, exp_me)\n"
+            "  discharge randomization     with e_me_rand\n"
+            "  open      adequate_power\n"
+            "  open      external_validity",
+            self.emitted,
+        )
         me_discharge = next(e for e in discharges if e["arg"] == "a_me")
         self.assertEqual(
             (me_discharge["question"], me_discharge["with"], me_discharge["source-cell"]),

@@ -99,6 +99,11 @@ leaf e_me_rand : randomized(exp_me)
   provenance = user
   refs       = [paper.md#sec=8.1]
 
+arg a_me : supports(c_me) by controlled_experiment(kv_quant, latency, mobile_edge, exp_me)
+  discharge randomization     with e_me_rand
+  open      adequate_power
+  open      external_validity
+
 # --- typed attacks (task 6) ---------------------------------------------------
 
 # dd_cp_shift

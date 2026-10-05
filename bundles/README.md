@@ -31,22 +31,18 @@ bundle today is `bundles/walking-skeleton/` (§2).
   source binding; the §4.3 duplicate-report situation (one measurand cell
   reported in two places) is **logged in provenance only** — no implementation
   layer carries duplicate-report groups (issue #38).
-- **Hole lowering (verified against the TCB at the B1 freeze).** Under
-  `lara-core@0.2`, the core this bundle was built against, an argument with an
-  open mandatory critical question was a whole-unit checker **rejection**
-  (`PEIncompleteArgument`), not an accept-with-holes. Since `lara-core@0.3`
-  such an argument is accepted as a located hole (spec §4.4,
-  `docs/located-gap-decision.md`); the frozen B1 lowering and its pinned
-  provenance strings below are unchanged, and re-lowering to declare the
-  incomplete argument is tracked in issue #15. The B1 gate
-  requires the emitted `.lara` to be *accepted*. The elaborator therefore
-  lowers an explicit hole (§11 task 4) by **not emitting the incomplete
-  argument** — the E2 mechanism: the claim's complete-support set is empty and
-  `statusC` reports `gap`. The hole decision (which questions, why, from which
-  source node) is recorded in the provenance log (§7). This is the only
-  acceptance-compatible reading of "explicit hole creation" on the frozen
-  frontend; the alternative (emit an `open` line) yields a reject verdict and
-  fails the B1 gate.
+- **Hole lowering (re-lowered under `lara-core@0.3`, issue #15).** At the B1
+  freeze the core was `lara-core@0.2`, where an argument with an open
+  mandatory critical question was a whole-unit checker **rejection**
+  (`PEIncompleteArgument`), so B1 lowered an explicit hole (§11 task 4) by
+  *not emitting* the incomplete argument. Since `lara-core@0.3` such an
+  argument is accepted as a located hole (spec §4.4,
+  `docs/located-gap-decision.md`). The elaborator now **emits** every
+  instantiated argument: an unanswered question becomes an `open <question>`
+  line, the argument is reported in the verdict's `holes` section with its
+  open obligations, and the claim's complete-support set stays empty, so
+  `statusC` still reports `gap`. The hole decision (which questions, why,
+  from which source node) is still recorded in the provenance log (§7).
 
 ## 2. Directory layout
 
@@ -230,11 +226,13 @@ declaration order: if the trace holds a cell whose topic answers the
 question's answer pattern (`randomization` → `randomized(Exp)`, `power` →
 `powered(Exp)`, `generalization` → `generalizes(M, Q, D)`), emit
 `discharge <question> with <leaf>`; otherwise the question is an **explicit
-hole**, lowered per §1 (hole lowering): the incomplete argument is **not
-emitted**, the claim's complete-support set stays empty (→ `gap`), and the
-hole is logged in provenance with question ids, the responsible source node,
-and rationale. (A surface `open` line is a checker rejection on the frozen
-frontend — verified §1 — so it is never emitted.)
+hole**, lowered per §1 (hole lowering): emit `open <question>` in the
+question's declaration position, so the argument is emitted either way. With
+an open mandatory question the argument is a located hole: the checker accepts
+it, reports it in the verdict's `holes` section, and the claim's
+complete-support set stays empty (→ `gap`). The hole is logged in provenance
+with the argument and claim ids, question id, the responsible source node, and
+rationale.
 
 **Task 5 — strict-backend / theory / certificate selection.** N/A (T1): no
 strict instance is certified; `Lara.Syntax` forces `AssuranceNone`. Logged as
@@ -272,8 +270,9 @@ matched by the elaborator — attacks are never declared in the source.
 2. Per claim context, in source tree order: the `claim` declaration, then its
    leaves — ALL cells of the claim subtree, including attack-source cells, in
    tree-walk order (an experiment's cells before its sibling dead ends'
-   cells; the E3 precedent) — then its support `arg` (if task 4 assembled
-   one) with discharge lines in policy question order.
+   cells; the E3 precedent) — then its support `arg` (one per task-3
+   instantiation) with its `discharge` and `open` lines in policy question
+   order.
 3. Attacker args and attack declarations, in source tree order of the nodes
    that produced them. No leaves here: attack-source leaves are already
    emitted in their claim context per item 2.
@@ -404,10 +403,10 @@ makes "no hand-authored certificate" auditable.
   "task-4-question-accounting": [
     { "arg": "a_ow", "question": "randomization", "decision": "discharge",
       "with": "e_ow_rand", "source-cell": "cell_ow_rand" },
-    { "claim": "c_me", "question": "adequate_power", "decision": "hole",
+    { "arg": "a_me", "claim": "c_me", "question": "adequate_power", "decision": "hole",
       "source-node": "dd_me_pool",
-      "lowered": "gap",
-      "reason": "no evidence cell answers the question; the frozen frontend rejects surface holes (PEIncompleteArgument), so the incomplete argument is not emitted and the claim's complete support is empty" }
+      "lowered": "located-hole",
+      "reason": "no evidence cell answers the question; the incomplete argument is emitted with the question open, and lara-core@0.3 reports it as a located hole while the claim's complete support stays empty" }
   ],
   "task-5-strict-selection": {
     "status": "not-applicable",
@@ -427,7 +426,9 @@ makes "no hand-authored certificate" auditable.
 Schema rules: `duplicate-report` is `null` unless the cell has more than one
 ref location. `substitution` pairs are in **rule parameter order** (arrays,
 not objects). `decision` is `discharge` (with `with` + `source-cell`) or
-`hole` (with `source-node`, `lowered`, `reason`). `role` is `attack`
+`hole` (with `arg`, `claim`, `source-node`, `lowered`, `reason`; `lowered` is
+`located-hole` for a mandatory question and `open` for an optional one, whose
+`open` line adds no obligation). `role` is `attack`
 (with `attack` + `policy-basis`), `support` (with `leaf`), or `none`
 (with `note`). The log contains no timestamps, no absolute paths, and no
 content not derivable from `source.yaml` + the trusted policy.
@@ -460,7 +461,8 @@ For the committed `walking-skeleton` source, the emitted `.lara` checks
 argument, no attackers), `c_cp` → **defeated** (complete argument, undercut by
 the distribution shift and undermined at its external-validity leaf — both
 attackers derived from trace nodes), `c_me` → **gap** (empty complete support;
-the unmet power and external-validity questions are the task-4 holes logged in
-provenance). No rebut pair arises: all claim/attack atoms live in disjoint
+`a_me` is emitted with its unmet power and external-validity questions open,
+reported as a located hole in the verdict's `holes` section, and logged as the
+task-4 holes in provenance). No rebut pair arises: all claim/attack atoms live in disjoint
 `(method, quality, distribution)` contexts, and no `not_improves` argument is
 ever assembled.
