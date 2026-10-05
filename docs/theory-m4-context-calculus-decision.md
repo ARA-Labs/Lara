@@ -173,9 +173,18 @@ obligations. A **term-level** hole — an argument with unresolved
 critical-question obligations (`HasSupport … w C O`, `O ≠ []`) discharged by
 the context — is unrepresentable in this calculus, and not by choice:
 `Compile.CheckedProgram.complete` (`Compile.lean:480`) forces `O = []` on every
-declared argument, and discharges live *inside* the term (`D : List (QuestionId
+AF argument, and discharges live *inside* the term (`D : List (QuestionId
 × SupportTerm)`), not in a name environment a context could extend.
 `Grounded.Claim.holes` is likewise never read by the observation of §5.
+
+Since `lara-core@0.3` an accepted unit may also carry *located* holes
+(`docs/located-gap-decision.md`): declared arguments that type-check with
+`O ≠ []`. They are reported beside the framework and are not AF arguments, so
+`complete` still holds of every argument the framework contains; it no longer
+holds of every declared argument. They are not context holes either — no
+context fills them — and the linking, composition and contextual-equivalence
+results of this record stay stated over the hole-free `SideOk.support` domain
+(`Context/Link.lean`), where every declared argument is complete.
 
 Consequence for the original closeout: M3's contextual-adequacy debt was
 discharged **partially**, with term-level holes retained.

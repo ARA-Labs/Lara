@@ -96,11 +96,19 @@ Map each annotated CQ onto the nearest policy CQ of the chosen rule; then:
 - annotated **met** → `discharge <question> with <leaf>` (leaf cites the
   annotation's basis).
 - annotated **unmet-gap** on a policy-MANDATORY question → **do not declare
-  the arg** (E2-style unit). An open mandatory obligation is an
-  IncompleteArgument rejection, never a hole in an accepted unit; `gap` is
-  produced exactly one way — empty complete support. This applies even when
-  the annotator rated the CQ optional (uniform-standard rule: the policy call
-  wins; record the divergence in the header — see `adaptive-pruning/C03`).
+  the arg** (E2-style unit). `gap` is produced exactly one way — empty
+  complete support. This applies even when the annotator rated the CQ
+  optional (uniform-standard rule: the policy call wins; record the
+  divergence in the header — see `adaptive-pruning/C03`). The units were
+  lowered when an open mandatory obligation rejected the whole unit
+  (`incomplete-argument`, through `lara-core@0.2`). Since `lara-core@0.3` the
+  checker accepts such an arg as a located hole: it stays out of the graph,
+  the claim still reports `gap`, and the verdict's `holes` section names the
+  arg and its open questions (`docs/located-gap-decision.md`). Declaring the
+  arg with `open <question>` is therefore valid and more informative, and
+  gives the same status. The frozen units keep the omission so that their
+  bytes and statuses stay comparable across the freeze; re-lowering them to
+  declare their incomplete args is separate work, not part of this rule.
 - annotated **unmet-defeater** → the arg IS declared complete (discharge the
   contested question with the paper's own claimed basis) and the defeating
   evidence forms a leaf-rooted challenge arg concluding the rule's exception
@@ -135,7 +143,9 @@ dead-end/counter-evidence), `arg dN : challenges(<question>(a1)) by leaf(uN)`,
 `undercut dN a1.rule`. An unattacked undercutter drives the support out ⇒
 claim `defeated`. If a mandatory CQ of the same arg is independently
 unmet-gap, the gap rule wins (no arg to attack) and the undercut evidence
-stays as a header note — the status is `gap`, not `defeated`.
+stays as a header note — the status is `gap`, not `defeated`. Declaring the
+incomplete arg and the undercut would give the same status: an attack on the
+root of a hole produces no edge, because no complete argument contains it.
 
 ## After writing a unit
 

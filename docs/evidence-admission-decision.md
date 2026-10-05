@@ -5,7 +5,7 @@ boundary and the paper claim for byte-level evidence admission, per the
 2026-08-26 scope decision. It authorizes no implementation: the layer is
 deferred, blocked on the corpus inventory gate below plus explicit researcher
 approval. Nothing here is part of the frozen core specification (`lara-core@0.1` when
-this was recorded, `lara-core@0.2` now),
+this was recorded, `lara-core@0.3` now),
 and `docs/spec.md` intentionally does not specify this layer._
 
 Vocabulary for cold readers: a *leaf* is a declared piece of evidence; a
@@ -127,12 +127,17 @@ evidence-checked identity, and the two identities are reported separately.
 - **Trust tiers and manifest roles never enter the defeat calculus.**
   Provenance informs admission; typed rebut/undercut/undermine decide
   defeat. A trust tier is not a scientific defeat relation.
-- **`PEIncompleteArgument` is the v0.1 contract, not a bug.** A submitted
-  argument with an open mandatory obligation rejects; an accepted gap is
-  represented as *no submitted argument* (`corpus-units/LOWERING.md`).
-  Accepting partial alternatives would be a later core version with a full
-  refreeze, outside this record. (`lara-core@0.2` shipped as the many-sorted
-  signature, not this.)
+- **Incomplete arguments are a core matter, not an admission one.** Through
+  `lara-core@0.2` a submitted argument with an open mandatory obligation
+  rejected (`PEIncompleteArgument`), and an accepted gap was represented as
+  *no submitted argument*. That was a scope decision, not a soundness
+  requirement. `lara-core@0.3` accepts such an argument as a located hole,
+  outside the argumentation framework, as a core version change with a full
+  refreeze (`docs/located-gap-decision.md`). Nothing in this layer interacts
+  with that change: admission decides which leaves reach `Gamma`, and whether
+  a term that uses them is complete is decided afterwards by the core. A
+  quarantined hole is pruned like any other dependent argument and is never
+  reported as a hole.
 - **Quarantine is unavailability, not falsity.** No admission outcome
   creates an attack or directly sets a four-state status.
 - **Goal/attempt history stays outside the calculus.** The registration
@@ -160,7 +165,7 @@ combined-report bytes — an M5-scale refreeze.
 ## 8. Versioning
 
 The frozen core (`lara-core@0.1` when this was recorded; `lara-core@0.2`, the
-many-sorted signature, since) — checker, wire grammar, fixtures, proof
+many-sorted signature, and then `lara-core@0.3`, located gaps, since) — checker, wire grammar, fixtures, proof
 statements — is preserved unchanged. Evidence admission, if built, is an independently
 versioned source layer (`lara-evidence@0.1`) so concrete checker evolution
 never silently changes the argumentation calculus.

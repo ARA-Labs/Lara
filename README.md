@@ -20,7 +20,9 @@ claim the checker reports one of four statuses, and why:
 
 - **justified** — the claim has a complete supporting argument that survives
   every declared attack;
-- **gap** — no complete supporting argument has been declared for the claim;
+- **gap** — no complete supporting argument has been declared for the claim
+  (an argument that leaves a required question open does not count, and the
+  verdict names it and the questions it leaves open);
 - **defeated** — an argument existed, but something also declared in the file
   knocks it down;
 - **contested** — support and attack are in a standoff, so neither side wins.
@@ -86,7 +88,9 @@ arithmetic and the comparative claim are **justified**.
 The checker also does not search for missing pieces or guess. Everything is
 what the producer wrote down; the value is that "what you wrote down" is now
 something a machine can check, and a claim with no complete argument is
-reported as **gap**, a first-class outcome rather than a rejection.
+reported as **gap**, a first-class outcome rather than a rejection. An
+argument the author started but could not finish is reported too, as a
+*located gap*: which argument it is and which questions it leaves open.
 
 When claims, evidence, and dead ends are explicit objects, the *support* of
 each claim becomes something a small trusted kernel can type, compile, and
@@ -161,8 +165,10 @@ Arguments come in two strengths. A *defeasible* step like `a1` ("the
 experiment suggests the method works") must answer every critical question its
 reasoning scheme requires (was it randomized, was the sample adequate, does
 it generalize) with a declared piece of evidence. An argument that leaves a
-required question open is rejected, so an author who cannot answer one leaves
-the argument out, and the claim reports **gap**. A *strict* step like `s1` ("0.71 is less than 0.74") must
+required question open is not thrown away and does not count as support: the
+checker accepts the file, keeps that argument out of the graph, and reports it
+as a located gap with the questions it leaves open. If it was the claim's only
+support, the claim reports **gap**. A *strict* step like `s1` ("0.71 is less than 0.74") must
 instead carry a certificate that a small dedicated backend re-checks from
 scratch: the checker does not trust the author's arithmetic, it redoes it.
 
@@ -178,7 +184,7 @@ confirm the same result), the argument labelling, and each requested status
 (wrapped here):
 
 ```text
-(verdict (replay-id (core lara-core@0.2) (policy empirical-v3)
+(verdict (replay-id (core lara-core@0.3) (policy empirical-v3)
                     (backends (backend nd 1) (backend ord 1))
                     (theories sha256:empv3-t0) (artifact sha256:aaaa...))
   accept (labels (0 in) (1 out) (2 in)) (edges (2 1))
@@ -188,11 +194,13 @@ confirm the same result), the argument labelling, and each requested status
 
 The certified arithmetic stands on its own (`c2` **justified**: `s1` is strict
 and unattacked) while the empirical claim is **defeated** (`c1`: the paper's
-own limitations note, `d1`, undermines the experiment argument `a1` and
+own limitations note, `d1`, undercuts the experiment argument `a1` and
 nothing knocks `d1` down). Run 1 of the same example
-([`run1/`](examples/running-example/run1/)) omits the leaf that discharges
-external validity: no complete support argument for `c1` can be declared, and
-the verdict reports **gap**.
+([`run1/`](examples/running-example/run1/)) omits the leaf `e6` that
+discharges external validity: it declares the same argument `a1` with
+`external_validity` left open, so `c1` has no complete
+support and reports **gap**, and the verdict's `holes` section names `a1` and
+the open question `external_validity`.
 
 One artifact is one paper, and a **map** is several of them. A `.laramap`
 manifest names independently authored, independently checkable `.lara` members
@@ -320,7 +328,7 @@ Start with the [documentation index](docs/README.md) for reading paths and theor
 
 | Document | What it covers |
 | --- | --- |
-| [`docs/spec.md`](docs/spec.md) | The **v0.1 language specification** (frozen; current core `lara-core@0.2`): TCB, propositions and `nf`/`≡`, policies, strict backends, support-term and attack typing, compilation and grounded semantics, rejection classes |
+| [`docs/spec.md`](docs/spec.md) | The **v0.1 language specification** (frozen; current core `lara-core@0.3`): TCB, propositions and `nf`/`≡`, policies, strict backends, support-term and attack typing, compilation and grounded semantics, rejection classes |
 | [`docs/lara-surface-grammar.md`](docs/lara-surface-grammar.md) | The `.lara` presentation syntax (current: **`lara-syntax@0.10`**), with per-version appendices — comparison blocks, value bindings, inferred instantiation, named certificate premise slots, surface strictness, premise-label citation, named `nd@1` proof terms, and source-authored `nd@1` formula annotations |
 | [`docs/foundations.md`](docs/foundations.md) | The four lines of work Lara builds on: abstract and structured argumentation, argumentation schemes, proof-carrying code / LCF |
 | [`docs/novelty-and-related-work.md`](docs/novelty-and-related-work.md) | The novelty claim and the delta table against prior art (Micropublications, AIF, EG-VAR, Pandžić, ASPIC+, Dung, PCC/FPC) |

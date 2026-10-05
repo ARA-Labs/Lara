@@ -264,6 +264,38 @@ claim has holes, and the Haskell reporting path computes located incomplete
 alternatives in `src/Lara/Reporting.hs`. Holes are neither a fifth grounded
 status nor a sixth public report.
 
+Since `lara-core@0.3` (`docs/located-gap-decision.md`) an accepted source can
+contain holes: declared arguments that type-check with a nonempty mandatory
+obligation set. The checked framework holds only the complete arguments, so
+`completeClaimFor` and every matrix above still read complete support only.
+`Accepted` no longer implies that every raw argument is complete: what an
+accepted run yields as checked arguments and attacks is the complete arguments
+and the attacks whose source is complete. `applyUpdate_addInstance_ok` keeps
+its complete-support premise: it is the completion case.
+
+Adding a hole is inert only conditionally. A fresh `addInstance` whose term is
+a hole, with the attacks unchanged, leaves the complete arguments, their typing
+context and the closure coverage between them fixed, so every core status is
+unchanged and the only new output is the hole's diagnostic. The unconditional
+claim is false: an attack from a complete source onto an occurrence inside a
+hole produces closure edges onto complete arguments containing that occurrence,
+so `addAttack` onto a hole can change a core status, and removing a hole can
+remove such an attack at the raw endpoint boundary. Graph and status invariance
+is therefore stated under unchanged complete-to-complete coverage, or for the
+fresh hole-only `addInstance` above. No update other than `addInstance` changes
+which declared terms are holes.
+
+Completion is additive. An author completes a gap with `addLeaf` for each
+fresh admitted leaf it needs, then `addInstance` of a distinct complete term
+under a fresh raw name. The old hole and every raw attack stay declared. This
+is not a sequence that is accepted step by step in general: the complete term
+goes through ordinary attack-completeness checking, so if it licenses an
+outgoing conflict that no declared attack covers, `addInstance` rejects before
+the `addAttack` that would cover it can be applied. The supported statement is
+about the complete declaration-plus-attacks program, checked directly.
+Discharging a hole in place, under its own id, and atomic multi-edit completion
+are not update constructors.
+
 `Lara.Update.beliefSet sem unit p` means
 `coreObs sem unit p = observed justified`. The M3 AGM comparison fixes
 `sem = Semantics.groundedSem` and tests exactly two probes.
