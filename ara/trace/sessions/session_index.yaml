@@ -708,9 +708,9 @@ sessions:
 
 - id: 2026-10-05_001
   date: '2026-10-05'
-  summary: 'Located gap finished end to end (lara-core@0.3, map-verdict@2); freeze v7 with 18 holes accepted and 655/655 agreement.'
-  turn_count: 1
-  events_count: 4
+  summary: 'Located gap finished (lara-core@0.3, map-verdict@2, freeze v7), then follow-ups #11/#13/#14/#15/#16 landed in PR #12 with freeze v8 (660/660; no-cq changes 48/48 corpus units).'
+  turn_count: 2
+  events_count: 12
   claims_touched:
   - C24
-  open_threads: 2
+  open_threads: 3

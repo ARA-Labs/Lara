@@ -2,10 +2,9 @@ session:
   id: 2026-10-05_001
   date: '2026-10-05'
   started: 2026-10-05T17:00+00:00
-  last_turn: 2026-10-05T19:50+00:00
-  turn_count: 1
-  summary: 'Finished the located-gap feature (lara-core@0.3, PR #12): Haskell mirror, Lean driver, map-verdict@2,
-    mutant and ablation semantics, full regeneration, freeze v7.'
+  last_turn: 2026-10-06T00:10+00:00
+  turn_count: 2
+  summary: 'Finished located gap (lara-core@0.3, PR #12, freeze v7), then landed follow-ups #11/#13/#14/#15/#16 in the same PR: obligation sites (D12), hole-aware linking, discharge/atomic updates, corpus re-lowered to declare holes, freeze v8 (660/660).'
 events_logged:
 - turn: 1
   type: decision
@@ -31,6 +30,54 @@ events_logged:
   routing: staged
   provenance: ai-suggested
   summary: node completeness load-bearing for status (gap->justified 11/18)
+- turn: 2
+  type: decision
+  id: N351_followups
+  routing: direct
+  provenance: user
+  summary: land follow-ups 11/13/14/15/16 in PR 12; amend lara-core@0.3 in place (D12)
+- turn: 2
+  type: experiment
+  id: N351_sites
+  routing: direct
+  provenance: ai-executed
+  summary: hole rows locate obligations at rule occurrences; Lean openSites sound and complete
+- turn: 2
+  type: experiment
+  id: N351_linking
+  routing: direct
+  provenance: ai-executed
+  summary: SideOkHoles linking; hole erasure observable counterexample
+- turn: 2
+  type: experiment
+  id: N351_updates
+  routing: direct
+  provenance: ai-executed
+  summary: dischargeOpen and atomic batch updates; sequential completion can fail
+- turn: 2
+  type: decision
+  id: N351_relower
+  routing: direct
+  provenance: ai-executed
+  summary: 48 gap units declare located holes; audit only load-bearing attacks
+- turn: 2
+  type: experiment
+  id: N351_v8
+  routing: direct
+  provenance: ai-executed
+  summary: 'freeze v8: 660/660; no-cq changes 48/48 corpus units (gap->justified 46)'
+- turn: 2
+  type: observation
+  id: O182
+  routing: staged
+  provenance: ai-executed
+  summary: holes are not observationally inert under composition
+- turn: 2
+  type: observation
+  id: O183
+  routing: staged
+  provenance: ai-executed
+  summary: atomic batch is complete for completion; sequential updates are not
 ai_actions:
 - turn: 1
   action: 'Implemented Stages 3-7 of the located-gap plan, regenerated all fixtures, cut freeze v7, opened
@@ -45,10 +92,32 @@ ai_actions:
   - corpus-units/
   - measurements/frozen/
   - docs/
+- turn: 2
+  action: Ran three worktree agents (#16, #11/#14, #13) and four corpus re-lowering agents; merged all branches; regenerated corpus, mutants, bundle; cut freeze v8
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/Check/HoleSites.lean
+  - lean/Lara/Context/LinkHoles.lean
+  - lean/Lara/Update/Discharge.lean
+  - lean/Lara/Update/Completion.lean
+  - src/Lara/Wire.hs
+  - src/Lara/Update.hs
+  - src/Lara/Mutate/Sites.hs
+  - src/Lara/ClaimSupport.hs
+  - src/Lara/Measure.hs
+  - corpus-units/
+  - elaborator/elaborate.py
+  - bundles/walking-skeleton/
+  - measurements/frozen/
+  - docs/located-gap-decision.md
+  - docs/m5-freeze-checklist.md
 claims_touched:
 - id: C24
   action: revised
   turn: 1
+- id: C24
+  action: advanced
+  turn: 2
 logic_revisions:
 - turn: 1
   entry: C24
@@ -82,12 +151,27 @@ logic_revisions:
   after: v7 located_gap_v7.md quotes
   signal: empirical-resolution
   provenance: ai-suggested
+- turn: 2
+  entry: C24
+  field: Conditions/Sources/Proof
+  before: |-
+    - **Conditions**: Seeded mutation corpus; ablation cells `noCQConfig` (node promotion, `PromoteTypedHoles`), `noTypedConfig`, and `noConflictScanConfig` of `Lara.Check.CheckConfig` under `lara-core@0.3`. `noTypedConfig` disables both typed attacks and conflict-scan completeness, so it maps to R10/R11/MissingConflict together. Monotonicity is claimed and checked (`AblationSpec`) for the rejection-relaxing switches only; node promotion is identity exactly on units whose full verdict reports no hole, and can in principle turn an accept into a missing-conflict reject, which the seeded corpus never exhibits. Untested boundary: human-authored natural defects, deferred; no claim about naturally occurring defect rates.
+    - **Sources**: ["no-cq 0 missed / 17 status shifts / 637 unchanged ← ara/evidence/results/located_gap_v7.md «no-cq: count=655; missed-rejects=0; new-rejects=0; status-shifts=17; unchanged=637; changed class: accept-located-hole=18 (shifted statuses gap->justified=11, gap->defeated=4, gap->contested=2, justified->contested=1).» [result]", "37/618 ← ara/evidence/results/located_gap_v7.md «no-typed: count=655; missed-rejects=37; new-rejects=0; unchanged=618; missed classes: reject-MissingConflict=5, reject-R10=11, reject-R11=21.» [result]", "5/650 ← ara/evidence/results/located_gap_v7.md «no-conflict-scan: count=655; missed-rejects=5; new-rejects=0; unchanged=650; missed classes: reject-MissingConflict=5.» [result]"]
+    - **Proof**: [`measurements/frozen/ablation.{json,tsv}` (clean be82e97 v7 run), `ara/evidence/results/located_gap_v7.md`, `test/AblationSpec.hs` (`prop_noCQSurgical`, `prop_promotionIdentityWithoutHoles`, `prop_monotonicity`), trace N351_v7; v6 evidence `ara/evidence/results/backend_mutation_v6.md` and N266_v6; historical T6 execution in N97]
+  after: Conditions add the 48 hole-bearing corpus units; Sources and Proof cite located_gap_v8.md (no-cq 66 changed incl. corpus 48/48; no-typed 39; no-conflict-scan 5)
+  signal: empirical-resolution
+  provenance: ai-suggested
+  note: Statement unchanged; status stays testing (no verbal affirmation)
 key_context:
 - turn: 1
   excerpt: 'User goal: check the progress of this WIP PR, finish it and make the PR ready for review.'
+- turn: 2
+  excerpt: 'User: see the follow up issues from our pr. let''s just address all of them in this single pr'
 open_threads:
 - 'PR #12 review and merge; m5-freeze-v7 tag on the merge commit'
 - 'Follow-ups #13 (composition over holes), #14 (in-place discharge), #15 (re-lower corpus), #16 (nested
   hole locations)'
+- 'Turn 2: PR #12 now closes #11, #13, #14, #15, #16; needs push, PR body update, review; m5-freeze-v8 tag on merge'
 ai_suggestions_pending:
 - O181 candidate claim on node completeness and status
+- O182, O183 candidate claims (composition with holes; atomic completion)

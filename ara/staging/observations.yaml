@@ -3962,3 +3962,35 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+- id: O182
+  timestamp: 2026-10-05T22:30+00:00
+  provenance: ai-executed
+  content: >-
+    Holes are not observationally inert under composition: deleting a hole together with the only attack
+    aimed inside it can change a context's observation (hole_erasure_observable: contested vs rejected).
+    Fragments that agree on complete arguments AND live attacks are observed identically (obsGen_hole_blind).
+  context: >-
+    Issue #13 hole-aware linking (N351_linking). Candidate claim about contextual equivalence with holes;
+    relates to D6 (attacks into holes keep closure edges).
+  potential_type: claim
+  bound_to:
+  - N351_linking
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O183
+  timestamp: 2026-10-05T23:00+00:00
+  provenance: ai-executed
+  content: >-
+    Individually rechecked updates do not guarantee a completion path: a fresh complete argument can need an
+    attack whose source does not yet exist. An atomic batch checked once on the final state is complete for
+    completion (atomic_completion_complete; counterexample sequential_completion_fails).
+  context: Issues #11/#14 (N351_updates). Candidate claim about update vocabularies and acceptance.
+  potential_type: claim
+  bound_to:
+  - N351_updates
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

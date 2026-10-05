@@ -1705,3 +1705,11 @@ entries:
   - Staged O181 (node completeness load-bearing for status) rather than crystallizing; single seeded run, no closure signal. Considered folding it into C16, rejected - C16 is a corpus-composition claim.
   - Recorded the mismatched D7 fixture as a dead_end; its lesson is kept as a separate test.
   - No change to C16/C21/C25 - located holes are consistent with gap routing and conservative reporting; considered C25 (evidence-blocked) near-miss, D7 narrows the reference carrier but C25's statement is not about carriers.
+
+- turn: 2026-10-05_001#2
+  notes:
+  - Logged the user's "address all follow-ups in this PR" as a user-provenance decision (N351_followups); the no-bump amendment of lara-core@0.3 (D12) is folded into it as ai-executed detail, not user-affirmed.
+  - Advanced C24 via empirical resolution (freeze v8): Sources/Proof/Conditions only; Statement and testing status unchanged - no verbal affirmation.
+  - O181 (node completeness load-bearing for status) gains corpus evidence (46/48 gap->justified under no-cq) but stays staged; considered artifact commitment because the freeze checklist now cites the corpus headline, rejected - a doc citing a measurement is not a dependent artifact.
+  - Staged O182 (holes not observationally inert under composition) and O183 (atomic completion complete, sequential not) rather than crystallizing; proved results but no researcher comment yet.
+  - Recorded the corpus re-lowering, the hole-obligation operator restriction, and the load-bearing audit rule as one decision node (N351_relower) since they were forced together by the regeneration.
