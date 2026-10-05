@@ -410,7 +410,7 @@ def policy_text(extra):
 
 # The groups.sexp fixture's w1, as an inline source: it declares the leaf
 # table w0.lara elaborates to, so it can share w0.lara's context.
-INLINE_W1 = ('(inline (check-input (replay-id (core lara-core@0.2) (policy pw-t7) (backends (backend nd 1))'
+INLINE_W1 = ('(inline (check-input (replay-id (core lara-core@0.3) (policy pw-t7) (backends (backend nd 1))'
              ' (theories) (artifact pw-groups-w1)) (unit (sigma (sorts) (cons) (preds (pred p (args)) (pred q (args))))'
              ' (policy (rules) (contraries (contrary (apat q) (apat p))) (exceptions)) (theories)'
              ' (leaves (leaf l1 (atom p)) (leaf l2 (atom q)) (leaf l3 (atom p))) (args (arg a1 (leaf l1)) (arg a2 (leaf l2)))'

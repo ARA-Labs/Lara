@@ -1,6 +1,6 @@
 ; Context src, world s0: the p argument alone, so p is justified.
 (check-input
-  (replay-id (core lara-core@0.2) (policy pw-src) (backends (backend nd 1))
+  (replay-id (core lara-core@0.3) (policy pw-src) (backends (backend nd 1))
     (theories) (artifact pw-src-s0))
   (unit
     (sigma (sorts Item) (cons (con z (args) Item))

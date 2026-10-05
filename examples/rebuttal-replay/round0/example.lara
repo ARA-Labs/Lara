@@ -104,8 +104,9 @@ claim c_kurt
 
 # The paper supplies the ablation premise and the two met CQs, but the ablation is single-run:
 # corpus-v1 / rebuttal-v1 make variance_reported MANDATORY, and no honest variance leaf exists.
-# An arg with an open mandatory CQ is an IncompleteArgument rejection, so NO arg is declared — the
-# claim's complete-support set is empty and it lands `gap` (E2-style; corpus unit C04).
+# So the argument a_kurt declares that question open: it is a located hole (spec §4.4), not an AF
+# node. The claim's complete-support set is empty and it lands `gap`, and the verdict's holes
+# section names a_kurt with its open obligation variance_reported.
 leaf pk1 : reports(e03, ablation_effect(kurtosis_salience, apt_llama2_7b, openllm_avg, positive))
   kind       = observed
   provenance = ai-executed
@@ -121,8 +122,12 @@ leaf pk3 : matched_protocol(e03)
   provenance = ai-executed
   refs       = [logic/experiments.md#E03-step-7]
 
-# (Intentionally no `arg` for c_kurt: variance_reported(e03) has no honest leaf — E03 reports a
-# single run — and rebuttal-v1 makes that obligation mandatory. Round 2 supplies the variance runs.)
+# variance_reported(e03) has no honest leaf — E03 reports a single run — and rebuttal-v1 makes
+# that obligation mandatory, so it stays open. Round 2 supplies the variance runs and discharges it.
+arg a_kurt : supports(c_kurt) by component_ablation(kurtosis_salience, apt_llama2_7b, openllm_avg, e03)
+  discharge single_variable   with pk2
+  discharge protocol_parity   with pk3
+  open      variance_reported
 
 status c_bench
 status c_measure
@@ -131,14 +136,16 @@ status c_kurt
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle) — verified by test/WorkedExamplesSpec.hs
 # ==============================================================================================
-# Compiled AF (declaration order): a_bench (0), a_meas (1). No attacks.
+# Compiled AF (declaration order): a_bench (0), a_meas (1). No attacks. a_kurt is a hole
+# (declaration index 2, obligation variance_reported), not an AF node.
 #   a_bench (0) -> in    (LIn; unattacked)
 #   a_meas  (1) -> in    (LIn; unattacked)
 # Claim statuses:
 #   c_bench   -> justified  (support a_bench is in)
 #   c_measure -> justified  (support a_meas is in)
-#   c_kurt    -> gap        (empty complete support: no arg concludes contributes(kurtosis_salience,
-#                            apt_llama2_7b, openllm_avg); statusC = Gap iff null claimSupport, spec §8)
+#   c_kurt    -> gap        (empty complete support: the only arg concluding contributes(kurtosis_salience,
+#                            apt_llama2_7b, openllm_avg) is the hole a_kurt; statusC = Gap iff null
+#                            claimSupport, spec §8)
 #
 # Trajectory so far: c_bench justified, c_measure justified, c_kurt gap. Round 1 (reviews) attacks
 # the two justified claims; round 2 (rebuttal) reinstates one, concedes one, and discharges the gap.

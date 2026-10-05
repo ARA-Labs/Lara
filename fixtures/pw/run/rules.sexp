@@ -6,7 +6,7 @@
   (worlds
     (world a0 a (inline
       (check-input
-        (replay-id (core lara-core@0.2) (policy pw-rules) (backends (backend nd 1))
+        (replay-id (core lara-core@0.3) (policy pw-rules) (backends (backend nd 1))
           (theories) (artifact pw-rules-a0))
         (unit
           (sigma (sorts) (cons) (preds (pred p (args)) (pred q (args))))
@@ -23,7 +23,7 @@
           (queries)))))
     (world b0 b (inline
       (check-input
-        (replay-id (core lara-core@0.2) (policy pw-rules) (backends (backend nd 1))
+        (replay-id (core lara-core@0.3) (policy pw-rules) (backends (backend nd 1))
           (theories) (artifact pw-rules-b0))
         (unit
           (sigma (sorts) (cons) (preds (pred p (args)) (pred q (args))))

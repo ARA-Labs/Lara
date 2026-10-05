@@ -123,7 +123,7 @@ for root in fixtures examples bundles corpus-units; do
   # check-pw-conformance.py asserts totality over fixtures/pw/**, so a stray file
   # there is a setup failure in that gate rather than a free pass here. And a
   # map's two committed artifacts are a map-check-input@1 parity envelope and a
-  # map-verdict@1 composite golden, which scripts/check-map-conformance.sh and
+  # map-verdict@2 composite golden, which scripts/check-map-conformance.sh and
   # test/MapSpec.hs own.
   #
   # Why the exclusions are not the safeguard. This positive half treats "both

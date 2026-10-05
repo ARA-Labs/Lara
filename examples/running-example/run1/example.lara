@@ -1,13 +1,14 @@
 # fig:example run 1 — the mandatory external_validity question has no
-# discharging leaf, so no complete support argument can be declared for c1;
-# the evidence leaves (and the recorded dead end e4) are admitted, but the
-# claim has no assembled support: gap.
+# discharging leaf, so the support argument a1 declares it open: a1 is a
+# located hole (spec §4.4). The unit is accepted, a1 is not an AF node, c1 has
+# no complete support and reports gap, and the verdict's holes section names
+# a1 with its open obligation external_validity. The evidence leaves (and the
+# recorded dead end e4) are admitted.
 #
 # The strict ord@1 comparison s1 is present and unattacked in this run too:
 # the certified arithmetic c2 stands on its own even while the empirical
-# claim c1 has no support. Run 2 is this program plus the e6 leaf, the
-# support argument a1, and the undercut d1.
-
+# claim c1 has no complete support. Run 2 is this program with a1's open
+# question discharged by the new e6 leaf, plus the undercut d1.
 artifact paper_17 at sha256:aaaa...
 policy empirical-v3
 use backends [nd@1, ord@1]
@@ -57,6 +58,11 @@ leaf e4 : distribution_shift(M, accuracy, D)
 
 arg s1 : supports(c2) by lt_recheck from [base, ours]
   assurance = cert(ord@1, sha256:empv3-t0, (ordcmp (prem base) (prem ours)))
+
+arg a1 : supports(c1) by controlled_experiment from [e1]
+  discharge randomization     with e2
+  discharge adequate_power    with e3
+  open external_validity
 
 status c1
 status c2

@@ -28,8 +28,8 @@ Total mutants: 595
 | `accept-evidence-blocked` | 9 |
 | `accept-gap` | 9 |
 | `accept-justified` | 9 |
+| `accept-located-hole` | 18 |
 | `codec-reject` | 57 |
-| `reject-IncompleteArgument` | 18 |
 | `reject-MissingConflict` | 5 |
 | `reject-R1` | 71 |
 | `reject-R10` | 11 |

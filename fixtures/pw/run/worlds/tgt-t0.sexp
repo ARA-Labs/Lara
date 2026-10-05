@@ -1,7 +1,7 @@
 ; Context tgt, world t0: the q argument alone. tgt declares r and not s, and
 ; declares u as unary where src declares it nullary.
 (check-input
-  (replay-id (core lara-core@0.2) (policy pw-tgt) (backends (backend nd 1))
+  (replay-id (core lara-core@0.3) (policy pw-tgt) (backends (backend nd 1))
     (theories) (artifact pw-tgt-t0))
   (unit
     (sigma (sorts Item) (cons (con z (args) Item))

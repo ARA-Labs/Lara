@@ -60,7 +60,7 @@ ordinary example directories (`paper-a/` … `paper-d/`, each registered in
 What makes it a map is what it holds *in addition* — the `map.laramap` manifest
 that composes those four members, and the two derived map anchors,
 `map.core.sexp` (the `map-check-input@1` parity envelope) and `map.verdict.sexp`
-(the golden `map-verdict@1` composite). Neither is a wire check-input envelope,
+(the golden `map-verdict@2` composite). Neither is a wire check-input envelope,
 so neither is `scripts/differential.sh`'s: `map.core.sexp` is what
 `scripts/check-map-conformance.sh` hands the Lean `lara-map-driver` in order to
 compare the two drivers, and `map.verdict.sexp` is a golden pinned by

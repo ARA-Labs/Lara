@@ -328,14 +328,76 @@ negDuplicateArgument =
     [(ArgId "a0", SLeaf (LeafId "l1")), (ArgId "a1", SLeaf (LeafId "l1"))]
     [] []
 
-negIncompleteArgument :: Unit
-negIncompleteArgument =
+-- | A mandatory question left open: up to @lara-core\@0.2@ the
+-- @incomplete-argument@ rejection, now an accepted located hole (spec §4.4)
+-- whose claim is @gap@.
+locatedHoleAccept :: Unit
+locatedHoleAccept =
   mkUnit
     [defRule "d" [] [] (apat0 "c" []) [Question (QuestionId "q1") (apat0 "ans" []) Mandatory]]
     [] [] []
     [(ArgId "a", instD "d" [] [] [] [ObligationId "q1"])]
     []
     [atom0 "c" []]
+
+-- | A rule @premise ⇒ concl@ whose instance is a hole: one mandatory
+-- question.
+holeRule :: String -> String -> String -> Rule
+holeRule rid premise concl =
+  defRule rid [] [apat0 premise []] (apat0 concl [])
+    [Question (QuestionId "hq") (apat0 "ans" []) Mandatory]
+
+-- | D4/D6: a typed attack sourced at a hole is checked and listed on the
+-- hole's row (original attack index 1), but adds no edge; the attack aimed at
+-- the hole is kept and adds none either (no complete argument contains the
+-- hole's root).
+holeAttackInert :: Unit
+holeAttackInert =
+  mkUnit
+    [defRule "r" [] [apat0 "p" []] (apat0 "concl" []) [], holeRule "h" "p" "base"]
+    [Contrary (apat0 "concl" []) (apat0 "base" []), Contrary (apat0 "base" []) (apat0 "concl" [])]
+    []
+    [(LeafId "e1", atom0 "p" [])]
+    [ (ArgId "a1", instD "r" [] [SLeaf (LeafId "e1")] [] [])
+    , (ArgId "aH", instD "h" [] [SLeaf (LeafId "e1")] [] [ObligationId "hq"])
+    ]
+    [Rebut (ArgId "a1") (ArgId "aH"), Rebut (ArgId "aH") (ArgId "a1")]
+    [atom0 "concl" [], atom0 "base" []]
+
+-- | D7: the promotion hazard of 'groupConflictQuarantineAttacker' with a
+-- typed hole as the quarantined attacker. A hole is no node of the reference
+-- framework, so quarantining it blocks nothing and @concl@ is published
+-- @justified@ (it was @evidence-blocked@ under @lara-core\@0.2@).
+groupQuarantineHoleAttacker :: Unit
+groupQuarantineHoleAttacker =
+  groupConflictQuarantineAttacker
+    { unitRules = unitRules groupConflictQuarantineAttacker ++ [holeRule "h" "base" "base"]
+    , unitArgs =
+        [ (ArgId "a1", instD "r" [] [SLeaf (LeafId "e1")] [] [])
+        , (ArgId "a2", instD "h" [] [SLeaf (LeafId "e2")] [] [ObligationId "hq"])
+        , (ArgId "a3", SLeaf (LeafId "e4"))
+        ]
+    }
+
+-- | D6 under quarantine: 'groupQuarantineLostEdge' with the quarantined @aT@
+-- a typed hole. @aT@ is not a reference node, but the undermine onto its
+-- @Lk@ occurrence still closes onto the retained complete @aW@ in the
+-- declared framework and is lost from the checked one, so @cw@ is
+-- @evidence-blocked@.
+groupQuarantineHoleLostEdge :: Unit
+groupQuarantineHoleLostEdge =
+  groupQuarantineLostEdge
+    { unitRules =
+        [ defRule "r" [] [apat0 "q" [], apat0 "k" []] (apat0 "concl" [])
+            [Question (QuestionId "hq") (apat0 "ans" []) Mandatory]
+        , defRule "rw" [] [apat0 "k" []] (apat0 "cw" []) []
+        ]
+    , unitArgs =
+        [ (ArgId "aT", instD "r" [] [SLeaf (LeafId "Lq"), SLeaf (LeafId "Lk")] [] [ObligationId "hq"])
+        , (ArgId "aW", instD "rw" [] [SLeaf (LeafId "Lk")] [] [])
+        , (ArgId "aS", SLeaf (LeafId "La"))
+        ]
+    }
 
 negMissingConflict :: Unit
 negMissingConflict =
@@ -637,7 +699,10 @@ corpus =
   , ("fixtures/corpus/stress-independent-120.sexp", stressUnit 120)
   , ("fixtures/corpus/reject-duplicate-rule.sexp", negDuplicateRule)
   , ("fixtures/corpus/reject-duplicate-argument.sexp", negDuplicateArgument)
-  , ("fixtures/corpus/reject-incomplete-argument.sexp", negIncompleteArgument)
+  , ("fixtures/corpus/accept-located-hole.sexp", locatedHoleAccept)
+  , ("fixtures/corpus/hole-attack-inert.sexp", holeAttackInert)
+  , ("fixtures/corpus/group-quarantine-hole-attacker.sexp", groupQuarantineHoleAttacker)
+  , ("fixtures/corpus/group-quarantine-hole-lost-edge.sexp", groupQuarantineHoleLostEdge)
   , ("fixtures/corpus/reject-missing-conflict.sexp", negMissingConflict)
   , ("fixtures/corpus/reject-r12.sexp", negR12)
   , ("fixtures/corpus/reject-r1.sexp", negR1)
@@ -707,7 +772,7 @@ checkInput backends unit = do
   replayId <-
     either (fail . replayErrorMessage) pure $
       mkReplayId
-        LaraCoreV02
+        LaraCoreV03
         (PolicyId "conformance-v1")
         backends
         (sortBy compareTheoryDigest (map fst (unitTheories unit)))

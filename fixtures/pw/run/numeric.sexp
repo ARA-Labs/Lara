@@ -5,7 +5,7 @@
   (worlds
     (world n0 n (inline
       (check-input
-        (replay-id (core lara-core@0.2) (policy pw-num) (backends (backend nd 1))
+        (replay-id (core lara-core@0.3) (policy pw-num) (backends (backend nd 1))
           (theories) (artifact pw-num-n0))
         (unit
           (sigma (sorts) (cons) (preds (pred m (args Num))))

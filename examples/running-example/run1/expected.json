@@ -1,6 +1,6 @@
 {
   "replay-id": {
-    "core": "lara-core@0.2",
+    "core": "lara-core@0.3",
     "policy": "empirical-v3",
     "backends": [
       "nd@1",
@@ -19,8 +19,8 @@
         "claim": "improves(M, accuracy, D)",
         "status": "gap",
         "complete-support": 0,
-        "holes": 0,
-        "incomplete-alternative": false
+        "holes": 1,
+        "incomplete-alternative": true
       },
       {
         "claim": "num_lt(0.71, 0.74)",
@@ -35,6 +35,16 @@
         "arg": "s1",
         "index": 0,
         "label": "in"
+      }
+    ],
+    "holes": [
+      {
+        "arg": "a1",
+        "index": 1,
+        "obligations": [
+          "external_validity"
+        ],
+        "attacks": []
       }
     ]
   }

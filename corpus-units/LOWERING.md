@@ -108,7 +108,7 @@ Map each annotated CQ onto the nearest policy CQ of the chosen rule; then:
   arg with `open <question>` is therefore valid and more informative, and
   gives the same status. The frozen units keep the omission so that their
   bytes and statuses stay comparable across the freeze; re-lowering them to
-  declare their incomplete args is separate work, not part of this rule.
+  declare their incomplete args is tracked in issue #15, not part of this rule.
 - annotated **unmet-defeater** → the arg IS declared complete (discharge the
   contested question with the paper's own claimed basis) and the defeating
   evidence forms a leaf-rooted challenge arg concluding the rule's exception
