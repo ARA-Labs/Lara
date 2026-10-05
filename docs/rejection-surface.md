@@ -528,10 +528,10 @@ The seeded mutation suite quantifies the split. At evaluation freeze v6 (`docs/m
 `accept-all-contested` 4) and the remaining 9 (`accept-justified`) exercise mutations the checker
 correctly absorbs without a status change. Both halves are byte-identical across the Haskell and Lean
 drivers (`scripts/differential.sh`). The 18 `hole-obligation` mutants, which rejected as
-`incomplete-argument` in that snapshot, keep their mutation unchanged under `lara-core@0.3`; only
-their replay identity is regenerated, as for every committed input. They are expected to accept
-with a located hole unless a later defect in the same unit now rejects; the split is recounted at
-the next freeze.
+`incomplete-argument` in that snapshot, keep their mutation unchanged under `lara-core@0.3`. At
+freeze v7 all 18 accept with exactly one located hole at the seeded argument (none is masked by a
+later defect), so the split is 519 rejecting and 76 accepting mutants
+(`measurements/frozen/lara-core-0.3-regeneration-diffs.md`).
 
 ## 4. Relationship to `rit` (the question that prompted this)
 
