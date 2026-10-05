@@ -18,10 +18,28 @@
         "claim": "better(lbcs, probabilistic, top5_accuracy, imagenet1k)",
         "status": "gap",
         "complete-support": 0,
-        "holes": 0,
-        "incomplete-alternative": false
+        "holes": 1,
+        "incomplete-alternative": true
       }
     ],
-    "labels": []
+    "labels": [],
+    "holes": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "obligations": [
+          "variance_reported"
+        ],
+        "sites": [
+          {
+            "question": "variance_reported",
+            "at": [
+              "rule"
+            ]
+          }
+        ],
+        "attacks": []
+      }
+    ]
   }
 }

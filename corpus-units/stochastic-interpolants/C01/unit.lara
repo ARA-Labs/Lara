@@ -15,8 +15,9 @@
 #     annotation's mandatory "is Theorem 3.1's proof available/checkable within the artifact, or
 #     only cited?" (and "is the unique-minimizer property itself checked, not only the transport
 #     equation?") — both annotated unmet-gap (the theorem is attested via trace N02; neither its
-#     hypotheses nor its proof are reproduced). An open mandatory obligation is IncompleteArgument,
-#     so NO complete arg is declarable: E2-style gap.
+#     hypotheses nor its proof are reproduced). The incomplete argument is declared as a located
+#     hole with `open assumptions_hold` (lowering re-done for issue #15 under `lara-core@0.3`);
+#     complete support stays empty.
 #   * scope_licensed (mandatory) is annotated met: E01 verifies the transport equation for the
 #     independent, conditional-xi, and data-dependent couplings, so the "dependent couplings"
 #     scope is licensed on the tested instances; its leaf is supplied. Regularity/integrability
@@ -51,12 +52,14 @@ leaf e2 : scope_licensed(quadratic_regression_minimizer)
   provenance = ai-executed
   refs       = [logic/experiments.md#E01-Procedure-step-2, logic/experiments.md#E01-Procedure-step-4]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... and the incomplete argument is a located hole ------------------------------------------
 
-# (Intentionally no `arg`: assumptions_established(theorem_3_1) has no honest leaf — the artifact
-# reproduces neither the theorem's hypotheses nor its proof, and E01 verifies only the transport
-# equation, not the minimizer property — and analytic_argument makes that obligation mandatory.
-# The complete-support set is therefore empty.)
+# assumptions_established(theorem_3_1) has no honest leaf — the artifact reproduces neither the
+# theorem's hypotheses nor its proof, and E01 verifies only the transport equation, not the
+# minimizer property — so the mandatory assumptions_hold stays open.
+arg a1 : supports(c01) by analytic_argument(quadratic_regression_minimizer, theorem_3_1)
+  open      assumptions_hold
+  discharge scope_licensed with e2
 
 status c01
 
@@ -64,5 +67,6 @@ status c01
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
 # Compiled AF: no arguments.
+# Located hole: a1 (declaration index 0), open obligations [assumptions_hold]; sources no attacks.
 # Claim status:
-#   c01 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c01 -> gap (empty complete support; the hole a1 is reported, not a node; spec §8)

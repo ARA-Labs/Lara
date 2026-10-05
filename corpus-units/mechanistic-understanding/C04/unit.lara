@@ -11,15 +11,17 @@
 #     unembedding exception are constants-free content, kept in nl and refs.
 #   * The mandatory instrument_validity CQ is unmet-gap: E03 names "per-tensor average norm
 #     difference" but never defines the averaging (per-element vs per-row vs per-tensor), so the
-#     1e-5/1e-3 thresholds are not re-checkable — the measuring instrument is undefined. An open
-#     mandatory obligation is an IncompleteArgument rejection, so no complete measurement is
-#     declarable — E2-style gap on empty complete support (adaptive-pruning/C03 pattern). This
-#     is the descriptive-claim analogue of the variance gap: the measurement bar is unmet not on
-#     variance but on instrument definition.
+#     1e-5/1e-3 thresholds are not re-checkable — the measuring instrument is undefined. The
+#     measurement argument is declared as a located hole with `open instrument_validity` (lowering
+#     re-done for issue #15 under lara-core@0.3; until lara-core@0.2 the open mandatory obligation
+#     rejected the unit, so the arg was omitted): it is not an AF node and the claim stays gap on
+#     empty complete support. This is the descriptive-claim analogue of the variance gap: the
+#     measurement bar is unmet not on variance but on instrument definition.
 #   * coverage (the enumeration covers every matched tensor — token embeddings, all 24 MLP
 #     blocks, attention heads, unembedding; checkpoints identical to the intervention/bypass
-#     experiments) is annotated met and kept as a leaf. The optional unembedding-scoping CQ is
-#     met and folds into the coverage refs and nl.
+#     experiments) is annotated met and discharged on the hole. The optional unembedding-scoping
+#     CQ is met and folds into the coverage refs and nl. The optional confound_control has no
+#     annotated basis and is opened (R5 question accounting; no status effect).
 #   * Coverage flag (kind-a, summary §3): the bounded universal with a named exception ("every
 #     tensor except unembedding") instantiates as the single holds atom; the per-tensor
 #     thresholds and exception live in nl, audited on faithfulness.
@@ -51,17 +53,23 @@ leaf e2 : covers_scope(e03, gpt2_dpo)
   provenance = ai-executed
   refs       = [logic/experiments.md#E03-Procedure-step-2, logic/experiments.md#E03-Setup, trace/exploration_tree.yaml#N09]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... but only an incomplete argument (a located hole) is declarable -------------------------
 
-# (Intentionally no `arg`: valid_instrument(minimal_weight_change, e03) has no honest leaf — the
-# averaging behind "norm difference < 1e-5" is undefined, so the thresholds are not re-checkable
-# — and corpus-v1 makes instrument_validity mandatory. The complete-support set is empty.)
+# The incomplete argument: instrument_validity has no honest leaf — the averaging behind "norm
+# difference < 1e-5" is undefined, so the thresholds are not re-checkable — and corpus-v1 makes
+# it mandatory, so it stays open and a1 is a hole.
+arg a1 : supports(c04) by measurement(minimal_weight_change, gpt2_dpo, e03)
+  discharge coverage            with e2
+  open      instrument_validity
+  open      confound_control
 
 status c04
 
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
-# Compiled AF: no arguments.
+# Compiled AF: no arguments (a1 is a located hole, not an AF node).
+# Located hole: a1 (measurement), open obligations [instrument_validity]; sources no attacks.
 # Claim status:
-#   c04 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c04 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8;
+#          the hole a1 is reported in the verdict's holes section, not as a node)

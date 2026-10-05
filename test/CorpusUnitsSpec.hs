@@ -61,8 +61,9 @@ samplePath = "m0/sample.tsv"
 policyPath :: FilePath
 policyPath = "corpus-units/corpus-v1.policy.lara"
 
--- | @(group, artifact, claim_id, claim_type, double_annotate, expected_status)@.
-type ManifestRow = (String, String, String, String, String, String)
+-- | @(group, artifact, claim_id, claim_type, double_annotate, expected_status,
+-- located_holes)@.
+type ManifestRow = (String, String, String, String, String, String, String)
 
 splitTabs :: String -> [String]
 splitTabs s = case break (== '\t') s of
@@ -75,7 +76,7 @@ readManifest = do
   traverse toRow [ln | ln <- drop 1 (lines raw), not (null ln)]
   where
     toRow ln = case splitTabs ln of
-      [g, a, c, t, d, s] -> pure (g, a, c, t, d, s)
+      [g, a, c, t, d, s, h] -> pure (g, a, c, t, d, s, h)
       _ -> fail (manifestPath ++ ": malformed row: " ++ ln)
 
 -- | The sample's @(group, artifact, claim_id, claim_type, double_annotate)@
@@ -91,7 +92,7 @@ readSampleKeys = do
     ]
 
 unitDir :: ManifestRow -> FilePath
-unitDir (_, artifact, claimId, _, _, _) = "corpus-units/" ++ artifact ++ "/" ++ claimId
+unitDir (_, artifact, claimId, _, _, _, _) = "corpus-units/" ++ artifact ++ "/" ++ claimId
 
 -- ---------------------------------------------------------------------------
 -- Shared derivation (the exact gen-corpus-units.hs derivation chain —
@@ -126,12 +127,13 @@ deriveInput dir = do
 -- ---------------------------------------------------------------------------
 
 -- | The manifest rows are exactly the frozen sample rows (set equality on the
--- five shared columns; the manifest adds only @expected_status@).
+-- five shared columns; the manifest adds only @expected_status@ and
+-- @located_holes@).
 prop_corpusManifestMatchesSample :: Property
 prop_corpusManifestMatchesSample = once $ ioProperty $ do
   manifest <- readManifest
   sample <- readSampleKeys
-  let manifestKeys = sort [(g, a, c, t, d) | (g, a, c, t, d, _) <- manifest]
+  let manifestKeys = sort [(g, a, c, t, d) | (g, a, c, t, d, _, _) <- manifest]
   pure $
     counterexample
       "corpus-units/MANIFEST.tsv rows must be exactly the m0/sample.tsv rows"
@@ -189,14 +191,16 @@ prop_corpusUnitsFresh = once $ ioProperty $ do
                 (expectedJson input === committedJson)
 
 -- | The manifest's @expected_status@ equals the computed status of the unit's
--- single queried claim, and every unit is an accept-verdict unit.
+-- single queried claim, its @located_holes@ equals the number of located
+-- holes the verdict reports (spec §4.4), and every unit is an accept-verdict
+-- unit.
 prop_corpusExpectedStatus :: Property
 prop_corpusExpectedStatus = once $ ioProperty $ do
   manifest <- readManifest
   checks <- mapM checkOne manifest
   pure $ counterexample "corpus manifest parsed to zero rows" (not (null manifest)) .&&. conjoin checks
   where
-    checkOne row@(_, _, _, _, _, expected) = do
+    checkOne row@(_, _, _, _, _, expected, holes) = do
       let dir = unitDir row
       derived <- deriveInput dir
       pure $ case derived of
@@ -206,10 +210,20 @@ prop_corpusExpectedStatus = once $ ioProperty $ do
             counterexample
               (dir ++ ": manifest expected_status " ++ show expected ++ " /= computed " ++ show status)
               (status === expected)
+              .&&. counterexample
+                (dir ++ ": manifest located_holes " ++ show holes ++ " /= computed")
+                (computedHoles (expectedJsonValue input) === Just (read holes :: Int))
           other ->
             counterexample
               (dir ++ ": expected exactly one accept-verdict claim status, got " ++ show other)
               False
+    computedHoles v = do
+      JObject top <- Just v
+      JObject diag <- lookup "located-diagnostic" top
+      case lookup "holes" diag of
+        Nothing -> Just 0
+        Just (JArray hs) -> Just (length hs)
+        Just _ -> Nothing
     computedStatuses v = do
       JObject top <- Just v
       JString "accept" <- lookup "verdict-class" top
@@ -226,7 +240,7 @@ prop_corpusExpectedStatus = once $ ioProperty $ do
 prop_corpusStatusDistribution :: Property
 prop_corpusStatusDistribution = once $ ioProperty $ do
   manifest <- readManifest
-  let got = [(s, length g) | g@(s : _) <- group (sort [st | (_, _, _, _, _, st) <- manifest])]
+  let got = [(s, length g) | g@(s : _) <- group (sort [st | (_, _, _, _, _, st, _) <- manifest])]
   pure $
     counterexample
       "corpus status distribution drifted (or an illegal status value appeared)"
@@ -240,7 +254,7 @@ prop_corpusStatusDistribution = once $ ioProperty $ do
 prop_corpusStratumCoverage :: Property
 prop_corpusStratumCoverage = once $ ioProperty $ do
   manifest <- readManifest
-  let count ty = length [() | (_, _, _, t, _, _) <- manifest, t == ty]
+  let count ty = length [() | (_, _, _, t, _, _, _) <- manifest, t == ty]
       got = map (\ty -> (ty, count ty)) (map fst quotas)
   pure $ counterexample "corpus stratum counts drifted from the frozen M0 sample" (got === quotas)
   where

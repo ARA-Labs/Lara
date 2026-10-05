@@ -20,13 +20,16 @@
 #       - scope_licensed (scope_licensed): annotation CQ1 — no experiment inspects the tournament
 #         code path; E03, the only cited experiment, verifies C03 and covers generation-parameter
 #         alignment, so the code citation in C04's Proof stands in for an inspection nobody ran.
-#     A mandatory policy CQ with no honest discharging leaf is an IncompleteArgument rejection, so
-#     NO complete analytic_argument(...) instance is declarable: E2-style unit, `gap` on empty
-#     support.
+#     The incomplete analytic_argument(...) is declared as a located hole with
+#     `open assumptions_hold` and `open scope_licensed` (lowering re-done for issue #15 under
+#     `lara-core@0.3`); `gap` on empty complete support.
 #   * Dead end N604 is annotated `decision: undercut` of the latency sub-claim's support (a
 #     tournament run stalled under a 429 judge storm, so within-round parallelism did not deliver
 #     round-bounded latency). Per LOWERING Attacks, with a mandatory CQ independently unmet the gap
-#     rule wins: there is no arg to undercut, so N604 is recorded here as a header note only.
+#     rule wins. The undercut is now declared against the hole's root (leaf u1 concluding the
+#     analytic_argument exception unsound_assumption, challenge d1, `undercut d1 a1.rule`): it
+#     type-checks and is inert, because no complete argument contains a1's root. The annotator
+#     flagged N604 as a coin-flip undercut-vs-none; it changes no status either way.
 #
 # Expected verdict is at the bottom of this file (golden oracle).
 
@@ -50,19 +53,36 @@ leaf e1 : derives(tournament_counting_derivation, tournament_judge_call_optimal)
   provenance = ai-executed
   refs       = [logic/claims.md#C04, rl_finetune_best_of_n.py#118-139, trace/exploration_tree.yaml#N05]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# Dead end N604: a tournament run on the same judge stalled under a 429 storm, so the derivation's
+# parallel-dispatch => round-bounded-latency assumption fails when the shared judge throttles.
+leaf u1 : unsound_assumption(tournament_judge_call_optimal)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [trace/exploration_tree.yaml#N604]
 
-# (Intentionally no `arg`: assumptions_established(tournament_counting_derivation) has no honest
-# leaf — the judge is not a consistent comparator (N100/N104) — and scope_licensed is unmet — no
-# experiment inspects the tournament code path (E03 verifies only C03). Both are mandatory in
-# corpus-v1. Dead end N604 (decision: undercut of the latency sub-claim) is a header note; with
-# the arg undeclarable there is nothing to undercut. Complete support is empty.)
+# --- ... and the incomplete argument is a located hole ------------------------------------------
+
+# assumptions_established(tournament_counting_derivation) has no honest leaf — the judge is not a
+# consistent comparator (N100/N104) — and scope_licensed is unmet — no experiment inspects the
+# tournament code path (E03 verifies only C03) — so both mandatory questions stay open.
+arg a1 : supports(c04) by analytic_argument(tournament_judge_call_optimal, tournament_counting_derivation)
+  open assumptions_hold
+  open scope_licensed
+
+# --- N604 undercuts the latency inference (gap rule wins: inert on a hole) ---------------------
+
+# Licensed by `exception analytic_argument : unsound_assumption(P)` (corpus-v1). The target is the
+# root of the hole a1, so the attack is kept but produces no edge.
+arg d1 : challenges(assumptions_hold(a1)) by leaf(u1)
+undercut d1 a1.rule
 
 status c04
 
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
-# Compiled AF: no arguments.
+# Compiled AF: d1 alone, unattacked -> in (grounded). The undercut d1 a1.rule is typed and kept
+# but produces no edge: a1 is a hole, so no complete argument contains its root (spec §8).
+# Located hole: a1 (declaration index 0), open obligations [assumptions_hold, scope_licensed]; sources no attacks.
 # Claim status:
-#   c04 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c04 -> gap (empty complete support; the hole a1 is reported, not a node; spec §8)

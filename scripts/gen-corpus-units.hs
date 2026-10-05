@@ -49,9 +49,9 @@ policyPath :: FilePath
 policyPath = "corpus-units/corpus-v1.policy.lara"
 
 -- | A manifest row: (group, artifact, claim id). The remaining columns
--- (claim_type, double_annotate, expected_status) are consumed by
+-- (claim_type, double_annotate, expected_status, located_holes) are consumed by
 -- @test/CorpusUnitsSpec.hs@, not by generation — but a row must still carry
--- exactly those six fields, so a malformed line fails here with the
+-- exactly those seven fields, so a malformed line fails here with the
 -- offending text instead of being silently truncated.
 type Row = (String, String, String)
 
@@ -99,7 +99,7 @@ readManifest = do
       | otherwise -> traverse toRow body
   where
     toRow ln = case splitTabs ln of
-      [g, a, c, _, _, _] -> pure (g, a, c)
+      [g, a, c, _, _, _, _] -> pure (g, a, c)
       _ -> fail (manifestPath ++ ": malformed row: " ++ ln)
 
 splitTabs :: String -> [String]

@@ -18,10 +18,28 @@
         "claim": "preferred(cfg_negative_prompting, vanilla, system_prompt_following)",
         "status": "gap",
         "complete-support": 0,
-        "holes": 0,
-        "incomplete-alternative": false
+        "holes": 1,
+        "incomplete-alternative": true
       }
     ],
-    "labels": []
+    "labels": [],
+    "holes": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "obligations": [
+          "rater_power"
+        ],
+        "sites": [
+          {
+            "question": "rater_power",
+            "at": [
+              "rule"
+            ]
+          }
+        ],
+        "attacks": []
+      }
+    ]
   }
 }

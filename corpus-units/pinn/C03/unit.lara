@@ -13,14 +13,17 @@
 #     component "wins" on the ill-conditioning (max-eigenvalue) axis. IC and BC are folded into
 #     one comparand constant; per-PDE cells and the two well-conditioned components stay in nl
 #     and refs.
-#   * The mandatory measurement_validity CQ is unmet-gap: E02 names SLQ (PyHessian or
-#     equivalent) but Metrics report only the visual spectra with no estimator error bars, so
-#     the cross-component max-eigenvalue ordering is untrusted. variance_reported is also unmet
-#     (a single best Adam+L-BFGS checkpoint per PDE, no seeds/widths/stages). Open mandatory
-#     obligations make the argument an IncompleteArgument rejection, so no complete
-#     controlled_comparison is declarable — E2-style gap on empty complete support
-#     (adaptive-pruning/C03 pattern). baseline_parity (all three spectra from the same
-#     checkpoint with the same SLQ procedure) is annotated met and kept as a leaf.
+#   * The mandatory measurement_validity CQ is unmet-gap: E02 names SLQ (PyHessian or equivalent)
+#     but Metrics report only the visual spectra with no estimator error bars, so the
+#     cross-component max-eigenvalue ordering is untrusted. variance_reported is also unmet (a
+#     single best Adam+L-BFGS checkpoint per PDE, no seeds/widths/stages). The
+#     controlled_comparison argument is declared as a located hole with
+#     `open measurement_validity` and `open variance_reported` (lowering re-done for issue #15
+#     under lara-core@0.3; until lara-core@0.2 the open mandatory obligation rejected the unit, so
+#     the arg was omitted): it is not an AF node and the claim stays gap on empty complete
+#     support. baseline_parity (all three spectra from the same checkpoint with the same SLQ
+#     procedure) is annotated met and discharged on the hole. The optional scope_match has no
+#     annotated basis and is opened (R5 question accounting; no status effect).
 #   * Coverage flag (kind-a, summary §3): C03 has two heterogeneous support strands (the E02
 #     spectral comparison and the Theorem 8.4 operator-conditioning prediction), but one
 #     inference_scheme per claim; the theoretical strand (annotated met, met via E05/C07) is
@@ -53,18 +56,25 @@ leaf e2 : matched_setup(residual_component, ic_bc_components, e02)
   provenance = ai-executed
   refs       = [logic/experiments.md#E02-Procedure-step-1, logic/experiments.md#E02-Procedure-step-3, logic/experiments.md#E02-Procedure-step-6]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... but only an incomplete argument (a located hole) is declarable -------------------------
 
-# (Intentionally no `arg`: valid_measurement(ill_conditioning, e02) has no honest leaf — SLQ
-# estimator error is unquantified, so the component ordering rests on visual spectra — and
-# variance_reported is likewise unmet (one best checkpoint per PDE). Both are mandatory in
-# corpus-v1. The claim's complete-support set is therefore empty.)
+# The incomplete argument: measurement_validity (SLQ estimator error unquantified, so the
+# component ordering rests on visual spectra) and variance_reported (one best checkpoint per
+# PDE) have no honest leaf and are both mandatory, so both stay open and a1 is a hole.
+arg a1 : supports(c03) by controlled_comparison(residual_component, ic_bc_components, ill_conditioning, pinn_pdes, e02)
+  discharge baseline_parity      with e2
+  open      measurement_validity
+  open      variance_reported
+  open      scope_match
 
 status c03
 
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
-# Compiled AF: no arguments.
+# Compiled AF: no arguments (a1 is a located hole, not an AF node).
+# Located hole: a1 (controlled_comparison), open obligations
+#   [measurement_validity, variance_reported]; sources no attacks.
 # Claim status:
-#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8;
+#          the hole a1 is reported in the verdict's holes section, not as a node)

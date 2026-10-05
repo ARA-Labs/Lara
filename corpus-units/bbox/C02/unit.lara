@@ -11,11 +11,13 @@
 #   * The annotation's own mandatory CQ3 is unmet-gap: the A100 adapter-training compute listed in
 #     E03 Setup is never dollarized, so the total-cost premise is unestablished. Mapped onto the
 #     nearest policy-mandatory CQ measurement_validity (the cost metric does not validly capture
-#     total training cost). An open mandatory obligation is an IncompleteArgument rejection, so no
-#     complete controlled_comparison is declarable -> E2-style gap.
+#     total training cost). The incomplete controlled_comparison argument is declared as a
+#     located hole with `open measurement_validity` (lowering re-done for issue #15 under
+#     `lara-core@0.3`): it is not an AF node, so the claim lands `gap` on empty complete support.
 #   * variance_reported (policy-mandatory) also has no discharging leaf: costs are single-snapshot
 #     deterministic API billing with no repeats, so under the uniform standard it is undischarged
-#     as well. Either blocker forces gap; measurement_validity is the annotation-grounded driver.
+#     as well and is also opened. Either blocker forces gap; measurement_validity is the
+#     annotation-grounded driver.
 #   * CQ1 (same pricing/accounting) discharges baseline_parity; CQ2 (accuracy recorded, cost not
 #     confounded by a quality drop) maps to the optional scope_match. Both leaves are on the page.
 #
@@ -49,12 +51,16 @@ leaf e3 : scope_matched(bbox_adapter, training_cost, strategyqa_gsm8k)
   provenance = ai-executed
   refs       = [logic/experiments.md#E03-Procedure-step-7, logic/experiments.md#E03-Metrics]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... and the incomplete argument is declared as a located hole ------------------------------
 
-# (Intentionally no `arg`: measurement_validity(training_cost, e03) has no honest leaf — E03 counts
-# only Azure API tokens and never dollarizes the A100 adapter compute (CQ3, unmet-gap) — and
-# variance_reported(e03) has none either (single-snapshot deterministic billing). Both are
-# policy-mandatory, so the claim's complete-support set is empty.)
+# valid_measurement(training_cost, e03) has no honest leaf (A100 adapter compute is never
+# dollarized, CQ3) and variance_reported(e03) has none either (single-snapshot billing). Both are
+# policy-mandatory and stay open: a1 is a hole, not an AF node.
+arg a1 : supports(c02) by controlled_comparison(bbox_adapter, azure_sft, training_cost, strategyqa_gsm8k, e03)
+  discharge baseline_parity      with e2
+  discharge scope_match          with e3
+  open      measurement_validity
+  open      variance_reported
 
 status c02
 
@@ -62,5 +68,7 @@ status c02
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
 # Compiled AF: no arguments.
+# Located hole: a1 (open obligations [measurement_validity, variance_reported]; sources no attacks).
 # Claim status:
-#   c02 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c02 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8 — the hole
+#               is reported, not a node)

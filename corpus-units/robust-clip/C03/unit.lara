@@ -11,18 +11,22 @@
 #     (the vulnerable anchor / comparand), Q = targeted_attack_robustness, Exp = e02.
 #   * Bundled four-cell result; binding conjunct is FARE4 0% at both radii, the strongest cell.
 #     FARE2's 0% / 2.0% cells stay in nl and the premise leaf refs.
-#   * The mandatory benchmark_valid CQ is unmet, so no complete benchmark_evaluation is
-#     declarable (E2-style gap). Annotation CQ "is 'fully robust' supported without adaptive or
-#     non-APGD attacks tailored to FARE?" is mandatory unmet-gap: a single non-adaptive attack
-#     family (APGD on autoregressive cross-entropy) does not validly establish full robustness
-#     of the claimed metric — 0% under one protocol is a gap, not a demonstrated defence. This
-#     is the mandatoriness call the batch note flagged: the "fully robust" wording maps onto
-#     valid_benchmark(B, Q), a MANDATORY question, so gap wins over reading it as the optional
-#     environment_match.
+#   * The mandatory benchmark_valid CQ is unmet, so the benchmark_evaluation argument is declared
+#     as a located hole with `open benchmark_valid` (lowering re-done for issue #15 under
+#     lara-core@0.3; until lara-core@0.2 the open mandatory obligation rejected the unit, so the
+#     arg was omitted): it is not an AF node and the claim stays gap on empty complete support.
+#     Annotation CQ "is 'fully robust' supported without adaptive or non-APGD attacks tailored to
+#     FARE?" is mandatory unmet-gap: a single non-adaptive attack family (APGD on autoregressive
+#     cross-entropy) does not validly establish full robustness of the claimed metric — 0% under
+#     one protocol is a gap, not a demonstrated defence. This is the mandatoriness call the batch
+#     note flagged: the "fully robust" wording maps onto valid_benchmark(B, Q), a MANDATORY
+#     question, so gap wins over reading it as the optional environment_match.
 #   * protocol_fixed IS met: annotation CQ2 (APGD, 10,000 iterations per combination, documented
 #     budget) plus CQ1 (attack succeeds 100% on original CLIP under the same protocol) establish
-#     a fixed, biting protocol. The optional CQs (exact-string success criterion; unbiased image
-#     selection) are met but omitted (optional, no status effect).
+#     a fixed, biting protocol; it is discharged on the hole. The optional CQs (exact-string
+#     success criterion; unbiased image selection) are met but have no benchmark_evaluation
+#     question and are omitted; the optional environment_match has no annotated basis and is
+#     opened (R5 question accounting; no status effect).
 #   * Scope holes (only LLaVA-1.5 attacked though the title says LVLMs; robustness only within
 #     linf eps <= 4/255) are recorded in nl / holes, not lowered.
 #   * The strict count-to-rate arithmetic adapter does not exist yet; lowers through the
@@ -55,17 +59,23 @@ leaf e2 : fixed_protocol(fare, original_clip, e02)
   provenance = ai-executed
   refs       = [logic/experiments.md#E02-System, logic/experiments.md#E02-Procedure]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... but only an incomplete argument (a located hole) is declarable -------------------------
 
-# (Intentionally no `arg`: valid_benchmark(original_clip, targeted_attack_robustness) is unmet —
-# a single non-adaptive attack family cannot validly establish the claimed "full" robustness —
-# and that CQ is mandatory, so the claim's complete-support set is empty.)
+# The incomplete argument: benchmark_valid has no honest leaf — a single non-adaptive attack
+# family cannot validly establish the claimed "full" robustness — and it is mandatory, so a1 is
+# a hole.
+arg a1 : supports(c03) by benchmark_evaluation(fare, original_clip, targeted_attack_robustness, e02)
+  discharge protocol_fixed    with e2
+  open      benchmark_valid
+  open      environment_match
 
 status c03
 
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
-# Compiled AF: no arguments.
+# Compiled AF: no arguments (a1 is a located hole, not an AF node).
+# Located hole: a1 (benchmark_evaluation), open obligations [benchmark_valid]; sources no attacks.
 # Claim status:
-#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec section 8)
+#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec section 8;
+#          the hole a1 is reported in the verdict's holes section, not as a node)

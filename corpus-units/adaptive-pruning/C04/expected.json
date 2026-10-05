@@ -19,8 +19,8 @@
         "claim": "contributes(kurtosis_salience, apt_llama2_7b, openllm_avg)",
         "status": "gap",
         "complete-support": 0,
-        "holes": 0,
-        "incomplete-alternative": false
+        "holes": 1,
+        "incomplete-alternative": true
       }
     ],
     "labels": [
@@ -28,6 +28,24 @@
         "arg": "a1",
         "index": 0,
         "label": "in"
+      }
+    ],
+    "holes": [
+      {
+        "arg": "a2",
+        "index": 1,
+        "obligations": [
+          "variance_reported"
+        ],
+        "sites": [
+          {
+            "question": "variance_reported",
+            "at": [
+              "rule"
+            ]
+          }
+        ],
+        "attacks": []
       }
     ]
   }

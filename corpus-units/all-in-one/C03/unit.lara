@@ -14,7 +14,9 @@
 #     corpus-v1's standard: E02 samples 100 conditionals while the claim generalizes to all
 #     arbitrary conditionals. The annotation's coverage_flag records that this sample-to-'all'
 #     generalization has no native strict warrant. The mandatory obligation has no discharging
-#     leaf, so no complete inductive_generalization instance is declarable — E2-style gap.
+#     leaf, so the incomplete inductive_generalization argument is declared as a located hole
+#     with `open sample_representative` (lowering re-done for issue #15 under `lara-core@0.3`): it
+#     is not an AF node, so the claim lands `gap` on empty complete support.
 #
 # Expected verdict is at the bottom of this file (golden oracle).
 
@@ -43,11 +45,13 @@ leaf e2 : valid_instances(e02)
   provenance = ai-executed
   refs       = [logic/experiments.md#E02-Setup, logic/experiments.md#E02-Expected-outcome]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... and the incomplete argument is declared as a located hole ------------------------------
 
-# (Intentionally no `arg`: representative_sample(e02, arbitrary_conditionals) has no honest leaf —
-# 100 sampled conditionals do not warrant the universal over all arbitrary conditionals — and
-# corpus-v1 makes that obligation mandatory. Complete support is empty.)
+# representative_sample(e02, arbitrary_conditionals) has no honest leaf (100 sampled conditionals
+# do not warrant the universal) and corpus-v1 makes it mandatory, so it stays open: a1 is a hole.
+arg a1 : supports(c03) by inductive_generalization(accurate_conditional_estimation, arbitrary_conditionals, e02)
+  discharge instance_validity     with e2
+  open      sample_representative
 
 status c03
 
@@ -55,5 +59,7 @@ status c03
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
 # Compiled AF: no arguments.
+# Located hole: a1 (open obligations [sample_representative]; sources no attacks).
 # Claim status:
-#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8 — the hole
+#               is reported, not a node)

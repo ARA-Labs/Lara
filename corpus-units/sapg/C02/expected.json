@@ -18,10 +18,28 @@
         "claim": "better(sapg, dexpbt, asymptotic_success, allegro_kuka_hard)",
         "status": "gap",
         "complete-support": 0,
-        "holes": 0,
-        "incomplete-alternative": false
+        "holes": 1,
+        "incomplete-alternative": true
       }
     ],
-    "labels": []
+    "labels": [],
+    "holes": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "obligations": [
+          "baseline_parity"
+        ],
+        "sites": [
+          {
+            "question": "baseline_parity",
+            "at": [
+              "rule"
+            ]
+          }
+        ],
+        "attacks": []
+      }
+    ]
   }
 }

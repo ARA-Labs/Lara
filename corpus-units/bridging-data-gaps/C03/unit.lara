@@ -12,12 +12,14 @@
 #   * The annotation's mandatory CQ2 is unmet-gap: the two conditions run asymmetric configs
 #     (baseline batch 5 / 1 GPU vs TAN batch 40 / 8x A100) that are never normalized, so the 9-vs-20
 #     GB and 3-vs-7.5 GPU-h numbers are not comparable. Mapped onto policy-mandatory baseline_parity
-#     -> unmet. An open mandatory obligation is an IncompleteArgument rejection -> E2-style gap.
+#     -> unmet. The incomplete controlled_comparison argument is declared as a located hole with
+#     `open baseline_parity` (lowering re-done for issue #15 under `lara-core@0.3`): it is not an
+#     AF node, so the claim lands `gap` on empty complete support.
 #   * CQ1 (FID at convergence equal-or-better, so resources are not traded for quality) discharges
 #     the optional scope_match; the resource metrics themselves are recorded for both methods
 #     (E03 steps 1-3), discharging measurement_validity. Both leaves are on the page.
 #   * variance_reported also has no leaf (single measurement per config, no repeats) — a second
-#     policy-mandatory blocker; baseline_parity is the annotation-grounded driver.
+#     policy-mandatory blocker, also opened; baseline_parity is the annotation-grounded driver.
 #
 # Expected verdict is at the bottom of this file (golden oracle).
 
@@ -49,12 +51,16 @@ leaf e3 : scope_matched(ddpm_tan, training_resource_cost, ffhq_sunglasses_10shot
   provenance = ai-executed
   refs       = [logic/experiments.md#E03-Procedure-step-4, evidence/tables/table2_fid.md, evidence/figures/figure4_ablation.md]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... and the incomplete argument is declared as a located hole ------------------------------
 
-# (Intentionally no `arg`: matched_setup(ddpm_tan, full_finetune, e03) has no honest leaf — the
-# asymmetric batch/GPU configurations are never normalized (CQ2, unmet-gap) — and
-# variance_reported(e03) has none either (single measurement per config). Both are policy-mandatory,
-# so the claim's complete-support set is empty.)
+# matched_setup(ddpm_tan, full_finetune, e03) has no honest leaf (asymmetric batch/GPU configs
+# never normalized, CQ2) and variance_reported(e03) has none either (single measurement per
+# config). Both are policy-mandatory and stay open: a1 is a hole, not an AF node.
+arg a1 : supports(c03) by controlled_comparison(ddpm_tan, full_finetune, training_resource_cost, ffhq_sunglasses_10shot, e03)
+  discharge measurement_validity with e2
+  discharge scope_match          with e3
+  open      baseline_parity
+  open      variance_reported
 
 status c03
 
@@ -62,5 +68,7 @@ status c03
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
 # Compiled AF: no arguments.
+# Located hole: a1 (open obligations [baseline_parity, variance_reported]; sources no attacks).
 # Claim status:
-#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8 — the hole
+#               is reported, not a node)

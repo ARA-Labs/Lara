@@ -16,16 +16,18 @@
 #   * coverage (covers_scope) is UNMET-gap: annotation CQ3 (is the within-run cascade consistent
 #     across the cited runs?) is unmet — run 14's msg-157 timeout (N759) was FOLLOWED by three
 #     successful official scores (N756-N758), so 'subsequent calls tend to time out' is
-#     unquantified and unestablished. A mandatory policy CQ with no honest discharging leaf is an
-#     IncompleteArgument rejection, so NO complete measurement(...) instance is declarable: the
-#     unit is E2-style (claim + met-CQ leaves present, no arg), landing `gap` on empty support.
+#     unquantified and unestablished. The incomplete measurement(...) argument is declared as a
+#     located hole with `open coverage` (lowering re-done for issue #15 under `lara-core@0.3`),
+#     landing `gap` on empty complete support.
 #   * confound_control (optional) is UNMET too: annotation CQ2 (does the observation isolate
 #     checkpoint size from GPU co-tenant contention?) is unmet, and it is exactly the theme of the
 #     two dead-end undercuts N603 and N759 (decision: undercut of C12's support — both name
-#     GPU/self-inflicted contention as the live alternative cause). Per LOWERING Attacks, when a
-#     mandatory CQ of the same arg is independently unmet-gap the gap rule wins: there is no arg to
-#     undercut, so this undercut evidence is recorded here as a header note, NOT as an arg. Status
-#     is `gap`, not `defeated`.
+#     GPU/self-inflicted contention as the live alternative cause). confound_control is opened.
+#     Per LOWERING Attacks, when a mandatory CQ of the same arg is independently unmet-gap the gap
+#     rule wins. The undercut is declared against the hole's root (leaf u1 concluding the
+#     measurement exception measurement_artifact from N603/N759, challenge d1,
+#     `undercut d1 a1.rule`): it type-checks and is inert, because no complete argument contains
+#     a1's root. Status is `gap`, not `defeated`.
 #
 # Expected verdict is at the bottom of this file (golden oracle).
 
@@ -56,20 +58,38 @@ leaf e2 : valid_instrument(timeout_checkpoint_pathology, cross_run_scoring)
   provenance = ai-executed
   refs       = [logic/problem.md#50-51, trace/exploration_tree.yaml#N312, evidence/tables/malt_attempts.md#run-345746-row-13]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# Dead ends N603 (run-11 timeouts attributed to GPU / scorer contention) and N759 (run-14 timeout
+# from the agent's own training script holding the GPU): the observed timeouts have a live
+# alternative cause besides checkpoint size.
+leaf u1 : measurement_artifact(timeout_checkpoint_pathology, fix_embedding_scoring)
+  kind       = observed
+  provenance = ai-executed
+  refs       = [trace/exploration_tree.yaml#N603, trace/exploration_tree.yaml#N759, trace/exploration_tree.yaml#N756-N758]
 
-# (Intentionally no `arg`: coverage/covers_scope(cross_run_scoring, fix_embedding_scoring) has no
-# honest leaf — the cascade generalization is contradicted in run 14 (N756-N758 succeeded after
-# the N759 timeout) — and corpus-v1 makes coverage mandatory. Dead ends N603 and N759 are
-# annotated `decision: undercut` against the checkpoint-size attribution (GPU / self-inflicted
-# contention), but with a mandatory CQ independently unmet the gap rule wins, so that undercut
-# evidence stays a header note rather than an arg. The claim's complete-support set is empty.)
+# --- ... and the incomplete argument is a located hole ------------------------------------------
+
+# covers_scope(cross_run_scoring, fix_embedding_scoring) has no honest leaf — the cascade
+# generalization is contradicted in run 14 (N756-N758 succeeded after the N759 timeout) — so the
+# mandatory coverage stays open; the optional confound_control is unmet too.
+arg a1 : supports(c12) by measurement(timeout_checkpoint_pathology, fix_embedding_scoring, cross_run_scoring)
+  discharge instrument_validity with e2
+  open      coverage
+  open      confound_control
+
+# --- N603/N759 undercut the attribution (gap rule wins: inert on a hole) -----------------------
+
+# Licensed by `exception measurement : measurement_artifact(P, S)` (corpus-v1). The target is the
+# root of the hole a1, so the attack is kept but produces no edge.
+arg d1 : challenges(confound_control(a1)) by leaf(u1)
+undercut d1 a1.rule
 
 status c12
 
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
-# Compiled AF: no arguments.
+# Compiled AF: d1 alone, unattacked -> in (grounded). The undercut d1 a1.rule is typed and kept
+# but produces no edge: a1 is a hole, so no complete argument contains its root (spec §8).
+# Located hole: a1 (declaration index 0), open obligations [coverage]; sources no attacks.
 # Claim status:
-#   c12 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c12 -> gap (empty complete support; the hole a1 is reported, not a node; spec §8)

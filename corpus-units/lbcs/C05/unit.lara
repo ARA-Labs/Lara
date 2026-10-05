@@ -15,14 +15,16 @@
 #     ratio-reduction conjunct (b) 68.53 < 70 and 77.82 < 80 lives in nl and refs
 #     (LOWERING §Formal atoms, bundled claims).
 #   * The mandatory variance_reported CQ has no discharging leaf: E05 metrics list Top-5 and
-#     optimized ratio with no repetition count or std (unlike E01's explicit 10-run mean+-std),
-#     so the Top-5 margins may be within run-to-run noise. An open mandatory obligation is an
-#     IncompleteArgument rejection, so no complete controlled_comparison is declarable — E2-
-#     style gap on empty complete support (adaptive-pruning/C03 pattern). baseline_parity
-#     (identical ResNet-50/SGD post-selection training) and measurement_validity (grouping trick
-#     applied symmetrically; Top-5 a standard metric) are annotated met and kept as leaves.
+#     optimized ratio with no repetition count or std (unlike E01's explicit 10-run mean+-std), so
+#     the Top-5 margins may be within run-to-run noise. The controlled_comparison argument is
+#     declared as a located hole with `open variance_reported` (lowering re-done for issue #15
+#     under lara-core@0.3; until lara-core@0.2 the open mandatory obligation rejected the unit, so
+#     the arg was omitted): it is not an AF node and the claim stays gap on empty complete
+#     support. baseline_parity (identical ResNet-50/SGD post-selection training) and
+#     measurement_validity (grouping trick applied symmetrically; Top-5 a standard metric) are
+#     annotated met and discharged on it.
 #   * The optional "all baselines present at ImageNet scale" CQ is unmet (Influential absent),
-#     so scope_match is not discharged; it has no status effect and is noted here only.
+#     so scope_match is opened, not discharged (R5 question accounting; no status effect).
 #
 # Expected verdict is at the bottom of this file (golden oracle).
 
@@ -56,17 +58,24 @@ leaf e3 : valid_measurement(top5_accuracy, e05)
   provenance = ai-executed
   refs       = [logic/experiments.md#E05-Procedure-step-2, logic/experiments.md#E05-Setup]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... but only an incomplete argument (a located hole) is declarable -------------------------
 
-# (Intentionally no `arg`: variance_reported(e05) has no honest leaf — E05 reports no repetition
-# count or std at ImageNet scale — and corpus-v1 makes that obligation mandatory. The claim's
-# complete-support set is therefore empty.)
+# The incomplete argument: variance_reported(e05) has no honest leaf — E05 reports no repetition
+# count or std at ImageNet scale — and corpus-v1 makes it mandatory, so a1 is a hole.
+arg a1 : supports(c05) by controlled_comparison(lbcs, probabilistic, top5_accuracy, imagenet1k, e05)
+  discharge baseline_parity      with e2
+  discharge measurement_validity with e3
+  open      variance_reported
+  open      scope_match
 
 status c05
 
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
-# Compiled AF: no arguments.
+# Compiled AF: no arguments (a1 is a located hole, not an AF node).
+# Located hole: a1 (controlled_comparison), open obligations [variance_reported];
+#   sources no attacks.
 # Claim status:
-#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8;
+#          the hole a1 is reported in the verdict's holes section, not as a node)

@@ -17,7 +17,9 @@
 #     C2ST is comparable between the two regimes on a shared protocol).
 #   * adequate_power is annotated UNMET-GAP and mandatory: E01/E02 assert "does not meaningfully
 #     hurt" with no equivalence margin, variance, or power analysis. The mandatory obligation has
-#     no discharging leaf, so no complete null_comparison instance is declarable — E2-style gap.
+#     no discharging leaf, so the incomplete null_comparison argument is declared as a located
+#     hole with `open adequate_power` (lowering re-done for issue #15 under `lara-core@0.3`): it
+#     is not an AF node, so the claim lands `gap` on empty complete support.
 #   * Policy vocabulary gap (annotation coverage_flag): LARA's support/attack edges have no native
 #     equivalence-margin construct. The null_comparison dual is the closest honest lowering; the
 #     missing margin is exactly what leaves adequate_power (powered) undischarged. N03b is the
@@ -55,11 +57,15 @@ leaf e3 : valid_measurement(posterior_c2st, e01)
   provenance = ai-executed
   refs       = [logic/experiments.md#E01, Appendix-A3]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... and the incomplete argument is declared as a located hole ------------------------------
 
-# (Intentionally no `arg`: powered(e01) has no honest leaf — E01/E02 state "does not meaningfully
-# hurt" with no equivalence margin or variance — and corpus-v1 makes that obligation mandatory
-# for the null_comparison dual. No positive-side arg is declared either. Complete support is empty.)
+# powered(e01) has no honest leaf (no equivalence margin or variance) and corpus-v1 makes it
+# mandatory for the null_comparison dual, so it stays open: a1 is a hole, not an AF node. No
+# positive-side arg is declared.
+arg a1 : supports(c06) by null_comparison(all_conditionals, posterior_only, posterior_c2st, benchmark_tasks, e01)
+  discharge baseline_parity      with e2
+  discharge measurement_validity with e3
+  open      adequate_power
 
 status c06
 
@@ -67,5 +73,7 @@ status c06
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
 # Compiled AF: no arguments.
+# Located hole: a1 (open obligations [adequate_power]; sources no attacks).
 # Claim status:
-#   c06 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c06 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8 — the hole
+#               is reported, not a node)

@@ -18,10 +18,34 @@
         "claim": "holds(timeout_checkpoint_pathology, fix_embedding_scoring)",
         "status": "gap",
         "complete-support": 0,
-        "holes": 0,
-        "incomplete-alternative": false
+        "holes": 1,
+        "incomplete-alternative": true
       }
     ],
-    "labels": []
+    "labels": [
+      {
+        "arg": "d1",
+        "index": 0,
+        "label": "in"
+      }
+    ],
+    "holes": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "obligations": [
+          "coverage"
+        ],
+        "sites": [
+          {
+            "question": "coverage",
+            "at": [
+              "rule"
+            ]
+          }
+        ],
+        "attacks": []
+      }
+    ]
   }
 }

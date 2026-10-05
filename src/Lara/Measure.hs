@@ -53,6 +53,7 @@ module Lara.Measure
   , ablationTsvHeader
   ) where
 
+import Data.Char (isDigit)
 import Data.List (intercalate, isInfixOf, isPrefixOf, nub, sort)
 
 import Lara.AST (Label (..), RejectClass (..), Rejection (..), Status (..))
@@ -69,7 +70,7 @@ import Lara.Diagnostics
   )
 import Lara.Driver (runCheck, runCheckLocatedWith)
 import Lara.ExpectedJson (JValue (..), renderJson)
-import Lara.Mutate (Expected (..), parseExpected, parseFamily, statusText)
+import Lara.Mutate (Expected (..), expectedText, parseExpected, parseFamily, statusText)
 import Lara.Replay (CheckInput, inputReplayId)
 import Lara.Strict (SExpr (..))
 import Lara.Wire
@@ -156,8 +157,13 @@ parseMutantManifest raw =
   , Just locs <- [parseConstituentList loc]
   ]
 
--- | Parse @corpus-units\/MANIFEST.tsv@ into input rows (6 columns; the
--- @expected_status@ column becomes an @accept-\<status\>@ expectation).
+-- | Parse @corpus-units\/MANIFEST.tsv@ into input rows (7 columns). A unit
+-- whose @located_holes@ column is positive is specified to carry a located
+-- hole, so it is measured as @accept-located-hole@ — the class the full
+-- system reports for it (spec §4.4) and the one @no-cq@ promotes — exactly
+-- as the hole mutants are; its claim status stays pinned by
+-- @test\/CorpusUnitsSpec.hs@. Any other unit's @expected_status@ column
+-- becomes an @accept-\<status\>@ expectation.
 parseCorpusManifest :: String -> [InputMeta]
 parseCorpusManifest raw =
   [ InputMeta
@@ -166,7 +172,7 @@ parseCorpusManifest raw =
       , imFamily = group
       , imOperator = Nothing
       , imExpected = e
-      , imExpectedText = "accept-" ++ status
+      , imExpectedText = expectedText e
       , imExpectedLocation = Nothing
       , imHsDiag = ""
       , imLeanDiag = ""
@@ -174,9 +180,14 @@ parseCorpusManifest raw =
       }
   | ln <- drop 1 (lines raw)
   , not (null ln)
-  , [group, artifact, claimId, _type, _dbl, status] <- [splitTab ln]
-  , Just e <- [parseExpected ("accept-" ++ status)]
+  , [group, artifact, claimId, _type, _dbl, status, holes] <- [splitTab ln]
+  , Just e <- [corpusExpected status holes]
   ]
+  where
+    corpusExpected status holes
+      | holes == "0" = parseExpected ("accept-" ++ status)
+      | all isDigit holes && not (null holes) = Just ExpectLocatedHole
+      | otherwise = Nothing
 
 splitTab :: String -> [String]
 splitTab s = case break (== '\t') s of

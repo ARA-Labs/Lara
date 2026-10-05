@@ -18,10 +18,28 @@
         "claim": "not_better(all_conditionals, posterior_only, posterior_c2st, benchmark_tasks)",
         "status": "gap",
         "complete-support": 0,
-        "holes": 0,
-        "incomplete-alternative": false
+        "holes": 1,
+        "incomplete-alternative": true
       }
     ],
-    "labels": []
+    "labels": [],
+    "holes": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "obligations": [
+          "adequate_power"
+        ],
+        "sites": [
+          {
+            "question": "adequate_power",
+            "at": [
+              "rule"
+            ]
+          }
+        ],
+        "attacks": []
+      }
+    ]
   }
 }

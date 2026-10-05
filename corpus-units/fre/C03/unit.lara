@@ -8,14 +8,17 @@
 #   * Family map: benchmark_evaluation. S = fre_all, B = gc_baselines (GC-IQL/GC-BC),
 #     Q = cross_family_return. Per-family cells live in `nl` and refs.
 #   * The annotation's mandatory CQ2 is unmet-gap: the conditioning protocol for the goal-
-#     conditioned baselines on non-goal tasks (directional, simplex, path) is never stated, so their
-#     near-zero scores could be partly a task-specification artifact. Mapped onto policy-mandatory
-#     benchmark_valid (is the benchmark valid for the comparands?) -> unmet. An open mandatory
-#     obligation is an IncompleteArgument rejection, so no complete benchmark_evaluation is
-#     declarable -> E2-style gap.
-#   * CQ1 (one frozen FRE-all checkpoint across every family, no per-family specialists) discharges
-#     protocol_fixed; that leaf is on the page. The optional variance CQ3 (met, mean +- std) is
-#     omitted (no status effect).
+#     conditioned baselines on non-goal tasks (directional, simplex, path) is never stated, so
+#     their near-zero scores could be partly a task-specification artifact. Mapped onto
+#     policy-mandatory benchmark_valid (is the benchmark valid for the comparands?) -> unmet. The
+#     benchmark_evaluation argument is declared as a located hole with `open benchmark_valid`
+#     (lowering re-done for issue #15 under lara-core@0.3; until lara-core@0.2 the open mandatory
+#     obligation rejected the unit, so the arg was omitted): it is not an AF node and the claim
+#     stays gap on empty complete support.
+#   * CQ1 (one frozen FRE-all checkpoint across every family, no per-family specialists)
+#     discharges protocol_fixed on the hole. The optional environment_match has no annotated basis
+#     and is opened (R5 question accounting; no status effect). The optional variance CQ3 (met,
+#     mean +- std) has no benchmark_evaluation question and is omitted (no status effect).
 #   * The path-task tension (GC-IQL scores 46.6/70.3 on ant-path, above FRE) is internal to the
 #     artifact's own table, not a dead-end node with decision=undercut, so per the annotation it
 #     surfaces as this header note, not an attack edge.
@@ -45,18 +48,22 @@ leaf e2 : fixed_protocol(fre_all, gc_baselines, e01)
   provenance = ai-executed
   refs       = [logic/experiments.md#E01-Procedure-steps-2-5]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... but only an incomplete argument (a located hole) is declarable -------------------------
 
-# (Intentionally no `arg`: benchmark_valid(gc_baselines, cross_family_return) has no honest leaf —
-# the conditioning protocol for the goal-conditioned baselines on non-goal tasks is unspecified
-# (CQ2, unmet-gap), so their near-zero scores may be a task-spec artifact — and corpus-v1 makes
-# benchmark validity mandatory. The claim's complete-support set is therefore empty.)
+# The incomplete argument: benchmark_valid has no honest leaf — the GC baselines' conditioning
+# protocol on non-goal tasks is unspecified — and corpus-v1 makes it mandatory, so a1 is a hole.
+arg a1 : supports(c03) by benchmark_evaluation(fre_all, gc_baselines, cross_family_return, e01)
+  discharge protocol_fixed    with e2
+  open      benchmark_valid
+  open      environment_match
 
 status c03
 
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
-# Compiled AF: no arguments.
+# Compiled AF: no arguments (a1 is a located hole, not an AF node).
+# Located hole: a1 (benchmark_evaluation), open obligations [benchmark_valid]; sources no attacks.
 # Claim status:
-#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8;
+#          the hole a1 is reported in the verdict's holes section, not as a node)

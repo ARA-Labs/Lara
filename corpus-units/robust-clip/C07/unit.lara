@@ -12,23 +12,30 @@
 #     better(nonrobust_shared_clip, robust_clip, transfer_vulnerability, coco_captioning) —
 #     the shared non-robust encoder is MORE transfer-vulnerable (large CIDEr drop) than robust
 #     encoders (near-clean). The annotation's own scheme is controlled_comparison, followed here.
-#   * The mandatory baseline_parity CQ is unmet, so no complete controlled_comparison is
-#     declarable (E2-style gap). Annotation CQ "is there a control separating 'shared' from
-#     merely 'non-robust' — a distinct-but-vulnerable non-shared encoder?" is mandatory
-#     unmet-gap: every non-robust condition reuses the same original CLIP, so the causal
-#     comparison lacks the control arm that would match the setup for the sharing factor. This
-#     is the batch's judgment call — the missing-control CQ maps onto matched_setup(S, B, Exp),
-#     the MANDATORY baseline_parity question, because a causal "because they share the encoder"
-#     comparison is not setup-matched without it. The shown data never contradicts the
-#     attribution, so this is a gap, not a defeater (no undercut).
+#   * The mandatory baseline_parity CQ is unmet, so the controlled_comparison argument is declared
+#     as a located hole with `open baseline_parity` (lowering re-done for issue #15 under
+#     lara-core@0.3; until lara-core@0.2 the open mandatory obligation rejected the unit, so the
+#     arg was omitted): it is not an AF node and the claim stays gap on empty complete support.
+#     Annotation CQ "is there a control separating 'shared' from merely 'non-robust' — a
+#     distinct-but-vulnerable non-shared encoder?" is mandatory unmet-gap: every non-robust
+#     condition reuses the same original CLIP, so the causal comparison lacks the control arm that
+#     would match the setup for the sharing factor. This is the batch's judgment call — the
+#     missing-control CQ maps onto matched_setup(S, B, Exp), the MANDATORY baseline_parity
+#     question, because a causal "because they share the encoder" comparison is not setup-matched
+#     without it. The shown data never contradicts the attribution, so this is a gap, not a
+#     defeater (no undercut).
 #   * measurement_validity IS met: annotation CQ2 (clean baselines reported, so the CIDEr drop
 #     is attributable) and CQ3 (transfer failure under robust encoders is distinguishable from
 #     mere model degradation — those models stay near clean) discharge valid_measurement. The
 #     "same adversarial images, only the encoder varies" CQ1 is a met facet of matched-setup but
 #     is folded into the premise refs; it does not cover the missing shared-vs-nonrobust control,
-#     so baseline_parity stays undischarged. The optional both-directions CQ is met, omitted.
-#   * Variance is not separately reported and the margins are large, but the binding obligation
-#     here is the missing control, so the unit is E2-gap regardless of the variance question.
+#     so baseline_parity stays open. measurement_validity is discharged on the hole. The optional
+#     both-directions CQ is met, omitted; the optional scope_match has no annotated basis and is
+#     opened (R5 question accounting; no status effect).
+#   * Variance is not separately reported and the margins are large, but no annotated CQ or leaf
+#     supports variance_reported, so it is opened too (a second mandatory obligation). The
+#     binding obligation is the missing control; the unit is gap regardless of the variance
+#     question.
 #
 # Expected verdict is at the bottom of this file (golden oracle).
 
@@ -57,17 +64,25 @@ leaf e2 : valid_measurement(transfer_vulnerability, e01)
   provenance = ai-executed
   refs       = [logic/experiments.md#E01-Procedure-step-2, evidence/tables/table1_lvlm_robustness.md]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... but only an incomplete argument (a located hole) is declarable -------------------------
 
-# (Intentionally no `arg`: matched_setup(nonrobust_shared_clip, robust_clip, e01) is unmet —
-# no distinct-but-vulnerable non-shared encoder isolates "shared" from "non-robust" — and
-# baseline_parity is mandatory, so the claim's complete-support set is empty.)
+# The incomplete argument: baseline_parity has no honest leaf — no distinct-but-vulnerable
+# non-shared encoder isolates "shared" from "non-robust" — and variance_reported has none either;
+# both are mandatory, so both stay open and a1 is a hole.
+arg a1 : supports(c07) by controlled_comparison(nonrobust_shared_clip, robust_clip, transfer_vulnerability, coco_captioning, e01)
+  discharge measurement_validity with e2
+  open      baseline_parity
+  open      variance_reported
+  open      scope_match
 
 status c07
 
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
-# Compiled AF: no arguments.
+# Compiled AF: no arguments (a1 is a located hole, not an AF node).
+# Located hole: a1 (controlled_comparison), open obligations [baseline_parity, variance_reported];
+#   sources no attacks.
 # Claim status:
-#   c07 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec section 8)
+#   c07 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec section 8;
+#          the hole a1 is reported in the verdict's holes section, not as a node)

@@ -9,8 +9,10 @@
 # Lowering notes (conventions: corpus-units/LOWERING.md):
 #   * E04 Procedure step 3 averages >=40 inferences but Metrics reports only point values -- no
 #     timing variance / CI. corpus-v1 makes variance_reported MANDATORY family-wide, so no honest
-#     variance leaf exists: the complete-support set is empty and the claim lands `gap` (E2-style,
-#     no arg), exactly like adaptive-pruning/C03.
+#     variance leaf exists: the controlled_comparison argument is incomplete and is declared as a
+#     located hole with `open variance_reported` (lowering re-done for issue #15 under
+#     lara-core@0.3). The complete-support set is empty and the claim lands `gap`, like
+#     adaptive-pruning/C03. The optional scope_match has no annotated basis and is opened too.
 #   * Policy-vs-annotation divergence (uniform-standard rule): the M0 annotator rated the timing-
 #     variance CQ OPTIONAL ("no stated margin ... does not defeat"); corpus-v1's family-wide call
 #     wins and it is mandatory. The other CQs are annotated met -- baseline_parity <- CQ2/CQ3
@@ -28,7 +30,7 @@ artifact self-composing-policies at sha256:74f7fb5d060a
 policy corpus-v1
 use backends [nd@1]
 
-# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+# --- The headline claim, stated but not complete at corpus-v1's evidential bar -----------------
 
 claim c04
   nl      = "CompoNet empirical inference time grows substantially slower than ProgressiveNet as tasks increase from 1 to 300 (CompoNet gradual, ProgressiveNet clearly quadratic), on identical hardware with a 1-minute / at-least-40-inference averaging protocol and batch size 8 for both models"
@@ -54,16 +56,23 @@ leaf e3 : valid_measurement(inference_time_scaling, e04)
   provenance = ai-executed
   refs       = [logic/experiments.md#E04-Setup, logic/experiments.md#E04-Procedure-step-3]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... but the argument is incomplete (a located hole) ----------------------------------------
 
-# (Intentionally no `arg`: variance_reported(e04) has no honest leaf -- E04 reports point timings
-# only -- and corpus-v1 makes that obligation mandatory. The claim's complete-support set is empty.)
+# variance_reported is open (E04 reports point timings only) and mandatory, so a1 is a hole; the
+# optional scope_match has no leaf and is open too.
+arg a1 : supports(c04) by controlled_comparison(componet, prognet, inference_time_scaling, tasks_up_to_300, e04)
+  discharge baseline_parity      with e2
+  discharge measurement_validity with e3
+  open      variance_reported
+  open      scope_match
 
 status c04
 
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
-# Compiled AF: no arguments.
+# Compiled AF: no arguments (the hole is not a node).
+# Located hole: a1, open obligations [variance_reported]; it sources no attacks.
 # Claim status:
-#   c04 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c04 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8;
+#          the located hole is reported in `holes`, not counted as support)

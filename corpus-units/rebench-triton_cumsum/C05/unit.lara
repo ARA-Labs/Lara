@@ -12,12 +12,13 @@
 #     tao_correct_solution.py exists anywhere; the 0.47 is transcribed from the metr-re-bench
 #     README, and claims.md marks C05 untested) and benchmark_valid (annotation CQ2 — correctness
 #     on all inputs, incl. the n<1e6 PyTorch fallback path, is inferred from the check's structure,
-#     not from a logged results_match=True run). A mandatory policy CQ with no honest discharging
-#     leaf is an IncompleteArgument rejection, so NO complete benchmark_evaluation(...) instance is
-#     declarable: E2-style unit, `gap` on empty support.
+#     not from a logged results_match=True run). The incomplete benchmark_evaluation(...)
+#     argument is declared as a located hole with `open protocol_fixed` and
+#     `open benchmark_valid` (lowering re-done for issue #15 under `lara-core@0.3`); `gap` on
+#     empty complete support.
 #   * annotation CQ3 (does the execution environment match the reference number?) is unmet-gap too
-#     but maps to the OPTIONAL environment_match; CQ4 (JIT excluded via 3-warmup CUDA-graph
-#     capture) is met but optional. Neither changes the gap.
+#     but maps to the OPTIONAL environment_match, which is opened; CQ4 (JIT excluded via 3-warmup
+#     CUDA-graph capture) is met but has no corpus-v1 question. Neither changes the gap.
 #   * The claim is unestablished-in-artifact (benchmark instantiated only vicariously through the
 #     README's run), NOT defeated — N04/N06 are motivating dead ends (decision:none), no attack.
 #
@@ -43,12 +44,16 @@ leaf e1 : reports(e03, benchmark_result(superblock_atomic_pipeline, rebench_refe
   provenance = ai-executed
   refs       = [logic/claims.md#C05, evidence/tables/reference_scores.md, metr-re-bench/ai_rd_triton_cumsum/README.md, logic/experiments.md#E03]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... and the incomplete argument is a located hole ------------------------------------------
 
-# (Intentionally no `arg`: fixed_protocol(superblock_atomic_pipeline, rebench_reference, e03) has
-# no honest leaf — no scorer invocation is recorded, the 0.47 is transcribed — and valid_benchmark
-# is unestablished — correctness on all inputs is inferred from the check's structure, not a logged
-# pass. Both are mandatory in corpus-v1. Complete support is empty.)
+# fixed_protocol(superblock_atomic_pipeline, rebench_reference, e03) has no honest leaf — no
+# scorer invocation is recorded, the 0.47 is transcribed — and valid_benchmark is unestablished —
+# correctness on all inputs is inferred from the check's structure, not a logged pass — so both
+# mandatory questions stay open; the optional environment_match is unmet too.
+arg a1 : supports(c05) by benchmark_evaluation(superblock_atomic_pipeline, rebench_reference, triton_cumsum_score, e03)
+  open protocol_fixed
+  open benchmark_valid
+  open environment_match
 
 status c05
 
@@ -56,5 +61,6 @@ status c05
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
 # Compiled AF: no arguments.
+# Located hole: a1 (declaration index 0), open obligations [protocol_fixed, benchmark_valid]; sources no attacks.
 # Claim status:
-#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c05 -> gap (empty complete support; the hole a1 is reported, not a node; spec §8)

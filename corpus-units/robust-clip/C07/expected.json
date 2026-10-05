@@ -18,10 +18,35 @@
         "claim": "better(nonrobust_shared_clip, robust_clip, transfer_vulnerability, coco_captioning)",
         "status": "gap",
         "complete-support": 0,
-        "holes": 0,
-        "incomplete-alternative": false
+        "holes": 1,
+        "incomplete-alternative": true
       }
     ],
-    "labels": []
+    "labels": [],
+    "holes": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "obligations": [
+          "baseline_parity",
+          "variance_reported"
+        ],
+        "sites": [
+          {
+            "question": "baseline_parity",
+            "at": [
+              "rule"
+            ]
+          },
+          {
+            "question": "variance_reported",
+            "at": [
+              "rule"
+            ]
+          }
+        ],
+        "attacks": []
+      }
+    ]
   }
 }

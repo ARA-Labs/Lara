@@ -13,12 +13,16 @@
 #     construction is applied to every method (CQ1 met) but baseline hyperparameter configuration
 #     under shift is unstated (annotated mandatory unmet-gap; unlike E07, E08 says nothing about
 #     method configuration). Fairness of the comparand is therefore unestablished -> the argument
-#     cannot honestly discharge baseline_parity. NO complete arg is declarable: E2-style gap.
+#     cannot honestly discharge baseline_parity. The incomplete argument is declared as a located
+#     hole with `open baseline_parity` and `open variance_reported` (lowering re-done for issue #15
+#     under `lara-core@0.3`); complete support stays empty.
 #   * Reinforcing (policy-vs-annotation divergence, uniform-standard rule): the mandatory
 #     variance_reported CQ maps onto the annotation's "is the mixed stream repeated across seeds?",
 #     rated OPTIONAL and unmet-gap (a single unseeded interleaving); corpus-v1 makes it mandatory,
 #     so it independently blocks a complete arg. e2 (matched_setup) captures only the met stream-
-#     construction aspect (CQ1); e3 (valid_measurement) the standard accuracy/ECE metrics.
+#     construction aspect (CQ1), so it does not discharge baseline_parity and stays an unused
+#     leaf; e3 (valid_measurement) discharges measurement_validity on the standard accuracy/ECE
+#     metrics. The optional scope_match has no leaf and is opened.
 #   * Leaf kinds are attested, not observed: the annotation notes no exploration-tree node covers
 #     E08 (the trace ends at N12), so the non-i.i.d. cells are attested from claims/experiments
 #     text with no trace-level provenance.
@@ -54,11 +58,16 @@ leaf e3 : valid_measurement(adaptation_accuracy, e08)
   provenance = ai-executed
   refs       = [logic/experiments.md#E08-Procedure-step-3]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... and the incomplete argument is a located hole ------------------------------------------
 
-# (Intentionally no `arg`: baseline_parity is only partly met — the stream is matched but baseline
-# hyperparameter configuration under shift is unstated — and variance_reported(e08) has no honest
-# leaf (a single unseeded interleaving). Both are mandatory, so the complete-support set is empty.)
+# baseline_parity is only partly met — the stream is matched but baseline hyperparameter
+# configuration under shift is unstated — and variance_reported(e08) has no honest leaf (a single
+# unseeded interleaving), so both mandatory questions stay open.
+arg a1 : supports(c07) by controlled_comparison(foa, sar, adaptation_accuracy, non_iid_shift, e08)
+  open      baseline_parity
+  discharge measurement_validity with e3
+  open      variance_reported
+  open      scope_match
 
 status c07
 
@@ -66,5 +75,6 @@ status c07
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
 # Compiled AF: no arguments.
+# Located hole: a1 (declaration index 0), open obligations [baseline_parity, variance_reported]; sources no attacks.
 # Claim status:
-#   c07 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c07 -> gap (empty complete support; the hole a1 is reported, not a node; spec §8)

@@ -10,12 +10,14 @@
 #     not_correlated(X, Y, S) with X = avg_bleu, Y = accuracy_increase, S = model_dataset_pairs --
 #     a genuine negation of a correlation conclusion, so the null rule is the right target rather
 #     than a positive conclusion over negative-content constants.
-#   * Both mandatory corpus-v1 CQs are annotated unmet-gap, so no complete argument is declarable
-#     and the claim lands `gap` (E2-style): significance <- CQ1 (Table 3 notes assert "no
-#     correlation observed" but no test statistic / alpha appears; recomputed r = -0.234, t ~
-#     -0.87 confirms the direction only); adequate_power <- CQ2 (n = 15 fixed, no power analysis,
-#     so absence-is-informative is unbacked). No mandatory CQ met, so only the premise leaf is
-#     kept. The optional BLEU-reference CQ is also unmet; optional, no status effect.
+#   * Both mandatory corpus-v1 CQs are annotated unmet-gap, so the argument is incomplete: it is
+#     declared as a located hole with `open significance` and `open adequate_power` (lowering
+#     re-done for issue #15 under lara-core@0.3), and the claim lands `gap` on empty complete
+#     support: significance <- CQ1 (Table 3 notes assert "no correlation observed" but no test
+#     statistic / alpha appears; recomputed r = -0.234, t ~ -0.87 confirms the direction only);
+#     adequate_power <- CQ2 (n = 15 fixed, no power analysis, so absence-is-informative is
+#     unbacked). No mandatory CQ met, so only the premise leaf is kept. The optional
+#     BLEU-reference CQ is also unmet; optional, no status effect.
 #   * The contrary pair correlated/not_correlated is symmetric in corpus-v1, but this unit
 #     concludes only not_correlated over the (avg_bleu, accuracy_increase) pair; C05's positive
 #     conclusion is over a different pair (avg_seq_length) in a separate unit, so no mutual rebut
@@ -29,7 +31,7 @@ artifact semantic-self-consistency at sha256:970cd14ac108
 policy corpus-v1
 use backends [nd@1]
 
-# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+# --- The headline claim, stated but not complete at corpus-v1's evidential bar -----------------
 
 claim c06
   nl      = "Average BLEU score does not correlate with the average accuracy increase from the semantic methods over the 15 model-dataset pairs of Table 3 (recomputed Pearson r ~= -0.234, not significant at n = 15)"
@@ -45,17 +47,21 @@ leaf e1 : reports(e04, correlation(avg_bleu, accuracy_increase, model_dataset_pa
   provenance = ai-executed
   refs       = [logic/claims.md#C06, evidence/tables/table3_sequence_length_bleu.md, trace/exploration_tree.yaml#N11]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... but the argument is incomplete (a located hole) ----------------------------------------
 
-# (Intentionally no `arg`: significance_reported(e04) and powered(e04) have no honest leaves -- no
-# test/alpha is reported and there is no power analysis at n = 15 -- and corpus-v1 makes both
-# mandatory for the null dual. The claim's complete-support set is empty.)
+# significance (no test statistic or alpha reported) and adequate_power (n = 15, no power
+# analysis) are open and mandatory for the null dual, so a1 is a hole.
+arg a1 : supports(c06) by null_correlation(avg_bleu, accuracy_increase, model_dataset_pairs, e04)
+  open significance
+  open adequate_power
 
 status c06
 
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
-# Compiled AF: no arguments.
+# Compiled AF: no arguments (the hole is not a node).
+# Located hole: a1, open obligations [significance, adequate_power]; it sources no attacks.
 # Claim status:
-#   c06 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c06 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8;
+#          the located hole is reported in `holes`, not counted as support)

@@ -18,10 +18,35 @@
         "claim": "better(tsnpse_vp, tsnpe, valid_summary_stats, pyloric_budget_le_200k)",
         "status": "gap",
         "complete-support": 0,
-        "holes": 0,
-        "incomplete-alternative": false
+        "holes": 1,
+        "incomplete-alternative": true
       }
     ],
-    "labels": []
+    "labels": [],
+    "holes": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "obligations": [
+          "measurement_validity",
+          "variance_reported"
+        ],
+        "sites": [
+          {
+            "question": "measurement_validity",
+            "at": [
+              "rule"
+            ]
+          },
+          {
+            "question": "variance_reported",
+            "at": [
+              "rule"
+            ]
+          }
+        ],
+        "attacks": []
+      }
+    ]
   }
 }

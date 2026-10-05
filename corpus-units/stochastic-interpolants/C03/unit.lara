@@ -10,14 +10,16 @@
 #     by a clean-form controlled comparison; the causal attribution rides on the CQs.
 #   * The mandatory variance_reported CQ maps onto the annotation's mandatory "are seeds/repeated
 #     runs/FID variability reported so 1.13 vs 1.35 is distinguishable from noise?" — annotated
-#     unmet-gap (a single training run per condition, no seed count or uncertainty). An open
-#     mandatory obligation is IncompleteArgument, so NO complete arg is declarable: E2-style gap.
+#     unmet-gap (a single training run per condition, no seed count or uncertainty). The
+#     incomplete argument is declared as a located hole with `open variance_reported` (lowering
+#     re-done for issue #15 under `lara-core@0.3`); complete support stays empty.
 #   * Two further mandatory CQs are also unmet-gap and reinforce the gap: the baseline evaluation
 #     protocol at sampling time is unstated (baseline_parity aspect), and the known-pixel
 #     compositing confound is not separated from the coupling (annotated unmet-GAP, not
 #     unmet-defeater, so it surfaces as a hole, no undercut). baseline_parity's training-side
 #     matching (CQ1) and the one-protocol FID computation (CQ5) are the two met CQs whose leaves
-#     the paper supplies.
+#     the paper supplies; they discharge baseline_parity and measurement_validity. The optional
+#     scope_match has no leaf and is opened.
 #   * The E02 step-3 sign inconsistency (I'_t = x0 - x1 vs stated x1 - x0) is an internal-
 #     consistency hole noted in nl-adjacent refs, not a defeat edge.
 #
@@ -52,12 +54,15 @@ leaf e3 : valid_measurement(fid, e02)
   provenance = ai-executed
   refs       = [logic/experiments.md#E02-Procedure-step-7]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... and the incomplete argument is a located hole ------------------------------------------
 
-# (Intentionally no `arg`: variance_reported(e02) has no honest leaf — one training run per
-# condition, no seeds or FID uncertainty — and controlled_comparison makes that obligation
-# mandatory. The evaluation-protocol and compositing CQs are also unmet-gap. Complete support is
-# empty.)
+# variance_reported(e02) has no honest leaf — one training run per condition, no seeds or FID
+# uncertainty — so the mandatory variance_reported stays open.
+arg a1 : supports(c03) by controlled_comparison(dependent_coupling, uncoupled_baseline, fid, imagenet256_inpainting, e02)
+  discharge baseline_parity      with e2
+  discharge measurement_validity with e3
+  open      variance_reported
+  open      scope_match
 
 status c03
 
@@ -65,5 +70,6 @@ status c03
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
 # Compiled AF: no arguments.
+# Located hole: a1 (declaration index 0), open obligations [variance_reported]; sources no attacks.
 # Claim status:
-#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c03 -> gap (empty complete support; the hole a1 is reported, not a node; spec §8)

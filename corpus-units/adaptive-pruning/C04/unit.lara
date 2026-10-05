@@ -14,7 +14,9 @@
 #     annotator rated this CQ OPTIONAL, reasoning the 23.8% relative effect makes noise an
 #     unlikely full explanation; corpus-v1 makes variance mandatory family-wide (uniform-standard
 #     rule, adaptive-pruning/C03), so the policy call wins and the mandatory obligation has no
-#     discharging leaf. No complete component_ablation instance is declarable — E2-style gap.
+#     discharging leaf. The incomplete component_ablation argument is declared as a located hole
+#     a2 with `open variance_reported` (lowering re-done for issue #15 under `lara-core@0.3`): it
+#     is not an AF node, so c04's complete support stays empty and the claim lands `gap`.
 #   * Divergence from test-time-model-adaptation/C04: there variance had NO annotated CQ, so
 #     margins licensed a discharge; here the annotator explicitly evaluated variance and rated it
 #     unmet, so no honest margins-discharge is available — the claim lands `gap`, not `justified`.
@@ -91,11 +93,14 @@ leaf e5 : reports(e03, score_cell(ablated_config(kurtosis_salience, apt_llama2_7
 arg a1 : supports(c04a) by rational_drop_recheck(kurtosis_salience, apt_llama2_7b, openllm_avg, e03, 50, 38.1, 0.238, 0.05)
   assurance = cert(ra@1, sha256:corpus-v1-ra-theory-0, (radrop (prem 0) (prem 1) (frac 119 500)))
 
-# --- ... but no complete argument for the headline claim is declarable --------------------------
+# --- ... and the incomplete argument is declared as a located hole ------------------------------
 
-# (Intentionally no `arg` for c04: variance_reported(e03) has no honest leaf — E03 reports
-# single runs — and corpus-v1 makes that obligation mandatory. The headline claim's
-# complete-support set is empty.)
+# variance_reported(e03) has no honest leaf (E03 reports single runs) and corpus-v1 makes it
+# mandatory, so it stays open: a2 is a hole, not an AF node.
+arg a2 : supports(c04) by component_ablation(kurtosis_salience, apt_llama2_7b, openllm_avg, e03)
+  discharge single_variable   with e2
+  discharge protocol_parity   with e3
+  open      variance_reported
 
 status c04
 
@@ -103,6 +108,8 @@ status c04
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
 # Compiled AF: a1 alone (the strict certificate step), unattacked -> in (grounded).
+# Located hole: a2 (open obligations [variance_reported]; sources no attacks).
 # Claim status:
 #   c04 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8 — the
-#               strict sub-claim's arg supports c04a, not c04)
+#               strict sub-claim's arg supports c04a, not c04, and the hole a2 is reported,
+#               not a node)

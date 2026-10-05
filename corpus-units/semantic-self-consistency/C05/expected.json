@@ -18,10 +18,35 @@
         "claim": "correlated(avg_seq_length, accuracy_increase, model_dataset_pairs)",
         "status": "gap",
         "complete-support": 0,
-        "holes": 0,
-        "incomplete-alternative": false
+        "holes": 1,
+        "incomplete-alternative": true
       }
     ],
-    "labels": []
+    "labels": [],
+    "holes": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "obligations": [
+          "significance",
+          "independence"
+        ],
+        "sites": [
+          {
+            "question": "significance",
+            "at": [
+              "rule"
+            ]
+          },
+          {
+            "question": "independence",
+            "at": [
+              "rule"
+            ]
+          }
+        ],
+        "attacks": []
+      }
+    ]
   }
 }
