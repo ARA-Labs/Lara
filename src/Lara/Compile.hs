@@ -22,10 +22,11 @@ module Lara.Compile
     -- * Checked programs and the compiled AF
     -- | 'CheckedProgram' is opaque: the constructor is hidden so a \"checked\"
     -- program cannot be forged; see "Lara.Compile.Internal". Read via 'cpArgs'
-    -- \/ 'cpAtts'.
+    -- \/ 'cpAtts' \/ 'cpHoles'.
   , CheckedProgram
   , cpArgs
   , cpAtts
+  , cpHoles
   , edgeB
   , checkedAF
   ) where

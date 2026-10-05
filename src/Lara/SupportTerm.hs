@@ -25,6 +25,14 @@ module Lara.SupportTerm
   , CheckedNode
   , cnTerm
   , cnConclusion
+    -- * Located hole (Lean @Compile.CheckedHole@)
+    -- | Opaque for the same reason; read via 'chIndex' \/ 'chTerm' \/
+    -- 'chConclusion' \/ 'chObligations'.
+  , CheckedHole
+  , chIndex
+  , chTerm
+  , chConclusion
+  , chObligations
     -- * The certificate oracle (Lean @certOkOf@)
   , CertOk
   , CertOutcome (..)
@@ -75,7 +83,7 @@ import Data.Set (Set)
 import Lara.AST
 import Lara.Prop (Prop (..), Term (..), equiv)
 import Lara.Strict (Dependency)
-import Lara.SupportTerm.Internal (CheckedNode (..))
+import Lara.SupportTerm.Internal (CheckedHole (..), CheckedNode (..))
 
 -- ---------------------------------------------------------------------------
 -- Result and node types
