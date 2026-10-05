@@ -42,6 +42,7 @@ import Lara.Driver
 import Lara.Map.Driver
 import Lara.Examples
 import Lara.Examples.AttackCompleteness
+import Lara.Examples.EvidenceBlocked
 import Lara.Invariants
 import Lara.Realizability
 import Lara.Complexity.Numeral
@@ -1138,6 +1139,51 @@ open Lara
 #print axioms Lara.Check.Unit.CheckUnitSound.hole_reports_exact
 #print axioms Lara.Check.Unit.CheckUnitSound.hole_inert_source
 #print axioms Lara.Check.Unit.gap_of_only_holes
+
+-- Conservative reporting with located holes (spec §4.3; decision §5, D7):
+-- the reference carrier `D` excludes typed holes and keeps unclassified
+-- quarantined terms, the checked carrier `K` holds the retained complete
+-- nodes, and the seed is `(D \ K)` plus retained complete nodes that lost an
+-- incoming edge. `K ⊆ D` is obligation transport on supported retained terms;
+-- nothing quarantined means nothing blocked, holes or not.
+#print axioms Lara.BlockedProgram.mem_retainedIndices_iff
+#print axioms Lara.BlockedProgram.checkedCarrier_eq
+#print axioms Lara.BlockedProgram.referenceCarrier_eq
+#print axioms Lara.BlockedProgram.retainedIndices_mono
+#print axioms Lara.BlockedProgram.retainedIndices_congr
+#print axioms Lara.BlockedProgram.retainedArguments_keepComplete
+#print axioms Lara.BlockedProgram.keepComplete_terms
+#print axioms Lara.BlockedProgram.coveredB_liveAttacks
+#print axioms Lara.BlockedProgram.referenceLive_of_keepComplete
+#print axioms Lara.BlockedProgram.complete_subset_reference
+#print axioms Lara.BlockedProgram.blockedQueries_eq_nil_of_keep_all
+#print axioms Lara.BlockedProgram.referenceLive_indices_of_keep_all
+#print axioms Lara.BlockedProgram.blockedSeed_eq_nil_of_keep_all
+#print axioms Lara.BlockedProgram.blockedSet_nil
+#print axioms Lara.BlockedProgram.supportBlocked_nil
+#print axioms Lara.BlockedProgram.production_justified_nonpromotion_of_keep_all
+#print axioms Lara.BlockedProgram.checked_args_keepComplete
+#print axioms Lara.BlockedProgram.checked_atts_live
+#print axioms Lara.BlockedProgram.referenceLive_eq_notHole
+#print axioms Lara.BlockedProgram.checked_complete_subset_notHole
+#print axioms Lara.BlockedProgram.referenceLive_indices_eq_notHole
+#print axioms Lara.BlockedProgram.notHole_indices_eq_complete_of_typed
+#print axioms Lara.BlockedProgram.checked_production_justified_nonpromotion_notHole
+#print axioms Lara.Groups.usesLeaf_eq_true_iff
+#print axioms Lara.Groups.keepArg_leaves
+#print axioms Lara.Admission.buildGamma_quarantineLeaves
+#print axioms Lara.Admission.prune_gamma_agree
+#print axioms Lara.Examples.EvidenceBlocked.tMixDone_complete
+#print axioms Lara.Examples.EvidenceBlocked.tHolePair_hole
+#print axioms Lara.Examples.EvidenceBlocked.tHoleL2_hole
+#print axioms Lara.Examples.EvidenceBlocked.hole_alone_reference_eq_complete
+#print axioms Lara.Examples.EvidenceBlocked.hole_alone_quarantine_not_blocked
+#print axioms Lara.Examples.EvidenceBlocked.hole_alone_quarantine_blocked_under_all_declared
+#print axioms Lara.Examples.EvidenceBlocked.dropped_attack_seed
+#print axioms Lara.Examples.EvidenceBlocked.dropped_attack_onto_hole_blocks_support
+#print axioms Lara.Examples.EvidenceBlocked.unclassified_not_hole
+#print axioms Lara.Examples.EvidenceBlocked.unclassified_quarantine_blocks_support
+#print axioms Lara.Examples.EvidenceBlocked.clean_unit_with_hole_not_blocked
 
 -- Result 9 (backend replacement / Theorem 2, Model A): uniform injective
 -- certificate relabel preserves the compiled AF and every claim status.

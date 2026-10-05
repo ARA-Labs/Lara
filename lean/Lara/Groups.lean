@@ -341,4 +341,68 @@ theorem quarantineArgs_nil (args : List (String × SupportTerm)) :
   unfold quarantineArgs
   simp [keepArg_nil]
 
+/-- A listed leaf occurs in a concatenation exactly when it occurs in one side. -/
+private theorem exists_mem_append_or {xs ys qs : List LeafId} :
+    ((∃ l, l ∈ xs ∧ l ∈ qs) ∨ (∃ l, l ∈ ys ∧ l ∈ qs)) ↔
+      ∃ l, l ∈ xs ++ ys ∧ l ∈ qs := by
+  constructor
+  · rintro (⟨l, hl, hq⟩ | ⟨l, hl, hq⟩)
+    · exact ⟨l, List.mem_append.mpr (Or.inl hl), hq⟩
+    · exact ⟨l, List.mem_append.mpr (Or.inr hl), hq⟩
+  · rintro ⟨l, hl, hq⟩
+    rcases List.mem_append.mp hl with hl | hl
+    · exact Or.inl ⟨l, hl, hq⟩
+    · exact Or.inr ⟨l, hl, hq⟩
+
+/-- `usesLeaf` decides whether some leaf of the term is listed. -/
+theorem usesLeaf_eq_true_iff (qs : List LeafId) (w : SupportTerm) :
+    usesLeaf qs w = true ↔ ∃ l, l ∈ Support.leaves w ∧ l ∈ qs := by
+  revert qs
+  refine SupportTerm.rec
+    (motive_1 := fun w => ∀ qs, usesLeaf qs w = true ↔
+      ∃ l, l ∈ Support.leaves w ∧ l ∈ qs)
+    (motive_2 := fun ws => ∀ qs, usesLeafList qs ws = true ↔
+      ∃ l, l ∈ Support.leavesList ws ∧ l ∈ qs)
+    (motive_3 := fun ds => ∀ qs, usesLeafDisch qs ds = true ↔
+      ∃ l, l ∈ Support.leavesDis ds ∧ l ∈ qs)
+    (motive_4 := fun p => ∀ qs, usesLeaf qs p.2 = true ↔
+      ∃ l, l ∈ Support.leaves p.2 ∧ l ∈ qs)
+    ?leaf ?inst ?nilL ?consL ?nilD ?consD ?pair w
+  case leaf =>
+    intro l qs
+    simp [usesLeaf, Support.leaves]
+  case inst =>
+    intro rn theta premises discharges holes assurance ihPremises
+      ihDischarges qs
+    simp only [usesLeaf, Bool.or_eq_true, Support.leaves]
+    rw [ihPremises qs, ihDischarges qs]
+    exact exists_mem_append_or
+  case nilL =>
+    intro qs
+    simp [usesLeafList, Support.leavesList]
+  case consL =>
+    intro head tail ihHead ihTail qs
+    simp only [usesLeafList, Bool.or_eq_true, Support.leavesList]
+    rw [ihHead qs, ihTail qs]
+    exact exists_mem_append_or
+  case nilD =>
+    intro qs
+    simp [usesLeafDisch, Support.leavesDis]
+  case consD =>
+    intro head tail ihHead ihTail qs
+    simp only [usesLeafDisch, Bool.or_eq_true, Support.leavesDis]
+    rw [ihHead qs, ihTail qs]
+    exact exists_mem_append_or
+  case pair =>
+    intro q child ih qs
+    exact ih qs
+
+/-- A kept argument uses no quarantined leaf. -/
+theorem keepArg_leaves {qs : List LeafId} {a : String × SupportTerm}
+    (h : keepArg qs a = true) : ∀ l ∈ Support.leaves a.2, l ∉ qs := by
+  intro l hl hq
+  have huses : usesLeaf qs a.2 = true :=
+    (usesLeaf_eq_true_iff qs a.2).mpr ⟨l, hl, hq⟩
+  simp [keepArg, huses] at h
+
 end Lara.Groups

@@ -1580,12 +1580,16 @@ counterpart is `src/Lara/Blocked.hs`. -/
 
 /-- The queries whose public status is `evidence-blocked`: those with a complete
 support argument in the forward closure of the seed. A query with no complete
-support is `gap` and is never blocked — losing support cannot promote a claim. -/
+support is `gap` and is never blocked — losing support cannot promote a claim.
+`done` is the checked cache's completeness test and `live` the reference mask
+(`BlockedProgram.referenceLive`). -/
 def blockedQueries (keep : (String × SupportTerm) → Bool)
+    (done : SupportTerm → Bool) (live : (String × SupportTerm) → Bool)
     (declared : List (String × SupportTerm))
     (declAtts keptAtts : List Attack) (support : Atom → List Nat)
     (queries : List Atom) : List Atom :=
-  BlockedProgram.blockedQueries keep declared declAtts keptAtts support queries
+  BlockedProgram.blockedQueries keep done live declared declAtts keptAtts
+    support queries
 
 /-- Read the accept verdict off an accepted unit: grounded labels over the
 compiled AF (`checkedAF`), the compiled closure edges in ascending order, and
@@ -1672,8 +1676,15 @@ def runOnContents (contents : String) : IO _root_.Unit := do
                 -- Thus the accepted program's compact AF is connected to the
                 -- declared-index framework by construction, rather than by an
                 -- unproved re-resolution equivalence.
+                -- Retained declarations reuse the checked cache; each
+                -- quarantined declaration is classified once under the full
+                -- declared leaf table, so typed holes drop out of the
+                -- reference framework.
+                let done := BlockedProgram.checkedDone accepted
+                let live := BlockedProgram.referenceLive keep done
+                  d.policy.ruleLookup (buildGamma d.leaves) reg
                 let blocked :=
-                  blockedQueries keep d.argsRaw d.atts atts
+                  blockedQueries keep done live d.argsRaw d.atts atts
                     (fun p => claimSupportFor accepted p) d.queries
                 IO.println (printSx (buildAccept rid accepted d.queries blocked))
 

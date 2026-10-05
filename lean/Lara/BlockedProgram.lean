@@ -4,13 +4,34 @@ import Lara.RawAttack
 
 /-
 The program-level instance of conservative reporting for quarantine-affected
-claims (spec §4.3).
+claims (spec §4.3, `docs/located-gap-decision.md` §5).
 
 `Lara.Blocked` proves the metatheory over an arbitrary pair of frameworks. This
-module builds a declared-index pair matching the drivers' seed computation —
-the declared framework `G` over all declared arguments, and a sub-carrier `F`
-over the retained ones — and **discharges the three obligations** `Blocking`
-requires for that pair.
+module builds a declared-index pair matching the drivers' seed computation and
+**discharges the three obligations** `Blocking` requires for that pair. Both
+frameworks live in original declaration index space:
+
+* the reference carrier `D` is `retainedIndices live declared` for a reference
+  mask `live`. The production mask `referenceLive` reads the checked cache on
+  retained declarations and classifies each quarantined declaration once under
+  the full declared `Γ`: it is a node unless it is a successfully typed hole,
+  so an unclassified (ill-typed) quarantined term stays a conservative node;
+* the checked carrier `K` is `retainedIndices (keepComplete keep done) declared`:
+  the retained declarations the checker made AF nodes. Raw retention `keep`
+  stays separate, so retained holes keep their raw ids and attack endpoints;
+* `declaredAF` (`G`) carries `D` with the closure edges of the declared
+  attacks, `checkedAF` (`F`) carries `K` with those of the retained attacks;
+* the seed is `(D \ K) ∪ {j ∈ K | ∃ i ∈ K, G.attack i j ∧ ¬ F.attack i j}`,
+  closed forward along `G` over `D` only. Holes are not in `D`, so neither they
+  nor the attacks they source can seed or propagate blocking; a dropped attack
+  onto an occurrence inside a removed hole still seeds a retained complete
+  argument containing that occurrence, because `G` has the closure edge and
+  `F` lost it.
+
+`Blocking` holds for every reference carrier containing `K`, so the abstract
+results only need `K ⊆ D`; `referenceLive_eq_notHole` identifies the executable
+carrier with the specification carrier `D` (complete or unclassified under the
+full declared `Γ`) by obligation transport on the supported retained terms.
 
 The definitions here are executable and both drivers mirror them. The
 compact-to-declared `AFEmbedding`, lifted complete-support claim, and exact
@@ -51,12 +72,88 @@ def retainedArguments (keep : (String × SupportTerm) → Bool)
     List (String × SupportTerm) :=
   (retainedView keep declared).map (fun entry => entry.1)
 
-/-- Declaration-order indices of the arguments quarantine retained. Both
-declared-index frameworks use these indices, while production's compact index
-`k` embeds as `retainedIndices keep declared[k]?`. -/
+/-- Declaration-order indices of the declarations a mask selects. Under the raw
+keep predicate these are the arguments quarantine retained; under
+`keepComplete` they are `K`, and production's compact index `k` embeds as
+`(retainedIndices (keepComplete keep done) declared)[k]?`; under a reference
+mask they are `D`. -/
 def retainedIndices (keep : (String × SupportTerm) → Bool)
     (declared : List (String × SupportTerm)) : List Nat :=
   (retainedView keep declared).map (fun entry => entry.2)
+
+/-- Complete retention: the declaration survives the raw prune and the checked
+cache made it an AF node. `done` is that cache's completeness test
+(`checkedDone` in production). Raw retention `keep` is kept separate because
+retained holes still need their raw ids and attack endpoints. -/
+def keepComplete (keep : (String × SupportTerm) → Bool)
+    (done : SupportTerm → Bool) (a : String × SupportTerm) : Bool :=
+  keep a && done a.2
+
+/-- The specification reference mask (spec §4.3): a declaration is a reference
+node unless it is a successfully typed hole under `Gamma`. A term whose
+inference fails is a node: it is not `argHole`. This is not `argComplete`. -/
+def notHole {canon : String → String} (Pi : RuleId → Option Rule)
+    (Gamma : LeafId → Option Atom) (reg : BackendRegistry canon)
+    (a : String × SupportTerm) : Bool :=
+  ! Check.argHole Pi Gamma reg a.2
+
+/-- The production reference mask. A retained declaration reuses the checked
+cache (`done`), so no retained term is re-inferred; a quarantined declaration
+is classified by one inference under the full declared `Gamma`.
+`referenceLive_eq_notHole` proves it equals `notHole` on every declaration. -/
+def referenceLive {canon : String → String}
+    (keep : (String × SupportTerm) → Bool) (done : SupportTerm → Bool)
+    (Pi : RuleId → Option Rule) (Gamma : LeafId → Option Atom)
+    (reg : BackendRegistry canon) (a : String × SupportTerm) : Bool :=
+  if keep a then done a.2 else notHole Pi Gamma reg a
+
+/-- The checked cache's completeness test: a retained term is complete exactly
+when it is one of the accepted program's AF arguments. -/
+def checkedDone {canon : String → String} {Gamma : LeafId → Option Atom}
+    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (accepted : Lara.Unit.CheckedUnit canon Gamma CertOk)
+    (w : SupportTerm) : Bool :=
+  decide (w ∈ accepted.program.args)
+
+/-- `K` for an accepted unit: the declared indices of its AF nodes, read off
+its cache. `checkedCarrier_eq` unfolds it. -/
+abbrev checkedCarrier {canon : String → String} {Gamma : LeafId → Option Atom}
+    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (accepted : Lara.Unit.CheckedUnit canon Gamma CertOk)
+    (keep : (String × SupportTerm) → Bool)
+    (declared : List (String × SupportTerm)) : List Nat :=
+  retainedIndices (keepComplete keep (checkedDone accepted)) declared
+
+/-- `D` for an accepted unit: the production reference carrier under the full
+declared context `GammaDecl`. `referenceCarrier_eq` unfolds it. -/
+abbrev referenceCarrier {canon : String → String} {Gamma : LeafId → Option Atom}
+    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (accepted : Lara.Unit.CheckedUnit canon Gamma CertOk)
+    (keep : (String × SupportTerm) → Bool) (Pi : RuleId → Option Rule)
+    (GammaDecl : LeafId → Option Atom) (reg : BackendRegistry canon)
+    (declared : List (String × SupportTerm)) : List Nat :=
+  retainedIndices (referenceLive keep (checkedDone accepted) Pi GammaDecl reg)
+    declared
+
+theorem checkedCarrier_eq {canon : String → String}
+    {Gamma : LeafId → Option Atom}
+    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (accepted : Lara.Unit.CheckedUnit canon Gamma CertOk)
+    (keep : (String × SupportTerm) → Bool)
+    (declared : List (String × SupportTerm)) :
+    checkedCarrier accepted keep declared =
+      retainedIndices (keepComplete keep (checkedDone accepted)) declared := rfl
+
+theorem referenceCarrier_eq {canon : String → String}
+    {Gamma : LeafId → Option Atom}
+    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (accepted : Lara.Unit.CheckedUnit canon Gamma CertOk)
+    (keep : (String × SupportTerm) → Bool) (Pi : RuleId → Option Rule)
+    (GammaDecl : LeafId → Option Atom) (reg : BackendRegistry canon)
+    (declared : List (String × SupportTerm)) :
+    referenceCarrier accepted keep Pi GammaDecl reg declared =
+      retainedIndices (referenceLive keep (checkedDone accepted) Pi GammaDecl reg)
+        declared := rfl
 
 /-- The structural subargument-closure edge rule (`coveredB`, the same
 relation `edgeB` compiles) over declared argument terms. It needs no leaf
@@ -68,22 +165,26 @@ def edgeIn (declared : List (String × SupportTerm)) (atts : List Attack)
   | some s, some t => coveredB atts s.2 t.2
   | _, _ => false
 
-/-- The declared (pre-quarantine) framework — `Blocking`'s `G`. -/
-def declaredAF (declared : List (String × SupportTerm)) (declAtts : List Attack) :
-    Grounded.AF :=
-  { args := List.range declared.length, attack := edgeIn declared declAtts }
+/-- The declared (pre-quarantine) reference framework over carrier `D` —
+`Blocking`'s `G`. The carrier is passed as a list so the driver classifies
+each declaration once. -/
+def declaredAF (declared : List (String × SupportTerm)) (declAtts : List Attack)
+    (reference : List Nat) : Grounded.AF :=
+  { args := reference, attack := edgeIn declared declAtts }
 
-/-- The checked (post-quarantine) framework in declared index space —
-`Blocking`'s `F`. -/
+/-- The checked (post-quarantine) framework in declared index space over
+carrier `K` — `Blocking`'s `F`. -/
 def checkedAF (declared : List (String × SupportTerm)) (keptAtts : List Attack)
     (retained : List Nat) : Grounded.AF :=
   { args := retained, attack := edgeIn declared keptAtts }
 
-/-- The material the prune touched: every removed argument, plus every retained
-argument that lost an incoming edge. -/
+/-- The material the prune touched: every removed reference node
+(`D \ K`), plus every retained complete node that lost an incoming edge from
+another one. -/
 def blockedSeed (declared : List (String × SupportTerm))
-    (declAtts keptAtts : List Attack) (retained : List Nat) : List Nat :=
-  ((List.range declared.length).filter (fun i => ! Grounded.memB i retained)) ++
+    (declAtts keptAtts : List Attack) (reference retained : List Nat) :
+    List Nat :=
+  (reference.filter (fun i => ! Grounded.memB i retained)) ++
   (retained.filter (fun j =>
     retained.any (fun i => edgeIn declared declAtts i j && ! edgeIn declared keptAtts i j)))
 
@@ -91,7 +192,9 @@ def blockedSeed (declared : List (String × SupportTerm))
 def liftSupport (retained support : List Nat) : List Nat :=
   support.filterMap (fun i => retained[i]?)
 
-/-- The production claim after lifting its compact support indices. Holes are
+/-- The production claim after lifting its compact support indices along `K`.
+With holes present `K` is not an initial segment of the declared indices, so
+this is not the identity even when nothing is quarantined. Holes are
 unchanged; `completeClaimFor` supplies `[]` in the shipped path. -/
 def liftClaim (retained : List Nat) (c : Grounded.Claim) : Grounded.Claim :=
   { support := liftSupport retained c.support, holes := c.holes }
@@ -112,17 +215,21 @@ def blockedQueriesFor (retained blocked : List Nat)
   queries.filter (fun p => supportBlocked retained blocked (support p))
 
 /-- The exact production blocked-query computation, including its no-prune
-fast path. -/
+fast path. The fast path tests raw retention: a unit whose holes are all
+retained quarantines nothing, so hole filtering alone never blocks. The
+reference carrier is computed once and shared by the seed and the closure. -/
 def blockedQueries (keep : (String × SupportTerm) → Bool)
+    (done : SupportTerm → Bool) (live : (String × SupportTerm) → Bool)
     (declared : List (String × SupportTerm))
     (declAtts keptAtts : List Attack) (support : Atom → List Nat)
     (queries : List Atom) : List Atom :=
   let kept := retainedArguments keep declared
   if declared.length == kept.length then []
   else
-    let retained := retainedIndices keep declared
-    let blocked := blockedSet (declaredAF declared declAtts)
-      (blockedSeed declared declAtts keptAtts retained)
+    let retained := retainedIndices (keepComplete keep done) declared
+    let reference := retainedIndices live declared
+    let blocked := blockedSet (declaredAF declared declAtts reference)
+      (blockedSeed declared declAtts keptAtts reference retained)
     blockedQueriesFor retained blocked support queries
 
 /-! ### Discharging the `Blocking` obligations -/
@@ -177,7 +284,7 @@ theorem selectAligned_subset (keep : α → Bool) :
           · simp only [selectAligned, hkeep] at hx
             exact List.mem_cons_of_mem value (ih values x hx)
 
-/-- **Obligation 1 (`hargs`).** The retained indices are declared indices. -/
+/-- Retained indices are declared indices. -/
 theorem retainedIndices_subset {keep : (String × SupportTerm) → Bool}
     {declared : List (String × SupportTerm)} :
     ∀ i, i ∈ retainedIndices keep declared → i ∈ List.range declared.length := by
@@ -237,6 +344,88 @@ theorem retained_lookup_of_mem {keep : (String × SupportTerm) → Bool}
     (hi : i ∈ retainedIndices keep declared) :
     ∃ k : Nat, (retainedIndices keep declared)[k]? = some i :=
   (List.mem_iff_getElem? (l := retainedIndices keep declared) (a := i)).mp hi
+
+/-- Membership in `retainedIndices`: the mask selects the declaration at that
+index. -/
+theorem mem_retainedIndices_iff {keep : (String × SupportTerm) → Bool}
+    {declared : List (String × SupportTerm)} {i : Nat} :
+    i ∈ retainedIndices keep declared ↔
+      ∃ a, declared[i]? = some a ∧ keep a = true := by
+  simp only [retainedIndices, retainedView, List.mem_map, List.mem_filter]
+  constructor
+  · rintro ⟨⟨a, j⟩, ⟨hzip, hkeep⟩, rfl⟩
+    exact ⟨a, (List.mem_zipIdx_iff_getElem?).mp hzip, hkeep⟩
+  · rintro ⟨a, ha, hkeep⟩
+    exact ⟨(a, i), ⟨(List.mem_zipIdx_iff_getElem?).mpr ha, hkeep⟩, rfl⟩
+
+/-- A mask that selects more declarations selects more indices. -/
+theorem retainedIndices_mono {keep keep' : (String × SupportTerm) → Bool}
+    {declared : List (String × SupportTerm)}
+    (h : ∀ a, a ∈ declared → keep a = true → keep' a = true) :
+    ∀ i, i ∈ retainedIndices keep declared →
+      i ∈ retainedIndices keep' declared := by
+  intro i hi
+  obtain ⟨a, ha, hkeep⟩ := mem_retainedIndices_iff.mp hi
+  exact mem_retainedIndices_iff.mpr ⟨a, ha, h a (List.mem_of_getElem? ha) hkeep⟩
+
+/-- Masks that agree on the declarations select the same index list. -/
+theorem retainedIndices_congr {keep keep' : (String × SupportTerm) → Bool}
+    {declared : List (String × SupportTerm)}
+    (h : ∀ a, a ∈ declared → keep a = keep' a) :
+    retainedIndices keep declared = retainedIndices keep' declared := by
+  unfold retainedIndices retainedView
+  congr 1
+  apply List.filter_congr
+  intro entry hentry
+  apply h entry.1
+  have hget := (List.mem_zipIdx_iff_getElem? (x := entry)).mp hentry
+  exact List.mem_of_getElem? hget
+
+/-- **Filter composition for complete retention.** Retaining the complete
+declarations is retaining the raw survivors and then keeping the complete
+ones. -/
+theorem retainedArguments_keepComplete (keep : (String × SupportTerm) → Bool)
+    (done : SupportTerm → Bool) (declared : List (String × SupportTerm)) :
+    retainedArguments (keepComplete keep done) declared =
+      (retainedArguments keep declared).filter (fun a => done a.2) := by
+  rw [retainedArguments_eq_filter, retainedArguments_eq_filter,
+    List.filter_filter]
+  apply List.filter_congr
+  intro a _
+  simp [keepComplete, Bool.and_comm]
+
+/-- The term projection of complete retention filters the retained terms. -/
+theorem keepComplete_terms (keep : (String × SupportTerm) → Bool)
+    (done : SupportTerm → Bool) (declared : List (String × SupportTerm)) :
+    (retainedArguments (keepComplete keep done) declared).map (·.2) =
+      ((retainedArguments keep declared).map (·.2)).filter done := by
+  rw [retainedArguments_keepComplete, List.filter_map]
+  rfl
+
+/-- Coverage from a live source reads the same edges before and after live
+filtering. -/
+theorem coveredB_liveAttacks {live : List SupportTerm} {atts : List Attack}
+    {source target : SupportTerm} (hsource : source ∈ live) :
+    coveredB (Check.liveAttacks live atts) source target =
+      coveredB atts source target := by
+  unfold coveredB Check.liveAttacks
+  rw [List.any_filter]
+  congr 1
+  funext k
+  by_cases hk : k.source = source
+  · simp [hk, hsource]
+  · simp [hk]
+
+/-- `K ⊆ D` for the production mask, by construction: a retained complete
+declaration is a reference node because the mask reads the same cache. -/
+theorem referenceLive_of_keepComplete {canon : String → String}
+    {keep : (String × SupportTerm) → Bool} {done : SupportTerm → Bool}
+    {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
+    {reg : BackendRegistry canon} {a : String × SupportTerm}
+    (h : keepComplete keep done a = true) :
+    referenceLive keep done Pi Gamma reg a = true := by
+  simp only [keepComplete, Bool.and_eq_true] at h
+  simp [referenceLive, h.1, h.2]
 
 /-! ### Reindexing a compact framework into declared index space -/
 
@@ -344,14 +533,17 @@ theorem statusC_justified_embed {C F : Grounded.AF} {lift : Nat → Option Nat}
     ⟨A, hAc, labelC_inn_embed he hA hin⟩
 
 /-- The production compact AF embeds into the proved declared-index checked AF.
-The hypotheses are exactly the successful checker's two list equalities: it
-checked the retained argument projection and the filtered declared attacks. -/
+The hypotheses are exactly the successful checker's two list equalities: its AF
+arguments are the projection of the declarations `keep` selects (production
+passes `keepComplete`), and its compiled attacks are the live filter of the
+retained declared attacks. Live filtering loses no edge between AF arguments
+(`coveredB_liveAttacks`), so `F` may use the retained attacks themselves. -/
 theorem compile_checkedAF_embedding
     (P : Compile.CheckedProgram canon Pi Gamma CertOk dp)
     (keep : (String × SupportTerm) → Bool)
     (declared : List (String × SupportTerm)) (keptAtts : List Attack)
     (hargs : P.args = (retainedArguments keep declared).map (·.2))
-    (hatts : P.atts = keptAtts) :
+    (hatts : P.atts = Check.liveAttacks P.args keptAtts) :
     AFEmbedding (Compile.checkedAF P)
       (checkedAF declared keptAtts (retainedIndices keep declared))
       (fun k => (retainedIndices keep declared)[k]?) := by
@@ -387,13 +579,25 @@ theorem compile_checkedAF_embedding
       rfl
     simp only [Compile.checkedAF, Compile.toAF, Compile.edgeB, checkedAF, edgeIn]
     rw [hsourceP, htargetP, hsourceDecl, htargetDecl, hatts]
+    exact coveredB_liveAttacks (List.mem_of_getElem? hsourceP)
 
-/-- **Obligation 2 (`hmissing`).** Every declared argument the prune removed is
-seeded. -/
+/-- **Obligation 1 (`hargs`).** `K ⊆ D` whenever the reference mask holds of
+every retained complete declaration. For the production mask this is
+`referenceLive_of_keepComplete`; for the specification mask it is obligation
+transport (`checked_complete_subset_notHole`). -/
+theorem complete_subset_reference {keep live : (String × SupportTerm) → Bool}
+    {done : SupportTerm → Bool} {declared : List (String × SupportTerm)}
+    (hlive : ∀ a, a ∈ declared → keepComplete keep done a = true → live a = true) :
+    ∀ i, i ∈ retainedIndices (keepComplete keep done) declared →
+      i ∈ retainedIndices live declared :=
+  retainedIndices_mono hlive
+
+/-- **Obligation 2 (`hmissing`).** Every reference node outside the checked
+carrier is seeded. -/
 theorem blockedSeed_hmissing {declared : List (String × SupportTerm)}
-    {declAtts keptAtts : List Attack} {retained : List Nat} :
-    ∀ i, i ∈ List.range declared.length → i ∉ retained →
-      i ∈ blockedSeed declared declAtts keptAtts retained := by
+    {declAtts keptAtts : List Attack} {reference retained : List Nat} :
+    ∀ i, i ∈ reference → i ∉ retained →
+      i ∈ blockedSeed declared declAtts keptAtts reference retained := by
   intro i hi hni
   refine List.mem_append_left _ (List.mem_filter.mpr ⟨hi, ?_⟩)
   have : Grounded.memB i retained = false := by
@@ -405,10 +609,10 @@ incoming edges — as an *equality*: `≥` is the seed's own test, and `≤` is
 `coveredB_mono` over the filtered attack list. -/
 theorem blockedSeed_hedge {declared : List (String × SupportTerm)}
     {declAtts keptAtts : List Attack}
-    {retained : List Nat} :
+    {reference retained : List Nat} :
     (∀ k, k ∈ keptAtts → k ∈ declAtts) →
     ∀ j, j ∈ retained →
-      j ∉ blockedSeed declared declAtts keptAtts retained →
+      j ∉ blockedSeed declared declAtts keptAtts reference retained →
       ∀ i, i ∈ retained →
         edgeIn declared keptAtts i j = edgeIn declared declAtts i j := by
   intro hsub j hj hns i hi
@@ -436,17 +640,18 @@ theorem blockedSeed_hedge {declared : List (String × SupportTerm)}
 drivers compute, together with the blocked set they compute, satisfies
 `Blocking`, so `Lara.Blocked.justified_nonpromotion` and `statusC_agree` apply
 to *these* frameworks. The three obligations are discharged above, not
-asserted. The section below transports this result through production's compact
-checked-program indices and computed complete-support sets. -/
+asserted; the only premise on the carriers is `K ⊆ D`. The section below
+transports this result through production's compact checked-program indices and
+computed complete-support sets. -/
 theorem blocking_of_blockedSeed (declared : List (String × SupportTerm))
-    (declAtts keptAtts : List Attack) (retained : List Nat)
-    (hret : ∀ i, i ∈ retained → i ∈ List.range declared.length)
+    (declAtts keptAtts : List Attack) (reference retained : List Nat)
+    (hret : ∀ i, i ∈ retained → i ∈ reference)
     (hsub : ∀ k, k ∈ keptAtts → k ∈ declAtts) :
     Blocking
       (checkedAF declared keptAtts retained)
-      (declaredAF declared declAtts)
-      (blockedSet (declaredAF declared declAtts)
-        (blockedSeed declared declAtts keptAtts retained)) := by
+      (declaredAF declared declAtts reference)
+      (blockedSet (declaredAF declared declAtts reference)
+        (blockedSeed declared declAtts keptAtts reference retained)) := by
   exact
     blocking_of_seed
       hret
@@ -496,15 +701,17 @@ theorem supportBlocked_false_of_not_mem {retained blocked : List Nat}
 predicate whenever quarantine actually removed an argument (the non-fast-path
 branch). -/
 theorem supportBlocked_false_of_not_mem_blockedQueries
-    {keep : (String × SupportTerm) → Bool}
+    {keep live : (String × SupportTerm) → Bool} {done : SupportTerm → Bool}
     {declared : List (String × SupportTerm)} {declAtts keptAtts : List Attack}
     {support : Atom → List Nat} {queries : List Atom} {p : Atom}
     (hpruned : declared.length ≠ (retainedArguments keep declared).length)
     (hp : p ∈ queries)
-    (hnot : p ∉ blockedQueries keep declared declAtts keptAtts support queries) :
-    let retained := retainedIndices keep declared
-    let blocked := blockedSet (declaredAF declared declAtts)
-      (blockedSeed declared declAtts keptAtts retained)
+    (hnot : p ∉ blockedQueries keep done live declared declAtts keptAtts
+      support queries) :
+    let retained := retainedIndices (keepComplete keep done) declared
+    let reference := retainedIndices live declared
+    let blocked := blockedSet (declaredAF declared declAtts reference)
+      (blockedSeed declared declAtts keptAtts reference retained)
     supportBlocked retained blocked (support p) = false := by
   simp only [blockedQueries, hpruned, BEq.beq, decide_false,
     Bool.false_eq_true, if_false] at hnot
@@ -527,42 +734,50 @@ theorem claimSupportFor_mem_checkedAF
 
 /-- **Production non-promotion.** For the exact compact AF and
 `completeClaimFor` that `Driver.buildAccept` labels, an unblocked `justified`
-status remains `justified` in the declared framework after all quarantined
-arguments and attacks are reinstated.
+status remains `justified` in the declared reference framework after the
+quarantined arguments and attacks are reinstated.
 
-`hargs` and `hatts` are the successful checker's exact input equalities. The
-driver now supplies the retained projections in those hypotheses by
-construction. `hunblocked` is the predicate behind absence from
+`hargs` and `hatts` are the successful checker's exact output equalities: its
+AF arguments are the complete retention of the declarations, and its compiled
+attacks are the live filter of the retained declared attacks. `hlive` is
+`K ⊆ D`. `hunblocked` is the predicate behind absence from
 `blockedQueriesFor`; `supportBlocked_false_of_not_mem` derives it from the
 public list membership test. -/
 theorem production_justified_nonpromotion
     (accepted : Lara.Unit.CheckedUnit canon Gamma CertOk)
-    (keep : (String × SupportTerm) → Bool)
+    (keep live : (String × SupportTerm) → Bool) (done : SupportTerm → Bool)
     (declared : List (String × SupportTerm)) (declAtts keptAtts : List Attack)
     (p : Atom)
     (hargs : accepted.program.args =
-      (retainedArguments keep declared).map (·.2))
-    (hatts : accepted.program.atts = keptAtts)
+      (retainedArguments (keepComplete keep done) declared).map (·.2))
+    (hatts : accepted.program.atts =
+      Check.liveAttacks accepted.program.args keptAtts)
     (hsub : ∀ k, k ∈ keptAtts → k ∈ declAtts)
+    (hlive : ∀ a, a ∈ declared → keepComplete keep done a = true →
+      live a = true)
     (hunblocked :
-      let retained := retainedIndices keep declared
-      let blocked := blockedSet (declaredAF declared declAtts)
-        (blockedSeed declared declAtts keptAtts retained)
+      let retained := retainedIndices (keepComplete keep done) declared
+      let reference := retainedIndices live declared
+      let blocked := blockedSet (declaredAF declared declAtts reference)
+        (blockedSeed declared declAtts keptAtts reference retained)
       supportBlocked retained blocked (claimSupportFor accepted p) = false)
     (hstatus : Grounded.statusC (Compile.checkedAF accepted.program)
       (completeClaimFor accepted p) = .justified) :
-    Grounded.statusC (declaredAF declared declAtts)
-      (liftClaim (retainedIndices keep declared) (completeClaimFor accepted p)) =
-        .justified := by
-  let retained := retainedIndices keep declared
+    Grounded.statusC
+      (declaredAF declared declAtts (retainedIndices live declared))
+      (liftClaim (retainedIndices (keepComplete keep done) declared)
+        (completeClaimFor accepted p)) = .justified := by
+  let retained := retainedIndices (keepComplete keep done) declared
+  let reference := retainedIndices live declared
   let F := checkedAF declared keptAtts retained
-  let G := declaredAF declared declAtts
-  let B := blockedSet G (blockedSeed declared declAtts keptAtts retained)
+  let G := declaredAF declared declAtts reference
+  let B := blockedSet G (blockedSeed declared declAtts keptAtts reference retained)
   let cC := completeClaimFor accepted p
   let cF := liftClaim retained cC
   have he : AFEmbedding (Compile.checkedAF accepted.program) F
       (fun k => retained[k]?) := by
-    exact compile_checkedAF_embedding accepted.program keep declared keptAtts hargs hatts
+    exact compile_checkedAF_embedding accepted.program _ declared keptAtts
+      hargs hatts
   have hcompact : Grounded.statusC (Compile.checkedAF accepted.program) cC =
       .justified := hstatus
   have hF : Grounded.statusC F cF = .justified := by
@@ -577,8 +792,8 @@ theorem production_justified_nonpromotion
       exact mem_liftSupport_iff.mpr ⟨a, ha, hA⟩
     · exact hcompact
   have hb : Blocking F G B := by
-    exact blocking_of_blockedSeed declared declAtts keptAtts retained
-      (fun _ hi => retainedIndices_subset _ hi) hsub
+    exact blocking_of_blockedSeed declared declAtts keptAtts reference retained
+      (complete_subset_reference hlive) hsub
   apply justified_nonpromotion (cF := cF) (cG := cF) hb
   · intro A hA
     change A ∈ liftSupport retained (claimSupportFor accepted p) at hA
@@ -592,34 +807,40 @@ theorem production_justified_nonpromotion
   · exact hF
 
 /-- Every unblocked complete-support argument has the same label in the compact
-checked framework and the declared framework.  This is the per-argument bridge
-needed by the five-valued tighten row, including its defeated-to-contested
-impossibility. -/
+checked framework and the declared reference framework. This is the
+per-argument bridge needed by the five-valued tighten row, including its
+defeated-to-contested impossibility. -/
 theorem production_unblocked_label_agree
     (accepted : Lara.Unit.CheckedUnit canon Gamma CertOk)
-    (keep : (String × SupportTerm) → Bool)
+    (keep live : (String × SupportTerm) → Bool) (done : SupportTerm → Bool)
     (declared : List (String × SupportTerm)) (declAtts keptAtts : List Attack)
     (p : Atom)
     (hargs : accepted.program.args =
-      (retainedArguments keep declared).map (·.2))
-    (hatts : accepted.program.atts = keptAtts)
+      (retainedArguments (keepComplete keep done) declared).map (·.2))
+    (hatts : accepted.program.atts =
+      Check.liveAttacks accepted.program.args keptAtts)
     (hsub : ∀ k, k ∈ keptAtts → k ∈ declAtts)
+    (hlive : ∀ a, a ∈ declared → keepComplete keep done a = true →
+      live a = true)
     (hunblocked :
-      let retained := retainedIndices keep declared
-      let blocked := blockedSet (declaredAF declared declAtts)
-        (blockedSeed declared declAtts keptAtts retained)
+      let retained := retainedIndices (keepComplete keep done) declared
+      let reference := retainedIndices live declared
+      let blocked := blockedSet (declaredAF declared declAtts reference)
+        (blockedSeed declared declAtts keptAtts reference retained)
       supportBlocked retained blocked (claimSupportFor accepted p) = false)
     {a A : Nat} (ha : a ∈ claimSupportFor accepted p)
-    (hA : (retainedIndices keep declared)[a]? = some A) :
+    (hA : (retainedIndices (keepComplete keep done) declared)[a]? = some A) :
     Grounded.labelC (Compile.checkedAF accepted.program) a =
-      Grounded.labelC (declaredAF declared declAtts) A := by
-  let retained := retainedIndices keep declared
+      Grounded.labelC
+        (declaredAF declared declAtts (retainedIndices live declared)) A := by
+  let retained := retainedIndices (keepComplete keep done) declared
+  let reference := retainedIndices live declared
   let F := checkedAF declared keptAtts retained
-  let G := declaredAF declared declAtts
-  let B := blockedSet G (blockedSeed declared declAtts keptAtts retained)
+  let G := declaredAF declared declAtts reference
+  let B := blockedSet G (blockedSeed declared declAtts keptAtts reference retained)
   have he : AFEmbedding (Compile.checkedAF accepted.program) F
       (fun k => retained[k]?) :=
-    compile_checkedAF_embedding accepted.program keep declared keptAtts
+    compile_checkedAF_embedding accepted.program _ declared keptAtts
       hargs hatts
   have haC : a ∈ (Compile.checkedAF accepted.program).args :=
     claimSupportFor_mem_checkedAF a ha
@@ -631,8 +852,8 @@ theorem production_unblocked_label_agree
     supportBlocked_false_unblocked hunblocked A hAlift
   exact (labelC_eq_of_embedding he haC hA).trans
     (Blocked.labelC_agree
-      (blocking_of_blockedSeed declared declAtts keptAtts retained
-        (fun _ hi => retainedIndices_subset _ hi) hsub)
+      (blocking_of_blockedSeed declared declAtts keptAtts reference retained
+        (complete_subset_reference hlive) hsub)
       hAF hAB)
 
 /-- Driver-facing form of `production_justified_nonpromotion`: a requested
@@ -640,30 +861,307 @@ query that is absent from the exact `blockedQueries` output supplies the
 unblocked premise automatically. -/
 theorem production_justified_nonpromotion_of_not_blocked
     (accepted : Lara.Unit.CheckedUnit canon Gamma CertOk)
-    (keep : (String × SupportTerm) → Bool)
+    (keep live : (String × SupportTerm) → Bool) (done : SupportTerm → Bool)
     (declared : List (String × SupportTerm)) (declAtts keptAtts : List Attack)
     (queries : List Atom) (p : Atom)
     (hargs : accepted.program.args =
-      (retainedArguments keep declared).map (·.2))
-    (hatts : accepted.program.atts = keptAtts)
+      (retainedArguments (keepComplete keep done) declared).map (·.2))
+    (hatts : accepted.program.atts =
+      Check.liveAttacks accepted.program.args keptAtts)
     (hsub : ∀ k, k ∈ keptAtts → k ∈ declAtts)
+    (hlive : ∀ a, a ∈ declared → keepComplete keep done a = true →
+      live a = true)
     (hpruned : declared.length ≠ (retainedArguments keep declared).length)
     (hp : p ∈ queries)
-    (hnot : p ∉ blockedQueries keep declared declAtts keptAtts
+    (hnot : p ∉ blockedQueries keep done live declared declAtts keptAtts
       (fun q => claimSupportFor accepted q) queries)
     (hstatus : Grounded.statusC (Compile.checkedAF accepted.program)
       (completeClaimFor accepted p) = .justified) :
-    Grounded.statusC (declaredAF declared declAtts)
-      (liftClaim (retainedIndices keep declared) (completeClaimFor accepted p)) =
-        .justified := by
-  apply production_justified_nonpromotion accepted keep declared declAtts keptAtts p
-      hargs hatts hsub ?_ hstatus
+    Grounded.statusC
+      (declaredAF declared declAtts (retainedIndices live declared))
+      (liftClaim (retainedIndices (keepComplete keep done) declared)
+        (completeClaimFor accepted p)) = .justified := by
+  apply production_justified_nonpromotion accepted keep live done declared
+      declAtts keptAtts p hargs hatts hsub hlive ?_ hstatus
   exact supportBlocked_false_of_not_mem_blockedQueries hpruned hp hnot
 
+/-! ### The no-prune fast path
+
+When raw retention keeps every declaration, `blockedQueries` returns `[]`
+without computing anything. The general rule agrees: with the production mask
+the reference carrier is exactly `K` and no edge is lost, so the seed is empty.
+A clean accepted unit with holes therefore reports no `evidence-blocked`;
+filtering holes out of the AF is not quarantine. -/
+
+/-- The fast path: a unit that quarantines nothing blocks no query. -/
+theorem blockedQueries_eq_nil_of_keep_all
+    {keep live : (String × SupportTerm) → Bool} {done : SupportTerm → Bool}
+    {declared : List (String × SupportTerm)} {declAtts keptAtts : List Attack}
+    {support : Atom → List Nat} {queries : List Atom}
+    (hall : ∀ a, a ∈ declared → keep a = true) :
+    blockedQueries keep done live declared declAtts keptAtts support queries =
+      [] := by
+  have hkept : retainedArguments keep declared = declared := by
+    rw [retainedArguments_eq_filter]
+    exact List.filter_eq_self.mpr hall
+  simp [blockedQueries, hkept]
+
+/-- With nothing quarantined, the production reference carrier is `K`. -/
+theorem referenceLive_indices_of_keep_all {canon : String → String}
+    {keep : (String × SupportTerm) → Bool} {done : SupportTerm → Bool}
+    {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
+    {reg : BackendRegistry canon} {declared : List (String × SupportTerm)}
+    (hall : ∀ a, a ∈ declared → keep a = true) :
+    retainedIndices (referenceLive keep done Pi Gamma reg) declared =
+      retainedIndices (keepComplete keep done) declared := by
+  apply retainedIndices_congr
+  intro a ha
+  simp [referenceLive, keepComplete, hall a ha]
+
+/-- **Hole filtering alone is not quarantine.** With nothing quarantined and
+the retained attacks equal to the declared ones, the general seed is empty, so
+the fast path loses nothing. -/
+theorem blockedSeed_eq_nil_of_keep_all {canon : String → String}
+    {keep : (String × SupportTerm) → Bool} {done : SupportTerm → Bool}
+    {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
+    {reg : BackendRegistry canon} {declared : List (String × SupportTerm)}
+    {declAtts keptAtts : List Attack}
+    (hall : ∀ a, a ∈ declared → keep a = true)
+    (hatts : keptAtts = declAtts) :
+    blockedSeed declared declAtts keptAtts
+      (retainedIndices (referenceLive keep done Pi Gamma reg) declared)
+      (retainedIndices (keepComplete keep done) declared) = [] := by
+  rw [referenceLive_indices_of_keep_all hall, hatts]
+  unfold blockedSeed
+  apply List.append_eq_nil_iff.mpr
+  constructor
+  · apply List.filter_eq_nil_iff.mpr
+    intro i hi
+    simp [Grounded.memB, hi]
+  · apply List.filter_eq_nil_iff.mpr
+    intro j _
+    simp
+
+/-- The closure of an empty seed is empty. -/
+theorem blockedSet_nil (G : Grounded.AF) : blockedSet G [] = [] := by
+  have h : ∀ k, closureIter G [] k = [] := by
+    intro k
+    induction k with
+    | zero => simp [closureIter, Grounded.memB]
+    | succ k ih => simp [closureIter, closureStep, ih, Grounded.memB]
+  exact h _
+
+/-- With nothing blocked, a support set whose indices all lift is unblocked. -/
+theorem supportBlocked_nil {retained support : List Nat}
+    (hlt : ∀ k, k ∈ support → k < retained.length) :
+    supportBlocked retained [] support = false := by
+  unfold supportBlocked
+  apply Bool.eq_false_iff.mpr
+  intro hany
+  obtain ⟨k, hk, hblocked⟩ := List.any_eq_true.mp hany
+  obtain ⟨i, hi⟩ := getElem?_some_of_lt retained k (hlt k hk)
+  rw [hi] at hblocked
+  simp at hblocked
+
+/-- **No-prune non-promotion.** When raw retention keeps everything and the
+retained attacks are the declared ones, a compact `justified` status is
+`justified` in the declared reference framework. The compact AF is an onto
+embedding into it, not equal to it: with holes present `K` skips their
+indices, so `liftClaim` is not the identity. -/
+theorem production_justified_nonpromotion_of_keep_all {canon : String → String}
+    {Gamma : LeafId → Option Atom}
+    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (accepted : Lara.Unit.CheckedUnit canon Gamma CertOk)
+    (keep : (String × SupportTerm) → Bool) (done : SupportTerm → Bool)
+    (Pi : RuleId → Option Rule) (GammaDecl : LeafId → Option Atom)
+    (reg : BackendRegistry canon)
+    (declared : List (String × SupportTerm)) (declAtts keptAtts : List Attack)
+    (p : Atom)
+    (hargs : accepted.program.args =
+      (retainedArguments (keepComplete keep done) declared).map (·.2))
+    (hatts : accepted.program.atts =
+      Check.liveAttacks accepted.program.args keptAtts)
+    (hall : ∀ a, a ∈ declared → keep a = true)
+    (hkept : keptAtts = declAtts)
+    (hstatus : Grounded.statusC (Compile.checkedAF accepted.program)
+      (completeClaimFor accepted p) = .justified) :
+    Grounded.statusC
+      (declaredAF declared declAtts
+        (retainedIndices (referenceLive keep done Pi GammaDecl reg) declared))
+      (liftClaim (retainedIndices (keepComplete keep done) declared)
+        (completeClaimFor accepted p)) = .justified := by
+  apply production_justified_nonpromotion accepted keep _ done declared
+      declAtts keptAtts p hargs hatts (fun k hk => hkept ▸ hk)
+      (fun a _ h => referenceLive_of_keepComplete h) ?_ hstatus
+  dsimp only
+  rw [blockedSeed_eq_nil_of_keep_all hall hkept, blockedSet_nil]
+  apply supportBlocked_nil
+  intro k hk
+  have hkC := claimSupportFor_mem_checkedAF (accepted := accepted) k hk
+  have hlt := List.mem_range.mp hkC
+  rw [hargs, List.length_map, retained_lengths_eq] at hlt
+  exact hlt
+
+/-! ### Checker-instantiated masks
+
+A successful `checkUnit` call fixes `done` to its cache (`checkedDone`) and the
+reference mask to `referenceLive`. On supported retained terms the checked and
+declared contexts agree leafwise, so obligations transport exactly and the
+production mask is the specification mask `notHole`. Full-declared inference
+can fail only on pruned terms, which `referenceLive` keeps as nodes. -/
+
+/-- The checker's AF arguments are the complete retention of the declarations
+under its own cache: no support inference is rerun. -/
+theorem checked_args_keepComplete {canon : String → String}
+    {Gamma : LeafId → Option Atom} {reg : BackendRegistry canon}
+    {ground : List Atom} {sigma : Lara.Sigma.Sigma}
+    {policy : Lara.Policy.Policy}
+    {accepted : Lara.Unit.CheckedUnit canon Gamma (Lara.Support.certOkOf reg)}
+    {keep : (String × SupportTerm) → Bool}
+    {declared : List (String × SupportTerm)} {atts : List Attack}
+    (hcheck : Lara.Check.Unit.checkUnit Gamma reg ground
+      ({ sigma := sigma
+       , policy := policy
+       , args := (retainedArguments keep declared).map (·.2)
+       , atts := atts } : Lara.Unit) = .ok accepted) :
+    accepted.program.args =
+      (retainedArguments (keepComplete keep (checkedDone accepted))
+        declared).map (·.2) := by
+  have hargs := (Lara.Check.Unit.checkUnit_sound hcheck).args_eq
+  rw [keepComplete_terms]
+  have hfilter :
+      ((retainedArguments keep declared).map (·.2)).filter
+          (checkedDone accepted) =
+        Check.completeArgs policy.ruleLookup Gamma reg
+          ((retainedArguments keep declared).map (·.2)) := by
+    unfold Check.completeArgs
+    apply List.filter_congr
+    intro w hw
+    simp only [checkedDone]
+    rw [hargs]
+    simp [Check.completeArgs, List.mem_filter, hw]
+  rw [hfilter]
+  exact hargs
+
+/-- The checker's compiled attacks are the live filter of the attacks it was
+given. -/
+theorem checked_atts_live {canon : String → String}
+    {Gamma : LeafId → Option Atom} {reg : BackendRegistry canon}
+    {ground : List Atom} {unit : Lara.Unit}
+    {accepted : Lara.Unit.CheckedUnit canon Gamma (Lara.Support.certOkOf reg)}
+    (hcheck : Lara.Check.Unit.checkUnit Gamma reg ground unit = .ok accepted) :
+    accepted.program.atts =
+      Check.liveAttacks accepted.program.args unit.atts :=
+  (Lara.Check.Unit.checkUnit_sound hcheck).atts_eq
+
+/-- **Obligation transport.** On every declaration the production reference
+mask equals the specification mask `notHole` under the full declared context,
+provided the checked context agrees with it on the leaves of every retained
+term. A retained term types under the checked context (`raw_support`), so its
+cached completeness is its obligation set's emptiness, which transports to the
+declared context; a quarantined term is classified by `notHole` itself. -/
+theorem referenceLive_eq_notHole {canon : String → String}
+    {Gamma : LeafId → Option Atom} {reg : BackendRegistry canon}
+    {ground : List Atom} {sigma : Lara.Sigma.Sigma}
+    {policy : Lara.Policy.Policy}
+    {accepted : Lara.Unit.CheckedUnit canon Gamma (Lara.Support.certOkOf reg)}
+    {keep : (String × SupportTerm) → Bool}
+    {declared : List (String × SupportTerm)} {atts : List Attack}
+    (GammaDecl : LeafId → Option Atom)
+    (hcheck : Lara.Check.Unit.checkUnit Gamma reg ground
+      ({ sigma := sigma
+       , policy := policy
+       , args := (retainedArguments keep declared).map (·.2)
+       , atts := atts } : Lara.Unit) = .ok accepted)
+    (hgamma : ∀ a, a ∈ declared → keep a = true →
+      ∀ l ∈ leaves a.2, Gamma l = GammaDecl l) :
+    ∀ a, a ∈ declared →
+      referenceLive keep (checkedDone accepted) policy.ruleLookup GammaDecl reg a =
+        notHole policy.ruleLookup GammaDecl reg a := by
+  intro a ha
+  cases hkeep : keep a with
+  | false => simp [referenceLive, hkeep]
+  | true =>
+      have hsound := Lara.Check.Unit.checkUnit_sound hcheck
+      have hmem : a.2 ∈ (retainedArguments keep declared).map (·.2) := by
+        rw [retainedArguments_eq_filter]
+        exact List.mem_map_of_mem (List.mem_filter.mpr ⟨ha, hkeep⟩)
+      obtain ⟨C, O, hC⟩ := hsound.raw_support a.2 hmem
+      have hdecl := hasSupport_congr_gamma_on hC (hgamma a ha hkeep)
+      have hdone : checkedDone accepted a.2 = O.isEmpty := by
+        simp only [checkedDone]
+        rw [hsound.args_eq]
+        simp only [Check.completeArgs, List.mem_filter, hmem, true_and,
+          Bool.decide_eq_true]
+        exact Check.argComplete_of_hasSupport hC
+      simp only [referenceLive, hkeep, if_true, notHole,
+        Check.argHole_of_hasSupport hdecl, hdone, Bool.not_not]
+
+/-- `K ⊆ D` for the specification carrier: every retained complete declaration
+is not a typed hole under the full declared context. -/
+theorem checked_complete_subset_notHole {canon : String → String}
+    {Gamma : LeafId → Option Atom} {reg : BackendRegistry canon}
+    {ground : List Atom} {sigma : Lara.Sigma.Sigma}
+    {policy : Lara.Policy.Policy}
+    {accepted : Lara.Unit.CheckedUnit canon Gamma (Lara.Support.certOkOf reg)}
+    {keep : (String × SupportTerm) → Bool}
+    {declared : List (String × SupportTerm)} {atts : List Attack}
+    (GammaDecl : LeafId → Option Atom)
+    (hcheck : Lara.Check.Unit.checkUnit Gamma reg ground
+      ({ sigma := sigma
+       , policy := policy
+       , args := (retainedArguments keep declared).map (·.2)
+       , atts := atts } : Lara.Unit) = .ok accepted)
+    (hgamma : ∀ a, a ∈ declared → keep a = true →
+      ∀ l ∈ leaves a.2, Gamma l = GammaDecl l) :
+    ∀ i, i ∈ checkedCarrier accepted keep declared →
+      i ∈ retainedIndices (notHole policy.ruleLookup GammaDecl reg) declared :=
+  complete_subset_reference (fun a ha h =>
+    (referenceLive_eq_notHole GammaDecl hcheck hgamma a ha) ▸
+      referenceLive_of_keepComplete h)
+
+/-- The executable reference carrier is the specification carrier. -/
+theorem referenceLive_indices_eq_notHole {canon : String → String}
+    {Gamma : LeafId → Option Atom} {reg : BackendRegistry canon}
+    {ground : List Atom} {sigma : Lara.Sigma.Sigma}
+    {policy : Lara.Policy.Policy}
+    {accepted : Lara.Unit.CheckedUnit canon Gamma (Lara.Support.certOkOf reg)}
+    {keep : (String × SupportTerm) → Bool}
+    {declared : List (String × SupportTerm)} {atts : List Attack}
+    (GammaDecl : LeafId → Option Atom)
+    (hcheck : Lara.Check.Unit.checkUnit Gamma reg ground
+      ({ sigma := sigma
+       , policy := policy
+       , args := (retainedArguments keep declared).map (·.2)
+       , atts := atts } : Lara.Unit) = .ok accepted)
+    (hgamma : ∀ a, a ∈ declared → keep a = true →
+      ∀ l ∈ leaves a.2, Gamma l = GammaDecl l) :
+    referenceCarrier accepted keep policy.ruleLookup GammaDecl reg declared =
+      retainedIndices (notHole policy.ruleLookup GammaDecl reg) declared :=
+  retainedIndices_congr (referenceLive_eq_notHole GammaDecl hcheck hgamma)
+
+/-- **Reference nodes are the complete declarations, under full typing.** If
+every declaration types under the declared context, no reference node is
+unclassified, and `D` is exactly the complete declared arguments. Without the
+typing premise this fails: an ill-typed quarantined term is a node of `D` but
+not complete. -/
+theorem notHole_indices_eq_complete_of_typed {canon : String → String}
+    {Pi : RuleId → Option Rule} {Gamma : LeafId → Option Atom}
+    {reg : BackendRegistry canon} {declared : List (String × SupportTerm)}
+    (htyped : ∀ a, a ∈ declared →
+      ∃ C O, HasSupport canon Pi Gamma (certOkOf reg) a.2 C O) :
+    retainedIndices (notHole Pi Gamma reg) declared =
+      retainedIndices (fun a => Check.argComplete Pi Gamma reg a.2) declared := by
+  apply retainedIndices_congr
+  intro a ha
+  obtain ⟨C, O, hC⟩ := htyped a ha
+  simp [notHole, Check.argHole_of_hasSupport hC,
+    Check.argComplete_of_hasSupport hC]
+
 /-- Fully checker-instantiated shipped-path theorem. A successful `checkUnit`
-call supplies `hargs` and `hatts`; callers cannot assert a parallel compact AF.
-This is the proof boundary used by the driver branch after it constructs the
-retained arguments and filtered declared attacks. -/
+call supplies `hargs` and `hatts` and fixes the masks to its cache; callers
+cannot assert a parallel compact AF. `K ⊆ D` holds by construction of
+`referenceLive`, so this form needs no context premise. -/
 theorem checked_production_justified_nonpromotion_of_not_blocked
     {RawAttack : Type}
     (reg : Lara.Support.BackendRegistry canon)
@@ -673,7 +1171,7 @@ theorem checked_production_justified_nonpromotion_of_not_blocked
     (declared : List (String × SupportTerm)) (declAtts : List Attack)
     (keepAttack : RawAttack → Bool) (rawAtts : List RawAttack)
     (queries : List Atom) (p : Atom) (sigma : Lara.Sigma.Sigma)
-    (ground : List Atom)
+    (ground : List Atom) (GammaDecl : LeafId → Option Atom)
     (hcheck : Lara.Check.Unit.checkUnit Gamma reg ground
       ({ sigma := sigma
        , policy := policy
@@ -682,21 +1180,64 @@ theorem checked_production_justified_nonpromotion_of_not_blocked
         .ok accepted)
     (hpruned : declared.length ≠ (retainedArguments keep declared).length)
     (hp : p ∈ queries)
-    (hnot : p ∉ blockedQueries keep declared declAtts
-      (selectAligned keepAttack rawAtts declAtts)
+    (hnot : p ∉ blockedQueries keep (checkedDone accepted)
+      (referenceLive keep (checkedDone accepted) policy.ruleLookup GammaDecl reg)
+      declared declAtts (selectAligned keepAttack rawAtts declAtts)
       (fun q => claimSupportFor accepted q) queries)
     (hstatus : Grounded.statusC (Compile.checkedAF accepted.program)
       (completeClaimFor accepted p) = .justified) :
-    Grounded.statusC (declaredAF declared declAtts)
-      (liftClaim (retainedIndices keep declared) (completeClaimFor accepted p)) =
-        .justified := by
-  have hsound := Lara.Check.Unit.checkUnit_sound hcheck
-  have hargs := hsound.args_eq
-  have hatts := hsound.atts_eq
-  exact production_justified_nonpromotion_of_not_blocked
-    accepted keep declared declAtts (selectAligned keepAttack rawAtts declAtts)
-      queries p hargs hatts
+    Grounded.statusC
+      (declaredAF declared declAtts
+        (referenceCarrier accepted keep policy.ruleLookup GammaDecl reg declared))
+      (liftClaim (checkedCarrier accepted keep declared)
+        (completeClaimFor accepted p)) = .justified :=
+  production_justified_nonpromotion_of_not_blocked
+    accepted keep _ (checkedDone accepted) declared declAtts
+      (selectAligned keepAttack rawAtts declAtts) queries p
+      (checked_args_keepComplete hcheck) (checked_atts_live hcheck)
       (fun k hk => selectAligned_subset keepAttack rawAtts declAtts k hk)
+      (fun _ _ h => referenceLive_of_keepComplete h)
       hpruned hp hnot hstatus
+
+/-- The shipped-path theorem with the specification reference carrier: a
+published `justified` query is `justified` in the framework whose nodes are
+the declarations that are complete or unclassified under the full declared
+context. `hgamma` is the leafwise agreement admission establishes for retained
+terms. -/
+theorem checked_production_justified_nonpromotion_notHole
+    {RawAttack : Type}
+    (reg : Lara.Support.BackendRegistry canon)
+    (policy : Lara.Policy.Policy)
+    (accepted : Lara.Unit.CheckedUnit canon Gamma (Lara.Support.certOkOf reg))
+    (keep : (String × SupportTerm) → Bool)
+    (declared : List (String × SupportTerm)) (declAtts : List Attack)
+    (keepAttack : RawAttack → Bool) (rawAtts : List RawAttack)
+    (queries : List Atom) (p : Atom) (sigma : Lara.Sigma.Sigma)
+    (ground : List Atom) (GammaDecl : LeafId → Option Atom)
+    (hcheck : Lara.Check.Unit.checkUnit Gamma reg ground
+      ({ sigma := sigma
+       , policy := policy
+       , args := (retainedArguments keep declared).map (·.2)
+       , atts := selectAligned keepAttack rawAtts declAtts } : Lara.Unit) =
+        .ok accepted)
+    (hgamma : ∀ a, a ∈ declared → keep a = true →
+      ∀ l ∈ leaves a.2, Gamma l = GammaDecl l)
+    (hpruned : declared.length ≠ (retainedArguments keep declared).length)
+    (hp : p ∈ queries)
+    (hnot : p ∉ blockedQueries keep (checkedDone accepted)
+      (referenceLive keep (checkedDone accepted) policy.ruleLookup GammaDecl reg)
+      declared declAtts (selectAligned keepAttack rawAtts declAtts)
+      (fun q => claimSupportFor accepted q) queries)
+    (hstatus : Grounded.statusC (Compile.checkedAF accepted.program)
+      (completeClaimFor accepted p) = .justified) :
+    Grounded.statusC
+      (declaredAF declared declAtts
+        (retainedIndices (notHole policy.ruleLookup GammaDecl reg) declared))
+      (liftClaim (checkedCarrier accepted keep declared)
+        (completeClaimFor accepted p)) = .justified := by
+  rw [← referenceLive_indices_eq_notHole GammaDecl hcheck hgamma]
+  exact checked_production_justified_nonpromotion_of_not_blocked reg policy
+    accepted keep declared declAtts keepAttack rawAtts queries p sigma ground
+    GammaDecl hcheck hpruned hp hnot hstatus
 
 end Lara.BlockedProgram

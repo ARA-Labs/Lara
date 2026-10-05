@@ -98,7 +98,10 @@
 --     non-promotion result plus same-support status preservation — Lara.Blocked;
 --     a declared-index framework pair and the drivers' seed discharge the three
 --     abstract Blocking obligations — Lara.BlockedProgram. The reindexing and
---     support bridge to the compact production AF closes the loop.
+--     support bridge to the compact production AF closes the loop. With
+--     located holes the reference carrier excludes typed holes and keeps
+--     unclassified quarantined terms; its kernel-checked acceptance cases are
+--     Lara.Examples.EvidenceBlocked.
 --   * the `comparison` surface form's direction-of-goodness contract
 --     (lara-syntax@0.3 §1.2 / grammar Appendix B.3): the generated `ord@1` goal
 --     holds exactly when "ours is better than base" under the measurand's
@@ -384,6 +387,7 @@ import Lara.Complexity.Reduction
 import Lara.Complexity
 import Lara.Examples
 import Lara.Examples.AttackCompleteness
+import Lara.Examples.EvidenceBlocked
 import Lara.Examples.PolicyAcceptance
 import Lara.Examples.GroundedConsistency
 import Lara.Examples.CompilerInvariants
