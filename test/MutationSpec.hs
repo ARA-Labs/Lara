@@ -96,7 +96,8 @@ import Lara.Sigma (declarePred)
 import Lara.Strict (SExpr (..))
 import qualified Lara.Strict.RA as RA
 import Lara.Wire
-  ( Outcome (..)
+  ( HoleRow (..)
+  , Outcome (..)
   , PublicStatus (..)
   , Verdict (..)
   , WireError (..)
@@ -180,8 +181,9 @@ actualOutcome bytes = case decodeCheckInputFile bytes of
     Reject other -> "reject-" ++ show other
     -- An @evidence-blocked@ query has no four-state public status — spec §4.3 —
     -- so the accept is its own manifest class.
-    Accept labels _ statuses
+    Accept labels _ statuses holes
       | any (not . isPublished . snd) statuses -> expectedText ExpectEvidenceBlocked
+      | not (null holes) -> expectedText ExpectLocatedHole
       | not (null labels)
           && all ((== LUndec) . snd) labels
           && not (null statuses)
@@ -264,8 +266,8 @@ prop_seededReproducibility = once $ ioProperty $ do
           (mutantBytes m === committed)
 
 -- | The rejection-class half of the T1 exit criterion, measured from the
--- manifest: every executable rejection class, the structural obligation-gate
--- reject (@reject-IncompleteArgument@, M5 T6), the codec negatives, and the
+-- manifest: every executable rejection class, the located-hole accept
+-- (@accept-located-hole@, M5 T6), the codec negatives, and the
 -- cycle family are witnessed. The status\/attack-kind half of the criterion
 -- needs T2 corpus units and is not asserted here.
 -- | The family vocabulary is well formed, independently of what the committed
@@ -305,10 +307,10 @@ prop_mutationCoverage = once $ ioProperty $ do
         ExpectCodecReject
           : ExpectAllContested
           : ExpectEvidenceBlocked
-          -- The obligation-gate witness (M5 T6): `hole-obligation` is the one
-          -- operator specified to `reject-IncompleteArgument`, so requiring the
+          -- The located-gap witness (M5 T6): `hole-obligation` is the one
+          -- operator specified to `accept-located-hole`, so requiring the
           -- outcome here requires the operator to produce mutants of its class.
-          : ExpectIncompleteArgument
+          : ExpectLocatedHole
           -- The attack-completeness witness, the same way:
           -- `drop-covering-attack` is the one operator specified to
           -- `reject-MissingConflict`.
@@ -416,7 +418,7 @@ prop_expectedLocationColumn = once $ ioProperty $ do
   where
     wellFormed row = case rowExpected row of
       ExpectClass _ -> sited row
-      ExpectIncompleteArgument -> sited row -- single-seeded-site reject too
+      ExpectLocatedHole -> sited row -- seeded at the argument that becomes a hole
       ExpectMissingConflict -> sited row -- located at the uncovered pair
       _ -> rowSite row == "-"
     sited row = rowSite row /= "-" && roundTrips (rowSite row)
@@ -502,23 +504,32 @@ prop_siteMatchesChecker = once $ ioProperty $ do
           counterexample ("mutated unit failed to rebuild: " ++ show err) False
         Right mutated ->
           let (verdict, located) = runCheckLocated mutated
+              -- A rejection is located by the checker's constituent; a
+              -- located hole by its verdict row's original argument index.
+              reported = case (verdictOutcome verdict, located) of
+                (_, Just lr) -> Just (lrConstituent lr)
+                (Accept{verdictHoles = hole : _}, Nothing) -> Just (CArgument (hrIndex hole))
+                _ -> Nothing
            in conjoin
                 [ counterexample ("outcome was " ++ show (verdictOutcome verdict)) $
-                    case specifiedRejection expected of
-                      Just rej -> verdictOutcome verdict === Reject rej
-                      Nothing ->
-                        counterexample "site specified a non-rejection outcome" False
-                , counterexample ("checker located " ++ show (fmap lrConstituent located)) $
+                    case expected of
+                      ExpectLocatedHole -> case verdictOutcome verdict of
+                        Accept{verdictHoles = [_]} -> property True
+                        _ -> counterexample "expected an accept with exactly one hole" False
+                      _ -> case specifiedRejection expected of
+                        Just rej -> verdictOutcome verdict === Reject rej
+                        Nothing ->
+                          counterexample "site specified an unsited outcome" False
+                , counterexample ("checker located " ++ show reported) $
                     case predicted of
                       [] -> counterexample "site published an empty ground-truth list" False
-                      primary : _ -> fmap lrConstituent located === Just primary
+                      primary : _ -> reported === Just primary
                 ]
 
-    -- Every site enumerator specifies a rejection; the accept, cycle, and
-    -- codec families are constructions, not sites.
+    -- Every site enumerator specifies a rejection or a located hole; the
+    -- accept, cycle, and codec families are constructions, not sites.
     specifiedRejection e = case e of
       ExpectClass c -> Just (RejectClass c)
-      ExpectIncompleteArgument -> Just IncompleteArgument
       ExpectMissingConflict -> Just MissingConflict
       _ -> Nothing
 
@@ -597,7 +608,9 @@ atIx xs i
 -- one. This property states the mapping itself: for each site, the declared
 -- index the rewrite edited is exactly the one 'Lara.Blocked.retainedIndices'
 -- (or 'Lara.Blocked.retainedAttackIndices') pairs with the published checked
--- index. A transposition fails it as soon as the two spaces differ, which
+-- index. The one exception is a located-hole site, which publishes the
+-- declared index itself, because a verdict's hole rows are reported in that
+-- space (spec §4.4); there the edited index must equal the published one. A transposition fails it as soon as the two spaces differ, which
 -- 'quarantineSkewed' arranges for every base.
 --
 -- The second half is the anti-vacuity gate, the sibling of
@@ -618,7 +631,7 @@ prop_siteDirectionSkewed = once $ ioProperty $ do
           ++ [("quarantining-conflict-fixture", quarantiningConflictBase)]
       skewed = [(b ++ "+skew", quarantineSkewed u) | (b, u) <- bases]
       allSites =
-        [ (base, siteOp op, u, predicted, mutate)
+        [ (base, siteOp op, u, (expected, predicted), mutate)
         | (base, u) <- skewed ++ bases
         , isSkewed u
         , op <- siteOps
@@ -629,7 +642,7 @@ prop_siteDirectionSkewed = once $ ioProperty $ do
         -- which cannot apply here anyway: @retract-rule@ edits the policy (no
         -- indexed material moves), and the composites edit two constituents.
         , opFamily (siteOp op) /= FamLocalization
-        , (_, predicted, mutate) <- publishedSites op u
+        , (expected, predicted, mutate) <- publishedSites op u
         ]
       -- The sole-edit direction argument pairs ONE published index with ONE
       -- edited constituent, so the per-site check runs on singleton-published
@@ -637,20 +650,20 @@ prop_siteDirectionSkewed = once $ ioProperty $ do
       -- an undeferred composite-publishing operator cannot vanish from the
       -- anti-vacuity gate — it fails it until it carries an off-diagonal
       -- singleton or a gate of its own.
-      sites = [(base, op, u, c, mutate) | (base, op, u, [c], mutate) <- allSites]
-      indexed = [s | s@(_, _, _, c, _) <- sites, isIndexed c]
+      sites = [(base, op, u, (e, c), mutate) | (base, op, u, (e, [c]), mutate) <- allSites]
+      indexed = [s | s@(_, _, _, (_, c), _) <- sites, isIndexed c]
       isIndexed c = case c of
         CArgument _ -> True
         CAttack _ -> True
         _ -> False
-      offDiagonal (_, _, u, c, _) = case c of
+      offDiagonal (_, _, u, (_, c), _) = case c of
         CArgument ci -> retainedIndices (prune u) `atIx` ci /= Just ci
         CAttack ci -> retainedAttackIndices (prune u) `atIx` ci /= Just ci
         _ -> False
       opsWithIndex =
         [ op
         | op <- siteOps
-        , any (\(_, o, _, cs, _) -> o == siteOp op && any isIndexed cs) allSites
+        , any (\(_, o, _, (_, cs), _) -> o == siteOp op && any isIndexed cs) allSites
         ]
   pure $
     conjoin
@@ -665,8 +678,8 @@ prop_siteDirectionSkewed = once $ ioProperty $ do
         ]
           ++ [ counterexample
                  (base ++ "/" ++ opName op ++ ": published " ++ show predicted)
-                 (directionHolds u predicted mutate)
-             | (base, op, u, predicted, mutate) <- indexed
+                 (directionHolds u expected predicted mutate)
+             | (base, op, u, (expected, predicted), mutate) <- indexed
              ]
       )
   where
@@ -674,17 +687,22 @@ prop_siteDirectionSkewed = once $ ioProperty $ do
       bytes <- readFile ("examples/" ++ base ++ "/example.core.sexp")
       pure (base, either (const Nothing) Just (decodeCheckInputFile bytes))
 
-    directionHolds u predicted mutate =
+    directionHolds u expected predicted mutate =
       let u' = mutate u
        in case predicted of
             CArgument ci ->
               case soleEdit (unitArgs u) (unitArgs u') of
                 Nothing ->
                   counterexample "rewrite did not edit exactly one declared argument" False
-                Just di ->
-                  counterexample
-                    ("rewrite edited declared argument " ++ show di)
-                    (retainedIndices (prune u) `atIx` ci === Just di)
+                Just di
+                  | expected == ExpectLocatedHole ->
+                      counterexample
+                        ("hole site: rewrite edited declared argument " ++ show di)
+                        (ci === di)
+                  | otherwise ->
+                      counterexample
+                        ("rewrite edited declared argument " ++ show di)
+                        (retainedIndices (prune u) `atIx` ci === Just di)
             CAttack ci ->
               case soleEdit (unitAttacks u) (unitAttacks u') of
                 Nothing ->
@@ -1144,7 +1162,7 @@ prop_corpusBudget = once $ ioProperty $ do
 primaryStatus :: String -> Maybe Status
 primaryStatus bytes = case decodeCheckInputFile bytes of
   Right input -> case verdictOutcome (runCheck input) of
-    Accept _ _ [(_, Published st)] -> Just st
+    Accept _ _ [(_, Published st)] _ -> Just st
     _ -> Nothing
   Left _ -> Nothing
 

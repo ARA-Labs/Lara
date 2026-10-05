@@ -51,7 +51,8 @@ import System.Exit (exitFailure)
 import System.FilePath ((</>))
 import System.IO (hPutStrLn, stderr)
 
-import Lara.AST (Label (..), Rejection (..), Status (..))
+import Lara.AST (Label (..), Rejection (..), Status (..), Unit (..))
+import Lara.Diagnostics (Constituent (..), seededPrimary)
 import Lara.Driver (runCheck)
 import Lara.Mutate
   ( Expected (..)
@@ -74,9 +75,10 @@ import Lara.Mutate.Suite
   , corpusSweepReport
   , mutantsForBase
   )
-import Lara.Replay (CheckInput)
+import Lara.Replay (CheckInput, inputUnit)
 import Lara.Wire
-  ( Outcome (..)
+  ( HoleRow (..)
+  , Outcome (..)
   , PublicStatus (..)
   , Verdict (..)
   , WireError (..)
@@ -322,11 +324,24 @@ verify m = case mutantExpected m of
     case verdictOutcome verdict of
       Reject (RejectClass c') | c' == c -> pure ()
       outcome -> bad ("expected reject " ++ show c ++ ", got " ++ describe outcome)
-  ExpectIncompleteArgument -> withDecoded $ \verdict ->
-    case verdictOutcome verdict of
-      Reject IncompleteArgument -> pure ()
-      outcome ->
-        bad ("expected reject " ++ show IncompleteArgument ++ ", got " ++ describe outcome)
+  -- The hole's identity and obligations, not just its presence: exactly one
+  -- hole, at the seeded declaration index, named by that declaration's id,
+  -- with exactly one root obligation (the one mandatory discharge the
+  -- operator swapped for a declared hole; the base argument was complete).
+  ExpectLocatedHole -> withInputVerdict $ \input verdict ->
+    case (verdictOutcome verdict, seededPrimary <$> mutantSites m) of
+      (Accept{verdictHoles = [HoleRow i aid [_] _]}, Just (CArgument i'))
+        | i == i'
+        , Just (aid', _) <- lookup i (zip [0 ..] (unitArgs (inputUnit input)))
+        , aid == aid' ->
+            pure ()
+      (outcome, site) ->
+        bad
+          ( "expected one located hole with one obligation at "
+              ++ show site
+              ++ ", got "
+              ++ describe outcome
+          )
   ExpectMissingConflict -> withDecoded $ \verdict ->
     case verdictOutcome verdict of
       Reject MissingConflict -> pure ()
@@ -334,7 +349,7 @@ verify m = case mutantExpected m of
         bad ("expected reject " ++ show MissingConflict ++ ", got " ++ describe outcome)
   ExpectAllContested -> withDecoded $ \verdict ->
     case verdictOutcome verdict of
-      Accept labels _ statuses
+      Accept labels _ statuses _
         | all (isPublished . snd) statuses
             && not (null labels)
             && all ((== LUndec) . snd) labels
@@ -369,8 +384,8 @@ verify m = case mutantExpected m of
       Right input -> k input (runCheck input)
     describe outcome = case outcome of
       Reject r -> "reject " ++ show r
-      Accept labels _ statuses ->
-        "accept labels=" ++ show labels ++ " statuses=" ++ show statuses
+      Accept labels _ statuses holes ->
+        "accept labels=" ++ show labels ++ " statuses=" ++ show statuses ++ " holes=" ++ show holes
     bad why =
       fail
         ( "mutant "

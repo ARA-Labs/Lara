@@ -2,14 +2,18 @@
 -- ablation pass of "Lara.Measure" over both manifests (no subprocess, no
 -- timing).
 --
--- The three deterministic ablations ('Lara.Check.noCQConfig',
--- 'Lara.Check.noTypedConfig', 'Lara.Check.noConflictScanConfig') only ever
--- REMOVE rejections, so @accept(full) ⊆ accept(ablation)@ holds by
--- construction; this spec pins the strict converse expectations: each ablation
--- flips exactly its partition buckets ('ablationBucket') reject→accept and
--- leaves every other row unchanged (surgical), codec rows are unchanged by
--- definition, the 'AblationReport' aggregate matches the manifest partition,
--- and the @ablation.{json,tsv}@ renderers produce the declared shape.
+-- Two of the three deterministic ablations ('Lara.Check.noTypedConfig',
+-- 'Lara.Check.noConflictScanConfig') only ever REMOVE rejections, so
+-- @accept(full) ⊆ accept(ablation)@ holds for them by construction. The third,
+-- 'Lara.Check.noCQConfig', is different in kind: it promotes typed holes to AF
+-- nodes ('Lara.Check.PromoteTypedHoles'), so it changes accepted verdicts and
+-- is identity exactly on hole-free units. This spec pins the strict
+-- expectations: each rejection-relaxing ablation flips exactly its partition
+-- buckets ('ablationBucket') reject→accept, @no-cq@ changes exactly the
+-- located-hole rows while both runs accept, every other row is unchanged
+-- (surgical), codec rows are unchanged by definition, the 'AblationReport'
+-- aggregate matches the manifest partition, and the @ablation.{json,tsv}@
+-- renderers produce the declared shape.
 module AblationSpec (ablationSpecProps) where
 
 import qualified Data.Aeson as Aeson
@@ -21,7 +25,7 @@ import Test.QuickCheck
 
 import Lara.AST hiding (Reject)
 import SigmaFixture (sigmaOf)
-import Lara.Check (CheckConfig (..), fullConfig, noCQConfig, noConflictScanConfig, noTypedConfig)
+import Lara.Check (CheckConfig (..), NodeCompleteness (..), fullConfig, noCQConfig, noConflictScanConfig, noTypedConfig)
 import Lara.Diagnostics (LocatedRejection (..))
 import Lara.Driver (runCheckLocated, runCheckLocatedWith)
 import Lara.Measure
@@ -81,28 +85,26 @@ prop_fullPathGuard = once $ ioProperty $ do
               (v2, l2) = runCheckLocated input
            in printSExpr (encodeVerdict v1) === printSExpr (encodeVerdict v2) .&&. l1 === l2
 
--- | Every 'CheckConfig' inhabitant, not just the three named baselines in
--- 'ablationConfigs'. 'Lara.Check.CheckConfig' documents the inclusion
--- @accept(fullConfig) ⊆ accept(cfg)@ for /every/ @cfg@, so the property that
--- enforces it has to quantify over all 8 states — the named list is the
--- reporting vocabulary, and enumerating only it left 5 states unenforced
--- (including @ccTypedAttacks=False, ccConflictScan=True@, first reachable once
--- the scan was split out of the typed-attack bundle). Three flags, no
--- fixtures: the manifest inputs already discovered carry the whole argument.
+-- | Every rejection-relaxing 'CheckConfig' inhabitant, not just the named
+-- baselines in 'ablationConfigs'. 'Lara.Check.CheckConfig' documents the
+-- inclusion @accept(fullConfig) ⊆ accept(cfg)@ for every setting of its two
+-- rejection-relaxing flags, so the property that enforces it quantifies over
+-- all 4 states — enumerating only the named list once left states unenforced
+-- (including @ccTypedAttacks=False, ccConflictScan=True@). Node completeness
+-- stays 'CompleteNodesOnly' here: 'PromoteTypedHoles' changes the graph and is
+-- pinned separately ('prop_promotionIdentityWithoutHoles').
 allConfigs :: [(String, CheckConfig)]
 allConfigs =
-  [ (name, CheckConfig{ccObligationGate = g, ccTypedAttacks = t, ccConflictScan = s})
-  | g <- [True, False]
-  , t <- [True, False]
+  [ (name, CheckConfig{ccNodeCompleteness = CompleteNodesOnly, ccTypedAttacks = t, ccConflictScan = s})
+  | t <- [True, False]
   , s <- [True, False]
-  , let name = "gate=" ++ show g ++ ",typed=" ++ show t ++ ",scan=" ++ show s
+  , let name = "typed=" ++ show t ++ ",scan=" ++ show s
   ]
 
 -- | Accept-set monotonicity, strict form: every input the full system accepts
--- is accepted by each 'CheckConfig' with the byte-identical verdict (the config
--- only removes rejection arms, so on full-accepts the paths coincide).
--- Quantifies over all 8 inhabitants via 'allConfigs', which is exactly the
--- inclusion 'Lara.Check.CheckConfig' claims.
+-- is accepted by each rejection-relaxing 'CheckConfig' with the byte-identical
+-- verdict (the config only removes rejection arms, so on full-accepts the
+-- paths coincide). Quantifies over all 4 inhabitants via 'allConfigs'.
 prop_monotonicity :: Property
 prop_monotonicity = once $ ioProperty $ do
   inputs <- allInputs
@@ -122,14 +124,38 @@ prop_monotonicity = once $ ioProperty $ do
                   printSExpr (encodeVerdict vAbl) === printSExpr (encodeVerdict vFull)
                     .&&. lAbl === Nothing
 
+-- | Promotion has nothing to promote on a unit without holes: wherever the
+-- full system's verdict reports no hole, 'noCQConfig' (and every
+-- rejection-relaxing setting combined with it) yields the byte-identical
+-- verdict. This is the exact scope of the @no-cq@ ablation's effect.
+prop_promotionIdentityWithoutHoles :: Property
+prop_promotionIdentityWithoutHoles = once $ ioProperty $ do
+  inputs <- allInputs
+  checks <- mapM check inputs
+  pure $ conjoin (counterexample "no inputs discovered" (not (null checks)) : checks)
+  where
+    check im = do
+      bytes <- readFixture (imPath im)
+      pure $ counterexample (imPath im) $ case decodeCheckInputFile bytes of
+        Left _ -> property True
+        Right input ->
+          let (vFull, lFull) = runCheckLocatedWith fullConfig input
+              (vAbl, lAbl) = runCheckLocatedWith noCQConfig input
+           in case verdictOutcome vFull of
+                Accept{verdictHoles = _ : _} -> property True
+                _ ->
+                  printSExpr (encodeVerdict vAbl) === printSExpr (encodeVerdict vFull)
+                    .&&. lAbl === lFull
+
 -- ---------------------------------------------------------------------------
 -- Surgical flips (strict, per ablation)
 -- ---------------------------------------------------------------------------
 
 -- | Strict surgical expectation for one named ablation: every row in its flip
 -- buckets flips reject→accept (a missed reject whose recorded ablation outcome
--- is an accept class), and EVERY other row — other rejects, accepts, codec —
--- keeps the identical outcome text.
+-- is an accept class), every row in the @no-cq@ shift bucket stays an accept
+-- whose verdict changes, and EVERY other row — other rejects, accepts, codec —
+-- keeps the identical verdict.
 --
 -- Buckets are a list because @no-typed@ drops the whole typed-attack bundle
 -- (the paper's baseline), so it flips both the typing rows and the completeness
@@ -145,18 +171,31 @@ surgical name cfg buckets = once $ ioProperty $ do
   where
     check c =
       counterexample (name ++ ": " ++ imPath (acMeta c) ++ diag c) $
-        if ablationBucket (imExpected (acMeta c)) `elem` buckets
-          then
+        case ablationBucket (imExpected (acMeta c)) of
+          b
+            | b `notElem` buckets ->
+                conjoin
+                  [ counterexample "must be unchanged" (not (acChanged c))
+                  , acAblationActual c === acFullActual c
+                  ]
+          ShiftUnderNoCQ ->
+            conjoin
+              [ counterexample "full system must accept" ("accept-" `isPrefixOf` acFullActual c)
+              , counterexample "ablation must accept" ("accept-" `isPrefixOf` acAblationActual c)
+              , counterexample "the verdict must change" (acChanged c)
+              ]
+          _ ->
             conjoin
               [ counterexample "must be a missed reject" (acMissedReject c)
               , counterexample "full system must reject" ("reject-" `isPrefixOf` acFullActual c)
               , counterexample "ablation must accept" ("accept-" `isPrefixOf` acAblationActual c)
               ]
-          else counterexample "must be unchanged" (acAblationActual c === acFullActual c)
-    diag c = " (full " ++ acFullActual c ++ ", ablation " ++ acAblationActual c ++ ")"
+    diag c =
+      " (full " ++ acFullActual c ++ " " ++ show (acFullStatuses c)
+        ++ ", ablation " ++ acAblationActual c ++ " " ++ show (acAblationStatuses c) ++ ")"
 
 prop_noCQSurgical :: Property
-prop_noCQSurgical = surgical "no-cq" noCQConfig [FlipUnderNoCQ]
+prop_noCQSurgical = surgical "no-cq" noCQConfig [ShiftUnderNoCQ]
 
 prop_noTypedSurgical :: Property
 prop_noTypedSurgical =
@@ -189,16 +228,19 @@ prop_codecRows = once $ ioProperty $ do
             , acFullActual cell === codecFailText
             , acAblationActual cell === codecFailText
             , counterexample "codec rows can never be a missed reject" (not (acMissedReject cell))
+            , counterexample "codec rows can never change" (not (acChanged cell))
             ]
 
 -- ---------------------------------------------------------------------------
 -- Aggregate: non-triviality + partition agreement
 -- ---------------------------------------------------------------------------
 
--- | Each ablation misses at least one reject, and the 'AblationReport'
--- aggregate ('classSummaries') matches the manifest partition exactly: in the
--- flip bucket every row is missed, outside it nothing is missed and nothing
--- changes (no silent gaps between the report and the partition).
+-- | Each rejection-relaxing ablation misses at least one reject and @no-cq@
+-- changes at least one accept, and the 'AblationReport' aggregate
+-- ('classSummaries') matches the manifest partition exactly: in a flip bucket
+-- every row is missed, in the shift bucket every row changes with no reject on
+-- either side, outside them nothing is missed, nothing is newly rejected and
+-- nothing changes (no silent gaps between the report and the partition).
 prop_reportMatchesPartition :: Property
 prop_reportMatchesPartition = once $ ioProperty $ do
   inputs <- allInputs
@@ -209,26 +251,36 @@ prop_reportMatchesPartition = once $ ioProperty $ do
       cells <- cellsFor cfg
       let sums = classSummaries (abrCells (AblationReport name cells))
           missedTotal = sum (map csMissed sums)
+          changedTotal = sum [csTotal s - csUnchanged s | s <- sums]
           partitionTotal =
             length [im | im <- inputs, ablationBucket (imExpected im) `elem` buckets]
+          shifts = ShiftUnderNoCQ `elem` buckets
       pure $
         counterexample name $
           conjoin
-            [ counterexample "ablation must miss at least one reject" (missedTotal >= 1)
-            , counterexample "missed total must equal the manifest partition" $
-                missedTotal === partitionTotal
+            [ if shifts
+                then
+                  counterexample "no-cq must change at least one accept" (changedTotal >= 1)
+                    .&&. counterexample "changed total must equal the manifest partition" (changedTotal === partitionTotal)
+                else
+                  counterexample "ablation must miss at least one reject" (missedTotal >= 1)
+                    .&&. counterexample "missed total must equal the manifest partition" (missedTotal === partitionTotal)
             , conjoin (map (perClass inputs buckets) sums)
             ]
     perClass inputs buckets s =
       counterexample (csExpected s) $
         case bucketOfSpelling inputs (csExpected s) of
+          Just ShiftUnderNoCQ
+            | ShiftUnderNoCQ `elem` buckets ->
+                csUnchanged s === 0 .&&. csMissed s === 0 .&&. csNewRejects s === 0
           Just b
             | b `elem` buckets ->
                 csMissed s === csTotal s
                   .&&. counterexample
                     "accept-class breakdown must cover every miss"
                     (sum (map snd (csMissedAcceptClasses s)) === csMissed s)
-          Just _ -> csMissed s === 0 .&&. csUnchanged s === csTotal s
+          Just _ ->
+            csMissed s === 0 .&&. csNewRejects s === 0 .&&. csUnchanged s === csTotal s
           Nothing -> counterexample "summary class not in any manifest" (property False)
     bucketOfSpelling inputs cls =
       ablationBucket . imExpected <$> find ((== cls) . imExpectedText) inputs
@@ -236,7 +288,7 @@ prop_reportMatchesPartition = once $ ioProperty $ do
 -- | Partition totality: every typed 'Expected' present in either manifest
 -- lands in exactly one bucket (the four buckets are a disjoint cover — a
 -- function's image, counted), and the bucket assignment agrees with the
--- 'parseExpected' spelling table: @reject-IncompleteArgument@ is the No-CQ
+-- 'parseExpected' spelling table: @accept-located-hole@ is the No-CQ
 -- bucket, @reject-R10@\/@reject-R11@ the No-typed bucket,
 -- @reject-MissingConflict@ the No-conflict-scan bucket, everything else
 -- unchanged.
@@ -249,7 +301,7 @@ prop_partitionTotality = once $ ioProperty $ do
     conjoin
       [ counterexample "no inputs discovered" (not (null inputs))
       , counterexample "buckets must cover every row exactly once" $
-          countOf FlipUnderNoCQ
+          countOf ShiftUnderNoCQ
             + countOf FlipUnderNoTyped
             + countOf FlipUnderNoConflictScan
             + countOf UnchangedUnderAblations
@@ -261,7 +313,7 @@ prop_partitionTotality = once $ ioProperty $ do
           ]
       , counterexample "spelling table must parse its flip spellings" $
           conjoin
-            [ fmap ablationBucket (parseExpected "reject-IncompleteArgument") === Just FlipUnderNoCQ
+            [ fmap ablationBucket (parseExpected "accept-located-hole") === Just ShiftUnderNoCQ
             , fmap ablationBucket (parseExpected "reject-R10") === Just FlipUnderNoTyped
             , fmap ablationBucket (parseExpected "reject-R11") === Just FlipUnderNoTyped
             , fmap ablationBucket (parseExpected "reject-MissingConflict")
@@ -270,7 +322,7 @@ prop_partitionTotality = once $ ioProperty $ do
       ]
   where
     spellingBucket t
-      | t == "reject-IncompleteArgument" = FlipUnderNoCQ
+      | t == "accept-located-hole" = ShiftUnderNoCQ
       | t == "reject-MissingConflict" = FlipUnderNoConflictScan
       | t `elem` ["reject-R10", "reject-R11"] = FlipUnderNoTyped
       | otherwise = UnchangedUnderAblations
@@ -303,7 +355,11 @@ prop_rendererShape = once $ ioProperty $ do
                 , "expected"
                 , "full_actual"
                 , "ablation_actual"
+                , "full_statuses"
+                , "ablation_statuses"
                 , "missed_reject"
+                , "new_reject"
+                , "changed"
                 ]
       , counterexample "ablation.tsv must start with the header" $
           take 1 rows === [ablationTsvHeader]
@@ -317,10 +373,11 @@ prop_rendererShape = once $ ioProperty $ do
       Just _ -> True
       Nothing -> False
 
--- | A known hole-mutant flip records the expected accept class: the @E1@
--- base's query is justified, so its hole-obligation mutant — rejected
--- @IncompleteArgument@ by the full system — is recorded @accept-justified@
--- by the No-CQ ablation (the paper's alarming case).
+-- | A known hole mutant records the status shift: the @E1@ base's query is
+-- justified by the argument the mutant opens, so the full system reports it
+-- as a located hole with the claim @gap@, while the No-CQ ablation promotes
+-- the hole back to a node and publishes @justified@ (the paper's alarming
+-- case).
 prop_acceptClassRecording :: Property
 prop_acceptClassRecording = once $ ioProperty $ do
   inputs <- allInputs
@@ -331,27 +388,29 @@ prop_acceptClassRecording = once $ ioProperty $ do
       cell <- computeAblation noCQConfig im <$> readFixture (imPath im)
       pure $
         conjoin
-          [ counterexample "must be a missed reject" (acMissedReject cell)
-          , acFullActual cell === "reject-IncompleteArgument"
-          , acAblationActual cell === "accept-justified"
+          [ counterexample "must change" (acChanged cell)
+          , counterexample "is not a reject flip" (not (acMissedReject cell || acNewReject cell))
+          , acFullActual cell === "accept-located-hole"
+          , acFullStatuses cell === ["gap"]
+          , acAblationStatuses cell === ["justified"]
           ]
 
 -- | A hand-written minimal unit with a declared hole (the 'CheckSpec'
--- incomplete-argument shape): a defeasible rule with one Mandatory question,
--- instantiated with the question left open as a hole. The full system rejects
--- @IncompleteArgument@; 'noCQConfig' accepts it with the query justified — a
--- fast witness independent of the generated manifest.
+-- hole shape): a defeasible rule with one Mandatory question, instantiated
+-- with the question left open. The full system accepts, reports the hole and
+-- publishes @gap@; 'noCQConfig' promotes the hole and publishes @justified@ —
+-- a fast witness independent of the generated manifest.
 prop_handWrittenHole :: Property
 prop_handWrittenHole =
   once $
     conjoin
-      [ counterexample "full system must reject IncompleteArgument" $
-          case (verdictOutcome vFull, lrRejection <$> lFull) of
-            (Reject IncompleteArgument, Just IncompleteArgument) -> property True
+      [ counterexample "full system must accept with the hole and the claim gap" $
+          case (verdictOutcome vFull, lFull) of
+            (Accept [] [] [(_, Published Gap)] [_], Nothing) -> property True
             other -> counterexample (show other) (property False)
       , counterexample "no-CQ must accept with the query justified" $
           case (verdictOutcome vAbl, lAbl) of
-            (Accept _ _ [(_, Published Justified)], Nothing) -> property True
+            (Accept _ _ [(_, Published Justified)] _, Nothing) -> property True
             other -> counterexample (show other) (property False)
       ]
   where
@@ -413,7 +472,7 @@ prop_conflictScanGating =
       (Reject MissingConflict, Just MissingConflict) -> property True
       other -> counterexample (show other) (property False)
     acceptsJustified (v, l) = case (verdictOutcome v, l) of
-      (Accept _ _ [(_, Published Justified)], Nothing) -> property True
+      (Accept _ _ [(_, Published Justified)] _, Nothing) -> property True
       other -> counterexample (show other) (property False)
     input = testCheckInput negMissingConflict
 
@@ -430,14 +489,15 @@ ablationSpecProps :: [(String, IO Result)]
 ablationSpecProps =
   [ ("ablation: runCheckLocatedWith fullConfig == runCheckLocated over both manifests", quickCheckResult prop_fullPathGuard)
   , ("ablation: accept-set monotonicity (full accepts are byte-identical)", quickCheckResult prop_monotonicity)
-  , ("ablation: no-cq flips exactly reject-IncompleteArgument (surgical)", quickCheckResult prop_noCQSurgical)
+  , ("ablation: no-cq is identity wherever the full verdict has no hole", quickCheckResult prop_promotionIdentityWithoutHoles)
+  , ("ablation: no-cq changes exactly accept-located-hole (surgical)", quickCheckResult prop_noCQSurgical)
   , ("ablation: no-typed flips exactly reject-R10/R11 + reject-MissingConflict (surgical)", quickCheckResult prop_noTypedSurgical)
   , ("ablation: no-conflict-scan flips exactly reject-MissingConflict (surgical)", quickCheckResult prop_noConflictScanSurgical)
   , ("ablation: codec rows unchanged under every config", quickCheckResult prop_codecRows)
   , ("ablation: report counts match the manifest partition (non-trivial)", quickCheckResult prop_reportMatchesPartition)
   , ("ablation: partition totality over both manifests", quickCheckResult prop_partitionTotality)
   , ("ablation: ablation.{json,tsv} renderer shape", quickCheckResult prop_rendererShape)
-  , ("ablation: hole-mutant flip records its accept class", quickCheckResult prop_acceptClassRecording)
-  , ("ablation: hand-written hole unit (full rejects, no-cq accepts)", quickCheckResult prop_handWrittenHole)
+  , ("ablation: hole mutant records its status shift", quickCheckResult prop_acceptClassRecording)
+  , ("ablation: hand-written hole unit (full reports gap, no-cq justified)", quickCheckResult prop_handWrittenHole)
   , ("ablation: conflict scan is switched by its own flag, not by no-cq", quickCheckResult prop_conflictScanGating)
   ]
