@@ -109,6 +109,23 @@ theorem crossPairs_spec {k : Attack}
   · rw [attackFor_source]; exact hsArgs
   · rw [attackFor_target]; exact htArgs
 
+/-- **The batch saturation never touches a located hole.** Both endpoints of
+every attack it emits are *complete* support — they type with an empty
+obligation set — because the cache it ranges over keeps complete terms only.
+So a map's generated cross-member attacks are never sourced at, nor aimed at,
+a hole (spec §4.4, `docs/located-gap-decision.md` D4/D6/D9): only the members'
+own declared attacks can touch one. -/
+theorem crossPairs_endpoints_complete {k : Attack}
+    (hk : k ∈ crossPairs canon P.defeat P.ruleLookup cross
+      (conclusionCache P.ruleLookup Γ reg args)) :
+    (∃ Cs, HasSupport canon P.ruleLookup Γ (certOkOf reg) k.source Cs []) ∧
+      ∃ Ct, HasSupport canon P.ruleLookup Γ (certOkOf reg) k.target Ct [] := by
+  obtain ⟨s, hs, t, ht, -, -, -, rfl⟩ := mem_crossPairs.mp hk
+  obtain ⟨-, hsSup⟩ := mem_conclusionCache.mp (show (s.1, s.2) ∈ _ from hs)
+  obtain ⟨-, htSup⟩ := mem_conclusionCache.mp (show (t.1, t.2) ∈ _ from ht)
+  exact ⟨⟨s.2, by rw [attackFor_source]; exact hsSup⟩,
+    ⟨t.2, by rw [attackFor_target]; exact htSup⟩⟩
+
 /-- **The batch saturation emits the attack for every admitted conflict.** -/
 theorem crossPairs_emits {source target : SupportTerm} {Cs Ct : Atom}
     (hs : source ∈ args) (ht : target ∈ args)

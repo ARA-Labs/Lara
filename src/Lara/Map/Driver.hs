@@ -11,7 +11,7 @@
 --                -> load and recheck each member  ("Lara.Map.Load")
 --                -> qualify + merge + saturate + check  ("Lara.Map.Link")
 --                -> resolve coordinates, evaluate alignments, compose   <- here
---                -> @map-verdict\@1@ bytes  ("Lara.Map.Wire")
+--                -> @map-verdict\@2@ bytes  ("Lara.Map.Wire")
 -- @
 --
 -- 'runMap' is the whole @.laramap@ operation and is what @lara check@'s third
@@ -144,6 +144,7 @@ import Lara.Map.Link
   ( LinkedMap
   , linkMap
   , lmEdges
+  , lmHoles
   , lmLabels
   , lmNodes
   , lmStatuses
@@ -210,15 +211,15 @@ checkMap loaded = do
 --
 -- Nothing is computed here: every section is carried from something that
 -- already decided it, which is what makes the deterministic ordering
--- ("Lara.Map.Link" for @nodes@, @labels@, @edges@ and @statuses@;
+-- ("Lara.Map.Link" for @nodes@, @labels@, @edges@, @statuses@ and @holes@;
 -- "Lara.Map.Load" for @members@) observable in the bytes rather than imposed
 -- by the encoder.
 composeVerdict :: CheckedMembers -> LinkedMap -> MapVerdict
 composeVerdict loaded linked =
   MapVerdict
     { mvScope = ScopeMap
-    , mvSchema = MapVerdictSchemaV1
-    , mvCore = LaraCoreV02
+    , mvSchema = MapVerdictSchemaV2
+    , mvCore = LaraCoreV03
     , mvPolicy = mapPolicy manifest
     , mvBackends = mapBackends manifest
     , mvMembers =
@@ -235,6 +236,7 @@ composeVerdict loaded linked =
     , mvLabels = lmLabels linked
     , mvEdges = lmEdges linked
     , mvStatuses = lmStatuses linked
+    , mvHoles = lmHoles linked
     }
   where
     manifest = checkedManifest loaded

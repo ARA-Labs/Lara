@@ -74,6 +74,7 @@ import Lara.AST
   , Digest (..)
   , PolicyId (..)
   , PropId (..)
+  , QuestionId (..)
   , Status (..)
   , Unit (..)
   )
@@ -108,6 +109,7 @@ import Lara.Map.Types
   , Coord (..)
   , MapBoundaryError (..)
   , MapError (..)
+  , MapHole (..)
   , MapNode (..)
   , MapRejectError (..)
   , MapStatus (..)
@@ -149,6 +151,13 @@ agreementManifest = agreementDir </> "map.laramap"
 -- merge fires. Its goldens are pinned beside the agreement map's.
 mergeDir :: FilePath
 mergeDir = "test/fixtures/map/merge"
+
+-- | The map whose members each declare a located hole (@lara-core\@0.3@), one
+-- of them before that member's complete argument, so the linked declaration
+-- positions and the AF indices diverge. Its goldens are pinned beside the
+-- other two accepting anchors'.
+holeDir :: FilePath
+holeDir = "test/fixtures/map/hole"
 
 -- | The one fixture in the tree carrying @(audit-status disputed)@, and so the
 -- only place the decoder's audit-status table is exercised at all.
@@ -371,7 +380,7 @@ prop_mapIsDeterministic = once $ ioProperty $ do
 -- of them would produce.
 prop_verdictGoldenIsFresh :: Property
 prop_verdictGoldenIsFresh = once $ ioProperty $
-  conjoin <$> mapM fresh [agreementDir, mergeDir]
+  conjoin <$> mapM fresh [agreementDir, mergeDir, holeDir]
   where
     fresh dir = do
       outcome <- runMap (dir </> "map.laramap")
@@ -379,6 +388,169 @@ prop_verdictGoldenIsFresh = once $ ioProperty $
       pure $ expectVerdict dir outcome $ \verdict ->
         counterexample (dir ++ ": committed map.verdict.sexp has drifted") $
           printSExpr (encodeMapVerdict verdict) ++ "\n" === golden
+
+-- ---------------------------------------------------------------------------
+-- Located holes (map-verdict@2)
+-- ---------------------------------------------------------------------------
+
+-- | The rows of a verdict's @holes@ section, stripped to plain values.
+holeRowsOf :: MapVerdict -> [(String, String, [String])]
+holeRowsOf verdict =
+  [ ( aliasText (mhAlias hole)
+    , let ArgId a = mhArg hole in a
+    , [q | QuestionId q <- NE.toList (mhObligations hole)]
+    )
+  | hole <- mvHoles verdict
+  ]
+
+-- | __A map whose members declare holes is accepted, and reports them by
+-- member handle, outside the AF index space.__
+--
+-- @paper_pos@ declares the hole @ph@ /before/ its complete argument @pa@, and
+-- @paper_neg@ declares the complete @pb@ and then the hole @pb_open@. The
+-- linked declaration positions are @ph 0, pa 1, pb 2, pb_open 3@; the AF has
+-- two nodes, @pa@ at 0 and @pb@ at 1. So:
+--
+--   * @nodes@ names exactly the complete handles, each at its AF index — the
+--     index @labels@ and @edges@ use; @pa@ is node 0 although it is linked
+--     argument 1, which is the divergence @map-verdict\@1@ could not express;
+--   * @holes@ names each hole by @(member alias, member-local argument id)@
+--     with its exact obligations in core order, in member then declaration
+--     order, and no handle is in both sections;
+--   * the generated rebuttals @pa <-> pb@ are the only edges: the saturation
+--     generates nothing touching a hole, so the two contrary holes add no
+--     edge and both claims are contested exactly as in the hole-free map;
+--   * the bytes round-trip through the decoder.
+prop_holeMapReportsHoles :: Property
+prop_holeMapReportsHoles = once $ ioProperty $ do
+  outcome <- runMap (holeDir </> "map.laramap")
+  pure $ expectVerdict "hole map" outcome $ \verdict ->
+    let n = length (mvLabels verdict)
+        nodeRows =
+          [ (aliasText (mnAlias node), let ArgId a = mnArg node in a, nodeIndexInt (mnIndex node))
+          | node <- mvNodes verdict
+          ]
+        edges = [(nodeIndexInt i, nodeIndexInt j) | (i, j) <- mvEdges verdict]
+        nodeHandles = [(a, i) | (a, i, _) <- nodeRows]
+        holeHandles = [(a, i) | (a, i, _) <- holeRowsOf verdict]
+     in conjoin
+          [ counterexample "nodes are the complete handles at their AF indices" $
+              nodeRows === [("paper_pos", "pa", 0), ("paper_neg", "pb", 1)]
+          , counterexample "labels range over the AF nodes only" $
+              map (nodeIndexInt . fst) (mvLabels verdict) === [0, 1]
+          , counterexample "every node index is a labelled index" $
+              property (all (\(_, _, i) -> i < n) nodeRows)
+          , counterexample "edges are the generated rebuttals, in the AF space" $
+              edges === [(0, 1), (1, 0)]
+          , counterexample "holes are reported by member handle with exact obligations" $
+              holeRowsOf verdict
+                === [ ("paper_pos", "ph", ["external_validity"])
+                    , ("paper_neg", "pb_open", ["randomization", "adequate_power"])
+                    ]
+          , counterexample "no handle is both a node and a hole" $
+              property (null (nodeHandles `intersect` holeHandles))
+          , counterexample "holes do not move the statuses" $
+              answersOf verdict
+                === [("paper_pos", "c_pos", Contested), ("paper_neg", "c_neg", Contested)]
+          , counterexample "the verdict round-trips" $
+              decodeMapVerdict (encodeMapVerdict verdict) === Right verdict
+          ]
+
+-- | __A merged hole is reported once per handle, in handle order.__
+--
+-- Built in a temporary tree under a policy whose premise-less rule carries a
+-- mandatory question, so two members' identical holes merge into one linked
+-- argument (the only way a merge fires; see "Lara.Map.Link"). @paper_a@
+-- declares the hole @h_a@ and then the complete @ok_a@; @paper_b@ declares the
+-- same hole as @h_b@. The linked unit has one hole (position 0, owned by both)
+-- and one node (@ok_a@, position 1, AF index 0). The hole rows follow the
+-- handle order the nodes use — member order, then declaration order — so they
+-- are @paper_a h_a@ then @paper_b h_b@, each with the shared obligation.
+prop_mergedHoleIsReportedPerHandle :: Property
+prop_mergedHoleIsReportedPerHandle = once $ ioProperty $ do
+  outcome <-
+    withTree
+      [ ("map.laramap", manifest)
+      , ("hole-v1.policy.lara", policy)
+      , ("a.lara", memberA)
+      , ("b.lara", memberB)
+      ]
+      (\root -> runMap (root </> "map.laramap"))
+  pure $ expectVerdict "merged hole map" outcome $ \verdict ->
+    conjoin
+      [ counterexample "the complete handle is AF node 0" $
+          [ (aliasText (mnAlias node), let ArgId a = mnArg node in a, nodeIndexInt (mnIndex node))
+          | node <- mvNodes verdict
+          ]
+            === [("paper_a", "ok_a", 0)]
+      , counterexample "one labelled node" $ length (mvLabels verdict) === 1
+      , counterexample "both handles of the merged hole, in handle order" $
+          holeRowsOf verdict
+            === [("paper_a", "h_a", ["adoption"]), ("paper_b", "h_b", ["adoption"])]
+      , -- Map statuses are read off the linked unit, so @paper_b@'s claim,
+        -- which only a hole supports in its own member, is justified here by
+        -- @paper_a@'s complete argument for the same proposition.
+        counterexample "statuses come from the linked complete support" $
+          answersOf verdict === [("paper_a", "c_a", Justified), ("paper_b", "c_b", Justified)]
+      , counterexample "the verdict round-trips" $
+          decodeMapVerdict (encodeMapVerdict verdict) === Right verdict
+      ]
+  where
+    manifest =
+      unlines
+        [ "(lara-map@1"
+        , "  (policy hole-v1 hole-v1.policy.lara)"
+        , "  (backends (backend nd 1))"
+        , "  (members (member paper_a a.lara) (member paper_b b.lara))"
+        , "  (alignments)"
+        , "  (questions))"
+        ]
+    policy =
+      unlines
+        [ "policy hole-v1"
+        , "sort Measurand, Benchmark"
+        , "con accuracy : Measurand"
+        , "con glue : Benchmark"
+        , "pred standard_metric(Measurand, Benchmark)"
+        , "pred widely_adopted(Measurand, Benchmark)"
+        , "rule community_convention(Q, B)"
+        , "  mode       = defeasible"
+        , "  premises   = []"
+        , "  conclusion = standard_metric(Q, B)"
+        , "  question adoption : widely_adopted(Q, B) (mandatory)"
+        ]
+    memberA =
+      unlines
+        [ "artifact paper_a at sha256:a..."
+        , "policy hole-v1"
+        , "use backends [nd@1]"
+        , "claim c_a"
+        , "  nl      = \"Accuracy is the standard metric for GLUE\""
+        , "  formal  = standard_metric(accuracy, glue)"
+        , "  binding = { author = alice, audit-status = reviewed }"
+        , "leaf l_a : widely_adopted(accuracy, glue)"
+        , "  kind       = attested"
+        , "  provenance = user"
+        , "  refs       = [a.pdf#sec=1]"
+        , "arg h_a : supports(c_a) by community_convention(accuracy, glue)"
+        , "  open adoption"
+        , "arg ok_a : supports(c_a) by community_convention(accuracy, glue)"
+        , "  discharge adoption with l_a"
+        , "status c_a"
+        ]
+    memberB =
+      unlines
+        [ "artifact paper_b at sha256:b..."
+        , "policy hole-v1"
+        , "use backends [nd@1]"
+        , "claim c_b"
+        , "  nl      = \"Accuracy is the standard metric for GLUE\""
+        , "  formal  = standard_metric(accuracy, glue)"
+        , "  binding = { author = bob, audit-status = reviewed }"
+        , "arg h_b : supports(c_b) by community_convention(accuracy, glue)"
+        , "  open adoption"
+        , "status c_b"
+        ]
 
 -- ---------------------------------------------------------------------------
 -- The parity envelope
@@ -389,7 +561,7 @@ prop_verdictGoldenIsFresh = once $ ioProperty $
 -- that guards the __input__ side of the cross-driver comparison.
 prop_envelopeIsFresh :: Property
 prop_envelopeIsFresh = once $ ioProperty $
-  conjoin <$> mapM fresh [agreementDir, mergeDir]
+  conjoin <$> mapM fresh [agreementDir, mergeDir, holeDir]
   where
     fresh dir = do
       loaded <- loadMap (dir </> "map.laramap")
@@ -1558,6 +1730,8 @@ mapSpecProps =
   , ("map verdict ordering is canonical", quickCheckResult prop_verdictOrderingIsCanonical)
   , ("map run is deterministic", quickCheckResult prop_mapIsDeterministic)
   , ("map verdict golden is fresh", quickCheckResult prop_verdictGoldenIsFresh)
+  , ("map hole map reports holes", quickCheckResult prop_holeMapReportsHoles)
+  , ("map merged hole is reported per handle", quickCheckResult prop_mergedHoleIsReportedPerHandle)
   , ("map parity envelope is fresh", quickCheckResult prop_envelopeIsFresh)
   , ("map envelope mirrors loaded members", quickCheckResult prop_envelopeMirrorsLoadedMembers)
   , ("map envelope codec round-trips", quickCheckResult prop_envelopeRoundTrips)

@@ -15,7 +15,7 @@ map's policy id, backend selection, and declared alignments. Everything after
 that is recomputed here: qualification, the structural merge, the cross-member
 saturation, `Check.Unit.checkUnit`, the grounded labelling, the four-state
 statuses, and the alignment assertions. `scripts/check-map-conformance.sh`
-byte-compares the resulting `map-verdict@1` bytes and the exit code against
+byte-compares the resulting `map-verdict@2` bytes and the exit code against
 `lara check <map.laramap>`, so an agreement is two implementations reaching one
 answer rather than one echoing the other.
 
@@ -54,7 +54,20 @@ refusal nor claims to have.
 
 Every section of the verdict is emitted in the order this driver computed it —
 members in envelope order, nodes in member-then-declaration order, labels
-ascending, edges ascending lexicographic, statuses in member-then-claim order.
+ascending, edges ascending lexicographic, statuses in member-then-claim order,
+and located holes (if any) in the same member-then-declaration order as nodes.
+
+## Located holes (`lara-core@0.3`)
+
+A linked argument that type-checks with a nonempty mandatory obligation set is a
+located hole (spec §4.4): declared, never an AF node. The verdict's `nodes`,
+`labels` and `edges` therefore share the **AF** index space, reached through the
+checked unit's `nodeDecls`, and every handle of a hole is reported in the
+trailing `holes` section instead, by member alias and member-local argument id,
+with the hole's exact obligations. The cross-member saturation runs over
+`Lara.Context.conclusionCache`, which keeps complete support only, so it never
+generates an attack sourced at or aimed at a hole — exactly as
+`Lara.Map.Link.crossMemberAttacks` does.
 Nothing sorts at the printer, for the same reason `Lara.Map.Wire`'s encoder does
 not: an ordering bug must be visible in the bytes rather than tidied away.
 -/
@@ -77,13 +90,13 @@ open Lara.Driver (Sx dcanon printSx parseWire decodeUnit decodeAtom encodeAtom
 Its own table, deliberately disjoint from `Lara.Driver.Tag` as a *type* while
 overlapping it on several spellings. The reason is the one the composition
 decision record gives for keeping `Lara.Map.Wire.MapTag` out of
-`Lara.Wire.Tag`: `Tag` spells the frozen `lara-core@0.2` grammar, is byte-pinned
+`Lara.Wire.Tag`: `Tag` spells the frozen core grammar, is byte-pinned
 by conformance goldens, and must not grow a map's vocabulary. This table mirrors
 the Haskell side's two map tables — `Lara.Map.Wire.mapTagToString` for the
 verdict half and `Lara.Map.Driver.envTagToString` for the envelope half —
 which are themselves separate for the same reason one level down. -/
 
-/-- Every keyword of the `map-check-input@1` and `map-verdict@1` grammars. -/
+/-- Every keyword of the `map-check-input@1` and `map-verdict@2` grammars. -/
 inductive MTag where
   -- the parity envelope
   | mapCheckInput1 | claims | claim
@@ -92,8 +105,9 @@ inductive MTag where
   | alignments | alignment | ref | whole | arg | same | different
   | author | auditStatus | rationale | unreviewed | reviewed | disputed
   -- the composite verdict
-  | mapVerdict1 | scope | map | schema | mapVerdictSchema1 | core
+  | mapVerdict2 | scope | map | schema | mapVerdictSchema2 | core
   | nodes | node | labels | edges | statuses | status
+  | holes | hole | obligations
   -- grounded labels and four-state statuses
   | inL | outL | undecL
   | gap | justified | contested | defeated
@@ -112,12 +126,13 @@ def mtagToString : MTag → String
   | .rationale => "rationale"
   | .unreviewed => "unreviewed" | .reviewed => "reviewed"
   | .disputed => "disputed"
-  | .mapVerdict1 => "map-verdict@1"
+  | .mapVerdict2 => "map-verdict@2"
   | .scope => "scope" | .map => "map"
-  | .schema => "schema" | .mapVerdictSchema1 => "lara-map-verdict@1"
+  | .schema => "schema" | .mapVerdictSchema2 => "lara-map-verdict@2"
   | .core => "core"
   | .nodes => "nodes" | .node => "node" | .labels => "labels"
   | .edges => "edges" | .statuses => "statuses" | .status => "status"
+  | .holes => "holes" | .hole => "hole" | .obligations => "obligations"
   | .inL => "in" | .outL => "out" | .undecL => "undec"
   | .gap => "gap" | .justified => "justified"
   | .contested => "contested" | .defeated => "defeated"
@@ -608,10 +623,13 @@ def linkedGammaOf (qualified : List QualifiedMember) : LeafId → Option Atom :=
 linked terms, with the owner-based `crossMember` as its cross-member predicate.
 
 The cache holds the linked arguments that are complete checked support. A term
-that fails to infer, or retains an open critical-question obligation,
-contributes none: `checkUnit` runs afterwards and rejects the linked unit for
-exactly those terms, so skipping them here only avoids emitting an attack whose
-endpoint the checker is about to refuse. -/
+that fails to infer contributes none: `checkUnit` runs afterwards and rejects
+the linked unit for it, so skipping it only avoids emitting an attack whose
+endpoint the checker is about to refuse. A located hole — a term that infers
+with a nonempty obligation set — contributes none either, although the checker
+accepts it: an attack it sourced would be inert (D4), the missing-conflict scan
+never asks for one onto it, and a rebut of its root covers no complete argument
+(D6). `generatedAttacksOf_endpoints_complete` states the consequence. -/
 def generatedAttacksOf (shared : Decoded) (qualified : List QualifiedMember) :
     List Attack :=
   Lara.Map.crossPairs dcanon shared.policy.defeat shared.policy.ruleLookup
@@ -619,6 +637,19 @@ def generatedAttacksOf (shared : Decoded) (qualified : List QualifiedMember) :
       (ownersOf (declaredArgs qualified) t))
     (Lara.Context.conclusionCache shared.policy.ruleLookup (linkedGammaOf qualified)
       (buildRegistry shared.theories) (linkedTermsOf qualified))
+
+/-- **The map never generates an attack touching a located hole.** Both
+endpoints of every generated cross-member attack are complete support under the
+linked environment — `Lara.Map.crossPairs_endpoints_complete` at the driver's
+own generator. -/
+theorem generatedAttacksOf_endpoints_complete (shared : Decoded)
+    (qualified : List QualifiedMember) {k : Attack}
+    (hk : k ∈ generatedAttacksOf shared qualified) :
+    (∃ Cs, HasSupport dcanon shared.policy.ruleLookup (linkedGammaOf qualified)
+        (certOkOf (buildRegistry shared.theories)) k.source Cs []) ∧
+      ∃ Ct, HasSupport dcanon shared.policy.ruleLookup (linkedGammaOf qualified)
+        (certOkOf (buildRegistry shared.theories)) k.target Ct [] :=
+  Lara.Map.crossPairs_endpoints_complete hk
 
 /-- **The linked unit**: the shared contract, the merged arguments, and the
 members' transported attacks followed by the generated ones, each once. -/
@@ -898,12 +929,21 @@ theorem linkedUnitOf_checked (shared : Decoded) (qualified : List QualifiedMembe
 
 /-! ### The linked map -/
 
-/-- One `(member alias, local argument id)` handle and the linked index it
-resolved to. -/
+/-- One `(member alias, local argument id)` handle of a complete linked
+argument and the **AF** index it resolved to — the index `labels` and `edges`
+use, which differs from the linked declaration position as soon as a located
+hole precedes it. -/
 structure NodeOut where
   memberAlias : MemberAlias
   argId : ArgId
   index : Nat
+
+/-- One `(member alias, local argument id)` handle whose linked argument is a
+located hole, with the hole's exact mandatory root obligations in core order. -/
+structure HoleOut where
+  memberAlias : MemberAlias
+  argId : ArgId
+  obligations : List Lara.Support.QuestionId
 
 /-- One map-relative claim status. -/
 structure StatusOut where
@@ -918,6 +958,7 @@ structure LinkedOut where
   labels : List (Nat × Label)
   edges : List (Nat × Nat)
   statuses : List StatusOut
+  holes : List HoleOut
 
 /-- Why a map was refused after its bytes decoded.
 
@@ -1007,12 +1048,13 @@ def statusStr : Status → String
   | .defeated => mtagToString .defeated
 
 /-- The composite verdict. Every section prints in the order the driver computed
-it; nothing is sorted here. -/
+it; nothing is sorted here. The `holes` section is emitted only when the linked
+unit has a located hole. -/
 def encodeMapVerdict (input : MapIn) (linked : LinkedOut) : Sx :=
   .list
-    [ .atom (mtagToString .mapVerdict1)
+    ([ .atom (mtagToString .mapVerdict2)
     , .list [.atom (mtagToString .scope), .atom (mtagToString .map)]
-    , .list [.atom (mtagToString .schema), .atom (mtagToString .mapVerdictSchema1)]
+    , .list [.atom (mtagToString .schema), .atom (mtagToString .mapVerdictSchema2)]
     , .list [.atom (mtagToString .core), .atom mapCoreVersionText]
     , .list [.atom (mtagToString .policy), .atom input.policy.val]
     , .list (.atom (mtagToString .backends) ::
@@ -1035,7 +1077,14 @@ def encodeMapVerdict (input : MapIn) (linked : LinkedOut) : Sx :=
           .list [ .atom (mtagToString .status), .atom s.memberAlias.val
                 , .atom s.claim.val, encodeAtom s.atom
                 , .atom (statusStr s.status)]))
-    ]
+    ] ++
+    (if linked.holes.isEmpty then [] else
+      [ .list (.atom (mtagToString .holes) ::
+          linked.holes.map (fun h =>
+            .list [ .atom (mtagToString .hole), .atom h.memberAlias.val
+                  , .atom h.argId.val
+                  , .list (.atom (mtagToString .obligations) ::
+                      h.obligations.map (fun q => .atom q.name))])) ]))
 
 /-! ### The driver -/
 
@@ -1091,17 +1140,16 @@ def linkAndEvaluate (input : MapIn) : Except String (Except MapReject LinkedOut)
   | none => do
   let declared := declaredArgs qualified
   let linkedTerms := linkedTermsOf qualified
-  -- One node per declared `(member alias, local argument id)`, naming the linked
-  -- position its term became. `findIdx?` never misses: `linkedTerms` is the
-  -- distinct terms of this very list, so every declared term either is a first
-  -- occurrence or equals an earlier one. `filterMap` is the total spelling of
-  -- that, and dropping a handle rather than inventing an index is the safe way
-  -- for it to be wrong, because a fabricated index would put a node in a
-  -- verdict that names an argument nobody declared.
-  let nodes : List NodeOut :=
+  -- One linked position per declared `(member alias, local argument id)`.
+  -- `findIdx?` never misses: `linkedTerms` is the distinct terms of this very
+  -- list, so every declared term either is a first occurrence or equals an
+  -- earlier one. `filterMap` is the total spelling of that, and dropping a
+  -- handle rather than inventing an index is the safe way for it to be wrong,
+  -- because a fabricated index would put a node in a verdict that names an
+  -- argument nobody declared.
+  let handles : List (MemberAlias × ArgId × Nat) :=
     declared.filterMap (fun d =>
-      (linkedTerms.findIdx? (fun w => w == d.2.2)).map (fun i =>
-        { memberAlias := d.1, argId := d.2.1, index := i }))
+      (linkedTerms.findIdx? (fun w => w == d.2.2)).map (fun i => (d.1, d.2.1, i)))
   let gamma := linkedGammaOf qualified
   let reg := buildRegistry shared.theories
   let queries := dedupAtoms (qualified.flatMap (·.queries)) []
@@ -1115,6 +1163,19 @@ def linkAndEvaluate (input : MapIn) : Except String (Except MapReject LinkedOut)
   | .ok accepted =>
     let af := checkedAF accepted.program
     let n := accepted.program.args.length
+    -- Each handle is classified against the checked partition: a linked
+    -- position that is AF node `k` (`nodeDecls`) is a node at `k`; one that
+    -- is a located hole is a hole row. The linked unit is checked without
+    -- admission, so checked declaration positions are the linked positions.
+    -- The partition covers every declaration, so no handle falls through.
+    let nodes : List NodeOut :=
+      handles.filterMap (fun h =>
+        (accepted.nodeDecls.findIdx? (fun d => d == h.2.2)).map (fun k =>
+          { memberAlias := h.1, argId := h.2.1, index := k }))
+    let holes : List HoleOut :=
+      handles.filterMap (fun h =>
+        (accepted.holes.find? (fun hole => hole.index == h.2.2)).map (fun hole =>
+          { memberAlias := h.1, argId := h.2.1, obligations := hole.obligations }))
     let labels := (List.range n).map (fun i => (i, labelC af i))
     let edges := (List.range n).foldr
       (fun i acc => (List.range n).foldr
@@ -1132,7 +1193,8 @@ def linkAndEvaluate (input : MapIn) : Except String (Except MapReject LinkedOut)
     match firstFalseAlignment input.members input.alignments 0 with
     | some failure => .ok (.error failure)
     | none =>
-        .ok (.ok { nodes := nodes, labels := labels, edges := edges, statuses := statuses })
+        .ok (.ok { nodes := nodes, labels := labels, edges := edges, statuses := statuses
+                 , holes := holes })
 
 /-- Exit codes mirror the Haskell map door exactly: `0` with the composite
 verdict on `stdout`, `1` for a map that was understood and refused, `2` for a

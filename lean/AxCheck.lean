@@ -4127,6 +4127,7 @@ context's own arguments make unavailable. -/
 -- The batch link the drivers run, and its agreement with the fold.
 #print axioms Lara.Map.mem_crossPairs
 #print axioms Lara.Map.crossPairs_spec
+#print axioms Lara.Map.crossPairs_endpoints_complete
 #print axioms Lara.Map.crossPairs_emits
 #print axioms Lara.Map.batchGamma_extends
 #print axioms Lara.Map.ownedApart_iff
@@ -4154,6 +4155,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Map.Driver.linkedGammaOf_eq
 #print axioms Lara.Map.Driver.mem_linkedTermsOf
 #print axioms Lara.Map.Driver.linkedUnitOf_checked
+#print axioms Lara.Map.Driver.generatedAttacksOf_endpoints_complete
 /-! ### PW — the `Query_κ` well-sortedness refinement -/
 
 -- 1. Query formation. `queryFault` is the existing `Sigma` judgment, located:

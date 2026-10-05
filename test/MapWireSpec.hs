@@ -213,8 +213,8 @@ fullVerdict :: MapVerdict
 fullVerdict =
   MapVerdict
     { mvScope = ScopeMap
-    , mvSchema = MapVerdictSchemaV1
-    , mvCore = LaraCoreV02
+    , mvSchema = MapVerdictSchemaV2
+    , mvCore = LaraCoreV03
     , mvPolicy = PolicyId "demo-policy"
     , mvBackends = [(BackendId "nd", "1")]
     , mvMembers =
@@ -231,13 +231,14 @@ fullVerdict =
         [ MapStatus (aliasOf "paper_a") (PropId "c1") agreeAtom Justified
         , MapStatus (aliasOf "paper_b") (PropId "c7") agreeAtom Defeated
         ]
+    , mvHoles = []
     }
   where
     agreeAtom = Prop (Pred "agree") [TStr "x"]
 
 fullVerdictText :: String
 fullVerdictText =
-  "(map-verdict@1 (scope map) (schema lara-map-verdict@1) (core lara-core@0.2)"
+  "(map-verdict@2 (scope map) (schema lara-map-verdict@2) (core lara-core@0.3)"
     ++ " (policy demo-policy) (backends (backend nd 1))"
     ++ " (members (member paper_a a/paper.lara (artifact sha-a))"
     ++ " (member paper_b b/paper.lara (artifact sha-b)))"
@@ -245,6 +246,26 @@ fullVerdictText =
     ++ " (labels (0 in) (1 out)) (edges (0 1))"
     ++ " (statuses (status paper_a c1 (atom agree (str x)) justified)"
     ++ " (status paper_b c7 (atom agree (str x)) defeated)))"
+
+-- | 'fullVerdict' with a located hole: @paper_a@ also declared @a0@, which is
+-- typed in the linked unit but leaves two mandatory questions open, and
+-- @paper_b@ declared the same term as @b0@ (a merged hole is reported once per
+-- handle). Neither handle has an index, and the AF index space of @nodes@,
+-- @labels@ and @edges@ is unchanged by the hole.
+holeVerdict :: MapVerdict
+holeVerdict =
+  fullVerdict
+    { mvHoles =
+        [ MapHole (aliasOf "paper_a") (ArgId "a0") (QuestionId "q_scope" :| [QuestionId "q_bias"])
+        , MapHole (aliasOf "paper_b") (ArgId "b0") (QuestionId "q_scope" :| [QuestionId "q_bias"])
+        ]
+    }
+
+holeVerdictText :: String
+holeVerdictText =
+  init fullVerdictText
+    ++ " (holes (hole paper_a a0 (obligations q_scope q_bias))"
+    ++ " (hole paper_b b0 (obligations q_scope q_bias))))"
 
 prop_verdictGoldenVector :: Property
 prop_verdictGoldenVector =
@@ -254,6 +275,12 @@ prop_verdictGoldenVector =
           printSExpr (encodeMapVerdict fullVerdict) === fullVerdictText
       , counterexample "verdict decode" $
           decodeMapVerdict (parseOrDie fullVerdictText) === Right fullVerdict
+      , counterexample "hole verdict bytes" $
+          printSExpr (encodeMapVerdict holeVerdict) === holeVerdictText
+      , counterexample "hole verdict decode" $
+          decodeMapVerdict (parseOrDie holeVerdictText) === Right holeVerdict
+      , counterexample "no holes, no holes section" $
+          property (not ("holes" `isInfixOf` fullVerdictText))
       , counterexample "member-qualified handles read back as alias::local" $
           [ qualifiedDisplay (qualifyId (mnAlias n) (let ArgId a = mnArg n in a))
           | n <- mvNodes fullVerdict
@@ -261,7 +288,7 @@ prop_verdictGoldenVector =
             === ["paper_a::a1", "paper_b::b1", "paper_b::b2"]
       ]
 
--- | A solo @lara-core\@0.2@ verdict and a composite map verdict are mutually
+-- | A solo @lara-core\@0.3@ verdict and a composite map verdict are mutually
 -- undecodable: the @scope@ marker exists exactly to make this true.
 prop_scopesDoNotCross :: Property
 prop_scopesDoNotCross =
@@ -276,7 +303,7 @@ prop_scopesDoNotCross =
       ]
   where
     soloVerdictText =
-      "(verdict (replay-id (core lara-core@0.2) (policy demo-policy) (backends)"
+      "(verdict (replay-id (core lara-core@0.3) (policy demo-policy) (backends)"
         ++ " (theories) (artifact sha-a)) accept (labels (0 in)) (edges)"
         ++ " (statuses (status (atom agree (str x)) justified)))"
 
@@ -451,11 +478,25 @@ genVerdict = do
       )
   let statuses =
         nubBy (\a b -> (msAlias a, msClaim a) == (msAlias b, msClaim b)) rawStatuses
+  -- Hole handles are positional too (@hN@), so they are unique among
+  -- themselves and disjoint from the node handles (@aN@) by construction —
+  -- the decoder refuses a handle reported both as a node and as a hole. Each
+  -- obligation list is nonempty and duplicate-free, as the core emits it.
+  holeCount <- choose (0, 3)
+  holes <-
+    mapM
+      ( \position -> do
+          alias <- elements aliases
+          first <- elements questionPool
+          rest <- sublistOf (filter (/= first) questionPool)
+          pure (MapHole alias (ArgId ("h" ++ show (position :: Int))) (first :| rest))
+      )
+      [0 .. holeCount - 1]
   pure
     MapVerdict
       { mvScope = ScopeMap
-      , mvSchema = MapVerdictSchemaV1
-      , mvCore = LaraCoreV02
+      , mvSchema = MapVerdictSchemaV2
+      , mvCore = LaraCoreV03
       , mvPolicy = policy
       , mvBackends = backends
       , mvMembers = records
@@ -463,7 +504,10 @@ genVerdict = do
       , mvLabels = labels
       , mvEdges = edges
       , mvStatuses = statuses
+      , mvHoles = holes
       }
+  where
+    questionPool = map QuestionId ["q1", "q2", "q3", "q_\955"]
 
 -- ---------------------------------------------------------------------------
 -- Round trips and stability
@@ -705,9 +749,13 @@ prop_manifestMalformedMatrix =
 malformedVerdicts :: [(String, String)]
 malformedVerdicts =
   [ ("wrong scope atom", verdictWith [("(scope map)", "(scope solo)")])
-  , ("scope section missing", "(map-verdict@1 (schema lara-map-verdict@1) (core lara-core@0.2) (policy p) (backends) (members (member a x (artifact d))) (nodes) (labels) (edges) (statuses))")
-  , ("wrong schema atom", verdictWith [("(schema lara-map-verdict@1)", "(schema lara-map-verdict@2)")])
-  , ("wrong core version", verdictWith [("(core lara-core@0.2)", "(core lara-core@0.1)")])
+  , ("scope section missing", "(map-verdict@2 (schema lara-map-verdict@2) (core lara-core@0.3) (policy p) (backends) (members (member a x (artifact d))) (nodes) (labels) (edges) (statuses))")
+  , ("wrong schema atom", verdictWith [("(schema lara-map-verdict@2)", "(schema lara-map-verdict@1)")])
+  , -- @map-verdict\@2@ is a hard cutover: the @\@1@ envelope and schema are
+    -- refused, together or apart.
+    ("map-verdict@1 envelope", verdictWith [("(map-verdict@2", "(map-verdict@1"), ("(schema lara-map-verdict@2)", "(schema lara-map-verdict@1)")])
+  , ("map-verdict@1 envelope with the @2 schema", verdictWith [("(map-verdict@2", "(map-verdict@1")])
+  , ("wrong core version", verdictWith [("(core lara-core@0.3)", "(core lara-core@0.2)")])
   , ("empty members", verdictWith [(membersSection, "(members)")])
   , ( "duplicate member alias"
     , verdictWith
@@ -747,9 +795,31 @@ malformedVerdicts =
   , ("malformed status atom", verdictWith [("(atom agree (str x)) justified)", "(atom) justified)")])
   , ("status atom is not an atom form", verdictWith [("(atom agree (str x)) justified)", "(apat agree (str x)) justified)")])
   , ("trailing section", verdictWith [("(statuses", "(spare) (statuses")])
-  , ("verdict is an atom", "map-verdict@1")
+  , ("verdict is an atom", "map-verdict@2")
+    -- The located-hole section: optional, but when present nonempty, last,
+    -- and made of well-shaped rows with nonempty duplicate-free obligations
+    -- over declared aliases and handles reported nowhere else.
+  , ("empty holes section", verdictWith [("defeated)))", "defeated)) (holes))")])
+  , ("hole row one field short", withHoles "(hole paper_a a0)")
+  , ("hole row one field long", withHoles "(hole paper_a a0 (obligations q1) (attacks))")
+  , ("hole row under the solo arg tag", withHoles "(arg paper_a a0 (obligations q1))")
+  , ("hole row with a solo index", withHoles "(hole 0 paper_a a0 (obligations q1))")
+  , ("hole with empty obligations", withHoles "(hole paper_a a0 (obligations))")
+  , ("hole obligations missing their tag", withHoles "(hole paper_a a0 (q1 q2))")
+  , ("hole with a duplicate obligation", withHoles "(hole paper_a a0 (obligations q1 q1))")
+  , ("hole obligation is a list", withHoles "(hole paper_a a0 (obligations (q1)))")
+  , ("hole with an undeclared alias", withHoles "(hole paper_c a0 (obligations q1))")
+  , ("hole with an ill-spelled alias", withHoles "(hole paper:a a0 (obligations q1))")
+  , ("hole handle is also a node", withHoles "(hole paper_b b2 (obligations q1))")
+  , ("hole handle reported twice", withHoles "(hole paper_a a0 (obligations q1)) (hole paper_a a0 (obligations q2))")
+  , ("holes section is not a list of rows", verdictWith [("defeated)))", "defeated)) (holes hole))")])
+  , ("eleventh section is not holes", verdictWith [("defeated)))", "defeated)) (conditional (status (atom agree (str x)) justified)))")])
+  , ("a section after holes", verdictWith [("defeated)))", "defeated)) (holes (hole paper_a a0 (obligations q1))) (spare))")])
+  , ("holes before statuses", verdictWith [(" (statuses", " (holes (hole paper_a a0 (obligations q1))) (statuses")])
   ]
   where
+    -- The golden verdict with a @holes@ section holding exactly @rows@.
+    withHoles rows = verdictWith [("defeated)))", "defeated)) (holes " ++ rows ++ "))")]
     membersSection =
       "(members (member paper_a a/paper.lara (artifact sha-a))"
         ++ " (member paper_b b/paper.lara (artifact sha-b)))"
@@ -963,9 +1033,10 @@ everyMapError =
              , MRUnsupportedAdmission one "pruned:\n  e1\n  e2"
              , MRMemberAdmissionStop one "leaf e1 (observed, ai-executed) rejected"
              , MRMemberAdmissionStop one "leaf e1\n  rejected by (observed, ai-executed)"
-             , -- All five 'Rejection' constructors appear, and each is carried
+             , -- Every 'Rejection' constructor appears, and each is carried
                -- by a map error whose rendered line names it. Two of them
-               -- (@DuplicateArgument@, @IncompleteArgument@) were missing, and
+               -- (@DuplicateArgument@ and the since-retired
+               -- @IncompleteArgument@) were once missing, and
                -- remapping both to the wrong wire tag left the whole map suite
                -- green: nothing here forced the constructor to reach a
                -- diagnostic, so a map could name the wrong rejection class to
@@ -974,14 +1045,12 @@ everyMapError =
                MRMemberRejected one (RejectClass R2)
              , MRMemberRejected one DuplicateRule
              , MRMemberRejected one DuplicateArgument
-             , MRMemberRejected one IncompleteArgument
              , MRMemberRejected one MissingConflict
              , MRAlignmentFalse 0 Same
              , MRAlignmentFalse 1 Different
              , MRLinkRejected (RejectClass R11)
              , MRLinkRejected DuplicateRule
              , MRLinkRejected DuplicateArgument
-             , MRLinkRejected IncompleteArgument
              , MRLinkRejected MissingConflict
              , MRLinkBoundary "two members declare the same argument identifier"
              , MRLinkBoundary "boundary\nspanning\nthree lines"
@@ -1011,7 +1080,7 @@ prop_errorContract =
       MapBoundary _ -> 2
       MapReject _ -> 1
 
--- | The thirty error representatives render __thirty different lines__.
+-- | The error representatives render __pairwise different lines__.
 --
 -- 'prop_errorContract' above pins the exit code and the one-line shape of every
 -- representative, and neither is disturbed by two constructors rendering the
@@ -1053,17 +1122,16 @@ prop_rejectionSpellings =
           [ RejectClass R2
           , DuplicateRule
           , DuplicateArgument
-          , IncompleteArgument
           , MissingConflict
           ]
         rendered = map (renderMapError . MapReject . MRLinkRejected) rejections
         expected =
           [ "map link rejected: " ++ tag
-          | tag <- ["R2", "duplicate-rule", "duplicate-argument", "incomplete-argument", "missing-conflict"]
+          | tag <- ["R2", "duplicate-rule", "duplicate-argument", "missing-conflict"]
           ]
      in conjoin
           [ counterexample "each rejection renders its own tag" (rendered === expected)
-          , counterexample "the five spellings are distinct" $
+          , counterexample "the four spellings are distinct" $
               length (nub rendered) === length rendered
           ]
 

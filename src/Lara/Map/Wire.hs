@@ -1,7 +1,7 @@
 {-# LANGUAGE DerivingVia #-}
 
 -- | The S-expression codecs of the multi-artifact map: the @lara-map\@1@
--- manifest (input) and the @map-verdict\@1@ composite verdict (output).
+-- manifest (input) and the @map-verdict\@2@ composite verdict (output).
 --
 -- This is the map's decode boundary. Raw 'String's exist here and nowhere
 -- deeper: every atom this module reads is parsed into the symbolic vocabulary
@@ -15,7 +15,7 @@
 -- 'mapTagToString' table, even though the two overlap on spellings like
 -- @policy@, @backend@, and @status@. The overlap is deliberate — the map
 -- grammar names the same concepts with the same words, so a reader sees one
--- vocabulary — but the tables must stay independent: @lara-core\@0.2@'s tag
+-- vocabulary — but the tables must stay independent: @lara-core\@0.3@'s tag
 -- table is frozen and byte-pinned by conformance goldens and the Lean driver's
 -- mirrored table, so the map grammar must be unable to perturb it. Growing
 -- 'Lara.Wire.Tag' for a map keyword would put a non-core spelling inside the
@@ -25,7 +25,7 @@
 -- verdict's statuses carry propositions in exactly 'Lara.Wire.encodeAtom'\'s
 -- form, read back by 'Lara.Wire.decodeAtomSExpr'. Propositions are core
 -- objects, and a map that spelled them differently would be a second
--- proposition syntax to keep in step. The @lara-core\@0.2@ marker likewise
+-- proposition syntax to keep in step. The @lara-core\@0.3@ marker likewise
 -- comes from 'Lara.Wire.coreVersionText'.
 --
 -- == Manifest grammar
@@ -56,17 +56,28 @@
 -- == Composite verdict grammar
 --
 -- @
--- \<map-verdict\> ::= (map-verdict\@1 (scope map) (schema lara-map-verdict\@1)
---                                  (core lara-core\@0.2) (policy POLICY-ID)
+-- \<map-verdict\> ::= (map-verdict\@2 (scope map) (schema lara-map-verdict\@2)
+--                                  (core lara-core\@0.3) (policy POLICY-ID)
 --                                  (backends (backend BACKEND-ID VERSION)*)
 --                                  (members (member ALIAS PATH (artifact DIGEST))+)
 --                                  (nodes (node ALIAS ARG-ID INDEX)*)
 --                                  (labels (INDEX LABEL)*)
 --                                  (edges (SRC TGT)*)
---                                  (statuses (status ALIAS CLAIM-NAME \<atom\> STATUS)*))
+--                                  (statuses (status ALIAS CLAIM-NAME \<atom\> STATUS)*)
+--                                  HOLES?)
+-- HOLES  ::= (holes (hole ALIAS ARG-ID (obligations QUESTION-ID+))+)
 -- LABEL  ::= in | out | undec
 -- STATUS ::= gap | justified | contested | defeated
 -- @
+--
+-- Every @INDEX@, @SRC@ and @TGT@ is an __AF__ index of the linked unit: the
+-- @nodes@, @labels@ and @edges@ sections share one index space, which since
+-- @lara-core\@0.3@ is not the linked declaration position (a located hole is
+-- declared but is never a node). A handle whose linked argument is a hole is
+-- reported in @holes@, by its member alias and member-local argument id, with
+-- the hole's exact obligation list; it has no index and appears in no other
+-- section. The @holes@ section is present exactly when the linked unit has a
+-- hole, in linked declaration order and then handle order.
 --
 -- @(scope map)@ leads so that no consumer can confuse these bytes with a solo
 -- @(verdict …)@. @PATH@ is the manifest-spelled path, never a resolved one
@@ -92,10 +103,12 @@
 -- which diagnostic the operator reads, never of which inputs are accepted.
 --
 -- A composite verdict is terminal — no later stage will ever revisit it — so
--- its decoder additionally checks self-consistency: aliases in @nodes@ and
--- @statuses@ are declared in @members@, each @(alias, ARG-ID)@ handle occurs
--- once, @labels@ covers exactly @0 .. n-1@ ascending, @edges@ are strictly
--- ascending lexicographic, and every index is in range. This mirrors the two
+-- its decoder additionally checks self-consistency: aliases in @nodes@,
+-- @statuses@ and @holes@ are declared in @members@, each @(alias, ARG-ID)@
+-- handle occurs once across @nodes@ and @holes@ together, @labels@ covers
+-- exactly @0 .. n-1@ ascending, @edges@ are strictly ascending lexicographic,
+-- every index is in range, and a present @holes@ section is nonempty with
+-- nonempty, duplicate-free obligation lists. This mirrors the two
 -- extra invariants "Lara.Wire" checks at its own decode boundary (unique
 -- argument ids, declared attack endpoints): wire well-formedness, not a
 -- checker rejection.
@@ -182,8 +195,9 @@ data MapTag
   | MTAuthor | MTRationale | MTAuditStatus
   | MTUnreviewed | MTReviewed | MTDisputed
     -- composite verdict envelope
-  | MTMapVerdict1 | MTScope | MTMap | MTSchema | MTMapVerdictSchema1 | MTCore
+  | MTMapVerdict2 | MTScope | MTMap | MTSchema | MTMapVerdictSchema2 | MTCore
   | MTArtifact | MTNodes | MTNode | MTLabels | MTEdges | MTStatuses | MTStatus
+  | MTHoles | MTHole | MTObligations
     -- grounded labels and four-state statuses
   | MTIn | MTOut | MTUndec
   | MTGap | MTJustified | MTContested | MTDefeated
@@ -204,13 +218,14 @@ mapTagToString t = case t of
   MTAuditStatus -> "audit-status"
   MTUnreviewed -> "unreviewed"; MTReviewed -> "reviewed"
   MTDisputed -> "disputed"
-  MTMapVerdict1 -> "map-verdict@1"
+  MTMapVerdict2 -> "map-verdict@2"
   MTScope -> "scope"; MTMap -> "map"
-  MTSchema -> "schema"; MTMapVerdictSchema1 -> "lara-map-verdict@1"
+  MTSchema -> "schema"; MTMapVerdictSchema2 -> "lara-map-verdict@2"
   MTCore -> "core"; MTArtifact -> "artifact"
   MTNodes -> "nodes"; MTNode -> "node"
   MTLabels -> "labels"; MTEdges -> "edges"
   MTStatuses -> "statuses"; MTStatus -> "status"
+  MTHoles -> "holes"; MTHole -> "hole"; MTObligations -> "obligations"
   MTIn -> "in"; MTOut -> "out"; MTUndec -> "undec"
   MTGap -> "gap"; MTJustified -> "justified"
   MTContested -> "contested"; MTDefeated -> "defeated"
@@ -597,8 +612,8 @@ decodeMapQuestion e = do
 encodeMapVerdict :: MapVerdict -> SExpr
 encodeMapVerdict verdict =
   mtagged
-    MTMapVerdict1
-    [ mtagged MTScope [SAtom (mapTagToString (scopeTag (mvScope verdict)))]
+    MTMapVerdict2
+    ( [ mtagged MTScope [SAtom (mapTagToString (scopeTag (mvScope verdict)))]
     , mtagged MTSchema [SAtom (mapTagToString (schemaTag (mvSchema verdict)))]
     , mtagged MTCore [SAtom (coreVersionText (mvCore verdict))]
     , mtagged MTPolicy [SAtom (let PolicyId policy = mvPolicy verdict in policy)]
@@ -617,12 +632,16 @@ encodeMapVerdict verdict =
         ]
     , mtagged MTStatuses (map encodeMapStatus (mvStatuses verdict))
     ]
+        -- Present exactly when the linked unit has a located hole, so a map
+        -- with none prints the same section list it did before holes existed.
+        ++ [mtagged MTHoles (map encodeMapHole (mvHoles verdict)) | not (null (mvHoles verdict))]
+    )
 
 scopeTag :: MapScope -> MapTag
 scopeTag ScopeMap = MTMap
 
 schemaTag :: MapSchema -> MapTag
-schemaTag MapVerdictSchemaV1 = MTMapVerdictSchema1
+schemaTag MapVerdictSchemaV2 = MTMapVerdictSchema2
 
 labelTag :: Label -> MapTag
 labelTag label = case label of
@@ -655,6 +674,17 @@ encodeMapNode node =
     , SAtom (show (nodeIndexInt (mnIndex node)))
     ]
 
+encodeMapHole :: MapHole -> SExpr
+encodeMapHole hole =
+  mtagged
+    MTHole
+    [ encodeAlias (mhAlias hole)
+    , SAtom (let ArgId argument = mhArg hole in argument)
+    , mtagged
+        MTObligations
+        [SAtom question | QuestionId question <- NE.toList (mhObligations hole)]
+    ]
+
 encodeMapStatus :: MapStatus -> SExpr
 encodeMapStatus status =
   mtagged
@@ -672,7 +702,11 @@ decodeMapVerdict = runMapDecode . decodeMapVerdictM
 
 decodeMapVerdictM :: SExpr -> MapDecode MapVerdict
 decodeMapVerdictM value = do
-  [ scopeSection
+  fields <- mapSectionFields context MTMapVerdict2 value
+  -- Ten required sections, then the optional @holes@ section. A present
+  -- section is told apart by its position alone: anything in the eleventh
+  -- slot must be @(holes …)@, which 'decodeHoles' checks.
+  ( scopeSection
     , schemaSection
     , coreSection
     , policySection
@@ -682,13 +716,25 @@ decodeMapVerdictM value = do
     , labelsSection
     , edgesSection
     , statusesSection
-    ] <-
-    matchMapTagged context MTMapVerdict1 10 value
+    , holesSection
+    ) <- case fields of
+    [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10] ->
+      mok (s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, Nothing)
+    [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11] ->
+      mok (s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, Just s11)
+    _ ->
+      mwerr
+        context
+        ( "wrong number of fields for "
+            ++ mapTagToString MTMapVerdict2
+            ++ ": expected 10 or 11, got "
+            ++ show (length fields)
+        )
   [scope] <- matchMapTagged "map verdict scope" MTScope 1 scopeSection
   scopeValue <- mapKeyword "map verdict scope" [(MTMap, ScopeMap)] scope
   [schema] <- matchMapTagged "map verdict schema" MTSchema 1 schemaSection
   schemaValue <-
-    mapKeyword "map verdict schema" [(MTMapVerdictSchema1, MapVerdictSchemaV1)] schema
+    mapKeyword "map verdict schema" [(MTMapVerdictSchema2, MapVerdictSchemaV2)] schema
   [core] <- matchMapTagged "map verdict core" MTCore 1 coreSection
   coreValue <- decodeCoreVersion core
   [policy] <- matchMapTagged "map verdict policy" MTPolicy 1 policySection
@@ -701,6 +747,19 @@ decodeMapVerdictM value = do
   nodes <- decodeNodes declared nodeCount nodesSection
   edges <- decodeEdges nodeCount edgesSection
   statuses <- decodeStatuses declared statusesSection
+  holes <- maybe (mok []) (decodeHoles declared) holesSection
+  case firstDuplicate
+    ( [(mnAlias node, mnArg node) | node <- nodes]
+        ++ [(mhAlias hole, mhArg hole) | hole <- holes]
+    ) of
+    Just (alias, ArgId argument) ->
+      mwerr
+        "map verdict holes"
+        ( "argument handle "
+            ++ qualifiedDisplay (qualifyId alias argument)
+            ++ " is reported twice (a handle is a node or a hole, once)"
+        )
+    Nothing -> mok ()
   mok
     MapVerdict
       { mvScope = scopeValue
@@ -713,6 +772,7 @@ decodeMapVerdictM value = do
       , mvLabels = labels
       , mvEdges = edges
       , mvStatuses = statuses
+      , mvHoles = holes
       }
   where
     context = "map verdict"
@@ -720,9 +780,9 @@ decodeMapVerdictM value = do
 decodeCoreVersion :: SExpr -> MapDecode CoreVersion
 decodeCoreVersion e = do
   text <- mapAtomText context e
-  if text == coreVersionText LaraCoreV02
-    then mok LaraCoreV02
-    else mwerr context ("expected " ++ coreVersionText LaraCoreV02 ++ ", got " ++ show text)
+  if text == coreVersionText LaraCoreV03
+    then mok LaraCoreV03
+    else mwerr context ("expected " ++ coreVersionText LaraCoreV03 ++ ", got " ++ show text)
   where
     context = "map verdict core"
 
@@ -872,7 +932,45 @@ decodeStatuses declared section = do
               status
         else mwerr context ("undeclared member alias " ++ aliasText aliasValue)
 
--- | Read a proposition in @lara-core\@0.2@'s @\<atom\>@ form, relabelling the
+-- | The located-hole report: present only when nonempty, one
+-- @(hole ALIAS ARG-ID (obligations QUESTION-ID+))@ row per handle.
+--
+-- What the section's own bytes determine is settled here: the section is
+-- nonempty (the encoder omits an empty one, so a present-but-empty section is
+-- non-canonical), every alias is declared, and every obligation list is
+-- nonempty and duplicate-free (the core's obligation set is a deduplicated
+-- union). Uniqueness of a handle across @nodes@ and @holes@ is checked by the
+-- caller, which holds both. Whether a row's obligations are the ones its
+-- member's term really carries, and whether the rows are in linked declaration
+-- order, depend on the members and are not decidable from a verdict alone.
+decodeHoles :: Set.Set MemberAlias -> SExpr -> MapDecode [MapHole]
+decodeHoles declared section = do
+  fields <- mapSectionFields context MTHoles section
+  holes <- mapM decodeHole fields
+  if null holes
+    then mwerr context "holes section is present but empty"
+    else mok holes
+  where
+    context = "map verdict holes"
+    decodeHole e = do
+      [alias, argument, obligationsSection] <- matchMapTagged context MTHole 3 e
+      aliasValue <- decodeAlias context alias
+      if aliasValue `Set.member` declared
+        then mok ()
+        else mwerr context ("undeclared member alias " ++ aliasText aliasValue)
+      argumentId <- ArgId <$> mapAtomText context argument
+      questions <-
+        mapSectionFields context MTObligations obligationsSection
+          >>= mapM (fmap QuestionId . mapAtomText context)
+      obligations <- case NE.nonEmpty questions of
+        Nothing -> mwerr context "a hole has at least one obligation"
+        Just nonEmptyQuestions -> case firstDuplicate questions of
+          Just (QuestionId question) ->
+            mwerr context ("duplicate obligation " ++ question)
+          Nothing -> mok nonEmptyQuestions
+      mok MapHole{mhAlias = aliasValue, mhArg = argumentId, mhObligations = obligations}
+
+-- | Read a proposition in @lara-core\@0.3@'s @\<atom\>@ form, relabelling the
 -- core codec's failure with the map position that asked for it.
 decodeMapAtom :: String -> SExpr -> MapDecode Prop
 decodeMapAtom context e = case decodeAtomSExpr e of

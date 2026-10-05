@@ -25,7 +25,7 @@
 #          two drivers over stale bytes);
 #        * `lara check` and `lara-map-driver` must agree on stdout bytes AND
 #          exit code. A map that both accept is compared on its full
-#          map-verdict@1 bytes; a map both refuse after the checked boundary
+#          map-verdict@2 bytes; a map both refuse after the checked boundary
 #          (a false alignment, a linked unit that does not check) is compared
 #          on its empty stdout, its exit code, AND its stderr diagnostic with
 #          each driver's own name prefix stripped — because two empty stdouts
