@@ -109,6 +109,7 @@ examples/rebuttal-replay/round2/example.core.sexp
 examples/running-example/run1/example.core.sexp
 examples/running-example/run2/example.core.sexp
 fixtures/corpus/accept-located-hole.sexp
+fixtures/corpus/accept-nested-hole-sites.sexp
 fixtures/corpus/group-conflict-quarantine-attacker.sexp
 fixtures/corpus/group-conflict-quarantine.sexp
 fixtures/corpus/group-consistent-accept.sexp

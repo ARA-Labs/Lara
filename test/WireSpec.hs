@@ -416,13 +416,21 @@ genVerdict = do
         holes <-
           sequence
             [ HoleRow (i - 1) (ArgId ("h" ++ show k))
-                <$> listOf1 (QuestionId <$> genIdent)
+                <$> genHoleObligations
                 <*> listOf (choose (0, 9))
             | (k, i) <- zip [0 :: Int ..] holeIndices
             ]
         pure (Verdict replayId (Accept lbls edges statuses holes))
     , Verdict replayId . Reject <$> genRejection
     ]
+  where
+    -- Distinct obligations, each with a nonempty list of distinct sites
+    -- (spec §4.4, D12): the decoder rejects repeats of either.
+    genHoleObligations = do
+      questions <- nub <$> listOf1 (QuestionId <$> genIdent)
+      mapM
+        (\q -> HoleObligation q . nub <$> listOf1 genPosition)
+        questions
 
 -- ---------------------------------------------------------------------------
 -- Text-codec golden vectors (hand-verified)
@@ -1154,16 +1162,24 @@ prop_verdictGoldenVectors =
           [(0, LIn), (1, LOut)]
           [(0, 1)]
           [(Prop (Pred "p") [], Published Gap)]
-          [ HoleRow 0 (ArgId "h0") [QuestionId "q2", QuestionId "q1"] [1, 4]
-          , HoleRow 3 (ArgId "h3") [QuestionId "q1"] []
+          [ HoleRow
+              0
+              (ArgId "h0")
+              [ HoleObligation (QuestionId "q2") [[StepPremise 0], [StepPremise 1, StepQuestion (QuestionId "cq")]]
+              , HoleObligation (QuestionId "q1") [[]]
+              ]
+              [1, 4]
+          , HoleRow 3 (ArgId "h3") [HoleObligation (QuestionId "q1") [[StepQuestion (QuestionId "q0")]]] []
           ]
     holesText =
       "(verdict " ++ goldenReplayText
         ++ " accept (labels (0 in) (1 out)) "
         ++ "(edges (0 1)) "
         ++ "(statuses (status (atom p) gap)) "
-        ++ "(holes (arg 0 h0 (obligations q2 q1) (attacks 1 4)) "
-        ++ "(arg 3 h3 (obligations q1) (attacks))))"
+        ++ "(holes (arg 0 h0 (obligations "
+        ++ "(obligation q2 (pos (prem 0)) (pos (prem 1) (ques cq))) "
+        ++ "(obligation q1 (pos))) (attacks 1 4)) "
+        ++ "(arg 3 h3 (obligations (obligation q1 (pos (ques q0)))) (attacks))))"
     -- Both optional sections, in their fixed order.
     blockedHolesV =
       Verdict goldenReplayId $
@@ -1171,13 +1187,13 @@ prop_verdictGoldenVectors =
           [(0, LIn)]
           []
           [(Prop (Pred "p") [], EvidenceBlocked Justified)]
-          [HoleRow 1 (ArgId "h") [QuestionId "q"] [0]]
+          [HoleRow 1 (ArgId "h") [HoleObligation (QuestionId "q") [[]]] [0]]
     blockedHolesText =
       "(verdict " ++ goldenReplayText
         ++ " accept (labels (0 in)) (edges) "
         ++ "(statuses (status (atom p) evidence-blocked)) "
         ++ "(conditional (status (atom p) justified)) "
-        ++ "(holes (arg 1 h (obligations q) (attacks 0))))"
+        ++ "(holes (arg 1 h (obligations (obligation q (pos))) (attacks 0))))"
     rejectMissing = Verdict goldenReplayId (Reject MissingConflict)
 
 prop_verdictRoundTrip :: Property
@@ -1384,15 +1400,39 @@ prop_verdictMalformedMatrix = all isLeft (map decodeVerdict malformed)
       , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRow "2" "h" ["q"] [], holeRow "1" "k" ["q"] []]]
       , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRow "1" "h" ["q"] [], holeRow "1" "k" ["q"] []]]
       , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRow "0" "h" ["q"] [], holeRow "1" "h" ["q"] []]]
-      , accept [labelsSec, edgesSec, statusesSec, holesSec [SList [SAtom "arg", SAtom "0", SList [], SList [SAtom "obligations", SAtom "q"], SList [SAtom "attacks"]]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [SList [SAtom "arg", SAtom "0", SList [], SList [SAtom "obligations", rootObligation "q"], SList [SAtom "attacks"]]]]
+      -- Obligation rows (D12): the pre-site bare-id form, a wrong tag, no
+      -- site, a repeated site, a repeated obligation, a malformed position,
+      -- and a non-atom question are all non-canonical.
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [SAtom "q"]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [SList [SAtom "bogus", SAtom "q", posRoot]]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [SList [SAtom "obligation", SAtom "q"]]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [SList [SAtom "obligation", SAtom "q", posRoot, posRoot]]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [SList [SAtom "obligation", SAtom "q", posPrem "0", posRoot, posPrem "0"]]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [rootObligation "q", rootObligation "q"]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [SList [SAtom "obligation", SAtom "q", posPrem "01"]]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [SList [SAtom "obligation", SAtom "q", SList [SAtom "pos", SList [SAtom "prem"]]]]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [SList [SAtom "obligation", SList [], posRoot]]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [SList [SAtom "obligation", SAtom "q", SAtom "pos"]]]]
       ]
+    posRoot = SList [SAtom "pos"]
+    posPrem i = SList [SAtom "pos", SList [SAtom "prem", SAtom i]]
+    rootObligation q = SList [SAtom "obligation", SAtom q, posRoot]
+    holeRowWith index argumentId obligations =
+      SList
+        [ SAtom "arg"
+        , SAtom index
+        , SAtom argumentId
+        , SList (SAtom "obligations" : obligations)
+        , SList [SAtom "attacks"]
+        ]
     holesSec rows = SList (SAtom "holes" : rows)
     holeRow index argumentId obligations attacks =
       SList
         [ SAtom "arg"
         , SAtom index
         , SAtom argumentId
-        , SList (SAtom "obligations" : map SAtom obligations)
+        , SList (SAtom "obligations" : map rootObligation obligations)
         , SList (SAtom "attacks" : map SAtom attacks)
         ]
     conditionalPSec = SList [SAtom "conditional", statusEntry "p" "gap"]

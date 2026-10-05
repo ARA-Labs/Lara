@@ -49,7 +49,10 @@ import Lara.Wire
   , parseSExpr
   , printSExpr
   )
-import Lara.Check (UnitError (..), checkUnit, fullConfig, unitErrorClass)
+import Lara.Attack (subterm)
+import Lara.Check (UnitError (..), checkUnit, cuHoles, fullConfig, unitErrorClass)
+import Lara.Policy (lookupRule)
+import Lara.SupportTerm (chObligations, chTerm, holeNames, mandatoryNames, obligationSites)
 import Lara.Driver
   ( buildCertOk
   , buildGamma
@@ -1095,9 +1098,65 @@ prop_holeAccepted =
           printSExpr (encodeVerdict (runCheck (testCheckInput holeUnit)))
             === ( "(verdict " ++ testReplayText ++ " accept (labels) (edges)"
                     ++ " (statuses (status (atom c) gap))"
-                    ++ " (holes (arg 0 a (obligations q1) (attacks))))"
+                    ++ " (holes (arg 0 a (obligations (obligation q1 (pos))) (attacks))))"
                 )
       ]
+
+-- | D12 conformance evidence (the Lean @Lara.Check.HoleSites@ proofs carry
+-- soundness): on the nested-sites anchor, each hole's obligation rows name
+-- exactly its root obligations in order, and each row's sites are nonempty,
+-- duplicate-free, and — compared against a brute-force enumeration of every
+-- position of the term — exactly the rule occurrences that leave the question
+-- open with it mandatory. No open mandatory occurrence names a question
+-- outside the root obligations.
+prop_holeSitesAdequate :: Property
+prop_holeSitesAdequate =
+  once . ioProperty $ do
+    text <- readFile "fixtures/corpus/accept-nested-hole-sites.sexp"
+    pure $ case decodeCheckInputFile text of
+      Left e -> counterexample (show e) False
+      Right input ->
+        let unit = inputUnit input
+         in case checkUnit (buildGamma (unitLeaves unit)) (buildCertOk (unitTheories unit)) unit of
+              Left e -> counterexample (show e) False
+              Right accepted ->
+                let pI = lookupRule (unitRules unit)
+                    holes = cuHoles accepted
+                 in counterexample "three holes" (length holes === 3)
+                      .&&. conjoin [adequate pI (chTerm h) (chObligations h) | h <- holes]
+  where
+    adequate pI term obligations =
+      let rows = obligationSites pI term obligations
+          openAt q pos = case subterm term pos of
+            Just (SRule rn _ _ _ hs _) -> case pI rn of
+              Just r -> q `elem` holeNames hs && q `elem` mandatoryNames r
+              Nothing -> False
+            _ -> False
+          openMandatoryAt pos = case subterm term pos of
+            Just (SRule rn _ _ _ hs _) -> case pI rn of
+              Just r -> [q | q <- holeNames hs, q `elem` mandatoryNames r]
+              Nothing -> []
+            _ -> []
+          positions = allPositions term
+       in conjoin
+            [ counterexample "row questions are the obligations" $
+                map fst rows === obligations
+            , conjoin
+                [ counterexample (show q) $
+                    counterexample "nonempty" (not (null sites))
+                      .&&. counterexample "duplicate-free" (nub sites === sites)
+                      .&&. sort sites === sort [pos | pos <- positions, openAt q pos]
+                | (q, sites) <- rows
+                ]
+            , counterexample "every open mandatory question is an obligation" $
+                all (`elem` obligations) (concatMap openMandatoryAt positions)
+            ]
+    allPositions t =
+      [] : case t of
+        SLeaf _ -> []
+        SRule _ _ ws d _ _ ->
+          [StepPremise i : pos | (i, w) <- zip [0 ..] ws, pos <- allPositions w]
+            ++ [StepQuestion q : pos | (q, w) <- d, pos <- allPositions w]
 
 -- | A rule @premise ⇒ concl@ whose instance is a hole: one mandatory
 -- question.
@@ -1128,7 +1187,7 @@ prop_holeAttackInert =
     printSExpr (encodeVerdict (runCheck (testCheckInput holeAttackerUnit)))
       === ( "(verdict " ++ testReplayText ++ " accept (labels (0 in)) (edges)"
               ++ " (statuses (status (atom concl) justified) (status (atom base) gap))"
-              ++ " (holes (arg 1 aH (obligations hq) (attacks 1))))"
+              ++ " (holes (arg 1 aH (obligations (obligation hq (pos))) (attacks 1))))"
           )
 
 -- | D7, the @lara-core\@0.3@ change to conservative reporting: the
@@ -1475,6 +1534,7 @@ checkSpecProps =
   , ("check rejection-class negatives", quickCheckResult prop_negatives)
   , ("check open mandatory question is an accepted hole", quickCheckResult prop_holeAccepted)
   , ("check hole-sourced attack is checked but inert", quickCheckResult prop_holeAttackInert)
+  , ("check hole obligation sites are exactly the open occurrences (D12)", quickCheckResult prop_holeSitesAdequate)
   , ("check holes under quarantine (D6/D7)", quickCheckResult prop_holesUnderQuarantine)
   , ("check Sigma well-formedness fault matrix", quickCheckResult prop_sigmaWellFormedFaults)
   , ("check duplicate-report-group quarantine/gap", quickCheckResult prop_groupQuarantine)

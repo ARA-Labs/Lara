@@ -104,7 +104,8 @@ import Lara.SupportTerm
   , ReferenceReason (..)
   )
 import Lara.Wire
-  ( HoleRow (..)
+  ( HoleObligation (..)
+  , HoleRow (..)
   , Outcome (..)
   , PublicStatus (..)
   , Tag (..)
@@ -237,14 +238,25 @@ sourceResultJsonValue result =
         ]
 
 -- | One verdict @holes@ row as JSON: the hole's original declaration index
--- and id, its root obligations, and the original indices of the attacks it
--- sources (spec §4.4).
+-- and id, its root obligations, each obligation's sites — the rule
+-- occurrences that leave it open, rendered as attack target paths relative to
+-- the hole (@rule@ at the root, @0.q.rule@ below it; spec §4.4, D12) — and the
+-- original indices of the attacks it sources.
 holeEntry :: HoleRow -> JValue
 holeEntry (HoleRow i (ArgId a) obligations attacks) =
   JObject
     [ ("arg", JString a)
     , ("index", JNumber i)
-    , ("obligations", JArray [JString q | QuestionId q <- obligations])
+    , ("obligations", JArray [JString q | HoleObligation (QuestionId q) _ <- obligations])
+    , ( "sites"
+      , JArray
+          [ JObject
+              [ ("question", JString q)
+              , ("at", JArray [JString (renderPositionId pos "rule") | pos <- sites])
+              ]
+          | HoleObligation (QuestionId q) sites <- obligations
+          ]
+      )
     , ("attacks", JArray (map JNumber attacks))
     ]
 

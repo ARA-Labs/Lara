@@ -122,7 +122,9 @@ import Lara.SupportTerm
   , SlotSource (..)
   , chIndex
   , chObligations
+  , chTerm
   , inferSupport
+  , obligationSites
   , srObligations
   )
 import qualified Lara.Strict as St
@@ -131,7 +133,7 @@ import qualified Lara.Strict.Insp as Insp
 import qualified Lara.Strict.ND as ND
 import qualified Lara.Strict.Ord as Ord
 import qualified Lara.Strict.RA as RA
-import Lara.Wire (HoleRow (..), Outcome (..), PublicStatus (..), Verdict (..))
+import Lara.Wire (HoleObligation (..), HoleRow (..), Outcome (..), PublicStatus (..), Verdict (..))
 
 -- | Run replay preflight, the duplicate-report-group boundary check, and the
 -- checker, retaining the validated identity. Precedence mirrors the spec's
@@ -500,17 +502,21 @@ declaredTypedHole declared w =
 
 -- | The verdict's @holes@ rows (spec §4.4, @docs\/located-gap-decision.md@
 -- D5): each located hole of the checked unit, reported at its __original__
--- declaration index and id, with its exact root obligations and the original
--- indices of the raw attacks whose source it is. Admission's
--- retained-argument and retained-attack maps carry the checked positions back
--- to the supplied unit. Attacks are aligned by their raw source id, before
--- live-source filtering.
+-- declaration index and id, with its exact root obligations — each located at
+-- its sites (D12), read from the cached term by 'obligationSites', never by
+-- re-running inference — and the original indices of the raw attacks whose
+-- source it is. Admission's retained-argument and retained-attack maps carry
+-- the checked positions back to the supplied unit. Attacks are aligned by
+-- their raw source id, before live-source filtering. Mirrors Lean
+-- @Lara.Driver.holeRows@.
 holeRows :: Prune -> CheckedUnit -> [HoleRow]
 holeRows pruned accepted =
   [ HoleRow
       (originalArg (chIndex hole))
       holeId
-      (chObligations hole)
+      [ HoleObligation q sites
+      | (q, sites) <- obligationSites pI (chTerm hole) (chObligations hole)
+      ]
       [ originalAttack k
       | (k, attack) <- zip [0 ..] (unitAttacks checked)
       , attackSource attack == holeId
@@ -520,6 +526,7 @@ holeRows pruned accepted =
   ]
   where
     checked = pruneChecked pruned
+    pI = lookupRule (unitRules checked)
     originalArg = (retainedIndices pruned !!)
     originalAttack = (retainedAttackIndices pruned !!)
     attackSource attack = case attack of

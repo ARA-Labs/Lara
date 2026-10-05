@@ -47,6 +47,7 @@ import Lara.Strict
 import Lara.RA
 import Lara.Ord
 import Lara.Insp
+import Lara.Check.HoleSites
 
 namespace Lara.Driver
 
@@ -86,7 +87,7 @@ inductive Tag where
   | checkInput | replayId | core | backends | backend | artifact
   | verdict | accept | reject | labels | edges | statuses | status | conditional
   -- the located-hole verdict rows (spec §4.4; lara-core@0.3)
-  | obligations
+  | obligations | obligation
   | inL | outL | undecL | gap | justified | contested | defeated | evidenceBlocked
   | dupRule | dupArgument | missingConflict
   | groups | group | quarantine
@@ -120,7 +121,7 @@ def tagToString : Tag → String
   | .verdict => "verdict" | .accept => "accept" | .reject => "reject"
   | .labels => "labels" | .edges => "edges" | .statuses => "statuses"
   | .conditional => "conditional"
-  | .obligations => "obligations"
+  | .obligations => "obligations" | .obligation => "obligation"
   | .status => "status"
   | .inL => "in" | .outL => "out" | .undecL => "undec"
   | .gap => "gap" | .justified => "justified" | .contested => "contested"
@@ -1541,18 +1542,34 @@ inductive PublicStatus where
   deriving Repr, DecidableEq
 
 /-- One row of the verdict's `holes` section (spec §4.4,
-`docs/located-gap-decision.md` D5) — mirrors `Lara.Wire.HoleRow`. Every index
-is in the *supplied* unit's declaration space: `index` is the hole's original
-argument declaration index, `argId` that declaration's id, `obligations` its
-exact root obligations in order, and `attacks` the ascending original attack
-declaration indices of the retained raw attacks whose source is `argId`. -/
+`docs/located-gap-decision.md` D5, D12) — mirrors `Lara.Wire.HoleRow`. Every
+index is in the *supplied* unit's declaration space: `index` is the hole's
+original argument declaration index, `argId` that declaration's id,
+`obligations` its exact root obligations in order, each with its sites (the
+positions, relative to the hole's term, of the rule occurrences that leave it
+open — `Lara.Check.obligationSites`), and `attacks` the ascending original
+attack declaration indices of the retained raw attacks whose source is
+`argId`. -/
 structure HoleRow where
   index : Nat
   argId : String
-  obligations : List Lara.Support.QuestionId
+  obligations : List (Lara.Support.QuestionId × List Lara.Attack.Pos)
   attacks : List Nat
 
-/-- `(arg NAT ID (obligations ID+) (attacks NAT*))` — mirrors
+/-- `(pos ((prem NAT) | (ques ID))*)` — the attack position encoding, mirrors
+`Lara.Wire.encodePosition`. -/
+def encodePos (π : Lara.Attack.Pos) : Sx :=
+  .list (.atom (tagToString .pos) :: π.map (fun e =>
+    match e with
+    | .prem i => .list [.atom (tagToString .prem), sxNat i]
+    | .ques q => .list [.atom (tagToString .ques), .atom q.name]))
+
+/-- `(obligation ID POS+)` — mirrors `Lara.Wire.encodeHoleObligation`. -/
+def encodeHoleObligation (o : Lara.Support.QuestionId × List Lara.Attack.Pos) :
+    Sx :=
+  .list (.atom (tagToString .obligation) :: .atom o.1.name :: o.2.map encodePos)
+
+/-- `(arg NAT ID (obligations OBL+) (attacks NAT*))` — mirrors
 `Lara.Wire.encodeHoleRow`. -/
 def encodeHoleRow (row : HoleRow) : Sx :=
   .list
@@ -1560,7 +1577,7 @@ def encodeHoleRow (row : HoleRow) : Sx :=
     , sxNat row.index
     , .atom row.argId
     , .list (.atom (tagToString .obligations) ::
-        row.obligations.map (fun q => .atom q.name))
+        row.obligations.map encodeHoleObligation)
     , .list (.atom (tagToString .attacks) :: row.attacks.map sxNat)
     ]
 
@@ -1631,9 +1648,11 @@ pairs the `k`-th retained declaration with its original index; quarantine
 filters, so the map is monotone and the rows stay ascending. The attacks are
 the original indices of the raw attacks that survived quarantine (`keepAttack`,
 the same filter `selectAligned` uses) and whose raw source id is the hole's id,
-aligned before any live-source filtering. A checked index with no retained
-entry cannot arise (the checker indexes the retained arguments); such a hole is
-dropped rather than reported at a forged index. -/
+aligned before any live-source filtering. Each obligation carries its sites
+(D12), read from the hole's cached term and obligations by
+`Lara.Check.holeObligationSites`, never by re-running inference. A checked
+index with no retained entry cannot arise (the checker indexes the retained
+arguments); such a hole is dropped rather than reported at a forged index. -/
 def holeRows {Γ : LeafId → Option Atom}
     {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
     (keep : (String × SupportTerm) → Bool)
@@ -1648,9 +1667,31 @@ def holeRows {Γ : LeafId → Option Atom}
         some
           { index := original
           , argId := holeId
-          , obligations := hole.obligations
+          , obligations := Lara.Check.holeObligationSites hole
           , attacks := (attacksRaw.zipIdx.filter (fun entry =>
                 keepAttack entry.1 && entry.1.endpoints.1 == holeId)).map (·.2) })
+
+/-- **Every emitted row locates a checked hole's obligations.** Its obligation
+rows are `holeObligationSites` of a located hole of the accepted unit, so
+`Lara.Check.holeObligationSites_adequate` applies: the questions are the hole's
+exact root obligations in order, and each carries a nonempty, duplicate-free
+list of exactly the positions that leave it open. -/
+theorem holeRows_obligations {Γ : LeafId → Option Atom}
+    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (keep : (String × SupportTerm) → Bool)
+    (declared : List (String × SupportTerm))
+    (keepAttack : RawAttack → Bool) (attacksRaw : List RawAttack)
+    (accepted : Lara.Unit.CheckedUnit dcanon Γ CertOk) :
+    ∀ row ∈ holeRows keep declared keepAttack attacksRaw accepted,
+      ∃ hole ∈ accepted.holes,
+        row.obligations = Lara.Check.holeObligationSites hole := by
+  intro row hrow
+  obtain ⟨hole, hhole, hsome⟩ := List.mem_filterMap.mp hrow
+  refine ⟨hole, hhole, ?_⟩
+  split at hsome
+  · cases hsome
+  · cases hsome
+    rfl
 
 /-- Read the accept verdict off an accepted unit: grounded labels over the
 compiled AF (`checkedAF`), the compiled closure edges in ascending order,

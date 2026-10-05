@@ -92,7 +92,8 @@
 --                    \<conditional-sec\>? \<holes-sec\>?)
 --               | (verdict \<replay-id\> reject REJECTION)
 -- \<conditional-sec\> ::= (conditional (status \<atom\> CORE-STATUS)+)
--- \<holes-sec\> ::= (holes (arg NAT ID (obligations ID+) (attacks NAT*))+)
+-- \<holes-sec\> ::= (holes (arg NAT ID (obligations \<obligation\>+) (attacks NAT*))+)
+-- \<obligation\> ::= (obligation ID \<pos\>+)
 -- STATUS    ::= CORE-STATUS | evidence-blocked
 -- CORE-STATUS ::= gap | justified | contested | defeated
 -- REJECTION ::= duplicate-rule | duplicate-argument | missing-conflict
@@ -115,7 +116,9 @@
 -- The @holes@ section (spec §4.4, @lara-core\@0.3@) lists the declared
 -- arguments that type-check with an open mandatory critical question: each
 -- row names the hole by its original declaration index and id, its exact root
--- obligations, and the original indices of the typed attacks it sources. Holes
+-- obligations, each located at the rule occurrences (positions relative to the
+-- hole's term, in the attack position encoding) that leave it open, and the
+-- original indices of the typed attacks it sources. Holes
 -- are not AF nodes, so no label or edge mentions them. The section is present
 -- exactly when some declaration is a hole. The rejection payload is the class atom only —
 -- located diagnostics live in the checker's result type ("Lara.Check",
@@ -158,6 +161,7 @@ module Lara.Wire
   , conditionalStatus
   , isPublished
   , HoleRow (..)
+  , HoleObligation (..)
   , Outcome (..)
   , Verdict (..)
   , decodeVerdict
@@ -455,7 +459,7 @@ data Tag
   | TRebut | TUndercut | TUndermine
     -- verdicts
   | TVerdict | TAccept | TReject | TLabels | TEdges | TStatuses | TStatus
-  | TConditional | TObligations
+  | TConditional | TObligations | TObligation
   | TIn | TOut | TUndec | TGap | TJustified | TContested | TDefeated
   | TEvidenceBlocked
     -- rejection outcomes
@@ -493,7 +497,7 @@ tagToString t = case t of
   TVerdict -> "verdict"; TAccept -> "accept"; TReject -> "reject"
   TLabels -> "labels"; TEdges -> "edges"; TStatuses -> "statuses"
   TStatus -> "status"; TConditional -> "conditional"
-  TObligations -> "obligations"
+  TObligations -> "obligations"; TObligation -> "obligation"
   TIn -> "in"; TOut -> "out"; TUndec -> "undec"
   TGap -> "gap"; TJustified -> "justified"; TContested -> "contested"
   TDefeated -> "defeated"; TEvidenceBlocked -> "evidence-blocked"
@@ -1401,13 +1405,25 @@ data Outcome
 -- unit's @args@ and @attacks@ positions, before admission), not AF indices: a
 -- hole is a declaration, never a node, so 'hrIndex' is not bounded by the
 -- labels. 'hrObligations' is the exact root obligation list in the core's
--- deduplicated union order; 'hrAttacks' lists the typed raw attacks whose
--- source is this hole, ascending.
+-- deduplicated union order, each with its sites; 'hrAttacks' lists the typed
+-- raw attacks whose source is this hole, ascending.
 data HoleRow = HoleRow
   { hrIndex :: Int
   , hrArgId :: ArgId
-  , hrObligations :: [QuestionId]
+  , hrObligations :: [HoleObligation]
   , hrAttacks :: [Int]
+  }
+  deriving (Eq, Show)
+
+-- | One root obligation of a hole and its __sites__ (spec §4.4,
+-- @docs\/located-gap-decision.md@ D12): the positions, relative to the hole's
+-- term and in the attack position encoding (spec §7), of every rule occurrence
+-- that leaves the question open with the question mandatory for its rule. The
+-- list is nonempty and duplicate-free, in the traversal order of
+-- 'Lara.SupportTerm.openSites' (Lean @Lara.Check.obligationSites@).
+data HoleObligation = HoleObligation
+  { hoQuestion :: QuestionId
+  , hoSites :: [Position]
   }
   deriving (Eq, Show)
 
@@ -1452,16 +1468,21 @@ encodeVerdict (Verdict replayId outcome) =
           -- hole, so a hole-free verdict keeps its pre-@lara-core\@0.3@ bytes.
           ++ [tagged THoles (map encodeHoleRow holes) | not (null holes)]
 
--- | @(arg NAT ID (obligations ID+) (attacks NAT*))@.
+-- | @(arg NAT ID (obligations OBL+) (attacks NAT*))@.
 encodeHoleRow :: HoleRow -> SExpr
 encodeHoleRow (HoleRow index (ArgId argumentId) obligations attacks) =
   tagged
     TArg
     [ SAtom (show index)
     , SAtom argumentId
-    , tagged TObligations [SAtom q | QuestionId q <- obligations]
+    , tagged TObligations (map encodeHoleObligation obligations)
     , tagged TAttacks (map (SAtom . show) attacks)
     ]
+
+-- | @(obligation ID POS+)@.
+encodeHoleObligation :: HoleObligation -> SExpr
+encodeHoleObligation (HoleObligation (QuestionId q) sites) =
+  tagged TObligation (SAtom q : map encodePosition sites)
 
 encodeLabel :: Label -> SExpr
 encodeLabel label =
@@ -1637,14 +1658,32 @@ decodeVerdictM value = case value of
       argumentId <- ArgId <$> atomText "verdict hole" idValue
       obligations <-
         sectionFields "verdict hole obligations" TObligations obligationsValue
-          >>= mapM (fmap QuestionId . atomText "verdict hole obligations")
+          >>= mapM decodeHoleObligation
       if null obligations
         then werr "verdict hole obligations" "a hole has at least one obligation"
         else ok ()
+      if distinct (map hoQuestion obligations)
+        then ok ()
+        else werr "verdict hole obligations" "duplicate obligation in one hole"
       attacks <-
         sectionFields "verdict hole attacks" TAttacks attacksValue
           >>= mapM (parseNatText "verdict hole attacks")
       ok (HoleRow index argumentId obligations attacks)
+    decodeHoleObligation obligationValue = case obligationValue of
+      SList (SAtom k : questionValue : siteValues)
+        | parseTag k == Just TObligation -> do
+            question <- QuestionId <$> atomText "verdict hole obligation" questionValue
+            sites <- mapM decodePosition siteValues
+            if null sites
+              then werr "verdict hole obligation" "an obligation has at least one site"
+              else ok ()
+            if distinct sites
+              then ok (HoleObligation question sites)
+              else werr "verdict hole obligation" "duplicate site in one obligation"
+      _ ->
+        werr
+          "verdict hole obligation"
+          ("malformed obligation: " ++ show obligationValue)
     strictlyAscending xs = and (zipWith (<) xs (drop 1 xs))
     distinct xs = length xs == Set.size (Set.fromList xs)
 

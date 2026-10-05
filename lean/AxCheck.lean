@@ -1162,6 +1162,7 @@ open Lara
 #print axioms Lara.Check.obligationSites_questions
 #print axioms Lara.Check.obligationSites_adequate
 #print axioms Lara.Check.holeObligationSites_adequate
+#print axioms Lara.Driver.holeRows_obligations
 #print axioms Lara.Check.CheckedArguments.holes_terms
 #print axioms Lara.Check.CheckedArguments.partition
 #print axioms Lara.Check.CheckedArguments.typed
