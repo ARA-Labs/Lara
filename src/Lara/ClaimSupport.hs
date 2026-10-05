@@ -87,6 +87,8 @@ import Lara.AST
   , Unit (..)
   )
 import Lara.BindingAudit.Types
+import Lara.Check (resolveAttacks)
+import Lara.Compile (attackClosureB)
 import Lara.BindingAudit.Tsv (refCellErrorMessage, renderRefsCell, renderTsvRow)
 import Lara.ExpectedJson
   ( JValue (..)
@@ -264,11 +266,36 @@ computeUnit ruleModeOf flavored name ci surfaceDerivedArgs (Verdict _ outcome) p
         holeIds = [aid | HoleRow _ aid _ _ <- holes]
         afIndexById =
           zip [aid | (aid, _) <- unitArgs unit, aid `notElem` holeIds] [0 :: Int ..]
+        -- An @in@ challenge whose every typed attack is inert (aimed at a
+        -- located hole, D4/D6 of docs/located-gap-decision.md) bears on no
+        -- claim status, so neither it nor its leaves are load-bearing.
         loadBearingArgs =
           [ pair
           | pair@(aid, _) <- unitArgs unit
           , Just i <- [lookup aid afIndexById]
           , lookup i labels == Just LIn
+          , aid `notElem` inertOnlySources
+          ]
+        inertOnlySources =
+          [ aid
+          | (aid, _) <- unitArgs unit
+          , any ((== aid) . attackSrc) attacks
+          , not (any ((== aid) . attackSrc) liveAttacks)
+          ]
+        -- The typed attacks that can change a label: the source is a complete
+        -- AF node, and the target is complete or the attacked occurrence also
+        -- lies in some complete node (D6, the compiled-edge closure
+        -- 'Lara.Compile.attackClosureB'). An attack whose occurrence only a
+        -- located hole contains compiles to no edge.
+        completeTerms = [term | (aid, term) <- unitArgs unit, aid `notElem` holeIds]
+        liveAttacks =
+          [ attack
+          | attack <- attacks
+          , attackSrc attack `notElem` holeIds
+          , attackTarget attack `notElem` holeIds
+              || any
+                (\rk -> any (attackClosureB rk) completeTerms)
+                (resolveAttacks (unitArgs unit) [attack])
           ]
         loadBearingLeafIds = nub (concatMap (leaves . snd) loadBearingArgs)
 
@@ -380,7 +407,7 @@ computeUnit ruleModeOf flavored name ci surfaceDerivedArgs (Verdict _ outcome) p
                     ++ " is a challenge in " ++ name
                 )
 
-        attackAuditSubjects = map attackAuditSubject attacks
+        attackAuditSubjects = map attackAuditSubject liveAttacks
 
         attackAuditSubject attack =
           let sourceId = attackSrc attack
@@ -454,7 +481,7 @@ computeUnit ruleModeOf flavored name ci surfaceDerivedArgs (Verdict _ outcome) p
         attackTargets aid =
           nub
             [ attackTarget attack
-            | attack <- attacks
+            | attack <- liveAttacks
             , attackSrc attack == aid
             ]
 
