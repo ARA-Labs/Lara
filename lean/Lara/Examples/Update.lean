@@ -1,5 +1,9 @@
 /-
-A closed source-update fixture exposing the add-instance coverage obligation.
+Closed source-update fixtures: the add-instance coverage obligation, a fresh
+hole whose addition is inert (`addInstance_hole_inert`), a fresh complete
+alternative that completes a gap while the old hole stays reported
+(`addInstance_complete_alternative`), and the grounded and public transition
+matrices.
 -/
 
 import Lara.Update
@@ -105,6 +109,278 @@ theorem addInstance_uncovered_rejected :
           by decide, by decide, equiv_refl id pB, equiv_refl id pA⟩)
       (by simp [ConflictAttackable])
     simp [Covered] at hcovered
+
+/-! ### A fresh hole is inert -/
+
+private def holeArgsRaw : List (String × SupportTerm) :=
+  baseArgs ++ [("h", tMix)]
+
+private def holeDeclared : Admission.AlignedAttacks holeArgsRaw [] :=
+  { resolved := []
+  , resolve_eq := rfl
+  , ids_nodup := by decide }
+
+private def holeAdmission : Admission.AdmissionResult :=
+  { prune := Admission.buildPrune id [] baseMetas [(l1, pA), (l2, pB)]
+      holeArgsRaw [] [] holeDeclared.resolved
+  , declaredResolved := holeDeclared.resolved
+  , audit := Admission.buildAdmissionAudit id [] baseMetas [(l1, pA), (l2, pB)]
+      holeArgsRaw [] [] holeDeclared.resolved }
+
+private def holeState : Lara.Update.SourceState :=
+  { baseState with argsRaw := holeArgsRaw }
+
+private def holeUnit : Lara.Unit :=
+  { sigma := sigmaEx
+  , policy := unitPolicyEx
+  , args := [.leaf l1, tMix]
+  , atts := [] }
+
+private def holeCheck :=
+  Check.Unit.checkUnit baseGamma registryEx groundEx holeUnit
+
+private theorem holeCheck_isOk : holeCheck.isOk = true := by decide
+
+private def holeChecked :
+    Lara.Unit.CheckedUnit id baseGamma (certOkOf registryEx) :=
+  holeCheck.toOption.get (by decide)
+
+private theorem holeCheck_ok : holeCheck = .ok holeChecked := by
+  cases h : holeCheck with
+  | error error =>
+      have hs := holeCheck_isOk
+      rw [h] at hs
+      contradiction
+  | ok checked =>
+      have hoption : holeCheck.toOption = some checked :=
+        congrArg Except.toOption h
+      have haccepted : holeChecked = checked := by
+        unfold holeChecked
+        apply Option.get_of_eq_some
+        exact hoption
+      rw [haccepted]
+
+private def baseRun : Lara.Update.AcceptedRun registryEx baseState :=
+  { declared := baseDeclared
+  , admission := baseAdmission
+  , checked := baseChecked
+  , admission_ok := rfl
+  , check_ok := by
+      change baseCheck = .ok baseChecked
+      exact baseCheck_ok }
+
+private def holeRun : Lara.Update.AcceptedRun registryEx holeState :=
+  { declared := holeDeclared
+  , admission := holeAdmission
+  , checked := holeChecked
+  , admission_ok := rfl
+  , check_ok := by
+      change holeCheck = .ok holeChecked
+      exact holeCheck_ok }
+
+/-- **A fresh hole is inert, concretely.** Appending the mandatory-hole term
+`tMix` (open mandatory `q1`) under a fresh name to the accepted one-argument
+source meets every premise of `applyUpdate_addInstance_hole_ok` — no conflict
+premise is needed — and is accepted. Every core observation of every atom is
+unchanged under every extension semantics, and the report gains exactly that
+hole. -/
+theorem addInstance_hole_inert :
+    Lara.Update.InstanceFresh baseState "h" tMix ∧
+    Lara.termWellSorted baseState.sigma baseState.policy tMix = true ∧
+    (∃ C O, HasSupport id baseState.policy.ruleLookup
+      (Admission.buildGamma
+        (Admission.buildPrune id baseState.table baseState.metas
+          baseState.leaves baseState.argsRaw baseState.rawAtts
+          baseState.groups []).checkedLeaves)
+      (certOkOf registryEx) tMix C O ∧ O ≠ []) ∧
+    (∃ σ', Lara.Update.applyUpdate registryEx baseState (.addInstance "h" tMix) =
+      .ok σ' ∧ Lara.Update.Accepted registryEx σ') ∧
+    Lara.Update.applyUpdate registryEx baseState (.addInstance "h" tMix) =
+      .ok holeState ∧
+    (∀ sem p,
+      (Lara.Update.CoreTransition sem baseRun.checked holeRun.checked p).1 =
+        (Lara.Update.CoreTransition sem baseRun.checked holeRun.checked p).2) ∧
+    baseRun.checked.program.holes = [] ∧
+    holeRun.checked.program.holes = [tMix] := by
+  have hfresh : Lara.Update.InstanceFresh baseState "h" tMix := by
+    simp [Lara.Update.InstanceFresh, baseState, baseArgs, tMix]
+  have hsorted :
+      Lara.termWellSorted baseState.sigma baseState.policy tMix = true := by
+    decide
+  have hhole :
+      ∃ C O, HasSupport id baseState.policy.ruleLookup
+        (Admission.buildGamma
+          (Admission.buildPrune id baseState.table baseState.metas
+            baseState.leaves baseState.argsRaw baseState.rawAtts
+            baseState.groups []).checkedLeaves)
+        (certOkOf registryEx) tMix C O ∧ O ≠ [] :=
+    Check.argHole_iff.mp (by decide)
+  have happly :
+      Lara.Update.applyUpdate registryEx baseState (.addInstance "h" tMix) =
+        .ok holeState := rfl
+  have hinert sem p :=
+    Lara.Update.addInstance_hole_core_fixed (canon := id) sem registryEx
+      baseState holeState p "h" tMix baseRun.declared baseRun.admission
+      baseRun.checked holeRun.declared holeRun.admission holeRun.checked
+      baseRun.admission_ok baseRun.check_ok happly holeRun.admission_ok
+      holeRun.check_ok hhole
+  have hbaseHoles : baseRun.checked.program.holes = [] := by
+    have hs := Check.Unit.checkUnit_sound baseRun.check_ok
+    exact hs.holes_eq.trans (by decide)
+  refine ⟨hfresh, hsorted, hhole,
+    Lara.Update.applyUpdate_addInstance_hole_ok registryEx baseState "h" tMix
+      baseRun.accepted hfresh hsorted hhole,
+    happly, fun sem p => (hinert sem p).1, hbaseHoles, ?_⟩
+  rw [(hinert Semantics.groundedSem pA).2, hbaseHoles]
+  rfl
+
+/-! ### A fresh complete alternative completes a gap; the old hole persists -/
+
+private def gapArgsRaw : List (String × SupportTerm) := [("h", tMix)]
+
+private def gapDeclared : Admission.AlignedAttacks gapArgsRaw [] :=
+  { resolved := []
+  , resolve_eq := rfl
+  , ids_nodup := by decide }
+
+private def gapAdmission : Admission.AdmissionResult :=
+  { prune := Admission.buildPrune id [] baseMetas [(l1, pA), (l2, pB)]
+      gapArgsRaw [] [] gapDeclared.resolved
+  , declaredResolved := gapDeclared.resolved
+  , audit := Admission.buildAdmissionAudit id [] baseMetas [(l1, pA), (l2, pB)]
+      gapArgsRaw [] [] gapDeclared.resolved }
+
+private def gapState : Lara.Update.SourceState :=
+  { baseState with argsRaw := gapArgsRaw }
+
+private def gapUnit : Lara.Unit :=
+  { sigma := sigmaEx
+  , policy := unitPolicyEx
+  , args := [tMix]
+  , atts := [] }
+
+private def gapCheck :=
+  Check.Unit.checkUnit baseGamma registryEx groundEx gapUnit
+
+private theorem gapCheck_isOk : gapCheck.isOk = true := by decide
+
+private def gapChecked :
+    Lara.Unit.CheckedUnit id baseGamma (certOkOf registryEx) :=
+  gapCheck.toOption.get (by decide)
+
+private theorem gapCheck_ok : gapCheck = .ok gapChecked := by
+  cases h : gapCheck with
+  | error error =>
+      have hs := gapCheck_isOk
+      rw [h] at hs
+      contradiction
+  | ok checked =>
+      have hoption : gapCheck.toOption = some checked :=
+        congrArg Except.toOption h
+      have haccepted : gapChecked = checked := by
+        unfold gapChecked
+        apply Option.get_of_eq_some
+        exact hoption
+      rw [haccepted]
+
+private def gapRun : Lara.Update.AcceptedRun registryEx gapState :=
+  { declared := gapDeclared
+  , admission := gapAdmission
+  , checked := gapChecked
+  , admission_ok := rfl
+  , check_ok := by
+      change gapCheck = .ok gapChecked
+      exact gapCheck_ok }
+
+private def altArgsRaw : List (String × SupportTerm) :=
+  gapArgsRaw ++ [("a", .leaf l1)]
+
+private def altDeclared : Admission.AlignedAttacks altArgsRaw [] :=
+  { resolved := []
+  , resolve_eq := rfl
+  , ids_nodup := by decide }
+
+private def altAdmission : Admission.AdmissionResult :=
+  { prune := Admission.buildPrune id [] baseMetas [(l1, pA), (l2, pB)]
+      altArgsRaw [] [] altDeclared.resolved
+  , declaredResolved := altDeclared.resolved
+  , audit := Admission.buildAdmissionAudit id [] baseMetas [(l1, pA), (l2, pB)]
+      altArgsRaw [] [] altDeclared.resolved }
+
+private def altState : Lara.Update.SourceState :=
+  { baseState with argsRaw := altArgsRaw }
+
+private def altUnit : Lara.Unit :=
+  { sigma := sigmaEx
+  , policy := unitPolicyEx
+  , args := [tMix, .leaf l1]
+  , atts := [] }
+
+private def altCheck :=
+  Check.Unit.checkUnit baseGamma registryEx groundEx altUnit
+
+private theorem altCheck_isOk : altCheck.isOk = true := by decide
+
+private def altChecked :
+    Lara.Unit.CheckedUnit id baseGamma (certOkOf registryEx) :=
+  altCheck.toOption.get (by decide)
+
+private theorem altCheck_ok : altCheck = .ok altChecked := by
+  cases h : altCheck with
+  | error error =>
+      have hs := altCheck_isOk
+      rw [h] at hs
+      contradiction
+  | ok checked =>
+      have hoption : altCheck.toOption = some checked :=
+        congrArg Except.toOption h
+      have haccepted : altChecked = checked := by
+        unfold altChecked
+        apply Option.get_of_eq_some
+        exact hoption
+      rw [haccepted]
+
+private def altRun : Lara.Update.AcceptedRun registryEx altState :=
+  { declared := altDeclared
+  , admission := altAdmission
+  , checked := altChecked
+  , admission_ok := rfl
+  , check_ok := by
+      change altCheck = .ok altChecked
+      exact altCheck_ok }
+
+/-- **Completion is additive (D11), concretely.** The accepted source declares
+only the hole `tMix` for `pA`, so `pA` is `gap`. Adding the distinct complete
+leaf argument for `pA` under a fresh name is accepted; the old hole is still
+the whole hole report (`addInstance_holes_persist`), while `pA` moves from
+`gap` to `justified`. -/
+theorem addInstance_complete_alternative :
+    Lara.Update.applyUpdate registryEx gapState (.addInstance "a" (.leaf l1)) =
+      .ok altState ∧
+    gapRun.checked.program.holes = [tMix] ∧
+    altRun.checked.program.holes = gapRun.checked.program.holes ∧
+    Grounded.statusC (Compile.checkedAF gapRun.checked.program)
+      (Consistency.completeClaimFor gapRun.checked pA) = .gap ∧
+    Grounded.statusC (Compile.checkedAF altRun.checked.program)
+      (Consistency.completeClaimFor altRun.checked pA) = .justified := by
+  have happly :
+      Lara.Update.applyUpdate registryEx gapState (.addInstance "a" (.leaf l1)) =
+        .ok altState := rfl
+  have hpersist :=
+    Lara.Update.addInstance_holes_persist (canon := id) registryEx gapState
+      altState "a" (.leaf l1) gapRun.declared gapRun.admission gapRun.checked
+      altRun.declared altRun.admission altRun.checked gapRun.admission_ok
+      gapRun.check_ok happly altRun.admission_ok altRun.check_ok
+  have hgapHoles : gapRun.checked.program.holes = [tMix] :=
+    (Check.Unit.checkUnit_sound gapRun.check_ok).holes_eq.trans (by decide)
+  refine ⟨happly, hgapHoles, ?_, by decide, by decide⟩
+  rw [hpersist]
+  have hnotHole :
+      Check.holeArgs gapState.policy.ruleLookup
+        (Admission.buildGamma gapAdmission.prune.checkedLeaves) registryEx
+        [.leaf l1] = [] := by decide
+  exact (congrArg (gapRun.checked.program.holes ++ ·) hnotHole).trans
+    (List.append_nil _)
 
 /-! ### Reusable grounded-transition fixture family -/
 

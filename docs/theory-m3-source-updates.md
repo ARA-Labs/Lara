@@ -156,11 +156,14 @@ target `AcceptedRun`s, a key, and
 the exact restrictiveness and retained-Gamma hypotheses), an atom `p`, and
 `publicReport targetRun p = .justified`. The proof first applies
 `tighten_public_justified_source_justified` to derive justification for the
-source checked complete claim. The clean-source framework and lifted-claim
-identities then yield the justified lifted claim in the source declared
-framework, exactly the conclusion shape of
-`Admission.source_justified_nonpromotion`. This is the matrix-to-legacy
-direction, and the proof does not call the older admission theorem.
+source checked complete claim. `tighten_public_row_justified_nonpromotion`
+then lifts that claim along the source's checked carrier into the source
+declared framework over the specification carrier (every declaration except
+the typed holes), exactly the conclusion shape of
+`Admission.source_justified_nonpromotion`. With holes the compact framework
+only embeds into the declared one, so the lift is not the identity. This is the
+matrix-to-legacy direction, and the proof does not call the older admission
+theorem.
 
 `CleanBase` cannot be dropped from the universal additive theorem.
 `Examples.Update.addAttack_blocked_growth` gives a real accepted, non-clean
@@ -272,22 +275,32 @@ obligation set. The checked framework holds only the complete arguments, so
 accepted run yields as checked arguments and attacks is the complete arguments
 and the attacks whose source is complete. `applyUpdate_addInstance_ok` keeps
 its complete-support premise: it is the completion case.
+`applyUpdate_addInstance_hole_ok` is the hole case; it needs no conflict
+premise, since attack completeness constrains complete arguments only.
 
 Adding a hole is inert only conditionally. A fresh `addInstance` whose term is
 a hole, with the attacks unchanged, leaves the complete arguments, their typing
 context and the closure coverage between them fixed, so every core status is
-unchanged and the only new output is the hole's diagnostic. The unconditional
+unchanged and the only new output is the hole's diagnostic
+(`addInstance_hole_core_fixed`, witnessed by
+`Examples.Update.addInstance_hole_inert`). The unconditional
 claim is false: an attack from a complete source onto an occurrence inside a
 hole produces closure edges onto complete arguments containing that occurrence,
 so `addAttack` onto a hole can change a core status, and removing a hole can
 remove such an attack at the raw endpoint boundary. Graph and status invariance
 is therefore stated under unchanged complete-to-complete coverage, or for the
 fresh hole-only `addInstance` above. No update other than `addInstance` changes
-which declared terms are holes.
+which declared terms are holes: a typed term keeps its obligations wherever the
+leaf context agrees on its leaves (`typed_obligations_preserved`), so `addLeaf`
+and `addAttack` leave the reported holes unchanged and `tighten` preserves the
+obligations of every surviving term (`addLeaf_obligations_preserved`,
+`addAttack_obligations_preserved`, `tighten_obligations_preserved`). Tightening
+can still quarantine a hole, so its reported hole list only shrinks.
 
 Completion is additive. An author completes a gap with `addLeaf` for each
 fresh admitted leaf it needs, then `addInstance` of a distinct complete term
-under a fresh raw name. The old hole and every raw attack stay declared. This
+under a fresh raw name. The old hole and every raw attack stay declared, and the
+old hole stays reported (`addInstance_holes_persist`). This
 is not a sequence that is accepted step by step in general: the complete term
 goes through ordinary attack-completeness checking, so if it licenses an
 outgoing conflict that no declared attack covers, `addInstance` rejects before

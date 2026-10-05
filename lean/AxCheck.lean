@@ -1611,6 +1611,7 @@ outside the public audit surface. -/
 #print axioms Lara.Update.applyUpdate_tighten_ok
 #print axioms Lara.Update.applyUpdate_addAttack_ok
 #print axioms Lara.Update.applyUpdate_addInstance_ok
+#print axioms Lara.Update.applyUpdate_addInstance_hole_ok
 
 /-! ### M3 — preservation support -/
 
@@ -1665,6 +1666,14 @@ outside the public audit surface. -/
 #print axioms Lara.Update.nonInstance_gap_fixed
 #print axioms Lara.Update.addInstance_sink_status_monotone
 
+-- Obligations and holes across updates (docs/located-gap-decision.md §6).
+#print axioms Lara.Update.typed_obligations_preserved
+#print axioms Lara.Update.addLeaf_obligations_preserved
+#print axioms Lara.Update.addAttack_obligations_preserved
+#print axioms Lara.Update.tighten_obligations_preserved
+#print axioms Lara.Update.addInstance_holes_persist
+#print axioms Lara.Update.addInstance_hole_core_fixed
+
 /-! ### M3 — public transition API and matrix boundaries -/
 
 #print axioms Lara.Update.PublicReport
@@ -1673,6 +1682,9 @@ outside the public audit surface. -/
 #print axioms Lara.Update.PublicReport.render
 #print axioms Lara.Update.PublicReport.publicationLabel
 
+#print axioms Lara.Update.checkedCarrierForRun
+#print axioms Lara.Update.referenceCarrierForRun
+#print axioms Lara.Update.declaredCarrier
 #print axioms Lara.Update.blockedQueriesForRun
 #print axioms Lara.Update.blockedSeedForRun
 #print axioms Lara.Update.blockedSetForRun
@@ -1688,14 +1700,14 @@ outside the public audit surface. -/
 #print axioms Lara.Update.retainedIndices_eq_range_of_clean
 #print axioms Lara.Update.keptAttacks_eq_resolved_of_clean
 #print axioms Lara.Update.checkedArgs_eq_raw_of_clean
-#print axioms Lara.Update.checkedAF_eq_declaredAF_of_clean
+#print axioms Lara.Update.checkedAF_embedding_of_clean
 #print axioms Lara.Update.blockedSeedForRun_eq_nil_of_clean
 #print axioms Lara.Update.blockedSetForRun_eq_nil_of_clean
 
 #print axioms Lara.Update.blockedSet_eq_nil_of_seed_nil
 #print axioms Lara.Update.blockedQueriesForRun_eq_nil_of_empty_closure
 #print axioms Lara.Update.publicReport_eq_core_of_empty_closure
-#print axioms Lara.Update.checkedAF_eq_declaredAF_of_no_arg_prune
+#print axioms Lara.Update.checkedAF_embedding_of_no_arg_prune
 
 #print axioms Lara.Update.AdditiveUpdate
 #print axioms Lara.Update.additive_clean_target
@@ -1720,6 +1732,8 @@ outside the public audit surface. -/
 #print axioms Lara.Examples.Update.SuccessfulCoreCell.transition
 
 #print axioms Lara.Examples.Update.addInstance_uncovered_rejected
+#print axioms Lara.Examples.Update.addInstance_hole_inert
+#print axioms Lara.Examples.Update.addInstance_complete_alternative
 #print axioms Lara.Examples.Update.addAttack_blocked_growth
 
 -- The 37 reachable grounded core cells.
