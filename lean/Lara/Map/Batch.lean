@@ -227,15 +227,18 @@ checker premises, open here for the same reason they are open there.
 
 Read with the members' solo acceptance, this is the mechanized reason no map of
 well-formed members reaches `MRLinkRejected`: the linked unit the drivers build
-is accepted. -/
-theorem batch_checked {canon : String → String} {reg : BackendRegistry canon}
+is accepted. Since issue #13 a member may carry located holes (`SideOkHoles`):
+the batch saturation never touches one (`crossPairs_endpoints_complete`), and
+`Check.Unit.checkUnit_complete_holes` asks every declaration only to type.
+`batch_checked` is the hole-free corollary. -/
+theorem batch_checked_holes {canon : String → String} {reg : BackendRegistry canon}
     {sg : Sigma.Sigma} {P : Policy.Policy}
     (pairs : List (String × Fragment)) (cross : SupportTerm → SupportTerm → Bool)
     (args : List SupportTerm) (atts : List Attack) (ground : List Atom)
     (haliases : (pairs.map Prod.fst).Nodup)
     (hdecl : (pairs.flatMap (·.2.declared)).Nodup)
     (hmembers : ∀ p ∈ pairs,
-      SideOk canon reg (Admission.buildGamma p.2.gammaFrag) P p.2.args p.2.atts)
+      SideOkHoles canon reg (Admission.buildGamma p.2.gammaFrag) P p.2.args p.2.atts)
     (hcross : ∀ p ∈ pairs, ∀ q ∈ pairs, p.1 ≠ q.1 →
       ∀ s ∈ p.2.args, ∀ t ∈ q.2.args, cross s t = true)
     (hnodup : args.Nodup)
@@ -250,9 +253,9 @@ theorem batch_checked {canon : String → String} {reg : BackendRegistry canon}
     (hpolicyWf : Policy.WellFormed canon P) :
     ∃ accepted, Check.Unit.checkUnit (batchGamma pairs) reg ground
       { sigma := sg, policy := P, args := args, atts := atts } = .ok accepted := by
-  have hside : ∀ p ∈ pairs, SideOk canon reg (batchGamma pairs) P p.2.args p.2.atts :=
-    fun p hp => SideOk.mono_gamma (batchGamma_extends hdecl hp) (hmembers p hp)
-  refine Check.Unit.checkUnit_complete hsignature hscope hruleIds hpolicyWf hnodup
+  have hside : ∀ p ∈ pairs, SideOkHoles canon reg (batchGamma pairs) P p.2.args p.2.atts :=
+    fun p hp => SideOkHoles.mono_gamma (batchGamma_extends hdecl hp) (hmembers p hp)
+  refine Check.Unit.checkUnit_complete_holes hsignature hscope hruleIds hpolicyWf hnodup
     ?_ ?_ ?_ ?_ ?_
   · intro w hw
     obtain ⟨p, hp, hwp⟩ := (hargs w).mp hw
@@ -282,6 +285,177 @@ theorem batch_checked {canon : String → String} {reg : BackendRegistry canon}
       exact covered_of_mem_attackFor ((hatts _).mpr (Or.inr
         (crossPairs_emits hsource htarget hsSup htSup hcm hca
           (hcross p hp q hq hpq source hsp target htq))))
+
+/-- **The batch unit of hole-free members is accepted.** The hole-free
+corollary of `batch_checked_holes`. -/
+theorem batch_checked {canon : String → String} {reg : BackendRegistry canon}
+    {sg : Sigma.Sigma} {P : Policy.Policy}
+    (pairs : List (String × Fragment)) (cross : SupportTerm → SupportTerm → Bool)
+    (args : List SupportTerm) (atts : List Attack) (ground : List Atom)
+    (haliases : (pairs.map Prod.fst).Nodup)
+    (hdecl : (pairs.flatMap (·.2.declared)).Nodup)
+    (hmembers : ∀ p ∈ pairs,
+      SideOk canon reg (Admission.buildGamma p.2.gammaFrag) P p.2.args p.2.atts)
+    (hcross : ∀ p ∈ pairs, ∀ q ∈ pairs, p.1 ≠ q.1 →
+      ∀ s ∈ p.2.args, ∀ t ∈ q.2.args, cross s t = true)
+    (hnodup : args.Nodup)
+    (hargs : ∀ w, w ∈ args ↔ ∃ p ∈ pairs, w ∈ p.2.args)
+    (hatts : ∀ k, k ∈ atts ↔ (∃ p ∈ pairs, k ∈ p.2.atts) ∨
+      k ∈ crossPairs canon P.defeat P.ruleLookup cross
+        (conclusionCache P.ruleLookup (batchGamma pairs) reg args))
+    (hsignature : Check.Unit.signatureStage ground
+      { sigma := sg, policy := P, args := args, atts := atts } = none)
+    (hscope : Policy.firstOutOfScope? P = none)
+    (hruleIds : (P.rules.map (·.id)).Nodup)
+    (hpolicyWf : Policy.WellFormed canon P) :
+    ∃ accepted, Check.Unit.checkUnit (batchGamma pairs) reg ground
+      { sigma := sg, policy := P, args := args, atts := atts } = .ok accepted :=
+  batch_checked_holes pairs cross args atts ground haliases hdecl
+    (fun p hp => (hmembers p hp).toHoles) hcross hnodup hargs hatts hsignature
+    hscope hruleIds hpolicyWf
+
+/-! ### What the accepted batch unit reports about holes (issue #13)
+
+The map driver accepts a linked unit whose members carry located holes; these
+statements say what that accepted unit then is, in terms of the members alone.
+A member declaration's classification, conclusion and obligation set in its
+own environment are its classification, conclusion and obligation set in the
+map; every generated attack is live and never touches a hole; and an attack a
+member sources at its own hole stays inert. This is what the hole rows of
+`map-verdict@2` read: each row's obligations are those of a member's own
+declaration. -/
+
+section Accepted
+
+variable {canon : String → String} {reg : BackendRegistry canon}
+  {sg : Sigma.Sigma} {P : Policy.Policy}
+  {pairs : List (String × Fragment)} {cross : SupportTerm → SupportTerm → Bool}
+  {args : List SupportTerm} {atts : List Attack} {ground : List Atom}
+  {accepted : Lara.Unit.CheckedUnit canon (batchGamma pairs) (certOkOf reg)}
+
+/-- **A member declaration is classified in the map as in its member.** Typed in
+its member's own environment with obligation set `O`, it is an AF node of the
+accepted batch unit iff `O` is empty and a located hole iff it is not. -/
+theorem batch_classify
+    (hdecl : (pairs.flatMap (·.2.declared)).Nodup)
+    (hargs : ∀ w, w ∈ args ↔ ∃ p ∈ pairs, w ∈ p.2.args)
+    (hcheck : Check.Unit.checkUnit (batchGamma pairs) reg ground
+      { sigma := sg, policy := P, args := args, atts := atts } = .ok accepted)
+    {p : String × Fragment} (hp : p ∈ pairs) {w : SupportTerm} (hw : w ∈ p.2.args)
+    {A : Atom} {O : List QuestionId}
+    (hsup : HasSupport canon P.ruleLookup (Admission.buildGamma p.2.gammaFrag)
+      (certOkOf reg) w A O) :
+    (w ∈ accepted.program.args ↔ O = []) ∧ (w ∈ accepted.program.holes ↔ O ≠ []) := by
+  have hs := Check.Unit.checkUnit_sound hcheck
+  have hsupB := hasSupport_mono_gamma (batchGamma_extends hdecl hp) hsup
+  have hwArgs : w ∈ args := (hargs w).mpr ⟨p, hp, hw⟩
+  rw [hs.args_eq, hs.holes_eq]
+  refine ⟨?_, ?_⟩
+  · show w ∈ Check.completeArgs P.ruleLookup (batchGamma pairs) reg args ↔ _
+    rw [Check.mem_completeArgs_iff]
+    constructor
+    · rintro ⟨-, A', hA'⟩; exact (hasSupport_unique hsupB hA').2
+    · intro hO; subst hO; exact ⟨hwArgs, A, hsupB⟩
+  · show w ∈ Check.holeArgs P.ruleLookup (batchGamma pairs) reg args ↔ _
+    rw [Check.mem_holeArgs_iff]
+    constructor
+    · rintro ⟨-, A', O', hA', hO'⟩
+      rw [(hasSupport_unique hsupB hA').2]; exact hO'
+    · intro hO; exact ⟨hwArgs, A, O, hsupB, hO⟩
+
+/-- **Every hole of the map is a member's hole, reported as that member reports
+it.** Some member declares its term, and any member typing it in its own
+environment gives it the reported conclusion and obligations. -/
+theorem batch_hole_report
+    (hdecl : (pairs.flatMap (·.2.declared)).Nodup)
+    (hargs : ∀ w, w ∈ args ↔ ∃ p ∈ pairs, w ∈ p.2.args)
+    (hcheck : Check.Unit.checkUnit (batchGamma pairs) reg ground
+      { sigma := sg, policy := P, args := args, atts := atts } = .ok accepted)
+    {h : Compile.CheckedHole canon accepted.policy.ruleLookup (batchGamma pairs)
+      (certOkOf reg)} (hh : h ∈ accepted.holes) :
+    (∃ p ∈ pairs, h.term ∈ p.2.args) ∧
+      ∀ p ∈ pairs, ∀ {A : Atom} {O : List QuestionId},
+        HasSupport canon P.ruleLookup (Admission.buildGamma p.2.gammaFrag)
+          (certOkOf reg) h.term A O →
+        h.conclusion = A ∧ h.obligations = O := by
+  have hs := Check.Unit.checkUnit_sound hcheck
+  have hmem : h.term ∈ accepted.program.holes := by
+    rw [← accepted.holes_terms]; exact List.mem_map_of_mem hh
+  rw [hs.holes_eq] at hmem
+  refine ⟨(hargs h.term).mp (Check.mem_holeArgs_iff.mp hmem).1, ?_⟩
+  intro p hp A O hsup
+  have hsupB : HasSupport canon
+      ({ sigma := sg, policy := P, args := args, atts := atts } : Lara.Unit).policy.ruleLookup
+      (batchGamma pairs) (certOkOf reg) h.term A O :=
+    hasSupport_mono_gamma (batchGamma_extends hdecl hp) hsup
+  rw [← hs.policy_eq] at hsupB
+  exact hasSupport_unique h.valid hsupB
+
+/-- **Every member hole is reported by the map**, with its member's conclusion
+and obligation set. -/
+theorem batch_member_hole_reported
+    (hdecl : (pairs.flatMap (·.2.declared)).Nodup)
+    (hargs : ∀ w, w ∈ args ↔ ∃ p ∈ pairs, w ∈ p.2.args)
+    (hcheck : Check.Unit.checkUnit (batchGamma pairs) reg ground
+      { sigma := sg, policy := P, args := args, atts := atts } = .ok accepted)
+    {p : String × Fragment} (hp : p ∈ pairs) {w : SupportTerm} (hw : w ∈ p.2.args)
+    {A : Atom} {O : List QuestionId}
+    (hsup : HasSupport canon P.ruleLookup (Admission.buildGamma p.2.gammaFrag)
+      (certOkOf reg) w A O) (hO : O ≠ []) :
+    ∃ h ∈ accepted.holes, h.term = w ∧ h.conclusion = A ∧ h.obligations = O := by
+  have hhole := ((batch_classify hdecl hargs hcheck hp hw hsup).2).mpr hO
+  rw [← accepted.holes_terms] at hhole
+  obtain ⟨h, hh, hterm⟩ := List.mem_map.mp hhole
+  exact ⟨h, hh, hterm,
+    (batch_hole_report hdecl hargs hcheck hh).2 p hp (hterm ▸ hsup)⟩
+
+/-- **Every generated attack is compiled, and never touches a hole.** The batch
+saturation's endpoints are complete (`crossPairs_endpoints_complete`), so each
+generated attack is live in the accepted unit and neither of its endpoints is a
+located hole. -/
+theorem batch_generated_live
+    (hatts : ∀ k, k ∈ atts ↔ (∃ p ∈ pairs, k ∈ p.2.atts) ∨
+      k ∈ crossPairs canon P.defeat P.ruleLookup cross
+        (conclusionCache P.ruleLookup (batchGamma pairs) reg args))
+    (hcheck : Check.Unit.checkUnit (batchGamma pairs) reg ground
+      { sigma := sg, policy := P, args := args, atts := atts } = .ok accepted)
+    {k : Attack}
+    (hk : k ∈ crossPairs canon P.defeat P.ruleLookup cross
+      (conclusionCache P.ruleLookup (batchGamma pairs) reg args)) :
+    k ∈ accepted.program.atts ∧
+      k.source ∉ accepted.program.holes ∧ k.target ∉ accepted.program.holes := by
+  have hs := Check.Unit.checkUnit_sound hcheck
+  obtain ⟨⟨Cs, hCs⟩, ⟨Ct, hCt⟩⟩ := crossPairs_endpoints_complete hk
+  obtain ⟨-, hsrc, -⟩ := crossPairs_spec hk
+  refine ⟨?_, ?_, ?_⟩
+  · rw [hs.atts_eq, Check.mem_liveAttacks_iff, hs.args_eq, Check.mem_completeArgs_iff]
+    exact ⟨(hatts k).mpr (Or.inr hk), hsrc, Cs, hCs⟩
+  · rw [hs.holes_eq]
+    intro h
+    obtain ⟨-, C', O, hC', hO⟩ := Check.mem_holeArgs_iff.mp h
+    exact hO (hasSupport_unique hCs hC').2.symm
+  · rw [hs.holes_eq]
+    intro h
+    obtain ⟨-, C', O, hC', hO⟩ := Check.mem_holeArgs_iff.mp h
+    exact hO (hasSupport_unique hCt hC').2.symm
+
+/-- **D4 in a map.** An attack whose source is a declaration some member types
+as a hole compiles to nothing in the accepted batch unit, and no edge leaves
+that source. -/
+theorem batch_hole_source_inert
+    (hdecl : (pairs.flatMap (·.2.declared)).Nodup)
+    (hargs : ∀ w, w ∈ args ↔ ∃ p ∈ pairs, w ∈ p.2.args)
+    (hcheck : Check.Unit.checkUnit (batchGamma pairs) reg ground
+      { sigma := sg, policy := P, args := args, atts := atts } = .ok accepted)
+    {p : String × Fragment} (hp : p ∈ pairs) {k : Attack} (hsrc : k.source ∈ p.2.args)
+    {A : Atom} {O : List QuestionId}
+    (hsup : HasSupport canon P.ruleLookup (Admission.buildGamma p.2.gammaFrag)
+      (certOkOf reg) k.source A O) (hO : O ≠ []) :
+    k ∉ accepted.program.atts ∧ ∀ b, ¬ Compile.Edge accepted.program k.source b :=
+  (Check.Unit.checkUnit_sound hcheck).hole_inert_source
+    (((batch_classify hdecl hargs hcheck hp hsrc hsup).2).mpr hO)
+
+end Accepted
 
 /-! ### One concrete spelling of the batch unit -/
 

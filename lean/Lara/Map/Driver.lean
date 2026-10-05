@@ -869,13 +869,17 @@ enforces (unique aliases, and per-member unique leaves under the injective
 `Lara.Map.qualifyLeaf`); the four checker premises are the shared contract's;
 and `hmembers` is each member well-formed under its own environment, which is
 the solo check the frontend ran and which no envelope byte records. So a map
-whose members check on their own cannot reach `.linkRejected` here. -/
-theorem linkedUnitOf_checked (shared : Decoded) (qualified : List QualifiedMember)
+whose members check on their own cannot reach `.linkRejected` here. A member may
+carry located holes (issue #13): `hmembers` asks each declaration only to type,
+and the generated attacks never touch a hole
+(`generatedAttacksOf_endpoints_complete`). `linkedUnitOf_checked` is the
+hole-free corollary. -/
+theorem linkedUnitOf_checked_holes (shared : Decoded) (qualified : List QualifiedMember)
     (ground : List Atom)
     (haliases : (qualified.map (·.memberAlias.val)).Nodup)
     (hleaves : (qualified.flatMap (fun m => m.leaves.map (·.1))).Nodup)
     (hmembers : ∀ m ∈ qualified,
-      Lara.Context.SideOk dcanon (buildRegistry shared.theories)
+      Lara.Context.SideOkHoles dcanon (buildRegistry shared.theories)
         (Admission.buildGamma m.leaves) shared.policy (m.args.map (·.2)) m.atts)
     (hsignature : signatureStage ground (linkedUnitOf shared qualified) = none)
     (hscope : Policy.firstOutOfScope? shared.policy = none)
@@ -892,7 +896,7 @@ theorem linkedUnitOf_checked (shared : Decoded) (qualified : List QualifiedMembe
           (buildRegistry shared.theories) (linkedTermsOf qualified)) := by
     rw [generatedAttacksOf, linkedGammaOf_eq shared qualified]
   rw [linkedGammaOf_eq shared qualified]
-  refine Lara.Map.batch_checked (memberPairs shared qualified)
+  refine Lara.Map.batch_checked_holes (memberPairs shared qualified)
     (fun s t => crossMember (ownersOf (declaredArgs qualified) s)
       (ownersOf (declaredArgs qualified) t))
     (linkedTermsOf qualified)
@@ -926,6 +930,91 @@ theorem linkedUnitOf_checked (shared : Decoded) (qualified : List QualifiedMembe
       · obtain ⟨m, hm, rfl⟩ := List.mem_map.mp hp
         exact Or.inl ⟨m, hm, hk⟩
       · exact Or.inr hk
+
+/-- **The Lean driver's linked unit of hole-free members is accepted.** The
+hole-free corollary of `linkedUnitOf_checked_holes`. -/
+theorem linkedUnitOf_checked (shared : Decoded) (qualified : List QualifiedMember)
+    (ground : List Atom)
+    (haliases : (qualified.map (·.memberAlias.val)).Nodup)
+    (hleaves : (qualified.flatMap (fun m => m.leaves.map (·.1))).Nodup)
+    (hmembers : ∀ m ∈ qualified,
+      Lara.Context.SideOk dcanon (buildRegistry shared.theories)
+        (Admission.buildGamma m.leaves) shared.policy (m.args.map (·.2)) m.atts)
+    (hsignature : signatureStage ground (linkedUnitOf shared qualified) = none)
+    (hscope : Policy.firstOutOfScope? shared.policy = none)
+    (hruleIds : (shared.policy.rules.map (·.id)).Nodup)
+    (hpolicyWf : Policy.WellFormed dcanon shared.policy) :
+    ∃ accepted, checkUnit (linkedGammaOf qualified) (buildRegistry shared.theories) ground
+      (linkedUnitOf shared qualified) = .ok accepted :=
+  linkedUnitOf_checked_holes shared qualified ground haliases hleaves
+    (fun m hm => (hmembers m hm).toHoles) hsignature hscope hruleIds hpolicyWf
+
+/-- **The driver's hole report is its members' (issue #13).** Every located hole
+of the accepted linked unit — the record each `map-verdict@2` hole row reads its
+obligations from — is the term of some member's declaration, and any member
+declaring that term and typing it in its own environment gives it exactly the
+reported conclusion and obligation set. So a map hole row repeats the member's
+own solo report; linking neither adds nor drops an obligation. -/
+theorem linkedUnitOf_hole_report (shared : Decoded) (qualified : List QualifiedMember)
+    (ground : List Atom)
+    (hleaves : (qualified.flatMap (fun m => m.leaves.map (·.1))).Nodup)
+    {accepted : Lara.Unit.CheckedUnit dcanon (linkedGammaOf qualified)
+      (certOkOf (buildRegistry shared.theories))}
+    (hcheck : checkUnit (linkedGammaOf qualified) (buildRegistry shared.theories) ground
+      (linkedUnitOf shared qualified) = .ok accepted)
+    {h : Compile.CheckedHole dcanon accepted.policy.ruleLookup (linkedGammaOf qualified)
+      (certOkOf (buildRegistry shared.theories))} (hh : h ∈ accepted.holes) :
+    (∃ m ∈ qualified, h.term ∈ m.args.map (·.2)) ∧
+      ∀ m ∈ qualified, ∀ {A : Atom} {O : List Lara.Support.QuestionId},
+        HasSupport dcanon shared.policy.ruleLookup (Admission.buildGamma m.leaves)
+          (certOkOf (buildRegistry shared.theories)) h.term A O →
+        h.conclusion = A ∧ h.obligations = O := by
+  have hdecl : ((memberPairs shared qualified).flatMap (·.2.declared)).Nodup := by
+    simpa [memberPairs, List.flatMap_map, QualifiedMember.fragment,
+      Lara.Context.Fragment.declared] using hleaves
+  revert accepted
+  rw [linkedGammaOf_eq shared qualified]
+  intro accepted hcheck h hh
+  have hrep := Lara.Map.batch_hole_report (sg := shared.sigma) (P := shared.policy)
+    (args := linkedTermsOf qualified)
+    (atts := dedupAttacks (qualified.flatMap (·.atts) ++ generatedAttacksOf shared qualified) [])
+    hdecl (mem_linkedTermsOf shared qualified) hcheck hh
+  refine ⟨?_, ?_⟩
+  · obtain ⟨p, hp, hterm⟩ := hrep.1
+    obtain ⟨m, hm, rfl⟩ := List.mem_map.mp hp
+    exact ⟨m, hm, hterm⟩
+  · intro m hm A O hsup
+    exact hrep.2 (m.memberAlias.val, m.fragment shared) (List.mem_map.mpr ⟨m, hm, rfl⟩) hsup
+
+/-- **Every generated cross-member attack is live in the accepted map and never
+touches a hole.** `generatedAttacksOf_endpoints_complete` read through the
+checker: the attack is compiled, and neither endpoint is a located hole. -/
+theorem generatedAttacksOf_live (shared : Decoded) (qualified : List QualifiedMember)
+    (ground : List Atom)
+    {accepted : Lara.Unit.CheckedUnit dcanon (linkedGammaOf qualified)
+      (certOkOf (buildRegistry shared.theories))}
+    (hcheck : checkUnit (linkedGammaOf qualified) (buildRegistry shared.theories) ground
+      (linkedUnitOf shared qualified) = .ok accepted)
+    {k : Attack} (hk : k ∈ generatedAttacksOf shared qualified) :
+    k ∈ accepted.program.atts ∧
+      k.source ∉ accepted.program.holes ∧ k.target ∉ accepted.program.holes := by
+  have hs := checkUnit_sound hcheck
+  obtain ⟨⟨Cs, hCs⟩, ⟨Ct, hCt⟩⟩ := generatedAttacksOf_endpoints_complete shared qualified hk
+  obtain ⟨-, hsrc, -⟩ := Lara.Map.crossPairs_spec hk
+  refine ⟨?_, ?_, ?_⟩
+  · rw [hs.atts_eq, mem_liveAttacks_iff, hs.args_eq, mem_completeArgs_iff]
+    refine ⟨?_, hsrc, Cs, hCs⟩
+    show k ∈ dedupAttacks (qualified.flatMap (·.atts) ++ generatedAttacksOf shared qualified) []
+    rw [mem_dedupAttacks]
+    exact ⟨List.mem_append_right _ hk, List.not_mem_nil⟩
+  · rw [hs.holes_eq]
+    intro hmem
+    obtain ⟨-, C', O, hC', hO⟩ := mem_holeArgs_iff.mp hmem
+    exact hO (hasSupport_unique hCs hC').2.symm
+  · rw [hs.holes_eq]
+    intro hmem
+    obtain ⟨-, C', O, hC', hO⟩ := mem_holeArgs_iff.mp hmem
+    exact hO (hasSupport_unique hCt hC').2.symm
 
 /-! ### The linked map -/
 

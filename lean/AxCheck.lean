@@ -4122,11 +4122,14 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Map.qualifyGamma_disjoint
 #print axioms Lara.Map.sideGamma_linkStep
 #print axioms Lara.Map.linkStep_sideOk
+#print axioms Lara.Map.linkStep_sideOkHoles
 #print axioms Lara.Map.linkMembers_sideOk
+#print axioms Lara.Map.linkMembers_sideOkHoles
 #print axioms Lara.Map.firstShared?_nil
 #print axioms Lara.Map.linkOk_closedTail
 #print axioms Lara.Map.sideOk_closedTail
 #print axioms Lara.Map.linkMembers_checked
+#print axioms Lara.Map.linkMembers_checked_holes
 #print axioms Lara.Map.linkStep_declared
 #print axioms Lara.Map.linkMembers_declared
 #print axioms Lara.Map.qualifyFragment_declared
@@ -4159,6 +4162,12 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Map.batchGamma_extends
 #print axioms Lara.Map.ownedApart_iff
 #print axioms Lara.Map.batch_checked
+#print axioms Lara.Map.batch_checked_holes
+#print axioms Lara.Map.batch_classify
+#print axioms Lara.Map.batch_hole_report
+#print axioms Lara.Map.batch_member_hole_reported
+#print axioms Lara.Map.batch_generated_live
+#print axioms Lara.Map.batch_hole_source_inert
 #print axioms Lara.Map.mem_batchArgs
 #print axioms Lara.Map.mem_batchAtts
 #print axioms Lara.Map.batchUnit_checked
@@ -4182,7 +4191,10 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Map.Driver.linkedGammaOf_eq
 #print axioms Lara.Map.Driver.mem_linkedTermsOf
 #print axioms Lara.Map.Driver.linkedUnitOf_checked
+#print axioms Lara.Map.Driver.linkedUnitOf_checked_holes
+#print axioms Lara.Map.Driver.linkedUnitOf_hole_report
 #print axioms Lara.Map.Driver.generatedAttacksOf_endpoints_complete
+#print axioms Lara.Map.Driver.generatedAttacksOf_live
 /-! ### PW — the `Query_κ` well-sortedness refinement -/
 
 -- 1. Query formation. `queryFault` is the existing `Sigma` judgment, located:
