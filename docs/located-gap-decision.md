@@ -268,12 +268,14 @@ map accepts it. The composite verdict moved to `map-verdict@2` for this
   the same member-then-declaration order as `nodes`. It carries no index and no
   attack list.
 - The cross-member saturation generates no attack sourced at or aimed at a hole
-  (D4, D6), and stays the generator the hole-free linking theorems are about
-  (D9); `Lara.Map.crossPairs_endpoints_complete` states it.
+  (D4, D6); `Lara.Map.crossPairs_endpoints_complete` states it, and
+  `batch_generated_live` ties it to the accepted linked unit.
 
-D9's restriction is about the mechanized linking and composition results, which
-stay over hole-free sides; the map *driver* accepts linked units with holes,
-because acceptance is decided by `checkUnit` and not by those theorems.
+The map driver's acceptance of linked units with holes is covered by the
+hole-aware linking results of D9: `linkMembers_checked_holes` accepts members
+with holes, and `batch_hole_report` / `Driver.linkedUnitOf_hole_report` show
+that each map hole row is a member's own hole with that member's own
+conclusion and obligations.
 
 ## 5. Conservative reporting with holes
 
