@@ -44,10 +44,12 @@ module Lara.Reporting
     -- * Per-query reports
   , ClaimReport (..)
   , claimReports
+    -- * Naming AF nodes
+  , nodeArgIds
   ) where
 
 import Lara.AST hiding (Claim)
-import Lara.Check (CheckedUnit, cuHoles, cuNodes, cuProgram)
+import Lara.Check (CheckedUnit, cuHoles, cuNodeDecls, cuNodes, cuProgram)
 import Lara.Compile (checkedAF)
 import Lara.Grounded
   ( Claim (..)
@@ -194,3 +196,28 @@ claimReports unit accepted =
     nodes = cuNodes accepted
     alts = locatedHoles unit accepted
     af = checkedAF (cuProgram accepted)
+
+-- ---------------------------------------------------------------------------
+-- Naming AF nodes
+-- ---------------------------------------------------------------------------
+
+-- | The argument id of every AF node of an accepted unit, in AF order: entry
+-- @n@ names the label and edge index @n@. AF node @n@ is checked declaration
+-- @'Lara.Check.cuNodeDecls' !! n@, which differs from @n@ as soon as a hole
+-- precedes it, so a consumer naming labels must go through this map rather
+-- than index the declaration list with an AF index. The input contract is
+-- 'locatedHoles''s.
+nodeArgIds :: Unit -> CheckedUnit -> [ArgId]
+nodeArgIds unit accepted =
+  [ case lookup d argIds of
+      Just aid -> aid
+      Nothing ->
+        error
+          ( "Lara.Reporting.nodeArgIds: node at checked index "
+              ++ show d
+              ++ " is outside the supplied unit"
+          )
+  | d <- cuNodeDecls accepted
+  ]
+  where
+    argIds = zip [0 :: Int ..] (map fst (unitArgs unit))

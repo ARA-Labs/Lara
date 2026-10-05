@@ -62,7 +62,7 @@ cycleBytes n = case checkInput of
     checkInput = do
       rid <-
         mkReplayId
-          LaraCoreV02
+          LaraCoreV03
           (PolicyId "mutation-cycles-v1")
           [(BackendId "nd", "1")]
           []

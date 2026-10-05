@@ -1353,7 +1353,7 @@ e2eCheckInput :: Program -> Policy -> Unit -> Either ReplayError CheckInput
 e2eCheckInput program policy unit = do
   replayId <-
     mkReplayId
-      LaraCoreV02
+      LaraCoreV03
       (policyId policy)
       (programBackends program)
       (sort (map fst (policyTheories policy)))

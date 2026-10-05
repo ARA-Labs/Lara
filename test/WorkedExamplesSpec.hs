@@ -830,7 +830,7 @@ prop_replayPreflightExpectedJson =
       let replayId =
             either (error . replayErrorMessage) id $
               mkReplayId
-                LaraCoreV02
+                LaraCoreV03
                 (PolicyId "conformance-v1")
                 backends
                 []
@@ -886,7 +886,7 @@ prop_groupConflictExpectedJson =
       let replayId =
             either (error . replayErrorMessage) id $
               mkReplayId
-                LaraCoreV02
+                LaraCoreV03
                 (PolicyId "conformance-v1")
                 [(BackendId "nd", "1")]
                 []
@@ -1018,7 +1018,7 @@ prop_coverageMatrix = once $ ioProperty $ do
   verdicts <- mapM loadVerdict examplePolicies -- [(dir, Either err Verdict)]
   units <- mapM loadUnit examplePolicies -- [(dir, Unit)]
   let elabErrs = [dir ++ ": " ++ e | (dir, Left e) <- verdicts]
-      statuses = sort (nubOrd [conditionalStatus s | (_, Right (Verdict _ (Accept _ _ sts))) <- verdicts, (_, s) <- sts])
+      statuses = sort (nubOrd [conditionalStatus s | (_, Right (Verdict _ (Accept _ _ sts _))) <- verdicts, (_, s) <- sts])
       attackTags = sort (nubOrd [attackKind k | (_, u) <- units, k <- unitAttacks u])
       rejects = sort (nubOrd [r | (_, Right (Verdict _ (Reject r))) <- verdicts])
       outcomes = [(dir, o) | (dir, Right (Verdict _ o)) <- verdicts]
@@ -1033,7 +1033,7 @@ prop_coverageMatrix = once $ ioProperty $ do
         or
           [ not (null (unitAttacks u)) && Published Gap `elem` map snd sts
           | (dir, u) <- units
-          , Just (Accept _ _ sts) <- [lookup dir outcomes]
+          , Just (Accept _ _ sts _) <- [lookup dir outcomes]
           ]
   pure $
     conjoin

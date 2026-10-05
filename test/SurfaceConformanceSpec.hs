@@ -28,7 +28,8 @@ data Row = Row
   , rowAst :: String
   , rowOutcome :: String
   , rowCore :: String
-  , rowObligations :: String
+  , rowAuthoredOpen :: String
+  , rowLocatedHoles :: String
   , rowAttacks :: String
   , rowObservations :: String
   }
@@ -61,6 +62,9 @@ orderedCases =
   , "observation-defeated"
   , "observation-contested"
   , "observation-no-extension"
+  , "located-gap-root"
+  , "located-gap-premise"
+  , "located-gap-discharge"
   ]
 
 observationRows :: [(String, String, String)]
@@ -109,13 +113,13 @@ parseRows :: String -> Either String [Row]
 parseRows bytes = case lines bytes of
   [] -> Left "empty table"
   header : records
-    | header /= "case_id\tast_fingerprint\toutcome\tcore_fingerprint\tobligations\tattacks\tobservations" ->
+    | header /= "case_id\tast_fingerprint\toutcome\tcore_fingerprint\tauthored_open\tlocated_holes\tattacks\tobservations" ->
         Left ("bad header: " ++ header)
     | otherwise -> traverse parseRow records
   where
     parseRow line = case splitTabs line of
-      [caseId, ast, outcome, core, obligations, attacks, observations] ->
-        Right (Row caseId ast outcome core obligations attacks observations)
+      [caseId, ast, outcome, core, authoredOpen, locatedHoles, attacks, observations] ->
+        Right (Row caseId ast outcome core authoredOpen locatedHoles attacks observations)
       cells -> Left ("row has " ++ show (length cells) ++ " cells: " ++ line)
 
 loadRows :: IO (Either String [Row])
@@ -248,7 +252,29 @@ prop_admissionPrunedOpenObligation = once $ ioProperty $ do
     Left err -> counterexample err False
     Right row ->
       counterexample (show row) $
-        rowObligations row === "arg-open:cq"
+        -- An optional open question is authored data, never a hole (D8).
+        rowAuthoredOpen row === "arg-open:cq" .&&. rowLocatedHoles row === "-"
+
+-- | The located-gap rows (D8/D10): a hole is classified by the core's
+-- mandatory transitive obligation set, so an obligation inherited through a
+-- premise or a discharge makes the wrapper a hole too, and a complete
+-- alternative beside the holes keeps the claim justified.
+prop_locatedGapRows :: Property
+prop_locatedGapRows = once $ ioProperty $ do
+  parsed <- loadRows
+  pure $
+    conjoin
+      [ case parsed >>= rowNamed caseId of
+          Left err -> counterexample err False
+          Right row ->
+            counterexample (show row) $
+              (rowLocatedHoles row, takeWhile (/= ',') (rowObservations row)) === (holes, grounded)
+      | (caseId, holes, grounded) <-
+          [ ("located-gap-root", "arg-open:cq", "grounded:claim-main:gap")
+          , ("located-gap-premise", "arg-open:cq,arg-wrap:cq", "grounded:claim-main:gap")
+          , ("located-gap-discharge", "arg-open:cq,arg-discharged:cq", "grounded:claim-main:justified")
+          ]
+      ]
 
 prop_observationBranches :: Property
 prop_observationBranches = once $ ioProperty $ do
@@ -320,6 +346,7 @@ surfaceConformanceSpecProps =
   , ("surface golden case IDs are exact and ordered", quickCheckResult prop_goldenCasesExact)
   , ("surface alpha pairs change AST bytes but preserve core bytes", quickCheckResult prop_alphaPairs)
   , ("surface negatives retain stable structural outcomes", quickCheckResult prop_namedNegativeOutcomes)
+  , ("surface located-gap rows classify holes by core obligations", quickCheckResult prop_locatedGapRows)
   , ("surface obligations report the retained admission-pruned open case",
       quickCheckResult prop_admissionPrunedOpenObligation)
   , ("surface observation branches have exact attack and semantic cells",

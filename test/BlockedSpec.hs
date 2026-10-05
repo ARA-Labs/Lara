@@ -17,8 +17,10 @@
 --     under declared attack edges — Lean @seed_subset_blocked@ and
 --     @blocked_closed@, the two facts @blocking_of_seed@ needs.
 --   * __The seed obligations.__ On real units, the seed really does cover every
---     removed argument and every retained argument that lost an incoming edge —
---     Lean @blocking_of_seed@'s @hmissing@ and @hedge@ hypotheses.
+--     reference node that is not a checked node (@D \\ K@) and every checked
+--     node that lost an incoming edge — Lean @blocking_of_seed@'s @hmissing@
+--     and @hedge@ hypotheses — and the reference carrier excludes exactly the
+--     typed holes (@docs\/located-gap-decision.md@ §5).
 --   * __No quarantine, no cost.__ A unit with no @≢@ group blocks nothing, so
 --     every frozen artifact keeps its pre-conservative-reporting verdict bytes
 --     exactly.
@@ -35,8 +37,12 @@ import Lara.AST
   , Unit (..)
   )
 import Lara.Blocked
-  ( blockedQueries
+  ( Carriers
+  , blockedQueries
   , blockedSeed
+  , carrierChecked
+  , carrierReference
+  , carriers
   , blockedSet
   , declaredEdge
   , prune
@@ -48,8 +54,8 @@ import Lara.Blocked
   , retainedIndices
   , retainedLeafIndices
   )
-import Lara.Check (checkUnit, cuNodes)
-import Lara.Driver (buildCertOk, buildGamma)
+import Lara.Check (CheckedUnit, checkUnit, cuNodes)
+import Lara.Driver (buildCertOk, buildGamma, declaredTypedHole)
 import Lara.Grounded (AF (..), claimSupportFor, labelC)
 import Lara.Prop (Pred (..), Prop (..))
 
@@ -197,43 +203,68 @@ prop_directedBlockingTight d =
 -- Real units: the seed obligations
 -- ---------------------------------------------------------------------------
 
+-- | The accepted checked half of a unit's group-only prune, if any.
+acceptedOf :: Unit -> Maybe CheckedUnit
+acceptedOf declared =
+  either (const Nothing) Just $
+    checkUnit (buildGamma (unitLeaves checked)) (buildCertOk (unitTheories checked)) checked
+  where
+    checked = pruneChecked (prune declared)
+
+-- | The production carriers of a unit: the driver's own classifier and cache.
+carriersOf :: Unit -> CheckedUnit -> Carriers
+carriersOf declared = carriers (prune declared) (declaredTypedHole declared)
+
 -- | 'Lara.Blocked.blockedSeed' discharges Lean @blocking_of_seed@'s hypotheses
--- on a real declared\/checked unit pair: the retained indices are declared
--- indices (@hargs@), every removed argument is seeded (@hmissing@), and every
--- retained argument that lost an incoming edge is seeded (@hedge@).
+-- on a real declared\/checked unit pair: @K ⊆ D@ are declared indices
+-- (@hargs@), every reference node outside @K@ is seeded (@hmissing@), and
+-- every checked node that lost an incoming edge from another one is seeded
+-- (@hedge@). @D@ is exactly the declared arguments that are not typed holes
+-- under the full declared Γ, and @K@ the retained ones that are AF nodes.
 seedObligations :: String -> Unit -> Property
-seedObligations name declared =
-  conjoin
-    [ counterexample (name ++ ": retained ⊆ declared (hargs)") $
-        conjoin [counterexample (show i) (property (i < declaredCount)) | i <- retained]
-    , counterexample (name ++ ": every removed argument is seeded (hmissing)") $
-        conjoin
-          [ counterexample (show i) (property (i `elem` seed))
-          | i <- [0 .. declaredCount - 1]
-          , i `notElem` retained
+seedObligations name declared = case acceptedOf declared of
+  Nothing -> property True -- a rejected unit reports no statuses
+  Just accepted ->
+    let cs = carriersOf declared accepted
+        reference = carrierReference cs
+        checked = carrierChecked cs
+        seed = blockedSeed p cs
+        typedHole i = declaredTypedHole declared (snd (unitArgs declared !! i))
+     in conjoin
+          [ counterexample (name ++ ": K ⊆ D ⊆ declared (hargs)") $
+              conjoin
+                [ counterexample (show i) (property (i < declaredCount && i `elem` reference))
+                | i <- checked
+                ]
+          , counterexample (name ++ ": D is the declared non-holes") $
+              reference === [i | i <- [0 .. declaredCount - 1], not (typedHole i)]
+          , counterexample (name ++ ": every reference node outside K is seeded (hmissing)") $
+              conjoin
+                [ counterexample (show i) (property (i `elem` seed))
+                | i <- reference
+                , i `notElem` checked
+                ]
+          , -- Lean's @hedge@ is an equality, so both directions are asserted: a
+            -- lost edge must be seeded, and the prune must never /gain/ one.
+            counterexample (name ++ ": unseeded checked nodes kept their edges (hedge)") $
+              conjoin
+                [ counterexample (show (i, j)) (declaredEdge p i j === retainedEdge p i j)
+                | j <- checked
+                , j `notElem` seed
+                , i <- checked
+                ]
+          , counterexample (name ++ ": the prune never gains an edge") $
+              conjoin
+                [ counterexample (show (i, j)) (property (declaredEdge p i j))
+                | j <- retained
+                , i <- retained
+                , retainedEdge p i j
+                ]
           ]
-    , -- Lean's @hedge@ is an equality, so both directions are asserted: a lost
-      -- edge must be seeded, and the prune must never /gain/ one.
-      counterexample (name ++ ": unseeded retained arguments kept their edges (hedge)") $
-        conjoin
-          [ counterexample (show (i, j)) (declaredEdge p i j === retainedEdge p i j)
-          | j <- retained
-          , j `notElem` seed
-          , i <- retained
-          ]
-    , counterexample (name ++ ": the prune never gains an edge") $
-        conjoin
-          [ counterexample (show (i, j)) (property (declaredEdge p i j))
-          | j <- retained
-          , i <- retained
-          , retainedEdge p i j
-          ]
-    ]
   where
     p = prune declared
     declaredCount = length (unitArgs (pruneDeclared p))
     retained = retainedIndices p
-    seed = blockedSeed p
 
 -- | A unit with no @≢@ duplicate-report group prunes nothing, so nothing is
 -- blocked and its verdict bytes are exactly the pre-conservative-reporting
@@ -241,13 +272,11 @@ seedObligations name declared =
 noQuarantineNothingBlocked :: String -> Unit -> Property
 noQuarantineNothingBlocked name declared =
   counterexample (name ++ ": unquarantined unit blocks nothing") $
-    case checkUnit (buildGamma (unitLeaves checked)) (buildCertOk (unitTheories checked)) checked of
-      Left _ -> property True -- a rejected unit prints no statuses at all
-      Right accepted ->
-        blockedQueries p (cuNodes accepted) (unitQueries declared) === []
-  where
-    p = prune declared
-    checked = pruneChecked p
+    case acceptedOf declared of
+      Nothing -> property True -- a rejected unit prints no statuses at all
+      Just accepted ->
+        blockedQueries (prune declared) (carriersOf declared accepted) (cuNodes accepted) (unitQueries declared)
+          === []
 
 -- | Blocking is support-driven: a blocked query always has a non-empty complete
 -- support set, so blocking never fires on a @gap@ claim. That matters because
@@ -256,18 +285,16 @@ noQuarantineNothingBlocked name declared =
 -- keep reporting @gap@ rather than being blocked.
 blockedQueriesAreSupported :: String -> Unit -> Property
 blockedQueriesAreSupported name declared =
-  case checkUnit (buildGamma (unitLeaves checked)) (buildCertOk (unitTheories checked)) checked of
-    Left _ -> property True
-    Right accepted ->
+  case acceptedOf declared of
+    Nothing -> property True
+    Just accepted ->
       conjoin
         [ counterexample
             (name ++ ": blocked query " ++ show q ++ " has no complete support")
             (property (not (null (claimSupportFor (cuNodes accepted) q))))
-        | q <- blockedQueries p (cuNodes accepted) queries
+        | q <- blockedQueries (prune declared) (carriersOf declared accepted) (cuNodes accepted) queries
         ]
   where
-    p = prune declared
-    checked = pruneChecked p
     queries = unitQueries declared
 
 blockedSpecProps :: [(String, IO Result)]

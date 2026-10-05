@@ -20,6 +20,8 @@ module Lara.Driver
   , slotMappingLines
   , buildCertOk
   , buildAccept
+  , declaredTypedHole
+  , acceptedRawUnit
   , runCheck
   , runCheckLocated
   , runCheckLocatedWith
@@ -32,6 +34,8 @@ module Lara.Driver
 import Lara.Driver.Internal
   ( Prune
   , buildAccept
+  , declaredTypedHole
+  , acceptedRawUnit
   , buildCertOk
   , buildGamma
   , groupConflictMessage

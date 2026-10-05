@@ -275,7 +275,7 @@ prop_cliLaraBackendRejectionReason = once $ ioProperty $ do
         [ counterexample "exit code" (code === ExitFailure 1)
         , counterexample "stdout carries the bare class, not the reason" $
             out
-              === ( "(verdict (replay-id (core lara-core@0.2) (policy p)"
+              === ( "(verdict (replay-id (core lara-core@0.3) (policy p)"
                       ++ " (backends (backend ord 1)) (theories sha256:t0)"
                       ++ " (artifact sha256:5353535353535353535353535353535353535353535353535353535353535353))"
                       ++ " reject R13)\n"
@@ -334,7 +334,7 @@ prop_cliLaraComparisonRejectionContext = once $ ioProperty $ do
         [ counterexample "exit code" (code === ExitFailure 1)
         , counterexample "stdout carries the bare class, not the context" $
             out
-              === ( "(verdict (replay-id (core lara-core@0.2) (policy p)"
+              === ( "(verdict (replay-id (core lara-core@0.3) (policy p)"
                       ++ " (backends (backend ord 1)) (theories sha256:t0)"
                       ++ " (artifact sha256:5353535353535353535353535353535353535353535353535353535353535353))"
                       ++ " reject R13)\n"
@@ -599,7 +599,7 @@ unicodePolicy =
 -- none of them moves with a cell value.
 unicodeReplayId :: String
 unicodeReplayId =
-  "(replay-id (core lara-core@0.2) (policy p) (backends (backend ord 1))"
+  "(replay-id (core lara-core@0.3) (policy p) (backends (backend ord 1))"
     ++ " (theories sha256:t0)"
     ++ " (artifact sha256:5353535353535353535353535353535353535353535353535353535353535353))"
 
@@ -1193,7 +1193,7 @@ prop_cliAcceptedQuarantineAudit = once $ ioProperty $
         [ counterexample "exit code" (code === ExitSuccess)
         , counterexample "verdict stdout" $
             out
-              === ( "(verdict (replay-id (core lara-core@0.2) (policy p) (backends)"
+              === ( "(verdict (replay-id (core lara-core@0.3) (policy p) (backends)"
                       ++ " (theories) (artifact sha256:admission-cli)) accept"
                       ++ " (labels) (edges) (statuses))\n"
                   )

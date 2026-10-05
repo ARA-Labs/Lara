@@ -184,6 +184,7 @@ prop_strictCertificatePresentationAccepts =
                               , Published Justified
                               )
                             ]
+                        , verdictHoles = []
                         }
                     )
             ]
@@ -220,6 +221,7 @@ prop_B_frozenGolden = once $ ioProperty $ do
           , verdictEdges = [(0, 1), (1, 0)]
           , verdictStatuses =
               [(improvesMAD, Published Contested), (notImprovesMAD, Published Contested)]
+          , verdictHoles = []
           }
   pure $ case elaborate (registryOf pol) prog pol of
     Left e -> counterexample ("B: unexpected ElabError: " ++ elabErrorMessage e) False
@@ -276,7 +278,7 @@ prop_A_prepareSourceAllAdmit = once $ ioProperty $ do
             , admissionAuditAttacks audit === []
             , case verdictOutcome (sourceResultVerdict result) of
                 Reject rejection -> counterexample ("A: unexpected reject " ++ show rejection) False
-                Accept labels edges statuses ->
+                Accept labels edges statuses _ ->
                   conjoin
                     [ labels === [(0, LOut), (1, LIn), (2, LIn), (3, LIn)]
                     , edges === [(0, 3), (1, 0), (2, 0), (3, 0)]
@@ -394,6 +396,7 @@ prop_comparisonReplaysToAccept = once $ ioProperty $ do
                     , Published Justified
                     )
                   ]
+              , verdictHoles = []
               }
           )
 
@@ -687,6 +690,7 @@ prop_comparisonLowerIsBetter = once $ ioProperty $
                         , verdictEdges = []
                         , verdictStatuses =
                             [(Prop (Pred "num_lt") [TNum "0.9", TNum "1.2"], Published Justified)]
+                        , verdictHoles = []
                         }
                     )
             ]

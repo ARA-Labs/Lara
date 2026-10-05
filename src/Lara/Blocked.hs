@@ -74,6 +74,11 @@ module Lara.Blocked
   , retainedLeafIndices
   , declaredEdge
   , retainedEdge
+    -- * The reference and checked carriers (spec §4.3 with holes)
+  , Carriers
+  , carriers
+  , carrierReference
+  , carrierChecked
     -- * The driver entry points
   , blockedSeed
   , blockedQueries
@@ -94,7 +99,7 @@ import Lara.AST
   , Unit (..)
   )
 import Lara.Attack (RAttack)
-import Lara.Check (resolveAttacks)
+import Lara.Check (CheckedUnit, cuNodeDecls, resolveAttacks)
 import Lara.Compile (coveredB)
 import Lara.Grounded (claimSupportFor)
 import Lara.Prop (Prop, equiv)
@@ -388,57 +393,101 @@ retainedEdge :: Prune -> Int -> Int -> Bool
 retainedEdge p = edgeWith (map snd (unitArgs (pruneDeclared p))) (retainedAttacks p)
 
 -- ---------------------------------------------------------------------------
+-- The reference and checked carriers
+-- ---------------------------------------------------------------------------
+
+-- | The two framework carriers of spec §4.3, in declared index space
+-- (@docs\/located-gap-decision.md@ §5; Lean @BlockedProgram.referenceCarrier@
+-- \/ @checkedCarrier@). Built only by 'carriers', from one 'Prune' and the
+-- unit the checker accepted on its checked half.
+data Carriers = Carriers
+  { carrierReference :: [Int]
+  -- ^ @D@: the declared arguments that are not typed holes under the full
+  -- declared @Gamma@ — complete ones, plus quarantined ones whose support
+  -- inference fails (kept as conservative nodes)
+  , carrierChecked :: [Int]
+  -- ^ @K ⊆ D@: the retained complete arguments, i.e. the AF nodes; entry @n@
+  -- is the declared index of AF node @n@
+  }
+  deriving (Eq, Show)
+
+-- | Build @D@ and @K@ (Lean @BlockedProgram.referenceLive@ and
+-- @keepComplete@). A retained declaration reuses the checked cache — it is in
+-- @K@, and so in @D@, exactly when the checker made it an AF node — so no
+-- retained term is inferred again. A quarantined declaration is classified by
+-- @typedHole@, which the caller runs as one support inference under the full
+-- declared @Gamma@: a typed hole leaves @D@, and a term whose inference fails
+-- stays as a conservative node.
+--
+-- __Input contract.__ @accepted@ is the unit 'Lara.Check.checkUnit' accepted
+-- for @pruneChecked p@, so its node-declaration map indexes the retained
+-- arguments.
+carriers :: Prune -> (SupportTerm -> Bool) -> CheckedUnit -> Carriers
+carriers p typedHole accepted = Carriers reference checked
+  where
+    retained = retainedIndices p
+    -- An out-of-range node position can only mean the contract above was
+    -- broken; it is dropped from @K@, which seeds it as removed reference
+    -- material if it is in @D@ (the fail-closed direction).
+    checked = [i | n <- cuNodeDecls accepted, Just i <- [indexMaybe retained n]]
+    checkedSet = Set.fromList checked
+    retainedSet = Set.fromList retained
+    reference =
+      [ i
+      | (i, (_, w)) <- zip [0 ..] (unitArgs (pruneDeclared p))
+      , if Set.member i retainedSet
+          then Set.member i checkedSet
+          else not (typedHole w)
+      ]
+
+-- ---------------------------------------------------------------------------
 -- The driver entry points
 -- ---------------------------------------------------------------------------
 
--- | The material the prune touched, in declared index space: every removed
--- argument, plus every retained argument that lost an incoming edge. These are
--- exactly the @hmissing@ and @hedge@ obligations of Lean @blocking_of_seed@
--- (@hargs@ holds because 'retainedIndices' selects declared indices).
-blockedSeed :: Prune -> [Int]
-blockedSeed p =
-  [i | i <- allIdx, i `notElem` retained]
+-- | The material the prune touched, in declared index space (Lean
+-- @BlockedProgram.blockedSeed@): every reference node that is not a checked
+-- node (@D \\ K@), plus every checked node that lost an incoming edge from
+-- another checked node. These are the @hmissing@ and @hedge@ obligations of
+-- Lean @blocking_of_seed@. A typed hole is in neither carrier, so neither it
+-- nor the attacks it sources can seed.
+blockedSeed :: Prune -> Carriers -> [Int]
+blockedSeed p (Carriers reference checked) =
+  [i | i <- reference, not (Set.member i checkedSet)]
     ++ [ j
-       | j <- retained
-       , any (\i -> declared' i j && not (checked' i j)) retained
+       | j <- checked
+       , any (\i -> declared' i j && not (checked' i j)) checked
        ]
   where
-    allIdx = [0 .. length (unitArgs (pruneDeclared p)) - 1]
-    retained = retainedIndices p
+    checkedSet = Set.fromList checked
     declared' = declaredEdge p
     checked' = retainedEdge p
 
 -- | The blocked arguments: the forward closure of 'blockedSeed' under the
--- declared edge relation.
-blockedArgs :: Prune -> Set Int
-blockedArgs p =
-  blockedSet
-    [0 .. length (unitArgs (pruneDeclared p)) - 1]
-    (declaredEdge p)
-    (blockedSeed p)
+-- declared edge relation, over the reference carrier only.
+blockedArgs :: Prune -> Carriers -> Set Int
+blockedArgs p cs =
+  blockedSet (carrierReference cs) (declaredEdge p) (blockedSeed p cs)
 
 -- | The queries whose public status is @evidence-blocked@: those with a
 -- complete support argument in 'blockedArgs'. A query with /no/ complete support
 -- is @gap@ and is never blocked — losing support cannot promote a claim, and
 -- routing quarantined support to @gap@ is the intended §4.3 behavior.
-blockedQueries :: Prune -> [CheckedNode] -> [Prop] -> [Prop]
-blockedQueries p nodes queries
+blockedQueries :: Prune -> Carriers -> [CheckedNode] -> [Prop] -> [Prop]
+blockedQueries p cs nodes queries
   -- Fast path: quarantine removed nothing, so the checked program /is/ the
-  -- declared one and no status is conditional. This keeps every non-quarantining
-  -- artifact — which is all of them today — at exactly its pre-conservative-reporting cost.
+  -- declared one and no status is conditional. Raw retention is what is
+  -- tested: a unit whose holes are all retained quarantines nothing, so hole
+  -- filtering alone never blocks.
   | unitArgs (pruneDeclared p) == unitArgs (pruneChecked p)
   , unitAttacks (pruneDeclared p) == unitAttacks (pruneChecked p) =
       []
   | otherwise = nub [q | q <- queries, any isBlocked (claimSupportFor nodes q)]
   where
-    blocked = blockedArgs p
-    retained = retainedIndices p
-    -- 'claimSupportFor' indices are checked-node indices; 'blocked' holds
-    -- declared indices, and 'retained' is the lift between them. The lift is
-    -- total today (the two lists have equal length), but if that ever drifts the
-    -- fallback must be __blocked__: this module exists to fail closed, and the
-    -- Lean driver makes the same choice on the analogous uncertainty.
-    isBlocked k = case indexMaybe retained k of
+    blocked = blockedArgs p cs
+    -- 'claimSupportFor' indices are AF node positions; 'blocked' holds
+    -- declared indices, and @K@ is the lift between them. A missing image
+    -- fails closed, as the Lean driver's @supportBlocked@ does.
+    isBlocked k = case indexMaybe (carrierChecked cs) k of
       Just i -> Set.member i blocked
       Nothing -> True
 

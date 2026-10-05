@@ -1104,7 +1104,7 @@ auditRecordWithModeAndDerivedAndSurfaceLeaves ruleModeOf coreLeaves surfaceLeave
         , unitGroupMode = QuarantineOnConflict
         }
     input = testCheckInput unit
-    verdict = Verdict (inputReplayId input) (Accept labels [] [])
+    verdict = Verdict (inputReplayId input) (Accept labels [] [] [])
     program =
       Program
         { programArtifact = "synthetic"

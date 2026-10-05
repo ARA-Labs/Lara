@@ -11,7 +11,7 @@
 --     goldens the spec asks for, at the executable 'Unit' boundary.
 --   * __Rejection-class negatives.__ One minimal 'Unit' per rejection class the
 --     executable checker /decides/ (R1, R3, R4, R5, R7, R12, duplicate-rule,
---     duplicate-argument, incomplete-argument, missing-conflict), asserting the
+--     duplicate-argument, missing-conflict), asserting the
 --     wire 'Rejection' the checker produces. (The spec-taxonomy negatives of
 --     "Lara.Negatives" are Program-level and target a different, wider surface —
 --     see the Task 1 report.)
@@ -259,9 +259,11 @@ negDuplicateArgument =
     []
     []
 
--- incomplete-argument: a mandatory question left open as a hole.
-negIncompleteArgument :: Unit
-negIncompleteArgument =
+-- A mandatory question left open: up to @lara-core\@0.2@ this was the
+-- @incomplete-argument@ rejection; it is now an accepted located hole (spec
+-- §4.4) whose claim is @gap@.
+holeUnit :: Unit
+holeUnit =
   mkUnit
     [defRule "d" [] [] (apat0 "c" []) [Question (QuestionId "q1") (apat0 "ans" []) Mandatory]]
     []
@@ -684,9 +686,10 @@ mvAttackR11AndMissingConflict =
 -- 'RejectClass' haddock):
 --
 --   * __Executable classes__ (decided by 'checkUnit', one golden here each):
---     R1, R2, R3, R4, R5, R6, R7, R10, R11, R12 — plus the four structural
+--     R1, R2, R3, R4, R5, R6, R7, R10, R11, R12 — plus the three structural
 --     program-boundary outcomes duplicate-rule, duplicate-argument,
---     incomplete-argument, missing-conflict.
+--     missing-conflict. An open mandatory question is not a rejection: see
+--     'prop_holeAccepted'.
 --   * __Driver-boundary classes__ (decided by 'runCheck' before 'checkUnit',
 --     one golden here each): R13 (replay preflight) and R9 (an escalated
 --     duplicate-report-group conflict, spec §4.3).
@@ -698,7 +701,6 @@ negatives =
   [ ("duplicate-rule", negDuplicateRule, DuplicateRule)
   , ("R12 strict-reachable contrary", negR12, RejectClass R12)
   , ("duplicate-argument", negDuplicateArgument, DuplicateArgument)
-  , ("incomplete-argument", negIncompleteArgument, IncompleteArgument)
   , ("R1 dangling leaf", negR1, RejectClass R1)
   , ("R2 undeclared predicate symbol (not R1)", negR2Undeclared, RejectClass R2)
   , ("R2 theta-range sort (static half alone accepts)", negR2Theta, RejectClass R2)
@@ -853,7 +855,7 @@ prop_groupPrecedenceR13BeatsR9 =
     mixedReplayId =
       either (error . replayErrorMessage) id $
         mkReplayId
-          LaraCoreV02
+          LaraCoreV03
           (PolicyId "conformance-v1")
           []
           []
@@ -1074,6 +1076,162 @@ prop_groupQuarantineLostEdge =
           (rejectionOfUnit groupQuarantineLostEdgeCompleteUnit === Just MissingConflict)
       ]
 
+-- ---------------------------------------------------------------------------
+-- Located holes (spec §4.4, docs/located-gap-decision.md)
+-- ---------------------------------------------------------------------------
+
+-- | An open mandatory question no longer rejects: the unit is accepted, the
+-- argument is reported as a hole at its declaration index with its exact
+-- obligations, it is not an AF node (no labels), and its claim is @gap@.
+prop_holeAccepted :: Property
+prop_holeAccepted =
+  once $
+    conjoin
+      [ counterexample "an open mandatory question is not a rejection" $
+          rejectionOfUnit holeUnit === Nothing
+      , counterexample "its claim has no complete support" $
+          statusOfUnit holeUnit (atom0 "c" []) === Just Gap
+      , counterexample "the verdict bytes" $
+          printSExpr (encodeVerdict (runCheck (testCheckInput holeUnit)))
+            === ( "(verdict " ++ testReplayText ++ " accept (labels) (edges)"
+                    ++ " (statuses (status (atom c) gap))"
+                    ++ " (holes (arg 0 a (obligations q1) (attacks))))"
+                )
+      ]
+
+-- | A rule @premise ⇒ concl@ whose instance is a hole: one mandatory
+-- question.
+holeRule :: String -> String -> String -> Rule
+holeRule rid premise concl =
+  defRule rid [] [apat0 premise []] (apat0 concl []) [Question (QuestionId "hq") (apat0 "ans" []) Mandatory]
+
+-- | D4/D6 on the accept path: a well-typed attack sourced at a hole is
+-- checked and listed on the hole's row, but adds no edge — so the complete
+-- argument it rebuts stays @in@. The attack is declared second, so its
+-- original index is 1.
+holeAttackerUnit :: Unit
+holeAttackerUnit =
+  mkUnit
+    [defRule "r" [] [apat0 "p" []] (apat0 "concl" []) [], holeRule "h" "p" "base"]
+    [Contrary (apat0 "concl" []) (apat0 "base" []), Contrary (apat0 "base" []) (apat0 "concl" [])]
+    []
+    [(LeafId "e1", atom0 "p" [])]
+    [ (ArgId "a1", instD "r" [] [SLeaf (LeafId "e1")] [] [])
+    , (ArgId "aH", instD "h" [] [SLeaf (LeafId "e1")] [] [ObligationId "hq"])
+    ]
+    [Rebut (ArgId "a1") (ArgId "aH"), Rebut (ArgId "aH") (ArgId "a1")]
+    [atom0 "concl" [], atom0 "base" []]
+
+prop_holeAttackInert :: Property
+prop_holeAttackInert =
+  once $
+    printSExpr (encodeVerdict (runCheck (testCheckInput holeAttackerUnit)))
+      === ( "(verdict " ++ testReplayText ++ " accept (labels (0 in)) (edges)"
+              ++ " (statuses (status (atom concl) justified) (status (atom base) gap))"
+              ++ " (holes (arg 1 aH (obligations hq) (attacks 1))))"
+          )
+
+-- | D7, the @lara-core\@0.3@ change to conservative reporting: the
+-- promotion hazard of 'groupQuarantinePromotionUnit', except the quarantined
+-- attacker is a typed hole. A hole is not a node of any accepted framework,
+-- so it is not in the reference carrier, its attack has no edge there, and
+-- quarantining it blocks nothing: @concl@ is published @justified@ (under
+-- @lara-core\@0.2@ it was @evidence-blocked@).
+quarantinedHoleAttackerUnit :: Unit
+quarantinedHoleAttackerUnit = quarantinedAttackerVia "base"
+
+-- | The same shape with the attacker's rule expecting a @p@ premise, so its
+-- inference fails under the full declared Γ (R4). An unclassified
+-- quarantined term is not a typed hole: it stays a conservative node of the
+-- reference framework and its attack still blocks (spec §4.3, §5 of the
+-- decision record).
+quarantinedUnclassifiedAttackerUnit :: Unit
+quarantinedUnclassifiedAttackerUnit = quarantinedAttackerVia "p"
+
+quarantinedAttackerVia :: String -> Unit
+quarantinedAttackerVia premise =
+  groupQuarantinePromotionUnit
+    { unitRules = unitRules groupQuarantinePromotionUnit ++ [holeRule "h" premise "base"]
+    , unitArgs =
+        [ (ArgId "a1", instD "r" [] [SLeaf (LeafId "e1")] [] [])
+        , (ArgId "a2", instD "h" [] [SLeaf (LeafId "e2")] [] [ObligationId "hq"])
+        , (ArgId "a3", SLeaf (LeafId "e4"))
+        ]
+    }
+
+-- | A retained hole, with a quarantine elsewhere: the hole and the attack it
+-- sources neither seed nor propagate blocking. The quarantined @aX@ is
+-- complete under the full declared Γ, so it seeds, but it reaches nothing.
+retainedHoleWithQuarantineUnit :: Unit
+retainedHoleWithQuarantineUnit =
+  ( mkUnit
+      [defRule "r" [] [apat0 "p" []] (apat0 "concl" []) [], holeRule "h" "p" "base"]
+      [Contrary (apat0 "base" []) (apat0 "concl" [])]
+      []
+      [ (LeafId "e1", atom0 "p" [])
+      , (LeafId "e3", atom0 "q" [])
+      , (LeafId "e4", atom0 "other" [])
+      ]
+      [ (ArgId "a1", instD "r" [] [SLeaf (LeafId "e1")] [] [])
+      , (ArgId "aH", instD "h" [] [SLeaf (LeafId "e1")] [] [ObligationId "hq"])
+      , (ArgId "aX", SLeaf (LeafId "e3"))
+      ]
+      [Rebut (ArgId "aH") (ArgId "a1")]
+      [atom0 "concl" [], atom0 "q" []]
+  )
+    { unitGroups = [DupGroup (GroupId "g1") [LeafId "e3", LeafId "e4"]]
+    , unitGroupMode = QuarantineOnConflict
+    }
+
+-- | The other direction (D6 under quarantine): a retained complete attacker
+-- undermines a leaf occurrence inside a hole that quarantine removes. The
+-- hole is not a reference node, but the closure edge onto the retained
+-- complete argument containing the same occurrence is in the declared
+-- framework and lost from the checked one, so that argument is seeded and
+-- its claim is @evidence-blocked@.
+quarantinedHoleLostEdgeUnit :: Unit
+quarantinedHoleLostEdgeUnit =
+  groupQuarantineLostEdgeUnit
+    { unitRules =
+        [ defRule "r" [] [apat0 "q" [], apat0 "k" []] (apat0 "concl" [])
+            [Question (QuestionId "hq") (apat0 "ans" []) Mandatory]
+        , defRule "rw" [] [apat0 "k" []] (apat0 "cw" []) []
+        ]
+    , unitArgs =
+        [ (ArgId "aT", instD "r" [] [SLeaf (LeafId "Lq"), SLeaf (LeafId "Lk")] [] [ObligationId "hq"])
+        , (ArgId "aW", instD "rw" [] [SLeaf (LeafId "Lk")] [] [])
+        , (ArgId "aS", SLeaf (LeafId "La"))
+        ]
+    }
+
+prop_holesUnderQuarantine :: Property
+prop_holesUnderQuarantine =
+  once $
+    conjoin
+      [ counterexample "a quarantined hole attacker blocks nothing (D7)" $
+          conjoin
+            [ rejectionOfUnit quarantinedHoleAttackerUnit === Nothing
+            , blockedOfUnit quarantinedHoleAttackerUnit === []
+            , statusOfUnit quarantinedHoleAttackerUnit (atom0 "concl" []) === Just Justified
+            ]
+      , counterexample "an unclassified quarantined attacker stays a node and blocks" $
+          conjoin
+            [ rejectionOfUnit quarantinedUnclassifiedAttackerUnit === Nothing
+            , blockedOfUnit quarantinedUnclassifiedAttackerUnit === [atom0 "concl" []]
+            ]
+      , counterexample "a retained hole neither seeds nor propagates" $
+          conjoin
+            [ rejectionOfUnit retainedHoleWithQuarantineUnit === Nothing
+            , blockedOfUnit retainedHoleWithQuarantineUnit === []
+            , statusOfUnit retainedHoleWithQuarantineUnit (atom0 "concl" []) === Just Justified
+            ]
+      , counterexample "an attack into a quarantined hole still seeds a shared occurrence (D6)" $
+          conjoin
+            [ rejectionOfUnit quarantinedHoleLostEdgeUnit === Nothing
+            , blockedOfUnit quarantinedHoleLostEdgeUnit === [atom0 "cw" []]
+            ]
+      ]
+
 -- | The units in this module that exercise a §4.3 prune, shared with
 -- "BlockedSpec" so the blocked-set obligations are checked on the same
 -- fixtures the status properties above pin.
@@ -1084,6 +1242,10 @@ quarantineFixtures =
   , ("group-quarantine-promotion", groupQuarantinePromotionUnit)
   , ("group-quarantine-lost-edge", groupQuarantineLostEdgeUnit)
   , ("quarantining-conflict", quarantiningConflictBase)
+  , ("quarantined-hole-attacker", quarantinedHoleAttackerUnit)
+  , ("quarantined-unclassified-attacker", quarantinedUnclassifiedAttackerUnit)
+  , ("retained-hole-with-quarantine", retainedHoleWithQuarantineUnit)
+  , ("quarantined-hole-lost-edge", quarantinedHoleLostEdgeUnit)
   ]
 
 -- | Units with no @≢@ group: quarantine prunes nothing, so nothing may be
@@ -1253,7 +1415,7 @@ prop_verdictsCarryExactlyOneReplayId =
     preflightReplayId =
       either (error . replayErrorMessage) id $
         mkReplayId
-          LaraCoreV02
+          LaraCoreV03
           (PolicyId "conformance-v1")
           []
           []
@@ -1311,6 +1473,9 @@ checkSpecProps =
   , ("check golden missing-self-edge", quickCheckResult prop_goldenMissing)
   , ("check golden rebut program", quickCheckResult prop_goldenRebut)
   , ("check rejection-class negatives", quickCheckResult prop_negatives)
+  , ("check open mandatory question is an accepted hole", quickCheckResult prop_holeAccepted)
+  , ("check hole-sourced attack is checked but inert", quickCheckResult prop_holeAttackInert)
+  , ("check holes under quarantine (D6/D7)", quickCheckResult prop_holesUnderQuarantine)
   , ("check Sigma well-formedness fault matrix", quickCheckResult prop_sigmaWellFormedFaults)
   , ("check duplicate-report-group quarantine/gap", quickCheckResult prop_groupQuarantine)
   , ("check duplicate-report-group R9 stderr message", quickCheckResult prop_groupConflictMessage)

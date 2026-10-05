@@ -60,7 +60,8 @@ import Lara.Diagnostics
   , locate
   )
 import Lara.Driver
-  ( buildCertOk
+  ( acceptedRawUnit
+  , buildCertOk
   , buildGamma
   , groupConflictMessage
   , groupConflictReject
@@ -78,7 +79,6 @@ import Lara.Elaborate
   , sourceResultVerdict
   )
 import Lara.Grounded (Claim (..))
-import Lara.Policy (lookupRule)
 import Lara.Replay
   ( CheckInput
   , ReplayFailure (..)
@@ -96,6 +96,7 @@ import Lara.Prop (Prop, prettyProp)
 import Lara.Reporting
   ( ClaimReport (..)
   , claimReports
+  , nodeArgIds
   )
 import Lara.SupportTerm
   ( CheckError (..)
@@ -103,7 +104,8 @@ import Lara.SupportTerm
   , ReferenceReason (..)
   )
 import Lara.Wire
-  ( Outcome (..)
+  ( HoleRow (..)
+  , Outcome (..)
   , PublicStatus (..)
   , Tag (..)
   , Verdict (..)
@@ -199,16 +201,18 @@ sourceResultJsonValue result =
     Right input -> expectedJsonValue input
     Left _ ->
       case sourceResultVerdict result of
-        Verdict replayId (Accept labels _edges statuses) ->
+        Verdict replayId (Accept labels _edges statuses holes) ->
           JObject
             [ ("replay-id", replayIdValue replayId)
             , ("verdict-class", JString (tagToString TAccept))
             , ( "located-diagnostic"
               , JObject
-                  [ ("kind", JString "accept")
-                  , ("statuses", JArray (map sourceStatusEntry statuses))
-                  , ("labels", JArray (map sourceLabelEntry labels))
-                  ]
+                  ( [ ("kind", JString "accept")
+                    , ("statuses", JArray (map sourceStatusEntry statuses))
+                    , ("labels", JArray (map sourceLabelEntry labels))
+                    ]
+                      ++ [("holes", JArray (map holeEntry holes)) | not (null holes)]
+                  )
               )
             ]
         Verdict replayId (Reject rejection) ->
@@ -231,6 +235,18 @@ sourceResultJsonValue result =
         [ ("index", JNumber i)
         , ("label", JString (labelString label))
         ]
+
+-- | One verdict @holes@ row as JSON: the hole's original declaration index
+-- and id, its root obligations, and the original indices of the attacks it
+-- sources (spec §4.4).
+holeEntry :: HoleRow -> JValue
+holeEntry (HoleRow i (ArgId a) obligations attacks) =
+  JObject
+    [ ("arg", JString a)
+    , ("index", JNumber i)
+    , ("obligations", JArray [JString q | QuestionId q <- obligations])
+    , ("attacks", JArray (map JNumber attacks))
+    ]
 
 -- | The reject diagnostic of a policy-pruned source result.
 --
@@ -294,11 +310,11 @@ sourceConstituentValue argIds c = case c of
 expectedJsonValue :: CheckInput -> JValue
 expectedJsonValue input =
   case runCheck input of
-    Verdict _ (Accept labels _edges statuses) ->
+    Verdict _ (Accept labels _edges statuses holes) ->
       JObject
         [ ("replay-id", replayIdValue replayId)
         , ("verdict-class", JString (tagToString TAccept))
-        , ("located-diagnostic", acceptDiag labels statuses)
+        , ("located-diagnostic", acceptDiag labels statuses holes)
         ]
     Verdict _ (Reject rejection) ->
       JObject
@@ -320,18 +336,31 @@ expectedJsonValue input =
           | otherwise -> rejectDiag
     gamma = buildGamma (unitLeaves unit)
     certOk = buildCertOk (unitTheories unit)
-    pI = lookupRule (unitRules unit)
-    reports = claimReports pI gamma certOk unit
 
-    -- Accept: per-claim statuses + Reporting detail, plus the per-argument
-    -- grounded labels (both keyed to their declaration-order identity).
-    acceptDiag :: [(Int, Label)] -> [(Prop, PublicStatus)] -> JValue
-    acceptDiag lbls statuses =
+    -- The verdict's labels, edges and statuses cover the __checked__
+    -- (post-§4.3-quarantine) program, and its AF holds only the complete
+    -- arguments; 'acceptedRawUnit' yields the exact cache it was read from.
+    accepted = acceptedRawUnit input
+    reports = maybe [] (uncurry claimReports) accepted
+
+    -- With holes or a quarantine an AF index is not a declaration index, so
+    -- a label's argument name comes through the node-declaration map.
+    afArgIds :: [ArgId]
+    afArgIds = maybe [] (uncurry nodeArgIds) accepted
+
+    -- Accept: per-claim statuses + Reporting detail, the per-argument
+    -- grounded labels, and — only when present — the located holes, exactly
+    -- as the verdict's @holes@ section reports them.
+    acceptDiag :: [(Int, Label)] -> [(Prop, PublicStatus)] -> [HoleRow] -> JValue
+    acceptDiag lbls statuses holes =
       JObject
-        [ ("kind", JString "accept")
-        , ("statuses", JArray (zipWith statusEntry statuses reports))
-        , ("labels", JArray (map labelEntry lbls))
-        ]
+        ( [ ("kind", JString "accept")
+          , ("statuses", JArray (zipWith statusEntry statuses reports))
+          , ("labels", JArray (map labelEntry lbls))
+          ]
+            ++ [("holes", JArray (map holeEntry holes)) | not (null holes)]
+        )
+
 
     statusEntry :: (Prop, PublicStatus) -> ClaimReport -> JValue
     statusEntry (p, st) rep =
@@ -350,17 +379,10 @@ expectedJsonValue input =
              | not (isPublished st)
              ]
 
-    -- The verdict's labels cover the __checked__ (post-§4.3-quarantine)
-    -- program, so the argument name must come from the checked argument list:
-    -- indexing the declared list would misattribute every label after a pruned
-    -- argument (review round 2 — found while pinning the
-    -- quarantine-attacker golden). With nothing quarantined the lists are equal.
-    checkedArgs = unitArgs (pruneChecked (prune unit))
-
     labelEntry :: (Int, Label) -> JValue
     labelEntry (i, lbl) =
       JObject
-        ( [("arg", JString a) | Just (ArgId a) <- [fmap fst (safeIndex checkedArgs i)]]
+        ( [("arg", JString a) | Just (ArgId a) <- [safeIndex afArgIds i]]
             ++ [ ("index", JNumber i)
                , ("label", JString (labelString lbl))
                ]
@@ -564,8 +586,7 @@ rejectionClass r = tagToString $ case r of
 -- | Extra located detail recovered from a whole-unit rejection: for a wrapped
 -- located checker failure ('PERejection'), the offending leaf\/rule id and the
 -- term position ("Lara.SupportTerm".'CheckLoc') the checker recorded. Structural
--- program-boundary outcomes (duplicate rule\/argument, incomplete argument,
--- missing conflict) and policy violations carry no such inner detail, so they add
+-- program-boundary outcomes (duplicate rule\/argument, missing conflict) and policy violations carry no such inner detail, so they add
 -- nothing here (their constituent already locates them).
 rejectDetail :: UnitError -> [(String, JValue)]
 rejectDetail e = case e of
