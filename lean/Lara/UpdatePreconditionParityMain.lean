@@ -107,8 +107,117 @@ private def instanceRows : List String :=
         , "term=" ++ bit termCollision
         , toString (Update.instanceFreshB source candidateName candidateTerm) ]
 
+/-! ### In-place discharge and atomic batches -/
+
+private def qOpen : QuestionId := ⟨"q1"⟩
+private def qOther : QuestionId := ⟨"q2"⟩
+
+private def openInst : SupportTerm := .inst ⟨"r"⟩ [] [] [] [qOpen] .none
+private def closedInst : SupportTerm := .inst ⟨"r"⟩ [] [] [] [] .none
+private def wrapInst : SupportTerm :=
+  .inst ⟨"w"⟩ [] [openInst] [(qOther, .leaf ⟨"d"⟩)] [] .none
+
+/-- Canonical rendering of the small terms below, shared with the Haskell
+emitter: `rule(premises;question=discharge;open)`. -/
+private partial def renderTerm : SupportTerm → String
+  | .leaf l => l.name
+  | .inst r _ ws D H _ =>
+      r.name ++ "(" ++ String.intercalate "," (ws.map renderTerm) ++ ";" ++
+        String.intercalate "," (D.map fun e => e.1.name ++ "=" ++ renderTerm e.2) ++
+        ";" ++ String.intercalate "," (H.map (·.name)) ++ ")"
+
+private def shapes : List (String × SupportTerm) :=
+  [("leaf", .leaf ⟨"x"⟩), ("open", openInst), ("closed", closedInst), ("wrap", wrapInst)]
+
+private def positions : List (String × Attack.Pos) :=
+  [("eps", []), ("prem0", [.prem 0]), ("prem1", [.prem 1]), ("q2", [.ques qOther])]
+
+private def questions : List (String × QuestionId) := [("q1", qOpen), ("q2", qOther)]
+
+private def dischargeRowsTsv : List String :=
+  [false, true].flatMap fun declared =>
+    shapes.flatMap fun (shapeName, term) =>
+      positions.flatMap fun (posName, pos) =>
+        questions.map fun (qName, q) =>
+          let source : Update.SourceState :=
+            { blankState with
+              argsRaw := if declared then [("t", term)] else [] }
+          let decided := Update.dischargeOpenB source "t" pos q
+          let result :=
+            if decided then
+              match Update.dischargeRows source.argsRaw "t" pos q (.leaf ⟨"v"⟩) with
+              | [(_, rewritten)] => renderTerm rewritten
+              | _ => "?"
+            else "-"
+          row
+            [ "dischargeOpenB"
+            , "declared=" ++ bit declared
+            , "term=" ++ shapeName
+            , "pos=" ++ posName
+            , "q=" ++ qName
+            , toString decided
+            , "result=" ++ result ]
+
+private def leafX : LeafId := ⟨"x"⟩
+private def leafN : LeafId := ⟨"n"⟩
+
+private def batchBase : Update.SourceState :=
+  { blankState with
+    leaves := [(leafX, Examples.pA)]
+    metas := [{ id := leafX, kind := .observed, provenance := .user }]
+    argsRaw := [("a", .leaf leafX), ("h", openInst)] }
+
+private def edits : List (String × Update.AtomicEdit) :=
+  [ ("leafNew", .addLeaf leafN Examples.pA
+      { id := leafN, kind := .observed, provenance := .user })
+  , ("leafOld", .addLeaf leafX Examples.pA
+      { id := leafX, kind := .observed, provenance := .user })
+  , ("instNew", .addInstance "b" (.leaf leafN))
+  , ("instDup", .addInstance "a" (.leaf ⟨"y"⟩))
+  , ("attNew", .addAttack (.rebut "b" "a"))
+  , ("attOld", .addAttack (.rebut "h" "a"))
+  , ("disOk", .dischargeOpen "h" [] qOpen (.leaf leafN))
+  , ("disBad", .dischargeOpen "a" [] qOpen (.leaf leafN)) ]
+
+private def renderRejection : Update.UpdateRejection → String
+  | .leafNotFresh l => "leafNotFresh " ++ l.name
+  | .instanceNotFresh name _ => "instanceNotFresh " ++ name
+  | .endpointNotDeclared _ => "endpointNotDeclared"
+  | .notDischargeable name _ q => "notDischargeable " ++ name ++ " " ++ q.name
+  | .batchEdit index reason => "batchEdit " ++ toString index ++ " " ++
+      match reason with
+      | .leafNotFresh l => "leafNotFresh " ++ l.name
+      | .instanceNotFresh name _ => "instanceNotFresh " ++ name
+      | .endpointNotDeclared _ => "endpointNotDeclared"
+      | .notDischargeable name _ q => "notDischargeable " ++ name ++ " " ++ q.name
+      | _ => "other"
+  | _ => "other"
+
+private def renderState (state : Update.SourceState) : String :=
+  "args=" ++ String.intercalate ","
+      (state.argsRaw.map fun row => row.1 ++ ":" ++ renderTerm row.2) ++
+    " atts=" ++ toString state.rawAtts.length ++
+    " leaves=" ++ String.intercalate "," (state.leaves.map (·.1.name))
+
+private def batches : List (List (String × Update.AtomicEdit)) :=
+  [[]] ++ edits.map (fun e => [e]) ++
+    edits.flatMap (fun e => edits.map (fun f => [e, f]))
+
+private def batchRows : List String :=
+  batches.map fun batch =>
+    let result :=
+      match Update.applyBatch batchBase (batch.map (·.2)) with
+      | .ok state => "ok " ++ renderState state
+      | .error reason => "error " ++ renderRejection reason
+    row
+      [ "applyBatch"
+      , "edits=" ++ (if batch.isEmpty then "none"
+          else String.intercalate "," (batch.map (·.1)))
+      , result ]
+
 private def rows : List String :=
-  leafRows ++ admissionRows ++ endpointRows ++ instanceRows
+  leafRows ++ admissionRows ++ endpointRows ++ instanceRows ++
+    dischargeRowsTsv ++ batchRows
 
 def emit : IO _root_.Unit := do
   for output in rows do

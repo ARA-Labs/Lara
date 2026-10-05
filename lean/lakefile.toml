@@ -45,9 +45,10 @@ root = "Lara.PresentationParityMain"
 name = "surface-conformance"
 root = "Lara.SurfaceConformanceMain"
 
-# Exhaustive cross-language parity driver for Lara.Update's four constructor-side
-# precondition deciders. scripts/update-differential.sh diffs its canonical TSV
-# against the Haskell emitter.
+# Exhaustive cross-language parity driver for Lara.Update's constructor-side
+# precondition deciders, the in-place discharge rewrite, and the raw stage of an
+# atomic batch. scripts/update-differential.sh diffs its canonical TSV against
+# the Haskell emitter.
 [[lean_exe]]
 name = "update-preconditions"
 root = "Lara.UpdatePreconditionParityMain"

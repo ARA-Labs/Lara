@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Exhaustive Haskell/Lean parity for the four Lara.Update constructor-side
-# deciders. Both runtimes generate the same canonical TSV from their native
-# source carriers; Lean is the semantic oracle.
+# Exhaustive Haskell/Lean parity for the Lara.Update constructor-side deciders,
+# the in-place discharge rewrite, and the raw stage of an atomic batch. Both
+# runtimes generate the same canonical TSV from their native source carriers;
+# Lean is the semantic oracle.
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT HUP INT TERM
