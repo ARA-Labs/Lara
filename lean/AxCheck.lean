@@ -124,6 +124,7 @@ import Lara.Examples.PWWire
 import Lara.Examples.PWFinite
 import Lara.Examples.PWFileHost
 import Lara.PW.Run
+import Lara.Examples.PWRun
 
 open Lara
 
@@ -4448,6 +4449,14 @@ context's own arguments make unavailable. -/
 #print axioms Lara.PW.Run.addWorld_decoded
 #print axioms Lara.PW.Run.addWorld_quarantine_empty
 #print axioms Lara.PW.Run.addWorld_checks_declared
+
+-- PW outer runtime: duplicate-world identity carries the located holes. Two
+-- worlds whose checked programs agree on AF arguments and compiled attacks but
+-- not on holes are both loaded; a repeated program, holes included, is refused.
+#print axioms Lara.Examples.PWRun.holes_world_kept
+#print axioms Lara.Examples.PWRun.holes_world_states
+#print axioms Lara.Examples.PWRun.holes_world_complete_parts_agree
+#print axioms Lara.Examples.PWRun.holes_world_duplicate
 
 -- Admission, local statuses, and structural failure are separate facts.
 #print axioms Lara.Examples.AxiomWithdrawal.withdrawal_prunes

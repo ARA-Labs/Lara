@@ -465,3 +465,4 @@ import Lara.Examples.PWFinite
 import Lara.Examples.PWFileHost
 -- The finite executable reference for `pw-run 1` documents.
 import Lara.PW.Run
+import Lara.Examples.PWRun

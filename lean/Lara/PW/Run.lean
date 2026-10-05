@@ -21,7 +21,8 @@ bridge declarations and posed queries use the `pw-surface 1` contract unchanged.
 * `Model.candidates_declared` / `Model.accepts_declared` — at a declared world
   the frame's candidates and acceptance are exactly the resolved edges, read at
   world positions. This rests on the loader's invariant that one context never
-  holds two worlds with the same checked program (`LoadedCtx.distinct`).
+  holds two worlds with the same checked program — the same AF arguments,
+  compiled attacks and located holes (`WorldState`, `LoadedCtx.distinct`).
 * `resolveEdges_declared` / `loadWorlds_nodup` — resolution puts each declared
   edge along the bridge its name finds, with its declared acceptance, at the
   positions of the worlds it names; and no context holds two worlds with one
@@ -40,7 +41,9 @@ bridge declarations and posed queries use the `pw-surface 1` contract unchanged.
 declares and nothing else; a bridge's candidate relation is the finite edge
 list; acceptance is the declared Boolean. `Sat` over an arbitrary frame is
 proposition-valued and is not claimed executable. A world is a check-input
-envelope accepted by `checkUnit`, so its statuses are the local checker's.
+envelope accepted by `checkUnit`, so its statuses are the local checker's,
+computed from complete support alone. A world may carry located holes; they
+are part of its identity and of nothing this module states about statuses.
 A world whose duplicate-report groups all agree is checked as declared; a
 world with a conflicting group is refused, because §4.3 quarantine would make
 a public status conditional, which a Boolean status atom cannot say.
@@ -342,15 +345,22 @@ def checkWorld (e : Env) (ground : List Atom) (args : List SupportTerm)
   | .ok u => .ok ⟨u, (Lara.Check.Unit.checkUnit_sound h).sigma_eq,
       (Lara.Check.Unit.checkUnit_sound h).policy_eq⟩
 
+/-- What identifies a world within its context: its checked program's AF
+arguments, compiled attacks and located holes. The holes belong to the
+identity because two worlds whose complete programs agree may still report
+different incomplete alternatives; folding them into one world would drop a
+hole report. -/
+abbrev WorldState := List SupportTerm × List Attack.Attack × List SupportTerm
+
 /-- A world's checked program: what identifies it within its context. -/
-def stateOf {κ : Context} (w : World κ) : List SupportTerm × List Attack.Attack :=
-  (w.unit.program.args, w.unit.program.atts)
+def stateOf {κ : Context} (w : World κ) : WorldState :=
+  (w.unit.program.args, w.unit.program.atts, w.unit.program.holes)
 
 structure LoadedWorld (e : Env) where
   id : WorldId
   world : World e.context
 
-def LoadedWorld.state {e : Env} (w : LoadedWorld e) : List SupportTerm × List Attack.Attack :=
+def LoadedWorld.state {e : Env} (w : LoadedWorld e) : WorldState :=
   stateOf w.world
 
 /-- A context and its worlds, in declaration order. No two worlds share a
@@ -722,8 +732,7 @@ structure REdge where
 deriving DecidableEq
 
 /-- Position of a checked program among a context's worlds. -/
-def indexIn {e : Env} : List (LoadedWorld e) →
-    List SupportTerm × List Attack.Attack → Nat → Option Nat
+def indexIn {e : Env} : List (LoadedWorld e) → WorldState → Nat → Option Nat
   | [], _, _ => none
   | x :: xs, s, n => if x.state = s then some n else indexIn xs s (n + 1)
 
