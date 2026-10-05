@@ -68,6 +68,7 @@ import Lara.Examples.Update
 import Lara.Invariants.Merge
 import Lara.Context.Fragment
 import Lara.Context.Link
+import Lara.Context.LinkHoles
 import Lara.Context.Merge
 import Lara.Context.Compose
 import Lara.Context.Equivalence
@@ -2812,11 +2813,33 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.argsWellSorted_link
 #print axioms Lara.Context.signatureStage_link
 #print axioms Lara.Context.SideOk.mono_gamma
+#print axioms Lara.Context.SideOk.toHoles
+#print axioms Lara.Context.SideOkHoles.toSideOk
+#print axioms Lara.Context.SideOkHoles.mono_gamma
 #print axioms Lara.Context.fragmentAF_eq
 #print axioms Lara.Context.link_attackComplete
 #print axioms Lara.Context.link_checked
 #print axioms Lara.Context.linkedUnit_args_complete
 #print axioms Lara.Context.link_accepted_raw
+#print axioms Lara.Context.link_attackComplete_holes
+#print axioms Lara.Context.linkedUnit_args_typed
+#print axioms Lara.Context.link_checked_holes
+
+-- Context.LinkHoles: linking units with located holes (issue #13)
+#print axioms Lara.Context.filter_dedupList
+#print axioms Lara.Context.conclusionOf_eq_none_of_not_complete
+#print axioms Lara.Context.conclusionCache_completeArgs
+#print axioms Lara.Context.crossAtts_endpoints_complete
+#print axioms Lara.Context.crossAtts_completeArgs
+#print axioms Lara.Context.link_accepted_holes
+#print axioms Lara.Context.crossAtts_avoid_holes
+#print axioms Lara.Context.link_classify
+#print axioms Lara.Context.link_hole_report
+#print axioms Lara.Context.link_side_hole_reported
+#print axioms Lara.Context.link_node_report
+#print axioms Lara.Context.link_hole_source_inert
+#print axioms Lara.Context.link_shared_occurrence_edge
+#print axioms Lara.Context.link_edge_iff
 
 -- Context.Merge: the structural merge is semantically inert (F1)
 #print axioms Lara.Context.posOf_lt

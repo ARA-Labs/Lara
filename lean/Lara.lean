@@ -403,6 +403,7 @@ import Lara.Examples.Update
 import Lara.ListRel
 import Lara.Context.Fragment
 import Lara.Context.Link
+import Lara.Context.LinkHoles
 import Lara.Map.Qualify
 import Lara.Map.Batch
 import Lara.Map.Link
