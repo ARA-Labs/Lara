@@ -170,14 +170,19 @@ runtimes, so two worlds that differ only in their holes are not merged.
 the surface and the core report the same incomplete alternatives. The surface's
 existing diagnostics for authored questions are unchanged and stay distinct.
 
-**D11 — Completion is additive where ordinary updates allow it.** An author
-completes a gap by adding fresh admitted leaves as needed, then a distinct
-complete term under a fresh id. The old hole and the raw attacks stay declared.
-This is not a universally accepted completion sequence: the new complete term
-goes through ordinary attack-completeness checking, so if it licenses an
-outgoing conflict with no covering attack, `addInstance` can reject before a
-later `addAttack` could supply the cover. Discharging a hole in place, and
-atomic multi-edit completion, are out of scope. See §6 below.
+**D11 — Completion is additive, in place, or atomic.** An author completes a
+gap in one of three ways. Additively: add fresh admitted leaves as needed, then
+a distinct complete term under a fresh id; the old hole and the raw attacks stay
+declared. In place: discharge the hole's open question under its own id
+(`dischargeOpen`, D13). Atomically: apply leaves, instances or discharges and
+the attacks they need as one batch that is admitted and checked once
+(`atomic`, D14). The individually rechecked additive sequence is not
+universally accepted: the new complete term goes through ordinary
+attack-completeness checking, so if it licenses an outgoing conflict with no
+covering attack, `addInstance` can reject before a later `addAttack` could
+supply the cover. The atomic batch closes that gap. Updates are source-level
+and not on the verdict wire, so none of this changes the core contract. See §6
+and §6a below.
 
 **D12 — Each obligation is located at its rule occurrences (issue #16).** A
 hole row reports every root obligation together with its *sites*: the
@@ -392,9 +397,117 @@ therefore stated under unchanged complete-to-complete coverage, or for a fresh
 core status unchanged and adds a diagnostic.
 
 Completion follows D11. A fresh complete alternative is checked like any other
-`addInstance`; the old hole persists and is still reported. The supported
-statement is about the complete declaration-plus-attacks program, checked
-directly, and not about a sequence of individually rechecked updates.
+`addInstance`; the old hole persists and is still reported. As a sequence of
+individually rechecked updates this is not complete: `addInstance` of a
+complete term that needs an outgoing attack rejects, and the `addAttack` that
+would cover it rejects first because its source is not yet declared
+(`Examples.UpdateCompletion.sequential_completion_fails`). Completion is no
+longer only additive. An atomic batch performs the whole completion and checks
+the completed program once, so whenever that program is accepted the batch is
+(`atomic_completion_complete`). An in-place discharge rewrites the hole itself:
+the old hole leaves the report when the discharge completes it, and every other
+hole stays (`dischargeOpen_hole_becomes_node`, `dischargeOpen_others_persist`).
+§6a records both designs.
+
+## 6a. Update vocabulary for completion
+
+Both decisions below are source-update decisions
+(`docs/theory-m3-source-updates.md`). Updates are not on the verdict wire, so
+neither changes `lara-core@0.3`, the replay identity, any committed verdict, or
+the evaluation freeze.
+
+**D13 — Discharge a located hole in place (`dischargeOpen`, issue #14).**
+`dischargeOpen name π q v` answers the open question `q` of the rule occurrence
+at position `π` (spec §7, `π ::= ε | π.i | π.q`) inside the declared argument
+`name`, with the discharge term `v`.
+
+- *Precondition* (`DischargeOpen`, decided by `dischargeOpenB`): the name
+  resolves, through the first-match lookup raw attack endpoints use, to a term
+  whose occurrence at `π` is a rule instance with `q` in its open set `H`. The
+  precondition is syntactic. Whether `v` answers `q`'s pattern, and whether the
+  result is typed, are left to the checker, as for every other update.
+- *Effect*: at that occurrence `q` leaves `H` and `(q, v)` is **appended** to
+  the discharge map (`Discharge.dischargeAt`). The row keeps its name and its
+  declaration index, the raw attacks are untouched, and admission and
+  `checkUnit` then rerun on the edited source.
+- *Why append*: `lookupDis` reads the first matching entry, so appending leaves
+  every discharge lookup that succeeded before unchanged. Every position that
+  was defined in the old term stays defined and addresses an occurrence of the
+  same kind (the same leaf, or the same rule and substitution); off the
+  root-to-`π` path it is the identical subterm (`subterm_dischargeAt_old`). On
+  a typed term `q` had no discharge (`D ⊎ H` is a partition), so `π.q` is a new
+  position and addresses `v` (`subterm_dischargeAt_new`). Raw attack identities
+  and raw endpoint alignment are therefore preserved: each raw attack resolves
+  at the same index, kind and position, with the new term at the endpoints that
+  name the discharged argument (`resolveAttacks_dischargeRows`,
+  `dischargeOpen_resolved`).
+- *Metatheory*: the conclusion is unchanged (`dischargeAt_conclusion`). The
+  rewritten term types whenever the old one did and `v` answers the question
+  (`dischargeAt_hasSupport`). Its obligations are exactly the old open mandatory
+  questions away from `π`, those still open at `π`, and `v`'s obligations
+  (`dischargeAt_obligations_iff`, built on the occurrence characterization
+  `mem_obligations_iff`). Discharging the only open mandatory question, at its
+  only open occurrence, with a complete term yields a complete term
+  (`dischargeAt_complete`). Through the pipeline, every hole and complete
+  argument other than the discharged one persists in both directions
+  (`dischargeOpen_others_persist`). A retained hole discharged to completion by
+  a term that uses no quarantined leaf becomes an AF node, leaves the hole
+  report under both its old and its new term, and moves every claim equivalent
+  to its conclusion out of `gap` under every extension semantics
+  (`dischargeOpen_hole_becomes_node`).
+- *Not claimed*: no status matrix and no gap-monotonicity theorem. The site may
+  hold an *optional* open question of a complete argument; then an AF node's
+  term changes, and if `v` is itself incomplete the node becomes a hole and its
+  claim can enter `gap`. Even a hole-to-hole discharge can change an edge: an
+  attack from a complete source onto a position on the root-to-`π` path now
+  addresses the rewritten occurrence (D6).
+
+**D14 — Atomic multi-edit completion (`atomic`, issue #11).** `atomic edits`
+applies a list of raw edits — `addLeaf`, `addInstance`, `addAttack` and
+`dischargeOpen` (`AtomicEdit`, a separate type, so a batch cannot nest) — in
+order, then runs admission and `checkUnit` exactly once on the final raw state.
+
+- *Per-edit checks*: each edit's syntactic side condition is checked against
+  the state the earlier edits produced, so an attack may name an instance added
+  earlier in the same batch, but not a later one. The first failing edit rejects
+  the batch with `batchEdit index reason`.
+- *All or nothing*: the batch is accepted exactly when its raw edits apply and
+  the final raw state is `Accepted`, and it then returns that state
+  (`applyUpdate_atomic_ok_iff`). A rejected batch returns no state, and the
+  caller keeps the source (`applyOrKeep`, `atomic_partial_rejected`).
+- *Completeness of completion*: if the program obtained by adding fresh leaves,
+  fresh instances (or an in-place discharge) and the attacks they need is
+  accepted, the corresponding batch is accepted and yields exactly that program
+  (`atomic_completion_complete`, `atomic_discharge_completion_complete`). No
+  intermediate state is checked, which is what the sequential route lacks.
+- *Identities*: every successful batch keeps every raw attack and every
+  argument name at its declaration index. A batch without discharge keeps every
+  argument row (`applyBatchFrom_prefix`). If its new leaves are admitted, it
+  also keeps the source's complete arguments and reported holes as prefixes of
+  the target's (`atomic_additive_checked_prefix`).
+- *Why no `tighten`*: tightening never completes a gap. Leaving it out keeps
+  every batch without discharge inside the additive metatheory.
+
+**Rejected alternatives.**
+
+- *Nest `SourceUpdate` inside `atomic`.* A nested inductive allows batches of
+  batches and complicates every induction for no expressive gain.
+- *Check every intermediate state of a batch.* That is the sequential route
+  again, and it fails on the same counterexample.
+- *Delete the hole and re-add the completed term under the same id.* There is
+  no removal update, and a delete-then-add sequence passes through a state in
+  which the attacks naming the id do not resolve. Rewriting the row in place
+  keeps the id, the index and every raw attack.
+- *Prepend the discharge, or keep the discharge map sorted.* On an ill-formed
+  raw term either can shadow an earlier entry with the same key and move an
+  existing position. Appending provably preserves every old position.
+
+The Haskell mirror (`src/Lara/Update.hs`) carries both constructors, the site
+decider, the rewrite and the raw stage of a batch, and `make
+update-differential` diffs them exhaustively against Lean. Batch acceptance is
+Lean-only, like `applyUpdate`. The update golden prints the completion
+witnesses (`Examples.UpdateCompletion.completionWitnessReport`); no transition
+matrix is computed for the two new constructors.
 
 ## 7. Rejected alternatives
 
@@ -438,11 +551,12 @@ The located report is diagnostic data beside the unchanged status.
 
 ## 8. Non-goals and cost
 
-Obligation sites (D12, issue #16) are reported by the core verdict only, not by
-the map layer. Linking and composition were first left hole-free here; issue
-#13 extended them to units with holes (D9). This record does not add in-place
-discharge (D11, issue #14; atomic multi-edit completion is issue #11), or
-re-lower the frozen `corpus-units` to declare their incomplete arguments
+The follow-ups this record first deferred have landed with it. Hole rows
+locate each open obligation at its rule occurrences (D12, issue #16); the map
+layer still reports obligations without sites. Linking and composition cover
+units with holes (D9, issue #13). In-place discharge (issue #14) and atomic
+multi-edit completion (issue #11) are source updates, recorded in §6a. The
+frozen `corpus-units` declare their incomplete arguments as located holes
 (`corpus-units/LOWERING.md`, issue #15).
 
 The version bump changes every committed verdict and check-input byte that

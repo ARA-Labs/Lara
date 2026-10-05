@@ -29,38 +29,53 @@ retains one proof-relevant successful run: its aligned attacks, admission result
 checked unit, admission equality, and checker equality. The theorem
 `AcceptedRun.accepted` forgets those witnesses into `Accepted`.
 
-`Lara.Update.SourceUpdate` is the closed first-fragment update vocabulary:
+`Lara.Update.SourceUpdate` is the closed update vocabulary. The first fragment
+has four constructors; the two completion constructors were added later
+(`docs/located-gap-decision.md` §6a, D13 and D14):
 
 ```text
 addLeaf id atom metadata
 tighten (leaf-kind, provenance)
 addAttack raw-attack
 addInstance raw-name support-term
+dischargeOpen raw-name position question support-term
+atomic [atomic-edit]
 ```
 
-The `String` in `addInstance` is deliberate. It names a pre-parse `argsRaw` row;
-it is not a second parsed argument identifier. Raw attack endpoints use the same
-pre-parse names. The Haskell mirror in `src/Lara/Update.hs` preserves this
-exception and otherwise reuses the project's symbolic ADTs.
+An `AtomicEdit` is one of `addLeaf`, `addInstance`, `addAttack`, or
+`dischargeOpen`. It is a separate type, so a batch cannot contain a batch.
+
+The `String` in `addInstance` and `dischargeOpen` is deliberate. It names a
+pre-parse `argsRaw` row; it is not a second parsed argument identifier. Raw
+attack endpoints use the same pre-parse names. The Haskell mirror in
+`src/Lara/Update.hs` preserves this exception and otherwise reuses the
+project's symbolic ADTs.
 
 `Lara.Update.UpdateRejection` is a closed diagnostic type. Its constructor-side
-cases are `leafNotFresh`, `keyNotAdmitted`, `endpointNotDeclared`, and
-`instanceNotFresh`. Revalidation can also report duplicate raw argument names,
-attack-resolution failure, source invalidity, source rejection, or whole-unit
-rejection. No free-form rejection string crosses this boundary.
+cases are `leafNotFresh`, `keyNotAdmitted`, `endpointNotDeclared`,
+`instanceNotFresh`, and `notDischargeable`; a batch reports its first failing
+edit as `batchEdit index reason`. Revalidation can also report duplicate raw
+argument names, attack-resolution failure, source invalidity, source rejection,
+or whole-unit rejection. No free-form rejection string crosses this boundary.
 
 `Lara.Update.applyUpdate` checks the constructor side condition, edits only the
 corresponding raw carrier, and calls the real admission and whole-unit checker
 on the edited state. It returns the edited `SourceState` only after both stages
-accept. The four edits append a leaf and its metadata, replace or append one
-admission row with `quarantine`, append one raw attack, or append one raw
-argument row. There is no admit-to-reject constructor because
-`Admission.source_reject_no_checked_unit` proves that a rejected source has no
-checked-unit target.
+accept. The first four edits append a leaf and its metadata, replace or append
+one admission row with `quarantine`, append one raw attack, or append one raw
+argument row. `dischargeOpen` rewrites one raw argument row in place: at the
+rule occurrence at the position it removes the question from the open set and
+appends the discharge (`Lara.Update.Discharge.dischargeAt`); the row keeps its
+name and declaration index. `atomic` applies its raw edits in order, checking
+each edit's side condition against the state the earlier edits produced
+(`applyBatch`), and then admits and checks the final raw state once. There is no
+admit-to-reject constructor because `Admission.source_reject_no_checked_unit`
+proves that a rejected source has no checked-unit target.
 
 The Haskell mirror intentionally stops before `applyUpdate`. It provides
-constructor and decider conformance only. No driver, parser, `.lara` section,
-wire command, corpus case, or runtime update feature is part of M3.
+constructor and decider conformance, the discharge rewrite, and the raw stage of
+a batch only. No driver, parser, `.lara` section, wire command, corpus case, or
+runtime update feature is part of M3.
 
 ## Side Conditions and Preservation Hypotheses
 
@@ -72,6 +87,15 @@ The named executable deciders and Lean adequacy theorems are:
 | `tighten` | `Admission.decisionFor` returns `admit` at the key; omitted keys default to `admit`. | `AdmittedAt`, `admittedAtB`, `admittedAtB_iff` |
 | `addAttack` | Both raw endpoints name rows in `argsRaw`. | `EndpointDeclared`, `endpointDeclaredB`, `endpointDeclaredB_iff` |
 | `addInstance` | Both the raw name and the semantic support term are fresh in `argsRaw`. | `InstanceFresh`, `instanceFreshB`, `instanceFreshB_iff` |
+| `dischargeOpen` | The raw name resolves (first match, as endpoints do) to a term whose occurrence at the position is a rule instance with the question in its open set. | `DischargeOpen`, `dischargeOpenB`, `dischargeOpenB_iff` (term level: `Discharge.OpenAt`, `openAtB`, `openAtB_iff`) |
+| `atomic` | Each edit's own side condition, above, against the state the earlier edits produced. | `applyBatch`; the first failure is `batchEdit index reason` |
+
+The two completion constructors are characterized exactly rather than by
+sufficient conditions: `applyUpdate_dischargeOpen_ok_iff` (site precondition
+and acceptance of the rewritten source) and `applyUpdate_atomic_ok_iff` (raw
+batch success and acceptance of its final state). Their metatheory lives in
+`lean/Lara/Update/Discharge.lean` and `lean/Lara/Update/Completion.lean` and is
+summarized under "Holes and the AGM Probe" below.
 
 The preservation theorems in `lean/Lara/Update.lean` are sufficient-condition
 results, not unconditional admissibility claims:
@@ -308,17 +332,52 @@ obligations of every surviving term (`addLeaf_obligations_preserved`,
 `addAttack_obligations_preserved`, `tighten_obligations_preserved`). Tightening
 can still quarantine a hole, so its reported hole list only shrinks.
 
-Completion is additive. An author completes a gap with `addLeaf` for each
-fresh admitted leaf it needs, then `addInstance` of a distinct complete term
-under a fresh raw name. The old hole and every raw attack stay declared, and the
-old hole stays reported (`addInstance_holes_persist`). This
-is not a sequence that is accepted step by step in general: the complete term
-goes through ordinary attack-completeness checking, so if it licenses an
-outgoing conflict that no declared attack covers, `addInstance` rejects before
-the `addAttack` that would cover it can be applied. The supported statement is
-about the complete declaration-plus-attacks program, checked directly.
-Discharging a hole in place, under its own id, and atomic multi-edit completion
-are not update constructors.
+Completion has three routes (`docs/located-gap-decision.md` D11, §6a).
+
+*Additive.* An author adds each fresh admitted leaf with `addLeaf`, then a
+distinct complete term under a fresh raw name with `addInstance`. The old hole
+and every raw attack stay declared, and the old hole stays reported
+(`addInstance_holes_persist`). This sequence is not accepted step by step in
+general: the complete term goes through ordinary attack-completeness checking,
+so if it licenses an outgoing conflict that no declared attack covers,
+`addInstance` rejects, and the `addAttack` that would cover it rejects first
+because its source is not declared yet
+(`Examples.UpdateCompletion.sequential_completion_fails`).
+
+*Atomic* (D14). `atomic` performs the whole completion as one batch and checks
+the completed program once. It is accepted exactly when its raw edits apply and
+the final state is accepted (`applyUpdate_atomic_ok_iff`); a rejected batch
+leaves the source unchanged (`atomic_partial_rejected`, with `applyOrKeep`).
+Completion is complete: whenever the program obtained by adding fresh leaves,
+fresh instances or an in-place discharge, and the needed attacks is accepted,
+the batch yields exactly that program (`atomic_completion_complete`,
+`atomic_discharge_completion_complete`). Every batch keeps raw attacks and
+argument names at their indices, and a batch without discharge keeps every
+argument row (`applyBatchFrom_prefix`). With its new leaves admitted, it keeps
+the old complete arguments and the old reported holes as prefixes of the new
+ones (`atomic_additive_checked_prefix`, witnessed by
+`Examples.UpdateCompletion.atomic_keeps_old_hole`).
+
+*In place* (D13). `dischargeOpen` answers an open question of a declared
+argument under its own name. The term-level results in
+`lean/Lara/Update/Discharge.lean` show that every old position stays defined at
+the same occurrence kind (`subterm_dischargeAt_old`), that the conclusion is
+unchanged (`dischargeAt_conclusion`) and typing preserved when the discharge
+answers the question (`dischargeAt_hasSupport`), and that the new obligations
+are exactly the old ones away from the site, the ones still open at the site,
+and the discharge's own (`dischargeAt_obligations_iff`). Through the pipeline,
+raw endpoint alignment is preserved index by index (`dischargeOpen_resolved`),
+every other hole and complete argument persists (`dischargeOpen_others_persist`),
+and a retained hole discharged to completion becomes an AF node whose claim
+leaves `gap` under every extension semantics
+(`dischargeOpen_hole_becomes_node`, witnessed by
+`Examples.UpdateCompletion.discharge_hole_becomes_node`). Because the
+discharged argument keeps its declared name, its covering attack can also be
+added first, one update at a time (`discharge_needs_attack`). `dischargeOpen`
+has no gap-monotonicity theorem: discharging an optional question of a complete
+argument with an incomplete term turns an AF node into a hole. The update
+golden prints the completion witnesses below the matrices; no transition matrix
+is computed for `dischargeOpen` or `atomic`.
 
 `Lara.Update.beliefSet sem unit p` means
 `coreObs sem unit p = observed justified`. The M3 AGM comparison fixes
@@ -335,8 +394,8 @@ projection was not adjusted to recover one.
 
 The paper may claim:
 
-- a checked, one-step source-update calculus with four constructors and named,
-  executable constructor side conditions;
+- a checked, one-step source-update calculus with four first-fragment
+  constructors and named, executable constructor side conditions;
 - sufficient-condition acceptance preservation under the exact hypotheses of
   `applyUpdate_addLeaf_ok`, `applyUpdate_tighten_ok`,
   `applyUpdate_addAttack_ok`, and `applyUpdate_addInstance_ok`;
@@ -354,23 +413,31 @@ The paper may claim:
   source declared framework;
 - the count refutation for `addInstance`, the counterexample to dropping
   `CleanBase` from the universal additive theorem, holes independence, and the
-  two failed grounded AGM probes.
+  two failed grounded AGM probes;
+- two completion constructors with exact acceptance characterizations: in-place
+  discharge with position, conclusion, typing and obligation preservation, and
+  atomic batches that are all-or-nothing and complete for completion, with the
+  concrete sequential-failure counterexample.
 
 The paper must not claim:
 
 - an unindexed four-valued general-semantics matrix;
 - public additive behavior equals core behavior without `CleanBase`;
 - unconditional `addInstance` admissibility;
-- a theory of update composition, removal, or un-tightening;
+- a transition matrix, or gap monotonicity, for `dischargeOpen` or `atomic`;
+- a theory of update composition beyond one atomic batch, removal, or
+  un-tightening;
 - a CLI or runtime update feature;
 - full AGM compliance;
 - that the holes diagnostic is a sixth report.
 
 ## Scope and Verification
 
-M3 covers the first update fragment and one successful source edit at a time.
-It does not define update sequences, inverse operations, conflict resolution
-between edits, or algebraic laws for composition. M3 also does not prove
+M3 covers the first update fragment and one successful source edit at a time;
+the completion constructors add one in-place rewrite and one atomic batch, which
+is checked once as a single edit. M3 does not define update sequences beyond a
+batch, inverse operations, conflict resolution between edits, or algebraic laws
+for composition. M3 also does not prove
 contextual adequacy. Theory M4 retains that obligation: define
 fragments, imports, exports, holes, hygienic linking, ill-linked rejection, and
 contextual equivalence; then prove both directions of full abstraction against
@@ -404,7 +471,7 @@ cabal build lara-test
 cabal test lara-test --test-show-details=direct
 make update-goldens
 make update-goldens UPDATE=1   # deterministic regeneration, then review the diff
-cd lean && lake build Lara.Update Lara.Examples.Update
+cd lean && lake build Lara.Update Lara.Update.Completion Lara.Examples.Update Lara.Examples.UpdateCompletion
 ```
 
 `make update-goldens` rebuilds `Lara.Examples.Update`, runs
