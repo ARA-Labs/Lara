@@ -367,6 +367,7 @@ import Lara.BlockedProgram
 import Lara.RawAttack
 import Lara.Admission
 import Lara.Update
+import Lara.Update.Discharge
 import Lara.Attack
 import Lara.Compile
 import Lara.Observation

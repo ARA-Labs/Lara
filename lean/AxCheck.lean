@@ -64,6 +64,7 @@ import Lara.Examples.SurfaceTransportAttack
 import Lara.Examples.SurfaceTransportContext
 import Lara.Examples.SurfaceHoles
 import Lara.Update
+import Lara.Update.Discharge
 import Lara.Examples.Update
 import Lara.Invariants.Merge
 import Lara.Context.Fragment
@@ -1711,6 +1712,53 @@ outside the public audit surface. -/
 #print axioms Lara.Update.tighten_obligations_preserved
 #print axioms Lara.Update.addInstance_holes_persist
 #print axioms Lara.Update.addInstance_hole_core_fixed
+
+/-! ### Completion updates — in-place discharge (D13) and atomic batches (D14) -/
+
+-- Term-level discharge (lean/Lara/Update/Discharge.lean).
+#print axioms Lara.Update.Discharge.replaceDis
+#print axioms Lara.Update.Discharge.closeOpen
+#print axioms Lara.Update.Discharge.dischargeAt
+#print axioms Lara.Update.Discharge.OpenAt
+#print axioms Lara.Update.Discharge.openAtB
+#print axioms Lara.Update.Discharge.openAtB_iff
+#print axioms Lara.Update.Discharge.lookupDis_append_of_some
+#print axioms Lara.Update.Discharge.lookupDis_append_of_none
+#print axioms Lara.Update.Discharge.lookupDis_append_cases
+#print axioms Lara.Update.Discharge.lookupDis_replaceDis
+#print axioms Lara.Update.Discharge.replaceDis_map_fst
+#print axioms Lara.Update.Discharge.replaceDis_eq_set
+#print axioms Lara.Update.Discharge.lookupDis_none_of_not_mem
+#print axioms Lara.Update.Discharge.lookupDis_of_getElem?_nodup
+#print axioms Lara.Update.Discharge.OccKind
+#print axioms Lara.Update.Discharge.occKind
+#print axioms Lara.Update.Discharge.openSet
+#print axioms Lara.Update.Discharge.dischargeAt_nil
+#print axioms Lara.Update.Discharge.dischargeAt_isSome_iff
+#print axioms Lara.Update.Discharge.subterm_dischargeAt_old
+#print axioms Lara.Update.Discharge.subterm_dischargeAt_site
+#print axioms Lara.Update.Discharge.subterm_dischargeAt_new
+#print axioms Lara.Update.Discharge.subterm_dischargeAt_cases
+#print axioms Lara.Update.Discharge.OpenMandatoryAt
+#print axioms Lara.Update.Discharge.OpenMandatoryAway
+#print axioms Lara.Update.Discharge.mem_collectObligations_iff
+#print axioms Lara.Update.Discharge.mem_obligations_iff
+#print axioms Lara.Update.Discharge.hasSupport_concl_of_occKind
+#print axioms Lara.Update.Discharge.occKind_dischargeAt
+#print axioms Lara.Update.Discharge.dischargeAt_conclusion
+#print axioms Lara.Update.Discharge.lookupDis_site_none
+#print axioms Lara.Update.Discharge.mem_site_of_dischargeAt
+#print axioms Lara.Update.Discharge.dischargeAt_obligations_iff
+#print axioms Lara.Update.Discharge.dischargeAt_obligations_subset
+#print axioms Lara.Update.Discharge.dischargeAt_obligations_retained
+#print axioms Lara.Update.Discharge.dischargeAt_closes
+#print axioms Lara.Update.Discharge.dischargeAt_complete
+#print axioms Lara.Update.Discharge.dischargeAt_hasSupport
+#print axioms Lara.Update.Discharge.mem_leavesList_iff
+#print axioms Lara.Update.Discharge.mem_leavesDis_iff
+#print axioms Lara.Update.Discharge.leaves_dischargeAt
+#print axioms Lara.Update.Discharge.dischargeAt_ne
+
 
 /-! ### M3 — public transition API and matrix boundaries -/
 
