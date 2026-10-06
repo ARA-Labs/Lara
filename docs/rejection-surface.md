@@ -602,3 +602,17 @@ document should not be read as implying it does.
   of which are the anchors above.
 - `fixtures/mutants/README.md` and `MANIFEST.tsv` — the generated mutation suite that exercises every
   class at scale, differentially checked between the Haskell and Lean drivers.
+
+## Which failures does the evidence-package command add?
+
+`lara check-ara ROOT [--policy FILE] [--out DIR]` captures package files before checking source. Invalid or noncanonical manifests and capture/integrity failures of the paper, source or policy are package-global errors (exit 2). Evidence binding, requested-object capture/integrity, and extraction/proposition mismatches are located R8 rejections (exit 1). Both classes leave stdout empty and publish no accepted output bundle.
+
+After global capture and source validation, existing policy R8 precedes evidence binding, requested-object capture and extraction. Evidence failure precedes strict replay R13, group R9 and core outcomes. Binding and extraction select errors in leaf order; requested objects use manifest order and name the earliest referencing leaf. The exact contract is in [the evidence decision record §9](evidence-admission-decision.md#9-ara-packaging-direction-and-task-0-outcome-for-issue-8).
+
+Ordinary `.lara` commands without a package context refuse certified declarations at R8, including `check`, `deps`, map member loading and possible-world source loading. PW retains its existing stdout-only `pw-error` world-input envelope rather than the package command's empty-stdout convention. Raw core `.sexp` checking remains conditional declared-evidence checking.
+
+```sh
+make evidence-cli evidence-differential
+```
+
+These gates run the real binary over copied original packages and tampered inputs, then compare the finite typed model separately. Existing quarantine still produces an accepted source with directed `evidence-blocked` reporting when appropriate; it cannot hide a failed certified assertion or turn it into a successful certification.

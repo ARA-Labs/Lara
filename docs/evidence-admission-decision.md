@@ -190,6 +190,8 @@ The Lean development proves executable/declarative admission equivalence, replay
 
 Those theorems live in `lean/Lara/Evidence/` and are audited by `lean/AxCheck.lean` (`make axiom-audit`), `sorry`-free and restricted to the standard axiom trio. Filesystem capture, SHA-256 assumptions, compiler/runtime behavior and concrete CSV/JSON byte-parser refinement remain outside the finite-snapshot model. `scripts/evidence-differential.sh` provides conformance evidence over typed fixtures, not proofs about those concrete parsers. Neither replay nor a justified conditional status proves scientific validity, natural-language faithfulness or empirical truth.
 
+The [evidence theory note](theory-evidence-admission.md) maps each guarantee to its theorem and states the premises for source composition and concrete implementation refinement.
+
 ### What Task 0 established after portfolio revision
 
 The earlier `tsv-row@1` portfolio failed: the available row outputs are original CSV, not TSV, and reconstructed Markdown or expected-result prose cannot substitute for measured bytes. The approved plan permits revision against actual original formats. The revised [inventory](evidence-admission-inventory.md) preserves complete pinned CompoNet and Simformer originals and demonstrates ten exact leaves across two independently authored packages, three narrow claim families and two independently specified checker families. `csv-row@1` replaces `tsv-row@1`; `json-pointer@1` includes the explicit decimal-line encoding required by the saved original notebook outputs. This is not CSV converted to TSV or an invented success fixture.

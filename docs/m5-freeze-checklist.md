@@ -900,3 +900,9 @@ Two notes carried over from the T7 execution pass, both easy to get wrong:
 
 If any gate is red, stop and diagnose — never adjust an anchor to match observed
 output.
+
+## What the certified-evidence addition does not refreeze
+
+`lara-evidence@0.1` adds the `check-ara` package command; the v8 measurements above remain historical results over declared evidence. They do not measure package capture or extraction and must not be presented as evidence-checked runs. [Issue #20](https://github.com/ARA-Labs/Lara/issues/20) budgets the additive measured-input evaluation, corpus regeneration and matching report/freeze-tag update, together with the human payload-to-proposition review.
+
+The real package acceptance cases and R8 rejection scenarios currently run in `test/evidence-cli.sh`; the typed Haskell/Lean cases are pinned in `fixtures/evidence/model/MANIFEST.tsv` and run by `scripts/evidence-differential.sh`. Those gates validate the implemented boundary but do not silently extend this measured-input snapshot. The contract and trusted base are recorded in [the evidence decision record §9](evidence-admission-decision.md#9-ara-packaging-direction-and-task-0-outcome-for-issue-8).

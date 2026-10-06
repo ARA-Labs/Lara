@@ -119,9 +119,14 @@ side result
   and
   [`theory-pw-t9-path-composition.md`](theory-pw-t9-path-composition.md).
 
+The certified-evidence admission and source-composition results are recorded in
+[`theory-evidence-admission.md`](theory-evidence-admission.md), with explicit
+limits for byte parsing, cryptography and operating-system capture.
+
 ## Subdirectories
 
 - [`demos/`](demos/) — the prose-first demo write-ups (see entry
   points above).
 - `references/` — long-form reading notes on external sources feeding the
   related-work and annotation vocabulary.
+
