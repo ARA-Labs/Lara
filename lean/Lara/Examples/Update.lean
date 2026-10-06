@@ -521,12 +521,12 @@ private def graphState (spec : GraphSpec) : Lara.Update.SourceState :=
   , groups := []
   , ground := groundEx ++ [h0, h1, h2, h3, h4] }
 
-private def resolvedOrEmpty (state : Lara.Update.SourceState) : List Attack.Attack :=
+def resolvedOrEmpty (state : Lara.Update.SourceState) : List Attack.Attack :=
   match RawAttack.resolveAttacks state.argsRaw state.rawAtts with
   | .ok attacks => attacks
   | .error _ => []
 
-private def declaredOf (state : Lara.Update.SourceState)
+def declaredOf (state : Lara.Update.SourceState)
     (hresolve :
       RawAttack.resolveAttacks state.argsRaw state.rawAtts =
         .ok (resolvedOrEmpty state))
@@ -536,7 +536,7 @@ private def declaredOf (state : Lara.Update.SourceState)
   , resolve_eq := hresolve
   , ids_nodup := hids }
 
-private def admissionOf (state : Lara.Update.SourceState)
+def admissionOf (state : Lara.Update.SourceState)
     (declared : Admission.AlignedAttacks state.argsRaw state.rawAtts) :
     Admission.AdmissionResult :=
   { prune := Admission.buildPrune id state.table state.metas state.leaves
@@ -545,7 +545,7 @@ private def admissionOf (state : Lara.Update.SourceState)
   , audit := Admission.buildAdmissionAudit id state.table state.metas state.leaves
       state.argsRaw state.rawAtts state.groups declared.resolved }
 
-private def checkedResultOf (state : Lara.Update.SourceState)
+def checkedResultOf (state : Lara.Update.SourceState)
     (admission : Admission.AdmissionResult) :=
   Check.Unit.checkUnit (Admission.buildGamma admission.prune.checkedLeaves)
     registryEx state.ground
@@ -554,7 +554,7 @@ private def checkedResultOf (state : Lara.Update.SourceState)
     , args := admission.prune.keptArgs.map (·.2)
     , atts := admission.prune.keptAttacks }
 
-private def checkedOf (state : Lara.Update.SourceState)
+def checkedOf (state : Lara.Update.SourceState)
     (admission : Admission.AdmissionResult)
     (hok : (checkedResultOf state admission).isOk = true) :
     Lara.Unit.CheckedUnit id
@@ -574,7 +574,7 @@ abbrev AcceptedRun (state : Lara.Update.SourceState) :=
   Lara.Update.AcceptedRun registryEx state
 
 
-private def fixtureOf (state : Lara.Update.SourceState)
+def fixtureOf (state : Lara.Update.SourceState)
     (hresolve :
       RawAttack.resolveAttacks state.argsRaw state.rawAtts =
         .ok (resolvedOrEmpty state))

@@ -55,3 +55,7 @@ atomic beside hole h | accepted; holes 1 -> 1, h kept | atomic_keeps_old_hole
 dischargeOpen h eps q1 | accepted; holes 1 -> 0; p gap -> justified | discharge_hole_becomes_node
 dischargeOpen h 0 q1 alone | rejected missing-conflict | discharge_needs_attack
 atomic [dischargeOpen h 0 q1, addAttack h->a] | accepted; holes 1 -> 0; q gap -> justified | discharge_needs_attack
+atomic [addInstance b] beside lone hole h | accepted; holes 1 -> 1; p gap -> justified | atomic_completion_public_justified
+dischargeOpen h eps q2 by hole tUse | accepted; holes 0 -> 1; p justified -> gap | discharge_optional_enters_gap
+dischargeOpen h 0 q1 after addAttack h->a | accepted; holes 1 -> 0; p justified -> refuted | discharge_outgoing_defeats
+atomic [addLeaf l3 quarantined, addInstance c] beside hole h | accepted; args 1 -> 1; holes 1 -> 1, c pruned | atomic_quarantined_leaf_pruned

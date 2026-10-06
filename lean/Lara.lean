@@ -369,6 +369,7 @@ import Lara.Admission
 import Lara.Update
 import Lara.Update.Discharge
 import Lara.Update.Completion
+import Lara.Update.Transitions
 import Lara.Attack
 import Lara.Compile
 import Lara.Observation

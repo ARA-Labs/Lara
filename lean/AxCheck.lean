@@ -1829,6 +1829,30 @@ outside the public audit surface. -/
 #print axioms Lara.Update.claimSupportFor_ne_nil_of_arg
 #print axioms Lara.Update.dischargeOpen_hole_becomes_node
 
+-- Status transitions of the completion updates (lean/Lara/Update/Transitions.lean).
+#print axioms Lara.Update.insertShift
+#print axioms Lara.Update.claimSupportFor_insertShift
+#print axioms Lara.Update.sinkEmbedding_insertShift
+#print axioms Lara.Update.coreObs_not_gap_of_insert
+#print axioms Lara.Update.coreObs_gap_of_insert
+#print axioms Lara.Update.grounded_sink_monotone_of_insert
+#print axioms Lara.Update.Unattacked
+#print axioms Lara.Update.statusC_justified_of_unattacked
+#print axioms Lara.Update.coreObs_justified_of_unattacked
+#print axioms Lara.Update.publicReport_justified_of_unattacked
+#print axioms Lara.Update.dischargeOpen_completion_no_gap_entry
+#print axioms Lara.Update.dischargeOpen_completion_gap_fixed
+#print axioms Lara.Update.dischargeOpen_completion_sink_status_monotone
+#print axioms Lara.Update.dischargeOpen_completion_justified
+#print axioms Lara.Update.dischargeOpen_completion_public_justified
+#print axioms Lara.Update.AtomicEdit.AddsNoInstance
+#print axioms Lara.Update.AtomicEdit.AddsNoAttack
+#print axioms Lara.Update.atomic_additive_no_gap_entry
+#print axioms Lara.Update.atomic_instanceFree_gap_fixed
+#print axioms Lara.Update.atomic_attackFree_sink_status_monotone
+#print axioms Lara.Update.AcceptedRun.justified_of_unattacked_row
+#print axioms Lara.Update.atomic_completion_justified
+
 -- Completion fixtures (lean/Lara/Examples/UpdateCompletion.lean).
 #print axioms Lara.Examples.UpdateCompletion.stateWith
 #print axioms Lara.Examples.UpdateCompletion.coverAttack
@@ -1850,6 +1874,20 @@ outside the public audit surface. -/
 #print axioms Lara.Examples.UpdateCompletion.tUseDischarged
 #print axioms Lara.Examples.UpdateCompletion.useDischargedState
 #print axioms Lara.Examples.UpdateCompletion.discharge_needs_attack
+#print axioms Lara.Examples.UpdateCompletion.discharge_completion_public_justified
+#print axioms Lara.Examples.UpdateCompletion.gapBatchState
+#print axioms Lara.Examples.UpdateCompletion.atomic_completion_public_justified
+#print axioms Lara.Examples.UpdateCompletion.tMixBoth
+#print axioms Lara.Examples.UpdateCompletion.optionalDischargedState
+#print axioms Lara.Examples.UpdateCompletion.discharge_optional_enters_gap
+#print axioms Lara.Examples.UpdateCompletion.useAttackedState
+#print axioms Lara.Examples.UpdateCompletion.discharge_outgoing_defeats
+#print axioms Lara.Examples.UpdateCompletion.quarantineRow
+#print axioms Lara.Examples.UpdateCompletion.quarantineHoleState
+#print axioms Lara.Examples.UpdateCompletion.quarantinedMeta
+#print axioms Lara.Examples.UpdateCompletion.quarantineBatch
+#print axioms Lara.Examples.UpdateCompletion.quarantineBatchState
+#print axioms Lara.Examples.UpdateCompletion.atomic_quarantined_leaf_pruned
 #print axioms Lara.Examples.UpdateCompletion.completionWitnessReport
 
 /-! ### M3 — public transition API and matrix boundaries -/
@@ -1905,6 +1943,12 @@ outside the public audit surface. -/
 /-! ### M3 — exported examples and reachable witnesses -/
 
 #print axioms Lara.Examples.Update.AcceptedRun
+#print axioms Lara.Examples.Update.resolvedOrEmpty
+#print axioms Lara.Examples.Update.declaredOf
+#print axioms Lara.Examples.Update.admissionOf
+#print axioms Lara.Examples.Update.checkedResultOf
+#print axioms Lara.Examples.Update.checkedOf
+#print axioms Lara.Examples.Update.fixtureOf
 #print axioms Lara.Examples.Update.SuccessfulCoreCell
 #print axioms Lara.Examples.Update.SuccessfulPublicCell
 #print axioms Lara.Examples.Update.SuccessfulCoreCell.transition
