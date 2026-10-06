@@ -2,4 +2,6 @@
 import Lara.Check.Error
 import Lara.Check.SupportProof
 import Lara.Check.Attack
+import Lara.Check.Holes
+import Lara.Check.HoleSites
 import Lara.Check.Program

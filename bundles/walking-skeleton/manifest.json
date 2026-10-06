@@ -7,17 +7,17 @@
     "source": "source.yaml",
     "verdict": "verdict.txt"
   },
-  "checker-source-revision": "ede0eb0602b5a9e1038d56bf6fe133394daa270e",
+  "checker-source-revision": "362afb4d17a3585916cecfbf139f165f219929a8",
   "format": "lara-replay-bundle@1",
   "frozen-verdict": {
     "exit-code": 0
   },
-  "lara-core": "0.2",
+  "lara-core": "0.3",
   "producer-toolchain": {
     "elaborator": "elaborator/elaborate.py",
-    "python": "3.12.13",
+    "python": "3.12.9",
     "pyyaml": "6.0.2",
-    "uv": "0.11.2"
+    "uv": "0.11.32"
   },
   "skeleton": "walking-skeleton",
   "trusted-inputs": {

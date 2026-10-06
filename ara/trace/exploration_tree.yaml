@@ -10073,3 +10073,175 @@ tree:
   status: resolved
   also_depends_on:
   - N350_scope
+
+- id: N351_located_gap
+  type: decision
+  title: Accept open mandatory questions as located holes (lara-core@0.3) across both runtimes
+  provenance: user-revised
+  timestamp: 2026-10-05T19:00+00:00
+  choice: >-
+    Finished PR #12 under the approved plan (D1-D11): Haskell checker cache partitions complete nodes
+    from located holes; verdict gains an optional (holes (arg NAT ID (obligations ID+) (attacks NAT*)))
+    section reported in original declaration space (D5); evidence-blocked computed over a reference
+    carrier that excludes typed holes and a checked carrier of retained complete nodes (D7); Lean driver
+    emits the same bytes; map composite bumped to map-verdict@2 with a holes section keyed by member
+    alias and argument id (user decision 2026-10-05); generated cross-member attacks never touch a hole.
+  alternatives:
+  - keep rejecting incomplete arguments (the lara-core@0.2 contract)
+  - make holes nodes of the conservative-reporting reference framework (counterexample in decision record §7)
+  evidence:
+  - docs/located-gap-decision.md
+  - docs/multi-artifact-composition-decision.md
+  - src/Lara/Driver/Internal.hs
+  - src/Lara/Blocked.hs
+  - lean/Lara/Driver.lean
+  status: resolved
+  also_depends_on: []
+- id: N351_d7_fixture
+  type: dead_end
+  title: First D7 anchor used a hole rule whose premise pattern did not match the quarantined leaf
+  provenance: ai-executed
+  timestamp: 2026-10-05T18:30+00:00
+  hypothesis: A quarantined attacker built from holeRule "h" over a mismatched leaf is a typed hole and blocks nothing.
+  failure_mode: >-
+    Its inference fails (R4) under the full declared Gamma, so it is unclassified, stays a conservative
+    reference node, and the target was published evidence-blocked.
+  lesson: >-
+    A D7 witness must be a typed hole under the full declared Gamma; the mismatched variant is kept as a
+    separate test pinning that unclassified quarantined terms still block.
+  status: resolved
+  also_depends_on:
+  - N351_located_gap
+- id: N351_v7
+  type: experiment
+  title: Regenerate under lara-core@0.3 and cut evaluation freeze v7
+  provenance: ai-executed
+  timestamp: 2026-10-05T19:40+00:00
+  result: >-
+    Exactly the 18 hole-obligation mutants move reject-IncompleteArgument -> accept-located-hole, each with
+    one hole at the seeded argument; corpus status diff empty; class match 655/655; Haskell-Lean agreement
+    655/655; no-cq changes all 18 located-hole verdicts with 17 status shifts (gap->justified 11);
+    make local-gates and cabal test all pass.
+  evidence:
+  - ara/evidence/results/located_gap_v7.md
+  - measurements/frozen/lara-core-0.3-regeneration-diffs.md
+  - docs/m5-freeze-checklist.md
+  status: resolved
+  also_depends_on:
+  - N351_located_gap
+- id: N351_followups
+  type: decision
+  title: Land all located-gap follow-ups (#11, #13, #14, #15, #16) in PR #12
+  provenance: user
+  timestamp: 2026-10-05T21:00+00:00
+  choice: >-
+    Address every follow-up issue in the unmerged located-gap PR instead of separate PRs. Because
+    lara-core@0.3 never shipped, the hole-row wire change (#16) amends @0.3 in place (D12) with no
+    version bump; one freeze (v8) is cut after the corpus re-lowering.
+  alternatives:
+  - separate follow-up PRs after #12 merges
+  - bump to lara-core@0.4 for obligation sites
+  evidence:
+  - docs/located-gap-decision.md
+  status: resolved
+  also_depends_on:
+  - N351_v7
+- id: N351_sites
+  type: experiment
+  title: Locate each open obligation at its rule occurrences (#16, D12)
+  provenance: ai-executed
+  timestamp: 2026-10-05T22:35+00:00
+  result: >-
+    Hole rows become (obligations (obligation ID POS+)+); Lean openSites with soundness, completeness and
+    questions-equal-obligations theorems (lean/Lara/Check/HoleSites.lean); both drivers byte-identical on a
+    nested-sites anchor; map-verdict@2 unchanged.
+  evidence:
+  - lean/Lara/Check/HoleSites.lean
+  - fixtures/corpus/accept-nested-hole-sites.sexp
+  status: resolved
+  also_depends_on:
+  - N351_followups
+- id: N351_linking
+  type: experiment
+  title: Hole-aware linking and composition (#13)
+  provenance: ai-executed
+  timestamp: 2026-10-05T22:30+00:00
+  result: >-
+    SideOkHoles replaces the hole-free side condition; the link classifies each declaration as its side
+    does and reports exactly the sides' holes; Admissible generalized in place. Counterexample
+    hole_erasure_observable: deleting a hole together with the only attack aimed inside it changes what a
+    context observes (contested vs rejected), so the corrected equivalence also requires live attacks to agree.
+  evidence:
+  - lean/Lara/Context/LinkHoles.lean
+  - lean/Lara/Examples/LinkHoles.lean
+  status: resolved
+  also_depends_on:
+  - N351_followups
+- id: N351_updates
+  type: experiment
+  title: In-place discharge and atomic completion updates (#14, #11)
+  provenance: ai-executed
+  timestamp: 2026-10-05T23:00+00:00
+  result: >-
+    New SourceUpdate constructors dischargeOpen and atomic; applyUpdate_atomic_ok_iff and
+    atomic_completion_complete; sequential_completion_fails witnesses that addInstance then addAttack can
+    both reject while the atomic batch is accepted. No status-transition matrix for dischargeOpen: discharging
+    an optional question with an incomplete term can turn a node into a hole.
+  evidence:
+  - lean/Lara/Update/Completion.lean
+  - lean/Lara/Examples/UpdateCompletion.lean
+  status: resolved
+  also_depends_on:
+  - N351_followups
+- id: N351_relower
+  type: decision
+  title: Re-lower the 48 gap corpus units to declare their located holes (#15)
+  provenance: ai-executed
+  timestamp: 2026-10-05T23:30+00:00
+  choice: >-
+    Each gap unit declares its incomplete argument with open questions; two also declare their dead-end
+    undercut against the hole (inert). The hole-obligation mutation operator is restricted to complete
+    arguments; the binding audit counts only load-bearing attacks; corpus MANIFEST gains located_holes so
+    hole-bearing units are measured as accept-located-hole.
+  alternatives:
+  - keep the omission and leave corpus gaps unlocated
+  - audit every declared attack (would add five human-review rows for inert attacks)
+  evidence:
+  - corpus-units/LOWERING.md
+  - measurements/frozen/corpus-relowering-v8-diffs.md
+  status: resolved
+  also_depends_on:
+  - N351_followups
+- id: N351_v8
+  type: experiment
+  title: Cut evaluation freeze v8 over the re-lowered corpus
+  provenance: ai-executed
+  timestamp: 2026-10-06T00:00+00:00
+  result: >-
+    660 inputs, class match and Haskell-Lean agreement 660/660, location 485/485; no-cq changes all 66
+    located-hole verdicts including 48/48 corpus units (corpus gap->justified 46, gap->defeated 2).
+  evidence:
+  - ara/evidence/results/located_gap_v8.md
+  - docs/m5-freeze-checklist.md
+  status: resolved
+  also_depends_on:
+  - N351_relower
+  - N351_sites
+- id: N351_transitions
+  type: experiment
+  title: Status transitions, justified completion and quarantined batch leaves for the completion updates
+  provenance: ai-executed
+  timestamp: 2026-10-06T05:30+00:00
+  result: >-
+    A dischargeOpen that completes a retained hole behaves like a fresh addInstance (no gap entry, gap exit
+    only for equivalent claims, sink monotonicity when no raw attack names the argument); additive atomic
+    batches never enter gap; a complete unattacked completion makes equivalent claims justified (core, and
+    public when unblocked); quarantined new batch leaves preserve old arguments and holes exactly. The
+    unrestricted dischargeOpen statement is false (discharge_optional_enters_gap, discharge_outgoing_defeats).
+  evidence:
+  - lean/Lara/Update/Transitions.lean
+  - lean/Lara/Examples/UpdateCompletion.lean
+  - docs/located-gap-decision.md
+  status: resolved
+  also_depends_on:
+  - N351_updates

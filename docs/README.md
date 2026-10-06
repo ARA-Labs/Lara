@@ -48,6 +48,8 @@ front-end),
 (what the `ord@1` / `insp@1` backends certify),
 [`evidence-admission-decision.md`](evidence-admission-decision.md) (gated
 byte-level evidence layer),
+[`located-gap-decision.md`](located-gap-decision.md) (`lara-core@0.3`:
+incomplete arguments accepted as located holes),
 [`registration-receipt-contract.md`](registration-receipt-contract.md)
 (documentation-only receipt seam),
 [`naturalness-boundary.md`](naturalness-boundary.md) (where natural language

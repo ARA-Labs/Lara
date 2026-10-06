@@ -139,7 +139,44 @@ corpusGoldens =
   , ("fixtures/corpus/reject-r9.sexp", "(verdict reject R9)")
   , ("fixtures/corpus/reject-duplicate-rule.sexp", "(verdict reject duplicate-rule)")
   , ("fixtures/corpus/reject-duplicate-argument.sexp", "(verdict reject duplicate-argument)")
-  , ("fixtures/corpus/reject-incomplete-argument.sexp", "(verdict reject incomplete-argument)")
+  , -- Spec §4.4: an open mandatory question is an accepted located hole, not
+    -- a rejection; it is no AF node, so its claim is @gap@.
+    ( "fixtures/corpus/accept-located-hole.sexp"
+    , "(verdict accept (labels) (edges) (statuses (status (atom c) gap))"
+        ++ " (holes (arg 0 a (obligations (obligation q1 (pos))) (attacks))))"
+    )
+  , -- D12: each obligation is located at every rule occurrence that leaves it
+    -- open. @hAll@ opens @q1@ at its root and inherits it through premise 0
+    -- and through the @cq@ discharge, which also leaves @q2@ open; the
+    -- optional @o1@ is never an obligation. @hPrem@ has no @open@ of its own
+    -- and inherits @q1@ only through its premise, @hDis@ inherits @q2@ only
+    -- through its discharge. Obligations keep the core's union order.
+    ( "fixtures/corpus/accept-nested-hole-sites.sexp"
+    , "(verdict accept (labels (0 in)) (edges)"
+        ++ " (statuses (status (atom c) gap) (status (atom p) justified))"
+        ++ " (holes (arg 1 hAll (obligations (obligation q2 (pos (ques cq)))"
+        ++ " (obligation q1 (pos (prem 0)) (pos (ques cq)) (pos))) (attacks))"
+        ++ " (arg 2 hPrem (obligations (obligation q1 (pos (prem 0)))) (attacks))"
+        ++ " (arg 3 hDis (obligations (obligation q2 (pos (ques cq)))) (attacks))))"
+    )
+  , -- D4: the hole's typed rebut is listed on its row (attack 1) but is inert.
+    ( "fixtures/corpus/hole-attack-inert.sexp"
+    , "(verdict accept (labels (0 in)) (edges)"
+        ++ " (statuses (status (atom concl) justified) (status (atom base) gap))"
+        ++ " (holes (arg 1 aH (obligations (obligation hq (pos))) (attacks 1))))"
+    )
+  , -- D7: a quarantined hole is no reference node, so it blocks nothing.
+    ( "fixtures/corpus/group-quarantine-hole-attacker.sexp"
+    , "(verdict accept (labels (0 in) (1 in)) (edges)"
+        ++ " (statuses (status (atom concl) justified) (status (atom other) justified)))"
+    )
+  , -- D6: the attack into the quarantined hole still seeds the retained
+    -- complete argument sharing the attacked occurrence.
+    ( "fixtures/corpus/group-quarantine-hole-lost-edge.sexp"
+    , "(verdict accept (labels (0 in) (1 in)) (edges)"
+        ++ " (statuses (status (atom cw) evidence-blocked))"
+        ++ " (conditional (status (atom cw) justified)))"
+    )
   , ("fixtures/corpus/reject-missing-conflict.sexp", "(verdict reject missing-conflict)")
   , ("fixtures/corpus/reject-r1.sexp", "(verdict reject R1)")
   , ("fixtures/corpus/reject-r3.sexp", "(verdict reject R3)")
@@ -455,13 +492,15 @@ workedExampleGoldens =
     , "(verdict accept (labels (0 in) (1 in)) (edges)"
         ++ " (statuses (status (atom performs (con apt) (con dense_baseline) (con openllm_avg)) justified)"
         ++ " (status (atom holds (con low_memory_footprint) (con apt)) justified)"
-        ++ " (status (atom contributes (con kurtosis_salience) (con apt_llama2_7b) (con openllm_avg)) gap)))"
+        ++ " (status (atom contributes (con kurtosis_salience) (con apt_llama2_7b) (con openllm_avg)) gap))"
+        ++ " (holes (arg 2 a_kurt (obligations (obligation variance_reported (pos))) (attacks))))"
     )
   , ( "examples/rebuttal-replay/round1/example.core.sexp"
     , "(verdict accept (labels (0 out) (1 out) (2 in) (3 in) (4 in)) (edges (0 3) (2 0) (3 0) (4 1))"
         ++ " (statuses (status (atom performs (con apt) (con dense_baseline) (con openllm_avg)) defeated)"
         ++ " (status (atom holds (con low_memory_footprint) (con apt)) defeated)"
-        ++ " (status (atom contributes (con kurtosis_salience) (con apt_llama2_7b) (con openllm_avg)) gap)))"
+        ++ " (status (atom contributes (con kurtosis_salience) (con apt_llama2_7b) (con openllm_avg)) gap))"
+        ++ " (holes (arg 2 a_kurt (obligations (obligation variance_reported (pos))) (attacks))))"
     )
   , ( "examples/rebuttal-replay/round2/example.core.sexp"
     , "(verdict accept (labels (0 in) (1 out) (2 out) (3 out) (4 in) (5 in) (6 in) (7 in))"
@@ -479,7 +518,8 @@ workedExampleGoldens =
     ( "examples/running-example/run1/example.core.sexp"
     , "(verdict accept (labels (0 in)) (edges)"
         ++ " (statuses (status (atom improves (con M) (con accuracy) (con D)) gap)"
-        ++ " (status (atom num_lt (num 0.71) (num 0.74)) justified)))"
+        ++ " (status (atom num_lt (num 0.71) (num 0.74)) justified))"
+        ++ " (holes (arg 1 a1 (obligations (obligation external_validity (pos))) (attacks))))"
     )
   , ( "examples/running-example/run2/example.core.sexp"
     , "(verdict accept (labels (0 in) (1 out) (2 in)) (edges (2 1))"
@@ -657,7 +697,7 @@ prop_stressAccept = once (ioProperty check)
         Left e -> counterexample ("CODEC:" ++ show e) False
         Right input -> case verdictOutcome (runCheck input) of
           Reject rejection -> counterexample ("unexpected reject: " ++ show rejection) (property False)
-          Accept labels edges statuses ->
+          Accept labels edges statuses _ ->
             conjoin
               [ counterexample "label count" (length labels === 120)
               , counterexample "all in" (property (all ((== LIn) . snd) labels))

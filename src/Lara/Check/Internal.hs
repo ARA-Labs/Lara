@@ -12,14 +12,27 @@ module Lara.Check.Internal
   ) where
 
 import Lara.Compile (CheckedProgram)
-import Lara.SupportTerm (CheckedNode)
+import Lara.SupportTerm (CheckedHole, CheckedNode)
 
 -- | A unit accepted against its own policy-derived rule lookup (Lean
--- @Unit.CheckedUnit@). Retains the compiled program (arguments + typed attacks)
--- and the exact checked-node cache the checker produced; downstream compilation
--- and grounding need no support re-inference.
+-- @Unit.CheckedUnit@). Retains the compiled program (complete arguments, live
+-- typed attacks, hole terms), the exact checked-node cache the checker
+-- produced, the AF-to-checked-declaration map, and the located holes;
+-- downstream compilation, grounding and reporting need no support
+-- re-inference.
+--
+-- Under 'Lara.Check.fullConfig' the cache partition holds (Lean
+-- @DeclPartition@): 'cuNodeDecls' and the 'Lara.SupportTerm.chIndex' of
+-- 'cuHoles' are disjoint, ascending, and together cover every checked
+-- declaration index exactly once.
 data CheckedUnit = CheckedUnit
   { cuProgram :: CheckedProgram
   , cuNodes :: [CheckedNode]
+  , cuNodeDecls :: [Int]
+  -- ^ entry @n@ is the checked declaration index of AF node @n@ (Lean
+  -- @CheckedUnit.nodeDecls@)
+  , cuHoles :: [CheckedHole]
+  -- ^ the located holes, in checked declaration order (Lean
+  -- @CheckedUnit.holes@)
   }
   deriving (Eq, Show)

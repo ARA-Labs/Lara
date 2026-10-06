@@ -323,7 +323,8 @@ side's saturation cache — built under the linked Γ before checking — is the
 restriction of the checker's conflict cache to that side's arguments: `(w, A)`
 is in the side's inferred cache exactly when `w` is one of that side's
 arguments and the accepted unit carries a checked node for `w` whose recorded
-conclusion is `A`. -/
+conclusion is `A`. The cache holds only complete terms, so no premise excludes
+holes: a cached term is in `Check.completeArgs` of the linked declarations. -/
 theorem link_cache_bridge {canon : String → String} {reg : BackendRegistry canon}
     {C : Context} {F : Fragment} {unit : Lara.Unit} {Gamma : LeafId → Option Atom}
     {ground : List Atom} {checked : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg)}
@@ -338,16 +339,24 @@ theorem link_cache_bridge {canon : String → String} {reg : BackendRegistry can
   have hsound := Check.Unit.checkUnit_sound hcheck
   have hpol : checked.policy = F.policy := by
     rw [hsound.policy_eq, hunit]; rfl
-  have hargs : checked.program.args = dedupList (C.frame.args ++ F.args) := by
-    rw [hsound.args_eq, hunit]; rfl
-  have hsub : ∀ v ∈ side, v ∈ checked.program.args := by
+  have hargs : checked.program.args = Check.completeArgs checked.policy.ruleLookup
+      Gamma reg (dedupList (C.frame.args ++ F.args)) := by
+    rw [hsound.args_eq, hpol, hunit]; rfl
+  have hdecl : ∀ v ∈ side, v ∈ dedupList (C.frame.args ++ F.args) := by
     intro v hv
-    rw [hargs, mem_dedupList, List.mem_append]
+    rw [mem_dedupList, List.mem_append]
     rcases hside with rfl | rfl
     · exact Or.inl hv
     · exact Or.inr hv
-  rw [← hpol, mem_conclusionCache_of_sub hsub,
-    conclusionCache_eq_conflictCache checked unit.atts, List.mem_map]
+  -- A cached side term is complete, hence an AF argument of the linked program.
+  have hcache : (w, A) ∈ conclusionCache checked.policy.ruleLookup Gamma reg side ↔
+      w ∈ side ∧ (w, A) ∈ conclusionCache checked.policy.ruleLookup Gamma reg
+        checked.program.args := by
+    rw [mem_conclusionCache, mem_conclusionCache, hargs, Check.mem_completeArgs_iff]
+    constructor
+    · rintro ⟨hw, hsup⟩; exact ⟨hw, ⟨hdecl w hw, A, hsup⟩, hsup⟩
+    · rintro ⟨hw, -, hsup⟩; exact ⟨hw, hsup⟩
+  rw [← hpol, hcache, conclusionCache_eq_conflictCache checked unit.atts, List.mem_map]
   constructor
   · rintro ⟨hw, n, hn, hpair⟩
     exact ⟨hw, n, hn, congrArg Prod.fst hpair, congrArg Prod.snd hpair⟩
@@ -659,6 +668,80 @@ theorem SideOk.mono_gamma {canon : String → String} {reg : BackendRegistry can
     exact h.attack_complete source hs target ht Cs' Ct' hCs' hCt'
       (by rw [hCsEq, hCtEq]; exact hcm) hca
 
+/-- **A side with located holes is linkable** (issue #13): `SideOk` with the
+hole-free `support` field weakened to typing. Every declared argument type-checks
+under the linked Γ, complete or a located hole (a typed term with a nonempty
+mandatory obligation set, `docs/located-gap-decision.md` §1); the other four
+fields are `SideOk`'s verbatim. Attack completeness already quantifies over
+complete endpoints only, so a hole never owes coverage and is never owed it.
+This is the per-side bundle `Check.Unit.checkUnit_complete_holes` consumes, and
+every hole-free `SideOk` is one (`SideOk.toHoles`). -/
+structure SideOkHoles (canon : String → String) (reg : BackendRegistry canon)
+    (Gamma : LeafId → Option Atom) (P : Policy.Policy)
+    (args : List SupportTerm) (atts : List Attack) : Prop where
+  /-- every declared argument types: complete, or a located hole -/
+  support : ∀ w ∈ args, ∃ C O, HasSupport canon P.ruleLookup Gamma (certOkOf reg) w C O
+  /-- every declared attack types, whatever its source and target are (D4, D6) -/
+  typed : ∀ k ∈ atts, HasAttack canon P.ruleLookup Gamma (certOkOf reg) P.defeat k
+  /-- attack endpoints are declared, holes included -/
+  source_declared : ∀ k ∈ atts, k.source ∈ args
+  target_declared : ∀ k ∈ atts, k.target ∈ args
+  /-- the side's own conflicts between complete arguments are covered by the
+  side's own attacks -/
+  attack_complete :
+    Compile.AttackComplete canon P.ruleLookup Gamma (certOkOf reg) P.defeat args atts
+
+/-- **A hole-free side is a side with holes.** The corollary direction that keeps
+every `SideOk` caller of the hole-aware theorems working. -/
+theorem SideOk.toHoles {canon : String → String} {reg : BackendRegistry canon}
+    {Gamma : LeafId → Option Atom} {P : Policy.Policy}
+    {args : List SupportTerm} {atts : List Attack}
+    (h : SideOk canon reg Gamma P args atts) : SideOkHoles canon reg Gamma P args atts where
+  support := fun w hw => let ⟨C, hC⟩ := h.support w hw; ⟨C, [], hC⟩
+  typed := h.typed
+  source_declared := h.source_declared
+  target_declared := h.target_declared
+  attack_complete := h.attack_complete
+
+/-- A side with holes none of which is present is a hole-free side. -/
+theorem SideOkHoles.toSideOk {canon : String → String} {reg : BackendRegistry canon}
+    {Gamma : LeafId → Option Atom} {P : Policy.Policy}
+    {args : List SupportTerm} {atts : List Attack}
+    (h : SideOkHoles canon reg Gamma P args atts)
+    (hcomplete : ∀ w ∈ args, ∃ C, HasSupport canon P.ruleLookup Gamma (certOkOf reg) w C []) :
+    SideOk canon reg Gamma P args atts where
+  support := hcomplete
+  typed := h.typed
+  source_declared := h.source_declared
+  target_declared := h.target_declared
+  attack_complete := h.attack_complete
+
+/-- **A side with holes transports into the linked environment.** The typing
+moves by monotonicity, at each declaration's own obligation set, so a hole stays
+a hole and a complete argument stays complete; attack completeness moves because
+a typed term has one conclusion and one obligation set (`hasSupport_unique`). -/
+theorem SideOkHoles.mono_gamma {canon : String → String} {reg : BackendRegistry canon}
+    {Gamma Gamma' : LeafId → Option Atom} {P : Policy.Policy}
+    {args : List SupportTerm} {atts : List Attack}
+    (hext : ∀ l p, Gamma l = some p → Gamma' l = some p)
+    (h : SideOkHoles canon reg Gamma P args atts) :
+    SideOkHoles canon reg Gamma' P args atts where
+  support := by
+    intro w hw
+    obtain ⟨C, O, hC⟩ := h.support w hw
+    exact ⟨C, O, hasSupport_mono_gamma hext hC⟩
+  typed := fun k hk => hasAttack_mono_gamma hext (h.typed k hk)
+  source_declared := h.source_declared
+  target_declared := h.target_declared
+  attack_complete := by
+    intro source hs target ht Cs Ct hsSup htSup hcm hca
+    obtain ⟨Cs', Os', hCs'⟩ := h.support source hs
+    obtain ⟨Ct', Ot', hCt'⟩ := h.support target ht
+    obtain ⟨hCsEq, hOsEq⟩ := hasSupport_unique (hasSupport_mono_gamma hext hCs') hsSup
+    obtain ⟨hCtEq, hOtEq⟩ := hasSupport_unique (hasSupport_mono_gamma hext hCt') htSup
+    subst hCsEq hOsEq hCtEq hOtEq
+    exact h.attack_complete source hs target ht Cs' Ct' hCs' hCt' hcm hca
+
 /-! ### The fragment-relative carrier (D10) -/
 
 /-- **The fragment's own framework is the compiled AF of its own accepted
@@ -684,10 +767,15 @@ variable {canon : String → String} {reg : BackendRegistry canon}
 all-pairs condition and a premise of `Check.Unit.checkUnit_complete`, so a link
 that merely concatenated the two attack lists could not be checked. With the
 saturation it holds: within-side pairs are covered by the side's own attacks,
-cross-boundary pairs by `crossAtts`. -/
-theorem link_attackComplete
-    (hC : SideOk canon reg (linkGamma C F) F.policy C.frame.args C.frame.atts)
-    (hF : SideOk canon reg (linkGamma C F) F.policy F.args F.atts) :
+cross-boundary pairs by `crossAtts`.
+
+Stated over `SideOkHoles` (issue #13): the all-pairs condition reads complete
+endpoints only and the saturation's caches hold complete terms only, so neither
+side's located holes enter the argument. `link_attackComplete` is the hole-free
+corollary. -/
+theorem link_attackComplete_holes
+    (hC : SideOkHoles canon reg (linkGamma C F) F.policy C.frame.args C.frame.atts)
+    (hF : SideOkHoles canon reg (linkGamma C F) F.policy F.args F.atts) :
     Compile.AttackComplete canon F.policy.ruleLookup (linkGamma C F) (certOkOf reg)
       F.policy.defeat (dedupList (C.frame.args ++ F.args))
       (C.frame.atts ++ F.atts ++ crossAtts reg (linkGamma C F) C F) := by
@@ -710,16 +798,86 @@ theorem link_attackComplete
   · exact covered_mono hmid
       (hF.attack_complete source hs target ht Cs Ct hsSup htSup hcm hca)
 
-/-- **A well-linked composition is accepted (T1/T2).** Every premise of
-`Check.Unit.checkUnit_complete` is discharged from the two sides' linkability
-plus the guard except four explicit checker premises. `hargs` comes from the
-merge's `Nodup`, `hattackComplete` from `link_attackComplete`, and the
-saturation's typing from `crossAtts_spec`.
+/-- The hole-free corollary of `link_attackComplete_holes`. -/
+theorem link_attackComplete
+    (hC : SideOk canon reg (linkGamma C F) F.policy C.frame.args C.frame.atts)
+    (hF : SideOk canon reg (linkGamma C F) F.policy F.args F.atts) :
+    Compile.AttackComplete canon F.policy.ruleLookup (linkGamma C F) (certOkOf reg)
+      F.policy.defeat (dedupList (C.frame.args ++ F.args))
+      (C.frame.atts ++ F.atts ++ crossAtts reg (linkGamma C F) C F) :=
+  link_attackComplete_holes hC.toHoles hF.toHoles
+
+/-- Two complete sides make every linked declaration complete. -/
+theorem linkedUnit_args_complete
+    (hC : SideOk canon reg (linkGamma C F) F.policy C.frame.args C.frame.atts)
+    (hF : SideOk canon reg (linkGamma C F) F.policy F.args F.atts) :
+    ∀ w ∈ (linkedUnit reg C F).args, ∃ A,
+      HasSupport canon (linkedUnit reg C F).policy.ruleLookup (linkGamma C F)
+        (certOkOf reg) w A [] := by
+  intro w hw
+  rcases List.mem_append.mp (mem_dedupList.mp hw) with h | h
+  · exact hC.support w h
+  · exact hF.support w h
+
+/-- Two typed sides make every linked declaration typed, complete or a hole. -/
+theorem linkedUnit_args_typed
+    (hC : SideOkHoles canon reg (linkGamma C F) F.policy C.frame.args C.frame.atts)
+    (hF : SideOkHoles canon reg (linkGamma C F) F.policy F.args F.atts) :
+    ∀ w ∈ (linkedUnit reg C F).args, ∃ A O,
+      HasSupport canon (linkedUnit reg C F).policy.ruleLookup (linkGamma C F)
+        (certOkOf reg) w A O := by
+  intro w hw
+  rcases List.mem_append.mp (mem_dedupList.mp hw) with h | h
+  · exact hC.support w h
+  · exact hF.support w h
+
+/-- **A well-linked composition with located holes is accepted (T1/T2, issue
+#13).** Every premise of `Check.Unit.checkUnit_complete_holes` is discharged from
+the two sides' linkability plus the guard except four explicit checker premises.
+`hargs` comes from the merge's `Nodup`, `hattackComplete` from
+`link_attackComplete_holes`, and the saturation's typing from `crossAtts_spec`.
+A side may carry located holes: `checkUnit_complete_holes` asks every declared
+argument only to type.
 
 The signature-stage result and three policy premises stay hypotheses:
 `hsignature` covers Σ/policy/ground/argument sorting; `hscope`, `hruleIds`, and
 `hpolicy` cover scope, rule-identifier uniqueness, and policy well-formedness.
 No structural property of linking can supply them. -/
+theorem link_checked_holes {unit : Lara.Unit} {Gamma : LeafId → Option Atom}
+    (hlink : link reg C F = some (unit, Gamma))
+    (hsignature : Check.Unit.signatureStage (linkGround C F) unit = none)
+    (hscope : Policy.firstOutOfScope? F.policy = none)
+    (hruleIds : (F.policy.rules.map (·.id)).Nodup)
+    (hpolicy : Policy.WellFormed canon F.policy)
+    (hC : SideOkHoles canon reg (linkGamma C F) F.policy C.frame.args C.frame.atts)
+    (hF : SideOkHoles canon reg (linkGamma C F) F.policy F.args F.atts) :
+    ∃ accepted, Check.Unit.checkUnit Gamma reg (linkGround C F) unit = .ok accepted := by
+  obtain ⟨-, hunit, hgamma⟩ := link_some_inv hlink
+  subst hunit; subst hgamma
+  refine Check.Unit.checkUnit_complete_holes hsignature hscope hruleIds hpolicy
+    (dedupList_nodup _) (linkedUnit_args_typed hC hF) ?_ ?_ ?_
+    (link_attackComplete_holes hC hF)
+  · intro k hk
+    rcases List.mem_append.mp hk with h | h
+    · rcases List.mem_append.mp h with h' | h'
+      · exact hC.typed k h'
+      · exact hF.typed k h'
+    · exact (crossAtts_spec h).1
+  · intro k hk
+    rcases List.mem_append.mp hk with h | h
+    · rcases List.mem_append.mp h with h' | h'
+      · exact mem_dedupList.mpr (List.mem_append_left _ (hC.source_declared k h'))
+      · exact mem_dedupList.mpr (List.mem_append_right _ (hF.source_declared k h'))
+    · exact (crossAtts_spec h).2.1
+  · intro k hk
+    rcases List.mem_append.mp hk with h | h
+    · rcases List.mem_append.mp h with h' | h'
+      · exact mem_dedupList.mpr (List.mem_append_left _ (hC.target_declared k h'))
+      · exact mem_dedupList.mpr (List.mem_append_right _ (hF.target_declared k h'))
+    · exact (crossAtts_spec h).2.2
+
+/-- **A well-linked composition is accepted (T1/T2).** The hole-free corollary
+of `link_checked_holes`. -/
 theorem link_checked {unit : Lara.Unit} {Gamma : LeafId → Option Atom}
     (hlink : link reg C F = some (unit, Gamma))
     (hsignature : Check.Unit.signatureStage (linkGround C F) unit = none)
@@ -728,40 +886,31 @@ theorem link_checked {unit : Lara.Unit} {Gamma : LeafId → Option Atom}
     (hpolicy : Policy.WellFormed canon F.policy)
     (hC : SideOk canon reg (linkGamma C F) F.policy C.frame.args C.frame.atts)
     (hF : SideOk canon reg (linkGamma C F) F.policy F.args F.atts) :
-    ∃ accepted, Check.Unit.checkUnit Gamma reg (linkGround C F) unit = .ok accepted := by
-  by_cases hok : linkOk C F = true
-  · rw [link_eq_some hok] at hlink
-    have hpair := Option.some.inj hlink
-    have hunit : unit = linkedUnit reg C F := (congrArg Prod.fst hpair).symm
-    have hgamma : Gamma = linkGamma C F := (congrArg Prod.snd hpair).symm
-    subst hunit; subst hgamma
-    refine Check.Unit.checkUnit_complete hsignature hscope hruleIds hpolicy
-      (dedupList_nodup _) ?_ ?_ ?_ ?_ (link_attackComplete hC hF)
-    · intro w hw
-      rcases List.mem_append.mp (mem_dedupList.mp hw) with h | h
-      · exact hC.support w h
-      · exact hF.support w h
-    · intro k hk
-      rcases List.mem_append.mp hk with h | h
-      · rcases List.mem_append.mp h with h' | h'
-        · exact hC.typed k h'
-        · exact hF.typed k h'
-      · exact (crossAtts_spec h).1
-    · intro k hk
-      rcases List.mem_append.mp hk with h | h
-      · rcases List.mem_append.mp h with h' | h'
-        · exact mem_dedupList.mpr (List.mem_append_left _ (hC.source_declared k h'))
-        · exact mem_dedupList.mpr (List.mem_append_right _ (hF.source_declared k h'))
-      · exact (crossAtts_spec h).2.1
-    · intro k hk
-      rcases List.mem_append.mp hk with h | h
-      · rcases List.mem_append.mp h with h' | h'
-        · exact mem_dedupList.mpr (List.mem_append_left _ (hC.target_declared k h'))
-        · exact mem_dedupList.mpr (List.mem_append_right _ (hF.target_declared k h'))
-      · exact (crossAtts_spec h).2.2
-  · rw [Bool.not_eq_true] at hok
-    rw [link_eq_none hok] at hlink
-    exact absurd hlink (by simp)
+    ∃ accepted, Check.Unit.checkUnit Gamma reg (linkGround C F) unit = .ok accepted :=
+  link_checked_holes hlink hsignature hscope hruleIds hpolicy hC.toHoles hF.toHoles
+
+/-- **The accepted link of two hole-free sides is hole-free and exact.** When
+both sides are complete, the AF arguments of the accepted link are exactly the
+deduplicated sides, its attacks are the two sides' attacks followed by the
+saturation, and it locates no hole. The general statement, for sides with
+located holes, is `Lara.Context.link_accepted_holes`. -/
+theorem link_accepted_raw {unit : Lara.Unit} {Gamma : LeafId → Option Atom}
+    {ground : List Atom} {checked : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg)}
+    (hlink : link reg C F = some (unit, Gamma))
+    (hcheck : Check.Unit.checkUnit Gamma reg ground unit = .ok checked)
+    (hC : SideOk canon reg (linkGamma C F) F.policy C.frame.args C.frame.atts)
+    (hF : SideOk canon reg (linkGamma C F) F.policy F.args F.atts) :
+    checked.program.args = dedupList (C.frame.args ++ F.args) ∧
+      checked.program.atts =
+        C.frame.atts ++ F.atts ++ crossAtts reg (linkGamma C F) C F ∧
+      checked.program.holes = [] ∧ checked.holes = [] := by
+  obtain ⟨-, hunit, hgamma⟩ := link_some_inv hlink
+  subst hunit; subst hgamma
+  have hsound := Check.Unit.checkUnit_sound hcheck
+  have hcomplete := linkedUnit_args_complete hC hF
+  exact ⟨hsound.args_eq_of_complete hcomplete,
+    hsound.atts_eq_of_complete hcomplete,
+    hsound.holes_eq_nil_of_complete hcomplete⟩
 
 end Linked
 

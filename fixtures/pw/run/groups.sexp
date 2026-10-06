@@ -7,7 +7,7 @@
   (worlds
     (world w0 c (inline
       (check-input
-        (replay-id (core lara-core@0.2) (policy pw-t7) (backends (backend nd 1))
+        (replay-id (core lara-core@0.3) (policy pw-t7) (backends (backend nd 1))
           (theories) (artifact pw-groups-w0))
         (unit
           (sigma (sorts) (cons) (preds (pred p (args)) (pred q (args))))
@@ -20,7 +20,7 @@
           (groups quarantine (group g1 (l1 l3)))))))
     (world w1 c (inline
       (check-input
-        (replay-id (core lara-core@0.2) (policy pw-t7) (backends (backend nd 1))
+        (replay-id (core lara-core@0.3) (policy pw-t7) (backends (backend nd 1))
           (theories) (artifact pw-groups-w1))
         (unit
           (sigma (sorts) (cons) (preds (pred p (args)) (pred q (args))))

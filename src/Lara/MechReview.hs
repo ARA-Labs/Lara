@@ -54,11 +54,10 @@ import Lara.AST
   , Status (..)
   , Unit (..)
   )
-import Lara.Driver (buildCertOk, buildGamma, runCheck)
-import Lara.Policy (lookupRule)
+import Lara.Driver (acceptedRawUnit, runCheck)
 import Lara.Prop (equiv, prettyProp)
 import Lara.Replay (CheckInput, inputUnit)
-import Lara.Reporting (ClaimReport (..), IncompleteAlternative (..), claimReports)
+import Lara.Reporting (ClaimReport (..), IncompleteAlternative (..), claimReports, nodeArgIds)
 import Lara.Wire
   ( Outcome (..)
   , PublicStatus (..)
@@ -89,8 +88,9 @@ data ReviewComment = ReviewComment
   }
   deriving (Eq, Show)
 
--- | The declaration-order view of a surface argument: its index (which is also
--- its grounded-label index), its id, and its declared conclusion.
+-- | The declaration-order view of a surface argument: its surface declaration
+-- index, its id, and its declared conclusion. The index is not an AF index:
+-- labels are looked up through the argument id.
 data ArgView = ArgView
   { avIndex :: Int
   , avId :: String
@@ -109,17 +109,19 @@ unitReviewComments name ci prog =
     Reject _ -> [] -- every frozen corpus unit is accept-class; nothing to render
     -- An @evidence-blocked@ query is not a justified claim whatever its
     -- conditional label says (spec §4.3), so it still draws a comment.
-    Accept labels _edges statuses ->
+    Accept labels _edges statuses _ ->
       [ comment p st rep
       | ((p, st), rep) <- zip statuses reports
       , st /= Published Justified
       ]
       where
         unit = inputUnit ci
-        gamma = buildGamma (unitLeaves unit)
-        certOk = buildCertOk (unitTheories unit)
-        pI = lookupRule (unitRules unit)
-        reports = claimReports pI gamma certOk unit
+        accepted = acceptedRawUnit ci
+        reports = maybe [] (uncurry claimReports) accepted
+        -- AF index of each complete argument, keyed by id: labels are
+        -- indexed by AF node, which is not the declaration index once a hole
+        -- or a quarantined argument precedes it.
+        afIndexById = zip (maybe [] (uncurry nodeArgIds) accepted) [0 ..]
 
         argViews =
           [ ArgView i aid (argConcl a)
@@ -128,7 +130,11 @@ unitReviewComments name ci prog =
           ]
         surfaceClaims = [c | DeclClaim c <- programDecls prog]
         attacks = unitAttacks unit
-        labelOf i = lookup i labels
+        -- 'reviewBody' asks by surface declaration index ('avIndex').
+        labelOf i = do
+          view <- lookup i [(avIndex v, v) | v <- argViews]
+          n <- lookup (ArgId (avId view)) afIndexById
+          lookup n labels
 
         comment p st rep =
           ReviewComment

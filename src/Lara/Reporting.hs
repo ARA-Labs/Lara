@@ -1,22 +1,20 @@
 -- | Full claim holes and incomplete-alternative diagnostics (spec §8, N17
--- point 1) — the reporting surface deferred past the complete-only
+-- point 1) — the reporting surface beside the complete-only
 -- 'Lara.Grounded.completeClaimFor' projection.
 --
 -- Spec §8 defines two per-claim sets. @support(P,p)@ is the /complete/ checked
 -- support arguments for @p@ (obligation set @{}@, AF-eligible) — computed by
 -- 'Lara.Grounded.claimSupportFor' and reused verbatim here. @holes(P,p)@ is the
 -- /unresolved root obligations/ of @p@'s /incomplete/ candidate alternatives:
--- support terms that would support @p@ but carry an open mandatory critical
--- question (spec §6.1), so they are excluded from the AF and never reach an
--- accepted 'Lara.Check.CheckedUnit'.
+-- support terms that type but carry an open mandatory critical question
+-- (spec §6.1), so they are excluded from the AF.
 --
--- Because 'Lara.Check.checkArguments' (under 'Lara.Check.fullConfig') /rejects/
--- the whole unit on the first incomplete argument
--- ('Lara.Check.PEIncompleteArgument'), the incomplete
--- alternatives are invisible to the accept path. This module therefore runs a
--- separate __lenient__ scan over the raw 'Unit' arguments: it records each
--- incomplete alternative (located by its raw-argument index) instead of
--- rejecting, and it never touches the driver's verdict wire output.
+-- Since @lara-core\@0.3@ the checker accepts such a unit and partitions its
+-- argument cache once into AF nodes and located holes
+-- ('Lara.Check.cuNodes' \/ 'Lara.Check.cuHoles', spec §4.4). This module reads
+-- that partition and the compiled program of the __accepted__ unit; it runs no
+-- support inference and builds no second graph. A claim report exists only for
+-- an accepted unit.
 --
 -- __Status priority (N17 point 1, resolved).__ A hole forces @gap@ only when
 -- @support(P,p)@ is empty. 'Lara.Grounded.statusC' already realizes this: it
@@ -27,94 +25,91 @@
 -- never hides holes, but a winning complete argument is not suppressed by them."
 --
 -- __Hole index convention.__ 'holesFor' populates 'Lara.Grounded.claimHoles'
--- with the /declaration-order index of each incomplete alternative in the raw
--- unit's @unitArgs@/ (the 'iaIndex' of a located 'IncompleteAlternative') — a
--- stable, locatable identity that lets a consumer join a hole back to its term
--- and open obligations. This is a /different/ index space from 'claimSupport',
--- whose entries are complete-node (AF) indices; the two never interact
+-- with the /checked declaration index/ of each incomplete alternative — its
+-- position in the unit 'Lara.Check.checkUnit' accepted ('iaIndex', the
+-- checker's 'Lara.SupportTerm.chIndex'). This is a /different/ index space from
+-- 'claimSupport', whose entries are AF indices, and from the original
+-- declaration index a driver reports after admission; the two never interact
 -- numerically, because 'statusC' reads only 'claimSupport' for the status and
 -- only the /nonemptiness/ of 'claimHoles' feeds the diagnostic.
 module Lara.Reporting
-  ( -- * Located incomplete alternatives (spec §6.1 open root obligations)
+  ( -- * Located incomplete alternatives (spec §4.4 located holes)
     IncompleteAlternative (..)
-  , scanArguments
+  , locatedHoles
   , incompleteAlternativesFor
     -- * Holes and the full reporting claim (spec §8)
   , holesFor
   , reportClaimFor
   , incompleteAlternative
-    -- * The reporting AF and per-query reports
-  , reportAF
+    -- * Per-query reports
   , ClaimReport (..)
   , claimReports
+    -- * Naming AF nodes
+  , nodeArgIds
   ) where
 
 import Lara.AST hiding (Claim)
-import Lara.Check (resolveAttacks)
+import Lara.Check (CheckedUnit, cuHoles, cuNodeDecls, cuNodes, cuProgram)
 import Lara.Compile (checkedAF)
-import Lara.Compile.Internal (CheckedProgram (..))
 import Lara.Grounded
-  ( AF
-  , Claim (..)
+  ( Claim (..)
   , claimSupportFor
   , statusC
   )
 import Lara.Prop (Prop, equiv)
 import Lara.SupportTerm
-  ( CertOk
-  , CheckLoc (LocRoot)
-  , SupportResult (..)
-  , inferSupport
+  ( CheckedNode
+  , chConclusion
+  , chIndex
+  , chObligations
+  , chTerm
   )
-import Lara.SupportTerm.Internal (CheckedNode (..))
 
 -- ---------------------------------------------------------------------------
 -- Located incomplete alternatives
 -- ---------------------------------------------------------------------------
 
--- | A candidate support term retained by lenient reporting: a raw argument that
--- type-checks but carries open root obligations (unmet mandatory critical
--- questions, spec §6.1), so it is excluded from the AF. Located by its
--- declaration-order index in the raw unit's @unitArgs@.
+-- | One located hole of an accepted unit, as reporting names it: the checker's
+-- 'Lara.SupportTerm.CheckedHole' plus the 'ArgId' the checked unit declares at
+-- its index. It type-checks but carries open mandatory root obligations
+-- (spec §6.1), so it is excluded from the AF.
 data IncompleteAlternative = IncompleteAlternative
-  { iaIndex :: Int -- ^ declaration-order index in @unitArgs@
+  { iaIndex :: Int -- ^ checked declaration index ('Lara.SupportTerm.chIndex')
   , iaArgId :: ArgId
   , iaTerm :: SupportTerm
   , iaConclusion :: Prop
-  , iaObligations :: [QuestionId] -- ^ unresolved root obligations (nonempty)
+  , iaObligations :: [QuestionId] -- ^ exact mandatory root obligations (nonempty)
   }
   deriving (Eq, Show)
 
--- | Leniently check every declared argument, partitioning into complete checked
--- nodes (obligation set @[]@, AF-eligible) and located incomplete alternatives
--- (obligation set nonempty, AF-excluded). A hard type error (a 'Left' from
--- 'inferSupport') is dropped: it is neither complete support nor a hole. Unlike
--- 'Lara.Check.checkArguments' under 'Lara.Check.fullConfig', this never
--- rejects — every argument is scanned.
+-- | The located holes of an accepted unit, in checked declaration order, named
+-- by the argument ids of @unit@.
 --
--- The retained nodes are in declaration order, so their positions are exactly
--- the AF indices 'reportAF' compiles them into.
-scanArguments
-  :: (RuleId -> Maybe Rule)
-  -> (LeafId -> Maybe Prop)
-  -> CertOk
-  -> [(ArgId, SupportTerm)]
-  -> ([CheckedNode], [IncompleteAlternative])
-scanArguments pI gamma certOk = go 0
+-- __Input contract.__ @unit@ is the unit 'Lara.Check.checkUnit' accepted as
+-- @accepted@ — after any §4.3 prune, so the hole indices address its argument
+-- list. A hole index outside that list means the two were not paired by one
+-- check; that is a caller bug, and it fails loudly rather than name a hole by
+-- some other argument's id.
+locatedHoles :: Unit -> CheckedUnit -> [IncompleteAlternative]
+locatedHoles unit accepted =
+  [ IncompleteAlternative
+      (chIndex hole)
+      (argIdAt (chIndex hole))
+      (chTerm hole)
+      (chConclusion hole)
+      (chObligations hole)
+  | hole <- cuHoles accepted
+  ]
   where
-    go _ [] = ([], [])
-    go i ((aid, w) : rest) =
-      let (nodes, alts) = go (i + 1) rest
-       in case inferSupport pI gamma certOk LocRoot w of
-            Left _ -> (nodes, alts)
-            Right res
-              | null (srObligations res) ->
-                  (CheckedNode w (srConclusion res) : nodes, alts)
-              | otherwise ->
-                  ( nodes
-                  , IncompleteAlternative i aid w (srConclusion res) (srObligations res)
-                      : alts
-                  )
+    argIds = zip [0 :: Int ..] (map fst (unitArgs unit))
+    argIdAt i = case lookup i argIds of
+      Just aid -> aid
+      Nothing ->
+        error
+          ( "Lara.Reporting.locatedHoles: hole at checked index "
+              ++ show i
+              ++ " is outside the supplied unit"
+          )
 
 -- | The located incomplete alternatives whose conclusion is @≡ p@ (spec §8's
 -- incomplete candidate alternatives for @p@).
@@ -126,12 +121,13 @@ incompleteAlternativesFor alts p = [a | a <- alts, equiv (iaConclusion a) p]
 -- ---------------------------------------------------------------------------
 
 -- | @holes(P,p)@ as the @[Int]@ populating 'Lara.Grounded.claimHoles': the
--- raw-unit indices ('iaIndex') of the incomplete alternatives whose conclusion
--- is @≡ p@. Nonempty exactly when @p@ has an incomplete candidate alternative.
+-- checked declaration indices ('iaIndex') of the incomplete alternatives whose
+-- conclusion is @≡ p@. Nonempty exactly when @p@ has an incomplete candidate
+-- alternative.
 --
--- These are @unitArgs@ declaration indices — a __different index space__ from
--- 'Lara.Grounded.claimSupport' (complete-node/AF indices), sharing the @[Int]@
--- type only because the Lean @Claim@ mirror keeps both as @List Arg@. Only their
+-- These are checked declaration indices — a __different index space__ from
+-- 'Lara.Grounded.claimSupport' (AF indices), sharing the @[Int]@ type only
+-- because the Lean @Claim@ mirror keeps both as @List Arg@. Only their
 -- (non)emptiness is ever consumed (by 'incompleteAlternative'); a consumer that
 -- must resolve a hole back to its term or open obligations reads the located
 -- 'IncompleteAlternative' values ('crAlternatives' \/ 'incompleteAlternativesFor'),
@@ -160,17 +156,8 @@ incompleteAlternative :: Claim -> Bool
 incompleteAlternative c = not (null (claimHoles c))
 
 -- ---------------------------------------------------------------------------
--- The reporting AF and per-query reports
+-- Per-query reports
 -- ---------------------------------------------------------------------------
-
--- | The reporting AF, built from the complete nodes only — the incomplete
--- alternatives are excluded (spec §8). Attacks are resolved against the whole
--- raw argument list, but 'Lara.Compile.edgeB' only forms an edge between two
--- complete terms, so an attack sourced at or targeting an excluded incomplete
--- term contributes no edge.
-reportAF :: [(ArgId, SupportTerm)] -> [Attack] -> [CheckedNode] -> AF
-reportAF rawArgs attacks nodes =
-  checkedAF (CheckedProgram (map cnTerm nodes) (resolveAttacks rawArgs attacks))
 
 -- | One claim's full reporting record (spec §8): the query atom, the full claim
 -- (complete support indices + hole indices), its four-state status, the located
@@ -184,17 +171,17 @@ data ClaimReport = ClaimReport
   }
   deriving (Eq, Show)
 
--- | The full reporting analysis for a raw unit: a lenient argument scan, an AF
--- over the complete nodes, and one 'ClaimReport' per query atom. This is a
--- library/API surface only — it does not feed the driver verdict, so the frozen
--- fixture wire output is unaffected.
-claimReports
-  :: (RuleId -> Maybe Rule)
-  -> (LeafId -> Maybe Prop)
-  -> CertOk
-  -> Unit
-  -> [ClaimReport]
-claimReports pI gamma certOk unit =
+-- | The full reporting analysis of an accepted unit: one 'ClaimReport' per
+-- query atom of @unit@, over the checker's own node cache, located holes and
+-- compiled AF ('Lara.Compile.checkedAF' of 'Lara.Check.cuProgram'). The input
+-- contract is 'locatedHoles''s: @unit@ is the unit the checker accepted.
+--
+-- The status is the four-state 'statusC' of the checked graph. It is not a
+-- public status: §4.3's @evidence-blocked@ overlay is the driver's
+-- ('Lara.Driver.buildAccept'), and a caller that publishes a status reads it
+-- from the verdict.
+claimReports :: Unit -> CheckedUnit -> [ClaimReport]
+claimReports unit accepted =
   [ let claim = reportClaimFor nodes alts p
      in ClaimReport
           { crQuery = p
@@ -206,5 +193,31 @@ claimReports pI gamma certOk unit =
   | p <- unitQueries unit
   ]
   where
-    (nodes, alts) = scanArguments pI gamma certOk (unitArgs unit)
-    af = reportAF (unitArgs unit) (unitAttacks unit) nodes
+    nodes = cuNodes accepted
+    alts = locatedHoles unit accepted
+    af = checkedAF (cuProgram accepted)
+
+-- ---------------------------------------------------------------------------
+-- Naming AF nodes
+-- ---------------------------------------------------------------------------
+
+-- | The argument id of every AF node of an accepted unit, in AF order: entry
+-- @n@ names the label and edge index @n@. AF node @n@ is checked declaration
+-- @'Lara.Check.cuNodeDecls' !! n@, which differs from @n@ as soon as a hole
+-- precedes it, so a consumer naming labels must go through this map rather
+-- than index the declaration list with an AF index. The input contract is
+-- 'locatedHoles''s.
+nodeArgIds :: Unit -> CheckedUnit -> [ArgId]
+nodeArgIds unit accepted =
+  [ case lookup d argIds of
+      Just aid -> aid
+      Nothing ->
+        error
+          ( "Lara.Reporting.nodeArgIds: node at checked index "
+              ++ show d
+              ++ " is outside the supplied unit"
+          )
+  | d <- cuNodeDecls accepted
+  ]
+  where
+    argIds = zip [0 :: Int ..] (map fst (unitArgs unit))

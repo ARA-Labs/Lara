@@ -15,9 +15,10 @@
 #     signal' measured directly (variance, convergence traces, seeds)?", which the annotator rated
 #     OPTIONAL and unmet-gap (metrics are endpoint accuracy and ECE only; no seeds or variance).
 #     corpus-v1 makes variance mandatory family-wide (27 mandatory vs 16 optional annotations),
-#     and the policy call wins: an open mandatory obligation is IncompleteArgument, so NO complete
-#     arg is declarable -> E2-style gap. The claim's own "stable learning signal" wording is
-#     exactly the unmeasured quantity, which sharpens the divergence.
+#     and the policy call wins: the incomplete argument is declared as a located hole with
+#     `open variance_reported` (lowering re-done for issue #15 under `lara-core@0.3`), and
+#     complete support stays empty. The claim's own "stable learning signal" wording is exactly
+#     the unmeasured quantity, which sharpens the divergence.
 #   * single_variable (mandatory) is annotated met (E05's 7-way ablation isolates the discrepancy
 #     term); protocol_parity (mandatory) is supplied by the identical ImageNet-C severity-5,
 #     15-corruption protocol across all variants and NoAdapt. Both leaves are supplied. The
@@ -54,11 +55,14 @@ leaf e3 : matched_protocol(e05)
   provenance = ai-executed
   refs       = [logic/experiments.md#E05-Setup, logic/experiments.md#E06-baselines]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... and the incomplete argument is a located hole ------------------------------------------
 
-# (Intentionally no `arg`: variance_reported(e05) has no honest leaf — endpoint accuracy/ECE only,
-# no seeds or variance — and corpus-v1 makes that obligation mandatory even though the annotator
-# rated it optional. The complete-support set is therefore empty.)
+# variance_reported(e05) has no honest leaf — endpoint accuracy/ECE only, no seeds or variance —
+# so the policy-mandatory variance_reported stays open (the annotator rated it optional).
+arg a1 : supports(c05) by component_ablation(activation_discrepancy_fitness, cma_es_prompt_tta, adaptation_accuracy, e05)
+  discharge single_variable   with e2
+  discharge protocol_parity   with e3
+  open      variance_reported
 
 status c05
 
@@ -66,5 +70,6 @@ status c05
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
 # Compiled AF: no arguments.
+# Located hole: a1 (declaration index 0), open obligations [variance_reported]; sources no attacks.
 # Claim status:
-#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c05 -> gap (empty complete support; the hole a1 is reported, not a node; spec §8)

@@ -2185,8 +2185,8 @@ private theorem resolvedAttackVector_injective :
     simp_all [resolvedAttackVector]
 
 private def claimVector :
-    PropId × Lara.Grounded.Claim → String × List Nat × List Nat
-  | (id, claim) => (id.val, claim.support, claim.holes)
+    PropId × List Nat → String × List Nat
+  | (id, alternatives) => (id.val, alternatives)
 
 private def obligationVector :
     ArgId × List ObligationId → String × List String
@@ -2203,7 +2203,7 @@ private structure ElaborationVector where
   unitSigma : Lara.Sigma.Sigma
   unitAttacks : List ResolvedAttackVector
   resolvedAttacks : List ResolvedAttackVector
-  claims : List (String × List Nat × List Nat)
+  claimAlternatives : List (String × List Nat)
   authoredObligations : List (String × List String)
   openQuestions : List (String × List String)
   ground : List Lara.Atom
@@ -2218,7 +2218,7 @@ private def elaborationVector
     unitSigma := output.unit.sigma
     unitAttacks := output.unit.atts.map resolvedAttackVector
     resolvedAttacks := output.resolvedAttacks.map resolvedAttackVector
-    claims := output.claims.map claimVector
+    claimAlternatives := output.claimAlternatives.map claimVector
     authoredObligations := output.authoredObligations.map obligationVector
     openQuestions := output.openQuestions.map questionVector
     ground := output.ground }
@@ -2265,8 +2265,8 @@ private theorem questionIdValue_injective :
 private theorem claimVector_injective :
     Function.Injective claimVector := by
   intro left right h
-  rcases left with ⟨⟨leftId⟩, ⟨leftSupport, leftHoles⟩⟩
-  rcases right with ⟨⟨rightId⟩, ⟨rightSupport, rightHoles⟩⟩
+  rcases left with ⟨⟨leftId⟩, leftAlternatives⟩
+  rcases right with ⟨⟨rightId⟩, rightAlternatives⟩
   simp [claimVector] at h
   simp_all
 
@@ -2311,9 +2311,9 @@ private theorem elaborated_eq_of_vector
   have hresolvedAttacks : left.resolvedAttacks = right.resolvedAttacks :=
     map_injective_of_injective resolvedAttackVector_injective
       (congrArg ElaborationVector.resolvedAttacks hvector)
-  have hclaims : left.claims = right.claims :=
+  have hclaims : left.claimAlternatives = right.claimAlternatives :=
     map_injective_of_injective claimVector_injective
-      (congrArg ElaborationVector.claims hvector)
+      (congrArg ElaborationVector.claimAlternatives hvector)
   have hobligations : left.authoredObligations = right.authoredObligations :=
     map_injective_of_injective obligationVector_injective
       (congrArg ElaborationVector.authoredObligations hvector)
@@ -2399,10 +2399,9 @@ private def manualAllFormsGround : List Lara.Atom :=
   , atom "score" [.num "1"]
   ]
 
-private def manualAllFormsClaims :
-    List (PropId × Lara.Grounded.Claim) :=
-  [ (claimMain, { support := [0], holes := [] })
-  , (claimComparison, { support := [1], holes := [] })
+private def manualAllFormsAlternatives : List (PropId × List Nat) :=
+  [ (claimMain, [0])
+  , (claimComparison, [1])
   ]
 
 private def manualAllFormsElaborated :
@@ -2411,7 +2410,7 @@ private def manualAllFormsElaborated :
       explicitComparisonProgram
     ground := manualAllFormsGround
     unit := manualAllFormsUnit
-    claims := manualAllFormsClaims
+    claimAlternatives := manualAllFormsAlternatives
     argIds := [argExplicit, argInferred, argPro, argCon]
     authoredObligations :=
       [(argExplicit, []), (argInferred, []), (argPro, []), (argCon, [])]
@@ -2677,23 +2676,23 @@ example :
       Lara.Check.Unit.checkUnit output.gamma surfaceEnv.registry
           output.ground output.unit = .ok checked ∧
       Lara.Surface.observe Lara.Semantics.groundedSem hchecks claimMain =
-        (Lara.Surface.coreClaim? output claimMain).map
+        (Lara.Surface.coreClaim? output checked claimMain).map
           (Lara.Semantics.observe Lara.Semantics.groundedSem
             (Lara.Compile.checkedAF checked.program)) ∧
       Lara.Surface.observe Lara.Semantics.completeSem hchecks claimMain =
-        (Lara.Surface.coreClaim? output claimMain).map
+        (Lara.Surface.coreClaim? output checked claimMain).map
           (Lara.Semantics.observe Lara.Semantics.completeSem
             (Lara.Compile.checkedAF checked.program)) ∧
       Lara.Surface.observe Lara.Semantics.preferredSem hchecks claimMain =
-        (Lara.Surface.coreClaim? output claimMain).map
+        (Lara.Surface.coreClaim? output checked claimMain).map
           (Lara.Semantics.observe Lara.Semantics.preferredSem
             (Lara.Compile.checkedAF checked.program)) ∧
       Lara.Surface.observe Lara.Semantics.stableSem hchecks claimMain =
-        (Lara.Surface.coreClaim? output claimMain).map
+        (Lara.Surface.coreClaim? output checked claimMain).map
           (Lara.Semantics.observe Lara.Semantics.stableSem
             (Lara.Compile.checkedAF checked.program)) ∧
       Lara.Surface.observe Lara.Semantics.semiStableSem hchecks claimMain =
-        (Lara.Surface.coreClaim? output claimMain).map
+        (Lara.Surface.coreClaim? output checked claimMain).map
           (Lara.Semantics.observe Lara.Semantics.semiStableSem
             (Lara.Compile.checkedAF checked.program)) := by
   obtain ⟨output, hchecks⟩ := allForms_checks
@@ -2722,15 +2721,6 @@ example :
         some (.observed .defeated) := by
   native_decide
 
-/-- Missing claim lookup remains absent on both independently defined sides;
-it is never reclassified as an empty-support gap. -/
-example :
-    Lara.Surface.directClaim manualAllForms_checks ⟨"missing-claim"⟩ = none ∧
-      Lara.Surface.coreClaim? manualAllFormsElaborated ⟨"missing-claim"⟩ = none ∧
-      Lara.Surface.observe Lara.Semantics.groundedSem manualAllForms_checks
-          ⟨"missing-claim"⟩ = none := by
-  native_decide
-
 private def allFormsCheckedResult :=
   Lara.Check.Unit.checkUnit manualAllFormsElaborated.gamma surfaceEnv.registry
     manualAllFormsElaborated.ground manualAllFormsElaborated.unit
@@ -2745,26 +2735,36 @@ private def allFormsChecked :
   Lara.Check.Unit.okValue
     (Lara.Check.Unit.exists_ok_of_isOk allForms_checked_result_is_ok)
 
+/-- Missing claim lookup remains absent on both independently defined sides;
+it is never reclassified as an empty-support gap. -/
+example :
+    Lara.Surface.directClaim manualAllForms_checks ⟨"missing-claim"⟩ = none ∧
+      Lara.Surface.coreClaim? manualAllFormsElaborated allFormsChecked
+        ⟨"missing-claim"⟩ = none ∧
+      Lara.Surface.observe Lara.Semantics.groundedSem manualAllForms_checks
+          ⟨"missing-claim"⟩ = none := by
+  native_decide
+
 /-- The independently compiled all-forms carrier computes the same five
 concrete observations. -/
 example :
-    (Lara.Surface.coreClaim? manualAllFormsElaborated claimMain).map
+    (Lara.Surface.coreClaim? manualAllFormsElaborated allFormsChecked claimMain).map
         (Lara.Semantics.observe Lara.Semantics.groundedSem
           (Lara.Compile.checkedAF allFormsChecked.program)) =
           some (.observed .defeated) ∧
-    (Lara.Surface.coreClaim? manualAllFormsElaborated claimMain).map
+    (Lara.Surface.coreClaim? manualAllFormsElaborated allFormsChecked claimMain).map
         (Lara.Semantics.observe Lara.Semantics.completeSem
           (Lara.Compile.checkedAF allFormsChecked.program)) =
           some (.observed .defeated) ∧
-    (Lara.Surface.coreClaim? manualAllFormsElaborated claimMain).map
+    (Lara.Surface.coreClaim? manualAllFormsElaborated allFormsChecked claimMain).map
         (Lara.Semantics.observe Lara.Semantics.preferredSem
           (Lara.Compile.checkedAF allFormsChecked.program)) =
           some (.observed .defeated) ∧
-    (Lara.Surface.coreClaim? manualAllFormsElaborated claimMain).map
+    (Lara.Surface.coreClaim? manualAllFormsElaborated allFormsChecked claimMain).map
         (Lara.Semantics.observe Lara.Semantics.stableSem
           (Lara.Compile.checkedAF allFormsChecked.program)) =
           some (.observed .defeated) ∧
-    (Lara.Surface.coreClaim? manualAllFormsElaborated claimMain).map
+    (Lara.Surface.coreClaim? manualAllFormsElaborated allFormsChecked claimMain).map
         (Lara.Semantics.observe Lara.Semantics.semiStableSem
           (Lara.Compile.checkedAF allFormsChecked.program)) =
           some (.observed .defeated) := by
@@ -2837,7 +2837,7 @@ observation on both sides; it is not collapsed into a local four-state status. -
 example :
     Lara.Surface.observe Lara.Semantics.stableSem stableNone_checks claimMain =
         some .noExtension ∧
-    (Lara.Surface.coreClaim? stableNoneOutput claimMain).map
+    (Lara.Surface.coreClaim? stableNoneOutput stableNoneChecked claimMain).map
         (Lara.Semantics.observe Lara.Semantics.stableSem
           (Lara.Compile.checkedAF stableNoneChecked.program)) =
         some .noExtension := by

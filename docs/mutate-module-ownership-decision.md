@@ -484,7 +484,7 @@ argument D4 made for `retainedAttackIndices`. `Admission.buildPrune` proves
 `p.removedLeaves = leaves.filterMap …` and
 `p.checkedLeaves = Groups.quarantineLeaves qs leaves`
 (`lean/Lara/Admission.lean:764-765`), and the argument-side `retainedIndices`
-counterpart exists at `lean/Lara/BlockedProgram.lean:57` with axiom-checked
+counterpart exists at `lean/Lara/BlockedProgram.lean:80` with axiom-checked
 theorems. `retainedLeafIndices` only re-expresses an already-proved filter as an
 index list for the generator.
 

@@ -60,7 +60,6 @@ rejectionOf e = case e of
   UEProgram pe -> case pe of
     PERejection _ ce -> RejectClass (checkErrorClass ce)
     PEDuplicateArgument _ _ -> DuplicateArgument
-    PEIncompleteArgument _ _ -> IncompleteArgument
     PEMissingConflict _ -> MissingConflict
 
 -- ---------------------------------------------------------------------------
@@ -245,6 +244,5 @@ locate e = LocatedRejection (rejectionOf e) stage constituent
         PEDuplicateArgument i _ -> (StageDuplicateArgument, CArgument i)
         PERejection (DLArgument i) _ -> (StageSupport, CArgument i)
         PERejection (DLAttack i) _ -> (StageTypedAttack, CAttack i)
-        PEIncompleteArgument i _ -> (StageSupport, CArgument i)
         PEMissingConflict mc ->
           (StageMissingConflict, CConflictPair (mcSourceIndex mc) (mcTargetIndex mc))

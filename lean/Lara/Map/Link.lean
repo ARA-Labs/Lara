@@ -155,6 +155,44 @@ theorem linkStep_sideOk {canon : String → String} {reg : BackendRegistry canon
     · exact (crossAtts_spec h).2.2
   attack_complete := link_attackComplete hC hF
 
+/-- **One step preserves `SideOkHoles`** (issue #13): `linkStep_sideOk` for
+sides that may carry located holes. A merged declaration types because it types
+on its own side; attack completeness is `link_attackComplete_holes`. -/
+theorem linkStep_sideOkHoles {canon : String → String} {reg : BackendRegistry canon}
+    {C : Lara.Context.Context} {F : Fragment}
+    (hC : SideOkHoles canon reg (linkGamma C F) F.policy C.frame.args C.frame.atts)
+    (hF : SideOkHoles canon reg (linkGamma C F) F.policy F.args F.atts) :
+    SideOkHoles canon reg (linkGamma C F) F.policy
+      (dedupList (C.frame.args ++ F.args))
+      (C.frame.atts ++ F.atts ++ crossAtts reg (linkGamma C F) C F) where
+  support := by
+    intro w hw
+    rcases List.mem_append.mp (mem_dedupList.mp hw) with h | h
+    · exact hC.support w h
+    · exact hF.support w h
+  typed := by
+    intro k hk
+    rcases List.mem_append.mp hk with h | h
+    · rcases List.mem_append.mp h with h' | h'
+      · exact hC.typed k h'
+      · exact hF.typed k h'
+    · exact (crossAtts_spec h).1
+  source_declared := by
+    intro k hk
+    rcases List.mem_append.mp hk with h | h
+    · rcases List.mem_append.mp h with h' | h'
+      · exact mem_dedupList.mpr (List.mem_append_left _ (hC.source_declared k h'))
+      · exact mem_dedupList.mpr (List.mem_append_right _ (hF.source_declared k h'))
+    · exact (crossAtts_spec h).2.1
+  target_declared := by
+    intro k hk
+    rcases List.mem_append.mp hk with h | h
+    · rcases List.mem_append.mp h with h' | h'
+      · exact mem_dedupList.mpr (List.mem_append_left _ (hC.target_declared k h'))
+      · exact mem_dedupList.mpr (List.mem_append_right _ (hF.target_declared k h'))
+    · exact (crossAtts_spec h).2.2
+  attack_complete := link_attackComplete_holes hC hF
+
 /-! ### The fold -/
 
 /-- **Fold the members into one side.** Left-associated, in member order, which
@@ -220,6 +258,41 @@ theorem linkMembers_sideOk {canon : String → String} {reg : BackendRegistry ca
         rw [sideGamma_linkStep]
         exact hFP ▸ linkStep_sideOk (hFP ▸ hCstep) (hFP ▸ hFstep)
       exact linkMembers_sideOk Fs (linkStep reg C F)
+        (fun G hG => hpol G (List.mem_cons_of_mem _ hG))
+        hyg.2 hstep
+        (fun G hG => hmembers G (List.mem_cons_of_mem _ hG))
+
+/-- **The fold preserves `SideOkHoles`** (issue #13): `linkMembers_sideOk` for
+members that may carry located holes. -/
+theorem linkMembers_sideOkHoles {canon : String → String} {reg : BackendRegistry canon}
+    {P : Policy.Policy} :
+    ∀ (Fs : List Fragment) (C : Lara.Context.Context),
+      (∀ F ∈ Fs, F.policy = P) →
+      FoldHygiene reg C Fs →
+      SideOkHoles canon reg (sideGamma C) P C.frame.args C.frame.atts →
+      (∀ F ∈ Fs,
+        SideOkHoles canon reg (Admission.buildGamma F.gammaFrag) P F.args F.atts) →
+      SideOkHoles canon reg (sideGamma (linkMembers reg C Fs)) P
+        (linkMembers reg C Fs).frame.args (linkMembers reg C Fs).frame.atts
+  | [], C, _, _, hseed, _ => hseed
+  | F :: Fs, C, hpol, hyg, hseed, hmembers => by
+      have hFP : F.policy = P := hpol F (List.mem_cons_self ..)
+      have hCstep : SideOkHoles canon reg (linkGamma C F) P C.frame.args C.frame.atts :=
+        SideOkHoles.mono_gamma
+          (fun _ _ h => Admission.buildGamma_append_of_some _ _ h) hseed
+      have hFstep : SideOkHoles canon reg (linkGamma C F) P F.args F.atts := by
+        refine SideOkHoles.mono_gamma ?_ (hmembers F (List.mem_cons_self ..))
+        intro l p h
+        have hmem : l ∈ F.declared := Admission.buildGamma_some_mem h
+        have hfresh : l ∉ C.frame.declared := hyg.1 l hmem
+        rw [linkGamma, Admission.buildGamma_append_fresh _ _ hfresh]
+        exact h
+      have hstep :
+          SideOkHoles canon reg (sideGamma (linkStep reg C F)) P
+            (linkStep reg C F).frame.args (linkStep reg C F).frame.atts := by
+        rw [sideGamma_linkStep]
+        exact hFP ▸ linkStep_sideOkHoles (hFP ▸ hCstep) (hFP ▸ hFstep)
+      exact linkMembers_sideOkHoles Fs (linkStep reg C F)
         (fun G hG => hpol G (List.mem_cons_of_mem _ hG))
         hyg.2 hstep
         (fun G hG => hmembers G (List.mem_cons_of_mem _ hG))
@@ -301,7 +374,40 @@ envelope byte records — and the Haskell driver itself, which
 both produce.
 
 `soloMap_linkMembers_checked` below discharges every premise at a concrete map,
-so this is non-vacuous. -/
+so this is non-vacuous. Since issue #13 the seed and the members may carry
+located holes; `linkMembers_checked` is the hole-free corollary. -/
+theorem linkMembers_checked_holes {canon : String → String} {reg : BackendRegistry canon}
+    {sg : Sigma.Sigma} {P : Policy.Policy}
+    {C : Lara.Context.Context} {Fs : List Fragment}
+    (hdup : firstDup? (linkMembers reg C Fs).frame.declared = none)
+    (himports : (linkMembers reg C Fs).frame.imports.leaves = [])
+    (hsigma : (linkMembers reg C Fs).frame.sigma = sg)
+    (hpolicy' : (linkMembers reg C Fs).frame.policy = P)
+    (hpol : ∀ F ∈ Fs, F.policy = P)
+    (hyg : FoldHygiene reg C Fs)
+    (hseed : SideOkHoles canon reg (sideGamma C) P C.frame.args C.frame.atts)
+    (hmembers : ∀ F ∈ Fs,
+      SideOkHoles canon reg (Admission.buildGamma F.gammaFrag) P F.args F.atts)
+    (hsignature : Check.Unit.signatureStage
+      (linkGround (linkMembers reg C Fs) (closedTail sg P))
+      (linkedUnit reg (linkMembers reg C Fs) (closedTail sg P)) = none)
+    (hscope : Policy.firstOutOfScope? P = none)
+    (hruleIds : (P.rules.map (·.id)).Nodup)
+    (hpolicyWf : Policy.WellFormed canon P) :
+    ∃ accepted,
+      Check.Unit.checkUnit (linkGamma (linkMembers reg C Fs) (closedTail sg P)) reg
+        (linkGround (linkMembers reg C Fs) (closedTail sg P))
+        (linkedUnit reg (linkMembers reg C Fs) (closedTail sg P)) = .ok accepted := by
+  have hguard := linkOk_closedTail (sg := sg) (P := P) hdup himports hsigma hpolicy'
+  have hfolded := linkMembers_sideOkHoles (reg := reg) (P := P) Fs C hpol hyg hseed hmembers
+  refine link_checked_holes (link_eq_some hguard) hsignature hscope hruleIds hpolicyWf ?_ ?_
+  · refine SideOkHoles.mono_gamma ?_ hfolded
+    intro l p h
+    exact Admission.buildGamma_append_of_some _ _ h
+  · exact sideOk_closedTail.toHoles
+
+/-- **A folded map of hole-free members is accepted.** The hole-free corollary
+of `linkMembers_checked_holes`. -/
 theorem linkMembers_checked {canon : String → String} {reg : BackendRegistry canon}
     {sg : Sigma.Sigma} {P : Policy.Policy}
     {C : Lara.Context.Context} {Fs : List Fragment}
@@ -322,14 +428,9 @@ theorem linkMembers_checked {canon : String → String} {reg : BackendRegistry c
     ∃ accepted,
       Check.Unit.checkUnit (linkGamma (linkMembers reg C Fs) (closedTail sg P)) reg
         (linkGround (linkMembers reg C Fs) (closedTail sg P))
-        (linkedUnit reg (linkMembers reg C Fs) (closedTail sg P)) = .ok accepted := by
-  have hguard := linkOk_closedTail (sg := sg) (P := P) hdup himports hsigma hpolicy'
-  have hfolded := linkMembers_sideOk (reg := reg) (P := P) Fs C hpol hyg hseed hmembers
-  refine link_checked (link_eq_some hguard) hsignature hscope hruleIds hpolicyWf ?_ ?_
-  · refine SideOk.mono_gamma ?_ hfolded
-    intro l p h
-    exact Admission.buildGamma_append_of_some _ _ h
-  · exact sideOk_closedTail
+        (linkedUnit reg (linkMembers reg C Fs) (closedTail sg P)) = .ok accepted :=
+  linkMembers_checked_holes hdup himports hsigma hpolicy' hpol hyg hseed.toHoles
+    (fun F hF => (hmembers F hF).toHoles) hsignature hscope hruleIds hpolicyWf
 
 /-! ### Discharging the fold's premises for a qualified map
 

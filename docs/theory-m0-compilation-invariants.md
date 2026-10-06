@@ -65,8 +65,8 @@ over carriers instead of over programs.
 
 ### Why there is no `attackable` node label
 
-`Compile.AttackComplete` (`lean/Lara/Compile.lean:515`) is guarded by
-`Compile.ConflictAttackable` (`:405`), a property of a support *term* — a leaf,
+`Compile.AttackComplete` (`lean/Lara/Compile.lean:646`) is guarded by
+`Compile.ConflictAttackable` (`:512`), a property of a support *term* — a leaf,
 or an instance whose root rule is defeasible. Terms are gone from the carrier,
 so the obvious reading needs a per-node Boolean label, and an early draft of
 `StructuredAF` carried one.
@@ -94,14 +94,14 @@ rejecting counterexample. "Layer" is the classification M0 owes its dependents:
 
 | # | Invariant | Layer | Lean declaration | Rejecting counterexample |
 | --- | --- | --- | --- | --- |
-| 1 | Endpoint-safe pruning | carrier | `Invariants.CompilerInvariant.ranged`; holds by `Invariants.compileUnit_ranged` (`:162`), from `Compile.edgeB_faithful` (`Compile.lean:649`) | `Examples.CompilerInvariants.unrangedEx` (`:30`), rejected by `unrangedEx_not_realizable` (`:41`) |
-| 2 | Conflict completeness (forced edges) | carrier | `Invariants.CompilerInvariant.conflictComplete`; holds by `Invariants.compileUnit_conflictComplete` (`:175`), from `Unit.CheckedUnit.attack_complete` (`Lara/Unit.lean:193`) via `Compile.complete_conflict_edge` | `Examples.CompilerInvariants.unforcedConflictEx` (`:58`), rejected by `unforcedConflictEx_not_realizable` (`:71`); non-vacuous **off the diagonal** by `unforcedDistinctConflict_not_invariant` (`:118`) via `sharedContrary` (`:114`), which forces an edge between the *distinct* conclusions `pTa`/`qTa` under `Examples.dpShared`. Without it the field would be witnessed only where row 3 already bites |
+| 1 | Endpoint-safe pruning | carrier | `Invariants.CompilerInvariant.ranged`; holds by `Invariants.compileUnit_ranged` (`:162`), from `Compile.edgeB_faithful` (`Compile.lean:821`) | `Examples.CompilerInvariants.unrangedEx` (`:30`), rejected by `unrangedEx_not_realizable` (`:41`) |
+| 2 | Conflict completeness (forced edges) | carrier | `Invariants.CompilerInvariant.conflictComplete`; holds by `Invariants.compileUnit_conflictComplete` (`:175`), from `Unit.CheckedUnit.attack_complete` (`Lara/Unit.lean:200`) via `Compile.complete_conflict_edge` | `Examples.CompilerInvariants.unforcedConflictEx` (`:58`), rejected by `unforcedConflictEx_not_realizable` (`:71`); non-vacuous **off the diagonal** by `unforcedDistinctConflict_not_invariant` (`:118`) via `sharedContrary` (`:114`), which forces an edge between the *distinct* conclusions `pTa`/`qTa` under `Examples.dpShared`. Without it the field would be witnessed only where row 3 already bites |
 | 3 | Self-attack condition | carrier (derived) | `Invariants.compileUnit_selfConflict` (`:217`) — the `i = j` diagonal of #2, not an independent field | `unforcedSelfConflict_not_invariant` (`:97`), non-vacuous by `selfContrary` (`:89`); source-level witness `Examples.GroundedConsistency.missing_self_edge_rejected` (`:128`) |
 | 4 | Conclusion and claim ownership | adequacy | `Invariants.support_compileUnit` (`:246`) — carrier support agrees with `Consistency.claimSupportFor` (`Consistency.lean:63`); lifted to status by `Invariants.status_compileUnit` (`:257`) | none: a violation is not a framework but a disagreement between two projections, excluded by the theorem |
-| 5 | Subargument closure | source | `Compile.Covered` (`Compile.lean:435`), decided by `Compile.coveredB_iff` (`:446`) over the per-attack closure test `Compile.attackClosureB_iff` (`:352`); `Compile.closure_includes_direct` (`:576`) shows closure extends, never replaces, the direct attack | `Examples.CompilerInvariants.closure_rejects_noncontaining_target` (`:133`) — in the running fixture node `0` is in range and is the attack's own source, yet receives no edge, because it does not contain the attacked occurrence. Closure adds edges onto containing arguments only |
+| 5 | Subargument closure | source | `Compile.Covered` (`Compile.lean:542`), decided by `Compile.coveredB_iff` (`:553`) over the per-attack closure test `Compile.attackClosureB_iff` (`:459`); `Compile.closure_includes_direct` (`:707`) shows closure extends, never replaces, the direct attack | `Examples.CompilerInvariants.closure_rejects_noncontaining_target` (`:133`) — in the running fixture node `0` is in range and is the attack's own source, yet receives no edge, because it does not contain the attacked occurrence. Closure adds edges onto containing arguments only |
 | 6 | Positional attack coherence | source | `Compile.AttackOcc` (`Compile.lean:76`), `attackOcc_unique` (`:82`), `target_contains_occ` (`:97`) | the inversion theorems *are* the rejections: `Attack.undercut_target_rule` (`Lara/Attack.lean:622`) and `Attack.undermine_target_leaf` (`:632`) exclude the mismatched position kinds; `rebut_top_defeasible` (`:590`) and `undercut_pos_defeasible` (`:603`) exclude strict occurrences |
-| 7 | Strict-chain well-formedness | source | `Support.cert_steps_accounted` (`Lara/Support.lean:1244`) over `Support.CertStepIn` (`:1045`) | **open — B0.** The backend-leakage rejection is B0's deliverable; this row closes when B0 lands |
-| 8 | Declared-identity preservation | source | `Compile.CheckedProgram.nodup` (`Compile.lean:478`); `Unit.CheckedUnit.nodes_terms` (`Lara/Unit.lean:198`) aligns the cache with the argument list | none at the carrier level, deliberately: two nodes *may* share a conclusion. Term-level identity is a source invariant and is not observable after labelling |
+| 7 | Strict-chain well-formedness | source | `Support.cert_steps_accounted` (`Lara/Support.lean:1361`) over `Support.CertStepIn` (`:1162`) | **open — B0.** The backend-leakage rejection is B0's deliverable; this row closes when B0 lands |
+| 8 | Declared-identity preservation | source | `Compile.CheckedProgram.nodup` (`Compile.lean:588`); `Unit.CheckedUnit.nodes_terms` (`Lara/Unit.lean:205`) aligns the cache with the argument list | none at the carrier level, deliberately: two nodes *may* share a conclusion. Term-level identity is a source invariant and is not observable after labelling |
 
 ### Recorded obligations
 
@@ -112,7 +112,7 @@ as a new obligation:
 - **Row 7** still waits on B0 for its rejecting example. The invariant
   itself is proved; only its counterexample remains outstanding.
 - **Signature well-sortedness of node conclusions.** M0 recorded that
-  `Unit.CheckedUnit.args_well_sorted` (`Lara/Unit.lean:204`) covers argument terms,
+  `Unit.CheckedUnit.args_well_sorted` (`Lara/Unit.lean:222`) covers argument terms,
   not node conclusions. M1 now closes the executable realization obligation
   with `Realizability.Realization.node_conclusion_wellSorted`, under successful
   checking and used-leaf ground coverage. The result does not add a field to
@@ -169,7 +169,7 @@ The full declaration map and prohibited paper claims are recorded in
   freezes; the freeze is this document.
 - `Lara.Erase` is unrelated despite the name: it is the backend-relabel
   development for result 9, not an erasure to a naked framework.
-- `Consistency.contrary_args_not_both_grounded` (`Consistency.lean:106`) derives
+- `Consistency.contrary_args_not_both_grounded` (`Consistency.lean:118`) derives
   the same forced edge inline that `compileUnit_conflictComplete` now derives as
   a named invariant. The duplication is left in place: `Lara.Consistency` is a
   frozen headline result and `Lara.Invariants` imports it, so factoring the

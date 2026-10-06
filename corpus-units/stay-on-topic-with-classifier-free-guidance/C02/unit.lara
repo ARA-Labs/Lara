@@ -14,9 +14,10 @@
 #     conclusion (a controlled_comparison `better(...)` would over-claim CFG superiority).
 #   * null_comparison's mandatory adequate_power CQ maps onto the annotation's mandatory
 #     "non-significance backed by an equivalence test or power analysis?" — annotated unmet-gap
-#     (E04 runs only an ANCOVA significance test at p=0.01, no TOST/equivalence or power). An open
-#     mandatory obligation is an IncompleteArgument rejection, so NO complete arg is declarable:
-#     E2-style gap (see adaptive-pruning/C03).
+#     (E04 runs only an ANCOVA significance test at p=0.01, no TOST/equivalence or power). The
+#     null_comparison argument is therefore incomplete: it is declared as a located hole with
+#     `open adequate_power` (lowering re-done for issue #15 under lara-core@0.3); the claim stays
+#     `gap` on empty complete support (see adaptive-pruning/C03).
 #   * Reinforcing (not decisive): the mandatory family-pooling CQ (GPT-2/Pythia/LLaMA regressed
 #     with no family covariate) is a second unmet baseline_parity aspect; the identical-benchmark
 #     match (CQ1) and method-neutral FLOP accounting (CQ4) are the two met CQs whose leaves the
@@ -54,17 +55,23 @@ leaf e3 : valid_measurement(zero_shot_accuracy, e04)
   provenance = ai-executed
   refs       = [logic/experiments.md#E04-Procedure-step-4]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... but the argument is incomplete (a located hole) ----------------------------------------
 
-# (Intentionally no `arg`: adequate_power(e04) has no honest leaf — E04 runs only a p=0.01
-# significance test, never an equivalence/power procedure — and null_comparison makes that
-# obligation mandatory. The complete-support set is therefore empty.)
+# adequate_power is open (E04 runs only a p=0.01 significance test, never an equivalence/power
+# procedure) and mandatory for the null dual, so a1 is a hole. baseline_parity is discharged on
+# the identical-benchmark leaf (CQ1); the family-pooling aspect stays a header note.
+arg a1 : supports(c02) by null_comparison(cfg, vanilla_2x_flops, zero_shot_accuracy, lm_eval_9task, e04)
+  discharge baseline_parity      with e2
+  discharge measurement_validity with e3
+  open      adequate_power
 
 status c02
 
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
-# Compiled AF: no arguments.
+# Compiled AF: no arguments (the hole is not a node).
+# Located hole: a1, open obligations [adequate_power]; it sources no attacks.
 # Claim status:
-#   c02 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c02 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8;
+#          the located hole is reported in `holes`, not counted as support)

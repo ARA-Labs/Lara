@@ -421,6 +421,7 @@ private theorem nested_admissible : Lara.Context.Admissible registryEx frame clo
   guard := by decide
   ctx := by constructor <;> simp [frame, AttackComplete]
   frag := by
+    apply Lara.Context.SideOk.toHoles
     apply sideOk_of_typed fragment_instantiated fragment_templates_typed fillings_typed
     · intro k hk
       have he : k = .rebut (.leaf l2) nestedClosed := by simpa [closedFragment] using hk

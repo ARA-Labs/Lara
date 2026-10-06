@@ -171,7 +171,8 @@ executable mirror of the frozen Lean development:
   R4, R5, R6, R7, R10, R11, R12, and R13 (certificate replay at the support
   stage), plus the four structural outcomes (duplicate-rule, duplicate-argument,
   incomplete-argument, missing-conflict); `CheckSpec` pins each with a rejected
-  golden. The production driver decides replay-preflight R13 and escalated
+  golden. *(Since `lara-core@0.3` incomplete-argument is retired: an open
+  mandatory question is an accepted located hole, `docs/located-gap-decision.md`.)* The production driver decides replay-preflight R13 and escalated
   data-integrity R9. R8 is the
   source-admission boundary. R14 is the wire-decode boundary, covered by
   `WireSpec`'s malformed-input matrix. The mutation and differential corpora

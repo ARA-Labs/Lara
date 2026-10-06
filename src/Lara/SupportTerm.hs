@@ -25,6 +25,14 @@ module Lara.SupportTerm
   , CheckedNode
   , cnTerm
   , cnConclusion
+    -- * Located hole (Lean @Compile.CheckedHole@)
+    -- | Opaque for the same reason; read via 'chIndex' \/ 'chTerm' \/
+    -- 'chConclusion' \/ 'chObligations'.
+  , CheckedHole
+  , chIndex
+  , chTerm
+  , chConclusion
+  , chObligations
     -- * The certificate oracle (Lean @certOkOf@)
   , CertOk
   , CertOutcome (..)
@@ -58,6 +66,10 @@ module Lara.SupportTerm
   , openMandatory
   , collectObligations
   , holeNames
+    -- * Obligation sites (spec §4.4; located-gap decision D12)
+  , openSites
+  , sitesFor
+  , obligationSites
     -- * Leaf dependency report (spec §6)
   , leaves
     -- * Side-condition deciders
@@ -75,7 +87,7 @@ import Data.Set (Set)
 import Lara.AST
 import Lara.Prop (Prop (..), Term (..), equiv)
 import Lara.Strict (Dependency)
-import Lara.SupportTerm.Internal (CheckedNode (..))
+import Lara.SupportTerm.Internal (CheckedHole (..), CheckedNode (..))
 
 -- ---------------------------------------------------------------------------
 -- Result and node types
@@ -381,6 +393,47 @@ collectObligations
   :: [[QuestionId]] -> [[QuestionId]] -> Rule -> [QuestionId] -> [QuestionId]
 collectObligations premOs dischOs r hs =
   dedupQuestions (concat (premOs ++ dischOs ++ [openMandatory r hs]))
+
+-- ---------------------------------------------------------------------------
+-- Obligation sites (spec §4.4; Lean @Lara.Check.HoleSites@)
+-- ---------------------------------------------------------------------------
+
+-- | Every /site/ of a term: a mandatory question paired with the position of a
+-- rule occurrence that leaves it open (@q ∈ H@ and @q@ mandatory for that
+-- occurrence's rule). The order is the traversal 'collectObligations' uses —
+-- premise subterms in index order, then discharge subterms in discharge-map
+-- order, then the instance itself (post-order). It reads only the term and the
+-- rule lookup, so it runs on the checked cache and never re-infers support
+-- (Lean @openSites@; @openSites_sound@ \/ @openSites_complete@ \/
+-- @mem_obligations_iff_sites@ state its adequacy).
+openSites :: (RuleId -> Maybe Rule) -> SupportTerm -> [(QuestionId, Position)]
+openSites pI = go
+  where
+    go t = case t of
+      SLeaf _ -> []
+      SRule rn _ ws d hs _ ->
+        concat
+          [ prefixed (StepPremise i) (go w) | (i, w) <- zip [0 ..] ws ]
+          ++ concat [ prefixed (StepQuestion q) (go w) | (q, w) <- d ]
+          ++ case pI rn of
+            Just r -> [(q, []) | q <- openMandatory r (holeNames hs)]
+            Nothing -> []
+    prefixed step sites = [(q, step : pos) | (q, pos) <- sites]
+
+-- | The positions of the sites of one question, in site order (Lean
+-- @sitesFor@).
+sitesFor :: [(QuestionId, Position)] -> QuestionId -> [Position]
+sitesFor sites q = [pos | (q', pos) <- sites, q' == q]
+
+-- | One row per root obligation, in the order of the given obligation list:
+-- the question and its sites (Lean @obligationSites@). On a typed term with
+-- root obligations @O@ every row's position list is nonempty and
+-- duplicate-free (Lean @obligationSites_adequate@).
+obligationSites
+  :: (RuleId -> Maybe Rule) -> SupportTerm -> [QuestionId] -> [(QuestionId, [Position])]
+obligationSites pI w obligations =
+  let sites = openSites pI w
+   in [(q, sitesFor sites q) | q <- obligations]
 
 -- ---------------------------------------------------------------------------
 -- Leaf dependency report (spec §6; Lean @leaves@)

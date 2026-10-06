@@ -1,6 +1,6 @@
 {
   "replay-id": {
-    "core": "lara-core@0.2",
+    "core": "lara-core@0.3",
     "policy": "rebuttal-v1",
     "backends": [
       "nd@1"
@@ -30,8 +30,8 @@
         "claim": "contributes(kurtosis_salience, apt_llama2_7b, openllm_avg)",
         "status": "gap",
         "complete-support": 0,
-        "holes": 0,
-        "incomplete-alternative": false
+        "holes": 1,
+        "incomplete-alternative": true
       }
     ],
     "labels": [
@@ -59,6 +59,24 @@
         "arg": "d_meas",
         "index": 4,
         "label": "in"
+      }
+    ],
+    "holes": [
+      {
+        "arg": "a_kurt",
+        "index": 2,
+        "obligations": [
+          "variance_reported"
+        ],
+        "sites": [
+          {
+            "question": "variance_reported",
+            "at": [
+              "rule"
+            ]
+          }
+        ],
+        "attacks": []
       }
     ]
   }

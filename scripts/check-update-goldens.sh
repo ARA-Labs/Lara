@@ -22,8 +22,8 @@ esac
 
 cd "$repo_root"
 
-if ! (cd lean && lake build Lara.Examples.Update) > "$tmp_dir/lake-build.log" 2>&1; then
-  echo "update goldens: FAIL: lake build Lara.Examples.Update" >&2
+if ! (cd lean && lake build Lara.Examples.Update Lara.Examples.UpdateCompletion) > "$tmp_dir/lake-build.log" 2>&1; then
+  echo "update goldens: FAIL: lake build Lara.Examples.Update Lara.Examples.UpdateCompletion" >&2
   cat "$tmp_dir/lake-build.log" >&2
   exit 1
 fi

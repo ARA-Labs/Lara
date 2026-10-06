@@ -22,6 +22,15 @@ first. Successful construction carries that checker's
 exact retained-node cache, so it neither rechecks support terms nor asks
 callers to provide alignment proofs. Manual proof-level construction of
 `CheckedUnit` still requires every invariant.
+
+Since `lara-core@0.3` a unit whose arguments all type is accepted even when
+some leave a mandatory question open (spec §4.4). Those arguments are located
+holes: they are carried by `CheckedUnit.holes` with their checked declaration
+indices, stay out of the AF, and cannot change any claim's status. The raw
+facts the checker establishes about every declaration are exposed by
+`CheckUnitSound` directly, and the hole-free specializations
+(`args_eq_of_complete`, `atts_eq_of_complete`) recover the earlier exact
+correspondence under the stronger all-complete premise.
 -/
 
 import Lara.Unit
@@ -69,6 +78,20 @@ def signatureStage (ground : List Atom) (unit : Lara.Unit) : Option SignatureFau
   else if Lara.argsWellSorted unit.sigma unit.policy unit.args = false then
     some .argsIllSorted
   else none
+
+/-- Well-sortedness of an argument list survives filtering. -/
+theorem termsWellSorted_filter (sg : Sigma.Sigma) (P : Policy.Policy)
+    (p : Support.SupportTerm → Bool) :
+    ∀ (l : List Support.SupportTerm),
+      Lara.termsWellSorted sg P l = true →
+      Lara.termsWellSorted sg P (l.filter p) = true
+  | [], _ => rfl
+  | w :: ws, h => by
+      simp only [Lara.termsWellSorted, Bool.and_eq_true] at h
+      have ih := termsWellSorted_filter sg P p ws h.2
+      by_cases hp : p w = true
+      · simp [hp, Lara.termsWellSorted, h.1, ih]
+      · simp [hp, ih]
 
 /-! ### The three facts stage 2 establishes
 
@@ -162,14 +185,20 @@ def checkUnit {canon : String → String}
                     , attack_complete := accepted.attack_complete
                     , nodes := accepted.nodes
                     , nodes_terms := accepted.nodes_terms
+                    , nodeDecls := accepted.nodeDecls
+                    , holes := accepted.holes
+                    , holes_terms := accepted.holes_terms
                     , args_well_sorted := by
-                        have hargs : accepted.program.args = unit.args :=
-                          accepted.arguments_eq
-                        rw [hargs]
-                        exact signatureStage_args hsignature }
+                        rw [accepted.arguments_eq]
+                        exact termsWellSorted_filter _ _ _ _
+                          (signatureStage_args hsignature) }
 
 /-- The facts supplied by successful unit checking. Named projections keep
-clients independent of the order in which these obligations are recorded. -/
+clients independent of the order in which these obligations are recorded. The
+`raw_*` fields and `signature_ok` are what the checker established about the
+supplied declarations, holes included; `args_eq`, `holes_eq` and `atts_eq`
+relate the compiled program to the specification views of `Check.Program`;
+`partition` locates every checked declaration as an AF node or a hole. -/
 structure CheckUnitSound (canon : String → String)
     (Gamma : LeafId → Option Atom) (reg : BackendRegistry canon)
     (ground : List Atom) (unit : Lara.Unit)
@@ -182,15 +211,30 @@ structure CheckUnitSound (canon : String → String)
   policy_eq : accepted.policy = unit.policy
   ruleIds_nodup : (accepted.policy.rules.map (·.id)).Nodup
   policy_wf : Policy.WellFormed canon accepted.policy
-  args_eq : accepted.program.args = unit.args
-  atts_eq : accepted.program.atts = unit.atts
+  signature_ok : signatureStage ground unit = none
+  raw_sorted : Lara.argsWellSorted unit.sigma unit.policy unit.args = true
+  raw_nodup : unit.args.Nodup
+  raw_support : ∀ w ∈ unit.args, ∃ C O,
+    HasSupport canon unit.policy.ruleLookup Gamma (certOkOf reg) w C O
+  raw_typed : ∀ k ∈ unit.atts,
+    HasAttack canon unit.policy.ruleLookup Gamma (certOkOf reg)
+      unit.policy.defeat k
+  raw_source : ∀ k ∈ unit.atts, k.source ∈ unit.args
+  raw_target : ∀ k ∈ unit.atts, k.target ∈ unit.args
+  args_eq : accepted.program.args =
+    completeArgs unit.policy.ruleLookup Gamma reg unit.args
+  holes_eq : accepted.program.holes =
+    holeArgs unit.policy.ruleLookup Gamma reg unit.args
+  atts_eq : accepted.program.atts = liveAttacks accepted.program.args unit.atts
   attack_complete : Compile.AttackComplete canon accepted.policy.ruleLookup Gamma
     (certOkOf reg) accepted.policy.defeat accepted.program.args accepted.program.atts
   nodes_terms : accepted.nodes.map (·.term) = accepted.program.args
+  partition : DeclPartition unit.args accepted.nodes accepted.nodeDecls
+    accepted.holes
 
 /-- Successful executable acceptance exposes every field of `CheckedUnit` by
-its public name, together with exact correspondence to the raw declaration
-lists supplied to the checker. -/
+its public name, together with the raw facts about the declaration lists
+supplied to the checker and their exact partition into nodes and holes. -/
 theorem checkUnit_sound {canon : String → String}
     {Gamma : LeafId → Option Atom} {reg : BackendRegistry canon}
     {ground : List Atom} {unit : Lara.Unit}
@@ -209,10 +253,6 @@ theorem checkUnit_sound {canon : String → String}
         · split at h
           · contradiction
           · rename_i _ hsignature _ _ _ programAcceptance hprogram
-            have hargsEq : accepted.program.args = unit.args := by
-              have := Except.ok.inj h
-              subst this
-              exact programAcceptance.arguments_eq
             have hacc := Except.ok.inj h
             subst hacc
             exact {
@@ -220,20 +260,33 @@ theorem checkUnit_sound {canon : String → String}
               sigma_wf := signatureStage_sigma_wf hsignature
               policy_sorted := signatureStage_policy hsignature
               ground_sorted := signatureStage_ground hsignature
-              args_sorted := by rw [hargsEq]; exact signatureStage_args hsignature
+              args_sorted := by
+                rw [programAcceptance.arguments_eq]
+                exact termsWellSorted_filter _ _ _ _
+                  (signatureStage_args hsignature)
               policy_eq := rfl
               ruleIds_nodup :=
                 (Policy.firstDuplicateRuleId?_none_iff unit.policy.rules).mp (by assumption)
               policy_wf := (Policy.firstViolation_none_iff).mp (by assumption)
+              signature_ok := hsignature
+              raw_sorted := signatureStage_args hsignature
+              raw_nodup := programAcceptance.raw_nodup
+              raw_support := programAcceptance.raw_support
+              raw_typed := programAcceptance.raw_typed
+              raw_source := programAcceptance.raw_source
+              raw_target := programAcceptance.raw_target
               args_eq := programAcceptance.arguments_eq
+              holes_eq := programAcceptance.holes_eq
               atts_eq := programAcceptance.attacks_eq
               attack_complete := programAcceptance.attack_complete
-              nodes_terms := programAcceptance.nodes_terms }
+              nodes_terms := programAcceptance.nodes_terms
+              partition := programAcceptance.partition }
 
-/-- Exact completeness of the unit checker.  The premises are precisely the
-raw policy and detailed-program obligations checked in the public fixed
-order. -/
-theorem checkUnit_complete {canon : String → String}
+/-- **Exact completeness with located holes.** The premises are the raw policy
+and detailed-program obligations checked in the public fixed order, with every
+declared argument required only to type, complete or not. Attack completeness
+constrains complete arguments alone, which is all `AttackComplete` asks. -/
+theorem checkUnit_complete_holes {canon : String → String}
     {Gamma : LeafId → Option Atom} {reg : BackendRegistry canon}
     {ground : List Atom} {unit : Lara.Unit}
     (hsignature : signatureStage ground unit = none)
@@ -241,8 +294,8 @@ theorem checkUnit_complete {canon : String → String}
     (hruleIds : (unit.policy.rules.map (·.id)).Nodup)
     (hpolicy : Policy.WellFormed canon unit.policy)
     (hargs : unit.args.Nodup)
-    (hsupport : ∀ w ∈ unit.args, ∃ C,
-      HasSupport canon unit.policy.ruleLookup Gamma (certOkOf reg) w C [])
+    (hsupport : ∀ w ∈ unit.args, ∃ C O,
+      HasSupport canon unit.policy.ruleLookup Gamma (certOkOf reg) w C O)
     (htyped : ∀ k ∈ unit.atts,
       HasAttack canon unit.policy.ruleLookup Gamma (certOkOf reg)
         unit.policy.defeat k)
@@ -258,7 +311,7 @@ theorem checkUnit_complete {canon : String → String}
   have hviolation : Policy.firstViolation? canon unit.policy = none :=
     (Policy.firstViolation_none_iff).mpr hpolicy
   obtain ⟨programAcceptance, hprogram⟩ :=
-    checkProgramDetailed_complete hargs hsupport htyped hsource htarget
+    checkProgramDetailed_complete_holes hargs hsupport htyped hsource htarget
       hattackComplete
   unfold checkUnit
   split
@@ -286,6 +339,201 @@ theorem checkUnit_complete {canon : String → String}
               Except.ok.inj (hfound.symm.trans hprogram)
             subst found
             exact ⟨_, rfl⟩
+
+/-- Exact completeness of the unit checker for hole-free units: the
+all-complete corollary of `checkUnit_complete_holes`. -/
+theorem checkUnit_complete {canon : String → String}
+    {Gamma : LeafId → Option Atom} {reg : BackendRegistry canon}
+    {ground : List Atom} {unit : Lara.Unit}
+    (hsignature : signatureStage ground unit = none)
+    (hscope : Policy.firstOutOfScope? unit.policy = none)
+    (hruleIds : (unit.policy.rules.map (·.id)).Nodup)
+    (hpolicy : Policy.WellFormed canon unit.policy)
+    (hargs : unit.args.Nodup)
+    (hsupport : ∀ w ∈ unit.args, ∃ C,
+      HasSupport canon unit.policy.ruleLookup Gamma (certOkOf reg) w C [])
+    (htyped : ∀ k ∈ unit.atts,
+      HasAttack canon unit.policy.ruleLookup Gamma (certOkOf reg)
+        unit.policy.defeat k)
+    (hsource : ∀ k ∈ unit.atts, k.source ∈ unit.args)
+    (htarget : ∀ k ∈ unit.atts, k.target ∈ unit.args)
+    (hattackComplete :
+      Compile.AttackComplete canon unit.policy.ruleLookup Gamma
+        (certOkOf reg) unit.policy.defeat unit.args unit.atts) :
+    ∃ accepted, checkUnit Gamma reg ground unit = .ok accepted :=
+  checkUnit_complete_holes hsignature hscope hruleIds hpolicy hargs
+    (fun w hw => let ⟨C, hC⟩ := hsupport w hw; ⟨C, [], hC⟩)
+    htyped hsource htarget hattackComplete
+
+/-- The raw declarations of an accepted unit are attack complete: the checker
+established it over the complete arguments and live attacks, and attack
+completeness reads only complete sources and targets. -/
+theorem CheckUnitSound.raw_attack_complete {canon : String → String}
+    {Gamma : LeafId → Option Atom} {reg : BackendRegistry canon}
+    {ground : List Atom} {unit : Lara.Unit}
+    {accepted : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg)}
+    (hs : CheckUnitSound canon Gamma reg ground unit accepted) :
+    Compile.AttackComplete canon unit.policy.ruleLookup Gamma (certOkOf reg)
+      unit.policy.defeat unit.args unit.atts := by
+  have hcomplete := hs.attack_complete
+  rw [hs.atts_eq, attackComplete_iff_complete_live, hs.args_eq, hs.policy_eq,
+    attackComplete_completeArgs_iff] at hcomplete
+  exact hcomplete
+
+/-! ### Hole-free specializations
+
+Each states the stronger all-complete premise explicitly and recovers the exact
+correspondence between the compiled program and the raw declarations that held
+for every accepted unit up to `lara-core@0.2`. -/
+
+section Specializations
+
+variable {canon : String → String} {Gamma : LeafId → Option Atom}
+  {reg : BackendRegistry canon} {ground : List Atom} {unit : Lara.Unit}
+  {accepted : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg)}
+
+/-- With every declared argument complete, the AF arguments are exactly the
+declarations. -/
+theorem CheckUnitSound.args_eq_of_complete
+    (hs : CheckUnitSound canon Gamma reg ground unit accepted)
+    (h : ∀ w ∈ unit.args, ∃ C,
+      HasSupport canon unit.policy.ruleLookup Gamma (certOkOf reg) w C []) :
+    accepted.program.args = unit.args :=
+  hs.args_eq.trans (completeArgs_eq_self h)
+
+/-- With every declared argument complete, the compiled attacks are exactly
+the declared attacks. -/
+theorem CheckUnitSound.atts_eq_of_complete
+    (hs : CheckUnitSound canon Gamma reg ground unit accepted)
+    (h : ∀ w ∈ unit.args, ∃ C,
+      HasSupport canon unit.policy.ruleLookup Gamma (certOkOf reg) w C []) :
+    accepted.program.atts = unit.atts := by
+  rw [hs.atts_eq, hs.args_eq_of_complete h]
+  exact liveAttacks_eq_self hs.raw_source
+
+/-- With every declared argument complete, there is no hole. -/
+theorem CheckUnitSound.holes_eq_nil_of_complete
+    (hs : CheckUnitSound canon Gamma reg ground unit accepted)
+    (h : ∀ w ∈ unit.args, ∃ C,
+      HasSupport canon unit.policy.ruleLookup Gamma (certOkOf reg) w C []) :
+    accepted.program.holes = [] ∧ accepted.holes = [] := by
+  have hprogram : accepted.program.holes = [] :=
+    hs.holes_eq.trans (holeArgs_eq_nil h)
+  refine ⟨hprogram, ?_⟩
+  have hterms := accepted.holes_terms
+  rw [hprogram] at hterms
+  exact List.map_eq_nil_iff.mp hterms
+
+end Specializations
+
+/-! ### The located-gap guarantee (spec §4.4, §8) -/
+
+section LocatedGap
+
+variable {canon : String → String} {Gamma : LeafId → Option Atom}
+  {reg : BackendRegistry canon} {ground : List Atom} {unit : Lara.Unit}
+  {accepted : Lara.Unit.CheckedUnit canon Gamma (certOkOf reg)}
+
+/-- **Holes are exactly the open declarations.** Under the support typing every
+accepted declaration has, checked declaration `i` is reported as a hole iff its
+root obligation set is nonempty, and the report carries exactly that term,
+conclusion and obligation set. -/
+theorem CheckUnitSound.holes_iff
+    (hs : CheckUnitSound canon Gamma reg ground unit accepted)
+    {i : Nat} {w : SupportTerm} {C : Atom} {O : List QuestionId}
+    (hi : unit.args[i]? = some w)
+    (hw : HasSupport canon unit.policy.ruleLookup Gamma (certOkOf reg) w C O) :
+    (∃ h ∈ accepted.holes, h.index = i) ↔ O ≠ [] := by
+  rw [← hs.policy_eq] at hw
+  constructor
+  · rintro ⟨h, hh, rfl⟩
+    have hat := hs.partition.hole_decls h hh
+    rw [hi, Option.some.injEq] at hat
+    subst hat
+    exact (hasSupport_unique h.valid hw).2 ▸ h.nonempty
+  · intro hO
+    have hlt : i < unit.args.length := lt_of_getElem?_some hi
+    rcases (hs.partition.cover i).mp hlt with hnode | hhole
+    · exfalso
+      obtain ⟨n, hn⟩ := List.mem_iff_getElem?.mp hnode
+      have hmap := congrArg (·[n]?) hs.partition.node_decls
+      simp only [List.getElem?_map, hn, Option.map_some, hi] at hmap
+      cases hnodeAt : accepted.nodes[n]? with
+      | none => rw [hnodeAt] at hmap; cases hmap
+      | some node =>
+        rw [hnodeAt] at hmap
+        simp only [Option.map_some, Option.some.injEq] at hmap
+        rw [hmap] at hw
+        exact hO (hasSupport_unique node.valid hw).2.symm
+    · exact hhole
+
+/-- The reported record of a hole is exactly its cached judgment: its term is
+the declaration at its index, and its conclusion and obligations are the ones
+the declaration types with. -/
+theorem CheckUnitSound.hole_reports_exact
+    (hs : CheckUnitSound canon Gamma reg ground unit accepted)
+    {h : Compile.CheckedHole canon accepted.policy.ruleLookup Gamma
+      (certOkOf reg)} (hh : h ∈ accepted.holes)
+    {C : Atom} {O : List QuestionId}
+    (hw : HasSupport canon unit.policy.ruleLookup Gamma (certOkOf reg)
+      h.term C O) :
+    unit.args[h.index]? = some h.term ∧ h.conclusion = C ∧ h.obligations = O := by
+  rw [← hs.policy_eq] at hw
+  exact ⟨hs.partition.hole_decls h hh, hasSupport_unique h.valid hw⟩
+
+/-- The AF-node-to-declaration map is the complete-position view of the raw
+declarations: it is determined by the classification alone. -/
+theorem CheckUnitSound.nodeDecls_eq
+    (hs : CheckUnitSound canon Gamma reg ground unit accepted) :
+    accepted.nodeDecls = completeDecls unit.policy.ruleLookup Gamma reg unit.args := by
+  rw [← hs.policy_eq]
+  exact hs.partition.nodeDecls_eq
+
+/-- The hole positions are the hole-position view of the raw declarations. -/
+theorem CheckUnitSound.holeIndices_eq
+    (hs : CheckUnitSound canon Gamma reg ground unit accepted) :
+    accepted.holes.map (·.index) =
+      holeDecls unit.policy.ruleLookup Gamma reg unit.args := by
+  rw [← hs.policy_eq]
+  exact hs.partition.holeIndices_eq
+
+/-- **Attacks sourced at a hole are inert (D4).** Such a raw attack is not
+compiled, and no edge leaves its source. -/
+theorem CheckUnitSound.hole_inert_source
+    (hs : CheckUnitSound canon Gamma reg ground unit accepted)
+    {k : Attack} (hsource : k.source ∈ accepted.program.holes) :
+    k ∉ accepted.program.atts ∧
+      ∀ b, ¬ Compile.Edge accepted.program k.source b := by
+  have hnotArg : k.source ∉ accepted.program.args := by
+    rw [hs.holes_eq] at hsource
+    rw [hs.args_eq]
+    intro hc
+    exact completeArgs_holeArgs_disjoint hc hsource
+  refine ⟨fun hk => ?_, Compile.no_edge_of_not_arg accepted.program hnotArg⟩
+  rw [hs.atts_eq] at hk
+  exact hnotArg (mem_liveAttacks_iff.mp hk).2
+
+end LocatedGap
+
+/-- **A claim with no complete support is `gap` (spec §8).** If no retained
+complete node concludes `p`, then any claim whose support indices name nodes
+concluding `p` has status `gap`. This holds whatever the claim lists as holes:
+holes concluding `p` never count as support. -/
+theorem gap_of_only_holes {canon : String → String}
+    {Gamma : LeafId → Option Atom}
+    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (unit : Lara.Unit.CheckedUnit canon Gamma CertOk) {p : Atom}
+    {c : Grounded.Claim}
+    (hsupport : ∀ i ∈ c.support, ∃ node, unit.nodes[i]? = some node ∧
+      equiv canon node.conclusion p)
+    (hnone : ∀ node ∈ unit.nodes, ¬ equiv canon node.conclusion p) :
+    Grounded.statusC (Compile.checkedAF unit.program) c = .gap := by
+  apply (Grounded.statusC_gap_iff _ c).mpr
+  cases hc : c.support with
+  | nil => rfl
+  | cons i is =>
+    obtain ⟨node, hnode, hequiv⟩ := hsupport i (by simp [hc])
+    exact absurd hequiv (hnone node (List.mem_of_getElem? hnode))
 
 /-! ### Naming a successful check's accepted output
 

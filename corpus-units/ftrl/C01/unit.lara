@@ -17,12 +17,12 @@
 #   * null_comparison's mandatory adequate_power CQ (seeds/uncertainty for every environment)
 #     has no discharging leaf: E01 reports 5 seeds and E03 20 seeds/90% CIs, but E02
 #     (Montezuma) states no seed count or interval, so the seeds obligation is unmet corpus-
-#     wide for this claim. An open mandatory obligation is an IncompleteArgument rejection, so
-#     no complete null_comparison instance is declarable — the unit is E2-style: the claim and
-#     the supplied leaves are on the page, no arg binds them, and the claim lands `gap` on
-#     empty complete support (adaptive-pruning/C03 pattern). baseline_parity (scratch baseline
-#     run per environment) and measurement_validity (FAR-state collapse directly measured) are
-#     annotated met and kept as leaves.
+#     wide for this claim. The null_comparison argument is declared as a located hole with
+#     `open adequate_power` (lowering re-done for issue #15 under lara-core@0.3; until
+#     lara-core@0.2 the open mandatory obligation rejected the unit, so the arg was omitted):
+#     it is not an AF node, and the claim lands `gap` on empty complete support.
+#     baseline_parity (scratch baseline run per environment) and measurement_validity (FAR-state
+#     collapse directly measured) are annotated met and discharged on the hole.
 #   * Coverage flag (kind-a, summary §3): the majority quantifier "in most practical scenarios"
 #     over an open environment class has no direct construct; it instantiates per tested env in
 #     the atom and its class-vs-tested-set scope lives in the binding, audited on faithfulness.
@@ -61,17 +61,22 @@ leaf e3 : valid_measurement(final_return, e01)
   provenance = ai-executed
   refs       = [logic/experiments.md#E02-step-5, logic/experiments.md#E03-step-5, logic/experiments.md#E01-trajectory-metrics]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... but only an incomplete argument (a located hole) is declarable -------------------------
 
-# (Intentionally no `arg`: powered(e01) has no honest leaf — E02/Montezuma reports no seed
-# count or uncertainty — and corpus-v1 makes that obligation mandatory. The claim's complete-
-# support set is therefore empty.)
+# The incomplete argument: adequate_power has no honest leaf — E02/Montezuma reports no seed
+# count or uncertainty — and corpus-v1 makes it mandatory, so it stays open and a1 is a hole.
+arg a1 : supports(c01) by null_comparison(vanilla_ft, from_scratch, final_return, rl_envs, e01)
+  discharge baseline_parity      with e2
+  discharge measurement_validity with e3
+  open      adequate_power
 
 status c01
 
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
-# Compiled AF: no arguments.
+# Compiled AF: no arguments (a1 is a located hole, not an AF node).
+# Located hole: a1 (null_comparison), open obligations [adequate_power]; sources no attacks.
 # Claim status:
-#   c01 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c01 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8;
+#          the hole a1 is reported in the verdict's holes section, not as a node)

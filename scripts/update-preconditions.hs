@@ -1,7 +1,8 @@
 {-# OPTIONS_GHC -Wall -Werror #-}
 
--- | Exhaustive finite input spaces for the four constructor-side deciders in
--- "Lara.Update". The Lean emitter prints the same canonical rows.
+-- | Exhaustive finite input spaces for the constructor-side deciders in
+-- "Lara.Update", the in-place discharge rewrite, and the raw stage of an atomic
+-- batch. The Lean emitter prints the same canonical rows.
 module Main (main) where
 
 import Data.List (intercalate)
@@ -11,9 +12,14 @@ import Lara.AST
   , ArgId (..)
   , DupGroup (..)
   , GroupId (..)
+  , Assurance (..)
   , LeafId (..)
   , LeafKind (..)
+  , ObligationId (..)
   , Provenance (..)
+  , QuestionId (..)
+  , RuleId (..)
+  , Step (..)
   , SupportTerm (..)
   )
 import Lara.Update
@@ -146,5 +152,130 @@ instanceRows =
             }
   ]
 
+openInst, closedInst, wrapInst :: SupportTerm
+openInst = SRule (RuleId "r") [] [] [] [ObligationId "q1"] AssuranceNone
+closedInst = SRule (RuleId "r") [] [] [] [] AssuranceNone
+wrapInst =
+  SRule (RuleId "w") [] [openInst] [(QuestionId "q2", SLeaf (LeafId "d"))] [] AssuranceNone
+
+-- | Canonical rendering shared with the Lean emitter:
+-- @rule(premises;question=discharge;open)@.
+renderTerm :: SupportTerm -> String
+renderTerm term = case term of
+  SLeaf (LeafId l) -> l
+  SRule (RuleId r) _ premises discharges holes _ ->
+    r
+      ++ "("
+      ++ intercalate "," (map renderTerm premises)
+      ++ ";"
+      ++ intercalate "," [q ++ "=" ++ renderTerm w | (QuestionId q, w) <- discharges]
+      ++ ";"
+      ++ intercalate "," [o | ObligationId o <- holes]
+      ++ ")"
+
+dischargeRowsTsv :: [String]
+dischargeRowsTsv =
+  [ row
+      [ "dischargeOpenB"
+      , "declared=" ++ bit declared
+      , "term=" ++ shapeName
+      , "pos=" ++ posName
+      , "q=" ++ qName
+      , boolText decided
+      , "result=" ++ result
+      ]
+  | declared <- [False, True]
+  , (shapeName, term) <- shapes
+  , (posName, pos) <- positions
+  , (qName, q) <- questions
+  , let source = blankState {sourceArgsRaw = [(ArgId "t", term) | declared]}
+        decided = dischargeOpenB source (ArgId "t") pos q
+        result
+          | decided = case dischargeRows (sourceArgsRaw source) (ArgId "t") pos q (SLeaf (LeafId "v")) of
+              [(_, rewritten)] -> renderTerm rewritten
+              _ -> "?"
+          | otherwise = "-"
+  ]
+  where
+    shapes =
+      [ ("leaf", SLeaf (LeafId "x"))
+      , ("open", openInst)
+      , ("closed", closedInst)
+      , ("wrap", wrapInst)
+      ]
+    positions =
+      [ ("eps", [])
+      , ("prem0", [StepPremise 0])
+      , ("prem1", [StepPremise 1])
+      , ("q2", [StepQuestion (QuestionId "q2")])
+      ]
+    questions = [("q1", QuestionId "q1"), ("q2", QuestionId "q2")]
+
+batchBase :: SourceState
+batchBase =
+  blankState
+    { sourceLeaves = [(LeafId "x", error "proposition is not inspected")]
+    , sourceMetas = [LeafMeta (LeafId "x") Observed User]
+    , sourceArgsRaw = [(ArgId "a", SLeaf (LeafId "x")), (ArgId "h", openInst)]
+    }
+
+edits :: [(String, AtomicEdit)]
+edits =
+  [ ("leafNew", EditAddLeaf (LeafId "n") unused (LeafMeta (LeafId "n") Observed User))
+  , ("leafOld", EditAddLeaf (LeafId "x") unused (LeafMeta (LeafId "x") Observed User))
+  , ("instNew", EditAddInstance (ArgId "b") (SLeaf (LeafId "n")))
+  , ("instDup", EditAddInstance (ArgId "a") (SLeaf (LeafId "y")))
+  , ("attNew", EditAddAttack (RawRebut (ArgId "b") (ArgId "a")))
+  , ("attOld", EditAddAttack (RawRebut (ArgId "h") (ArgId "a")))
+  , ("disOk", EditDischargeOpen (ArgId "h") [] (QuestionId "q1") (SLeaf (LeafId "n")))
+  , ("disBad", EditDischargeOpen (ArgId "a") [] (QuestionId "q1") (SLeaf (LeafId "n")))
+  ]
+  where
+    unused = error "proposition is not inspected"
+
+renderRejection :: UpdateRejection -> String
+renderRejection reason = case reason of
+  BatchEdit index inner -> "batchEdit " ++ show index ++ " " ++ inner'
+    where
+      inner' = case inner of
+        BatchEdit _ _ -> "other"
+        _ -> renderRejection inner
+  LeafNotFresh (LeafId l) -> "leafNotFresh " ++ l
+  InstanceNotFresh (ArgId name) _ -> "instanceNotFresh " ++ name
+  EndpointNotDeclared _ -> "endpointNotDeclared"
+  NotDischargeable (ArgId name) _ (QuestionId q) -> "notDischargeable " ++ name ++ " " ++ q
+  KeyNotAdmitted _ -> "other"
+
+renderState :: SourceState -> String
+renderState state =
+  "args="
+    ++ intercalate "," [name ++ ":" ++ renderTerm term | (ArgId name, term) <- sourceArgsRaw state]
+    ++ " atts="
+    ++ show (length (sourceRawAttacks state))
+    ++ " leaves="
+    ++ intercalate "," [l | (LeafId l, _) <- sourceLeaves state]
+
+batchRows :: [String]
+batchRows =
+  [ row
+      [ "applyBatch"
+      , "edits=" ++ if null batch then "none" else intercalate "," (map fst batch)
+      , case applyBatch batchBase (map snd batch) of
+          Right state -> "ok " ++ renderState state
+          Left reason -> "error " ++ renderRejection reason
+      ]
+  | batch <- [[]] ++ [[e] | e <- edits] ++ [[e, f] | e <- edits, f <- edits]
+  ]
+
 main :: IO ()
-main = putStr (unlines (leafRows ++ admissionRows ++ endpointRows ++ instanceRows))
+main =
+  putStr
+    ( unlines
+        ( leafRows
+            ++ admissionRows
+            ++ endpointRows
+            ++ instanceRows
+            ++ dischargeRowsTsv
+            ++ batchRows
+        )
+    )

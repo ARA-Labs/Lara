@@ -47,6 +47,7 @@ import Lara.Strict
 import Lara.RA
 import Lara.Ord
 import Lara.Insp
+import Lara.Check.HoleSites
 
 namespace Lara.Driver
 
@@ -85,8 +86,10 @@ inductive Tag where
   | rebut | undercut | undermine
   | checkInput | replayId | core | backends | backend | artifact
   | verdict | accept | reject | labels | edges | statuses | status | conditional
+  -- the located-hole verdict rows (spec §4.4; lara-core@0.3)
+  | obligations | obligation
   | inL | outL | undecL | gap | justified | contested | defeated | evidenceBlocked
-  | dupRule | dupArgument | incompleteArgument | missingConflict
+  | dupRule | dupArgument | missingConflict
   | groups | group | quarantine
   -- the many-sorted signature Sigma (spec §2, §3.4; lara-core@0.2)
   | sigma | sorts | cons | preds | «pred»
@@ -118,12 +121,12 @@ def tagToString : Tag → String
   | .verdict => "verdict" | .accept => "accept" | .reject => "reject"
   | .labels => "labels" | .edges => "edges" | .statuses => "statuses"
   | .conditional => "conditional"
+  | .obligations => "obligations" | .obligation => "obligation"
   | .status => "status"
   | .inL => "in" | .outL => "out" | .undecL => "undec"
   | .gap => "gap" | .justified => "justified" | .contested => "contested"
   | .defeated => "defeated" | .evidenceBlocked => "evidence-blocked"
   | .dupRule => "duplicate-rule" | .dupArgument => "duplicate-argument"
-  | .incompleteArgument => "incomplete-argument"
   | .missingConflict => "missing-conflict"
   | .groups => "groups" | .group => "group" | .quarantine => "quarantine"
   | .sigma => "sigma" | .sorts => "sorts" | .cons => "cons"
@@ -1144,7 +1147,7 @@ structure Decoded where
 
 /-- The one supported core-version spelling — the single source of truth,
 mirroring `Lara.Wire.coreVersionText`. -/
-def coreVersionText : String := "lara-core@0.2"
+def coreVersionText : String := "lara-core@0.3"
 
 structure ReplayId where
   core : String
@@ -1481,14 +1484,13 @@ def checkClassStr : RejectClass → String
   | .R12 => tagToString .r12 | .R13 => tagToString .r13
 
 /-- The closed wire `REJECTION` vocabulary, mirroring `Lara.Wire`'s rejection
-spellings: either a checker rejection class or one of the four unit-level
+spellings: either a checker rejection class or one of the three unit-level
 failure keywords. Concrete spellings live in exactly one place,
 `wireRejectionString`. -/
 inductive WireRejection where
   | rejectClass : RejectClass → WireRejection
   | duplicateRule
   | duplicateArgument
-  | incompleteArgument
   | missingConflict
 
 /-- The on-the-wire spelling of a rejection — the single source of truth. -/
@@ -1496,7 +1498,6 @@ def wireRejectionString : WireRejection → String
   | .rejectClass cls => checkClassStr cls
   | .duplicateRule => tagToString .dupRule
   | .duplicateArgument => tagToString .dupArgument
-  | .incompleteArgument => tagToString .incompleteArgument
   | .missingConflict => tagToString .missingConflict
 
 /-- The wire rejection for a `checkUnit` failure — the wire `REJECTION`
@@ -1510,7 +1511,6 @@ def rejectWire : UnitError → WireRejection
     match e with
     | .rejection _ ce => .rejectClass ce.rejectClass
     | .duplicateArgument _ _ => .duplicateArgument
-    | .incompleteArgument _ _ => .incompleteArgument
     | .missingConflict _ => .missingConflict
 
 def encodeReplayId (rid : ReplayId) : Sx :=
@@ -1541,13 +1541,55 @@ inductive PublicStatus where
   | evidenceBlocked (conditional : Status)
   deriving Repr, DecidableEq
 
+/-- One row of the verdict's `holes` section (spec §4.4,
+`docs/located-gap-decision.md` D5, D12) — mirrors `Lara.Wire.HoleRow`. Every
+index is in the *supplied* unit's declaration space: `index` is the hole's
+original argument declaration index, `argId` that declaration's id,
+`obligations` its exact root obligations in order, each with its sites (the
+positions, relative to the hole's term, of the rule occurrences that leave it
+open — `Lara.Check.obligationSites`), and `attacks` the ascending original
+attack declaration indices of the retained raw attacks whose source is
+`argId`. -/
+structure HoleRow where
+  index : Nat
+  argId : String
+  obligations : List (Lara.Support.QuestionId × List Lara.Attack.Pos)
+  attacks : List Nat
+
+/-- `(pos ((prem NAT) | (ques ID))*)` — the attack position encoding, mirrors
+`Lara.Wire.encodePosition`. -/
+def encodePos (π : Lara.Attack.Pos) : Sx :=
+  .list (.atom (tagToString .pos) :: π.map (fun e =>
+    match e with
+    | .prem i => .list [.atom (tagToString .prem), sxNat i]
+    | .ques q => .list [.atom (tagToString .ques), .atom q.name]))
+
+/-- `(obligation ID POS+)` — mirrors `Lara.Wire.encodeHoleObligation`. -/
+def encodeHoleObligation (o : Lara.Support.QuestionId × List Lara.Attack.Pos) :
+    Sx :=
+  .list (.atom (tagToString .obligation) :: .atom o.1.name :: o.2.map encodePos)
+
+/-- `(arg NAT ID (obligations OBL+) (attacks NAT*))` — mirrors
+`Lara.Wire.encodeHoleRow`. -/
+def encodeHoleRow (row : HoleRow) : Sx :=
+  .list
+    [ .atom (tagToString .arg)
+    , sxNat row.index
+    , .atom row.argId
+    , .list (.atom (tagToString .obligations) ::
+        row.obligations.map encodeHoleObligation)
+    , .list (.atom (tagToString .attacks) :: row.attacks.map sxNat)
+    ]
+
 /-- The accept verdict. An `evidenceBlocked` status prints `evidence-blocked`
 in the `statuses` section and its conditional label moves to a trailing
-`conditional` section, which is emitted only when something is blocked. With
-nothing blocked this is the pre-`evidenceBlocked` encoding byte-for-byte. Mirrors
-`Lara.Wire.encodeVerdict`. -/
+`conditional` section, which is emitted only when something is blocked. The
+located holes follow in a trailing `holes` section, emitted only when some
+declaration is a hole. With nothing blocked and no hole this is the
+pre-`evidenceBlocked` encoding byte-for-byte. Mirrors `Lara.Wire.encodeVerdict`. -/
 def encodeAccept (rid : ReplayId) (labels : List (Nat × Label))
-    (edges : List (Nat × Nat)) (statuses : List (Atom × PublicStatus)) : Sx :=
+    (edges : List (Nat × Nat)) (statuses : List (Atom × PublicStatus))
+    (holes : List HoleRow) : Sx :=
   let conditional := statuses.filterMap (fun ps =>
     match ps.2 with
     | .published _ => none
@@ -1571,7 +1613,9 @@ def encodeAccept (rid : ReplayId) (labels : List (Nat × Label))
        [ .list (.atom (tagToString .conditional) ::
            conditional.map (fun ps =>
              .list [.atom (tagToString .status), encodeAtom ps.1,
-               .atom (statusStr ps.2)])) ]))
+               .atom (statusStr ps.2)])) ]) ++
+     (if holes.isEmpty then [] else
+       [ .list (.atom (tagToString .holes) :: holes.map encodeHoleRow) ]))
 
 /-! ### Conservative reporting for quarantine-affected queries (spec §4.3)
 
@@ -1584,22 +1628,80 @@ counterpart is `src/Lara/Blocked.hs`. -/
 
 /-- The queries whose public status is `evidence-blocked`: those with a complete
 support argument in the forward closure of the seed. A query with no complete
-support is `gap` and is never blocked — losing support cannot promote a claim. -/
+support is `gap` and is never blocked — losing support cannot promote a claim.
+`done` is the checked cache's completeness test and `live` the reference mask
+(`BlockedProgram.referenceLive`). -/
 def blockedQueries (keep : (String × SupportTerm) → Bool)
+    (done : SupportTerm → Bool) (live : (String × SupportTerm) → Bool)
     (declared : List (String × SupportTerm))
     (declAtts keptAtts : List Attack) (support : Atom → List Nat)
     (queries : List Atom) : List Atom :=
-  BlockedProgram.blockedQueries keep declared declAtts keptAtts support queries
+  BlockedProgram.blockedQueries keep done live declared declAtts keptAtts
+    support queries
+
+/-- The verdict's `holes` rows (spec §4.4, `docs/located-gap-decision.md` D5),
+mirroring Haskell `Lara.Driver.Internal.holeRows`: each located hole of the
+checked unit, in checked declaration order, reported at its *original*
+declaration index and id. A hole's checked index `k` is carried back through
+admission's retained view (`retainedView keep declared`), whose entry `k`
+pairs the `k`-th retained declaration with its original index; quarantine
+filters, so the map is monotone and the rows stay ascending. The attacks are
+the original indices of the raw attacks that survived quarantine (`keepAttack`,
+the same filter `selectAligned` uses) and whose raw source id is the hole's id,
+aligned before any live-source filtering. Each obligation carries its sites
+(D12), read from the hole's cached term and obligations by
+`Lara.Check.holeObligationSites`, never by re-running inference. A checked
+index with no retained entry cannot arise (the checker indexes the retained
+arguments); such a hole is dropped rather than reported at a forged index. -/
+def holeRows {Γ : LeafId → Option Atom}
+    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (keep : (String × SupportTerm) → Bool)
+    (declared : List (String × SupportTerm))
+    (keepAttack : RawAttack → Bool) (attacksRaw : List RawAttack)
+    (accepted : Lara.Unit.CheckedUnit dcanon Γ CertOk) : List HoleRow :=
+  let view := BlockedProgram.retainedView keep declared
+  accepted.holes.filterMap (fun hole =>
+    match view[hole.index]? with
+    | none => none
+    | some ((holeId, _), original) =>
+        some
+          { index := original
+          , argId := holeId
+          , obligations := Lara.Check.holeObligationSites hole
+          , attacks := (attacksRaw.zipIdx.filter (fun entry =>
+                keepAttack entry.1 && entry.1.endpoints.1 == holeId)).map (·.2) })
+
+/-- **Every emitted row locates a checked hole's obligations.** Its obligation
+rows are `holeObligationSites` of a located hole of the accepted unit, so
+`Lara.Check.holeObligationSites_adequate` applies: the questions are the hole's
+exact root obligations in order, and each carries a nonempty, duplicate-free
+list of exactly the positions that leave it open. -/
+theorem holeRows_obligations {Γ : LeafId → Option Atom}
+    {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    (keep : (String × SupportTerm) → Bool)
+    (declared : List (String × SupportTerm))
+    (keepAttack : RawAttack → Bool) (attacksRaw : List RawAttack)
+    (accepted : Lara.Unit.CheckedUnit dcanon Γ CertOk) :
+    ∀ row ∈ holeRows keep declared keepAttack attacksRaw accepted,
+      ∃ hole ∈ accepted.holes,
+        row.obligations = Lara.Check.holeObligationSites hole := by
+  intro row hrow
+  obtain ⟨hole, hhole, hsome⟩ := List.mem_filterMap.mp hrow
+  refine ⟨hole, hhole, ?_⟩
+  split at hsome
+  · cases hsome
+  · cases hsome
+    rfl
 
 /-- Read the accept verdict off an accepted unit: grounded labels over the
-compiled AF (`checkedAF`), the compiled closure edges in ascending order, and
+compiled AF (`checkedAF`), the compiled closure edges in ascending order,
 one public status per query atom in query order — `evidenceBlocked` for the
 queries in `blocked`, carrying the four-state label as its conditional
-diagnostic. -/
+diagnostic — and the located-hole rows `holes` (`holeRows`). -/
 def buildAccept {Γ : LeafId → Option Atom}
     {CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop}
     (rid : ReplayId) (accepted : Lara.Unit.CheckedUnit dcanon Γ CertOk)
-    (queries : List Atom) (blocked : List Atom) : Sx :=
+    (queries : List Atom) (blocked : List Atom) (holes : List HoleRow) : Sx :=
   let P := accepted.program
   let af := checkedAF P
   let n := P.args.length
@@ -1611,7 +1713,7 @@ def buildAccept {Γ : LeafId → Option Atom}
     let st := statusC af (completeClaimFor accepted p)
     (p, if blocked.contains p then PublicStatus.evidenceBlocked st
         else PublicStatus.published st))
-  encodeAccept rid labels edges statuses
+  encodeAccept rid labels edges statuses holes
 
 /-! ### The driver -/
 
@@ -1676,10 +1778,20 @@ def runOnContents (contents : String) : IO _root_.Unit := do
                 -- Thus the accepted program's compact AF is connected to the
                 -- declared-index framework by construction, rather than by an
                 -- unproved re-resolution equivalence.
+                -- Retained declarations reuse the checked cache; each
+                -- quarantined declaration is classified once under the full
+                -- declared leaf table, so typed holes drop out of the
+                -- reference framework.
+                let done := BlockedProgram.checkedDone accepted
+                let live := BlockedProgram.referenceLive keep done
+                  d.policy.ruleLookup (buildGamma d.leaves) reg
                 let blocked :=
-                  blockedQueries keep d.argsRaw d.atts atts
+                  blockedQueries keep done live d.argsRaw d.atts atts
                     (fun p => claimSupportFor accepted p) d.queries
-                IO.println (printSx (buildAccept rid accepted d.queries blocked))
+                let holes :=
+                  holeRows keep d.argsRaw keepAttack d.attacksRaw accepted
+                IO.println
+                  (printSx (buildAccept rid accepted d.queries blocked holes))
 
 /-- Executable entry point: `lara-driver <file.sexp>`. -/
 def main (args : List String) : IO _root_.Unit := do

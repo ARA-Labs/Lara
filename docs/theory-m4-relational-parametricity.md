@@ -23,7 +23,7 @@ statement and its proof.
 ## 1. The theorem
 
 M4 Part A's headline, `Lara.Context.backend_replacement_congruence`
-(`lean/Lara/Context/Equivalence.lean:831`), quantifies over a **function**
+(`lean/Lara/Context/Equivalence.lean:924`), quantifies over a **function**
 `f : Assurance → Assurance` and relates `F` to `mapAssurFrag f F`. M4's
 acceptance criterion reserves the word *parametricity* for a **relational**
 quantifier. This is that theorem with the function replaced by a relation:
@@ -72,27 +72,27 @@ the semantics-parametric form is an instantiation and not a second proof.
 | `hasSupport_rel` | `hasSupport_mapAssur` (`lean/Lara/EraseTransport.lean:91`) | `RelPreserving` |
 | `hasAttack_rel` | `hasAttack_mapAssur` (`lean/Lara/EraseTransport.lean:145`) | `RelPreserving` |
 | `relTerm_subterm` | `Erase.mapAssur_subterm` (`lean/Lara/Erase.lean:125`) | nothing |
-| `conflictAttackableB_rel` | `conflictAttackableB_mapAssur` (`lean/Lara/Context/Equivalence.lean:113`) | nothing |
-| `attackFor_rel` | `attackFor_mapAssur` (`lean/Lara/Context/Equivalence.lean:117`) | nothing |
-| `crossAttsFrom_rel` | `crossAttsFrom_map` (`lean/Lara/Context/Equivalence.lean:123`) | nothing |
-| `conclusionCache_rel` | `conclusionCache_map` (`lean/Lara/Context/Equivalence.lean:175`) | `RelPreserving` |
-| `crossAtts_rel` | `crossAtts_relabel` (`lean/Lara/Context/Equivalence.lean:294`) | `RelPreserving` |
-| `dedupList_rel` | `dedupList_map_of_injective` (`lean/Lara/Context/Equivalence.lean:84`) | **`RelInj`** |
-| `linkFault_rel`, `linkOk_rel`, `linkGamma_rel`, `linkGround_rel` | `linkFault_mapAssurFrag` etc. (`lean/Lara/Context/Equivalence.lean:74-80`) | nothing |
-| `link_rel_commutes` | `link_relabel_commutes` (`lean/Lara/Context/Equivalence.lean:319`) | `RelInj`, `RelPreserving` |
-| `termWellSorted_rel`, `argsWellSorted_rel`, `signatureStage_rel` | `termWellSorted_mapAssur`, `argsWellSorted_map`, `signatureStage_map` (`lean/Lara/Context/Equivalence.lean:207-234`) | nothing |
-| `attackOcc_rel`, `contains_rel`, `covered_rel` | `attackOcc_mapAssurAtt`, `contains_mapAssur`, `covered_mapAssur` (`lean/Lara/Context/Equivalence.lean:248-268`) | **`RelInj`** (see §3.1) |
-| `attackComplete_rel` | `attackComplete_map` (`lean/Lara/Context/Equivalence.lean:357`) | `RelInj`, `RelPreserving` |
-| `checkUnit_rel` | `checkUnit_map` (`lean/Lara/Context/Equivalence.lean:401`) | **`RelInj`**, `RelPreserving` |
+| `conflictAttackableB_rel` | `conflictAttackableB_mapAssur` (`lean/Lara/Context/Equivalence.lean:114`) | nothing |
+| `attackFor_rel` | `attackFor_mapAssur` (`lean/Lara/Context/Equivalence.lean:118`) | nothing |
+| `crossAttsFrom_rel` | `crossAttsFrom_map` (`lean/Lara/Context/Equivalence.lean:124`) | nothing |
+| `conclusionCache_rel` | `conclusionCache_map` (`lean/Lara/Context/Equivalence.lean:178`) | `RelPreserving` |
+| `crossAtts_rel` | `crossAtts_relabel` (`lean/Lara/Context/Equivalence.lean:308`) | `RelPreserving` |
+| `dedupList_rel` | `dedupList_map_of_injective` (`lean/Lara/Context/Equivalence.lean:85`) | **`RelInj`** |
+| `linkFault_rel`, `linkOk_rel`, `linkGamma_rel`, `linkGround_rel` | `linkFault_mapAssurFrag` etc. (`lean/Lara/Context/Equivalence.lean:75-80`) | nothing |
+| `link_rel_commutes` | `link_relabel_commutes` (`lean/Lara/Context/Equivalence.lean:333`) | `RelInj`, `RelPreserving` |
+| `termWellSorted_rel`, `argsWellSorted_rel`, `signatureStage_rel` | `termWellSorted_mapAssur`, `argsWellSorted_map`, `signatureStage_map` (`lean/Lara/Context/Equivalence.lean:220-234`) | nothing |
+| `attackOcc_rel`, `contains_rel`, `covered_rel` | `attackOcc_mapAssurAtt`, `contains_mapAssur`, `covered_mapAssur` (`lean/Lara/Context/Equivalence.lean:261-268`) | **`RelInj`** (see §3.1) |
+| `attackComplete_rel` | `attackComplete_map` (`lean/Lara/Context/Equivalence.lean:374`) | `RelInj`, `RelPreserving` |
+| `checkUnit_rel` | `checkUnit_map` (`lean/Lara/Context/Equivalence.lean:406`) | **`RelInj`**, `RelPreserving` |
 | `containsB_rel`, `containsBList_rel`, `containsBDis_rel` | `containsB_mapAssur` etc. (`lean/Lara/Erase.lean:150-176`) | **`RelInj`** |
 | `attackClosureB_rel` | `attackClosureB_mapAssur` (`lean/Lara/Erase.lean:179`) | **`RelInj`** |
 | `coveredB_rel` | `coveredB_relabel` (`lean/Lara/Erase.lean:198`) | **`RelInj`** |
-| `nodes_conclusion_rel` | `nodes_conclusion_map` (`lean/Lara/Context/Equivalence.lean:466`) | `RelPreserving` |
-| `compileUnit_rel` | `compileUnit_map` (`lean/Lara/Context/Equivalence.lean:511`) | `RelInj`, `RelPreserving` |
-| `exists_accepted_rel` | `exists_accepted_relabel` (`lean/Lara/Context/Equivalence.lean:705`) | both |
-| `compileUnit_link_rel` | `compileUnit_link_relabel` (`lean/Lara/Context/Equivalence.lean:723`) | both |
-| `obsGen_parametricity` | `obsGen_congr` (`lean/Lara/Context/Equivalence.lean:795`) | both |
-| `backend_replacement_parametricity_local` | `registry_swap_congruence` (`lean/Lara/Context/Equivalence.lean:890`) | `R := occRel F`, so both are discharged internally — a **trade**, not a strengthening: acceptance weakens to `occurrences F`, but `hC`/`hA` are new (§6) |
+| `nodes_conclusion_rel` | `nodes_conclusion_map` (`lean/Lara/Context/Equivalence.lean:531`) | `RelPreserving` |
+| `compileUnit_rel` | `compileUnit_map` (`lean/Lara/Context/Equivalence.lean:576`) | `RelInj`, `RelPreserving` |
+| `exists_accepted_rel` | `exists_accepted_relabel` (`lean/Lara/Context/Equivalence.lean:775`) | both |
+| `compileUnit_link_rel` | `compileUnit_link_relabel` (`lean/Lara/Context/Equivalence.lean:819`) | both |
+| `obsGen_parametricity` | `obsGen_congr` (`lean/Lara/Context/Equivalence.lean:888`) | both |
+| `backend_replacement_parametricity_local` | `registry_swap_congruence` (`lean/Lara/Context/Equivalence.lean:983`) | `R := occRel F`, so both are discharged internally — a **trade**, not a strengthening: acceptance weakens to `occurrences F`, but `hC`/`hA` are new (§6) |
 | `backend_replacement_parametricity_local_sem` | `registry_swap_congruence_sem` (`lean/Lara/Context/Observation.lean:345`) | ″ |
 
 `Lara.Forall₂` (`lean/Lara/ListRel.lean`) is the pointwise list relation the
@@ -118,12 +118,12 @@ conveniences — each one is a place where the calculus itself compares terms:
 1. **`dedupList`** — the structural merge (`Context/Fragment.lean:68`) decides
    `x ∈ rest`, so a relation collapsing two distinct arguments changes the
    merged argument *list*, hence the node count of the compiled AF.
-2. **`coveredB`** (`Compile.lean:441`) — decides `k.source = source`, so a
+2. **`coveredB`** (`Compile.lean:548`) — decides `k.source = source`, so a
    collapsing relation adds edges. `Lara/Erase.lean`'s own header already
    records this for the non-injective erase-to-`certified` map: "collapsing
    distinct subterms can merge occurrences and add subargument-closure edges."
 3. **`checkUnit_complete`'s `Nodup` premise** on the merged argument list
-   (`Check/Unit.lean:243`), discharged here by `nodup_rel`.
+   (`Check/Unit.lean:352`), discharged here by `nodup_rel`.
 
 This is **witnessed, not asserted**. `Context.relInj_necessary` is
 `coveredB_rel` with `hR` deleted and the conclusion negated: it exhibits a
@@ -233,7 +233,7 @@ claim that the local theorem itself witnesses nonexistence of every such map.
 actually relates, where `AssurPreserving f` obliges every rule and every
 assurance in the type. The gap is exactly the one the codebase already flagged,
 twice, in the docstrings of `registry_swap_congruence`
-(`lean/Lara/Context/Equivalence.lean:890`) and `registry_swap_congruence_sem`
+(`lean/Lara/Context/Equivalence.lean:983`) and `registry_swap_congruence_sem`
 (`lean/Lara/Context/Observation.lean:345`):
 
 > The hypothesis `hpres` is stated **globally**, over every rule and every

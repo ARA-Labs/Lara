@@ -122,4 +122,16 @@ theorem mem_left : ∀ {as : List α} {bs : List β},
       · obtain ⟨b, hb, hr⟩ := mem_left hs ha'
         exact ⟨b, by simp [hb], hr⟩
 
+/-- Filtering both sides by tests that agree on related elements. -/
+theorem filter {p : α → Bool} {q : β → Bool} : ∀ {as : List α} {bs : List β},
+    Forall₂ Rel as bs → (∀ a b, a ∈ as → Rel a b → p a = q b) →
+    Forall₂ Rel (as.filter p) (bs.filter q)
+  | _, _, .nil, _ => .nil
+  | a :: _, b :: _, .cons h hs, hpq => by
+      have htail := filter hs (fun a' b' ha' hr => hpq a' b' (by simp [ha']) hr)
+      rw [List.filter_cons, List.filter_cons, hpq a b (by simp) h]
+      split
+      · exact .cons h htail
+      · exact htail
+
 end Lara.Forall₂

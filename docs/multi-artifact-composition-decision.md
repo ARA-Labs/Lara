@@ -9,7 +9,8 @@ this record, each amending it as it went; nothing may change them without
 amending this file again. **No corpus regeneration and no freeze-tag bump is owed:** the
 layer is strictly additive above `lara-core@0.2`, and no corpus unit, mutant, wire,
 replay-identity, or golden byte changes — the only core-side edit is two additive exports of an
-existing `Lara.Wire` production. Companion to `docs/spec.md` §12 and its dated
+existing `Lara.Wire` production. Amended 2026-10-05: the composite verdict moved to
+`map-verdict@2` with the core's `lara-core@0.3` located-gap cutover (D14). Companion to `docs/spec.md` §12 and its dated
 amendment (the versioned extension marker), `strict-backend-decision.md` (the shared-contract
 fields a member is compared on), and `rejection-surface.md` (the two-exit-code
 door story a map inherits)._
@@ -185,24 +186,32 @@ and its formal target. An alignment is that kind of object one level up: an
 untrusted, attributed link between two *formal* coordinates. Reusing the record
 means the audit vocabulary is spelled once.
 
-## D5 — Composite verdict grammar `map-verdict@1`
+## D5 — Composite verdict grammar `map-verdict@2`
 
 ```text
-(map-verdict@1
+(map-verdict@2
   (scope map)
-  (schema lara-map-verdict@1)
-  (core lara-core@0.2)
+  (schema lara-map-verdict@2)
+  (core lara-core@0.3)
   (policy POLICY-ID)
   (backends (backend BACKEND-ID VERSION) ...)
   (members (member ALIAS PATH (artifact DIGEST)) ...)
   (nodes  (node ALIAS ARG-ID INDEX) ...)
   (labels (INDEX LABEL) ...)
   (edges  (SRC TGT) ...)
-  (statuses (status ALIAS CLAIM-NAME ATOM STATUS) ...))
+  (statuses (status ALIAS CLAIM-NAME ATOM STATUS) ...)
+  HOLES?)
 
+HOLES  ::= (holes (hole ALIAS ARG-ID (obligations QUESTION-ID ...+)) ...+)
 LABEL  ::= in | out | undec
 STATUS ::= gap | justified | contested | defeated
 ```
+
+This is the `@2` grammar (D14). `@1` differed in two places: `INDEX` was the
+linked declaration position, and there was no `holes` section.
+
+- `INDEX`, `SRC` and `TGT` are **AF indices** of the linked unit; `nodes`,
+  `labels` and `edges` share that one space (D14).
 
 - `(scope map)` leads the form so no consumer can confuse these bytes with a
   solo `(verdict …)`. It is a *decoded field*, not an unread literal, so a
@@ -303,7 +312,9 @@ qualify each member's local identities
 Structurally identical support terms across members are **merged** into one
 linked argument, and every original `(alias, local ArgId)` handle is retained in
 the node table pointing at the same index — so a map can always say which
-members independently produced an argument.
+members independently produced an argument. Since D14 a handle whose linked
+argument is a located hole is retained in the `holes` section instead, and the
+index a node carries is the AF index.
 
 Cross-member saturation mirrors `lean/Lara/Context/Fragment.lean`'s
 `crossAttsFrom`: for each ordered pair of distinct-member checked nodes whose
@@ -326,6 +337,7 @@ produce the same bytes:
 | `labels` | ascending `INDEX`, covering exactly `0 .. n-1` |
 | `edges` | ascending lexicographic `(SRC, TGT)`, exactly as `buildAccept` emits |
 | `statuses` | member order, then that member's own claim declaration order |
+| `holes` | member order, then that member's own declaration order (the `nodes` handle order); omitted when empty |
 
 The codec **carries** this order; it does not impose it. The encoder never
 sorts: the driver decides the canonical order and the bytes reflect exactly that
@@ -548,6 +560,130 @@ never sees exit 1 for a map that was also ill-formed. Inside the verdict codec,
 `labels` therefore reports as a labels error even when a node index is also out
 of range.
 
+## D14 — `map-verdict@2`: located holes in a linked unit (2026-10-05)
+
+`lara-core@0.3` (`docs/located-gap-decision.md`) accepts a unit containing a
+*located hole*: an argument that type-checks with a nonempty mandatory
+obligation set. A hole is declared but is never an AF node. A map member may
+now carry one, and so may the linked unit, which `checkUnit` accepts. Under
+`map-verdict@1` that broke the verdict silently: `nodes` carried each handle's
+linked *declaration position* while `labels` and `edges` carried *AF indices*,
+and the two diverge as soon as a hole precedes a complete argument. The user
+decided the bump on 2026-10-05; the decisions it carries are these.
+
+**Hard cutover.** The envelope tag is `map-verdict@2` and the schema
+`lara-map-verdict@2`. Both decoders accept exactly `@2`; an `@1` envelope or
+schema is refused. A map with no hole gets the same `nodes`, `labels`, `edges`
+and `statuses` bytes as under `@1`: only the two version atoms (and the core
+version, from the core's own cutover) change. The manifest grammar
+`lara-map@1` and the parity envelope `map-check-input@1` are unchanged: holes
+need no new input, because a member's unit already carries its `open`
+questions.
+
+**One index space.** Every `INDEX` in `nodes`, `labels` and `edges` is an AF
+index. `nodes` lists exactly the handles whose linked argument is complete,
+each at the AF index of that argument, reached through the checker's
+AF-to-declaration map (`cuNodeDecls` / `nodeDecls`). The decoder's coverage rule
+(every labelled index has a handle) is unchanged and still meaningful.
+
+**Holes by member handle.** The optional `holes` section lists one row per
+`(member alias, member-local ARG-ID)` handle whose linked argument is a hole,
+with the hole's exact mandatory root obligations in the core's
+`collectObligations` order. It carries no index: a hole has no AF index, and
+its linked declaration position is an artifact of the merge that no reader can
+resolve. A merged hole — one term declared by several members, possible only
+for a leaf-free term (D12) — gets one row per handle, each with the same
+obligations, exactly as a merged node gets one `nodes` row per handle.
+
+**Order: handle order, as for `nodes`.** Rows are in member order, then that
+member's own declaration order — the restriction of the one handle list both
+sections come from — so the rows of a merged hole need not be adjacent. This
+was chosen over "linked declaration order, then handle order" because it is the
+rule `nodes` and `statuses` already follow, a reader scanning one member finds
+that member's rows in the order its author wrote them, and the two orders agree
+whenever the merge does not fire.
+
+**Section placement and canonical form.** `holes` follows `statuses` and is
+omitted when the linked unit has no hole; a present-but-empty section is
+refused, as the solo verdict refuses one (`docs/located-gap-decision.md` §4).
+The decoder also refuses a row of the wrong shape, an undeclared alias, an
+empty or duplicated obligation list entry, and a handle that appears twice
+across `nodes` and `holes` together (a handle is a node or a hole, once). It
+cannot check that a row's obligations are the ones its member's term carries,
+or that rows are in handle order: both need the members.
+
+**The saturation generates nothing that touches a hole.** The cross-member
+generator ranges over the complete conclusion cache (`conclusionCache` in
+Haskell, `Lara.Context.conclusionCache` in Lean), so it emits no attack
+sourced at or aimed at a hole, and this is kept deliberately rather than
+widened:
+
+- an attack sourced at a hole is checked but inert (located-gap D4), so
+  generating one would add bytes to the linked unit and no edge;
+- the missing-conflict scan ranges over complete pairs only, so no attack onto
+  a hole is ever required for acceptance;
+- a generated rebut of a hole's root could only reach a complete argument
+  containing that root, and such an argument inherits the hole's obligations
+  and is itself a hole (located-gap D6), so it adds no edge; a generated
+  undermine targets a leaf, which is never a hole;
+- the generator stays the one `Lara.Map.batch_checked_holes` is proved about.
+  Since issue #13 that theorem takes members that may carry holes
+  (`SideOkHoles`, located-gap D9), and `batch_checked` is its hole-free
+  corollary.
+
+`Lara.Map.crossPairs_endpoints_complete` and its driver instance
+`Lara.Map.Driver.generatedAttacksOf_endpoints_complete` mechanize the
+consequence: both endpoints of every generated attack type with an empty
+obligation set. A member's own *declared* attacks that touch a hole are
+transported unchanged and go through the ordinary checker (D8): typed, and
+inert when sourced at a hole.
+
+**What is proved about a map with holes (issue #13).** The driver's acceptance
+of a linked unit with holes is now covered by a composition theorem, not only
+by `checkUnit`. `Lara.Map.Driver.linkedUnitOf_checked_holes` accepts the Lean
+driver's linked unit whenever each member satisfies `SideOkHoles` in its own
+environment. `Lara.Map.Driver.generatedAttacksOf_live` reads
+`crossPairs_endpoints_complete` through the checker: every generated attack is
+compiled, and neither of its endpoints is a hole.
+`Lara.Map.Driver.linkedUnitOf_hole_report` says each hole of the accepted
+unit is some member's declaration. Any member that declares it gives it, in
+that member's own environment, exactly the reported conclusion and obligation
+set. The hole rows read their obligations from those records, so a row repeats
+the member's solo report: linking adds and drops no obligation.
+`Lara.Map.batch_member_hole_reported` gives the converse at the batch level,
+where every member hole is reported. These are statements about the accepted
+unit. The `holes` wire section, its order and its handle selection are
+unchanged, and the parity script still covers them.
+
+**No attack list on a hole row.** The solo verdict's hole row lists the attacks
+the hole sources by original attack declaration index. A map has no
+reader-facing attack index — the linked attack list mixes transported and
+generated attacks and is never printed — and every such attack is inert, so the
+map row carries none. A reader who needs them reads the member's own solo
+verdict. The same holds for obligation sites (`located-gap-decision.md` D12):
+the solo row locates each obligation at its rule occurrences, the map row
+names the obligations only.
+
+**Statuses are unchanged in form.** A map status is read off the linked
+unit's complete support. A claim whose own member supports it only by a hole
+can still be `justified` in the map when another member contributes complete
+support for the same proposition; `test/MapSpec.hs`'s merged-hole case pins
+this.
+
+**Evidence.** `test/fixtures/map/hole/` is a committed accepting anchor whose
+two members each declare a hole, one of them before the member's complete
+argument, so the index spaces diverge; `scripts/check-map-conformance.sh`
+compares its `map-verdict@2` bytes across the Haskell and Lean drivers.
+`test/MapWireSpec.hs` carries a golden vector with a `holes` section, the
+generator emits holes, and the malformed-verdict matrix covers the section.
+
+**Cost.** Every committed composite verdict changes bytes:
+`examples/agreement-map-multi/map.verdict.sexp` and
+`test/fixtures/map/{agreement,merge}/map.verdict.sexp` (version atoms only),
+plus the new `test/fixtures/map/hole/` anchor. No parity envelope changes. The
+bump rides on the `lara-core@0.3` cutover's freeze, so no separate freeze-tag
+bump is owed for it.
+
 ## Rejected alternatives
 
 **A lockfile or content-addressed member store.** Rejected as D1 — it converts a
@@ -735,8 +871,9 @@ preserves mtime.
 `lean/Lara/Map/Qualify.lean` (the rename's injectivity, its disjointness across
 aliases, and its transport through `HasSupport`, `HasAttack`, `CheckedProgram`,
 `edgeB`, `checkedAF`, `labelC` and `statusC`) and `lean/Lara/Map/Link.lean` (the
-N-member fold, proved to preserve `Lara.Context.SideOk`, closed through
-`Lara.Context.link_checked`, and with both of that theorem's hygiene premises
+N-member fold, proved to preserve `Lara.Context.SideOk` and, since issue #13,
+`Lara.Context.SideOkHoles`, closed through `Lara.Context.link_checked` and
+`Lara.Context.link_checked_holes`, and with both of that theorem's hygiene premises
 proved rather than assumed). The two are discharged from different things, and
 the difference matters: `foldHygiene_of_distinct_aliases` discharges
 `FoldHygiene` from **alias distinctness alone**, while
@@ -780,7 +917,7 @@ them reference resolution (`MBUnknownAlias`, `MBUnknownClaim`,
 `MBCoordinateOutOfRange`, and a question's `MBMixedSelector`) and alignment
 evaluation (`MRAlignmentFalse`), which consume the same coordinates and did land
 together as this record said they would. `lara check <file.laramap>` is the
-third CLI door, printing `map-verdict@1` bytes on acceptance and one
+third CLI door, printing composite verdict bytes (`map-verdict@2` since D14) on acceptance and one
 `renderMapError` line at `mapErrorExitCode`'s 2-or-1 on failure; the `.lara` and
 `.sexp` doors are untouched, and every extension neither arm names still reaches
 the wire door.

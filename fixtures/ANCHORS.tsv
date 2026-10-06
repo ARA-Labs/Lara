@@ -108,11 +108,16 @@ examples/rebuttal-replay/round1/example.core.sexp
 examples/rebuttal-replay/round2/example.core.sexp
 examples/running-example/run1/example.core.sexp
 examples/running-example/run2/example.core.sexp
+fixtures/corpus/accept-located-hole.sexp
+fixtures/corpus/accept-nested-hole-sites.sexp
 fixtures/corpus/group-conflict-quarantine-attacker.sexp
 fixtures/corpus/group-conflict-quarantine.sexp
 fixtures/corpus/group-consistent-accept.sexp
+fixtures/corpus/group-quarantine-hole-attacker.sexp
+fixtures/corpus/group-quarantine-hole-lost-edge.sexp
 fixtures/corpus/group-quarantine-lost-edge.sexp
 fixtures/corpus/group-quarantine-numeric-multi-blocked.sexp
+fixtures/corpus/hole-attack-inert.sexp
 fixtures/corpus/independent-accept.sexp
 fixtures/corpus/insp-arity-mismatch-reject.sexp
 fixtures/corpus/insp-empty-inventory-accept.sexp
@@ -127,7 +132,6 @@ fixtures/corpus/ra-premise-only-reject.sexp
 fixtures/corpus/rebut-program.sexp
 fixtures/corpus/reject-duplicate-argument.sexp
 fixtures/corpus/reject-duplicate-rule.sexp
-fixtures/corpus/reject-incomplete-argument.sexp
 fixtures/corpus/reject-missing-conflict.sexp
 fixtures/corpus/reject-preflight-duplicate-backend.sexp
 fixtures/corpus/reject-preflight-unknown-backend.sexp

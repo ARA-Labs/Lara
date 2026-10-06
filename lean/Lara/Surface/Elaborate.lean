@@ -394,7 +394,7 @@ def outputFromAdmission (input : Input) (semantic : Presentation.Program)
         policy := toCorePolicy input.policy
         args := admission.prune.keptArgs.map (·.2)
         atts := admission.prune.keptAttacks }
-    claims := claimsOf keptPairs semantic
+    claimAlternatives := claimAlternativesOf keptPairs semantic
     argIds := admission.prune.keptIds.map fun id => ⟨id⟩
     authoredObligations := authoredObligationsOf input.program
     openQuestions := openQuestionsOf keptPairs
@@ -501,7 +501,8 @@ noncomputable def renameElaborated (ρg : Binding.GlobalRenaming) (source : Inpu
   { gamma := renameGamma ρg output.gamma
     ground := output.ground.map (renameResidualAtom ρg)
     unit := renameCoreUnit ρg output.unit
-    claims := output.claims.map fun claim => (ρg.prop claim.1, claim.2)
+    claimAlternatives :=
+      output.claimAlternatives.map fun claim => (ρg.prop claim.1, claim.2)
     argIds := output.argIds.map ρg.arg
     authoredObligations := output.authoredObligations.map fun entry =>
       (ρg.arg entry.1, entry.2.map ρg.obligation)
@@ -1252,8 +1253,8 @@ structure ElaborationAlignment (env : Env canon) (input : Input)
     result.output.argIds =
       result.declared.admission.prune.keptIds.map fun id => ⟨id⟩
   outputClaims :
-    result.output.claims =
-      claimsOf
+    result.output.claimAlternatives =
+      claimAlternativesOf
         (admissionKeptPairs result.declared.pairs result.declared.admission)
         result.declared.semanticProgram
   outputAuthoredObligations :
@@ -1709,7 +1710,8 @@ theorem outputFromAdmission_alignment (input : Input)
     output.unit.atts = admission.prune.keptAttacks ∧
     output.resolvedAttacks = admission.prune.keptAttacks ∧
     output.gamma = Lara.Admission.buildGamma admission.prune.checkedLeaves ∧
-    output.claims = claimsOf (admissionKeptPairs pairs admission) semantic ∧
+    output.claimAlternatives =
+      claimAlternativesOf (admissionKeptPairs pairs admission) semantic ∧
     output.openQuestions = openQuestionsOf (admissionKeptPairs pairs admission) ∧
     output.authoredObligations = authoredObligationsOf input.program := by
   simp [outputFromAdmission]
@@ -1726,8 +1728,8 @@ def DeclaredAdmissionOutputAligned (input : Input)
   result.output.resolvedAttacks = result.declared.admission.prune.keptAttacks ∧
   result.output.gamma =
     Lara.Admission.buildGamma result.declared.admission.prune.checkedLeaves ∧
-  result.output.claims =
-    claimsOf (admissionKeptPairs result.declared.pairs result.declared.admission)
+  result.output.claimAlternatives =
+    claimAlternativesOf (admissionKeptPairs result.declared.pairs result.declared.admission)
       result.declared.semanticProgram ∧
   result.output.openQuestions =
     openQuestionsOf
@@ -1945,8 +1947,8 @@ theorem elaborate_complete (env : Env canon) (input : Input) (output : Elaborate
         keptReconstructed canon input.policy output.semanticProgram pairs := by
     rfl
   have hclaimsCanonical :
-      claimsOf (admissionKeptPairs pairs admission) output.semanticProgram =
-        output.claims := by
+      claimAlternativesOf (admissionKeptPairs pairs admission) output.semanticProgram =
+        output.claimAlternatives := by
     rw [hkeptPairsCanonical]
     exact hclaims
   have hquestionsCanonical :
@@ -1980,7 +1982,7 @@ theorem elaborate_complete (env : Env canon) (input : Input) (output : Elaborate
   simp only [Except.map, bind_ok_reduce]
   apply congrArg Except.ok
   cases output with
-  | mk gamma ground unit claims argIds authoredObligations openQuestions
+  | mk gamma ground unit claimAlternatives argIds authoredObligations openQuestions
       resolvedAttacks semanticProgram =>
     cases unit with
     | mk sigma policy args atts =>

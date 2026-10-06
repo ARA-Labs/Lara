@@ -108,11 +108,13 @@ def world (result : AdmissionResult)
         , atts := (rawUnit result).atts
         , typed := by simp [hatts]
         , source_declared := by simp [hatts]
+        , holes := []
         , target_declared := by simp [hatts] }
     , attack_complete := by
         intro _ _ _ _ _ _ _ _ hcontrary
         simp [Attack.ContraryMatch, policy] at hcontrary
     , nodes := nodes, nodes_terms := hnodes
+    , nodeDecls := List.range nodes.length, holes := [], holes_terms := rfl
     , args_well_sorted := signatureStage_args hsig }
   sigma_eq := rfl
   policy_eq := rfl
@@ -133,7 +135,9 @@ theorem units_accepted : (checked retained).isOk = true ∧
       (by decide) source.unit.scopes_wf source.unit.ruleIds_nodup
       source.unit.policy_wf source.unit.program.nodup source.unit.program.complete
       source.unit.program.typed source.unit.program.source_declared
-      source.unit.program.target_declared source.unit.attack_complete
+      (fun k hk => (source.unit.program.target_declared k hk).resolve_right
+        List.not_mem_nil)
+      source.unit.attack_complete
     change (checked retained).isOk = true
     rw [checked, h]
     rfl
@@ -143,7 +147,9 @@ theorem units_accepted : (checked retained).isOk = true ∧
       (by decide) target.unit.scopes_wf target.unit.ruleIds_nodup
       target.unit.policy_wf target.unit.program.nodup target.unit.program.complete
       target.unit.program.typed target.unit.program.source_declared
-      target.unit.program.target_declared target.unit.attack_complete
+      (fun k hk => (target.unit.program.target_declared k hk).resolve_right
+        List.not_mem_nil)
+      target.unit.attack_complete
     change (checked withdrawn).isOk = true
     rw [checked, h]
     rfl

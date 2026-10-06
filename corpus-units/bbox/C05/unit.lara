@@ -13,11 +13,15 @@
 #   * The annotation's mandatory CQ3 is unmet-gap: the adapted arm draws extra beam-search samples
 #     (k=3) with no sampling-matched control, so the +6.85/+4.50 gains are not validly attributable
 #     to the transferred adapter alone. Mapped onto policy-mandatory measurement_validity -> unmet.
-#     An open mandatory obligation is an IncompleteArgument rejection -> E2-style gap.
+#     The incomplete controlled_comparison argument is declared as a located hole with
+#     `open measurement_validity` (lowering re-done for issue #15 under `lara-core@0.3`): it is
+#     not an AF node, so the claim lands `gap` on empty complete support.
 #   * CQ1 (no retraining) and CQ2 (same prompts/test sets per target) discharge baseline_parity;
-#     that leaf is on the page. The optional scope-adequacy CQ4 is omitted.
+#     that leaf is on the page. The optional scope-adequacy CQ4 is unmet, so the optional
+#     scope_match is opened (R5 accounting; no obligation).
 #   * variance_reported also has no leaf (only per-target averages, no per-dataset cells or repeats)
-#     — a second policy-mandatory blocker; measurement_validity is the annotation-grounded driver.
+#     — a second policy-mandatory blocker, also opened; measurement_validity is the
+#     annotation-grounded driver.
 #
 # Expected verdict is at the bottom of this file (golden oracle).
 
@@ -44,12 +48,17 @@ leaf e2 : matched_setup(bbox_adapter, unadapted_target, e02)
   provenance = ai-executed
   refs       = [logic/experiments.md#E02-Setup, logic/experiments.md#E02-Procedure-steps-1-5]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... and the incomplete argument is declared as a located hole ------------------------------
 
-# (Intentionally no `arg`: measurement_validity(transfer_accuracy, e02) has no honest leaf — the
-# adapted arm's extra beam-search samples are never controlled (CQ3, unmet-gap) — and
-# variance_reported(e02) has none either (per-target averages only). Both are policy-mandatory, so
-# the claim's complete-support set is empty.)
+# valid_measurement(transfer_accuracy, e02) has no honest leaf (the adapted arm's extra
+# beam-search samples are never controlled, CQ3) and variance_reported(e02) has none either
+# (per-target averages only). Both are policy-mandatory and stay open: a1 is a hole, not an AF
+# node. scope_match (optional, CQ4 unmet) is opened as well.
+arg a1 : supports(c05) by controlled_comparison(bbox_adapter, unadapted_target, transfer_accuracy, new_black_box_llms, e02)
+  discharge baseline_parity      with e2
+  open      measurement_validity
+  open      variance_reported
+  open      scope_match
 
 status c05
 
@@ -57,5 +66,7 @@ status c05
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
 # Compiled AF: no arguments.
+# Located hole: a1 (open obligations [measurement_validity, variance_reported]; sources no attacks).
 # Claim status:
-#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8 — the hole
+#               is reported, not a node)

@@ -71,6 +71,23 @@ is a rule mode, strict certificates are opaque backend payloads, and attacks are
 > inventing a second; no existing byte moves. Map failures carry their own versioned error sum and
 > its own exit-code split, and never classify a map fault as an R-class. **No corpus regeneration and
 > no freeze-tag bump is owed:** no corpus, mutant, wire, or replay-identity byte changes.
+
+> **Located gaps (`lara-core@0.3`, 2026-10-04).** An argument that type-checks but leaves a mandatory
+> obligation open is no longer a whole-unit rejection. It is accepted as a **hole**: it stays out of
+> the argumentation framework and is reported, with its declaration position, its id and its exact
+> mandatory obligations, in a new optional `holes` section of the verdict (§4.3 verdict grammar,
+> §4.4, §8). The named rejection kind `incomplete-argument` is retired (§10.1); R5 question
+> accounting is unchanged. The §4.3 conservative-reporting rule compares against complete declared
+> arguments, never holes. The four-state status vocabulary, the grounded labelling, and the §6.1 and
+> §7.1 typing rules are unchanged: a claim with only incomplete support reports `gap`, as it always
+> did. This is a core version change with a hard cutover (§2.1), so every committed verdict and
+> check-input byte that carries the replay identity is regenerated and a new evaluation freeze is
+> cut. A unit with no hole among its declarations, retained or quarantined, keeps its labels, edges
+> and statuses; only the core version component of its verdict changes. A quarantined hole is no
+> longer a node of the §4.3 reference framework, so its outgoing attacks no longer cause
+> `evidence-blocked`. `located-gap-decision.md` records the decisions and the rejected
+> alternatives.
+
 ## 0. How to read this specification (non-normative)
 
 This section is a reader's guide, not part of the frozen language definition;
@@ -226,13 +243,16 @@ and policy-allowlisted theory digests are part of replay identity.
 
 ### 2.1 Versioning and replay identity (v0.1-frozen)
 
-The language surface is itself versioned: **`lara-core@0.2`** names the abstract syntax, the
+The language surface is itself versioned: **`lara-core@0.3`** names the abstract syntax, the
 static judgments (§6.1, §7.1, §8, §8.1), and the wire schema — the S-expression codec of
-`Lara.Wire` (§1) — as frozen by M1. The
+`Lara.Wire` (§1) — as frozen by M1, amended by the many-sorted signature at `@0.2` and by located
+gaps at `@0.3` (`located-gap-decision.md`). Each core bump is a hard cutover: the decoder accepts
+exactly the current core version and refuses an input naming an earlier one as an R14 codec error.
+The
 presentation syntax is versioned separately (**`lara-syntax@0.10`**) because it may evolve against
 a fixed core (the §4.5 aliasing path); both front ends decode to the one abstract syntax.
 Presentation syntax versions live in `docs/lara-surface-grammar.md`; this specification pins the
-core. The codec round-trip obligation (§9 result 12) is stated against `lara-core@0.2`. Lean
+core. The codec round-trip obligation (§9 result 12) is stated against the current core version. Lean
 mechanizes `parse ∘ print = id` for the complete live structured `Program`/`Policy` AST at
 `lara-syntax@0.10`, including value bindings, inferred argument instantiations, `policySigma`,
 and optional measurand polarity (`lean/Lara/Presentation.lean`) — `lara-syntax@0.7` restricts the
@@ -254,7 +274,7 @@ assertions. Two representation exemptions are documented in the guard (`SortName
 tuple; v0.1 freezes it as
 
 ```text
-replayId(P) = ( lara-core@0.2,
+replayId(P) = ( lara-core@0.3,
                 policy id @ version,       -- e.g. empirical-v1
                 [beta@version*],           -- selected backends, e.g. nd@1
                 { h* },                    -- policy-allowlisted theory digests
@@ -264,7 +284,10 @@ replayId(P) = ( lara-core@0.2,
 Two runs with equal `replayId` on source-identical programs produce identical verdicts,
 diagnostics, and dependency reports (§9 results 1/5). Any component change — a policy edit, a
 backend upgrade, a re-pinned artifact — is a new replay identity; verdicts do not transfer across
-identities. Reports print the tuple verbatim.
+identities. Reports print the tuple verbatim. The core component is the closed
+`Lara.Replay.CoreVersion` sum; its one spelling lives in `Lara.Wire.coreVersionText` and is mirrored
+by `coreVersionText` in `lean/Lara/Driver.lean`, and both print `lara-core@0.3` inside the wire
+`replay-id` production.
 
 ## 3. Propositions and leaves
 
@@ -589,40 +612,110 @@ statuses would therefore let missing evidence make a claim look **stronger**. (A
 the paragraph above asserted the opposite — that a conflict "can never make a claim `justified`" —
 which holds only for the claim whose *own* support was quarantined.)
 
-The checker therefore reports conservatively. Let `G` be the declared framework, `F` the checked one
-after the prune, and `B` the forward closure, along `G`'s attack edges, of everything the prune
-touched: every removed argument, and every retained argument that lost an incoming edge (subargument
-closure means a dropped attack can also carry edges onto retained arguments). A queried claim with a
-complete support argument in `B` has public status **`evidence-blocked`**; its four-state label is
-retained in the verdict's `conditional` section as a `CORE-STATUS` diagnostic and is not the answer.
-Claims with no support argument in `B` keep their ordinary four-state status.
+The checker therefore reports conservatively. Both frameworks live in original (pre-admission)
+argument declaration index space:
+
+- the **reference carrier** `D` is every declaration that, under the full declared `Gamma` (every
+  declared leaf, quarantined or not), is either complete or *unclassified* — its support inference
+  fails, as for a quarantined declaration with a missing leaf or rule or an invalid assurance.
+  Successfully typed holes (§4.4) are excluded. Retained declarations reuse the checked cache,
+  since the checked `Gamma` agrees with the declared one on every leaf a retained term uses; each
+  quarantined declaration is inferred at most once for this classification;
+- the **checked carrier** `K ⊆ D` is the retained complete declarations;
+- `G` is the declared framework: carrier `D`, with the subargument-closure edges of the raw
+  declared attacks between members of `D`; `F` is the checked framework: carrier `K`, with the
+  closure edges of the retained attacks between members of `K`.
+
+The blocked set `B` is the forward closure, along `G`'s edges and over `D` only, of everything the
+prune touched:
+
+```text
+seed = (D \ K) ∪ { j ∈ K | ∃ i ∈ K. G.attack i j ∧ ¬ F.attack i j }
+```
+
+that is, every removed reference node, and every retained complete node that lost an incoming edge
+(subargument closure means a dropped attack can also carry edges onto retained arguments). A queried
+claim with a complete support argument in `B` has public status **`evidence-blocked`**; its
+four-state label is retained in the verdict's `conditional` section as a `CORE-STATUS` diagnostic and
+is not the answer. Claims with no support argument in `B` keep their ordinary four-state status.
+
+Holes and the attacks they source neither seed nor propagate blocking: a hole is not in `D`, and an
+attack sourced at one has no edge in `G`. Quarantining a hole alone therefore yields no
+`evidence-blocked`. A dropped attack from a retained complete source onto an occurrence inside a
+removed hole can still seed a retained complete argument that contains the same occurrence, because
+`G` has that closure edge and `F` lost it. An unclassified quarantined term stays a conservative node
+of `D` — including when it has a raw outgoing attack onto complete support — and is never reported as
+a typed hole. Holes are excluded from `D` because no accepted framework contains them: were a hole a
+reference node, an unattacked hole with a typed attack onto a claim's only support would defeat that
+support in `G` while the attack is inert in `F`, and a unit with nothing quarantined would violate
+non-promotion (`located-gap-decision.md` §7).
 
 The rule is directed, not "block the whole component": grounded labelling reads only a node's
-transitive attackers, so forward reachability is both sound and tight. `lara-core@0.2`'s labelling
-function, its input wire schema, and its rejection classes are unchanged — this is an outer
-reporting layer over the same core verdict. The *verdict* grammar does gain the `evidence-blocked`
-status and the optional `conditional` section (the verdict grammar below), so a consumer that has never heard of
-`evidence-blocked` fails to decode rather than misreading an inflated status; a program with nothing
-quarantined produces exactly the bytes from before the conservative-reporting change.
+transitive attackers, so forward reachability is both sound and tight. The core's labelling
+function, its input wire schema, and its rejection classes are unchanged by this rule — it is an
+outer reporting layer over the same core verdict. The *verdict* grammar does gain the
+`evidence-blocked` status and the optional `conditional` section (the verdict grammar below), so a
+consumer that has never heard of `evidence-blocked` fails to decode rather than misreading an
+inflated status; a program with nothing quarantined — holes included — reports no
+`evidence-blocked` query and produces no `conditional` section.
 
-#### Verdict grammar (v0.1)
+#### Verdict grammar (`lara-core@0.3`)
 
 ```text
 VERDICT ::= (verdict REPLAY-ID accept
               (labels (NAT LABEL)*)
               (edges (NAT NAT)*)
               (statuses (status ATOM STATUS)*)
-              CONDITIONAL-SEC?)
+              CONDITIONAL-SEC? HOLES-SEC?)
           | (verdict REPLAY-ID reject REJECTION)
 CONDITIONAL-SEC ::= (conditional (status ATOM CORE-STATUS)+)
+HOLES-SEC ::= (holes HOLE+)
+HOLE ::= (arg NAT ID (obligations OBL+) (attacks NAT*))
+OBL ::= (obligation ID POS+)
+POS ::= (pos ((prem NAT) | (ques ID))*)
 STATUS ::= CORE-STATUS | evidence-blocked
 CORE-STATUS ::= gap | justified | contested | defeated
 LABEL ::= in | out | undec
 ```
 
-The `conditional` entries are exactly the `evidence-blocked` queries, in query
-order. The executable codec grammar, including `REPLAY-ID` and `REJECTION`, is
-defined in `src/Lara/Wire.hs` and mirrored by `lean/Lara/Driver.lean`.
+`labels` and `edges` use AF indices: positions among the complete nodes of the checked unit, in
+declaration order (§8). The `conditional` entries are exactly the `evidence-blocked` queries, in
+query order.
+
+The `holes` section reports every surviving hole (§4.4) of the accepted unit and is omitted when
+there is none:
+
+- a hole's `NAT` is its **original** argument declaration index — its position in the supplied
+  unit's `args` before admission, or, on the `.lara` path, in the expanded and lowered declaration
+  ledger before admission — and its `ID` is its `ArgId`. Holes appear in original argument order;
+- `obligations` is the hole's exact mandatory root obligation set, in the core's deterministic
+  deduplicated union order (`collectObligations` in `lean/Lara/Support.lean`: premise obligations,
+  then discharge obligations, then the instance's own open mandatory questions, each question kept
+  at its last occurrence);
+- each `OBL` pairs one obligation with its **sites**: the positions `π` (§7, relative to the hole's
+  root term, `(pos)` being the root) such that `a@π` is a rule instance whose open set `H` contains
+  the question and whose rule declares it mandatory — exactly the occurrences that contribute it to
+  the root obligation set (§6.1). Sites follow the same traversal as the obligations (premise
+  subterms in index order, then discharge subterms in discharge-map order, then the instance itself)
+  and are distinct. They are read from the checked term, never by re-running inference
+  (`lean/Lara/Check/HoleSites.lean`; `located-gap-decision.md` D12). The multi-artifact map verdict
+  (§12) does not carry sites;
+- `attacks` lists, by original attack declaration index and in that order, the surviving
+  successfully typed raw attacks whose source is this hole, under raw endpoint alignment and before
+  live-source filtering. These attacks produce no edge. An empty `(attacks)` is canonical;
+- a hole is emitted whether or not a query names its conclusion. A per-claim report selects its
+  incomplete alternatives from this list by conclusion equivalence (§8) without changing it.
+  Quarantined declarations are absent from it: they stay in the admission audit.
+
+Identifiers use the existing atom printer, quoting and Unicode included. A standalone decoder checks
+row shape, canonical naturals, nonempty obligation lists, unique obligation ids within a row, a
+nonempty and repeat-free site list per obligation, unique hole indices, unique hole ids, and
+the fixed section order; it does not bound hole indices by the number of `labels` entries, because a
+hole index is a declaration position, not an AF node. Agreement of a hole's index with its id, and
+the validity of its attack references, are relative to the supplied input and its admission maps
+and are checked only where the input is available. A hole-free verdict has no `holes` section. The
+executable codec grammar, including `REPLAY-ID` and `REJECTION`, is defined in `src/Lara/Wire.hs`
+and mirrored by `lean/Lara/Driver.lean`.
 
 Four results mechanize the layer (`lean/Lara/Blocked.lean`, `lean/Lara/BlockedProgram.lean`):
 `justified_nonpromotion` — a publicly `justified` claim is `justified` in `G`, with the quarantined
@@ -631,7 +724,7 @@ an unblocked claim whose complete-support set is the *same* in `F` and `G` keeps
 equal-support premise is load-bearing: a claim whose own support the prune removed can move
 `justified` → `gap` without being blocked, so blocking is conservative against promotion, not a
 guarantee that nothing changed); `blocking_of_blockedSeed`, which discharges the three
-obligations for the declared-index frameworks and seed the drivers compute; and
+obligations for the declared-index frameworks over `D` and `K` and the seed the drivers compute; and
 `checked_production_justified_nonpromotion_of_not_blocked`, which maps the compact
 `Compile.checkedAF`, `completeClaimFor` support, and public unblocked decision through the
 retained-index embedding and obtains its AF lists from the successful `checkUnit` call, instantiating
@@ -691,13 +784,51 @@ An `arg` declaration names a support term (Section 6). Multiple independent supp
 claim are separate `arg` declarations — never merged into one term — so that defeat can eliminate
 one while the other survives.
 
-In v0.1 a submitted argument that still carries an open mandatory obligation makes the unit
-invalid: `checkUnit` rejects it with the named kind `incomplete-argument` (§10.1). An honest gap is
-expressed by *not submitting* the incomplete argument: a claim with no complete checked support
-reports `gap`, and other complete support arguments for the same claim remain eligible. The status
-function of §8 is stated over `holes(P, p)` so that a later core version could accept partial
-alternatives without changing it; under the v0.1 checker every accepted unit has empty root holes
-(`evidence-admission-decision.md` §6 records this as the v0.1 contract).
+**Located gaps (`lara-core@0.3`).** A declared argument that type-checks under §6.1 with a nonempty
+root obligation set is a **hole**:
+
+```text
+Sigma; Pi; Gamma; R |- a : supports(p_a) ▷ O      O ≠ ∅
+```
+
+`O` is mandatory and transitive: it contains every mandatory question left open in `a` or in any
+premise or discharge subterm, since §6.1 unions obligations upward. An open optional question
+contributes no obligation and never makes a hole. Only successfully typed arguments are holes: a
+support-inference failure is a rejection with its R-class, never an obligation.
+
+A hole does not make the unit invalid. The support stage partitions the checked declarations once
+into complete arguments, which become AF nodes (§8), and located holes, which do not. The two lists
+are disjoint, cover every checked declaration, keep declaration order, and keep the conclusion and
+obligation set the support stage computed; compilation and reporting reuse them and never re-infer
+support. Every declared attack is still type-checked under §7.1 whatever its endpoints are:
+
+- an attack **sourced at a hole** must type (an ill-typed one rejects with its R-class) and then
+  contributes no edge. The hole's report lists it (§4.3 verdict grammar);
+- an attack **targeting an occurrence inside a hole** from a complete source is kept: its closure
+  edges reach every complete argument that contains the attacked occurrence (§8). A rebut of the
+  hole's root reaches no complete argument, because every term containing the root inherits its
+  obligations.
+
+What still rejects the unit is unchanged: an ill-typed argument or attack, a duplicate argument, an
+R5 question-accounting failure, or a licensed conflict between complete arguments that no attack
+from a complete source covers (`missing-conflict`).
+
+A claim whose only candidate supports are holes reports `gap`, as a claim with no submitted
+support always did. A claim with complete support takes its status from the labels, and holes
+concluding the same proposition are reported beside it as incomplete alternatives. Holes are
+reported by original declaration index, `ArgId`, and exact mandatory obligations, each obligation
+located at the rule occurrences inside the hole that leave it open (positions as in §7, relative to
+the hole's root); labels, edges and
+complete support use AF indices. Positions the core computes are local to the post-admission unit
+it checked; the driver maps them back through admission's retained-argument and retained-attack
+maps and the complete-node-to-declaration map of the partition (`located-gap-decision.md` §3).
+Rejection constituents keep their local declaration ids.
+
+An author completes a gap additively: add fresh admitted leaves as needed, then a distinct
+complete argument under a fresh id. The hole stays declared and reported. The new argument is
+checked like any other, including attack completeness, so an update sequence that completes a gap
+is not guaranteed to be accepted step by step; the guarantee is about the complete program checked
+directly. Discharging a hole in place is not part of `lara-core@0.3`.
 
 ### 4.5 Reference policy scheme vocabulary (M0-frozen)
 
@@ -953,7 +1084,8 @@ and theory slots to digest-addressed entries. The complete dependency report is
 hidden.
 
 `O` is the set of unresolved mandatory obligations, collected across the term (an open hole in a
-subterm propagates). A complete graph node requires `O = empty`.
+subterm propagates). A complete graph node requires `O = empty`; a well-typed declared argument with
+`O ≠ empty` is accepted as a located hole (§4.4) and is not a graph node.
 
 **How the report is surfaced.** `certDeps(w)` is mechanized in
 `lean/Lara/Support.lean` (`cert_steps_accounted`, `certDeps_eq_union`) and mirrored in
@@ -1239,13 +1371,22 @@ occ(k)    = u      if k = rebut w u
 Attack(P) = { (w, v) | attack k declared in P
                        Sigma; Pi; Gamma; R |- k : attacks(w, u@π)
                        w ∈ Args(P),  v ∈ Args(P),  ∃π'. v@π' = occ(k) }
+
+Holes(P)  = { a | arg a declared in P,  Sigma; Pi; Gamma; R |- a : supports(p_a) ▷ O,  O ≠ ∅ }
 ```
 
 - `Args` admits only complete declared arguments (`O = ∅`); an incomplete argument neither enters
   the AF nor emits an edge — this is where Section 7.1's checked-not-complete source rule lands.
-- Occurrence containment `∃π'. v@π' = occ(k)` is structural: any complete argument sharing the
-  attacked subterm is defeated with it. The direct edge `(w, u)` is itself a closure edge, since
-  `occ(k)` occurs in `u` at `π`.
+  Since `lara-core@0.3` an accepted unit may contain such arguments: they form `Holes(P)`, the
+  located gaps of §4.4. Acceptance requires every declared argument to be in `Args(P) ∪ Holes(P)`
+  and every declared attack to type, whatever its endpoints; the AF is built from `Args(P)` alone.
+- The target `u` of a typed attack may be a hole. Occurrence containment `∃π'. v@π' = occ(k)` is
+  structural: any complete argument sharing the attacked subterm is defeated with it, even when the
+  attack was declared against an occurrence inside a hole. When `u ∈ Args(P)`, the direct edge
+  `(w, u)` is itself a closure edge, since `occ(k)` occurs in `u` at `π`.
+- `labels` and `edges` in the verdict number `Args(P)` in declaration order (AF indices), not
+  declared arguments; holes are reported separately by original declaration index (§4.3 verdict
+  grammar).
 - No untyped node or edge exists by construction (§9 result 4): `Args` requires the §6.1 judgment
   with an empty obligation set, `Attack` requires the §7.1 judgment.
 
@@ -1287,6 +1428,7 @@ transfer operator is monotone over a finite-height lattice; it is the external m
 argument framework to accepted claims that is non-monotonic.
 
 For a claim `p`, let `support(P, p)` be its complete checked support arguments and `holes(P, p)` its
+incomplete alternatives: the members of `Holes(P)` whose conclusion is `≡ p`, each with its
 unresolved root obligations. Claim status uses this priority:
 
 ```text
@@ -1301,7 +1443,10 @@ defeated  if support(P,p) is nonempty and every such a is labelled out
 exists, the priority above decides status from labels alone; an open hole on some *other* alternative
 never downgrades a claim with a complete `in` argument. Instead it surfaces through a separate
 `incompleteAlternative` diagnostic (status never hides holes, but a winning complete argument is not
-suppressed by them). This makes the status function total.
+suppressed by them). This makes the status function total. Up to `lara-core@0.2` the checker
+rejected any unit with a hole, so `holes(P, p)` was empty on every accepted unit; since `@0.3` it is
+populated from the accepted unit's located holes (§4.4), the status function itself is unchanged, and
+a claim whose candidate supports are all holes reports `gap`.
 
 **`contested` provenance (resolved, N17 point 2).** `contested` is defined as grounded `undec` (the
 broad reading above), which is wider than mutual defeat: even/odd cycles and `undec`-propagation all
@@ -1426,22 +1571,27 @@ duplicate rule IDs → R2 signature → R12 policy violation
 ```
 
 The first three checks precede program checking. Within program checking, duplicate detection precedes
-cache construction; the support stage then builds one retained checked-node cache. Typed-attack
-sources, the deterministic source-major/target-major completeness scan, and downstream claim
-aggregation reuse that cache and do not re-infer support. Legacy `checkProgram`/`CheckedProgram` remains the
-unchanged generic attack-soundness boundary; detailed `ProgramAcceptance` and `CheckedUnit` carry
-attack completeness.
+cache construction; the support stage then builds one retained checked-argument cache. It rejects
+only on a support-inference failure; since `lara-core@0.3` an open mandatory obligation is not a
+rejection, and the cache is partitioned once into complete nodes and located holes (§4.4). Typed
+attacks are checked against every declared argument; the AF and the deterministic
+source-major/target-major completeness scan use the complete nodes and the attacks whose source is
+complete. Typed-attack sources, the completeness scan, compilation, hole reporting and downstream
+claim aggregation reuse that cache and do not re-infer support. Legacy
+`checkProgram`/`CheckedProgram` remains the generic attack-soundness boundary; detailed
+`ProgramAcceptance` and `CheckedUnit` carry attack completeness and the located holes.
 
 `Lara.Consistency.claimSupportFor` aggregates exactly all retained complete checked nodes whose
 conclusions canonically match the requested proposition. The result-7 headline
 `contrary_claims_not_both_justified` consumes only claims computed by `completeClaimFor`; it does not
 quantify over arbitrary caller-supplied claims. Ordered pairs include the self-pair, so the missing
 self-edge is rejected and a typed self-edge prevents joint/self justification. `completeClaimFor`
-is a complete-only projection with definitionally empty holes—not an implementation of full
-`holes(P,p)` or `incompleteAlternative`.
+is a complete-only projection with definitionally empty holes. That is sound for status, which reads
+only complete support (`Semantics.observe_holes_independent`); the incomplete alternatives of a
+claim are read from the accepted unit's located holes, not from this projection.
 
-This mechanized result does not claim Path A, a production Haskell checker, NL-to-structure
-validation, full hole computation, or incomplete-alternative computation. `Lara.Grounded` is the
+This mechanized result does not claim Path A, a production Haskell checker, or NL-to-structure
+validation, and its consistency statement is about complete claims only. `Lara.Grounded` is the
 proof-oriented executable reference evaluator; its transparent repeated scans are not the deferred
 optimized production evaluator.
 
@@ -1449,7 +1599,8 @@ _M3 status (2026-07-27):_ the deferred Haskell pieces named here have since land
 mirror of this frozen semantics, with no change to the definitions above: the production checker is
 `Lara.Check.checkUnit`, the optimized production evaluator is `Lara.Runtime` (cached adjacency,
 verdict byte-identical to the reference path), and the `holes(P,p)` / `incompleteAlternative`
-diagnostics of §8 are computed by `Lara.Reporting`. Soundness remains carried by the Lean proofs;
+diagnostics of §8 are computed by `Lara.Reporting`, which since `lara-core@0.3` reads the accepted
+unit's located holes rather than rescanning arguments. Soundness remains carried by the Lean proofs;
 the two implementations are cross-checked byte-for-byte through the `Lara.Wire` differential anchor.
 
 ## 9. Static and semantic results required before freeze
@@ -1558,9 +1709,21 @@ undercut d1 a1.rule
 status c1
 ```
 
-This example is intentionally incomplete: `a1` leaves `external_validity` open, so the v0.1 checker
-rejects the unit with `incomplete-argument` (§4.4). Dropping `a1` instead makes `c1` report `gap`;
-`examples/running-example/run1/` is that shape. The worked examples under `examples/` (each with a
+This example is intentionally incomplete: `a1` leaves the mandatory question `external_validity`
+open, so `a1` is a hole (§4.4). Under `lara-core@0.3` the unit is accepted rather than rejected:
+`a1` is not an AF node, `c1` has no complete support and reports `gap`, and the verdict's `holes`
+section reports `a1` at its declaration index with the one obligation `external_validity`, located
+at `a1`'s root: `(obligation external_validity (pos))`. The undercut
+`d1 a1.rule` is a typed attack from a complete source onto the root of a hole; it is kept, but no
+complete argument contains `a1`'s root, so it produces no edge. Before `@0.3` the checker rejected
+this unit with `incomplete-argument`, and the only accepted way to express the gap was to omit `a1`,
+which loses the information about which question is missing. `examples/running-example/run1/`
+carries the `@0.3` shape of the same situation: it declares run 2's support argument `a1`
+(`controlled_experiment` from `e1`, discharging `randomization` with `e2` and `adequate_power` with
+`e3`) without the leaf `e6`, so the mandatory question `external_validity` stays open, and its
+verdict reports `a1` in the `holes` section with the obligation `external_validity` at its root
+beside `c1`'s
+`gap` status. The worked examples under `examples/` (each with a
 derived `example.core.sexp` wire anchor and `expected.json` golden) are the M3/M5 golden-test
 artifacts built against this frozen spec (`engineering-plan.md` §5).
 
@@ -1594,10 +1757,18 @@ well-sorted; it is simply not in scope, which is policy well-formedness. One cla
 R2 stays purely about sorts.
 
 
-Every ill-formed construct fails in exactly one located class. Besides R1–R14, the checker emits four
-named kinds from its fixed stage order: `duplicate-rule`, `duplicate-argument`,
-`incomplete-argument` (an open mandatory obligation, §4.4), and `missing-conflict` (a licensed
-conflict with no covering attack); `docs/rejection-surface.md` §2 anchors each. The enumeration is frozen so the
+**AMENDMENT (`lara-core@0.3`): `incomplete-argument` is retired.** An argument that type-checks
+with an open mandatory obligation is no longer ill-formed: it is accepted as a located hole (§4.4)
+and reported in the verdict's `holes` section. The named kind, its wire tag and its error
+constructors are removed from both runtimes. No R-class moves: R5 still rejects a question that is
+in neither the discharge map nor the open set `H`, or a discharge or an `open` that names an
+undeclared question; and a hole's supports and attacks are still type-checked, so a later R-class defect is no longer
+masked by an earlier incomplete argument.
+
+Every ill-formed construct fails in exactly one located class. Besides R1–R14, the checker emits
+three named kinds from its fixed stage order: `duplicate-rule`, `duplicate-argument`, and
+`missing-conflict` (a licensed conflict between complete arguments with no covering attack from a
+complete source); `docs/rejection-surface.md` §2 anchors each. The enumeration is frozen so the
 diagnostics surface (`Lara.Diagnostics`), the golden negative examples, and the M5 mutation suite
 share one spine: every class must be exercised by at least one rejected example and one mutation.
 
@@ -1616,7 +1787,7 @@ share one spine: every class must be exercised by at least one rejected example 
 | **R11** attack-relation | no declared contrary pair matches (rebut/undermine); no declared exception matches (undercut); target rule strict | the attack declaration | §7.1 |
 | **R12** policy-wf | a rule pattern variable occurs outside the rule's declared parameters (§4.1); or a `contrary` side may overlap a strict-reachable pattern at the instance level (Path B validator) | the policy, naming the scope violation or rule + pair | §4.1, §8.1 |
 | **R13** backend | certificate replay rejects; unknown backend or version; theory digest not allowlisted | the certified instance | §5 |
-| **R14** codec | wire program fails to decode to the abstract syntax: malformed S-expression, S-expression nesting deeper than the reader's bound (see below), unknown fields per `lara-core@0.2`, presentation parse error | the wire location | §1, §2.1 |
+| **R14** codec | wire program fails to decode to the abstract syntax: malformed S-expression, S-expression nesting deeper than the reader's bound (see below), unknown fields per the current core version, an input naming any other core version (§2.1), presentation parse error | the wire location | §1, §2.1 |
 
 **The reader's nesting bound is part of R14, and part of the shared contract.**
 Both readers — `Lara.Wire.parseSExprBS` and `Lara.Driver.parseWire` — refuse an
@@ -1651,9 +1822,10 @@ first form is refused with the depth message at line 1, column `maxDepth + 2`).
 The refusal behaviour is unchanged — no corpus, wire, mutant or replay-identity
 byte moves, and the three gates above still pass unmodified.
 
-Two non-classes, deliberately: **quarantine** (§4.3) is not rejection — the source boundary prunes
+Three non-classes, deliberately: **quarantine** (§4.3) is not rejection — the source boundary prunes
 the leaf, every dependent argument, and raw-endpoint attacks before core checking; **attack
-cycles** are not rejection — they evaluate to `undec`/`contested` (§8). The engineering-plan
+cycles** are not rejection — they evaluate to `undec`/`contested` (§8); and since `lara-core@0.3` a
+**well-typed incomplete argument** is not rejection — it is a located hole (§4.4). The engineering-plan
 mutation list maps onto this spine: wrong formulas → R2/R4, undeclared leaves → R1, hidden policy
 extension → R1/R12, bad attack targets → R10/R11, mis-declared obligations → R5, codec
 corruption → R14.
@@ -1692,11 +1864,40 @@ to the calculus — members are merged into one unit, cross-member attacks are c
 contraries, and that unit goes through the ordinary §8 pipeline, so a map can accept nothing a
 hand-written equivalent unit would not.
 
-**Two versioned schemas**, versioned independently of `lara-core@0.2`: `lara-map@1`, the declarative
-manifest; and `map-verdict@1`, the composite verdict, whose leading `(scope map)` marker keeps it
-distinguishable from a §10 `(verdict …)`, and whose statuses are the plain §8 four-state ones — a
-map refuses any member carrying a nonempty §4.3 admission or group-pruning audit, so
-`evidence-blocked` is unreachable by construction.
+**Two versioned schemas**, versioned independently of the core (now `lara-core@0.3`): `lara-map@1`,
+the declarative manifest; and `map-verdict@2`, the composite verdict, whose leading `(scope map)`
+marker keeps it distinguishable from a §10 `(verdict …)`, and whose statuses are the plain §8
+four-state ones — a map refuses any member carrying a nonempty §4.3 admission or group-pruning
+audit, so `evidence-blocked` is unreachable by construction.
+
+**The composite verdict (`map-verdict@2`).** The grammar is:
+
+```text
+MAP-VERDICT ::= (map-verdict@2 (scope map) (schema lara-map-verdict@2)
+                  (core lara-core@0.3) (policy POLICY-ID)
+                  (backends (backend BACKEND-ID VERSION)*)
+                  (members (member ALIAS PATH (artifact DIGEST))+)
+                  (nodes (node ALIAS ARG-ID NAT)*)
+                  (labels (NAT LABEL)*)
+                  (edges (NAT NAT)*)
+                  (statuses (status ALIAS CLAIM-NAME <atom> STATUS)*)
+                  MAP-HOLES?)
+MAP-HOLES   ::= (holes (hole ALIAS ARG-ID (obligations QUESTION-ID+))+)
+```
+
+Every `NAT` in `nodes`, `labels` and `edges` is an **AF index** of the linked unit: the three
+sections share one index space, which is not the linked declaration position once a member declares
+a located hole (§4.4), because a hole is declared but is never an AF node. `nodes` lists every
+`(member alias, member-local argument id)` handle whose linked argument is complete, in member order
+and then that member's declaration order, and covers every labelled index; a merged argument has one
+row per handle. `holes` lists every handle whose linked argument is a located hole, in the same
+handle order, with that hole's exact mandatory root obligations in core order (§4.4); it is omitted
+when the linked unit has no hole and is never present but empty. No handle appears in both sections.
+Holes are reported by member handle only: a hole has no AF index, and its linked declaration
+position is an artifact of the merge. The map's own cross-member saturation never generates an
+attack sourced at or aimed at a hole; a member's declared attacks touching one are carried into the
+linked unit and treated by §7.1 and §8 like any other (`docs/located-gap-decision.md` D4, D6).
+`map-verdict@1`, whose `nodes` used linked declaration positions, is refused.
 
 **Errors.** Map failures use their own versioned error sum with its own two-exit-code split
 (ill-formed map vs. checked-and-rejected map). No map fault is classified as a §10.1 R-code; where a
@@ -1708,6 +1909,9 @@ rejection unchanged.
 replay-identity, or golden byte, and no `Lara.Wire` encoder. The only core-side edit is two additive
 exports of an existing `Lara.Wire` production (§5's `<atom>` form), so `fixtures/`, `corpus/`,
 `corpus-units/`, and the differential goldens are bit-identical across this change.
+The move to `map-verdict@2` rides on the `lara-core@0.3` cutover and changes only the map's own
+goldens (`examples/agreement-map-multi/map.verdict.sexp` and `test/fixtures/map/**/map.verdict.sexp`);
+the manifest grammar and the parity envelope are unchanged.
 
 `docs/multi-artifact-composition-decision.md` is authoritative for this section and carries the
 detail that would rot if duplicated here: the two grammars, the shared-contract equality rules,

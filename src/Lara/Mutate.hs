@@ -102,7 +102,7 @@ data MutationOp
   | OpUnlicensedAttack -- ^ self-rebut with no declared contrary → R11
   | OpDropCoveringAttack -- ^ drop the sole cover of a contrary pair → missing conflict
   | OpOpenObligation -- ^ drop a mandatory discharge, no hole → R5
-  | OpHoleObligation -- ^ swap a mandatory discharge for a declared hole → obligation gate
+  | OpHoleObligation -- ^ swap a mandatory discharge for a declared hole → accepted located hole
   | OpTrustedAssurance -- ^ @trusted@ on a defeasible instance → R7
   | OpCertTheorySwap -- ^ certificate theory not allowlisted → R7
   | OpCertPayloadTamper -- ^ corrupt an allowlisted cert payload → R13

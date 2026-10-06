@@ -29,15 +29,19 @@ import qualified Lara.Strict.Ord as Ord
 import qualified Lara.Strict.RA as RA
 
 -- | The core-format version embedded in every replay identity. __Hard
--- cutover__: @lara-core\@0.1@ is retired, not carried alongside (decision
--- 5). Nothing is released, so there is no external compatibility burden, and a
--- dual-version decoder would have to answer what a @0.1@ unit's absent
--- signature means under strict mode — the answer being "nothing legal", since
--- the empty Σ accepts only symbol-free units.
+-- cutover__ at each bump: an older version is retired, not carried alongside.
+-- @lara-core\@0.1@ went at the signature bump (decision 5): a dual-version
+-- decoder would have had to answer what a @0.1@ unit's absent signature means
+-- under strict mode — "nothing legal", since the empty Σ accepts only
+-- symbol-free units. @lara-core\@0.2@ went at the located-gap bump
+-- (@docs\/located-gap-decision.md@ D1): @0.3@ accepts units @0.2@ rejected
+-- and adds the verdict's @holes@ section, so a @0.2@ identity would name a
+-- different acceptance contract. Nothing is released, so there is no external
+-- compatibility burden.
 --
 -- The replay-id grammar embeds this string, so __every__ @.sexp@ carrying a
 -- replay section changes bytes at the bump, not only those with a signature.
-data CoreVersion = LaraCoreV02
+data CoreVersion = LaraCoreV03
   deriving (Eq, Show)
 
 data ReplayId = ReplayId

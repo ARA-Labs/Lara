@@ -18,8 +18,10 @@
 #     alternative-cause counter-evidence, so it lowers as an absent mandatory CQ, not an undercut.
 #   * A second mandatory gap reinforces it: the null-effect half (ADVI/GSM at multiple batch
 #     sizes) is unsupported by E01/E02 as written and rests on expected-outcome text; and no
-#     variance CQ is supplied. Either mandatory gap suffices — no complete component_ablation
-#     instance is declarable, so the claim lands E2-style gap.
+#     variance CQ is supplied. Either mandatory gap suffices. The incomplete component_ablation
+#     argument is declared as a located hole with `open single_variable` and `open
+#     variance_reported` (lowering re-done for issue #15 under `lara-core@0.3`): it is not an AF
+#     node, so the claim lands `gap` on empty complete support.
 #
 # Expected verdict is at the bottom of this file (golden oracle).
 
@@ -48,11 +50,15 @@ leaf e2 : matched_protocol(e01)
   provenance = ai-executed
   refs       = [logic/experiments.md#E01-Metrics, logic/experiments.md#E04-step-8]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... and the incomplete argument is declared as a located hole ------------------------------
 
-# (Intentionally no `arg`: isolated(batch_size, e01) has no honest leaf — the lambda_t = BD
-# coupling confounds batch size with regularization strength except in E04 — and corpus-v1 makes
-# single_variable mandatory. The null-effect half is likewise unsupported. Complete support is empty.)
+# isolated(batch_size, e01) has no honest leaf (lambda_t = BD confounds batch size with
+# regularization strength except in E04) and variance_reported(e01) has none either; corpus-v1
+# makes both mandatory, so both stay open: a1 is a hole, not an AF node.
+arg a1 : supports(c06) by component_ablation(batch_size, bam, convergence_speed, e01)
+  discharge protocol_parity   with e2
+  open      single_variable
+  open      variance_reported
 
 status c06
 
@@ -60,5 +66,7 @@ status c06
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
 # Compiled AF: no arguments.
+# Located hole: a1 (open obligations [single_variable, variance_reported]; sources no attacks).
 # Claim status:
-#   c06 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c06 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8 — the hole
+#               is reported, not a node)

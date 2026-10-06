@@ -14,8 +14,9 @@
 #   * human_evaluation's mandatory rater_power CQ (sufficient_raters) maps onto the annotation's
 #     mandatory "per-gamma vote counts and evaluator counts sufficient, with variability for the
 #     75/52 figures?" — annotated unmet-gap (E05 metrics list only total/unique vote counts; no
-#     per-gamma sample size, CI, or test). An open mandatory obligation is IncompleteArgument, so
-#     NO complete arg is declarable: E2-style gap.
+#     per-gamma sample size, CI, or test). The human_evaluation argument is therefore incomplete:
+#     it is declared as a located hole with `open rater_power` (lowering re-done for issue #15
+#     under lara-core@0.3); the claim stays `gap` on empty complete support.
 #   * blinding (mandatory) is annotated met and its leaf is supplied. Post-hoc gamma=3 selection
 #     maps to the OPTIONAL preregistration CQ (no status effect); the 52%-establishes-
 #     non-degradation CQ is the null conjunct's equivalence question, outside the binding atom.
@@ -46,17 +47,23 @@ leaf e2 : blinded(e05)
   provenance = ai-executed
   refs       = [logic/experiments.md#E05-Procedure-step-3, logic/experiments.md#E05-Setup]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... but the argument is incomplete (a located hole) ----------------------------------------
 
-# (Intentionally no `arg`: sufficient_raters(e05) has no honest leaf — E05 reports no per-gamma
-# vote counts, confidence intervals, or significance for the 75%/52% rates — and human_evaluation
-# makes that obligation mandatory. The complete-support set is therefore empty.)
+# rater_power is open (no per-gamma vote counts, confidence intervals, or significance for the
+# 75%/52% rates) and mandatory, so a1 is a hole; the optional preregistration (post-hoc gamma=3
+# selection) is open too.
+arg a1 : supports(c05) by human_evaluation(cfg_negative_prompting, vanilla, system_prompt_following, e05)
+  discharge blinding        with e2
+  open      rater_power
+  open      preregistration
 
 status c05
 
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
-# Compiled AF: no arguments.
+# Compiled AF: no arguments (the hole is not a node).
+# Located hole: a1, open obligations [rater_power]; it sources no attacks.
 # Claim status:
-#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8;
+#          the located hole is reported in `holes`, not counted as support)

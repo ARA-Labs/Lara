@@ -42,6 +42,7 @@ import Lara.Driver
 import Lara.Map.Driver
 import Lara.Examples
 import Lara.Examples.AttackCompleteness
+import Lara.Examples.EvidenceBlocked
 import Lara.Invariants
 import Lara.Realizability
 import Lara.Complexity.Numeral
@@ -61,11 +62,16 @@ import Lara.Examples.Semantics
 import Lara.Examples.SurfaceTransport
 import Lara.Examples.SurfaceTransportAttack
 import Lara.Examples.SurfaceTransportContext
+import Lara.Examples.SurfaceHoles
 import Lara.Update
+import Lara.Update.Discharge
+import Lara.Update.Completion
 import Lara.Examples.Update
+import Lara.Examples.UpdateCompletion
 import Lara.Invariants.Merge
 import Lara.Context.Fragment
 import Lara.Context.Link
+import Lara.Context.LinkHoles
 import Lara.Context.Merge
 import Lara.Context.Compose
 import Lara.Context.Equivalence
@@ -80,6 +86,7 @@ import Lara.Context.Holes.Transport
 import Lara.Examples.TermHoles
 import Lara.Context.Surface
 import Lara.Examples.Linking
+import Lara.Examples.LinkHoles
 import Lara.Examples.CertificateCollapse
 import Lara.Examples.BackendComposition
 import Lara.Surface.Syntax
@@ -122,6 +129,7 @@ import Lara.Examples.PWWire
 import Lara.Examples.PWFinite
 import Lara.Examples.PWFileHost
 import Lara.PW.Run
+import Lara.Examples.PWRun
 
 open Lara
 
@@ -617,6 +625,7 @@ open Lara
 #print axioms Lara.Support.mem_questionNames
 #print axioms Lara.Support.leaves_declared
 #print axioms Lara.Support.hasSupport_unique
+#print axioms Lara.Support.hasSupport_obligations_indep
 #print axioms Lara.Support.hasSupport_inst_root
 #print axioms Lara.Support.hasSupport_leaf_gamma
 #print axioms Lara.Support.hasSupport_mono_gamma
@@ -714,7 +723,6 @@ open Lara
 -- Proof-bearing whole-program construction: deterministic duplicate boundary,
 -- aligned checked-source cache, strengthened R1 endpoint boundary, and exact
 -- relational soundness/completeness.
-#print axioms Lara.Check.incompleteArgument_no_rejectClass
 #print axioms Lara.Check.firstDuplicate_none_iff
 #print axioms Lara.Check.CheckedArguments.cache_nodup
 #print axioms Lara.Check.lookupChecked_term
@@ -723,7 +731,6 @@ open Lara
 #print axioms Lara.Check.checkProgram_complete
 #print axioms Lara.Check.checkProgram_accepted_source_declared
 #print axioms Lara.Check.checkProgram_accepted_target_declared
-#print axioms Lara.Check.checkProgram_nodes_complete
 
 -- Spec §8 compile freeze: result 4 both halves (no untyped node or attack),
 -- subargument closure extends the direct attack, and the N16 bridge at both
@@ -896,6 +903,7 @@ open Lara
 #print axioms Lara.Examples.PExCheck_success
 #print axioms Lara.Examples.PExCheck_ok
 #print axioms Lara.Examples.PEx_args
+#print axioms Lara.Examples.PEx_holes
 #print axioms Lara.Examples.PEx_atts
 #print axioms Lara.Examples.supportTerm_nested_structural_equality
 #print axioms Lara.Examples.supportTerm_certificate_payload_distinct
@@ -907,8 +915,11 @@ open Lara
 #print axioms Lara.Examples.check_program_certificate_payload_distinct
 #print axioms Lara.Examples.check_program_duplicate_first_pair
 #print axioms Lara.Examples.check_program_duplicate_crossing_first_pair
-#print axioms Lara.Examples.check_program_incomplete_exact
-#print axioms Lara.Examples.check_program_incomplete_not_rejection_class
+#print axioms Lara.Examples.check_program_incomplete_is_hole
+#print axioms Lara.Examples.check_program_incomplete_hole_report
+#print axioms Lara.Examples.check_program_incomplete_no_complete_support
+#print axioms Lara.Examples.check_program_hole_attack_closes_onto_complete
+#print axioms Lara.Examples.check_program_hole_rebut_no_edge
 #print axioms Lara.Examples.check_program_support_error_wrapped
 #print axioms Lara.Examples.check_program_first_argument_failure
 #print axioms Lara.Examples.check_program_undeclared_source
@@ -994,6 +1005,7 @@ open Lara
 #print axioms Lara.Grounded.statusC_all_out_not_justified
 #print axioms Lara.Consistency.wellFormed_contrary_target_attackable
 #print axioms Lara.Consistency.mem_claimSupportFor_iff
+#print axioms Lara.Consistency.completeClaimFor_gap_of_only_holes
 #print axioms Lara.Consistency.contrary_args_not_both_grounded
 #print axioms Lara.Consistency.contrary_claims_not_both_justified
 
@@ -1075,6 +1087,148 @@ open Lara
 #print axioms Lara.Examples.GroundedConsistency.computed_self_claim_not_justified
 #print axioms Lara.Examples.GroundedConsistency.computed_self_claim_result7
 
+-- lara-core@0.3 located gaps (spec §4.4, §8; docs/located-gap-decision.md).
+-- Accepted units may carry typed arguments with open mandatory obligations as
+-- located holes. The checker partitions its retained cache once into complete
+-- nodes and holes and proves agreement with the inference-based specification
+-- views; attacks sourced at holes are typed then inert (D4); attacks on a
+-- complete occurrence shared with a hole keep their closure edges (D6); a
+-- claim with no complete support is `gap`; and status depends only on the
+-- complete arguments and their complete-to-complete closure coverage.
+#print axioms Lara.Unit.CheckedUnit.holes_terms
+#print axioms Lara.Compile.lookupDis_some_getElem?
+#print axioms Lara.Compile.hasSupport_subterm
+#print axioms Lara.Compile.complete_contains_complete
+#print axioms Lara.Compile.complete_not_contains_hole
+#print axioms Lara.Compile.CheckedProgram.target_declared_of_holes_nil
+#print axioms Lara.Compile.no_edge_of_not_arg
+#print axioms Lara.Compile.closure_reaches_shared_occurrence
+#print axioms Lara.Compile.hole_occurrence_reaches_no_arg
+#print axioms Lara.Compile.checkedAF_eq_of_coverage
+#print axioms Lara.Compile.status_independent_of_holes
+#print axioms Lara.Compile.checkedAF_independent_of_holes
+#print axioms Lara.Check.argComplete_iff
+#print axioms Lara.Check.argHole_iff
+#print axioms Lara.Check.argComplete_of_hasSupport
+#print axioms Lara.Check.argHole_of_hasSupport
+#print axioms Lara.Check.mem_completeArgs_iff
+#print axioms Lara.Check.mem_holeArgs_iff
+#print axioms Lara.Check.completeArgs_holeArgs_disjoint
+#print axioms Lara.Check.mem_completeArgs_or_holeArgs
+#print axioms Lara.Check.completeArgs_append
+#print axioms Lara.Check.holeArgs_append
+#print axioms Lara.Check.completeArgs_congr
+#print axioms Lara.Check.completeArgs_subset
+#print axioms Lara.Check.completeArgs_sublist
+#print axioms Lara.Check.completeArgs_length_le
+#print axioms Lara.Check.completeArgs_eq_self
+#print axioms Lara.Check.holeArgs_eq_nil
+#print axioms Lara.Support.hasSupport_congr_gamma_on
+#print axioms Lara.Check.argComplete_congr_gamma_on
+#print axioms Lara.Check.argHole_congr_gamma_on
+#print axioms Lara.Check.mem_liveAttacks_iff
+#print axioms Lara.Check.liveAttacks_eq_self
+#print axioms Lara.Check.liveAttacks_congr
+#print axioms Lara.Check.liveAttacks_append
+#print axioms Lara.Check.liveAttacks_snoc_unused_source
+#print axioms Lara.Check.covered_liveAttacks_iff
+#print axioms Lara.Check.attackComplete_iff_complete_live
+#print axioms Lara.Check.attackComplete_completeArgs_iff
+#print axioms Lara.Check.coveredB_liveAttacks
+#print axioms Lara.Check.mem_declPositions_iff
+#print axioms Lara.Check.declPositions_map
+#print axioms Lara.Check.declPositions_congr
+#print axioms Lara.Check.declPositions_sorted
+#print axioms Lara.Check.declPositions_cons
+#print axioms Lara.Check.declPositions_length
+#print axioms Lara.Check.eq_of_pairwise_lt_of_mem_iff
+#print axioms Lara.Check.DeclPartition.mem_nodeDecls_iff
+#print axioms Lara.Check.DeclPartition.mem_holeIndices_iff
+#print axioms Lara.Check.DeclPartition.nodeDecls_eq
+#print axioms Lara.Check.DeclPartition.holeIndices_eq
+-- Located obligation sites (Lara.Check.HoleSites, located-gap decision D12)
+#print axioms Lara.Check.mem_prefixSites
+#print axioms Lara.Check.mem_ownSites
+#print axioms Lara.Check.mem_openSitesList
+#print axioms Lara.Check.mem_openSitesDis
+#print axioms Lara.Check.mem_openSites_inst
+#print axioms Lara.Check.mem_sitesFor
+#print axioms Lara.Check.lookupDis_mem
+#print axioms Lara.Check.lookupDis_of_nodup
+#print axioms Lara.Check.openSites_sound
+#print axioms Lara.Check.openSites_complete
+#print axioms Lara.Check.mem_openSites_iff
+#print axioms Lara.Check.mem_obligations_iff_sites
+#print axioms Lara.Check.sitesFor_ne_nil
+#print axioms Lara.Check.openSites_nodup
+#print axioms Lara.Check.sitesFor_nodup
+#print axioms Lara.Check.obligationSites_questions
+#print axioms Lara.Check.obligationSites_adequate
+#print axioms Lara.Check.holeObligationSites_adequate
+#print axioms Lara.Driver.holeRows_obligations
+#print axioms Lara.Check.CheckedArguments.holes_terms
+#print axioms Lara.Check.CheckedArguments.partition
+#print axioms Lara.Check.CheckedArguments.typed
+#print axioms Lara.Check.checkProgram_complete_holes
+#print axioms Lara.Check.checkProgramDetailed_complete_holes
+#print axioms Lara.Check.Unit.termsWellSorted_filter
+#print axioms Lara.Check.Unit.checkUnit_complete_holes
+#print axioms Lara.Check.Unit.CheckUnitSound.raw_attack_complete
+#print axioms Lara.Check.Unit.CheckUnitSound.args_eq_of_complete
+#print axioms Lara.Check.Unit.CheckUnitSound.atts_eq_of_complete
+#print axioms Lara.Check.Unit.CheckUnitSound.holes_eq_nil_of_complete
+#print axioms Lara.Check.Unit.CheckUnitSound.holes_iff
+#print axioms Lara.Check.Unit.CheckUnitSound.hole_reports_exact
+#print axioms Lara.Check.Unit.CheckUnitSound.nodeDecls_eq
+#print axioms Lara.Check.Unit.CheckUnitSound.holeIndices_eq
+#print axioms Lara.Check.Unit.CheckUnitSound.hole_inert_source
+#print axioms Lara.Check.Unit.gap_of_only_holes
+
+-- Conservative reporting with located holes (spec §4.3; decision §5, D7):
+-- the reference carrier `D` excludes typed holes and keeps unclassified
+-- quarantined terms, the checked carrier `K` holds the retained complete
+-- nodes, and the seed is `(D \ K)` plus retained complete nodes that lost an
+-- incoming edge. `K ⊆ D` is obligation transport on supported retained terms;
+-- nothing quarantined means nothing blocked, holes or not.
+#print axioms Lara.BlockedProgram.mem_retainedIndices_iff
+#print axioms Lara.BlockedProgram.checkedCarrier_eq
+#print axioms Lara.BlockedProgram.referenceCarrier_eq
+#print axioms Lara.BlockedProgram.retainedIndices_mono
+#print axioms Lara.BlockedProgram.retainedIndices_congr
+#print axioms Lara.BlockedProgram.retainedArguments_keepComplete
+#print axioms Lara.BlockedProgram.keepComplete_terms
+#print axioms Lara.BlockedProgram.coveredB_liveAttacks
+#print axioms Lara.BlockedProgram.referenceLive_of_keepComplete
+#print axioms Lara.BlockedProgram.complete_subset_reference
+#print axioms Lara.BlockedProgram.blockedQueries_eq_nil_of_keep_all
+#print axioms Lara.BlockedProgram.referenceLive_indices_of_keep_all
+#print axioms Lara.BlockedProgram.blockedSeed_eq_nil_of_keep_all
+#print axioms Lara.BlockedProgram.blockedSet_nil
+#print axioms Lara.BlockedProgram.supportBlocked_nil
+#print axioms Lara.BlockedProgram.production_justified_nonpromotion_of_keep_all
+#print axioms Lara.BlockedProgram.checked_args_keepComplete
+#print axioms Lara.BlockedProgram.checked_atts_live
+#print axioms Lara.BlockedProgram.referenceLive_eq_notHole
+#print axioms Lara.BlockedProgram.checked_complete_subset_notHole
+#print axioms Lara.BlockedProgram.referenceLive_indices_eq_notHole
+#print axioms Lara.BlockedProgram.notHole_indices_eq_complete_of_typed
+#print axioms Lara.BlockedProgram.checked_production_justified_nonpromotion_notHole
+#print axioms Lara.Groups.usesLeaf_eq_true_iff
+#print axioms Lara.Groups.keepArg_leaves
+#print axioms Lara.Admission.buildGamma_quarantineLeaves
+#print axioms Lara.Admission.prune_gamma_agree
+#print axioms Lara.Examples.EvidenceBlocked.tMixDone_complete
+#print axioms Lara.Examples.EvidenceBlocked.tHolePair_hole
+#print axioms Lara.Examples.EvidenceBlocked.tHoleL2_hole
+#print axioms Lara.Examples.EvidenceBlocked.hole_alone_reference_eq_complete
+#print axioms Lara.Examples.EvidenceBlocked.hole_alone_quarantine_not_blocked
+#print axioms Lara.Examples.EvidenceBlocked.hole_alone_quarantine_blocked_under_all_declared
+#print axioms Lara.Examples.EvidenceBlocked.dropped_attack_seed
+#print axioms Lara.Examples.EvidenceBlocked.dropped_attack_onto_hole_blocks_support
+#print axioms Lara.Examples.EvidenceBlocked.unclassified_not_hole
+#print axioms Lara.Examples.EvidenceBlocked.unclassified_quarantine_blocks_support
+#print axioms Lara.Examples.EvidenceBlocked.clean_unit_with_hole_not_blocked
+
 -- Result 9 (backend replacement / Theorem 2, Model A): uniform injective
 -- certificate relabel preserves the compiled AF and every claim status.
 #print axioms Lara.Erase.mapAssur_injective
@@ -1097,6 +1251,7 @@ open Lara
 #print axioms Lara.Erase.hasSupport_mapAssur
 #print axioms Lara.Erase.hasAttack_mapAssur
 #print axioms Lara.Erase.mapCertProg_args
+#print axioms Lara.Erase.mapCertProg_holes
 #print axioms Lara.Erase.mapCertProg_atts
 #print axioms Lara.Erase.backend_replacement_transport
 
@@ -1497,6 +1652,7 @@ outside the public audit surface. -/
 #print axioms Lara.Update.applyUpdate_tighten_ok
 #print axioms Lara.Update.applyUpdate_addAttack_ok
 #print axioms Lara.Update.applyUpdate_addInstance_ok
+#print axioms Lara.Update.applyUpdate_addInstance_hole_ok
 
 /-! ### M3 — preservation support -/
 
@@ -1533,6 +1689,15 @@ outside the public audit surface. -/
 #print axioms Lara.Grounded.statusC_ne_defeated_of_undec
 #print axioms Lara.Grounded.SinkExtension.justified_preserved
 #print axioms Lara.Grounded.SinkExtension.contested_not_defeated
+#print axioms Lara.Grounded.SinkEmbedding
+#print axioms Lara.Grounded.SinkEmbedding.directIn_forward
+#print axioms Lara.Grounded.SinkEmbedding.directOut_forward
+#print axioms Lara.Grounded.SinkEmbedding.directIn_backward
+#print axioms Lara.Grounded.SinkEmbedding.directOut_backward
+#print axioms Lara.Grounded.SinkEmbedding.label_old
+#print axioms Lara.Grounded.SinkEmbedding.justified_preserved
+#print axioms Lara.Grounded.SinkEmbedding.contested_not_defeated
+#print axioms Lara.Grounded.labelC_inn_of_unattacked
 
 #print axioms Lara.Consistency.claimSupportFor
 #print axioms Lara.Consistency.completeClaimFor
@@ -1551,6 +1716,180 @@ outside the public audit surface. -/
 #print axioms Lara.Update.nonInstance_gap_fixed
 #print axioms Lara.Update.addInstance_sink_status_monotone
 
+-- Obligations and holes across updates (docs/located-gap-decision.md §6).
+#print axioms Lara.Update.typed_obligations_preserved
+#print axioms Lara.Update.addLeaf_obligations_preserved
+#print axioms Lara.Update.addAttack_obligations_preserved
+#print axioms Lara.Update.tighten_obligations_preserved
+#print axioms Lara.Update.addInstance_holes_persist
+#print axioms Lara.Update.addInstance_hole_core_fixed
+
+/-! ### Completion updates — in-place discharge (D13) and atomic batches (D14) -/
+
+#print axioms Lara.Update.AtomicEdit
+#print axioms Lara.Update.DischargeOpen
+#print axioms Lara.Update.dischargeOpenB
+#print axioms Lara.Update.dischargeOpenB_iff
+#print axioms Lara.Update.dischargeRows
+#print axioms Lara.Update.AtomicEdit.applyRaw
+#print axioms Lara.Update.applyBatchFrom
+#print axioms Lara.Update.applyBatch
+#print axioms Lara.Update.applyUpdate_dischargeOpen_notDischargeable
+#print axioms Lara.Update.applyUpdate_atomic_batchRejected
+#print axioms Lara.Update.applyUpdate_dischargeOpen_ok_iff
+#print axioms Lara.Update.applyUpdate_dischargeOpen_target
+#print axioms Lara.Update.applyUpdate_atomic_ok_iff
+#print axioms Lara.Update.applyUpdate_atomic_target
+#print axioms Lara.Update.usesLeaf_true_iff
+
+-- Term-level discharge (lean/Lara/Update/Discharge.lean).
+#print axioms Lara.Update.Discharge.replaceDis
+#print axioms Lara.Update.Discharge.closeOpen
+#print axioms Lara.Update.Discharge.dischargeAt
+#print axioms Lara.Update.Discharge.OpenAt
+#print axioms Lara.Update.Discharge.openAtB
+#print axioms Lara.Update.Discharge.openAtB_iff
+#print axioms Lara.Update.Discharge.lookupDis_append_of_some
+#print axioms Lara.Update.Discharge.lookupDis_append_of_none
+#print axioms Lara.Update.Discharge.lookupDis_append_cases
+#print axioms Lara.Update.Discharge.lookupDis_replaceDis
+#print axioms Lara.Update.Discharge.replaceDis_map_fst
+#print axioms Lara.Update.Discharge.replaceDis_eq_set
+#print axioms Lara.Update.Discharge.lookupDis_none_of_not_mem
+#print axioms Lara.Update.Discharge.lookupDis_of_getElem?_nodup
+#print axioms Lara.Update.Discharge.OccKind
+#print axioms Lara.Update.Discharge.occKind
+#print axioms Lara.Update.Discharge.openSet
+#print axioms Lara.Update.Discharge.dischargeAt_nil
+#print axioms Lara.Update.Discharge.dischargeAt_isSome_iff
+#print axioms Lara.Update.Discharge.subterm_dischargeAt_old
+#print axioms Lara.Update.Discharge.subterm_dischargeAt_site
+#print axioms Lara.Update.Discharge.subterm_dischargeAt_new
+#print axioms Lara.Update.Discharge.subterm_dischargeAt_cases
+#print axioms Lara.Update.Discharge.OpenMandatoryAt
+#print axioms Lara.Update.Discharge.OpenMandatoryAway
+#print axioms Lara.Update.Discharge.mem_collectObligations_iff
+#print axioms Lara.Update.Discharge.mem_obligations_iff
+#print axioms Lara.Update.Discharge.hasSupport_concl_of_occKind
+#print axioms Lara.Update.Discharge.occKind_dischargeAt
+#print axioms Lara.Update.Discharge.dischargeAt_conclusion
+#print axioms Lara.Update.Discharge.lookupDis_site_none
+#print axioms Lara.Update.Discharge.mem_site_of_dischargeAt
+#print axioms Lara.Update.Discharge.dischargeAt_obligations_iff
+#print axioms Lara.Update.Discharge.dischargeAt_obligations_subset
+#print axioms Lara.Update.Discharge.dischargeAt_obligations_retained
+#print axioms Lara.Update.Discharge.dischargeAt_closes
+#print axioms Lara.Update.Discharge.dischargeAt_complete
+#print axioms Lara.Update.Discharge.dischargeAt_hasSupport
+#print axioms Lara.Update.Discharge.mem_leavesList_iff
+#print axioms Lara.Update.Discharge.mem_leavesDis_iff
+#print axioms Lara.Update.Discharge.leaves_dischargeAt
+#print axioms Lara.Update.Discharge.dischargeAt_ne
+
+-- Batch and pipeline-level discharge metatheory (lean/Lara/Update/Completion.lean).
+#print axioms Lara.Update.applyOrKeep
+#print axioms Lara.Update.applyOrKeep_of_error
+#print axioms Lara.Update.applyOrKeep_of_ok
+#print axioms Lara.Update.atomic_rejected_iff
+#print axioms Lara.Update.atomic_partial_rejected
+#print axioms Lara.Update.applyBatchFrom_append
+#print axioms Lara.Update.leafEdits
+#print axioms Lara.Update.instanceEdits
+#print axioms Lara.Update.attackEdits
+#print axioms Lara.Update.withLeaves
+#print axioms Lara.Update.applyBatchFrom_leafEdits
+#print axioms Lara.Update.applyBatchFrom_instanceEdits
+#print axioms Lara.Update.applyBatchFrom_attackEdits
+#print axioms Lara.Update.completionEdits
+#print axioms Lara.Update.completionState
+#print axioms Lara.Update.atomic_completion_complete
+#print axioms Lara.Update.dischargeRows_map_fst
+#print axioms Lara.Update.dischargeCompletionEdits
+#print axioms Lara.Update.dischargeCompletionState
+#print axioms Lara.Update.atomic_discharge_completion_complete
+#print axioms Lara.Update.AtomicEdit.Additive
+#print axioms Lara.Update.AtomicEdit.applyRaw_prefix
+#print axioms Lara.Update.applyBatchFrom_prefix
+#print axioms Lara.Update.applyUpdate_atomic_raw_prefix
+#print axioms Lara.Update.AtomicEdit.AdmittedAdditive
+#print axioms Lara.Update.atomic_additive_kept
+#print axioms Lara.Update.atomic_additive_checked_split
+#print axioms Lara.Update.atomic_additive_checked_prefix
+#print axioms Lara.Update.AcceptedRun.pruned_not_reported
+#print axioms Lara.Update.atomic_additive_clean_target
+#print axioms Lara.Update.dischargeTerm
+#print axioms Lara.Update.lookupArg_dischargeRows
+#print axioms Lara.Update.retarget
+#print axioms Lara.Update.resolveAttacks_dischargeRows
+#print axioms Lara.Update.dischargeOpen_raw_identities
+#print axioms Lara.Update.dischargeOpen_resolved
+#print axioms Lara.Update.dischargeOpen_runs
+#print axioms Lara.Update.dischargeOpen_others_persist
+#print axioms Lara.Update.dischargeOpen_row_kept
+#print axioms Lara.Update.claimSupportFor_ne_nil_of_arg
+#print axioms Lara.Update.dischargeOpen_hole_becomes_node
+
+-- Status transitions of the completion updates (lean/Lara/Update/Transitions.lean).
+#print axioms Lara.Update.insertShift
+#print axioms Lara.Update.claimSupportFor_insertShift
+#print axioms Lara.Update.sinkEmbedding_insertShift
+#print axioms Lara.Update.coreObs_not_gap_of_insert
+#print axioms Lara.Update.coreObs_gap_of_insert
+#print axioms Lara.Update.grounded_sink_monotone_of_insert
+#print axioms Lara.Update.Unattacked
+#print axioms Lara.Update.statusC_justified_of_unattacked
+#print axioms Lara.Update.coreObs_justified_of_unattacked
+#print axioms Lara.Update.publicReport_justified_of_unattacked
+#print axioms Lara.Update.dischargeOpen_completion_no_gap_entry
+#print axioms Lara.Update.dischargeOpen_completion_gap_fixed
+#print axioms Lara.Update.dischargeOpen_completion_sink_status_monotone
+#print axioms Lara.Update.dischargeOpen_completion_justified
+#print axioms Lara.Update.dischargeOpen_completion_public_justified
+#print axioms Lara.Update.AtomicEdit.AddsNoInstance
+#print axioms Lara.Update.AtomicEdit.AddsNoAttack
+#print axioms Lara.Update.atomic_additive_no_gap_entry
+#print axioms Lara.Update.atomic_instanceFree_gap_fixed
+#print axioms Lara.Update.atomic_attackFree_sink_status_monotone
+#print axioms Lara.Update.AcceptedRun.justified_of_unattacked_row
+#print axioms Lara.Update.atomic_completion_justified
+
+-- Completion fixtures (lean/Lara/Examples/UpdateCompletion.lean).
+#print axioms Lara.Examples.UpdateCompletion.stateWith
+#print axioms Lara.Examples.UpdateCompletion.coverAttack
+#print axioms Lara.Examples.UpdateCompletion.baseState
+#print axioms Lara.Examples.UpdateCompletion.completedState
+#print axioms Lara.Examples.UpdateCompletion.sequential_completion_fails
+#print axioms Lara.Examples.UpdateCompletion.completion_theorem_applies
+#print axioms Lara.Examples.UpdateCompletion.partial_batch_rejected
+#print axioms Lara.Examples.UpdateCompletion.batch_edits_checked_in_order
+#print axioms Lara.Examples.UpdateCompletion.holeState
+#print axioms Lara.Examples.UpdateCompletion.holeCompletedState
+#print axioms Lara.Examples.UpdateCompletion.atomic_keeps_old_hole
+#print axioms Lara.Examples.UpdateCompletion.gapState
+#print axioms Lara.Examples.UpdateCompletion.tMixDischarged
+#print axioms Lara.Examples.UpdateCompletion.gapDischargedState
+#print axioms Lara.Examples.UpdateCompletion.discharge_hole_becomes_node
+#print axioms Lara.Examples.UpdateCompletion.useState
+#print axioms Lara.Examples.UpdateCompletion.useCover
+#print axioms Lara.Examples.UpdateCompletion.tUseDischarged
+#print axioms Lara.Examples.UpdateCompletion.useDischargedState
+#print axioms Lara.Examples.UpdateCompletion.discharge_needs_attack
+#print axioms Lara.Examples.UpdateCompletion.discharge_completion_public_justified
+#print axioms Lara.Examples.UpdateCompletion.gapBatchState
+#print axioms Lara.Examples.UpdateCompletion.atomic_completion_public_justified
+#print axioms Lara.Examples.UpdateCompletion.tMixBoth
+#print axioms Lara.Examples.UpdateCompletion.optionalDischargedState
+#print axioms Lara.Examples.UpdateCompletion.discharge_optional_enters_gap
+#print axioms Lara.Examples.UpdateCompletion.useAttackedState
+#print axioms Lara.Examples.UpdateCompletion.discharge_outgoing_defeats
+#print axioms Lara.Examples.UpdateCompletion.quarantineRow
+#print axioms Lara.Examples.UpdateCompletion.quarantineHoleState
+#print axioms Lara.Examples.UpdateCompletion.quarantinedMeta
+#print axioms Lara.Examples.UpdateCompletion.quarantineBatch
+#print axioms Lara.Examples.UpdateCompletion.quarantineBatchState
+#print axioms Lara.Examples.UpdateCompletion.atomic_quarantined_leaf_pruned
+#print axioms Lara.Examples.UpdateCompletion.completionWitnessReport
+
 /-! ### M3 — public transition API and matrix boundaries -/
 
 #print axioms Lara.Update.PublicReport
@@ -1559,6 +1898,9 @@ outside the public audit surface. -/
 #print axioms Lara.Update.PublicReport.render
 #print axioms Lara.Update.PublicReport.publicationLabel
 
+#print axioms Lara.Update.checkedCarrierForRun
+#print axioms Lara.Update.referenceCarrierForRun
+#print axioms Lara.Update.declaredCarrier
 #print axioms Lara.Update.blockedQueriesForRun
 #print axioms Lara.Update.blockedSeedForRun
 #print axioms Lara.Update.blockedSetForRun
@@ -1574,14 +1916,14 @@ outside the public audit surface. -/
 #print axioms Lara.Update.retainedIndices_eq_range_of_clean
 #print axioms Lara.Update.keptAttacks_eq_resolved_of_clean
 #print axioms Lara.Update.checkedArgs_eq_raw_of_clean
-#print axioms Lara.Update.checkedAF_eq_declaredAF_of_clean
+#print axioms Lara.Update.checkedAF_embedding_of_clean
 #print axioms Lara.Update.blockedSeedForRun_eq_nil_of_clean
 #print axioms Lara.Update.blockedSetForRun_eq_nil_of_clean
 
 #print axioms Lara.Update.blockedSet_eq_nil_of_seed_nil
 #print axioms Lara.Update.blockedQueriesForRun_eq_nil_of_empty_closure
 #print axioms Lara.Update.publicReport_eq_core_of_empty_closure
-#print axioms Lara.Update.checkedAF_eq_declaredAF_of_no_arg_prune
+#print axioms Lara.Update.checkedAF_embedding_of_no_arg_prune
 
 #print axioms Lara.Update.AdditiveUpdate
 #print axioms Lara.Update.additive_clean_target
@@ -1601,11 +1943,19 @@ outside the public audit surface. -/
 /-! ### M3 — exported examples and reachable witnesses -/
 
 #print axioms Lara.Examples.Update.AcceptedRun
+#print axioms Lara.Examples.Update.resolvedOrEmpty
+#print axioms Lara.Examples.Update.declaredOf
+#print axioms Lara.Examples.Update.admissionOf
+#print axioms Lara.Examples.Update.checkedResultOf
+#print axioms Lara.Examples.Update.checkedOf
+#print axioms Lara.Examples.Update.fixtureOf
 #print axioms Lara.Examples.Update.SuccessfulCoreCell
 #print axioms Lara.Examples.Update.SuccessfulPublicCell
 #print axioms Lara.Examples.Update.SuccessfulCoreCell.transition
 
 #print axioms Lara.Examples.Update.addInstance_uncovered_rejected
+#print axioms Lara.Examples.Update.addInstance_hole_inert
+#print axioms Lara.Examples.Update.addInstance_complete_alternative
 #print axioms Lara.Examples.Update.addAttack_blocked_growth
 
 -- The 37 reachable grounded core cells.
@@ -1963,10 +2313,18 @@ outside the public audit surface. -/
 -- extension semantics satisfying `Observation.AttackExtensional sem.spec`.
 #print axioms Lara.Surface.directAF_args
 #print axioms Lara.Surface.directAF_attack_iff
-#print axioms Lara.Surface.directClaims_eq_claims
+#print axioms Lara.Surface.claimsOf_support_lt
+#print axioms Lara.Surface.claimAlternativesOf_sorted
+#print axioms Lara.Surface.directDecls_eq_checked
+#print axioms Lara.Surface.directClaims_eq_coreClaims
 #print axioms Lara.Surface.directClaim_eq_coreClaim?
 #print axioms Lara.Surface.directClaim_support_bound
 #print axioms Lara.Surface.direct_compiled_agree
+-- Surface/core located-hole coherence (D8, D10).
+#print axioms Lara.Surface.claimAlternatives_coherent
+#print axioms Lara.Surface.claimAlternatives_holes_sound
+#print axioms Lara.Surface.claimAlternatives_holes_complete
+#print axioms Lara.Surface.coreHoleReport_obligations
 #print axioms Lara.Surface.observe_coherent
 #print axioms Lara.Surface.observe_grounded_coherent
 #print axioms Lara.Surface.observe_complete_coherent
@@ -2660,9 +3018,33 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.argsWellSorted_link
 #print axioms Lara.Context.signatureStage_link
 #print axioms Lara.Context.SideOk.mono_gamma
+#print axioms Lara.Context.SideOk.toHoles
+#print axioms Lara.Context.SideOkHoles.toSideOk
+#print axioms Lara.Context.SideOkHoles.mono_gamma
 #print axioms Lara.Context.fragmentAF_eq
 #print axioms Lara.Context.link_attackComplete
 #print axioms Lara.Context.link_checked
+#print axioms Lara.Context.linkedUnit_args_complete
+#print axioms Lara.Context.link_accepted_raw
+#print axioms Lara.Context.link_attackComplete_holes
+#print axioms Lara.Context.linkedUnit_args_typed
+#print axioms Lara.Context.link_checked_holes
+
+-- Context.LinkHoles: linking units with located holes (issue #13)
+#print axioms Lara.Context.filter_dedupList
+#print axioms Lara.Context.conclusionOf_eq_none_of_not_complete
+#print axioms Lara.Context.conclusionCache_completeArgs
+#print axioms Lara.Context.crossAtts_endpoints_complete
+#print axioms Lara.Context.crossAtts_completeArgs
+#print axioms Lara.Context.link_accepted_holes
+#print axioms Lara.Context.crossAtts_avoid_holes
+#print axioms Lara.Context.link_classify
+#print axioms Lara.Context.link_hole_report
+#print axioms Lara.Context.link_side_hole_reported
+#print axioms Lara.Context.link_node_report
+#print axioms Lara.Context.link_hole_source_inert
+#print axioms Lara.Context.link_shared_occurrence_edge
+#print axioms Lara.Context.link_edge_iff
 
 -- Context.Merge: the structural merge is semantically inert (F1)
 #print axioms Lara.Context.posOf_lt
@@ -2695,6 +3077,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.composeOk_assoc_right
 #print axioms Lara.Context.compose_assoc_fields
 #print axioms Lara.Context.compose_assoc_mem
+#print axioms Lara.Context.sideOkHoles_composed
 #print axioms Lara.Context.sideOk_composed
 
 -- Context.Equivalence: contextual representation independence (F2)
@@ -2729,6 +3112,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.attackComplete_map
 #print axioms Lara.Context.signatureStage_of_ok
 #print axioms Lara.Context.checkUnit_map
+#print axioms Lara.Context.checkUnit_map_program
 #print axioms Lara.Context.nodes_conclusion_map
 #print axioms Lara.Context.compileUnit_map
 -- The projection layer: `obsGen` is `obs` with the per-export reading
@@ -2741,6 +3125,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.obs_eq_of_ok
 #print axioms Lara.Context.exists_accepted_of_admissible
 #print axioms Lara.Context.exists_accepted_relabel
+#print axioms Lara.Context.link_relabel_program
 #print axioms Lara.Context.compileUnit_link_relabel
 #print axioms Lara.Context.obsGen_congr
 #print axioms Lara.Context.backend_replacement_congruence
@@ -2758,6 +3143,9 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.admissible_composed
 #print axioms Lara.Context.backend_replacement_congruence_composed
 #print axioms Lara.Context.whole_program_replacement
+#print axioms Lara.Context.compileUnit_eq_of_program
+#print axioms Lara.Context.obsGen_hole_blind
+#print axioms Lara.Context.obs_hole_blind
 
 -- Invariants.Observation: the semantics-parametric carrier projection.
 -- `Invariants.status` reads the grounded labelling off a `StructuredAF`; these
@@ -2795,6 +3183,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Forall₂.getElem?_none
 #print axioms Lara.Forall₂.mem_right
 #print axioms Lara.Forall₂.mem_left
+#print axioms Lara.Forall₂.filter
 
 -- Context.Parametricity: the relational form of the M4 congruence.
 -- `R` replaces the function `f`; `RelInj` is what the structural merge and the
@@ -2869,6 +3258,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.attackComplete_rel
 #print axioms Lara.Context.nodup_rel
 #print axioms Lara.Context.checkUnit_rel
+#print axioms Lara.Context.checkUnit_rel_program
 #print axioms Lara.Context.relTerms_getElem?_none
 #print axioms Lara.Context.relDis_lookup_none
 #print axioms Lara.Context.relTerm_subterm_none
@@ -2993,6 +3383,19 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Examples.Linking.admissible_split
 #print axioms Lara.Examples.Linking.admissible_composite
 #print axioms Lara.Examples.Linking.link_checked_split
+
+-- Examples.LinkHoles: linking with located holes, and hole erasure observable (issue #13)
+#print axioms Lara.Examples.LinkHoles.tMix_hole
+#print axioms Lara.Examples.LinkHoles.holeFrag_sideOkHoles
+#print axioms Lara.Examples.LinkHoles.holeFrag_not_sideOk
+#print axioms Lara.Examples.LinkHoles.admissible_hole
+#print axioms Lara.Examples.LinkHoles.link_checked_hole
+#print axioms Lara.Examples.LinkHoles.link_hole_accepted
+#print axioms Lara.Examples.LinkHoles.obs_holeFrag_eq
+#print axioms Lara.Examples.LinkHoles.obs_holeFrag
+#print axioms Lara.Examples.LinkHoles.erasure_keeps_complete_args
+#print axioms Lara.Examples.LinkHoles.erasure_changes_live_attacks
+#print axioms Lara.Examples.LinkHoles.hole_erasure_observable
 #print axioms Lara.Examples.Linking.compose_triple_ok
 #print axioms Lara.Examples.Linking.compose_triple_ok'
 #print axioms Lara.Examples.Linking.compose_assoc_witness
@@ -3584,6 +3987,8 @@ fixture would be worthless. -/
 #print axioms Lara.Examples.SurfaceTransport.transport_cert_accepted_wrapped_raw
 #print axioms Lara.Examples.SurfaceTransport.transport_args_kernel
 #print axioms Lara.Examples.SurfaceTransport.transport_args_wrapped
+#print axioms Lara.Examples.SurfaceTransport.transport_complete_kernel
+#print axioms Lara.Examples.SurfaceTransport.transport_complete_wrapped
 #print axioms Lara.Examples.SurfaceTransport.transport_coreObligations_kernel
 #print axioms Lara.Examples.SurfaceTransport.transport_coreObligations_wrapped
 #print axioms Lara.Examples.SurfaceTransport.transport_checks_kernel
@@ -3643,6 +4048,8 @@ fixture would be worthless. -/
 #print axioms Lara.Examples.SurfaceTransportAttack.attack_cert_not_attackable
 #print axioms Lara.Examples.SurfaceTransportAttack.attack_hasAttack
 #print axioms Lara.Examples.SurfaceTransportAttack.attack_attackComplete
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_complete_kernel
+#print axioms Lara.Examples.SurfaceTransportAttack.attack_complete_wrapped
 #print axioms Lara.Examples.SurfaceTransportAttack.attack_coreObligations_kernel
 #print axioms Lara.Examples.SurfaceTransportAttack.attack_coreObligations_wrapped
 #print axioms Lara.Examples.SurfaceTransportAttack.attack_checks_kernel
@@ -3655,6 +4062,15 @@ fixture would be worthless. -/
 #print axioms Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_directAF_edge
 #print axioms Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_relabel_moves
 #print axioms Lara.Examples.SurfaceTransportAttack.surfaceTransportAttack_inputs_differ
+
+-- Kernel-checked located-hole claim map (root, premise and discharge holes;
+-- optional-only completeness; complete-plus-hole status; only-hole gap).
+#print axioms Lara.Examples.SurfaceHoles.holesCheck_ok
+#print axioms Lara.Examples.SurfaceHoles.holes_partition
+#print axioms Lara.Examples.SurfaceHoles.holes_claims
+#print axioms Lara.Examples.SurfaceHoles.holes_complete_alternative_status
+#print axioms Lara.Examples.SurfaceHoles.holes_only_incomplete_gap
+#print axioms Lara.Examples.SurfaceHoles.holes_optional_only
 
 /-! ### The context-bearing surface link fixture
 
@@ -3687,6 +4103,8 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.SurfaceTransportContext.context_hasSupport_cert
 #print axioms Lara.Examples.SurfaceTransportContext.context_args_kernel
 #print axioms Lara.Examples.SurfaceTransportContext.context_args_wrapped
+#print axioms Lara.Examples.SurfaceTransportContext.context_complete_kernel
+#print axioms Lara.Examples.SurfaceTransportContext.context_complete_wrapped
 #print axioms Lara.Examples.SurfaceTransportContext.context_coreObligations_kernel
 #print axioms Lara.Examples.SurfaceTransportContext.context_coreObligations_wrapped
 #print axioms Lara.Examples.SurfaceTransportContext.context_checks_kernel
@@ -3911,6 +4329,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Map.hasSupport_mapLeaf
 #print axioms Lara.Map.hasAttack_mapLeaf
 #print axioms Lara.Map.mapLeafProg_args
+#print axioms Lara.Map.mapLeafProg_holes
 #print axioms Lara.Map.mapLeafProg_atts
 #print axioms Lara.Map.edgeB_mapLeaf
 #print axioms Lara.Map.checkedAF_mapLeaf
@@ -3921,11 +4340,14 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Map.qualifyGamma_disjoint
 #print axioms Lara.Map.sideGamma_linkStep
 #print axioms Lara.Map.linkStep_sideOk
+#print axioms Lara.Map.linkStep_sideOkHoles
 #print axioms Lara.Map.linkMembers_sideOk
+#print axioms Lara.Map.linkMembers_sideOkHoles
 #print axioms Lara.Map.firstShared?_nil
 #print axioms Lara.Map.linkOk_closedTail
 #print axioms Lara.Map.sideOk_closedTail
 #print axioms Lara.Map.linkMembers_checked
+#print axioms Lara.Map.linkMembers_checked_holes
 #print axioms Lara.Map.linkStep_declared
 #print axioms Lara.Map.linkMembers_declared
 #print axioms Lara.Map.qualifyFragment_declared
@@ -3953,10 +4375,17 @@ context's own arguments make unavailable. -/
 -- The batch link the drivers run, and its agreement with the fold.
 #print axioms Lara.Map.mem_crossPairs
 #print axioms Lara.Map.crossPairs_spec
+#print axioms Lara.Map.crossPairs_endpoints_complete
 #print axioms Lara.Map.crossPairs_emits
 #print axioms Lara.Map.batchGamma_extends
 #print axioms Lara.Map.ownedApart_iff
 #print axioms Lara.Map.batch_checked
+#print axioms Lara.Map.batch_checked_holes
+#print axioms Lara.Map.batch_classify
+#print axioms Lara.Map.batch_hole_report
+#print axioms Lara.Map.batch_member_hole_reported
+#print axioms Lara.Map.batch_generated_live
+#print axioms Lara.Map.batch_hole_source_inert
 #print axioms Lara.Map.mem_batchArgs
 #print axioms Lara.Map.mem_batchAtts
 #print axioms Lara.Map.batchUnit_checked
@@ -3980,6 +4409,10 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Map.Driver.linkedGammaOf_eq
 #print axioms Lara.Map.Driver.mem_linkedTermsOf
 #print axioms Lara.Map.Driver.linkedUnitOf_checked
+#print axioms Lara.Map.Driver.linkedUnitOf_checked_holes
+#print axioms Lara.Map.Driver.linkedUnitOf_hole_report
+#print axioms Lara.Map.Driver.generatedAttacksOf_endpoints_complete
+#print axioms Lara.Map.Driver.generatedAttacksOf_live
 /-! ### PW — the `Query_κ` well-sortedness refinement -/
 
 -- 1. Query formation. `queryFault` is the existing `Sigma` judgment, located:
@@ -4275,6 +4708,14 @@ context's own arguments make unavailable. -/
 #print axioms Lara.PW.Run.addWorld_decoded
 #print axioms Lara.PW.Run.addWorld_quarantine_empty
 #print axioms Lara.PW.Run.addWorld_checks_declared
+
+-- PW outer runtime: duplicate-world identity carries the located holes. Two
+-- worlds whose checked programs agree on AF arguments and compiled attacks but
+-- not on holes are both loaded; a repeated program, holes included, is refused.
+#print axioms Lara.Examples.PWRun.holes_world_kept
+#print axioms Lara.Examples.PWRun.holes_world_states
+#print axioms Lara.Examples.PWRun.holes_world_complete_parts_agree
+#print axioms Lara.Examples.PWRun.holes_world_duplicate
 
 -- Admission, local statuses, and structural failure are separate facts.
 #print axioms Lara.Examples.AxiomWithdrawal.withdrawal_prunes

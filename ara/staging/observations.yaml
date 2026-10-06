@@ -3944,3 +3944,53 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+- id: O181
+  timestamp: "2026-10-05T19:45"
+  provenance: ai-suggested
+  content: >-
+    Node completeness is load-bearing for published status, not only for acceptance: promoting the 18
+    seeded located holes to AF nodes shifts a queried status in 17 of them, 11 from gap to justified.
+    Without the completeness partition, an argument with an open mandatory question would publish its
+    claim as justified.
+  context: >-
+    Freeze v7 no-cq ablation (ara/evidence/results/located_gap_v7.md). One seeded corpus; confirmatory by
+    construction (C24). Candidate refinement of C16 / a new claim about holes vs status.
+  potential_type: claim
+  bound_to:
+  - N351_v7
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O182
+  timestamp: 2026-10-05T22:30+00:00
+  provenance: ai-executed
+  content: >-
+    Holes are not observationally inert under composition: deleting a hole together with the only attack
+    aimed inside it can change a context's observation (hole_erasure_observable: contested vs rejected).
+    Fragments that agree on complete arguments AND live attacks are observed identically (obsGen_hole_blind).
+  context: >-
+    Issue #13 hole-aware linking (N351_linking). Candidate claim about contextual equivalence with holes;
+    relates to D6 (attacks into holes keep closure edges).
+  potential_type: claim
+  bound_to:
+  - N351_linking
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O183
+  timestamp: 2026-10-05T23:00+00:00
+  provenance: ai-executed
+  content: >-
+    Individually rechecked updates do not guarantee a completion path: a fresh complete argument can need an
+    attack whose source does not yet exist. An atomic batch checked once on the final state is complete for
+    completion (atomic_completion_complete; counterexample sequential_completion_fails).
+  context: Issues #11/#14 (N351_updates). Candidate claim about update vocabularies and acceptance.
+  potential_type: claim
+  bound_to:
+  - N351_updates
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

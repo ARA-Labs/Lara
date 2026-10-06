@@ -162,7 +162,7 @@ theorem admissible : Admissible registry ctx sourceFrag where
     source_declared := by intro k hk; simp [ctx, certCtx] at hk
     target_declared := by intro k hk; simp [ctx, certCtx] at hk
     attack_complete := by intro source hs; simp [ctx] at hs }
-  frag := source_sideOk
+  frag := source_sideOk.toHoles
   signature := signatureStage_link (by decide) (by decide) (by decide) (by decide)
     (by decide) (by decide)
   scope := by decide

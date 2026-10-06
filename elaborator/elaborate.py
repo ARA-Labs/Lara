@@ -67,9 +67,13 @@ REF_RE = re.compile(r"[^\s\[\],]+\Z")  # refs are emitted bare inside [ … ]
 
 # Verbatim provenance strings pinned by README §7.
 HOLE_REASON = (
-    "no evidence cell answers the question; the frozen frontend rejects surface "
-    "holes (PEIncompleteArgument), so the incomplete argument is not emitted and "
-    "the claim's complete support is empty"
+    "no evidence cell answers the question; the incomplete argument is emitted with "
+    "the question open, and lara-core@0.3 reports it as a located hole while the "
+    "claim's complete support stays empty"
+)
+OPEN_OPTIONAL_REASON = (
+    "no evidence cell answers the optional question; it is emitted open and adds "
+    "no obligation"
 )
 NONE_NOTE = "documents unmet questions; routed to task-4 hole, never an attack (spec §7)"
 TASK5_ENTRY = {
@@ -542,7 +546,6 @@ class Instantiation:
     premise_leaves: list[str]
     experiment: Node
     discharges: list[dict] = field(default_factory=list)  # task-4 entries
-    emitted: bool = False
 
 
 @dataclass
@@ -748,7 +751,6 @@ def derive(src: Source, policy: Policy) -> tuple[list[ClaimDerivation], dict]:
         ]
         for inst in cd.instantiations:
             subst = dict(inst.substitution)
-            holes: list[Question] = []
             for question in inst.rule.questions:  # policy declaration order
                 # Instantiate the question's answer pattern.
                 answer_bind = {k: ("atom", v) for k, v in subst.items()}
@@ -779,7 +781,6 @@ def derive(src: Source, policy: Policy) -> tuple[list[ClaimDerivation], dict]:
                         }
                     )
                 else:
-                    holes.append(question)
                     responsible = (
                         cell_less_dead_ends[0].id
                         if len(cell_less_dead_ends) == 1
@@ -787,19 +788,22 @@ def derive(src: Source, policy: Policy) -> tuple[list[ClaimDerivation], dict]:
                     )
                     inst.discharges.append(
                         {
+                            "arg": inst.arg,
                             "claim": cd.cid,
                             "question": question.name,
                             "decision": "hole",
                             "source-node": responsible,
-                            "lowered": "gap",
-                            "reason": HOLE_REASON,
+                            "lowered": "located-hole" if question.mandatory else "open",
+                            "reason": HOLE_REASON
+                            if question.mandatory
+                            else OPEN_OPTIONAL_REASON,
                         }
                     )
             prov4.extend(inst.discharges)
-            # Hole lowering (README §1): an open mandatory question is a whole-
-            # unit rejection, so the incomplete argument is NOT emitted; the
-            # claim's complete-support set stays empty (-> gap).
-            inst.emitted = not holes
+            # Hole lowering (README §1): every instantiated argument is emitted.
+            # An unanswered question becomes an `open` line; under lara-core@0.3
+            # an open mandatory question makes the argument a located hole, which
+            # the checker accepts and reports while the claim stays `gap`.
 
         # ---- Task 6: typed-attack extraction over the whole trace ----------
         discharge_records = [
@@ -978,15 +982,16 @@ def render_lara(src: Source, derivations: list[ClaimDerivation]) -> str:
                 )
             )
         for inst in cd.instantiations:
-            if not inst.emitted:
-                continue
             args = ", ".join(v for _, v in inst.substitution)
             lines = [f"arg {inst.arg} : supports({cd.cid}) by {inst.rule.name}({args})"]
             width = max((len(q.name) for q in inst.rule.questions), default=0) + 1
             for entry in inst.discharges:
-                lines.append(
-                    f"  discharge {entry['question'].ljust(width)}with {entry['with']}"
-                )
+                if entry["decision"] == "discharge":
+                    lines.append(
+                        f"  discharge {entry['question'].ljust(width)}with {entry['with']}"
+                    )
+                else:
+                    lines.append(f"  open      {entry['question']}")
             blocks.append("\n".join(lines))
     attacks = [a for cd in derivations for a in cd.attacks]
     if attacks:

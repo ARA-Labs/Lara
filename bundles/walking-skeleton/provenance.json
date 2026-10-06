@@ -317,19 +317,21 @@
       "with": "e_me_rand"
     },
     {
+      "arg": "a_me",
       "claim": "c_me",
       "decision": "hole",
-      "lowered": "gap",
+      "lowered": "located-hole",
       "question": "adequate_power",
-      "reason": "no evidence cell answers the question; the frozen frontend rejects surface holes (PEIncompleteArgument), so the incomplete argument is not emitted and the claim's complete support is empty",
+      "reason": "no evidence cell answers the question; the incomplete argument is emitted with the question open, and lara-core@0.3 reports it as a located hole while the claim's complete support stays empty",
       "source-node": "dd_me_pool"
     },
     {
+      "arg": "a_me",
       "claim": "c_me",
       "decision": "hole",
-      "lowered": "gap",
+      "lowered": "located-hole",
       "question": "external_validity",
-      "reason": "no evidence cell answers the question; the frozen frontend rejects surface holes (PEIncompleteArgument), so the incomplete argument is not emitted and the claim's complete support is empty",
+      "reason": "no evidence cell answers the question; the incomplete argument is emitted with the question open, and lara-core@0.3 reports it as a located hole while the claim's complete support stays empty",
       "source-node": "dd_me_pool"
     }
   ],

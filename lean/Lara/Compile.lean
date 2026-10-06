@@ -231,6 +231,113 @@ theorem lookupDis_some_mem {D : List (QuestionId × SupportTerm)}
     · simp only [if_neg hq] at h
       exact List.mem_cons.mpr (Or.inr (ih h))
 
+/-- A successful `lookupDis` is witnessed by a positional entry. -/
+theorem lookupDis_some_getElem? {D : List (QuestionId × SupportTerm)}
+    {q : QuestionId} {w : SupportTerm} (h : Attack.lookupDis D q = some w) :
+    ∃ j : Nat, D[j]? = some (q, w) := by
+  induction D with
+  | nil => simp [Attack.lookupDis] at h
+  | cons hd tl ih =>
+    obtain ⟨q', w'⟩ := hd
+    simp only [Attack.lookupDis] at h
+    by_cases hq : q' = q
+    · subst hq
+      simp only [if_true, Option.some.injEq] at h
+      exact ⟨0, by simp [h]⟩
+    · simp only [if_neg hq] at h
+      obtain ⟨j, hj⟩ := ih h
+      exact ⟨j + 1, by simpa using hj⟩
+
+private theorem mem_collectObligations {Os DOs : List (List QuestionId)}
+    {r : Rule} {H : List QuestionId} {O : List QuestionId} {q : QuestionId}
+    (hO : O ∈ Os ∨ O ∈ DOs) (hq : q ∈ O) :
+    q ∈ collectObligations Os DOs r H := by
+  rw [collectObligations, unionAll]
+  apply (mem_dedupQuestions _).mpr
+  rw [List.mem_flatten]
+  rcases hO with hO | hO
+  · exact ⟨O, by simp [hO], hq⟩
+  · exact ⟨O, by simp [hO], hq⟩
+
+/-- **Obligations propagate upward.** Every occurrence inside a typed term is
+itself typed, with a root obligation set contained in the whole term's: §6.1
+unions premise and discharge obligations into the instance's. -/
+theorem hasSupport_subterm {v : SupportTerm} {C : Atom} {O : List QuestionId}
+    (h : HasSupport canon Pi Gamma CertOk v C O) :
+    ∀ {π : Attack.Pos} {t : SupportTerm}, Attack.subterm v π = some t →
+      ∃ C' O', HasSupport canon Pi Gamma CertOk t C' O' ∧ ∀ q ∈ O', q ∈ O := by
+  induction h with
+  | @leaf l p hΓ =>
+    intro π t hsub
+    cases π with
+    | nil =>
+      simp only [Attack.subterm, Option.some.injEq] at hsub
+      subst hsub
+      exact ⟨p, [], .leaf hΓ, fun _ hq => hq⟩
+    | cons e π => simp [Attack.subterm] at hsub
+  | @inst rn θ ws D H α r As Cs Os DCs DOs C hside hprems hdis ihprems ihdis =>
+    intro π t hsub
+    cases π with
+    | nil =>
+      simp only [Attack.subterm, Option.some.injEq] at hsub
+      subst hsub
+      exact ⟨C, _, .inst hside hprems hdis, fun _ hq => hq⟩
+    | cons e π =>
+      cases e with
+      | prem i =>
+        simp only [Attack.subterm] at hsub
+        cases hw : ws[i]? with
+        | none => rw [hw] at hsub; cases hsub
+        | some w =>
+          rw [hw] at hsub
+          have hi := lt_of_getElem?_some hw
+          obtain ⟨A, hA⟩ := getElem?_some_of_lt Cs i
+            (by have := hside.lenCs; omega)
+          obtain ⟨O', hO'⟩ := getElem?_some_of_lt Os i
+            (by have := hside.lenOs; omega)
+          obtain ⟨C'', O'', ht, hsubset⟩ := ihprems i w A O' hw hA hO' hsub
+          exact ⟨C'', O'', ht, fun q hq =>
+            mem_collectObligations (Or.inl (List.mem_of_getElem? hO'))
+              (hsubset q hq)⟩
+      | ques q =>
+        simp only [Attack.subterm] at hsub
+        cases hw : Attack.lookupDis D q with
+        | none => rw [hw] at hsub; cases hsub
+        | some w =>
+          rw [hw] at hsub
+          obtain ⟨j, hj⟩ := lookupDis_some_getElem? hw
+          have hjlt := lt_of_getElem?_some hj
+          obtain ⟨A, hA⟩ := getElem?_some_of_lt DCs j
+            (by have := hside.lenDCs; omega)
+          obtain ⟨O', hO'⟩ := getElem?_some_of_lt DOs j
+            (by have := hside.lenDOs; omega)
+          obtain ⟨C'', O'', ht, hsubset⟩ := ihdis j q w A O' hj hA hO' hsub
+          exact ⟨C'', O'', ht, fun q' hq' =>
+            mem_collectObligations (Or.inr (List.mem_of_getElem? hO'))
+              (hsubset q' hq')⟩
+
+/-- **Complete terms have no incomplete occurrence.** Every occurrence inside a
+complete term (`O = ∅`) is itself complete. -/
+theorem complete_contains_complete {v t : SupportTerm} {C : Atom}
+    (hv : HasSupport canon Pi Gamma CertOk v C []) (hcontains : Contains v t) :
+    ∃ C', HasSupport canon Pi Gamma CertOk t C' [] := by
+  obtain ⟨π, hπ⟩ := hcontains
+  obtain ⟨C', O', ht, hsubset⟩ := hasSupport_subterm hv hπ
+  cases O' with
+  | nil => exact ⟨C', ht⟩
+  | cons q _ => exact absurd (hsubset q (by simp)) (by simp)
+
+/-- No complete term contains a typed term with mandatory obligations: a
+wrapper of a hole inherits the hole's obligations and is itself a hole. -/
+theorem complete_not_contains_hole {v t : SupportTerm} {C Ct : Atom}
+    {O : List QuestionId}
+    (hv : HasSupport canon Pi Gamma CertOk v C [])
+    (ht : HasSupport canon Pi Gamma CertOk t Ct O) (hO : O ≠ []) :
+    ¬ Contains v t := by
+  intro hcontains
+  obtain ⟨C', ht'⟩ := complete_contains_complete hv hcontains
+  exact hO (hasSupport_unique ht ht').2
+
 /-- **`containsB` decides `Contains` on the `DisNodup` domain.** The mutual
 statement over the three scanners is proved together (via the four-motive
 `SupportTerm.rec`), generalized over the query. Forward: a hit in
@@ -463,29 +570,39 @@ theorem coveredB_iff {target : SupportTerm}
     exact ⟨decide_eq_true hsource,
       (attackClosureB_iff hwf k).mpr ⟨t, hocc, hcontains⟩⟩
 
-/-- A well-formed source program at the compile boundary: declared arguments
-with evidence they are complete checked support terms (`O = ∅`, spec §8
-`Args`), and declared attacks with evidence they type (§7.1). Compilation is
-defined only downstream of the checker, so the structure *is* the checker's
-postcondition. `nodup` models §8's `Args(P)` being a set of terms. -/
+/-- A well-formed source program at the compile boundary: the complete
+arguments `Args(P)` with evidence they are complete checked support terms
+(`O = ∅`, spec §8), the located holes `Holes(P)` (spec §4.4), and the compiled
+attacks — the typed declared attacks whose source is complete — with evidence
+they type (§7.1). Arguments and holes are both declared; only the complete
+ones are AF nodes. Compilation is defined only downstream of the checker, so
+the structure *is* the checker's postcondition. `nodup` models §8's `Args(P)`
+being a set of terms. -/
 structure CheckedProgram (canon : String → String) (Pi : RuleId → Option Rule)
     (Gamma : LeafId → Option Atom)
     (CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop)
     (dp : Attack.DefeatPolicy) where
-  /-- declared arguments, `Args(P)` -/
+  /-- the complete declared arguments, `Args(P)`: the AF nodes -/
   args : List SupportTerm
   /-- `Args(P)` is a set: no duplicate terms -/
   nodup : args.Nodup
-  /-- every declared argument is a complete checked support term -/
+  /-- every AF argument is a complete checked support term -/
   complete : ∀ w ∈ args, ∃ C, HasSupport canon Pi Gamma CertOk w C []
-  /-- declared attacks -/
+  /-- the compiled attacks: declared attacks whose source is in `args` -/
   atts : List Attack.Attack
-  /-- every declared attack types (§7.1) -/
+  /-- every compiled attack types (§7.1) -/
   typed : ∀ k ∈ atts, Attack.HasAttack canon Pi Gamma CertOk dp k
-  /-- every declared attack source is a declared argument (R1 boundary) -/
+  /-- every compiled attack source is a complete declared argument: an attack
+  sourced at a hole is checked but contributes no edge (spec §4.4) -/
   source_declared : ∀ k ∈ atts, k.source ∈ args
-  /-- every declared attack target is a declared argument (R1 boundary) -/
-  target_declared : ∀ k ∈ atts, k.target ∈ args
+  /-- located holes, `Holes(P)` (spec §4.4): typed declared arguments with a
+  nonempty root obligation set. They are never AF nodes; they are kept so a
+  compiled attack may name one as its target. -/
+  holes : List SupportTerm
+  /-- every compiled attack target is a complete declared argument or a hole;
+  an attack on an occurrence inside a hole still reaches every complete
+  argument containing that occurrence (spec §8) -/
+  target_declared : ∀ k ∈ atts, k.target ∈ args ∨ k.target ∈ holes
 
 /-- Exact checked metadata for one retained argument-cache entry. The public
 program representation remains intentionally lean; callers that need indexed
@@ -497,6 +614,20 @@ structure CheckedNode
   term       : SupportTerm
   conclusion : Atom
   valid      : HasSupport canon Pi Gamma CertOk term conclusion []
+
+/-- Exact checked metadata for one located hole (spec §4.4): its checked
+declaration index, and the conclusion and nonempty mandatory root obligation
+set the support stage cached for it. -/
+structure CheckedHole
+    (canon : String → String) (Pi : RuleId → Option Rule)
+    (Gamma : LeafId → Option Atom)
+    (CertOk : BackendId → Digest → CertRef → List Atom → Atom → Prop) where
+  index       : Nat
+  term        : SupportTerm
+  conclusion  : Atom
+  obligations : List QuestionId
+  valid       : HasSupport canon Pi Gamma CertOk term conclusion obligations
+  nonempty    : obligations ≠ []
 
 /-- **The compiled attack relation (spec §8 `Attack(P)`, v0.1-frozen).**
 `Edge P a b`: both endpoints are declared complete arguments, and some
@@ -574,11 +705,52 @@ theorem edge_iff (P : CheckedProgram canon Pi Gamma CertOk dp)
 /-- Closure extends the direct attack: a declared attack whose source and
 target are both declared arguments yields the direct edge source → target. -/
 theorem closure_includes_direct (P : CheckedProgram canon Pi Gamma CertOk dp)
-    {k : Attack.Attack} (hk : k ∈ P.atts) {t : SupportTerm}
-    (hocc : AttackOcc k t) :
+    {k : Attack.Attack} (hk : k ∈ P.atts) (htarget : k.target ∈ P.args)
+    {t : SupportTerm} (hocc : AttackOcc k t) :
     Edge P k.source k.target :=
-  ⟨P.source_declared k hk, P.target_declared k hk,
+  ⟨P.source_declared k hk, htarget,
     k, hk, rfl, t, hocc, target_contains_occ hocc⟩
+
+/-- A hole-free program has the pre-`lara-core@0.3` endpoint boundary: every
+compiled attack target is a complete declared argument. -/
+theorem CheckedProgram.target_declared_of_holes_nil
+    (P : CheckedProgram canon Pi Gamma CertOk dp) (h : P.holes = []) :
+    ∀ k ∈ P.atts, k.target ∈ P.args := by
+  intro k hk
+  rcases P.target_declared k hk with htarget | hhole
+  · exact htarget
+  · rw [h] at hhole
+    cases hhole
+
+/-- Only complete arguments emit edges: a term outside `Args(P)`, a hole in
+particular, is the source of no edge. -/
+theorem no_edge_of_not_arg (P : CheckedProgram canon Pi Gamma CertOk dp)
+    {a : SupportTerm} (ha : a ∉ P.args) (b : SupportTerm) : ¬ Edge P a b :=
+  fun hedge => ha hedge.1
+
+/-- **D6, positive half.** A compiled attack whose attacked occurrence is
+shared by a complete argument edges onto that argument, even when the
+attack's declared target is a hole. -/
+theorem closure_reaches_shared_occurrence
+    (P : CheckedProgram canon Pi Gamma CertOk dp)
+    {k : Attack.Attack} (hk : k ∈ P.atts) {t b : SupportTerm}
+    (hocc : AttackOcc k t) (hb : b ∈ P.args) (hcontains : Contains b t) :
+    Edge P k.source b :=
+  ⟨P.source_declared k hk, hb, k, hk, rfl, t, hocc, hcontains⟩
+
+/-- **D6, negative half.** An attack whose attacked occurrence is a hole — a
+rebut of a hole's root in particular — covers no complete argument, so it adds
+no edge even when its source is complete. -/
+theorem hole_occurrence_reaches_no_arg
+    (P : CheckedProgram canon Pi Gamma CertOk dp)
+    {k : Attack.Attack} {t : SupportTerm} {Ct : Atom} {O : List QuestionId}
+    (hocc : AttackOcc k t) (ht : HasSupport canon Pi Gamma CertOk t Ct O)
+    (hO : O ≠ []) :
+    ∀ b ∈ P.args, ∀ t', AttackOcc k t' → ¬ Contains b t' := by
+  intro b hb t' hocc' hcontains
+  rw [attackOcc_unique hocc' hocc] at hcontains
+  obtain ⟨C, hC⟩ := P.complete b hb
+  exact complete_not_contains_hole hC ht hO hcontains
 
 /-! ### The bridge to the abstract grounded layer (N16)
 
@@ -902,5 +1074,78 @@ theorem srcStatus_iff_checked
     (s : Grounded.Status) :
     SrcStatus P c s ↔ s = Grounded.statusC (checkedAF P) c :=
   srcStatus_iff (edgeB_faithful P) c s
+
+/-! ### Located holes do not move status
+
+The compiled AF reads only `args` and the closure coverage of `atts` between
+them; `holes` is diagnostic data. Two statements are kept apart: the AF of a
+program is unchanged by its hole list alone, and, more generally, two programs
+with the same complete arguments and the same complete-to-complete closure
+coverage have the same AF and so every claim the same status. The second is
+the form a source edit can use; it is not unconditional, because an attack
+onto an occurrence inside a hole may still cover a complete argument (D6). -/
+
+/-- Equal complete arguments and equal complete-to-complete closure coverage
+give the same checked AF. The two programs may differ in their holes, their
+attacks sourced at or aimed at holes, and their typing contexts. -/
+theorem checkedAF_eq_of_coverage
+    {canon' : String → String} {Pi' : RuleId → Option Rule}
+    {Gamma' : LeafId → Option Atom}
+    {CertOk' : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    {dp' : Attack.DefeatPolicy}
+    (P : CheckedProgram canon Pi Gamma CertOk dp)
+    (Q : CheckedProgram canon' Pi' Gamma' CertOk' dp')
+    (hargs : P.args = Q.args)
+    (hcoverage : ∀ a ∈ P.args, ∀ b ∈ P.args,
+      Covered P.atts a b ↔ Covered Q.atts a b) :
+    checkedAF P = checkedAF Q := by
+  have hedge : ∀ i j, edgeB P i j = edgeB Q i j := by
+    intro i j
+    unfold edgeB
+    rw [← hargs]
+    cases hi : P.args[i]? with
+    | none => rfl
+    | some a =>
+      cases hj : P.args[j]? with
+      | none => rfl
+      | some b =>
+        have ha := List.mem_of_getElem? hi
+        have hb := List.mem_of_getElem? hj
+        obtain ⟨C, hC⟩ := P.complete b hb
+        obtain ⟨C', hC'⟩ := Q.complete b (hargs ▸ hb)
+        apply Bool.eq_iff_iff.mpr
+        rw [coveredB_iff (hasSupport_disNodup hC),
+          coveredB_iff (hasSupport_disNodup hC')]
+        exact hcoverage a ha b hb
+  unfold checkedAF toAF
+  rw [hargs]
+  congr 1
+  funext i j
+  exact hedge i j
+
+/-- **Status is independent of holes.** Under equal complete arguments and
+equal complete-to-complete closure coverage, every claim has the same compiled
+status. -/
+theorem status_independent_of_holes
+    {canon' : String → String} {Pi' : RuleId → Option Rule}
+    {Gamma' : LeafId → Option Atom}
+    {CertOk' : BackendId → Digest → CertRef → List Atom → Atom → Prop}
+    {dp' : Attack.DefeatPolicy}
+    (P : CheckedProgram canon Pi Gamma CertOk dp)
+    (Q : CheckedProgram canon' Pi' Gamma' CertOk' dp')
+    (hargs : P.args = Q.args)
+    (hcoverage : ∀ a ∈ P.args, ∀ b ∈ P.args,
+      Covered P.atts a b ↔ Covered Q.atts a b)
+    (c : Grounded.Claim) :
+    Grounded.statusC (checkedAF P) c = Grounded.statusC (checkedAF Q) c := by
+  rw [checkedAF_eq_of_coverage P Q hargs hcoverage]
+
+/-- **Diagnostic-only holes independence.** Programs that differ only in their
+recorded holes compile to the same AF. -/
+theorem checkedAF_independent_of_holes
+    (P Q : CheckedProgram canon Pi Gamma CertOk dp)
+    (hargs : P.args = Q.args) (hatts : P.atts = Q.atts) :
+    checkedAF P = checkedAF Q :=
+  checkedAF_eq_of_coverage P Q hargs (fun a _ b _ => by rw [hatts])
 
 end Lara.Compile

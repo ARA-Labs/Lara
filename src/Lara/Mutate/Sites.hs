@@ -74,7 +74,7 @@ import Lara.Blocked (prune, pruneChecked)
 import Lara.Diagnostics (Constituent (..))
 import Lara.Prop (equiv)
 import Lara.Sigma (declarePred)
-import Lara.SupportTerm (instAPat, instAPats)
+import Lara.SupportTerm (instAPat, instAPats, openSites)
 
 import Lara.Mutate (Expected (..))
 import Lara.Mutate.Sites.Cert
@@ -85,9 +85,12 @@ import Lara.Mutate.Sites.Cert
 import Lara.Mutate.Sites.Conflict (dropCoveringAttackSites)
 import Lara.Mutate.Sites.Nav
   ( CheckedIx (..)
+  , DeclaredIx (..)
+  , argSites
   , attackSites
   , inequivLeaf
   , leafSites
+  , occurrences
   , ruleOf
   , ruleSites
   , rewriteArg
@@ -198,22 +201,29 @@ openObligationSites u =
       SRule r theta ws [entry | entry@(q', _) <- d, q' /= q] hs a
     dropDischarge _ t = t
 
--- Obligation gate: replace one mandatory discharge with a declared hole. The
+-- Located hole: replace one mandatory discharge with a declared hole. The
 -- clone of 'openObligationSites' that swaps the entry into the hole set
 -- instead of deleting it: R5 coverage still holds (the question is covered by
--- the hole), so the schema-valid argument reaches the obligation gate with an
--- open mandatory obligation — the full system rejects with
--- 'IncompleteArgument', and only 'Lara.Check.noCQConfig' accepts it. Only
--- mandatory discharges are sites: holing an optional question's discharge
--- contributes no obligation ('Lara.SupportTerm.openMandatory') and the full
--- system would accept.
+-- the hole), so the schema-valid argument types with an open mandatory root
+-- obligation — the full system accepts and reports it in the verdict's
+-- @holes@ section (spec §4.4), and only 'Lara.Check.noCQConfig' promotes it
+-- back to an AF node. The seeded site is the edited argument at its
+-- __declared__ index, the space hole rows are reported in. Only mandatory
+-- discharges are sites: holing an optional question's discharge contributes
+-- no obligation ('Lara.SupportTerm.openMandatory') and the argument would
+-- stay complete. Only complete arguments are sites: the operator seeds the
+-- defect that turns a complete argument into a hole, so an argument that is
+-- already a located hole in the base (a re-lowered corpus unit, issue #15)
+-- would carry pre-existing obligations besides the seeded one.
 holeObligationSites :: Unit -> [(Expected, Constituent, Unit -> Unit)]
 holeObligationSites u =
-  [ ( ExpectIncompleteArgument
-    , CArgument (checkedIx ci)
+  [ ( ExpectLocatedHole
+    , CArgument (declaredIx di)
     , rewriteArg di (rewriteAt pos (holeDischarge q))
     )
-  | (ci, di, pos, SRule rn _ _ d _ _) <- ruleSites pruned
+  | (_, di, w) <- argSites pruned
+  , null (openSites (ruleOf checked) w)
+  , (pos, SRule rn _ _ d _ _) <- occurrences w
   , Just r <- [ruleOf checked rn]
   , (q, _) <- take 1 [entry | entry@(q, _) <- d, mandatoryIn r q]
   ]

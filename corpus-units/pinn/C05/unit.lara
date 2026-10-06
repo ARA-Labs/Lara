@@ -11,17 +11,20 @@
 #     competitor convention takes Adam (the tuned, closest competitor; reaction@width=100 is
 #     where Adam ties) as B; L-BFGS-alone, the two effect sizes (14.2x, 6.07x), and the reaction
 #     exception stay in nl and refs.
-#   * The mandatory baseline_parity CQ is unmet-gap: the setups are not matched on tuning
-#     effort — Adam searches 5 lrs, Adam+L-BFGS searches 5 lrs x 3 switch points = 15 configs,
-#     and L-BFGS alone is untuned (lr=1.0); selecting the best configuration per optimizer then
-#     favors the larger grid. An open mandatory obligation is an IncompleteArgument rejection,
-#     so no complete controlled_comparison is declarable — E2-style gap on empty complete
-#     support (adaptive-pruning/C03 pattern). The annotation rates this CQ unmet-GAP (not
-#     unmet-defeater) and every trace dead end is decision:none, so the tuning asymmetry is a
-#     hole, not a licensed undercut — the unit stays a gap, not defeated.
+#   * The mandatory baseline_parity CQ is unmet-gap: the setups are not matched on tuning effort —
+#     Adam searches 5 lrs, Adam+L-BFGS searches 5 lrs x 3 switch points = 15 configs, and L-BFGS
+#     alone is untuned (lr=1.0); selecting the best configuration per optimizer then favors the
+#     larger grid. The controlled_comparison argument is declared as a located hole with
+#     `open baseline_parity` (lowering re-done for issue #15 under lara-core@0.3; until
+#     lara-core@0.2 the open mandatory obligation rejected the unit, so the arg was omitted): it
+#     is not an AF node and the claim stays gap on empty complete support. The annotation rates
+#     this CQ unmet-GAP (not unmet-defeater) and every trace dead end is decision:none, so the
+#     tuning asymmetry is a hole, not a licensed undercut — the unit stays a gap, not defeated.
 #   * The gap here is baseline_parity, not variance: variance_reported IS met (E03 reports 5
 #     seeds, min/median/max) and measurement_validity is met (min L2RE a standard metric; the
-#     14.2x/6.07x ratios are arithmetic re-checks against Table 1). Both are kept as leaves.
+#     14.2x/6.07x ratios are arithmetic re-checks against Table 1). Both are discharged on the
+#     hole. The optional scope_match has no annotated basis and is opened (R5 question
+#     accounting; no status effect).
 #
 # Expected verdict is at the bottom of this file (golden oracle).
 
@@ -55,17 +58,25 @@ leaf e3 : variance_reported(e03)
   provenance = ai-executed
   refs       = [logic/experiments.md#E03-Setup, logic/experiments.md#E03-Procedure-step-6]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... but only an incomplete argument (a located hole) is declarable -------------------------
 
-# (Intentionally no `arg`: matched_setup(adam_lbfgs, adam, e03) has no honest leaf — the tuning
-# budgets are asymmetric (untuned L-BFGS, 5-config Adam, 15-config Adam+L-BFGS) — and corpus-v1
-# makes baseline_parity mandatory. The claim's complete-support set is therefore empty.)
+# The incomplete argument: baseline_parity has no honest leaf — the tuning budgets are
+# asymmetric (untuned L-BFGS, 5-config Adam, 15-config Adam+L-BFGS) — and corpus-v1 makes it
+# mandatory, so it stays open and a1 is a hole.
+arg a1 : supports(c05) by controlled_comparison(adam_lbfgs, adam, min_l2re, pinn_pdes, e03)
+  discharge measurement_validity with e2
+  discharge variance_reported    with e3
+  open      baseline_parity
+  open      scope_match
 
 status c05
 
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
-# Compiled AF: no arguments.
+# Compiled AF: no arguments (a1 is a located hole, not an AF node).
+# Located hole: a1 (controlled_comparison), open obligations [baseline_parity];
+#   sources no attacks.
 # Claim status:
-#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8;
+#          the hole a1 is reported in the verdict's holes section, not as a node)

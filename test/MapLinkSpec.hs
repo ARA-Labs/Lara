@@ -70,7 +70,9 @@ import Lara.Map.Link
   , sharedSections
   , lmEdges
   , lmGenerated
+  , lmHoles
   , lmLabels
+  , lmNodeDecls
   , lmNodes
   , lmStatuses
   , lmUnit
@@ -102,6 +104,7 @@ import Lara.Map.Qualify
   )
 import Lara.Map.Types
   ( MapError
+  , MapHole (..)
   , MapNode (..)
   , MapStatus (..)
   , MemberAlias
@@ -836,9 +839,13 @@ prop_saturationIsCrossMemberOnly = once $ ioProperty $ do
       [ (mnArgIdOf linked node, aliasText (mnAlias node))
       | node <- lmNodes linked
       ]
+    -- 'mnIndex' is an AF index; 'lmNodeDecls' carries it to the linked
+    -- declaration position the argument list is indexed by.
     mnArgIdOf linked node =
-      case drop (nodeIndexInt (mnIndex node)) (unitArgs (lmUnit linked)) of
-        ((argId, _) : _) -> argId
+      case drop (nodeIndexInt (mnIndex node)) (lmNodeDecls linked) of
+        (position : _) -> case drop position (unitArgs (lmUnit linked)) of
+          ((argId, _) : _) -> argId
+          [] -> ArgId ""
         [] -> ArgId ""
 
 -- ---------------------------------------------------------------------------
@@ -868,8 +875,11 @@ prop_nodesAreTotalProvenance = once $ ioProperty $ do
             args = unitArgs (lmUnit linked)
             nodes = lmNodes linked
             handleOf node = (mnAlias node, mnArg node)
-            termAt i = case drop i args of
-              ((_, term) : _) -> Just term
+            -- An AF index, carried to its linked declaration position first.
+            termAt i = case drop i (lmNodeDecls linked) of
+              (position : _) -> case drop position args of
+                ((_, term) : _) -> Just term
+                [] -> Nothing
               [] -> Nothing
          in conjoin
               [ counterexample "one node per declared argument, in that order" $
@@ -1274,7 +1284,7 @@ prop_labelsAndEdgesAreWellFormed = once $ ioProperty $ do
   outcome <- linkFixture (copiesFixture source)
   pure $
     expectLinked "well-formed labels and edges" outcome $ \linked ->
-      let n = length (unitArgs (lmUnit linked))
+      let n = length (lmNodeDecls linked)
           labelIndices = map (nodeIndexInt . fst) (lmLabels linked)
           edgePairs = [(nodeIndexInt i, nodeIndexInt j) | (i, j) <- lmEdges linked]
        in conjoin
@@ -1288,13 +1298,72 @@ prop_labelsAndEdgesAreWellFormed = once $ ioProperty $ do
                 property (all (\node -> mkNodeIndex (nodeIndexInt (mnIndex node)) /= Nothing) (lmNodes linked))
             ]
 
+-- | __Holes split the linked unit's two index spaces, and the saturation
+-- leaves them alone.__
+--
+-- The committed @test\/fixtures\/map\/hole@ map: @paper_pos@ declares the
+-- hole @ph@ before its complete @pa@, and @paper_neg@ declares the complete
+-- @pb@ before the hole @pb_open@. Linked positions are @ph 0, pa 1, pb 2,
+-- pb_open 3@, so
+--
+--   * 'lmNodeDecls' is @[1, 2]@: AF node 0 is linked argument 1;
+--   * each node's AF index resolves, through 'lmNodeDecls', to the member's own
+--     argument, and each hole handle's argument is not an AF node;
+--   * the saturation generated exactly the two @pa \<-\> pb@ rebuttals —
+--     neither endpoint of any generated attack is a hole, although @ph@ and
+--     @pb_open@ conclude contrary propositions (located-gap D4\/D6\/D9).
+prop_holesSplitIndexSpaces :: Property
+prop_holesSplitIndexSpaces = once $ ioProperty $ do
+  outcome <- (>>= linkMap) <$> loadMap "test/fixtures/map/hole/map.laramap"
+  pure $
+    expectLinked "the hole map" outcome $ \linked ->
+      let args = unitArgs (lmUnit linked)
+          argIdAt i = case drop i args of
+            ((argId, _) : _) -> Just argId
+            [] -> Nothing
+          nodeArgId node = case drop (nodeIndexInt (mnIndex node)) (lmNodeDecls linked) of
+            (position : _) -> argIdAt position
+            [] -> Nothing
+          holeIds = [argIdAt i | i <- [0, 3]]
+          endpoints attack = case attack of
+            Rebut source target -> [source, target]
+            Undercut source target _ -> [source, target]
+            Undermine source target _ -> [source, target]
+       in conjoin
+            [ counterexample "four linked arguments, two AF nodes" $
+                (length args, lmNodeDecls linked) === (4, [1, 2])
+            , counterexample "labels are over the AF nodes" $
+                map (nodeIndexInt . fst) (lmLabels linked) === [0, 1]
+            , counterexample "each node names its member's own argument" $
+                [ (aliasText (mnAlias node), mnArg node, nodeArgId node)
+                | node <- lmNodes linked
+                ]
+                  === [ ("paper_pos", ArgId "pa", argIdAt 1)
+                      , ("paper_neg", ArgId "pb", argIdAt 2)
+                      ]
+            , counterexample "the holes are the other two handles" $
+                [(aliasText (mhAlias hole), mhArg hole) | hole <- lmHoles linked]
+                  === [("paper_pos", ArgId "ph"), ("paper_neg", ArgId "pb_open")]
+            , counterexample "the saturation generated the two complete rebuttals" $
+                length (lmGenerated linked) === 2
+            , counterexample "no generated attack touches a hole" $
+                property
+                  ( and
+                      [ Just endpoint `notElem` holeIds
+                      | attack <- lmGenerated linked
+                      , endpoint <- endpoints attack
+                      ]
+                  )
+            ]
+
 -- ---------------------------------------------------------------------------
 -- Registration
 -- ---------------------------------------------------------------------------
 
 mapLinkSpecProps :: [(String, IO Result)]
 mapLinkSpecProps =
-  [ ("map unqualified members collide", quickCheckResult prop_unqualifiedMembersCollide)
+  [ ("map holes split the index spaces", quickCheckResult prop_holesSplitIndexSpaces)
+  , ("map unqualified members collide", quickCheckResult prop_unqualifiedMembersCollide)
   , ("map structural tripwires", quickCheckResult prop_structuralTripwires)
   , ("map qualified identities are disjoint", quickCheckResult prop_qualifiedIdsAreDisjoint)
   , ("map colliding members link once qualified", quickCheckResult prop_collidingMembersLink)

@@ -9,7 +9,7 @@
   (worlds
     (world a0 a (inline
       (check-input
-        (replay-id (core lara-core@0.2) (policy pw-renamed) (backends (backend nd 1))
+        (replay-id (core lara-core@0.3) (policy pw-renamed) (backends (backend nd 1))
           (theories) (artifact pw-renamed-a0))
         (unit
           (sigma (sorts Item) (cons (con z (args) Item) (con f (args Item) Item))
@@ -27,7 +27,7 @@
           (queries)))))
     (world b0 b (inline
       (check-input
-        (replay-id (core lara-core@0.2) (policy pw-renamed) (backends (backend nd 1))
+        (replay-id (core lara-core@0.3) (policy pw-renamed) (backends (backend nd 1))
           (theories) (artifact pw-renamed-b0))
         (unit
           (sigma (sorts Item) (cons (con z2 (args) Item) (con g (args Item) Item))

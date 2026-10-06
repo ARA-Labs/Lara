@@ -199,12 +199,12 @@ prop_frozenNumbers = once $ ioProperty $ do
       , counterexample "load-bearing provenance" (csLoadBearingProvenance rep === [(AiExecuted, 38)])
       , counterexample "load-bearing kind" (csLoadBearingKind rep === [(Attested, 20), (Observed, 18)])
       , counterexample "load-bearing paper-anchored" (csLoadBearingPaperAnchored rep === 15)
-      , counterexample "all leaves total" (csAllTotal rep === 169)
-      , counterexample "all leaves provenance" (csAllProvenance rep === [(AiExecuted, 169)])
-      , counterexample "all leaves kind" (csAllKind rep === [(Attested, 106), (Observed, 63)])
+      , counterexample "all leaves total" (csAllTotal rep === 171)
+      , counterexample "all leaves provenance" (csAllProvenance rep === [(AiExecuted, 171)])
+      , counterexample "all leaves kind" (csAllKind rep === [(Attested, 106), (Observed, 65)])
       , counterexample "all leaves paper-anchored" (csAllPaperAnchored rep === 51)
-      , counterexample "typed attacks" (csTypedAttacks rep === 3)
-      , counterexample "dead-end attacks" (csDeadEndAttacks rep === 2)
+      , counterexample "typed attacks" (csTypedAttacks rep === 5)
+      , counterexample "dead-end attacks" (csDeadEndAttacks rep === 4)
       , counterexample "strict steps" (csStrictSteps rep === 1)
       , counterexample "strict certified" (csStrictCertified rep === 1)
       , counterexample "documented strict-flavored" (csStrictFlavored rep === 5)
@@ -1104,7 +1104,7 @@ auditRecordWithModeAndDerivedAndSurfaceLeaves ruleModeOf coreLeaves surfaceLeave
         , unitGroupMode = QuarantineOnConflict
         }
     input = testCheckInput unit
-    verdict = Verdict (inputReplayId input) (Accept labels [] [])
+    verdict = Verdict (inputReplayId input) (Accept labels [] [] [])
     program =
       Program
         { programArtifact = "synthetic"

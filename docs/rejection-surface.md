@@ -13,7 +13,10 @@ partial-label repair condition. Updated 2026-08-23 for `lara-syntax@0.10`
 source-authored formula annotations (§1.4 row `CertNdFormulaMalformed`; the D7
 marker vocabulary gains `(prop _)`). Updated 2026-08-25: mutation-suite counts
 refreshed to the `m5-freeze-v5` suite (541 mutants); the accept half is
-unchanged at 58, since all 37 added mutants are rejects._
+unchanged at 58, since all 37 added mutants are rejects. Updated 2026-10-04
+for `lara-core@0.3` located gaps: the `incomplete-argument` kind is retired
+and its anchor becomes an accepted unit with a `holes` section (§2); the §3
+mutation counts are those of the last freeze before that change._
 
 The dated updates above are maintenance history; skip them on a first read.
 The content starts here, with the distinction the whole note turns on: a
@@ -382,15 +385,38 @@ reproduce the class shown.
 | R13 backend | certificate replay rejects; unknown backend/version; theory digest not allowlisted. Since `lara-syntax@0.6`, a malformed premise-slot spelling under a matching `ord@1`/`ra@1`/`insp@1` schema on the `.lara` door rejects at elaboration instead of here (§1.2; grammar Appendix E). At `@0.9`/`@0.10` the same source-boundary migration applies only to `nd@1` payloads containing one of D7's five named markers (§1.4; grammar Appendices H and I); marker-free and raw `.sexp` payloads remain backend-owned — acceptance unchanged. The reason is followed by the slot → source mapping on both doors (§1.5) | `fixtures/corpus/ord-lt-boundary-reject.sexp` | `reject R13`, stderr: `certificate replay: ord@1 (theory t0) rejected the certificate: the claimed comparison does not hold: 5 < 5 is false` then `  slot 0 = leaf e0` |
 | R14 codec | wire program fails to decode: malformed S-expression, S-expression nesting deeper than the readers' shared `maxDepth` (see the bound note below), unknown fields, presentation parse error | `fixtures/mutants/malformed/A--codec-core-version-0.sexp` | exit 2, stderr: `lara: codec error at replay-id: unsupported core version: "lara-core@0.1"`, **nothing on stdout** |
 
-The checker also emits four named rejection kinds outside R1–R14. They are part of the wire
+The checker also emits three named rejection kinds outside R1–R14. They are part of the wire
 `REJECTION` grammar (`Lara.Wire`) and of `checkUnit`'s seven-stage order (`Lara.Check`):
 
 | Kind | Trigger | Anchor | Verified output |
 | --- | --- | --- | --- |
 | `duplicate-rule` | two policy rules share an id (stage 1) | `fixtures/corpus/reject-duplicate-rule.sexp` | `reject duplicate-rule` |
 | `duplicate-argument` | two arguments share an id (stage 4) | `fixtures/corpus/reject-duplicate-argument.sexp` | `reject duplicate-argument` |
-| `incomplete-argument` | a submitted argument still has an open mandatory obligation (an `open q` hole) | `fixtures/corpus/reject-incomplete-argument.sexp`; `fixtures/mutants/A--hole-obligation-0.sexp` | `reject incomplete-argument` |
-| `missing-conflict` | a conflict the policy's contraries license has no covering attack (stage 7) | `fixtures/corpus/reject-missing-conflict.sexp`; `fixtures/mutants/A--drop-covering-attack-0.sexp` | `reject missing-conflict` |
+| `missing-conflict` | a conflict the policy's contraries license between two complete arguments has no covering attack from a complete source (stage 7) | `fixtures/corpus/reject-missing-conflict.sexp`; `fixtures/mutants/A--drop-covering-attack-0.sexp` | `reject missing-conflict` |
+
+**`incomplete-argument` is retired at `lara-core@0.3`.** Through `lara-core@0.2` a fourth kind
+rejected any unit containing an argument that type-checks with an open mandatory obligation. Such an
+argument is now accepted as a *located hole* (spec §4.4): it stays out of the argumentation
+framework, the claim it alone supports reports `gap`, and the verdict's `holes` section names it.
+Its former anchor, `fixtures/corpus/reject-incomplete-argument.sexp`, is renamed
+`fixtures/corpus/accept-located-hole.sexp` — one argument `a` whose rule leaves the mandatory
+question `q1` open, and one query `c`. Both drivers print (wrapped here)
+
+```
+(verdict (replay-id …) accept (labels) (edges)
+  (statuses (status (atom c) gap))
+  (holes (arg 0 a (obligations (obligation q1 (pos))) (attacks))))
+```
+
+with exit **0**, pinned byte for byte by `test/DifferentialSpec.hs` and `scripts/differential.sh`.
+`fixtures/corpus/hole-attack-inert.sexp` pins a hole's typed outgoing attack, listed on its row and
+contributing no edge, and `fixtures/corpus/accept-nested-hole-sites.sexp` pins obligations located at
+nested rule occurrences — inherited through a premise, through a discharge, and one question open at
+three sites (`located-gap-decision.md` D12). What did not
+move: R5 still rejects a question in neither the discharge map nor the open set `H`, and a hole's premises, discharges and outgoing attacks are still type-checked, so an
+ill-typed attack *from* a hole rejects with its R-class. Because the checker no longer stops at the
+first incomplete argument, a later support or attack defect in the same unit is reported instead of
+being masked.
 
 One class is not individually anchored above, because it is a source-boundary rejection rather
 than a checker verdict:
@@ -455,7 +481,7 @@ try) and `parseWire_nested_error` (an input opening more than `maxDepth` lists b
 is refused with the depth message at line 1, column `maxDepth + 2`). No refusal behaviour changed;
 the three gates above pass unmodified.
 
-The full mutation manifest (`fixtures/mutants/MANIFEST.tsv`, 595 mutants) exercises every class at
+The full mutation manifest (`fixtures/mutants/MANIFEST.tsv`, 600 mutants) exercises every class at
 scale and is the authoritative cross-check if an anchor above ever drifts; each row names its
 `expected` outcome (`reject-R1`, …, `codec-reject`) and `expected-location`.
 
@@ -491,17 +517,26 @@ built, which is different from `examples/R1`'s argument that cites a leaf which 
 calculus keeps them apart (see `examples/R1/example.lara`'s own closing "teaching point" comment,
 which states this contrast directly).
 
-Most *scientific* problems — weak evidence, a claim whose argument could not be completed and so
-was not submitted, a contested field — land in the "valid but unsupported" bucket by design: a rejected extractor should not
+Most *scientific* problems — weak evidence, a claim whose argument could not be completed (since
+`lara-core@0.3` reported as a located hole beside the `gap` status, §2), a contested field — land in
+the "valid but unsupported" bucket by design: a rejected extractor should not
 automatically become a counter-argument. The natural assumption is the opposite of how the calculus is built, so this is
 worth stating plainly rather than leaving a reader to infer it.
 
-The seeded mutation suite quantifies the split. Of 595 mutants, 537 reject (across the R-classes,
-the `incomplete-argument` and `missing-conflict` kinds, and codec) and 58 are *accept* mutants; of those, 49 have a ground-truth **status change**
+The seeded mutation suite quantifies the split. At evaluation freeze v6 (`docs/m5-freeze-checklist.md`), the last before
+`lara-core@0.3`, 537 of 595 mutants reject (across the R-classes, the then-current
+`incomplete-argument` and `missing-conflict` kinds, and codec) and 58 are *accept* mutants; of those, 49 have a ground-truth **status change**
 (`accept-defeated` 18, `accept-contested` 9, `accept-gap` 9, `accept-evidence-blocked` 9,
 `accept-all-contested` 4) and the remaining 9 (`accept-justified`) exercise mutations the checker
 correctly absorbs without a status change. Both halves are byte-identical across the Haskell and Lean
-drivers (`scripts/differential.sh`).
+drivers (`scripts/differential.sh`). The 18 `hole-obligation` mutants, which rejected as
+`incomplete-argument` in that snapshot, keep their mutation unchanged under `lara-core@0.3`. At
+freeze v7 all 18 accept with exactly one located hole at the seeded argument (none is masked by a
+later defect), so the split is 519 rejecting and 76 accepting mutants
+(`measurements/frozen/lara-core-0.3-regeneration-diffs.md`). Freeze v8 re-lowered the corpus
+units, which are mutation bases, to declare their located holes; that adds 5 rejecting mutants
+(2 `R10`, 3 `R4`), for 524 rejecting and 76 accepting out of 600
+(`measurements/frozen/corpus-relowering-v8-diffs.md`).
 
 ## 4. Relationship to `rit` (the question that prompted this)
 

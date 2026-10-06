@@ -87,6 +87,8 @@ import Lara.AST
   , Unit (..)
   )
 import Lara.BindingAudit.Types
+import Lara.Check (resolveAttacks)
+import Lara.Compile (attackClosureB)
 import Lara.BindingAudit.Tsv (refCellErrorMessage, renderRefsCell, renderTsvRow)
 import Lara.ExpectedJson
   ( JValue (..)
@@ -100,7 +102,7 @@ import Lara.Replay (CheckInput (..))
 import Lara.Prop (Prop)
 import Lara.Syntax (printArg, printArgConcl, printProp)
 import Lara.SupportTerm (leaves)
-import Lara.Wire (Outcome (..), Verdict (..), conditionalStatus, isPublished)
+import Lara.Wire (HoleRow (..), Outcome (..), Verdict (..), conditionalStatus, isPublished)
 
 -- ---------------------------------------------------------------------------
 -- Paper anchoring (the refs axis of number 2)
@@ -237,10 +239,10 @@ computeUnit ruleModeOf flavored name ci surfaceDerivedArgs (Verdict _ outcome) p
     -- A conditional label is not a claim status (spec §4.3). No
     -- frozen corpus unit quarantines, so refuse rather than let an
     -- @evidence-blocked@ query enter the aggregate under its conditional label.
-    Accept _ _ statuses
+    Accept _ _ statuses _
       | any (not . isPublished . snd) statuses ->
           error ("claim-support: evidence-blocked corpus unit " ++ name)
-    Accept labels _ statuses ->
+    Accept labels _ statuses holes ->
       UnitRecord
         { urName = name
         , urStatuses = map (conditionalStatus . snd) statuses
@@ -256,11 +258,44 @@ computeUnit ruleModeOf flavored name ci surfaceDerivedArgs (Verdict _ outcome) p
         }
       where
         unit = inputUnit ci
-        indexedArgs = zip [0 :: Int ..] (unitArgs unit)
+        -- Labels are indexed by AF node, which is not the declaration index
+        -- once a hole precedes a complete argument. The AF nodes are the
+        -- declared arguments the verdict does not report as holes, in
+        -- declaration order — exact here because no frozen corpus unit
+        -- quarantines, so the checked unit is the declared one.
+        holeIds = [aid | HoleRow _ aid _ _ <- holes]
+        afIndexById =
+          zip [aid | (aid, _) <- unitArgs unit, aid `notElem` holeIds] [0 :: Int ..]
+        -- An @in@ challenge whose every typed attack is inert (aimed at a
+        -- located hole, D4/D6 of docs/located-gap-decision.md) bears on no
+        -- claim status, so neither it nor its leaves are load-bearing.
         loadBearingArgs =
           [ pair
-          | (i, pair) <- indexedArgs
+          | pair@(aid, _) <- unitArgs unit
+          , Just i <- [lookup aid afIndexById]
           , lookup i labels == Just LIn
+          , aid `notElem` inertOnlySources
+          ]
+        inertOnlySources =
+          [ aid
+          | (aid, _) <- unitArgs unit
+          , any ((== aid) . attackSrc) attacks
+          , not (any ((== aid) . attackSrc) liveAttacks)
+          ]
+        -- The typed attacks that can change a label: the source is a complete
+        -- AF node, and the target is complete or the attacked occurrence also
+        -- lies in some complete node (D6, the compiled-edge closure
+        -- 'Lara.Compile.attackClosureB'). An attack whose occurrence only a
+        -- located hole contains compiles to no edge.
+        completeTerms = [term | (aid, term) <- unitArgs unit, aid `notElem` holeIds]
+        liveAttacks =
+          [ attack
+          | attack <- attacks
+          , attackSrc attack `notElem` holeIds
+          , attackTarget attack `notElem` holeIds
+              || any
+                (\rk -> any (attackClosureB rk) completeTerms)
+                (resolveAttacks (unitArgs unit) [attack])
           ]
         loadBearingLeafIds = nub (concatMap (leaves . snd) loadBearingArgs)
 
@@ -372,7 +407,7 @@ computeUnit ruleModeOf flavored name ci surfaceDerivedArgs (Verdict _ outcome) p
                     ++ " is a challenge in " ++ name
                 )
 
-        attackAuditSubjects = map attackAuditSubject attacks
+        attackAuditSubjects = map attackAuditSubject liveAttacks
 
         attackAuditSubject attack =
           let sourceId = attackSrc attack
@@ -446,7 +481,7 @@ computeUnit ruleModeOf flavored name ci surfaceDerivedArgs (Verdict _ outcome) p
         attackTargets aid =
           nub
             [ attackTarget attack
-            | attack <- attacks
+            | attack <- liveAttacks
             , attackSrc attack == aid
             ]
 

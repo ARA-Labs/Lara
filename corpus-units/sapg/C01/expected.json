@@ -1,6 +1,6 @@
 {
   "replay-id": {
-    "core": "lara-core@0.2",
+    "core": "lara-core@0.3",
     "policy": "corpus-v1",
     "backends": [
       "nd@1"
@@ -18,10 +18,35 @@
         "claim": "contributes(parallel_env_scaling, ppo, performance_saturation)",
         "status": "gap",
         "complete-support": 0,
-        "holes": 0,
-        "incomplete-alternative": false
+        "holes": 1,
+        "incomplete-alternative": true
       }
     ],
-    "labels": []
+    "labels": [],
+    "holes": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "obligations": [
+          "single_variable",
+          "protocol_parity"
+        ],
+        "sites": [
+          {
+            "question": "single_variable",
+            "at": [
+              "rule"
+            ]
+          },
+          {
+            "question": "protocol_parity",
+            "at": [
+              "rule"
+            ]
+          }
+        ],
+        "attacks": []
+      }
+    ]
   }
 }

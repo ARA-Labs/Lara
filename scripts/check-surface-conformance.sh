@@ -7,7 +7,12 @@ set -euo pipefail
 # comma-separated set drawn from the closed vocabulary below; every token is
 # required to occur.  The canonical output has exactly this header:
 #
-# case_id  ast_fingerprint  outcome  core_fingerprint  obligations  attacks  observations
+# case_id  ast_fingerprint  outcome  core_fingerprint  authored_open  located_holes  attacks  observations
+#
+# `authored_open` lists every question an author left open anywhere in a
+# retained argument, optional ones included (syntax data); `located_holes` lists
+# the core's located holes, one `arg:question` atom per exact mandatory
+# obligation (docs/located-gap-decision.md D8).
 #
 # Fingerprints are 16 lowercase hexadecimal digits: FNV-1a-64 over the UTF-8
 # bytes of a length-framed structured encoding.  List cells are `-` when empty;
@@ -112,7 +117,7 @@ if [ "${SURFACE_CONFORMANCE_TEST_MUTATE_HASKELL_OUTPUT:-0}" = 1 ]; then
   mv "$tmp_dir/haskell.mutated.tsv" "$tmp_dir/haskell.tsv"
 fi
 
-expected_header=$'case_id\tast_fingerprint\toutcome\tcore_fingerprint\tobligations\tattacks\tobservations'
+expected_header=$'case_id\tast_fingerprint\toutcome\tcore_fingerprint\tauthored_open\tlocated_holes\tattacks\tobservations'
 for output in "$tmp_dir/haskell.tsv" "$tmp_dir/lean.tsv"; do
   [ -s "$output" ] || { echo "surface conformance: FAIL: empty output: $output" >&2; exit 1; }
   [ "$(head -n 1 "$output")" = "$expected_header" ] || {

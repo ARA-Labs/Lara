@@ -89,9 +89,9 @@ codecMutantsForBase base bytes = case parseSExpr bytes of
     junkSection (SList kids) = Just (SList (kids ++ [SList [SAtom "mut_junk"]]))
     junkSection _ = Nothing
     -- The fixture text moves with the core-version bump; the expectation does
-    -- not. `lara-core@0.1` is retired (decision 5), so it is exactly the
-    -- kind of unsupported version this operator must present.
-    coreVersion = mapAtom (\a -> if a == "lara-core@0.2" then "lara-core@0.1" else a)
+    -- not. `lara-core@0.2` is retired by the located-gap cutover (D1), so it
+    -- is exactly the kind of unsupported version this operator must present.
+    coreVersion = mapAtom (\a -> if a == "lara-core@0.3" then "lara-core@0.2" else a)
     replayOrder (SList [ci, SList (ridTag : core : policy : rest), unit]) =
       Just (SList [ci, SList (ridTag : policy : core : rest), unit])
     replayOrder _ = Nothing

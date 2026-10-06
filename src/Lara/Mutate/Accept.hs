@@ -84,7 +84,7 @@ isJustified :: CheckInput -> Bool
 isJustified input = case runCheck input of
   -- The conditional label of an @evidence-blocked@ query is not its status
   -- (spec §4.3): such a query is never counted justified.
-  Verdict _ (Accept _ _ statuses) -> case unitQueries (inputUnit input) of
+  Verdict _ (Accept _ _ statuses _) -> case unitQueries (inputUnit input) of
     [q] -> lookup q statuses == Just (Published Justified)
     _ -> False
   _ -> False
@@ -101,7 +101,7 @@ isJustified input = case runCheck input of
 acceptStructureOk :: MutationOp -> Expected -> CheckInput -> Verdict -> Bool
 acceptStructureOk op expected input (Verdict _ outcome) = case outcome of
   Reject _ -> False
-  Accept labels _edges statuses -> statusOk && shapeOk
+  Accept labels _edges statuses _ -> statusOk && shapeOk
     where
       u = inputUnit input
       mq = case unitQueries u of

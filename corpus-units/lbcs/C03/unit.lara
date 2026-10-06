@@ -15,13 +15,15 @@
 #     adapter that would certify Theorem 2 (a mechanized proof checker) does not exist yet, so
 #     analytic_argument stays defeasible; migration to a strict rule + certificate is future
 #     work (corpus-v1 design note; LOWERING §Scheme family map).
-#   * Both mandatory analytic CQs are unmet-gap: assumptions_established (Conditions 1-2 are
-#     never operationalized or checked — they appear only in the claim statement) and
-#     scope_licensed (the finite-T sweep, T<=2000, never bridges to the t->inf probability-1
-#     statement). Two open mandatory obligations make the argument an IncompleteArgument
-#     rejection, so no complete analytic_argument is declarable — E2-style gap on empty
-#     complete support (adaptive-pruning/C03 pattern). The optional CQs (repetition count,
-#     single dataset/model pair) are also unmet and simply omitted.
+#   * Both mandatory analytic CQs are unmet-gap: assumptions_established (Conditions 1-2 are never
+#     operationalized or checked — they appear only in the claim statement) and scope_licensed
+#     (the finite-T sweep, T<=2000, never bridges to the t->inf probability-1 statement). The
+#     analytic_argument is declared as a located hole with both `open assumptions_hold` and
+#     `open scope_licensed` (lowering re-done for issue #15 under lara-core@0.3; until
+#     lara-core@0.2 the open mandatory obligation rejected the unit, so the arg was omitted): it
+#     is not an AF node and the claim stays gap on empty complete support. The annotation's
+#     optional CQs (repetition count, single dataset/model pair) are also unmet; analytic_argument
+#     has no matching question, so they are omitted.
 #   * The derivation itself is not shipped: the claim's Proof field points only at empirical
 #     E03/E06, so the principal premise derives(theorem2_proof, lbcs_eps_convergence) is merely
 #     ATTESTED (the paper asserts the appendix proof), deepening the gap beyond the two CQs.
@@ -51,17 +53,23 @@ leaf e1 : derives(theorem2_proof, lbcs_eps_convergence)
   provenance = ai-executed
   refs       = [logic/claims.md#C03, Theorem-2, logic/experiments.md#E03, logic/experiments.md#E06, Table-7, Table-1, trace/exploration_tree.yaml#N08, trace/exploration_tree.yaml#N12]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... but only an incomplete argument (a located hole) is declarable -------------------------
 
-# (Intentionally no `arg`: assumptions_established(theorem2_proof) — Conditions 1-2 unverified —
-# and scope_licensed(lbcs_eps_convergence) — finite-T does not license the t->inf limit — are
-# both mandatory and both unmet, and derives is only attested. The complete-support set is empty.)
+# The incomplete argument: assumptions_hold (Conditions 1-2 unverified) and scope_licensed
+# (finite T does not license the t -> inf limit) are both mandatory and both have no honest
+# leaf, so both stay open and a1 is a hole; its premise e1 is only attested.
+arg a1 : supports(c03) by analytic_argument(lbcs_eps_convergence, theorem2_proof)
+  open      assumptions_hold
+  open      scope_licensed
 
 status c03
 
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
-# Compiled AF: no arguments.
+# Compiled AF: no arguments (a1 is a located hole, not an AF node).
+# Located hole: a1 (analytic_argument), open obligations [assumptions_hold, scope_licensed];
+#   sources no attacks.
 # Claim status:
-#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8;
+#          the hole a1 is reported in the verdict's holes section, not as a node)

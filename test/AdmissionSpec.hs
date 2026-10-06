@@ -171,7 +171,7 @@ prop_explicitAdmitPreservesGraph =
           , admissionAuditAttacks (sourceResultAudit result) === []
           , case verdictOutcome (sourceResultVerdict result) of
               Reject rejection -> counterexample ("unexpected core reject: " ++ show rejection) False
-              Accept labels edges statuses ->
+              Accept labels edges statuses _ ->
                 conjoin
                   [ labels === [(0, LOut), (1, LIn)]
                   , edges === [(1, 0)]
@@ -404,7 +404,7 @@ prop_attackEndpointFiltering =
           [ admissionAuditAttacks audit === take 2 attacks
           , case verdictOutcome (sourceResultVerdict result) of
               Reject rejection -> counterexample ("unexpected reject: " ++ show rejection) False
-              Accept _ edges _ -> edges === [(1, 0)]
+              Accept _ edges _ _ -> edges === [(1, 0)]
           ]
   where
     attacks =
@@ -504,7 +504,7 @@ prop_policyQuarantineBlockedOverlay =
      in conjoin
           [ case verdictOutcome (sourceResultVerdict result) of
               Reject rejection -> counterexample ("unexpected reject: " ++ show rejection) False
-              Accept _ _ statuses ->
+              Accept _ _ statuses _ ->
                 statuses
                   === [ (atom0 "target", EvidenceBlocked Justified)
                       , (atom0 "other", Published Justified)

@@ -14,7 +14,7 @@ The existing M4 fixtures cannot refute it. `Lara.Examples.Linking`'s carriers
 are a two-node chain — `ctxEx`/`fragEx` (`lean/Lara/Examples/Linking.lean:43`
 and `:47`), where `q` undermines `p` and nothing attacks `q` — and a two-node
 mutual rebut observed at a singleton support, `symCtx`/`symFrag`
-(`lean/Lara/Examples/Linking.lean:592`, `:595`). Both are frameworks on which
+(`lean/Lara/Examples/Linking.lean:594`, `:597`). Both are frameworks on which
 all five instances of `ExtensionSemantics` agree — checked, not asserted:
 `obsSem_linking_agrees` and `obsSem_sym_agrees` below state the agreement at the
 two carriers, five conjuncts each. This module supplies the carriers where they
@@ -104,13 +104,13 @@ open Lara.Examples.Linking
 
 A `DefeatPolicy`'s contrary list is a list of **(source-pattern,
 target-pattern)** pairs, exactly as `Lara.Examples.dpEx`
-(`lean/Lara/Examples.lean:1494`) is: `dpEx = ⟨[(apB, apA)], []⟩` is what makes
+(`lean/Lara/Examples.lean:1501`) is: `dpEx = ⟨[(apB, apA)], []⟩` is what makes
 the saturated attack `Lara.Examples.kAtk = .undermine (.leaf l2) (.leaf l1) []`
-(`lean/Lara/Examples.lean:1466`), and `l2` concludes `q` while `l1` concludes
+(`lean/Lara/Examples.lean:1473`), and `l2` concludes `q` while `l1` concludes
 `p`, so `(apB, apA)` reads *q attacks p*. `cyclePolicy` follows the shape of
-`Linking.symPolicy` (`lean/Lara/Examples/Linking.lean:589`), changing only
+`Linking.symPolicy` (`lean/Lara/Examples/Linking.lean:591`), changing only
 `unitPolicyEx`'s `defeat` field, and reuses `Linking.apS`
-(`lean/Lara/Examples/Linking.lean:739`) for the `s` pattern rather than
+(`lean/Lara/Examples/Linking.lean:741`) for the `s` pattern rather than
 introducing a second name for it.
 
 The split. The context declares and asserts `l2` (conclusion `q`); the fragment
@@ -119,9 +119,9 @@ boundary and are supplied by `crossAtts` (`lean/Lara/Context/Fragment.lean:207`)
 — the mechanism `Linking.crossAtts_nonempty`
 (`lean/Lara/Examples/Linking.lean:139`) pins. The third, `s ⊣ p`, has **both
 endpoints among the fragment's own arguments**, so the fragment must declare it
-itself: `SideOk.attack_complete` (`lean/Lara/Context/Link.lean:631`) obliges a
+itself: `SideOk.attack_complete` (`lean/Lara/Context/Link.lean:640`) obliges a
 side to cover every contrary pair internal to it, and
-`Linking.hostile_composite_not_sideOk` (`lean/Lara/Examples/Linking.lean:561`)
+`Linking.hostile_composite_not_sideOk` (`lean/Lara/Examples/Linking.lean:563`)
 is the witness that omitting such an attack really does break well-formedness.
 
 The linked carrier, with node indices as `Invariants.eraseAF` assigns them.
@@ -252,8 +252,8 @@ theorem cycle_sideOk_frag (reg : BackendRegistry id) :
 /-- The three-cycle is admissible against every registry; it contains only leaves. -/
 theorem cycle_admissible (reg : BackendRegistry id) : Admissible reg cycleCtx cycleFrag where
   guard := cycle_link_ok
-  ctx := cycle_sideOk_ctx reg
-  frag := cycle_sideOk_frag reg
+  ctx := (cycle_sideOk_ctx reg).toHoles
+  frag := (cycle_sideOk_frag reg).toHoles
   signature :=
     signatureStage_link (by decide) (by decide) (by decide) (by decide)
       (by decide) (by decide)
@@ -354,8 +354,8 @@ The export is `s`, node `2` — the sink, attacked by both members of the
 two-cycle and attacking nothing. -/
 
 /-- `p ⊣ q`, `q ⊣ p`, `p ⊣ s`, `q ⊣ s`. A superset of `Linking.symPolicy`'s
-table (`lean/Lara/Examples/Linking.lean:589`), which has the mutual rebut but no
-sink — which is why `Linking.obs_contested` (`:597`) sees no disagreement and
+table (`lean/Lara/Examples/Linking.lean:591`), which has the mutual rebut but no
+sink — which is why `Linking.obs_contested` (`:599`) sees no disagreement and
 this fixture does. -/
 def sinkPolicy : Policy.Policy :=
   { unitPolicyEx with defeat := ⟨[(apA, apB), (apB, apA), (apA, apS), (apB, apS)], []⟩ }
@@ -421,11 +421,11 @@ Without these, `backend_replacement_congruence_sem` and
 `registry_swap_congruence_sem` would be conditionals whose premises are not
 known to hold of anything, and `CtxEquivSem` would have no witness of any kind.
 They are the semantics-parametric counterparts of `Linking.congruence_witness`
-(`lean/Lara/Examples/Linking.lean:676`) and `Linking.registry_swap_witness`
+(`lean/Lara/Examples/Linking.lean:678`) and `Linking.registry_swap_witness`
 (`:670`). The first now uses `cycle_admissible` on the three-cycle. The
 registry-swap witness retains `Linking.admissible_split` (`:345`),
-`Linking.assurPreserving_onlyNd` (`:658`) and `Linking.registryOnlyNd` (`:637`).
-Both use `fixesContext_id` (`lean/Lara/Context/Equivalence.lean:868`). -/
+`Linking.assurPreserving_onlyNd` (`:660`) and `Linking.registryOnlyNd` (`:639`).
+Both use `fixesContext_id` (`lean/Lara/Context/Equivalence.lean:961`). -/
 
 /-- **Congruence at every semantics on the linked three-cycle.**
 `cycle_admissible` supplies the premises at the very carrier where
@@ -443,7 +443,7 @@ theorem congruence_witness_sem (sem : ExtensionSemantics) :
     (cycle_admissible registryEx) (fixesContext_id cycleCtx)
 
 /-- **D6, at every semantics at once.** Two genuinely different registries —
-`Linking.registryOnlyNd_ne_registryEx` (`lean/Lara/Examples/Linking.lean:645`)
+`Linking.registryOnlyNd_ne_registryEx` (`lean/Lara/Examples/Linking.lean:647`)
 proves they differ — read the same fragment the same way, under every extension
 semantics.
 
@@ -451,7 +451,7 @@ Here the `sem` quantifier is inert: all five semantics agree at this carrier.
 The fragment also carries no certificate, so
 the acceptance-profile hypothesis is discharged against material that has no
 assurance to preserve. The certificate-bearing grounded counterpart is
-`Linking.cert_registry_swap_witness` (`lean/Lara/Examples/Linking.lean:909`). -/
+`Linking.cert_registry_swap_witness` (`lean/Lara/Examples/Linking.lean:911`). -/
 theorem registry_swap_witness_sem (sem : ExtensionSemantics) :
     obsSem sem registryOnlyNd ctxEx fragEx = obsSem sem registryEx ctxEx fragEx :=
   registry_swap_congruence_sem sem assurPreserving_onlyNd
@@ -491,10 +491,10 @@ theorem cert_registry_swap_witness_sem (sem : ExtensionSemantics) :
 /-- **A `CtxEquivSem` negative pair at `stableSem`.** The two fragments export
 the same conclusion; `Linking.quietCtx` (`lean/Lara/Examples/Linking.lean:58`)
 tells them apart, because `fragEx` supplies an argument for its export and
-`Linking.silentFrag` (`:610`) supplies none.
+`Linking.silentFrag` (`:612`) supplies none.
 
 This is the semantics-parametric counterpart of `Linking.ctxEquiv_negative`
-(`lean/Lara/Examples/Linking.lean:616`) and exists for the same reason: without
+(`lean/Lara/Examples/Linking.lean:618`) and exists for the same reason: without
 it, "no context distinguishes them" would be a statement about a relation
 nothing is known to be false of, and `CtxEquivSem` would be trivially
 satisfiable for all anyone could tell.
@@ -529,7 +529,7 @@ direction from `ctxEquivSem_grounded_iff` breaks the build. -/
 
 Stated at `groundedSem`, where — unlike `ctxEquivSem_negative` — the answer is
 already known from `Linking.ctxEquiv_negative`
-(`lean/Lara/Examples/Linking.lean:616`); the derivation *through* the `iff` is
+(`lean/Lara/Examples/Linking.lean:618`); the derivation *through* the `iff` is
 the whole reason the theorem is here. -/
 theorem ctxEquivSem_grounded_negative : ¬ CtxEquivSem groundedSem registryEx fragEx silentFrag :=
   fun h => Linking.ctxEquiv_negative ((ctxEquivSem_grounded_iff registryEx fragEx silentFrag).mp h)
@@ -606,7 +606,7 @@ theorem obsSem_linking_agrees :
   decide
 
 /-- **Agreement at the other pre-existing M4 carrier.** `Linking.symCtx` and
-`Linking.symFrag` (`lean/Lara/Examples/Linking.lean:592`, `:595`) are a mutual
+`Linking.symFrag` (`lean/Lara/Examples/Linking.lean:594`, `:597`) are a mutual
 rebut between two leaves, observed at the singleton support of `p`. All five
 semantics report `contested` there, so this carrier could not have separated
 them either.
@@ -614,7 +614,7 @@ them either.
 This is the second half of the claim this module's header makes about why the
 existing fixtures were insufficient, and it is here for the same reason as the
 five-way form of `obsSem_linking_agrees`: the header would otherwise be
-asserting it. `Linking.obs_contested` (`lean/Lara/Examples/Linking.lean:597`)
+asserting it. `Linking.obs_contested` (`lean/Lara/Examples/Linking.lean:599`)
 pins only the grounded reading.
 
 Why the mutual rebut does *not* separate, whereas `sinkCtx`/`sinkFrag` does:
@@ -667,7 +667,7 @@ The proof cannot be `decide`, precisely because `sem` is free. It runs the case
 split `obsGen` runs: the checker's rejection branch is refuted by
 `gap_accepted`, and on the accepted branch the exported claim's grounded status
 is extracted from `Linking.obs_gap` (`lean/Lara/Examples/Linking.lean:187`)
-through `obs_eq_of_ok` (`lean/Lara/Context/Equivalence.lean:686`) and handed to
+through `obs_eq_of_ok` (`lean/Lara/Context/Equivalence.lean:756`) and handed to
 `Invariants.observeSem_of_status_gap`, which is where the semantics-independence
 actually lives.
 
@@ -704,7 +704,7 @@ reaches all three arms — `Linking.obs_incompatible_id_clash`
 (`:129`) are the other two — and the semantics-parametric twins are free,
 because the link guard and the whole-unit checker both run *before* any
 projection is consulted. That is exactly the content of `obsGen_incompatible`
-and `obsGen_rejected` (`lean/Lara/Context/Equivalence.lean:614`, `:632`), and it
+and `obsGen_rejected` (`lean/Lara/Context/Equivalence.lean:684`, `:702`), and it
 is why these must be term proofs through `obsSem_incompatible` /
 `obsSem_rejected` rather than `decide`: with `sem` free there is nothing for
 `decide` to evaluate, and the point is that there is nothing it *needs* to

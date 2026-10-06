@@ -34,6 +34,8 @@ module Lara.Driver.Internal
   , slotMappingLines
   , buildCertOk
   , buildAccept
+  , declaredTypedHole
+  , acceptedRawUnit
   , runCheck
   , runCheckLocated
   , runCheckLocatedWith
@@ -61,11 +63,16 @@ import Lara.AST
   , TheoryDigest (..)
   , RejectClass (..)
   , Rejection (..)
+  , Attack (..)
+  , SupportTerm
   , Unit (..)
   )
 import Lara.Blocked
   ( Prune
   , blockedQueries
+  , carriers
+  , retainedAttackIndices
+  , retainedIndices
   , groupConsistent
   , prune
   , pruneWithPolicySeed
@@ -82,6 +89,7 @@ import Lara.Check
   , ProgramError (..)
   , UnitError (..)
   , checkUnitWith
+  , cuHoles
   , cuNodes
   , cuProgram
   , fullConfig
@@ -110,7 +118,14 @@ import Lara.SupportTerm
   , CertOk
   , CertOutcome (..)
   , CheckError (..)
+  , CheckLoc (..)
   , SlotSource (..)
+  , chIndex
+  , chObligations
+  , chTerm
+  , inferSupport
+  , obligationSites
+  , srObligations
   )
 import qualified Lara.Strict as St
 import Lara.Strict.Deps (CertDep, certDeps, encodeCertDeps)
@@ -118,7 +133,7 @@ import qualified Lara.Strict.Insp as Insp
 import qualified Lara.Strict.ND as ND
 import qualified Lara.Strict.Ord as Ord
 import qualified Lara.Strict.RA as RA
-import Lara.Wire (Outcome (..), PublicStatus (..), Verdict (..))
+import Lara.Wire (HoleObligation (..), HoleRow (..), Outcome (..), PublicStatus (..), Verdict (..))
 
 -- | Run replay preflight, the duplicate-report-group boundary check, and the
 -- checker, retaining the validated identity. Precedence mirrors the spec's
@@ -241,6 +256,26 @@ runCheckReported cfg input pruned =
                       , []
                       , unitCertDeps checked
                       )
+
+-- | The checked unit and accepted cache behind a raw-door accepting verdict:
+-- the checked half of the group-only prune, re-checked exactly as
+-- 'runCheckLocated' checks it. 'Nothing' when that verdict is a rejection
+-- (replay preflight, the group boundary, or the checker).
+--
+-- For Haskell-only reporting tools (@expected.json@, the mechanical reviewer)
+-- that must name AF nodes and holes by the cache the verdict was read from;
+-- the verdict itself never needs it.
+acceptedRawUnit :: CheckInput -> Maybe (Unit, CheckedUnit)
+acceptedRawUnit input = case runtimeReplayFailure input of
+  Just _ -> Nothing
+  Nothing
+    | groupConflictRejectPrune pruned -> Nothing
+    | otherwise ->
+        either (const Nothing) (Just . (,) checked) $
+          checkUnitWith fullConfig (buildGamma (unitLeaves checked)) (buildCertOk (unitTheories checked)) checked
+  where
+    pruned = prune (inputUnit input)
+    checked = pruneChecked pruned
 
 -- | The one @stderr@ line explaining a __checker-side__ R13: the registered
 -- backend replayed the certificate and refused it, and this is the reason it
@@ -435,15 +470,69 @@ buildAccept pruned accepted =
         [ (p, publicStatus p (statusC af (completeClaimFor (cuNodes accepted) p)))
         | p <- queries
         ]
+    , verdictHoles = holeRows pruned accepted
     }
   where
     af = runtimeAF (cuProgram accepted)
     n = length (afArgs af)
-    queries = unitQueries (pruneDeclared pruned)
-    blocked = blockedQueries pruned (cuNodes accepted) queries
+    declared = pruneDeclared pruned
+    queries = unitQueries declared
+    -- Only consulted off the fast path, and then only for quarantined
+    -- declarations: one inference each under the full declared Γ.
+    cs = carriers pruned (declaredTypedHole declared) accepted
+    blocked = blockedQueries pruned cs (cuNodes accepted) queries
     publicStatus p
       | p `elem` blocked = EvidenceBlocked
       | otherwise = Published
+
+-- | Whether a support term is a typed hole under a unit's full declared
+-- context (Lean @Check.argHole@): it type-checks, with a nonempty root
+-- obligation set. A term whose inference fails is not a hole. The
+-- conservative-reporting reference carrier excludes exactly these
+-- ("Lara.Blocked".'carriers').
+declaredTypedHole :: Unit -> SupportTerm -> Bool
+declaredTypedHole declared w =
+  case inferSupport pI gamma certOk LocRoot w of
+    Right result -> not (null (srObligations result))
+    Left _ -> False
+  where
+    pI = lookupRule (unitRules declared)
+    gamma = buildGamma (unitLeaves declared)
+    certOk = buildCertOk (unitTheories declared)
+
+-- | The verdict's @holes@ rows (spec §4.4, @docs\/located-gap-decision.md@
+-- D5): each located hole of the checked unit, reported at its __original__
+-- declaration index and id, with its exact root obligations — each located at
+-- its sites (D12), read from the cached term by 'obligationSites', never by
+-- re-running inference — and the original indices of the raw attacks whose
+-- source it is. Admission's retained-argument and retained-attack maps carry
+-- the checked positions back to the supplied unit. Attacks are aligned by
+-- their raw source id, before live-source filtering. Mirrors Lean
+-- @Lara.Driver.holeRows@.
+holeRows :: Prune -> CheckedUnit -> [HoleRow]
+holeRows pruned accepted =
+  [ HoleRow
+      (originalArg (chIndex hole))
+      holeId
+      [ HoleObligation q sites
+      | (q, sites) <- obligationSites pI (chTerm hole) (chObligations hole)
+      ]
+      [ originalAttack k
+      | (k, attack) <- zip [0 ..] (unitAttacks checked)
+      , attackSource attack == holeId
+      ]
+  | hole <- cuHoles accepted
+  , let holeId = fst (unitArgs checked !! chIndex hole)
+  ]
+  where
+    checked = pruneChecked pruned
+    pI = lookupRule (unitRules checked)
+    originalArg = (retainedIndices pruned !!)
+    originalAttack = (retainedAttackIndices pruned !!)
+    attackSource attack = case attack of
+      Rebut w _ -> w
+      Undercut w _ _ -> w
+      Undermine w _ _ -> w
 
 -- ---------------------------------------------------------------------------
 -- Certificate dependency reports

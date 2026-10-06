@@ -566,7 +566,7 @@ data SupportTerm
 -- | A single step in a position path (spec §7): a premise index or a
 -- critical-question name. @π ::= ε | π.i | π.q@.
 data Step = StepPremise Int | StepQuestion QuestionId
-  deriving (Eq, Show)
+  deriving (Eq, Ord, Show)
 
 -- | A position @π@ in a support term: the empty path is the root (its
 -- conclusion). @w\@π@ is the subterm occurrence at @π@.
@@ -919,6 +919,5 @@ data Rejection
   = RejectClass RejectClass
   | DuplicateRule -- ^ duplicate policy rule identifier
   | DuplicateArgument -- ^ two structurally identical argument terms
-  | IncompleteArgument -- ^ an argument with open root obligations
   | MissingConflict -- ^ an undeclared contrary pair between complete arguments
   deriving (Eq, Ord, Show)

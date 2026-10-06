@@ -14,8 +14,10 @@
 #     vacuously).
 #   * The annotation's mandatory CQ3 is unmet-gap: no variance/repeats justify the 1.77-point
 #     equivalence margin. A non-inferiority claim needs power to detect a difference, so this maps
-#     onto null_comparison's mandatory adequate_power(e01) -> unmet. An open mandatory obligation is
-#     an IncompleteArgument rejection -> E2-style gap.
+#     onto null_comparison's mandatory adequate_power(e01) -> unmet. The incomplete
+#     null_comparison argument is declared as a located hole with `open adequate_power`
+#     (lowering re-done for issue #15 under `lara-core@0.3`): it is not an AF node, so the claim
+#     lands `gap` on empty complete support.
 #   * CQ1 (arms identical except positive-sample selection) discharges baseline_parity; CQ2 (no
 #     ground-truth leakage through the judge) discharges measurement_validity. Both leaves are on
 #     the page. The optional best-of-two-sizes CQ4 is omitted.
@@ -50,12 +52,15 @@ leaf e3 : valid_measurement(reasoning_accuracy, e01)
   provenance = ai-executed
   refs       = [logic/experiments.md#E01-Procedure-step-4]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... and the incomplete argument is declared as a located hole ------------------------------
 
-# (Intentionally no `arg`: adequate_power(e01) has no honest leaf — E01 reports single best-of-two
-# numbers with no repeats or confidence intervals (CQ3, unmet-gap), so the 1.77-point equivalence
-# margin is uncalibrated against noise — and corpus-v1 makes power mandatory for null_comparison.
-# The claim's complete-support set is therefore empty.)
+# powered(e01) has no honest leaf (single best-of-two numbers, no repeats or confidence
+# intervals, CQ3) and corpus-v1 makes it mandatory for null_comparison, so it stays open: a1 is a
+# hole, not an AF node.
+arg a1 : supports(c06) by null_comparison(ai_feedback, ground_truth_labels, reasoning_accuracy, bbox_datasets, e01)
+  discharge baseline_parity      with e2
+  discharge measurement_validity with e3
+  open      adequate_power
 
 status c06
 
@@ -63,5 +68,7 @@ status c06
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
 # Compiled AF: no arguments.
+# Located hole: a1 (open obligations [adequate_power]; sources no attacks).
 # Claim status:
-#   c06 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c06 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8 — the hole
+#               is reported, not a node)

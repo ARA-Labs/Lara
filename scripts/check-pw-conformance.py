@@ -282,6 +282,11 @@ CASES = [
     ('checker rejection', 'inline', [('(attacks (undermine a2 a1 (pos)))', '(attacks)')], {}, 1, '(pw-error 1 world (world-rejected w1 missing-conflict))'),
     ('undeclared leaf', 'inline', [('(arg a2 (leaf l2))', '(arg a2 (leaf l9))')], {}, 1, '(pw-error 1 world (world-rejected w1 '),
     ('duplicate world state', 'inline', [('(args (arg a1 (leaf l1)) (arg a2 (leaf l2)))', '(args (arg a1 (leaf l1)))'), ('(attacks (undermine a2 a1 (pos)))', '(attacks)')], {}, 1, '(pw-error 1 world (duplicate-world-state w1 w0))'),
+    # A world's identity includes its located holes: w1 has w0's AF arguments
+    # and attacks plus a hole leaving the mandatory q1 open, so both worlds
+    # load. Under an arguments-and-attacks identity this would be the
+    # duplicate-world-state case above.
+    ('worlds differing only in holes', 'inline', [('(policy (rules) (contraries', '(policy (rules (rule d (mode defeasible) (params) (premises) (conclusion (apat p)) (questions (question q1 (apat q) mandatory)) (allow-trusted false) (certifiers))) (contraries'), ('(args (arg a1 (leaf l1)) (arg a2 (leaf l2)))', '(args (arg a1 (leaf l1)) (arg h1 (inst d (subst) (premises) (discharges) (holes q1) (assurance none))))'), ('(attacks (undermine a2 a1 (pos)))', '(attacks)')], {}, 0, '(pw-result 1 (queries (query (at w0 true) (at w1 true))'),
     # The context environment: every field a later world must repeat. Each
     # case changes the second world only.
     ('context environment: signature', 'inline', [('(preds (pred p (args)) (pred q (args)))', '(preds (pred p (args)) (pred q (args)) (pred r (args)))', 2)], {}, 1, '(pw-error 1 world (context-environment w1 c))'),
@@ -405,7 +410,7 @@ def policy_text(extra):
 
 # The groups.sexp fixture's w1, as an inline source: it declares the leaf
 # table w0.lara elaborates to, so it can share w0.lara's context.
-INLINE_W1 = ('(inline (check-input (replay-id (core lara-core@0.2) (policy pw-t7) (backends (backend nd 1))'
+INLINE_W1 = ('(inline (check-input (replay-id (core lara-core@0.3) (policy pw-t7) (backends (backend nd 1))'
              ' (theories) (artifact pw-groups-w1)) (unit (sigma (sorts) (cons) (preds (pred p (args)) (pred q (args))))'
              ' (policy (rules) (contraries (contrary (apat q) (apat p))) (exceptions)) (theories)'
              ' (leaves (leaf l1 (atom p)) (leaf l2 (atom q)) (leaf l3 (atom p))) (args (arg a1 (leaf l1)) (arg a2 (leaf l2)))'

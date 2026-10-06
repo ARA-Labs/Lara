@@ -48,7 +48,7 @@ frozen core:
 |---|---|
 | `sigma`, `policy` | Both are `Lara.Unit` fields, and R-L3 must retain the two disagreeing values, so they are compared structurally at the guard (§3). |
 | `gammaFrag` | `Lara.Unit` has **no Γ field**; Γ indexes `Unit.CheckedUnit`. Γ is what the two sides contribute, so `link` returns `Lara.Unit × (LeafId → Option Atom)` and builds Γ with `Admission.buildGamma` (D2). |
-| `ground` | `Check.Unit.checkUnit` takes a `ground : List Atom` and sorts it (`Lara.groundWellSorted`, `Check/Unit.lean:132`). A fragment that contributed arguments but no ground atoms could not be checked. |
+| `ground` | `Check.Unit.checkUnit` takes a `ground : List Atom` and sorts it (`Lara.groundWellSorted`, `Check/Unit.lean:155`). A fragment that contributed arguments but no ground atoms could not be checked. |
 | `args`, `atts` | The declared material `Compile.CheckedProgram` is built from. |
 | `imports` | Leaf-name openness (D12, §6). |
 | `exports` | Observable **conclusions**, not pinned claims (D4, §5). |
@@ -97,9 +97,9 @@ rather than asserting it.
 
 ## 4. Saturation is forced, not chosen (D2)
 
-`Compile.AttackComplete` (`Compile.lean:515`) is an **all-pairs** condition over
+`Compile.AttackComplete` (`Compile.lean:646`) is an **all-pairs** condition over
 the declared arguments, and it is a *premise* of
-`Check.Unit.checkUnit_complete` (`Check/Unit.lean:236`, premise at `:251`). A `link` that merely
+`Check.Unit.checkUnit_complete` (`Check/Unit.lean:345`, premise at `:360`). A `link` that merely
 concatenated `C.atts ++ F.atts` would leave every cross-boundary contrary
 conflict uncovered, `hattackComplete` would be unsatisfiable on exactly the
 interesting links, and the calculus would only ever accept programs whose two
@@ -172,10 +172,23 @@ enlarge M4 rather than close it.
 obligations. A **term-level** hole — an argument with unresolved
 critical-question obligations (`HasSupport … w C O`, `O ≠ []`) discharged by
 the context — is unrepresentable in this calculus, and not by choice:
-`Compile.CheckedProgram.complete` (`Compile.lean:480`) forces `O = []` on every
-declared argument, and discharges live *inside* the term (`D : List (QuestionId
+`Compile.CheckedProgram.complete` (`Compile.lean:590`) forces `O = []` on every
+AF argument, and discharges live *inside* the term (`D : List (QuestionId
 × SupportTerm)`), not in a name environment a context could extend.
 `Grounded.Claim.holes` is likewise never read by the observation of §5.
+
+Since `lara-core@0.3` an accepted unit may also carry *located* holes
+(`docs/located-gap-decision.md`): declared arguments that type-check with
+`O ≠ []`. They are reported beside the framework and are not AF arguments, so
+`complete` still holds of every argument the framework contains; it no longer
+holds of every declared argument. They are not context holes either — no
+context fills them. Since issue #13 the linking, composition and
+contextual-equivalence results of this record are stated over `SideOkHoles`
+(`Context/Link.lean`). That condition asks each declared argument only to
+type, so a side may carry located holes. `Admissible` carries such sides, and
+`Context/LinkHoles.lean` shows that the accepted link's holes and hole reports
+are the sides' own. The hole-free `SideOk` theorems are corollaries
+(`docs/located-gap-decision.md` D9).
 
 Consequence for the original closeout: M3's contextual-adequacy debt was
 discharged **partially**, with term-level holes retained.
@@ -220,7 +233,7 @@ question Part B's entry gate exists to answer.
 types at all, every compiled AF is edgeless, and no context can force an import
 label — so a `logrel_complete` without a hypothesis is *false*. It is worse
 than that degenerate case: `Compile.ConflictAttackable` is unconditionally
-`True` on leaves (`Compile.lean:407`) while `HasAttack.rebut` requires
+`True` on leaves (`Compile.lean:514`) while `HasAttack.rebut` requires
 `r.mode = .defeasible` (`Lara/Attack.lean:550`), so a purely symmetric contrary
 table can force only `{in, undec}`. Contraries are also *patterns* with
 universally quantified variables (`Lara/Attack.lean:85`), so a "fresh" atom on the
@@ -304,7 +317,7 @@ they are kept here because the record explains *why* F0 chose to defer.
 discharge each have an identified route through existing machinery:
 
 - `link_attackComplete` — `contraryMatchB_iff` (`Lara/Attack.lean:506`) and
-  `conflictAttackableB_iff` (`Compile.lean:420`) invert the two Boolean guards;
+  `conflictAttackableB_iff` (`Compile.lean:527`) invert the two Boolean guards;
   `inferSupport_complete` puts every complete argument in the cache, so no
   forced pair is missed.
 - typing of the emitted attacks — `HasAttack.rebut` from

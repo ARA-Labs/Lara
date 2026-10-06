@@ -1,0 +1,22 @@
+; A two-member map in which each member declares a located hole
+; (lara-core@0.3, spec §4.4). Both members are accepted on their own and the
+; linked unit is accepted with two holes. The committed map.verdict.sexp pins
+; map-verdict@2's two hole decisions: nodes/labels/edges share the AF index
+; space (paper_pos's complete `pa` is AF node 0 although `ph` precedes it), and
+; every hole is reported by (member alias, member-local argument id) with its
+; exact obligations. map.core.sexp is the parity envelope the Lean driver reads.
+(lara-map@1
+  (policy empirical-v1 empirical-v1.policy.lara)
+  (backends (backend nd 1))
+  (members
+    (member paper_pos pos.lara)
+    (member paper_neg neg.lara))
+  (alignments
+    (alignment
+      (ref paper_pos c_pos whole)
+      (ref paper_neg c_neg whole)
+      different
+      (author reviewer_r)
+      (audit-status reviewed)
+      (rationale "The two papers state opposite results about the same system, measurand and dataset.")))
+  (questions))

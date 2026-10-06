@@ -75,7 +75,7 @@ requiredFeatures =
 
 outputHeader :: String
 outputHeader =
-  "case_id\tast_fingerprint\toutcome\tcore_fingerprint\tobligations\tattacks\tobservations"
+  "case_id\tast_fingerprint\toutcome\tcore_fingerprint\tauthored_open\tlocated_holes\tattacks\tobservations"
 
 splitOn :: Char -> String -> [String]
 splitOn _ [] = [""]
@@ -691,11 +691,11 @@ sourceInvalidTag :: SourceInvalid -> Maybe String
 sourceInvalidTag (SourceElaborationError err) = errorTag err
 sourceInvalidTag _ = Nothing
 
-data OutputRow = OutputRow String String String String String String String
+data OutputRow = OutputRow String String String String String String String String
 
 renderOutputRow :: OutputRow -> String
-renderOutputRow (OutputRow caseId ast outcome core obligations attacks observations) =
-  intercalate "\t" [caseId, ast, outcome, core, obligations, attacks, observations]
+renderOutputRow (OutputRow caseId ast outcome core authoredOpen locatedHoles attacks observations) =
+  intercalate "\t" [caseId, ast, outcome, core, authoredOpen, locatedHoles, attacks, observations]
 
 evaluateRow :: FilePath -> ManifestRow -> IO OutputRow
 evaluateRow manifestPath row = do
@@ -734,14 +734,24 @@ evaluateRow manifestPath row = do
             (Check.checkUnit (buildGamma (unitLeaves checkedUnit))
               (buildCertOk (unitTheories checkedUnit)) checkedUnit)
           let outcome = "accept"
-              obligations = renderList
+              -- Every question an author left open anywhere in a retained
+              -- argument, optional ones included, in term order: syntax data
+              -- that does not decide hole-hood (D8).
+              authoredOpen = renderList
                 [argument ++ ":" ++ obligation
                 | (ArgId argument, term) <- unitArgs checkedUnit
                 , ObligationId obligation <- holesOf term]
+              -- The core's located holes in checked declaration order, one
+              -- atom per exact mandatory transitive obligation (D8/D10).
+              locatedHoles = renderList
+                [argument ++ ":" ++ obligation
+                | hole <- Check.cuHoles accepted
+                , Just (ArgId argument, _) <- [nth (SupportTerm.chIndex hole) (unitArgs checkedUnit)]
+                , QuestionId obligation <- SupportTerm.chObligations hole]
               attacks = renderList (map renderAttack (unitAttacks checkedUnit))
               observations = renderList (renderObservations program checkedUnit accepted)
               output = OutputRow (manifestCase row) ast outcome
-                (fingerprint (sxCoreUnit checkedUnit)) obligations attacks observations
+                (fingerprint (sxCoreUnit checkedUnit)) authoredOpen locatedHoles attacks observations
           unless (manifestExpected row == outcome) $
             failUtf8 (contextual "expected outcome mismatch" (manifestExpected row, outcome))
           pure output
@@ -751,7 +761,8 @@ evaluateRow manifestPath row = do
       let outcome = "reject:" ++ tag
       unless (manifestExpected row == outcome) $
         failUtf8 (contextual "expected outcome mismatch" (manifestExpected row, outcome))
-      pure (OutputRow (manifestCase row) ast outcome "-" "-" "-" "-")
+      pure (OutputRow (manifestCase row) ast outcome "-" "-" "-" "-" "-")
+    nth i xs = lookup i (zip [0 ..] xs)
     holesOf (SLeaf _) = []
     holesOf (SRule _ _ premises discharges holes _) =
       holes ++ concatMap holesOf premises ++ concatMap (holesOf . snd) discharges

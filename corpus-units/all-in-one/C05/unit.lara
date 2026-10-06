@@ -11,12 +11,14 @@
 #     holds(interval_conditioning, simformer). instrument_validity is annotated met (constrained
 #     samples quantitatively satisfy the interval constraint, energy below the 10% quantile). The
 #     optional confound_control is met (an unconstrained-posterior baseline shows the constraint
-#     has effect) and is retained as a present leaf.
+#     has effect) and is discharged.
 #   * coverage is annotated UNMET-GAP: E05 is the sole supporting experiment (single simulator,
 #     Hodgkin-Huxley). The annotator rated this CQ OPTIONAL ("shown on more than one system?");
 #     corpus-v1 makes coverage (covers_scope) mandatory (uniform-standard rule,
 #     adaptive-pruning/C03), so the policy call wins and the mandatory obligation has no
-#     discharging leaf. No complete measurement instance is declarable — E2-style gap.
+#     discharging leaf. The incomplete measurement argument is declared as a located hole with
+#     `open coverage` (lowering re-done for issue #15 under `lara-core@0.3`): it is not an AF
+#     node, so the claim lands `gap` on empty complete support.
 #
 # Expected verdict is at the bottom of this file (golden oracle).
 
@@ -50,11 +52,14 @@ leaf e3 : confounds_controlled(e05)
   provenance = ai-executed
   refs       = [logic/experiments.md#E05-Baselines]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... and the incomplete argument is declared as a located hole ------------------------------
 
-# (Intentionally no `arg`: covers_scope(e05, simformer) has no honest leaf — the capability is
-# shown on one simulator only — and corpus-v1 makes that obligation mandatory. Complete support
-# is empty.)
+# covers_scope(e05, simformer) has no honest leaf (one simulator only) and corpus-v1 makes it
+# mandatory, so it stays open: a1 is a hole, not an AF node.
+arg a1 : supports(c05) by measurement(interval_conditioning, simformer, e05)
+  discharge instrument_validity with e2
+  discharge confound_control    with e3
+  open      coverage
 
 status c05
 
@@ -62,5 +67,7 @@ status c05
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
 # Compiled AF: no arguments.
+# Located hole: a1 (open obligations [coverage]; sources no attacks).
 # Claim status:
-#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c05 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8 — the hole
+#               is reported, not a node)

@@ -10,8 +10,10 @@
 #   * dose_response maps to component_ablation. Negative-result lowered as a POSITIVE conclusion
 #     over a negative-content effect: contributes(parallel_env_scaling, ppo, performance_saturation)
 #     — increasing parallel environments produces the saturation effect on PPO.
-#   * Two mandatory corpus-v1 CQs are unmet, so no complete component_ablation is declarable
-#     (E2-style gap):
+#   * Two mandatory corpus-v1 CQs are unmet, so the component_ablation argument is incomplete:
+#     it is declared as a located hole with `open protocol_parity` and `open single_variable`
+#     (lowering re-done for issue #15 under lara-core@0.3; the claim stays gap on empty complete
+#     support):
 #       - protocol_parity: annotation CQ "is asymptotic performance measured comparably at every
 #         batch size?" is mandatory unmet-gap — E01 says "to convergence (or a fixed compute
 #         budget)" and leaves the disjunction unresolved, so a fixed budget could cap large-batch
@@ -32,7 +34,7 @@ artifact sapg at sha256:f4108aa329a9
 policy corpus-v1
 use backends [nd@1]
 
-# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar ---------------
+# --- The headline claim, stated but not complete at corpus-v1's evidential bar -----------------
 
 claim c01
   nl      = "PPO asymptotic performance saturates as parallel environments increase (plateau around 25k envs), due to redundant IID samples from a shared Gaussian policy; the sweep spans ~1500 to 100000 environments (4x beyond the threshold) on Shadow Hand and Allegro Kuka Throw over >= 3 seeds, and SAPG exceeds the PPO plateau on the same tasks"
@@ -53,17 +55,22 @@ leaf e2 : variance_reported(e01)
   provenance = ai-executed
   refs       = [logic/experiments.md#E01-Procedure-step-5, trace/exploration_tree.yaml#N02]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... but the argument is incomplete (a located hole) -----------------------------------------
 
-# (Intentionally no `arg`: matched_protocol(e01) is unmet — convergence-vs-fixed-budget is left
-# unresolved — and isolated(parallel_env_scaling, e01) is unmet — per-batch-size optimizer
-# tuning is unstated. Both are mandatory, so the claim's complete-support set is empty.)
+# protocol_parity is open (convergence-vs-fixed-budget is left unresolved) and single_variable is
+# open (per-batch-size optimizer tuning is unstated); both are mandatory, so a1 is a hole.
+arg a1 : supports(c01) by component_ablation(parallel_env_scaling, ppo, performance_saturation, e01)
+  discharge variance_reported with e2
+  open      single_variable
+  open      protocol_parity
 
 status c01
 
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
-# Compiled AF: no arguments.
+# Compiled AF: no arguments (the hole is not a node).
+# Located hole: a1, open obligations [single_variable, protocol_parity]; it sources no attacks.
 # Claim status:
-#   c01 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec section 8)
+#   c01 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec section 8;
+#          the located hole is reported in `holes`, not counted as support)

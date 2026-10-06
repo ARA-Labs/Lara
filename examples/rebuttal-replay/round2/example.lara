@@ -5,9 +5,11 @@
 # in existing calculus vocabulary:
 #
 #   * DISCHARGE a gap (c_kurt gap -> justified): the rebuttal supplies 5-seed variance runs for the
-#     kurtosis ablation, so variance_reported now has a discharging leaf. The previously
-#     undeclarable component_ablation argument becomes complete and, unattacked, is `in` -> the
-#     claim moves gap -> justified. This is the headline gap->justified discharge (issue #62).
+#     kurtosis ablation, so variance_reported now has a discharging leaf. The component_ablation
+#     argument a_kurt, a located hole in rounds 0/1, discharges its open question, becomes complete
+#     and, unattacked, is `in` -> the claim moves gap -> justified. This is the headline
+#     gap->justified discharge (issue #62). Each round is its own artifact version, so a_kurt is
+#     completed in place rather than by a source update (spec §4.4).
 #   * COUNTER-ATTACK to reinstate (c_bench defeated -> justified): the author defeats BOTH reviewer
 #     attacks on the benchmark claim (E4-style reinstatement):
 #       - vs Reviewer 1's UNDERMINE: an author leaf concluding protocol_confirmed undermines the
@@ -162,8 +164,8 @@ undercut d_meas a_meas.rule
 
 # --- Discharge the gap: variance runs for the kurtosis ablation (c_kurt gap -> justified) -------
 # The author's response supplies 5-seed variance runs of the E03 kurtosis ablation. variance_reported
-# now has a discharging leaf, so the component_ablation argument that was undeclarable in rounds 0/1
-# becomes complete. Unattacked, it is `in` -> c_kurt moves gap -> justified.
+# now has a discharging leaf, so the component_ablation argument a_kurt, a located hole in rounds
+# 0/1, becomes complete. Unattacked, it is `in` -> c_kurt moves gap -> justified.
 leaf rk_var : variance_reported(e03)
   kind       = observed
   provenance = user

@@ -1,6 +1,6 @@
 {
   "replay-id": {
-    "core": "lara-core@0.2",
+    "core": "lara-core@0.3",
     "policy": "corpus-v1",
     "backends": [
       "nd@1"
@@ -18,10 +18,28 @@
         "claim": "better(representation_with_prior, fixed_logit, forecasting_f1, forgetting_configs)",
         "status": "gap",
         "complete-support": 0,
-        "holes": 0,
-        "incomplete-alternative": false
+        "holes": 1,
+        "incomplete-alternative": true
       }
     ],
-    "labels": []
+    "labels": [],
+    "holes": [
+      {
+        "arg": "a1",
+        "index": 0,
+        "obligations": [
+          "variance_reported"
+        ],
+        "sites": [
+          {
+            "question": "variance_reported",
+            "at": [
+              "rule"
+            ]
+          }
+        ],
+        "attacks": []
+      }
+    ]
   }
 }

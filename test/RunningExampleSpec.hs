@@ -50,7 +50,7 @@ prop_shape :: Property
 prop_shape = once $ ioProperty $ do
   runs <- checkedRuns
   case map (verdictOutcome . snd) runs of
-    [Accept ls1 es1 sts1, Accept ls2 es2 sts2] ->
+    [Accept ls1 es1 sts1 _, Accept ls2 es2 sts2 _] ->
       pure $
         conjoin
           [ counterexample "run 1 framework is the strict step alone, in" (map snd ls1 === [LIn] .&&. es1 === [])

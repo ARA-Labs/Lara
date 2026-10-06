@@ -346,7 +346,7 @@ genReplayId = do
   backends <- genBackendSelection
   theories <- genCanonicalTheories
   artifact <- Digest <$> genAtomString
-  case mkReplayId LaraCoreV02 policy backends theories artifact of
+  case mkReplayId LaraCoreV03 policy backends theories artifact of
     Right replayId -> pure replayId
     Left _ -> discard -- unreachable: the theories are canonical by construction
 
@@ -387,7 +387,6 @@ genRejection =
     [ RejectClass <$> elements [minBound .. maxBound]
     , pure DuplicateRule
     , pure DuplicateArgument
-    , pure IncompleteArgument
     , pure MissingConflict
     ]
 
@@ -409,9 +408,29 @@ genVerdict = do
         -- the status, so the generator cannot construct an inconsistent
         -- statuses/blocked pairing even by accident.
         statuses <- listOf ((,) <$> genProp <*> genPublicStatus)
-        pure (Verdict replayId (Accept lbls edges statuses))
+        -- Holes (spec §4.4) sit at strictly ascending declaration indices
+        -- with distinct ids; an index is a declaration, not a node, so it is
+        -- not bounded by the label count.
+        holeCount <- choose (0, 3)
+        holeIndices <- scanl1 (+) <$> vectorOf holeCount (choose (1, 4))
+        holes <-
+          sequence
+            [ HoleRow (i - 1) (ArgId ("h" ++ show k))
+                <$> genHoleObligations
+                <*> listOf (choose (0, 9))
+            | (k, i) <- zip [0 :: Int ..] holeIndices
+            ]
+        pure (Verdict replayId (Accept lbls edges statuses holes))
     , Verdict replayId . Reject <$> genRejection
     ]
+  where
+    -- Distinct obligations, each with a nonempty list of distinct sites
+    -- (spec §4.4, D12): the decoder rejects repeats of either.
+    genHoleObligations = do
+      questions <- nub <$> listOf1 (QuestionId <$> genIdent)
+      mapM
+        (\q -> HoleObligation q . nub <$> listOf1 genPosition)
+        questions
 
 -- ---------------------------------------------------------------------------
 -- Text-codec golden vectors (hand-verified)
@@ -869,7 +888,7 @@ goldenUnit =
 
 goldenReplayText :: String
 goldenReplayText =
-  "(replay-id (core lara-core@0.2) (policy empirical-v1) "
+  "(replay-id (core lara-core@0.3) (policy empirical-v1) "
     ++ "(backends (backend nd 1)) "
     ++ "(theories sha256:theory-a) "
     ++ "(artifact sha256:artifact-0))"
@@ -878,7 +897,7 @@ goldenReplayId :: ReplayId
 goldenReplayId =
   either (error . replayErrorMessage) id $
     mkReplayId
-      LaraCoreV02
+      LaraCoreV03
       (PolicyId "empirical-v1")
       [(BackendId "nd", "1")]
       [TheoryDigest "sha256:theory-a"]
@@ -919,7 +938,7 @@ prop_replayEnvelopeGoldenVectors =
     acceptVerdict =
       Verdict
         goldenReplayId
-        (Accept [(0, LIn)] [] [(Prop (Pred "p") [], Published Justified)])
+        (Accept [(0, LIn)] [] [(Prop (Pred "p") [], Published Justified)] [])
     rejectVerdict = Verdict goldenReplayId (Reject (RejectClass R13))
 
 prop_replayEnvelopeMalformedMatrix :: Bool
@@ -930,29 +949,30 @@ prop_replayEnvelopeMalformedMatrix =
     && isLeft (decodeText decodeVerdict "(verdict reject R1)")
   where
     malformedReplay =
-      [ "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories))"
-      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories) (artifact sha256:a) extra)"
+      [ "(replay-id (core lara-core@0.3) (policy empirical-v1) (backends) (theories))"
+      , "(replay-id (core lara-core@0.3) (policy empirical-v1) (backends) (theories) (artifact sha256:a) extra)"
       , "(replay-id (core) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.2 extra) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.2) (policy) (backends) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.2) (policy empirical-v1 extra) (backends) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends (backend nd)) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends (backend nd 1 extra)) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories (x)) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories) (artifact))"
-      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories) (artifact sha256:a extra))"
-      , "(replay-id (policy empirical-v1) (core lara-core@0.2) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.3 extra) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.3) (policy) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.3) (policy empirical-v1 extra) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.3) (policy empirical-v1) (backends (backend nd)) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.3) (policy empirical-v1) (backends (backend nd 1 extra)) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.3) (policy empirical-v1) (backends) (theories (x)) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.3) (policy empirical-v1) (backends) (theories) (artifact))"
+      , "(replay-id (core lara-core@0.3) (policy empirical-v1) (backends) (theories) (artifact sha256:a extra))"
+      , "(replay-id (policy empirical-v1) (core lara-core@0.3) (backends) (theories) (artifact sha256:a))"
         -- The retired version (hard cutover, decision 5): a @0.1 envelope is
         -- an unsupported core version, not a compatibility path.
       , "(replay-id (core lara-core@0.1) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
-      , "(replay-id (core (lara-core@0.2)) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.2) (policy (empirical-v1)) (backends) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends (backend (nd) 1)) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends (backend nd (1))) (theories) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories (sha256:a)) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories) (artifact (sha256:a)))"
-      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories sha256:z sha256:a) (artifact sha256:a))"
-      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories sha256:a sha256:a) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.2) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core (lara-core@0.3)) (policy empirical-v1) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.3) (policy (empirical-v1)) (backends) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.3) (policy empirical-v1) (backends (backend (nd) 1)) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.3) (policy empirical-v1) (backends (backend nd (1))) (theories) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.3) (policy empirical-v1) (backends) (theories (sha256:a)) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.3) (policy empirical-v1) (backends) (theories) (artifact (sha256:a)))"
+      , "(replay-id (core lara-core@0.3) (policy empirical-v1) (backends) (theories sha256:z sha256:a) (artifact sha256:a))"
+      , "(replay-id (core lara-core@0.3) (policy empirical-v1) (backends) (theories sha256:a sha256:a) (artifact sha256:a))"
       ]
     malformedInput =
       [ "(check-input " ++ goldenReplayText ++ ")"
@@ -1050,9 +1070,11 @@ prop_verdictGoldenVectors =
     , decodeVerdict (encodeVerdict rejectR5) == Right rejectR5
     , printSExpr (encodeVerdict rejectDup) == rejectText DuplicateRule
     , decodeVerdict (encodeVerdict rejectDup) == Right rejectDup
-    , printSExpr (encodeVerdict rejectIncomplete)
-        == rejectText IncompleteArgument
-    , decodeVerdict (encodeVerdict rejectIncomplete) == Right rejectIncomplete
+    , printSExpr (encodeVerdict holesV) == holesText
+    , decodeVerdict (encodeVerdict holesV) == Right holesV
+    , parseSExpr holesText == Right (encodeVerdict holesV)
+    , printSExpr (encodeVerdict blockedHolesV) == blockedHolesText
+    , decodeVerdict (encodeVerdict blockedHolesV) == Right blockedHolesV
     , printSExpr (encodeVerdict rejectMissing)
         == rejectText MissingConflict
     , decodeVerdict (encodeVerdict rejectMissing) == Right rejectMissing
@@ -1072,6 +1094,7 @@ prop_verdictGoldenVectors =
           [ (Prop (Pred "p") [], Published Justified)
           , (Prop (Pred "q") [TNum "2"], Published Defeated)
           ]
+          []
     -- Spec §4.3: @p@'s support could have been affected by
     -- quarantine, so its public status is @evidence-blocked@ and the four-state
     -- label it would have had moves to the @conditional@ section. @q@ is out of
@@ -1084,6 +1107,7 @@ prop_verdictGoldenVectors =
           [ (Prop (Pred "p") [], EvidenceBlocked Justified)
           , (Prop (Pred "q") [TNum "2"], Published Defeated)
           ]
+          []
     blockedText =
       "(verdict " ++ goldenReplayText
         ++ " accept (labels (0 in) (1 out) (2 undec)) "
@@ -1103,6 +1127,7 @@ prop_verdictGoldenVectors =
           , (Prop (Pred "q") [TNum "2"], Published Defeated)
           , (Prop (Pred "r") [], EvidenceBlocked Contested)
           ]
+          []
     twoBlockedText =
       "(verdict " ++ goldenReplayText
         ++ " accept (labels (0 in) (1 out) (2 undec)) "
@@ -1123,12 +1148,52 @@ prop_verdictGoldenVectors =
     rejectionText rejection = case rejection of
       RejectClass R5 -> "R5"
       DuplicateRule -> "duplicate-rule"
-      IncompleteArgument -> "incomplete-argument"
       MissingConflict -> "missing-conflict"
       _ -> error "unexpected rejection fixture"
     rejectR5 = Verdict goldenReplayId (Reject (RejectClass R5))
     rejectDup = Verdict goldenReplayId (Reject DuplicateRule)
-    rejectIncomplete = Verdict goldenReplayId (Reject IncompleteArgument)
+    -- Spec §4.4: a hole is a declaration, not a node — its index (here 3)
+    -- is an original declaration position past the two labels, its
+    -- obligations keep the core's order, and an empty attack list prints as
+    -- @(attacks)@.
+    holesV =
+      Verdict goldenReplayId $
+        Accept
+          [(0, LIn), (1, LOut)]
+          [(0, 1)]
+          [(Prop (Pred "p") [], Published Gap)]
+          [ HoleRow
+              0
+              (ArgId "h0")
+              [ HoleObligation (QuestionId "q2") [[StepPremise 0], [StepPremise 1, StepQuestion (QuestionId "cq")]]
+              , HoleObligation (QuestionId "q1") [[]]
+              ]
+              [1, 4]
+          , HoleRow 3 (ArgId "h3") [HoleObligation (QuestionId "q1") [[StepQuestion (QuestionId "q0")]]] []
+          ]
+    holesText =
+      "(verdict " ++ goldenReplayText
+        ++ " accept (labels (0 in) (1 out)) "
+        ++ "(edges (0 1)) "
+        ++ "(statuses (status (atom p) gap)) "
+        ++ "(holes (arg 0 h0 (obligations "
+        ++ "(obligation q2 (pos (prem 0)) (pos (prem 1) (ques cq))) "
+        ++ "(obligation q1 (pos))) (attacks 1 4)) "
+        ++ "(arg 3 h3 (obligations (obligation q1 (pos (ques q0)))) (attacks))))"
+    -- Both optional sections, in their fixed order.
+    blockedHolesV =
+      Verdict goldenReplayId $
+        Accept
+          [(0, LIn)]
+          []
+          [(Prop (Pred "p") [], EvidenceBlocked Justified)]
+          [HoleRow 1 (ArgId "h") [HoleObligation (QuestionId "q") [[]]] [0]]
+    blockedHolesText =
+      "(verdict " ++ goldenReplayText
+        ++ " accept (labels (0 in)) (edges) "
+        ++ "(statuses (status (atom p) evidence-blocked)) "
+        ++ "(conditional (status (atom p) justified)) "
+        ++ "(holes (arg 1 h (obligations (obligation q (pos))) (attacks 0))))"
     rejectMissing = Verdict goldenReplayId (Reject MissingConflict)
 
 prop_verdictRoundTrip :: Property
@@ -1321,7 +1386,56 @@ prop_verdictMalformedMatrix = all isLeft (map decodeVerdict malformed)
       , accept [labelsSec, edgesSec, twoBlockedStatusesSec, SList [SAtom "conditional", statusEntry "q" "defeated", statusEntry "p" "gap"]]
       , accept [labelsSec, edgesSec, twoBlockedStatusesSec, SList [SAtom "conditional", statusEntry "p" "gap"]]
       , accept [labelsSec, edgesSec, twoBlockedStatusesSec, SList [SAtom "conditional", statusEntry "p" "gap", statusEntry "q" "defeated", statusEntry "q" "defeated"]]
+      -- The holes section (spec §4.4): present-but-empty, out of order,
+      -- repeated, row shape, empty obligations, non-canonical naturals,
+      -- descending or repeated indices, and repeated ids are all non-canonical.
+      , accept [labelsSec, edgesSec, statusesSec, SList [SAtom "holes"]]
+      , accept [labelsSec, edgesSec, blockedStatusesSec, holesSec [holeRow "0" "h" ["q"] []], conditionalPSec]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRow "0" "h" ["q"] []], holesSec [holeRow "1" "k" ["q"] []]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [SList [SAtom "arg", SAtom "0", SAtom "h", SList [SAtom "obligations", SAtom "q"]]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [SList [SAtom "hole", SAtom "0", SAtom "h", SList [SAtom "obligations", SAtom "q"], SList [SAtom "attacks"]]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRow "0" "h" [] []]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRow "00" "h" ["q"] []]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRow "0" "h" ["q"] ["01"]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRow "2" "h" ["q"] [], holeRow "1" "k" ["q"] []]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRow "1" "h" ["q"] [], holeRow "1" "k" ["q"] []]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRow "0" "h" ["q"] [], holeRow "1" "h" ["q"] []]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [SList [SAtom "arg", SAtom "0", SList [], SList [SAtom "obligations", rootObligation "q"], SList [SAtom "attacks"]]]]
+      -- Obligation rows (D12): the pre-site bare-id form, a wrong tag, no
+      -- site, a repeated site, a repeated obligation, a malformed position,
+      -- and a non-atom question are all non-canonical.
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [SAtom "q"]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [SList [SAtom "bogus", SAtom "q", posRoot]]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [SList [SAtom "obligation", SAtom "q"]]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [SList [SAtom "obligation", SAtom "q", posRoot, posRoot]]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [SList [SAtom "obligation", SAtom "q", posPrem "0", posRoot, posPrem "0"]]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [rootObligation "q", rootObligation "q"]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [SList [SAtom "obligation", SAtom "q", posPrem "01"]]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [SList [SAtom "obligation", SAtom "q", SList [SAtom "pos", SList [SAtom "prem"]]]]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [SList [SAtom "obligation", SList [], posRoot]]]]
+      , accept [labelsSec, edgesSec, statusesSec, holesSec [holeRowWith "0" "h" [SList [SAtom "obligation", SAtom "q", SAtom "pos"]]]]
       ]
+    posRoot = SList [SAtom "pos"]
+    posPrem i = SList [SAtom "pos", SList [SAtom "prem", SAtom i]]
+    rootObligation q = SList [SAtom "obligation", SAtom q, posRoot]
+    holeRowWith index argumentId obligations =
+      SList
+        [ SAtom "arg"
+        , SAtom index
+        , SAtom argumentId
+        , SList (SAtom "obligations" : obligations)
+        , SList [SAtom "attacks"]
+        ]
+    holesSec rows = SList (SAtom "holes" : rows)
+    holeRow index argumentId obligations attacks =
+      SList
+        [ SAtom "arg"
+        , SAtom index
+        , SAtom argumentId
+        , SList (SAtom "obligations" : map rootObligation obligations)
+        , SList (SAtom "attacks" : map SAtom attacks)
+        ]
+    conditionalPSec = SList [SAtom "conditional", statusEntry "p" "gap"]
     accept sections =
       SList ([SAtom "verdict", encodeReplayId goldenReplayId, SAtom "accept"] ++ sections)
     labelsSec = SList [SAtom "labels"]
@@ -1382,7 +1496,7 @@ prop_leanDriverAcceptGolden =
     expected =
       Verdict
         goldenReplayId
-        (Accept [(0, LUndec)] [(0, 0)] [(Prop (Pred "p") [], Published Contested)])
+        (Accept [(0, LUndec)] [(0, 0)] [(Prop (Pred "p") [], Published Contested)] [])
 
 -- | Fixture: the missing-self-edge unit of the same file
 -- ('missingSelfEdgeUnit') — no attack covers the declared contrary. Pins the

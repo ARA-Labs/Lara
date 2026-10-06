@@ -412,7 +412,7 @@ checkedVerdictJson source = do
     SourceAccepted sourceInput -> Right (runSourceCheck sourceInput)
   let verdict = sourceResultVerdict result
   case verdict of
-    Verdict _ (Accept _ _ _) ->
+    Verdict _ (Accept _ _ _ _) ->
       case sourceResultCheckInput result of
         Left err -> Left ("accepted source did not retain check input: " ++ show err)
         Right input ->

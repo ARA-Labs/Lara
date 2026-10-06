@@ -23,20 +23,21 @@ module Lara.Mutate.Outcome
 import Lara.AST
 
 -- | The outcome a mutant is specified to have (spec §10.1): a rejection with
--- a fixed class, one of the two structural rejects this suite specifies (the
--- obligation gate, the completeness scan; 'Rejection' has two more,
--- 'DuplicateRule' and 'DuplicateArgument', which no operator targets), a
--- codec-boundary reject (exit 2, no verdict), or — for the cycle family — an
--- accept where every label is @undec@ and every queried status is @contested@.
+-- a fixed class, the structural completeness reject this suite specifies
+-- ('Rejection' has two more, 'DuplicateRule' and 'DuplicateArgument', which no
+-- operator targets), a codec-boundary reject (exit 2, no verdict), an accept
+-- that reports a located hole, or — for the cycle family — an accept where
+-- every label is @undec@ and every queried status is @contested@.
 data Expected
   = ExpectClass RejectClass
-  | ExpectIncompleteArgument
-  -- ^ the structural obligation-gate reject ('Lara.AST.IncompleteArgument', a
-  -- 'Rejection' with no R-class by design): the mutant is schema-valid — R5
-  -- coverage holds because the open question is covered by a declared hole —
-  -- and the full system rejects it only at the obligation gate
-  -- ('Lara.Check.ccObligationGate'), i.e. an argument reaching the root with
-  -- an open mandatory obligation.
+  | ExpectLocatedHole
+  -- ^ the located-gap outcome (spec §4.4, spelled @accept-located-hole@): the
+  -- mutant is schema-valid — R5 coverage holds because the open question is
+  -- covered by a declared hole — and the argument it edits types with an
+  -- open mandatory root obligation, so the full system accepts and reports
+  -- that argument in the verdict's @holes@ section instead of making it an AF
+  -- node. Up to @lara-core\@0.2@ this was the @incomplete-argument@
+  -- rejection (retired, @docs\/located-gap-decision.md@ D3).
   | ExpectMissingConflict
   -- ^ the structural completeness reject ('Lara.AST.MissingConflict', a
   -- 'Rejection' with no R-class by design): the mutant declares an attackable
@@ -64,7 +65,7 @@ data Expected
 expectedText :: Expected -> String
 expectedText e = case e of
   ExpectClass c -> "reject-" ++ show c
-  ExpectIncompleteArgument -> "reject-" ++ show IncompleteArgument
+  ExpectLocatedHole -> "accept-located-hole"
   ExpectMissingConflict -> "reject-" ++ show MissingConflict
   ExpectCodecReject -> "codec-reject"
   ExpectAllContested -> "accept-all-contested"
@@ -89,7 +90,7 @@ parseExpected s =
     ("codec-reject", ExpectCodecReject)
       : ("accept-all-contested", ExpectAllContested)
       : (expectedText ExpectEvidenceBlocked, ExpectEvidenceBlocked)
-      : (expectedText ExpectIncompleteArgument, ExpectIncompleteArgument)
+      : (expectedText ExpectLocatedHole, ExpectLocatedHole)
       : (expectedText ExpectMissingConflict, ExpectMissingConflict)
       : [(expectedText (ExpectClass c), ExpectClass c) | c <- [minBound .. maxBound]]
       ++ [ (expectedText (ExpectPrimaryStatus st), ExpectPrimaryStatus st)

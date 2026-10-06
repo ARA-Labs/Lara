@@ -1,6 +1,6 @@
 ; Context tgt, world t1: the p argument alone.
 (check-input
-  (replay-id (core lara-core@0.2) (policy pw-tgt) (backends (backend nd 1))
+  (replay-id (core lara-core@0.3) (policy pw-tgt) (backends (backend nd 1))
     (theories) (artifact pw-tgt-t1))
   (unit
     (sigma (sorts Item) (cons (con z (args) Item))

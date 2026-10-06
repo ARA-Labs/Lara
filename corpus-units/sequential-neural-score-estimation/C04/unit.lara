@@ -12,12 +12,14 @@
 #     stays in nl and refs. S = tsnpse_vp, Q = valid_summary_stats, D = pyloric_budget_le_200k
 #     (the "all budgets <= 200k" curve window, 30000 + 8*20000 = 190000 <= 200k). The 81% figure
 #     lives in nl.
-#   * Two policy-mandatory CQs are annotated unmet-gap, so no complete controlled_comparison is
-#     declarable and the claim lands `gap` (E2-style): variance_reported <- CQ3 (a single 9-round
-#     run, no seeds / uncertainty band, point percentages only); measurement_validity <- CQ4 (the
-#     NaN-imputation -- invalid stats replaced 2 SD below the prior predictive -- is specified only
-#     for the TSNPSE run, so cross-method comparability of the valid-% metric is unconfirmed, i.e.
-#     valid_measurement(valid_summary_stats, e04) cannot be attested).
+#   * Two policy-mandatory CQs are annotated unmet-gap, so the controlled_comparison argument is
+#     incomplete: it is declared as a located hole with `open measurement_validity` and
+#     `open variance_reported` (lowering re-done for issue #15 under lara-core@0.3), and the claim
+#     lands `gap` on empty complete support: variance_reported <- CQ3 (a single 9-round run, no
+#     seeds / uncertainty band, point percentages only); measurement_validity <- CQ4 (the
+#     NaN-imputation -- invalid stats replaced 2 SD below the prior predictive -- is specified
+#     only for the TSNPSE run, so cross-method comparability of the valid-% metric is unconfirmed,
+#     i.e. valid_measurement(valid_summary_stats, e04) cannot be attested).
 #   * Met CQs kept as leaves: baseline_parity <- CQ1 (identical Pyloric simulator, 31 params, 18
 #     summary stats, prior, observed data; TSNPE/SNVI named baselines); scope_match (optional) <-
 #     CQ2/CQ5 (matched simulation budgets, the <200k window covered by the reported rounds). No
@@ -31,7 +33,7 @@ artifact sequential-neural-score-estimation at sha256:67e559ec03eb
 policy corpus-v1
 use backends [nd@1]
 
-# --- The headline claim, stated but not assemblable at corpus-v1's evidential bar --------------
+# --- The headline claim, stated but not complete at corpus-v1's evidential bar -----------------
 
 claim c04
   nl      = "TSNPSE-VP achieves a superior percentage of valid summary statistics on the Pyloric problem, reaching 81% in the final round and exceeding both TSNPE and SNVI at every matched simulation budget below 200k"
@@ -57,18 +59,24 @@ leaf e5 : scope_matched(tsnpse_vp, valid_summary_stats, pyloric_budget_le_200k)
   provenance = ai-executed
   refs       = [logic/experiments.md#E04-Procedure-step-7, logic/experiments.md#E04-Setup]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... but the argument is incomplete (a located hole) ----------------------------------------
 
-# (Intentionally no `arg`: variance_reported(e04) has no honest leaf -- single-run point
-# percentages -- and valid_measurement(valid_summary_stats, e04) cannot be attested because the
-# NaN-imputation is specified only for TSNPSE, leaving cross-method comparability open. corpus-v1
-# makes both mandatory. The claim's complete-support set is empty.)
+# measurement_validity (NaN-imputation specified only for the TSNPSE run) and variance_reported
+# (a single 9-round run, point percentages) are open and mandatory, so a1 is a hole.
+arg a1 : supports(c04) by controlled_comparison(tsnpse_vp, tsnpe, valid_summary_stats, pyloric_budget_le_200k, e04)
+  discharge baseline_parity      with e2
+  discharge scope_match          with e5
+  open      measurement_validity
+  open      variance_reported
 
 status c04
 
 # ==============================================================================================
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
-# Compiled AF: no arguments.
+# Compiled AF: no arguments (the hole is not a node).
+# Located hole: a1, open obligations [measurement_validity, variance_reported]; it sources no
+# attacks.
 # Claim status:
-#   c04 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c04 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8;
+#          the located hole is reported in `holes`, not counted as support)

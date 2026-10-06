@@ -125,7 +125,7 @@ Every other attack reuses existing `corpus-v1` vocabulary: the rebut fires throu
 
 ### Round 0 — submission (the paper alone)
 
-The paper states three claims and supplies its evidence. `c_bench` and `c_measure` assemble complete arguments (their mandatory CQs are met; the optional `environment_match` / `confound_control` are left `open` with no status effect). `c_kurt` supplies the ablation premise and both met CQs (`single_variable`, `protocol_parity`) but **no** `variance_reported` leaf — the ablation is single-run. An argument with an open **mandatory** CQ is an `IncompleteArgument` rejection, so no argument is declared for `c_kurt`: its complete-support set is empty and it is `gap` (E2-style; the corpus-unit C04 mechanism).
+The paper states three claims and supplies its evidence. `c_bench` and `c_measure` assemble complete arguments (their mandatory CQs are met; the optional `environment_match` / `confound_control` are left `open` with no status effect). `c_kurt` supplies the ablation premise and both met CQs (`single_variable`, `protocol_parity`) but **no** `variance_reported` leaf — the ablation is single-run. The argument `a_kurt` therefore declares that **mandatory** CQ `open`: it is a located hole (spec §4.4), not an AF node, so `c_kurt`'s complete-support set is empty and it is `gap`, and the verdict's `holes` section names `a_kurt` with its obligation `variance_reported`. (Through `lara-core@0.2` such an argument was an `IncompleteArgument` rejection, so the round-0 artifact had to omit it.)
 
 ### Round 1 — reviews (three reviewer comments as typed attacks)
 
@@ -137,13 +137,13 @@ Reviewer-cited external evidence enters as `attested` leaves with OpenReview ref
 | R2 | **rebut** | "A concurrent replication finds APT does **not** match the dense baseline on OpenLLM." | `null_benchmark` argument concluding `not_performs(...)` (declared contrary of `c_bench`'s conclusion), with its own `protocol_fixed` + `matched_environment` leaves; mutual `rebut` (attack completeness). |
 | R3 | **undercut** | "Your low-memory number is a measurement artifact of gradient checkpointing enabled only for APT." | Leaf `measurement_artifact(...)` (declared exception); `undercut d_meas a_meas.rule`. |
 
-The reviewers also note the ablation is single-run ("add error bars"). That is **not** a typed attack — it is the already-unmet mandatory `variance_reported` CQ that keeps `c_kurt` `gap`. The framework flagged it at submission; the reviewer merely agrees.
+The reviewers also note the ablation is single-run ("add error bars"). That is **not** a typed attack — it is the already-open mandatory `variance_reported` CQ, reported on `a_kurt`'s hole row, that keeps `c_kurt` `gap`. The framework flagged it at submission; the reviewer merely agrees.
 
 Grounded result: the undermine and the rebut each drive `a_bench` out; the undercut drives `a_meas` out. `c_bench` and `c_measure` become `defeated`; `c_kurt` stays `gap`.
 
 ### Round 2 — rebuttal (three standard author moves, one calculus each)
 
-- **Discharge the gap** (`c_kurt` gap → justified): the author supplies 5-seed variance runs, so `variance_reported` now has a leaf. The previously undeclarable `component_ablation` argument becomes complete and, unattacked, is `in`. This is the headline `gap → justified` discharge.
+- **Discharge the gap** (`c_kurt` gap → justified): the author supplies 5-seed variance runs, so `variance_reported` now has a leaf. The `component_ablation` argument `a_kurt`, a hole in rounds 0 and 1, discharges the question, becomes complete and, unattacked, is `in`. This is the headline `gap → justified` discharge.
 - **Counter-attack to reinstate** (`c_bench` defeated → justified): the author defeats **both** reviewer attacks (E4-style reinstatement). Against R1's undermine, an author leaf concluding `protocol_confirmed` undermines the reviewer's `not_fixed_protocol` leaf (one-directional contrary → the defender is unattacked). Against R2's rebut, the author shows the cited replication ran on a mismatched eval harness, **undercutting** the reviewer's `null_benchmark` at its rule via `null_benchmark : environment_mismatch`. With both attackers out, `a_bench` is reinstated.
 - **Concede** (`c_measure` defeated → defeated): the author accepts R3's point and adds **no** counter-argument. `a_meas` stays out, so `c_measure` stays `defeated`. Concession is the *absence* of a defense — no special construct.
 

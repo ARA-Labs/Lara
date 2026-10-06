@@ -87,7 +87,11 @@
 --
 --   * linked arguments — member order, then that member's declaration order,
 --     first occurrence winning a merge;
---   * nodes — member order, then that member's declaration order;
+--   * nodes — member order, then that member's declaration order, restricted
+--     to the handles of complete linked arguments, each carrying its __AF__
+--     index;
+--   * holes — the same handle order, restricted to the handles of located
+--     holes (see "Located holes" below);
 --   * attacks — every member's declared attacks first (member order, then
 --     declaration order), then the generated ones in ascending
 --     @(source index, target index)@;
@@ -95,6 +99,31 @@
 --   * edges — ascending lexicographic @(source, target)@, exactly as
 --     'Lara.Driver.buildAccept' emits them;
 --   * statuses — member order, then that member's own claim declaration order.
+--
+-- == Located holes (@lara-core\@0.3@)
+--
+-- A member may declare a /hole/: an argument that type-checks with a nonempty
+-- mandatory obligation set (spec §4.4, @docs\/located-gap-decision.md@). The
+-- member is accepted, and so is a linked unit that carries the hole, because
+-- 'Lara.Check.checkUnit' accepts it. A hole is declared but is never an AF
+-- node, so the linked unit has two index spaces: the linked declaration
+-- position ('laIndex') and the AF index of a complete argument. 'evaluate'
+-- maps every handle through 'Lara.Check.cuNodeDecls' so the @nodes@, @labels@
+-- and @edges@ of the verdict share the AF space, and reports every handle of a
+-- hole in 'lmHoles' instead, with the hole's exact obligations.
+--
+-- __The saturation never generates an attack sourced at or aimed at a
+-- hole__ ('conclusionCache' keeps complete support only). Neither would change
+-- anything: an attack sourced at a hole is checked but inert (D4), and the
+-- missing-conflict scan ranges over complete pairs only, so no generated
+-- attack onto a hole is ever required; a generated rebut of a hole's root
+-- could only reach a complete argument containing that root, and such an
+-- argument inherits the hole's obligations and is therefore itself a hole
+-- (D6), so it adds no edge; and a generated undermine targets a leaf, which is
+-- never a hole. Keeping the cache complete-only also keeps the generator the
+-- one @Lara.Map.batch_checked@ is proved about over the hole-free domain D9
+-- fixes. A member's /declared/ attacks touching a hole are transported
+-- unchanged and handled by the checker like any other (D4, D6).
 module Lara.Map.Link
   ( -- * Linking a loaded map
     linkMap
@@ -104,6 +133,8 @@ module Lara.Map.Link
   , LinkedMap
   , lmUnit
   , lmNodes
+  , lmHoles
+  , lmNodeDecls
   , lmLabels
   , lmEdges
   , lmStatuses
@@ -132,7 +163,9 @@ module Lara.Map.Link
   , linkedArguments
   ) where
 
+import Data.Either (lefts, rights)
 import Data.List.NonEmpty (NonEmpty ((:|)))
+import qualified Data.List.NonEmpty as NE
 -- Qualified for the reason "Lara.Map.Driver" gives: a plain import of
 -- @foldl'@ is required on GHC 9.6 and redundant on 9.10, and a qualified one is
 -- clean on both.
@@ -155,7 +188,7 @@ import Lara.AST
   , Unit (..)
   )
 import Lara.Attack (contraryMatchB)
-import Lara.Check (CheckedUnit, checkUnit, cuNodes, cuProgram)
+import Lara.Check (CheckedUnit, checkUnit, cuHoles, cuNodeDecls, cuNodes, cuProgram)
 import Lara.Compile (conflictAttackableB)
 import Lara.Diagnostics (rejectionOf)
 import Lara.Driver (buildCertOk, buildGamma)
@@ -178,6 +211,7 @@ import Lara.Map.Qualify
   )
 import Lara.Map.Types
   ( MapError (..)
+  , MapHole (..)
   , MapNode (..)
   , MapRejectError (..)
   , MapStatus (..)
@@ -193,6 +227,8 @@ import Lara.Sigma (Sigma)
 import Lara.SupportTerm
   ( CertOk
   , CheckLoc (LocRoot)
+  , chIndex
+  , chObligations
   , inferSupport
   , srConclusion
   , srObligations
@@ -214,8 +250,9 @@ data LinkedArg = LinkedArg
     -- the linked unit names the argument by it
   , laTerm :: SupportTerm
   , laIndex :: Int
-    -- ^ the argument's position in the linked unit, which is also its node
-    -- index in the compiled framework
+    -- ^ the argument's declaration position in the linked unit. This is its
+    -- AF node index only while no hole precedes it: a located hole is declared
+    -- but is never a node (see "Located holes" in the module header)
   , laOwners :: [MemberAlias]
   }
   deriving (Eq, Show)
@@ -237,6 +274,8 @@ data LinkedArg = LinkedArg
 data LinkedMap = LinkedMap
   { lmUnitField :: Unit
   , lmNodesField :: [MapNode]
+  , lmHolesField :: [MapHole]
+  , lmNodeDeclsField :: [Int]
   , lmLabelsField :: [(NodeIndex, Label)]
   , lmEdgesField :: [(NodeIndex, NodeIndex)]
   , lmStatusesField :: [MapStatus]
@@ -248,13 +287,33 @@ data LinkedMap = LinkedMap
 lmUnit :: LinkedMap -> Unit
 lmUnit = lmUnitField
 
--- | The provenance mapping: one entry per @(member alias, local 'ArgId')@ that
--- any member declared, naming the linked argument index it resolved to.
+-- | The provenance mapping of the complete arguments: one entry per
+-- @(member alias, local 'ArgId')@ that any member declared whose linked
+-- argument is an AF node, naming that node's __AF__ index.
 --
 -- In member order, then that member's own declaration order. Several entries
--- share an index exactly when the merge fired.
+-- share an index exactly when the merge fired. Together with 'lmHoles' it
+-- covers every declared handle exactly once.
 lmNodes :: LinkedMap -> [MapNode]
 lmNodes = lmNodesField
+
+-- | The located holes of the linked unit: one entry per @(member alias, local
+-- 'ArgId')@ whose linked argument is a hole, with the hole's exact mandatory
+-- obligations in core order.
+--
+-- In the same handle order as 'lmNodes' (member order, then that member's own
+-- declaration order), so a merged hole's rows need not be adjacent. Empty
+-- exactly when the linked unit has no hole.
+lmHoles :: LinkedMap -> [MapHole]
+lmHoles = lmHolesField
+
+-- | The AF-to-linked-declaration map ('Lara.Check.cuNodeDecls' of the accepted
+-- linked unit): entry @n@ is the position in @'unitArgs' . 'lmUnit'@ of AF
+-- node @n@. A consumer that wants the linked argument a 'MapNode' or a label
+-- names must go through this list; indexing the argument list with an AF index
+-- is wrong as soon as a hole precedes the node.
+lmNodeDecls :: LinkedMap -> [Int]
+lmNodeDecls = lmNodeDeclsField
 
 -- | The grounded labelling of the linked framework, ascending by index and
 -- covering exactly @0 .. n-1@.
@@ -334,7 +393,6 @@ linkMap loaded = do
   let qualified = [qualifyMember (cmAlias member) (cmUnit member) | member <- members]
   leaves <- linkedLeaves qualified
   let (linkedArgs, handles) = mergeArguments qualified
-  nodes <- traverse toNode handles
   args <- linkedArguments linkedArgs
   let pI = lookupRule (ssRules shared)
       gamma = buildGamma leaves
@@ -364,16 +422,7 @@ linkMap loaded = do
   accepted <- case checkUnit gamma certOk unit of
     Left unitError -> Left (MapReject (MRLinkRejected (rejectionOf unitError)))
     Right checked -> Right checked
-  evaluate members unit nodes generated accepted
-  where
-    -- 'mnArg' is the verdict's __reporting__ handle: the name the member's own
-    -- author wrote. The 'LocalArgId' wrapper is unwrapped here, at the wire
-    -- boundary, so that everything upstream of it is unable to supply the
-    -- qualified key by mistake — 'MapNode' is a wire type and cannot carry a
-    -- map-only wrapper.
-    toNode (alias, local, position) = do
-      index <- requireIndex position
-      pure MapNode{mnAlias = alias, mnArg = localArgId local, mnIndex = index}
+  evaluate members unit handles generated accepted
 
 -- | The one place a structural link failure is spelled.
 linkBoundary :: String -> MapError
@@ -637,14 +686,19 @@ data ConclusionEntry = ConclusionEntry
 -- | The conclusions of the linked arguments that are __complete checked
 -- support__ under the linked environment, in linked-argument order.
 --
--- A term that fails to infer, or that retains an open critical-question
--- obligation, contributes no conclusion and therefore no cross-member attack.
--- That is not leniency: 'Lara.Check.checkUnit' runs afterwards and rejects the
--- linked unit for exactly those terms, so the only effect of skipping them here
--- is that the saturation does not emit an attack whose endpoint the checker is
--- about to refuse. This mirrors @conclusionOf@ in
--- @lean\/Lara\/Context\/Fragment.lean@, whose cache is total exactly where
--- acceptance is possible.
+-- A term that fails to infer contributes no conclusion and therefore no
+-- cross-member attack: 'Lara.Check.checkUnit' runs afterwards and rejects the
+-- linked unit for that term, so skipping it only avoids emitting an attack
+-- whose endpoint the checker is about to refuse.
+--
+-- A __located hole__ — a term that infers but retains an open mandatory
+-- obligation — contributes none either, and there the reason is different:
+-- the checker accepts it, but no attack to or from it is needed or useful
+-- (see "Located holes" in the module header). An attack it sourced would be
+-- inert (D4); the missing-conflict scan never asks for an attack onto it; and
+-- a rebut of its root covers no complete argument (D6). This mirrors
+-- @conclusionOf@ in @lean\/Lara\/Context\/Fragment.lean@, whose cache is the
+-- complete support exactly.
 conclusionCache
   :: (RuleId -> Maybe Rule)
   -> (LeafId -> Maybe Prop)
@@ -768,14 +822,23 @@ dedupe = go []
 -- than a simplification: a member whose admission or group-pruning audit is
 -- nonempty is refused at load ('Lara.Map.Types.MRUnsupportedAdmission'), so no
 -- query in a map can be blocked and the four-state 'Status' is total here.
+--
+-- Every handle is classified once against the checked unit's partition: a
+-- handle whose linked position is AF node @n@ ('Lara.Check.cuNodeDecls') is a
+-- 'MapNode' at index @n@, and one whose position is a located hole
+-- ('Lara.Check.cuHoles') is a 'MapHole'. The linked unit is checked without
+-- admission, so its checked declaration positions are the linked positions.
 evaluate
   :: [CheckedMember]
   -> Unit
-  -> [MapNode]
+  -> [(MemberAlias, LocalArgId, Int)]
   -> [Attack]
   -> CheckedUnit
   -> Either MapError LinkedMap
-evaluate members unit nodes generated accepted = do
+evaluate members unit handles generated accepted = do
+  classified <- traverse classify handles
+  let nodes = lefts classified
+      holes = rights classified
   labels <- traverse (\i -> (,) <$> requireIndex i <*> pure (labelC af i)) [0 .. n - 1]
   edges <-
     traverse
@@ -785,6 +848,8 @@ evaluate members unit nodes generated accepted = do
     LinkedMap
       { lmUnitField = unit
       , lmNodesField = nodes
+      , lmHolesField = holes
+      , lmNodeDeclsField = cuNodeDecls accepted
       , lmLabelsField = labels
       , lmEdgesField = edges
       , lmStatusesField = statuses
@@ -798,6 +863,40 @@ evaluate members unit nodes generated accepted = do
     -- code paths.
     af = runtimeAF (cuProgram accepted)
     n = length (afArgs af)
+    afIndexOf = zip (cuNodeDecls accepted) [0 :: Int ..]
+    -- 'mnArg' and 'mhArg' are the verdict's __reporting__ handle: the name the
+    -- member's own author wrote. The 'LocalArgId' wrapper is unwrapped here,
+    -- at the wire boundary, so that everything upstream of it is unable to
+    -- supply the qualified key by mistake — 'MapNode' and 'MapHole' are wire
+    -- types and cannot carry a map-only wrapper.
+    --
+    -- The two failure arms are tripwires: the checker's partition covers
+    -- every declaration, and a hole's obligation set is nonempty by
+    -- construction. A handle that hit neither arm would otherwise vanish from
+    -- the verdict, and a hole with no obligation would be a node by another
+    -- name.
+    classify (alias, local, position) = case lookup position afIndexOf of
+      Just afIndex -> do
+        index <- requireIndex afIndex
+        pure (Left MapNode{mnAlias = alias, mnArg = localArgId local, mnIndex = index})
+      Nothing -> case [hole | hole <- cuHoles accepted, chIndex hole == position] of
+        hole : _ -> case NE.nonEmpty (chObligations hole) of
+          Just obligations ->
+            pure
+              ( Right
+                  MapHole
+                    { mhAlias = alias
+                    , mhArg = localArgId local
+                    , mhObligations = obligations
+                    }
+              )
+          Nothing ->
+            Left (linkBoundary ("linked hole at position " ++ show position ++ " has no obligation"))
+        [] ->
+          Left
+            ( linkBoundary
+                ("linked position " ++ show position ++ " is neither an AF node nor a located hole")
+            )
     statuses =
       [ MapStatus
           { msAlias = cmAlias member

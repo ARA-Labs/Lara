@@ -1,7 +1,7 @@
 ; Context src, world s1: the same p argument plus an unattacked q attacker, so
 ; p is defeated and q is justified (the PW0 T7 target world).
 (check-input
-  (replay-id (core lara-core@0.2) (policy pw-src) (backends (backend nd 1))
+  (replay-id (core lara-core@0.3) (policy pw-src) (backends (backend nd 1))
     (theories) (artifact pw-src-s1))
   (unit
     (sigma (sorts Item) (cons (con z (args) Item))

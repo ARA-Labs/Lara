@@ -18,7 +18,7 @@ root = "Lara.DriverMain"
 # The multi-artifact map driver (the Lean side of
 # scripts/check-map-conformance.sh). Reads one `map-check-input@1` parity
 # envelope, performs the qualification, merge, cross-member saturation, check
-# and grounded evaluation itself, and prints `map-verdict@1` bytes that must
+# and grounded evaluation itself, and prints `map-verdict@2` bytes that must
 # equal `lara check <map.laramap>`'s.
 [[lean_exe]]
 name = "lara-map-driver"
@@ -45,9 +45,10 @@ root = "Lara.PresentationParityMain"
 name = "surface-conformance"
 root = "Lara.SurfaceConformanceMain"
 
-# Exhaustive cross-language parity driver for Lara.Update's four constructor-side
-# precondition deciders. scripts/update-differential.sh diffs its canonical TSV
-# against the Haskell emitter.
+# Exhaustive cross-language parity driver for Lara.Update's constructor-side
+# precondition deciders, the in-place discharge rewrite, and the raw stage of an
+# atomic batch. scripts/update-differential.sh diffs its canonical TSV against
+# the Haskell emitter.
 [[lean_exe]]
 name = "update-preconditions"
 root = "Lara.UpdatePreconditionParityMain"

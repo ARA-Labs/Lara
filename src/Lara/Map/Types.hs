@@ -95,6 +95,7 @@ module Lara.Map.Types
   , MapSchema (..)
   , MemberRecord (..)
   , MapNode (..)
+  , MapHole (..)
   , MapStatus (..)
   , MapVerdict (..)
     -- * Diagnostics
@@ -131,7 +132,7 @@ import Lara.AST
 import Lara.Prop (Prop)
 import Lara.Replay (CoreVersion)
 import Lara.Wire
-  ( Tag (TDupArgument, TDupRule, TIncompleteArgument, TMissingConflict)
+  ( Tag (TDupArgument, TDupRule, TMissingConflict)
   , rejectClassTag
   , tagToString
   )
@@ -328,8 +329,14 @@ mkArgIndex n
 argIndexInt :: ArgIndex -> Int
 argIndexInt (ArgIndex n) = n
 
--- | An argument index of the /linked/ unit — the compiled position a map node,
+-- | An AF node index of the /linked/ unit — the compiled position a map node,
 -- label, or edge endpoint refers to.
+--
+-- Since @map-verdict\@2@ this is the __AF__ index (spec §4.4,
+-- @docs\/located-gap-decision.md@ §3), not the linked declaration position:
+-- a located hole is declared but is never an AF node, so as soon as a hole
+-- precedes a complete argument the two numberings diverge. The @nodes@,
+-- @labels@ and @edges@ sections share this one index space.
 --
 -- __Opaque__ for the same reason as 'ArgIndex': non-negative by construction.
 newtype NodeIndex = NodeIndex Int
@@ -567,7 +574,11 @@ data MapScope = ScopeMap
 -- | The composite verdict's schema identity, carried inside the verdict so a
 -- consumer that has never heard of this schema fails to decode rather than
 -- half-reading it.
-data MapSchema = MapVerdictSchemaV1
+--
+-- @lara-map-verdict\@2@ (the only schema): the @nodes@ section indexes AF
+-- nodes rather than linked declarations, and the optional @holes@ section
+-- reports the located holes of the linked unit. @\@1@ is refused.
+data MapSchema = MapVerdictSchemaV2
   deriving (Eq, Show, Enum, Bounded)
 
 -- | A member as a verdict reports it: its alias, its manifest-spelled path,
@@ -580,18 +591,39 @@ data MemberRecord = MemberRecord
   }
   deriving (Eq, Ord, Show)
 
--- | One member-local argument handle and the linked-unit index it resolved to.
+-- | One member-local argument handle and the AF node index it resolved to.
 --
 -- Structurally identical support terms from different members merge into one
 -- linked argument, so several nodes may share an index; every original
--- @(alias, local ArgId)@ handle is retained so a report can always name where
--- an argument came from.
+-- @(alias, local ArgId)@ handle of a /complete/ linked argument is retained so
+-- a report can always name where an argument came from. A handle whose linked
+-- argument is a located hole is a 'MapHole' instead, never a node.
 data MapNode = MapNode
   { mnAlias :: MemberAlias
   , mnArg :: ArgId
   , mnIndex :: NodeIndex
+    -- ^ the __AF__ index of the linked argument (see 'NodeIndex'), the index
+    -- the @labels@ and @edges@ sections use
   }
   deriving (Eq, Ord, Show)
+
+-- | One member-local argument handle whose linked argument is a __located
+-- hole__ (spec §4.4): it type-checks in the linked unit but carries a nonempty
+-- mandatory root obligation set, so it is not an AF node and has no label.
+--
+-- Reported by the handle the member's own author wrote, @(alias, local
+-- ArgId)@, never by a linked index: a hole has no AF index, and its linked
+-- declaration position is an artifact of the merge that no reader can
+-- resolve. A merged hole (one term declared by several members) is reported
+-- once per handle, each row carrying the same obligations.
+data MapHole = MapHole
+  { mhAlias :: MemberAlias
+  , mhArg :: ArgId
+  , mhObligations :: NonEmpty QuestionId
+    -- ^ the hole's exact mandatory root obligations, in the core's
+    -- deduplicated @collectObligations@ order
+  }
+  deriving (Eq, Show)
 
 -- | One map-relative claim status: which member's claim, the proposition
 -- queried, and its four-state status in the linked unit.
@@ -623,13 +655,14 @@ data MapVerdict = MapVerdict
     -- accept vacuously over an empty universe, and the boundary cannot tell
     -- that apart from a verdict whose members were dropped.
     mvMembers :: NonEmpty MemberRecord
-  , -- | Member order, then that member's own declaration order. Each
-    -- @('mnAlias', 'mnArg')@ handle occurs once, each 'mnAlias' is declared in
-    -- 'mvMembers', and the 'mnIndex' values cover __exactly__ the labelled
-    -- arguments — every one of them is @< length 'mvLabels'@, and every
-    -- labelled index has at least one handle. A linked argument exists because
-    -- some member declared its support term, so an argument with no handle
-    -- would be one that arose from nobody.
+  , -- | Member order, then that member's own declaration order, restricted to
+    -- the handles of complete linked arguments. Each @('mnAlias', 'mnArg')@
+    -- handle occurs once (across 'mvNodes' and 'mvHoles' together), each
+    -- 'mnAlias' is declared in 'mvMembers', and the 'mnIndex' values — AF
+    -- indices — cover __exactly__ the labelled arguments: every one of them is
+    -- @< length 'mvLabels'@, and every labelled index has at least one handle.
+    -- A linked argument exists because some member declared its support term,
+    -- so an argument with no handle would be one that arose from nobody.
     mvNodes :: [MapNode]
   , -- | Ascending index, covering exactly @0 .. n-1@. This section pins @n@ for
     -- the two that follow.
@@ -643,6 +676,13 @@ data MapVerdict = MapVerdict
     -- so a repeat would make @lookup@ silently first-wins over two rows that may
     -- disagree. 'MBDuplicateClaim' holds a member to the same rule.
     mvStatuses :: [MapStatus]
+  , -- | The located holes of the linked unit, one row per handle: linked
+    -- declaration order, then, within one merged hole, handle order (member
+    -- order, then that member's declaration order). Each 'mhAlias' is declared
+    -- in 'mvMembers', no handle also appears in 'mvNodes', and each
+    -- obligation list is duplicate-free. Empty exactly when the linked unit
+    -- has no hole, and the encoder then omits the section.
+    mvHoles :: [MapHole]
   }
   deriving (Eq, Show)
 
@@ -654,7 +694,7 @@ data MapVerdict = MapVerdict
 --
 -- Deliberately a separate type from 'Lara.Wire.WireError', and defined here
 -- rather than in "Lara.Map.Wire", for two reasons: the map grammar is not the
--- frozen @lara-core\@0.2@ grammar and must be free to move without touching
+-- frozen @lara-core\@0.3@ grammar and must be free to move without touching
 -- it, and 'MapBoundaryError' has to name it, which a codec-side definition
 -- would turn into an import cycle. "Lara.Map.Wire" re-exports it so a codec
 -- consumer still needs one import.
@@ -948,7 +988,6 @@ rejectionText rejection =
   tagToString $ case rejection of
     DuplicateRule -> TDupRule
     DuplicateArgument -> TDupArgument
-    IncompleteArgument -> TIncompleteArgument
     MissingConflict -> TMissingConflict
     RejectClass rejectClass -> rejectClassTag rejectClass
 

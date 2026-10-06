@@ -311,22 +311,30 @@ private theorem assemble_from_audit {env : Env canon} {input : Input}
       by simpa [admissionArgs, keepArgument, keptReconstructed] using hselection'⟩
 
 /-- Independent surface derivability preserves core acceptance, authored
-argument order, core-visible open questions, and resolved attacks. -/
+argument order, core-visible open questions, and resolved attacks. The
+accepted unit's AF arguments are the complete retained declarations and its
+located holes are the retained declarations whose core obligation set is
+nonempty (D8): the authored root open questions do not decide either. -/
 theorem elaborate_preserves (env : Env canon) (input : Input)
     (output : Elaborated canon) (h : Checks env input output) :
     ∃ checked,
       elaborate env input = .ok output ∧
       Check.Unit.checkUnit output.gamma env.registry output.ground output.unit =
         .ok checked ∧
+      checked.program.args = Check.completeArgs output.unit.policy.ruleLookup
+        output.gamma env.registry output.unit.args ∧
+      checked.program.holes = Check.holeArgs output.unit.policy.ruleLookup
+        output.gamma env.registry output.unit.args ∧
       output.openQuestions.map Prod.fst = output.argIds ∧
       output.openQuestions.map Prod.snd = coreOpenQuestions output.unit ∧
       output.unit.atts = output.resolvedAttacks := by
   obtain ⟨checked, hchecked⟩ := h.core.checkUnit_complete
+  have hsound := Check.Unit.checkUnit_sound hchecked
   rcases h.program with
     ⟨pairs, declaredResolved, hprogram, hpairIds, hattacks, hselected,
       hargIds, hargs, hclaims, hquestions⟩
-  refine ⟨checked, elaborate_complete env input output h, hchecked, ?_, ?_,
-    h.unitAttacks.symm⟩
+  refine ⟨checked, elaborate_complete env input output h, hchecked,
+    hsound.args_eq, hsound.holes_eq, ?_, ?_, h.unitAttacks.symm⟩
   · rw [← hquestions, ← hargIds]
     simp [openQuestionsOf]
   · rw [← hquestions, coreOpenQuestions, ← hargs]
@@ -6101,24 +6109,11 @@ private theorem signatureStage_rename
     groundWellSorted_rename sigmaSound,
     argsWellSorted_rename sigmaSound]
 
-private theorem checkUnit_signatureStage_of_ok
-    {canon : String → String} {gamma : Support.LeafId → Option Atom}
-    {registry : Support.BackendRegistry canon} {ground : List Atom}
-    {unit : Lara.Unit}
-    {checked : Lara.Unit.CheckedUnit canon gamma
-      (Support.certOkOf registry)}
-    (h : Lara.Check.Unit.checkUnit gamma registry ground unit = .ok checked) :
-    Lara.Check.Unit.signatureStage ground unit = none := by
-  unfold Lara.Check.Unit.checkUnit at h
-  split at h
-  · contradiction
-  · split at h
-    · contradiction
-    · assumption
-
 /-- Computationally observable fields of two accepted units are related by a
 typed global renaming.  Proof fields are deliberately absent: the relation is
-stable under proof irrelevance and records the retained node cache in order. -/
+stable under proof irrelevance and records the retained node cache in order,
+the located holes with their declaration indices, conclusions and exact
+obligations, and the AF-node-to-declaration map. -/
 structure CheckedUnitRelated (ρg : Binding.GlobalRenaming)
     (source : Lara.Unit.CheckedUnit canon gamma
       (Support.certOkOf registry))
@@ -6134,6 +6129,18 @@ structure CheckedUnitRelated (ρg : Binding.GlobalRenaming)
     source.nodes.map (fun node => renameCoreSupportTerm ρg node.term)
   nodeConclusions : target.nodes.map (fun node => node.conclusion) =
     source.nodes.map (fun node => renameResidualAtom ρg node.conclusion)
+  nodeDecls : target.nodeDecls = source.nodeDecls
+  holes : target.program.holes =
+    source.program.holes.map (renameCoreSupportTerm ρg)
+  holeIndices : target.holes.map (fun hole => hole.index) =
+    source.holes.map (fun hole => hole.index)
+  holeTerms : target.holes.map (fun hole => hole.term) =
+    source.holes.map (fun hole => renameCoreSupportTerm ρg hole.term)
+  holeConclusions : target.holes.map (fun hole => hole.conclusion) =
+    source.holes.map (fun hole => renameResidualAtom ρg hole.conclusion)
+  holeObligations : target.holes.map (fun hole => hole.obligations) =
+    source.holes.map (fun hole =>
+      hole.obligations.map (renameCoreQuestionId ρg))
 
 private theorem checkedNodeConclusions_rename
     {canon : String → String} {env : Env canon}
@@ -6181,9 +6188,84 @@ private theorem checkedNodeConclusions_rename
               transportedAtTarget).1,
             ih targetRest terms.2⟩
 
+/-- The hole analogue of `checkedNodeConclusions_rename`: holes with renamed
+terms carry the renamed conclusion and the renamed exact obligation set. -/
+private theorem checkedHoleRecords_rename
+    {canon : String → String} {env : Env canon}
+    (sigmaSound : CoreSigmaRenamingSound ρg sigma)
+    (policySorted : Lara.policyWellSorted sigma sourcePolicy = true)
+    (envSound : EnvRenamingSound env ρg)
+    (policyEq : targetPolicy = renameCorePolicy ρg sourcePolicy) :
+    ∀ (sourceHoles : List (Lara.Compile.CheckedHole canon
+          sourcePolicy.ruleLookup gamma (Support.certOkOf env.registry)))
+      (targetHoles : List (Lara.Compile.CheckedHole canon
+          targetPolicy.ruleLookup (renameGamma ρg gamma)
+          (Support.certOkOf env.registry))),
+      targetHoles.map (fun hole => hole.term) =
+          sourceHoles.map (fun hole => renameCoreSupportTerm ρg hole.term) →
+        targetHoles.map (fun hole => hole.conclusion) =
+            sourceHoles.map (fun hole =>
+              renameResidualAtom ρg hole.conclusion) ∧
+          targetHoles.map (fun hole => hole.obligations) =
+            sourceHoles.map (fun hole =>
+              hole.obligations.map (renameCoreQuestionId ρg)) := by
+  intro sourceHoles
+  induction sourceHoles with
+  | nil =>
+      intro targetHoles terms
+      cases targetHoles with
+      | nil => exact ⟨rfl, rfl⟩
+      | cons target rest => simp at terms
+  | cons source rest ih =>
+      intro targetHoles terms
+      cases targetHoles with
+      | nil => simp at terms
+      | cons target targetRest =>
+          simp only [List.map_cons, List.cons.injEq] at terms ⊢
+          have transported :=
+            (hasSupport_rename_iff sigmaSound policySorted envSound gamma
+              source.term source.conclusion source.obligations).mpr source.valid
+          have targetValid : Support.HasSupport canon
+              (renameCorePolicy ρg sourcePolicy).ruleLookup
+              (renameGamma ρg gamma) (Support.certOkOf env.registry)
+              target.term target.conclusion target.obligations := by
+            simpa only [policyEq] using target.valid
+          rw [← terms.1] at transported
+          have unique := Support.hasSupport_unique targetValid transported
+          have rest := ih targetRest terms.2
+          exact ⟨⟨unique.1, rest.1⟩, ⟨unique.2, rest.2⟩⟩
+
+/-- A typed declaration and its renaming are classified alike: complete,
+or a located hole. -/
+private theorem argClass_rename
+    {canon : String → String} {env : Env canon}
+    {sigma : Lara.Sigma.Sigma} {policy : Lara.Policy.Policy}
+    {gamma : Support.LeafId → Option Atom}
+    (sigmaSound : CoreSigmaRenamingSound ρg sigma)
+    (policySorted : Lara.policyWellSorted sigma policy = true)
+    (envSound : EnvRenamingSound env ρg)
+    {term : Support.SupportTerm} {conclusion : Atom}
+    {obligations : List Support.QuestionId}
+    (valid : Support.HasSupport canon policy.ruleLookup gamma
+      (Support.certOkOf env.registry) term conclusion obligations) :
+    Check.argComplete (renameCorePolicy ρg policy).ruleLookup
+        (renameGamma ρg gamma) env.registry (renameCoreSupportTerm ρg term) =
+      Check.argComplete policy.ruleLookup gamma env.registry term ∧
+    Check.argHole (renameCorePolicy ρg policy).ruleLookup
+        (renameGamma ρg gamma) env.registry (renameCoreSupportTerm ρg term) =
+      Check.argHole policy.ruleLookup gamma env.registry term := by
+  have transported := (hasSupport_rename_iff sigmaSound policySorted envSound
+    gamma term conclusion obligations).mpr valid
+  rw [Check.argComplete_of_hasSupport transported,
+    Check.argComplete_of_hasSupport valid, Check.argHole_of_hasSupport transported,
+    Check.argHole_of_hasSupport valid]
+  simp
+
 /-- A concrete successful core check transports to a concrete successful
 renamed check together with the proof-irrelevance-safe accepted carrier
-relation. -/
+relation. Declarations need not be complete: the renaming carries each
+declaration's obligation set to its image, so complete arguments, located
+holes, their positions and the live attacks all correspond. -/
 theorem checkUnit_ok_rename
     {canon : String → String} {env : Env canon}
     {gamma : Support.LeafId → Option Atom} {ground : List Atom}
@@ -6201,60 +6283,17 @@ theorem checkUnit_ok_rename
       CheckedUnitRelated (canon := canon) (gamma := gamma)
         (registry := env.registry) ρg checked renamedChecked := by
   have sourceSound := Lara.Check.Unit.checkUnit_sound h
-  have sourceSigmaEq := sourceSound.sigma_eq
   have sourcePolicyEq := sourceSound.policy_eq
-  have sourceRuleIds := sourceSound.ruleIds_nodup
-  have sourcePolicyWf := sourceSound.policy_wf
-  have sourceArgumentsEq := sourceSound.args_eq
-  have sourceAttacksEq := sourceSound.atts_eq
-  have sourceAttackComplete := sourceSound.attack_complete
-  have sourceNodeTerms := sourceSound.nodes_terms
+  have sourceSignature := sourceSound.signature_ok
   have rawPolicySorted :
-      Lara.policyWellSorted unit.sigma unit.policy = true := by
-    exact Lara.Check.Unit.signatureStage_policy
-      (checkUnit_signatureStage_of_ok h)
+      Lara.policyWellSorted unit.sigma unit.policy = true :=
+    Lara.Check.Unit.signatureStage_policy sourceSignature
   have rawScopes : Lara.Policy.ScopesWellFormed unit.policy := by
     simpa only [sourcePolicyEq] using checked.scopes_wf
   have rawRuleIds : (unit.policy.rules.map (·.id)).Nodup := by
-    simpa only [sourcePolicyEq] using sourceRuleIds
+    simpa only [sourcePolicyEq] using sourceSound.ruleIds_nodup
   have rawPolicyWf : Lara.Policy.WellFormed canon unit.policy := by
-    simpa only [sourcePolicyEq] using sourcePolicyWf
-  have rawArgumentsNodup : unit.args.Nodup := by
-    simpa only [sourceArgumentsEq] using checked.program.nodup
-  have rawSupport : ∀ term ∈ unit.args, ∃ conclusion,
-      Support.HasSupport canon unit.policy.ruleLookup gamma
-        (Support.certOkOf env.registry) term conclusion [] := by
-    intro term member
-    obtain ⟨conclusion, valid⟩ := checked.program.complete term (by
-      simpa only [sourceArgumentsEq] using member)
-    exact ⟨conclusion, by simpa only [sourcePolicyEq] using valid⟩
-  have rawTyped : ∀ attack ∈ unit.atts,
-      Lara.Attack.HasAttack canon unit.policy.ruleLookup gamma
-        (Support.certOkOf env.registry) unit.policy.defeat attack := by
-    intro attack member
-    have valid := checked.program.typed attack (by
-      simpa only [sourceAttacksEq] using member)
-    simpa only [sourcePolicyEq] using valid
-  have rawSourceDeclared : ∀ attack ∈ unit.atts,
-      attack.source ∈ unit.args := by
-    intro attack member
-    have declared := checked.program.source_declared attack (by
-      simpa only [sourceAttacksEq] using member)
-    simpa only [sourceArgumentsEq] using declared
-  have rawTargetDeclared : ∀ attack ∈ unit.atts,
-      attack.target ∈ unit.args := by
-    intro attack member
-    have declared := checked.program.target_declared attack (by
-      simpa only [sourceAttacksEq] using member)
-    simpa only [sourceArgumentsEq] using declared
-  have rawAttackComplete : Lara.Compile.AttackComplete canon
-      unit.policy.ruleLookup gamma (Support.certOkOf env.registry)
-      unit.policy.defeat unit.args unit.atts := by
-    simpa only [sourcePolicyEq, sourceArgumentsEq, sourceAttacksEq] using
-      sourceAttackComplete
-  have sourceSignature :
-      Lara.Check.Unit.signatureStage ground unit = none := by
-    exact checkUnit_signatureStage_of_ok h
+    simpa only [sourcePolicyEq] using sourceSound.policy_wf
   have targetSignature :
       Lara.Check.Unit.signatureStage
           (ground.map (renameResidualAtom ρg)) (renameCoreUnit ρg unit) =
@@ -6272,18 +6311,17 @@ theorem checkUnit_ok_rename
     (policyWellFormed_rename_iff canon unit.policy).mpr rawPolicyWf
   have targetArgumentsNodup :
       (unit.args.map (renameCoreSupportTerm ρg)).Nodup :=
-    (argumentsNodup_rename_iff unit.args).mpr rawArgumentsNodup
+    (argumentsNodup_rename_iff unit.args).mpr sourceSound.raw_nodup
   have targetSupport : ∀ term ∈ unit.args.map (renameCoreSupportTerm ρg),
-      ∃ conclusion, Support.HasSupport canon
+      ∃ conclusion obligations, Support.HasSupport canon
         (renameCorePolicy ρg unit.policy).ruleLookup (renameGamma ρg gamma)
-        (Support.certOkOf env.registry) term conclusion [] := by
+        (Support.certOkOf env.registry) term conclusion obligations := by
     intro term member
     obtain ⟨sourceTerm, sourceMember, rfl⟩ := List.mem_map.mp member
-    obtain ⟨sourceConclusion, sourceValid⟩ :=
-      rawSupport sourceTerm sourceMember
-    refine ⟨renameResidualAtom ρg sourceConclusion, ?_⟩
-    simpa using (hasSupport_rename_iff sigmaSound rawPolicySorted envSound
-      gamma sourceTerm sourceConclusion []).mpr sourceValid
+    obtain ⟨conclusion, obligations, valid⟩ :=
+      sourceSound.raw_support sourceTerm sourceMember
+    exact ⟨_, _, (hasSupport_rename_iff sigmaSound rawPolicySorted envSound
+      gamma sourceTerm conclusion obligations).mpr valid⟩
   have targetTyped : ∀ attack ∈ unit.atts.map (renameCoreAttack ρg),
       Lara.Attack.HasAttack canon
         (renameCorePolicy ρg unit.policy).ruleLookup (renameGamma ρg gamma)
@@ -6292,92 +6330,124 @@ theorem checkUnit_ok_rename
     intro attack member
     obtain ⟨sourceAttack, sourceMember, rfl⟩ := List.mem_map.mp member
     exact (hasAttack_rename_iff sigmaSound rawPolicySorted envSound
-      gamma sourceAttack).mpr
-      (rawTyped sourceAttack sourceMember)
+      gamma sourceAttack).mpr (sourceSound.raw_typed sourceAttack sourceMember)
   have targetSourceDeclared :
       ∀ attack ∈ unit.atts.map (renameCoreAttack ρg),
         attack.source ∈ unit.args.map (renameCoreSupportTerm ρg) := by
     intro attack member
     obtain ⟨sourceAttack, sourceMember, rfl⟩ := List.mem_map.mp member
     simpa using List.mem_map.mpr
-      ⟨sourceAttack.source, rawSourceDeclared sourceAttack sourceMember, rfl⟩
+      ⟨sourceAttack.source, sourceSound.raw_source sourceAttack sourceMember, rfl⟩
   have targetTargetDeclared :
       ∀ attack ∈ unit.atts.map (renameCoreAttack ρg),
         attack.target ∈ unit.args.map (renameCoreSupportTerm ρg) := by
     intro attack member
     obtain ⟨sourceAttack, sourceMember, rfl⟩ := List.mem_map.mp member
     simpa using List.mem_map.mpr
-      ⟨sourceAttack.target, rawTargetDeclared sourceAttack sourceMember, rfl⟩
+      ⟨sourceAttack.target, sourceSound.raw_target sourceAttack sourceMember, rfl⟩
   have targetAttackComplete : Lara.Compile.AttackComplete canon
       (renameCorePolicy ρg unit.policy).ruleLookup (renameGamma ρg gamma)
       (Support.certOkOf env.registry) (renameCorePolicy ρg unit.policy).defeat
       (unit.args.map (renameCoreSupportTerm ρg))
       (unit.atts.map (renameCoreAttack ρg)) :=
     (attackComplete_rename_iff sigmaSound rawPolicySorted envSound gamma
-      unit.args unit.atts).mpr rawAttackComplete
+      unit.args unit.atts).mpr sourceSound.raw_attack_complete
   obtain ⟨renamedChecked, renamedCheck⟩ :=
-    Lara.Check.Unit.checkUnit_complete
+    Lara.Check.Unit.checkUnit_complete_holes
       (unit := renameCoreUnit ρg unit) targetSignature targetScopes
       targetRuleIds targetPolicyWf targetArgumentsNodup targetSupport
       targetTyped targetSourceDeclared targetTargetDeclared
       targetAttackComplete
   have targetSound := Lara.Check.Unit.checkUnit_sound renamedCheck
-  have targetSigmaEq := targetSound.sigma_eq
-  have targetPolicyEq := targetSound.policy_eq
-  have targetArgumentsEq := targetSound.args_eq
-  have targetAttacksEq := targetSound.atts_eq
-  have targetNodeTerms := targetSound.nodes_terms
+  have classified : ∀ term ∈ unit.args,
+      Check.argComplete (renameCorePolicy ρg unit.policy).ruleLookup
+          (renameGamma ρg gamma) env.registry (renameCoreSupportTerm ρg term) =
+        Check.argComplete unit.policy.ruleLookup gamma env.registry term ∧
+      Check.argHole (renameCorePolicy ρg unit.policy).ruleLookup
+          (renameGamma ρg gamma) env.registry (renameCoreSupportTerm ρg term) =
+        Check.argHole unit.policy.ruleLookup gamma env.registry term := by
+    intro term member
+    obtain ⟨_, _, valid⟩ := sourceSound.raw_support term member
+    exact argClass_rename sigmaSound rawPolicySorted envSound valid
   have sigmaRelated : renamedChecked.sigma = checked.sigma :=
-    targetSigmaEq.trans sourceSigmaEq.symm
+    targetSound.sigma_eq.trans sourceSound.sigma_eq.symm
   have policyRelated :
       renamedChecked.policy = renameCorePolicy ρg checked.policy := by
-    calc
-      renamedChecked.policy = (renameCoreUnit ρg unit).policy := targetPolicyEq
-      _ = renameCorePolicy ρg unit.policy := rfl
-      _ = renameCorePolicy ρg checked.policy :=
-        congrArg (renameCorePolicy ρg) sourcePolicyEq.symm
+    rw [targetSound.policy_eq, sourcePolicyEq]
+    rfl
   have argumentsRelated : renamedChecked.program.args =
       checked.program.args.map (renameCoreSupportTerm ρg) := by
-    calc
-      renamedChecked.program.args = (renameCoreUnit ρg unit).args :=
-        targetArgumentsEq
-      _ = unit.args.map (renameCoreSupportTerm ρg) := rfl
-      _ = checked.program.args.map (renameCoreSupportTerm ρg) :=
-        congrArg (List.map (renameCoreSupportTerm ρg)) sourceArgumentsEq.symm
+    rw [targetSound.args_eq, sourceSound.args_eq]
+    show Check.completeArgs (renameCorePolicy ρg unit.policy).ruleLookup
+        (renameGamma ρg gamma) env.registry
+        (unit.args.map (renameCoreSupportTerm ρg)) = _
+    simp only [Check.completeArgs, List.filter_map]
+    exact congrArg _ (List.filter_congr fun term member => by
+      simp [(classified term member).1])
+  have holesRelated : renamedChecked.program.holes =
+      checked.program.holes.map (renameCoreSupportTerm ρg) := by
+    rw [targetSound.holes_eq, sourceSound.holes_eq]
+    show Check.holeArgs (renameCorePolicy ρg unit.policy).ruleLookup
+        (renameGamma ρg gamma) env.registry
+        (unit.args.map (renameCoreSupportTerm ρg)) = _
+    simp only [Check.holeArgs, List.filter_map]
+    exact congrArg _ (List.filter_congr fun term member => by
+      simp [(classified term member).2])
   have attacksRelated : renamedChecked.program.atts =
       checked.program.atts.map (renameCoreAttack ρg) := by
-    calc
-      renamedChecked.program.atts = (renameCoreUnit ρg unit).atts :=
-        targetAttacksEq
-      _ = unit.atts.map (renameCoreAttack ρg) := rfl
-      _ = checked.program.atts.map (renameCoreAttack ρg) :=
-        congrArg (List.map (renameCoreAttack ρg)) sourceAttacksEq.symm
+    rw [targetSound.atts_eq, sourceSound.atts_eq, argumentsRelated]
+    show Check.liveAttacks (checked.program.args.map (renameCoreSupportTerm ρg))
+        (unit.atts.map (renameCoreAttack ρg)) = _
+    simp only [Check.liveAttacks, List.filter_map]
+    exact congrArg _ (List.filter_congr fun attack _ => by
+      simp only [Function.comp_def, attackSource_rename]
+      exact decide_eq_decide.mpr
+        (admission_mem_map_injective_iff (renameCoreSupportTerm ρg)
+          (fun _ _ equal => (renameCoreSupportTerm_eq_iff ρg).mp equal)
+          attack.source checked.program.args))
   have nodeTermsRelated : renamedChecked.nodes.map (fun node => node.term) =
       checked.nodes.map (fun node => renameCoreSupportTerm ρg node.term) := by
-    calc
-      renamedChecked.nodes.map (fun node => node.term) =
-          renamedChecked.program.args := targetNodeTerms
-      _ = checked.program.args.map (renameCoreSupportTerm ρg) :=
-        argumentsRelated
-      _ = (checked.nodes.map (fun node => node.term)).map
-          (renameCoreSupportTerm ρg) :=
-        congrArg (List.map (renameCoreSupportTerm ρg)) sourceNodeTerms.symm
-      _ = checked.nodes.map (fun node =>
-          renameCoreSupportTerm ρg node.term) := by
-        simp [List.map_map, Function.comp_def]
+    rw [targetSound.nodes_terms, argumentsRelated, ← sourceSound.nodes_terms,
+      List.map_map]
+    rfl
   have checkedSigmaSound : CoreSigmaRenamingSound ρg checked.sigma := by
-    rw [sourceSigmaEq]
+    rw [sourceSound.sigma_eq]
     exact sigmaSound
   have nodeConclusionsRelated := checkedNodeConclusions_rename
     checkedSigmaSound checked.policy_well_sorted envSound policyRelated
     checked.nodes renamedChecked.nodes nodeTermsRelated
+  have nodeDeclsRelated : renamedChecked.nodeDecls = checked.nodeDecls := by
+    rw [targetSound.nodeDecls_eq, sourceSound.nodeDecls_eq]
+    show Check.declPositions _ (unit.args.map (renameCoreSupportTerm ρg)) = _
+    rw [Check.declPositions_map]
+    exact Check.declPositions_congr fun term member => (classified term member).1
+  have holeIndicesRelated : renamedChecked.holes.map (fun hole => hole.index) =
+      checked.holes.map (fun hole => hole.index) := by
+    rw [targetSound.holeIndices_eq, sourceSound.holeIndices_eq]
+    show Check.declPositions _ (unit.args.map (renameCoreSupportTerm ρg)) = _
+    rw [Check.declPositions_map]
+    exact Check.declPositions_congr fun term member => (classified term member).2
+  have holeTermsRelated : renamedChecked.holes.map (fun hole => hole.term) =
+      checked.holes.map (fun hole => renameCoreSupportTerm ρg hole.term) := by
+    rw [renamedChecked.holes_terms, holesRelated, ← checked.holes_terms,
+      List.map_map]
+    rfl
+  have holeRecordsRelated := checkedHoleRecords_rename
+    checkedSigmaSound checked.policy_well_sorted envSound policyRelated
+    checked.holes renamedChecked.holes holeTermsRelated
   exact ⟨renamedChecked, renamedCheck,
     { sigma := sigmaRelated
       policy := policyRelated
       arguments := argumentsRelated
       attacks := attacksRelated
       nodeTerms := nodeTermsRelated
-      nodeConclusions := nodeConclusionsRelated }⟩
+      nodeConclusions := nodeConclusionsRelated
+      nodeDecls := nodeDeclsRelated
+      holes := holesRelated
+      holeIndices := holeIndicesRelated
+      holeTerms := holeTermsRelated
+      holeConclusions := holeRecordsRelated.1
+      holeObligations := holeRecordsRelated.2 }⟩
 
 private theorem checkUnit_ok_reflect
     {canon : String → String} {env : Env canon}
@@ -6393,20 +6463,8 @@ private theorem checkUnit_ok_reflect
     ∃ checked,
       Lara.Check.Unit.checkUnit gamma env.registry ground unit = .ok checked := by
   have targetSound := Lara.Check.Unit.checkUnit_sound h
-  have targetSigmaEq := targetSound.sigma_eq
   have targetPolicyEq := targetSound.policy_eq
-  have targetRuleIds := targetSound.ruleIds_nodup
-  have targetPolicyWf := targetSound.policy_wf
-  have targetArgumentsEq := targetSound.args_eq
-  have targetAttacksEq := targetSound.atts_eq
-  have targetAttackComplete := targetSound.attack_complete
-  have rawTargetPolicySorted :
-      Lara.policyWellSorted unit.sigma (renameCorePolicy ρg unit.policy) = true := by
-    exact Lara.Check.Unit.signatureStage_policy
-      (checkUnit_signatureStage_of_ok h)
-  have targetSignature : Lara.Check.Unit.signatureStage
-      (ground.map (renameResidualAtom ρg)) (renameCoreUnit ρg unit) = none := by
-    exact checkUnit_signatureStage_of_ok h
+  have targetSignature := targetSound.signature_ok
   have sourceSignature :
       Lara.Check.Unit.signatureStage ground unit = none := by
     rw [signatureStage_rename sigmaSound] at targetSignature
@@ -6421,106 +6479,58 @@ private theorem checkUnit_ok_reflect
     (scopesWellFormed_rename_iff unit.policy).mp rawTargetScopes
   have rawTargetRuleIds :
       ((renameCorePolicy ρg unit.policy).rules.map (·.id)).Nodup := by
-    simpa only [targetPolicyEq, renameCoreUnit] using targetRuleIds
+    simpa only [targetPolicyEq, renameCoreUnit] using targetSound.ruleIds_nodup
   have sourceRuleIds : (unit.policy.rules.map (·.id)).Nodup :=
     (ruleIdsNodup_rename_iff unit.policy).mp rawTargetRuleIds
   have rawTargetPolicyWf :
       Lara.Policy.WellFormed canon (renameCorePolicy ρg unit.policy) := by
-    simpa only [targetPolicyEq, renameCoreUnit] using targetPolicyWf
+    simpa only [targetPolicyEq, renameCoreUnit] using targetSound.policy_wf
   have sourcePolicyWf : Lara.Policy.WellFormed canon unit.policy :=
     (policyWellFormed_rename_iff canon unit.policy).mp rawTargetPolicyWf
-  have rawTargetArgumentsNodup :
-      (unit.args.map (renameCoreSupportTerm ρg)).Nodup := by
-    simpa only [targetArgumentsEq, renameCoreUnit] using
-      renamedChecked.program.nodup
   have sourceArgumentsNodup : unit.args.Nodup :=
-    (argumentsNodup_rename_iff unit.args).mp rawTargetArgumentsNodup
-  have rawTargetSupport : ∀ term ∈ unit.args.map (renameCoreSupportTerm ρg),
-      ∃ conclusion, Support.HasSupport canon
-        (renameCorePolicy ρg unit.policy).ruleLookup (renameGamma ρg gamma)
-        (Support.certOkOf env.registry) term conclusion [] := by
-    intro term member
-    obtain ⟨conclusion, valid⟩ := renamedChecked.program.complete term (by
-      simpa only [targetArgumentsEq, renameCoreUnit] using member)
-    exact ⟨conclusion, by
-      simpa only [targetPolicyEq, renameCoreUnit] using valid⟩
-  have sourceSupport : ∀ term ∈ unit.args, ∃ conclusion,
+    (argumentsNodup_rename_iff unit.args).mp targetSound.raw_nodup
+  have sourceSupport : ∀ term ∈ unit.args, ∃ conclusion obligations,
       Support.HasSupport canon unit.policy.ruleLookup gamma
-        (Support.certOkOf env.registry) term conclusion [] := by
+        (Support.certOkOf env.registry) term conclusion obligations := by
     intro term member
-    obtain ⟨targetConclusion, targetValid⟩ := rawTargetSupport
+    obtain ⟨_, _, targetValid⟩ := targetSound.raw_support
       (renameCoreSupportTerm ρg term) (List.mem_map.mpr ⟨term, member, rfl⟩)
-    obtain ⟨sourceConclusion, sourceObligations, _, obligationsEq,
-      sourceValid⟩ := hasSupport_reflect_exists sigmaSound
-        rawSourcePolicySorted envSound targetValid term rfl
-    have obligationsEmpty : sourceObligations = [] := by
-      cases sourceObligations with
-      | nil => rfl
-      | cons question rest => simp at obligationsEq
-    subst sourceObligations
-    exact ⟨sourceConclusion, sourceValid⟩
-  have rawTargetTyped : ∀ attack ∈ unit.atts.map (renameCoreAttack ρg),
-      Lara.Attack.HasAttack canon
-        (renameCorePolicy ρg unit.policy).ruleLookup (renameGamma ρg gamma)
-        (Support.certOkOf env.registry)
-        (renameCorePolicy ρg unit.policy).defeat attack := by
-    intro attack member
-    have valid := renamedChecked.program.typed attack (by
-      simpa only [targetAttacksEq, renameCoreUnit] using member)
-    simpa only [targetPolicyEq, renameCoreUnit] using valid
+    obtain ⟨sourceConclusion, sourceObligations, _, _, sourceValid⟩ :=
+      hasSupport_reflect_exists sigmaSound rawSourcePolicySorted envSound
+        targetValid term rfl
+    exact ⟨sourceConclusion, sourceObligations, sourceValid⟩
   have sourceTyped : ∀ attack ∈ unit.atts,
       Lara.Attack.HasAttack canon unit.policy.ruleLookup gamma
         (Support.certOkOf env.registry) unit.policy.defeat attack := by
     intro attack member
     exact (hasAttack_rename_iff sigmaSound rawSourcePolicySorted envSound
       gamma attack).mp
-      (rawTargetTyped (renameCoreAttack ρg attack)
+      (targetSound.raw_typed (renameCoreAttack ρg attack)
         (List.mem_map.mpr ⟨attack, member, rfl⟩))
-  have rawTargetSourceDeclared :
-      ∀ attack ∈ unit.atts.map (renameCoreAttack ρg),
-        attack.source ∈ unit.args.map (renameCoreSupportTerm ρg) := by
-    intro attack member
-    have declared := renamedChecked.program.source_declared attack (by
-      simpa only [targetAttacksEq, renameCoreUnit] using member)
-    simpa only [targetArgumentsEq, renameCoreUnit] using declared
-  have rawTargetTargetDeclared :
-      ∀ attack ∈ unit.atts.map (renameCoreAttack ρg),
-        attack.target ∈ unit.args.map (renameCoreSupportTerm ρg) := by
-    intro attack member
-    have declared := renamedChecked.program.target_declared attack (by
-      simpa only [targetAttacksEq, renameCoreUnit] using member)
-    simpa only [targetArgumentsEq, renameCoreUnit] using declared
   have sourceSourceDeclared : ∀ attack ∈ unit.atts,
       attack.source ∈ unit.args := by
     intro attack member
-    have renamedMember := rawTargetSourceDeclared (renameCoreAttack ρg attack)
+    have renamedMember := targetSound.raw_source (renameCoreAttack ρg attack)
       (List.mem_map.mpr ⟨attack, member, rfl⟩)
     apply (admission_mem_map_injective_iff (renameCoreSupportTerm ρg)
       (fun _ _ equal => (renameCoreSupportTerm_eq_iff ρg).mp equal)
       attack.source unit.args).mp
-    simpa using renamedMember
+    simpa [renameCoreUnit] using renamedMember
   have sourceTargetDeclared : ∀ attack ∈ unit.atts,
       attack.target ∈ unit.args := by
     intro attack member
-    have renamedMember := rawTargetTargetDeclared (renameCoreAttack ρg attack)
+    have renamedMember := targetSound.raw_target (renameCoreAttack ρg attack)
       (List.mem_map.mpr ⟨attack, member, rfl⟩)
     apply (admission_mem_map_injective_iff (renameCoreSupportTerm ρg)
       (fun _ _ equal => (renameCoreSupportTerm_eq_iff ρg).mp equal)
       attack.target unit.args).mp
-    simpa using renamedMember
-  have rawTargetAttackComplete : Lara.Compile.AttackComplete canon
-      (renameCorePolicy ρg unit.policy).ruleLookup (renameGamma ρg gamma)
-      (Support.certOkOf env.registry) (renameCorePolicy ρg unit.policy).defeat
-      (unit.args.map (renameCoreSupportTerm ρg))
-      (unit.atts.map (renameCoreAttack ρg)) := by
-    simpa only [targetPolicyEq, targetArgumentsEq, targetAttacksEq,
-      renameCoreUnit] using targetAttackComplete
+    simpa [renameCoreUnit] using renamedMember
   have sourceAttackComplete : Lara.Compile.AttackComplete canon
       unit.policy.ruleLookup gamma (Support.certOkOf env.registry)
       unit.policy.defeat unit.args unit.atts :=
     (attackComplete_rename_iff sigmaSound rawSourcePolicySorted envSound gamma
-      unit.args unit.atts).mp rawTargetAttackComplete
-  exact Lara.Check.Unit.checkUnit_complete sourceSignature sourceScopes
+      unit.args unit.atts).mp targetSound.raw_attack_complete
+  exact Lara.Check.Unit.checkUnit_complete_holes sourceSignature sourceScopes
     sourceRuleIds sourcePolicyWf sourceArgumentsNodup sourceSupport
     sourceTyped sourceSourceDeclared sourceTargetDeclared sourceAttackComplete
 
@@ -8233,20 +8243,17 @@ private theorem semanticClaimIds_semantic_related
     semanticClaimIds_eraseProgramNl] at mapped
   exact mapped.trans (semanticClaimIds_renameProgram source)
 
-private def claimFor (pairs : List ReconstructedArgument)
-    (claim : Presentation.PropId) : Lara.Grounded.Claim :=
-  let supporting := pairs.zipIdx.filter fun (pair, _) =>
-    argSupportsClaim claim pair.argument.concl
-  { support := (supporting.filter fun (pair, _) =>
-      rootHoles pair.core = []).map (·.2)
-    holes := (supporting.filter fun (pair, _) =>
-      rootHoles pair.core != []).map (·.2) }
+private def claimAlternativesFor (pairs : List ReconstructedArgument)
+    (claim : Presentation.PropId) : List Nat :=
+  (pairs.zipIdx.filter fun (pair, _) =>
+    argSupportsClaim claim pair.argument.concl).map (·.2)
 
-private theorem claimsOf_eq_claimFor
+private theorem claimAlternativesOf_eq_claimAlternativesFor
     (pairs : List ReconstructedArgument) (program : Presentation.Program) :
-    claimsOf pairs program = (semanticClaimIds program).map fun claim =>
-      (claim, claimFor pairs claim) := by
-  unfold claimsOf semanticClaimIds claimFor
+    claimAlternativesOf pairs program =
+      (semanticClaimIds program).map fun claim =>
+        (claim, claimAlternativesFor pairs claim) := by
+  unfold claimAlternativesOf semanticClaimIds claimAlternativesFor
   induction program.decls with
   | nil => rfl
   | cons declaration rest ih => cases declaration <;> simp_all
@@ -8262,33 +8269,33 @@ private theorem argSupportsClaim_rename_global
   rename_i challenge
   cases challenge <;> rfl
 
-private theorem claimFor_rename_global
+private theorem claimAlternativesFor_rename_global
     (sourceInput : Input) (pairs : List ReconstructedArgument)
     (claim : Presentation.PropId) :
-    claimFor
+    claimAlternativesFor
         (pairs.map (renameReconstructedArgument ρg
           (programValues sourceInput.program)))
-        (ρg.prop claim) = claimFor pairs claim := by
-  have holesNonempty : ∀ holes : List Support.QuestionId,
-      (holes.map (renameCoreQuestionId ρg) != []) = (holes != []) := by
-    intro holes
-    cases holes <;> rfl
-  unfold claimFor
+        (ρg.prop claim) = claimAlternativesFor pairs claim := by
+  unfold claimAlternativesFor
   simp only [List.zipIdx_map, List.filter_map, List.map_map,
     Function.comp_def, Prod.map]
   simp [renameReconstructedArgument, Binding.renameArg,
-    argSupportsClaim_rename_global, rootHoles_rename, holesNonempty]
+    argSupportsClaim_rename_global]
 
-private theorem claimsOf_rename_global
+/-- The claim alternative ledger is renaming-equivariant: claim ids are
+renamed and the alternative positions are unchanged. -/
+private theorem claimAlternativesOf_rename_global
     (sourceInput : Input) (pairs : List ReconstructedArgument)
     (related : SemanticProgramRelated ρg source target) :
-    claimsOf
+    claimAlternativesOf
         (pairs.map (renameReconstructedArgument ρg
           (programValues sourceInput.program))) target =
-      (claimsOf pairs source).map fun claim => (ρg.prop claim.1, claim.2) := by
-  rw [claimsOf_eq_claimFor, claimsOf_eq_claimFor,
+      (claimAlternativesOf pairs source).map fun claim =>
+        (ρg.prop claim.1, claim.2) := by
+  rw [claimAlternativesOf_eq_claimAlternativesFor,
+    claimAlternativesOf_eq_claimAlternativesFor,
     semanticClaimIds_semantic_related related]
-  simp [List.map_map, Function.comp_def, claimFor_rename_global]
+  simp [List.map_map, Function.comp_def, claimAlternativesFor_rename_global]
 
 mutual
   private theorem renameValueTerm_nil
@@ -8617,8 +8624,8 @@ structure ElaboratedRelated (ρg : Binding.GlobalRenaming)
   gamma : target.gamma = renameGamma ρg source.gamma
   ground : GroundRelated ρg sourceInput source.ground target.ground
   unit : target.unit = renameCoreUnit ρg source.unit
-  claims : target.claims = source.claims.map fun claim =>
-    (ρg.prop claim.1, claim.2)
+  claimAlternatives : target.claimAlternatives =
+    source.claimAlternatives.map fun claim => (ρg.prop claim.1, claim.2)
   argIds : target.argIds = source.argIds.map ρg.arg
   authoredObligations : target.authoredObligations =
     source.authoredObligations.map fun entry =>
@@ -8653,7 +8660,7 @@ private theorem outputFromAdmission_related
         (renameAdmissionResult ρg sourceAdmission)) := by
   have keptPairs := admissionKeptPairs_rename_global (ρg := ρg)
     sourceInput sourcePairs sourceAdmission keepEq
-  have claims := claimsOf_rename_global (ρg := ρg) sourceInput
+  have claims := claimAlternativesOf_rename_global (ρg := ρg) sourceInput
     (admissionKeptPairs sourcePairs sourceAdmission) semanticRelated
   have questions := openQuestionsOf_rename_global (ρg := ρg) sourceInput
     (admissionKeptPairs sourcePairs sourceAdmission)

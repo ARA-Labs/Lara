@@ -51,8 +51,8 @@ test-time-model-adaptation.C05	gap	0	0	0	0	0	0	no
 test-time-model-adaptation.C07	gap	0	0	0	0	0	0	no
 what-will-my-model-forget.C01	gap	0	0	0	0	0	0	no
 what-will-my-model-forget.C03	gap	0	0	0	0	0	0	no
-rebench-fix_embedding.C12	gap	0	0	0	0	0	0	no
-rebench-nanogpt_chat_rl.C04	gap	0	0	0	0	0	0	yes
+rebench-fix_embedding.C12	gap	0	0	1	1	0	0	no
+rebench-nanogpt_chat_rl.C04	gap	0	0	1	1	0	0	yes
 rebench-restricted_mlm.C07	gap	0	0	0	0	0	0	no
 rebench-restricted_mlm.C14	justified	3	0	0	0	0	0	no
 rebench-rust_codecontests.C02	justified	3	0	0	0	0	0	no

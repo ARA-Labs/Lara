@@ -18,9 +18,9 @@
 #     of division?) is unmet — the shipped file also holds init-time log-odds divisions
 #     (:25,56,62,93) and a Python-int floor division pad=(k-1)//2 inside conv1d_same that runs
 #     during forward, so the inspection does not exhaustively cover division sites. The 'single
-#     use' wording is literally false at file granularity. A mandatory policy CQ with no honest
-#     discharging leaf is an IncompleteArgument rejection, so NO complete code_inspection(...)
-#     instance is declarable: E2-style unit, `gap` on empty support.
+#     use' wording is literally false at file granularity. The incomplete code_inspection(...)
+#     argument is declared as a located hole with `open path_coverage` (lowering re-done for
+#     issue #15 under `lara-core@0.3`); `gap` on empty complete support.
 #   * Annotation CQ2 (does the task no-division rule scope to forward only?) is ALSO unmet-gap
 #     (mandatory): the rule text is never quoted in-artifact; legality rests solely on the author
 #     code comment. It has no clean corpus-v1 home (an interpretation obligation), and it only
@@ -54,13 +54,15 @@ leaf e2 : version_matched(tao_solution, e04)
   provenance = ai-executed
   refs       = [logic/experiments.md#E05, src/kernel/tao_train.py#73-75, trace/exploration_tree.yaml#O07]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... and the incomplete argument is a located hole ------------------------------------------
 
-# (Intentionally no `arg`: covers_paths(e04, tao_solution) has no honest leaf — the inspection
-# does not exhaustively cover the division sites (init-time :25,56,62,93; the floor division in
-# conv1d_same runs during forward), so the 'single use' property is unestablished at file
-# granularity — and corpus-v1 makes path_coverage mandatory. The no-division-rule scope (CQ2) is
-# likewise unquoted. Complete support is empty.)
+# covers_paths(e04, tao_solution) has no honest leaf — the inspection does not exhaustively cover
+# the division sites (init-time :25,56,62,93; the floor division in conv1d_same runs during
+# forward) — so the mandatory path_coverage stays open. The no-division-rule scope (CQ2) is
+# likewise unquoted and has no code_inspection question.
+arg a1 : supports(c07) by code_inspection(division_outside_forward, tao_solution, e04)
+  discharge version_match with e2
+  open      path_coverage
 
 status c07
 
@@ -68,5 +70,6 @@ status c07
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
 # Compiled AF: no arguments.
+# Located hole: a1 (declaration index 0), open obligations [path_coverage]; sources no attacks.
 # Claim status:
-#   c07 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c07 -> gap (empty complete support; the hole a1 is reported, not a node; spec §8)

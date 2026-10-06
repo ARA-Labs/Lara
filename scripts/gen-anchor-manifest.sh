@@ -17,7 +17,7 @@
 # scripts/check-pw-example.py (fixtures/pw/declared.sexp, the
 # Lean pw-example host's fixture), with the former asserting totality over the
 # whole subtree; and a map's two committed artifacts are
-# map-check-input@1 and map-verdict@1 rather than check-input@1 and belong to
+# map-check-input@1 and map-verdict@2 rather than check-input@1 and belong to
 # scripts/check-map-conformance.sh.
 #
 # Usage:  bash scripts/gen-anchor-manifest.sh

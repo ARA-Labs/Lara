@@ -1,13 +1,12 @@
 -- | The paper's running example (fig:example) as two checked programs, with
 -- their checker reports rendered for pasting into the paper (P6).
 --
--- Run 1 (@examples\/running-example\/run1@) declares the empirical claim and
--- its evidence leaves, including the recorded dead end @e4@, but the
--- mandatory @external_validity@ critical question has no discharging leaf,
--- so no complete support argument can be declared: the claim is @gap@.
--- (Declaring @a1@ with the mandatory question as an explicit hole is not the
--- gap path: the checker rejects that program as an incomplete argument — the
--- open-obligation gate the no-CQ ablation removes.) Both runs also carry the
+-- Run 1 (@examples\/running-example\/run1@) declares the empirical claim, its
+-- evidence leaves including the recorded dead end @e4@, and the support
+-- argument @a1@. The mandatory @external_validity@ critical question has no
+-- discharging leaf, so @a1@ leaves it open: @a1@ is a located hole (spec §4.4),
+-- the claim has no complete support and is @gap@, and the verdict's @holes@
+-- section names @a1@ with that obligation. Both runs also carry the
 -- artifact's one deductive step @s1@: a strict ord\@1 comparison of the two
 -- reported accuracy cells, authored in the current surface (value bindings,
 -- an inferred instantiation, and a certificate citing its premise slots by

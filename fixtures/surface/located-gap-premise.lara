@@ -1,0 +1,21 @@
+artifact located_gap_premise at sha256:located-gap-premise
+policy surface-policy
+use backends []
+
+claim claim-main
+  nl      = "open question inherited through a premise"
+  formal  = score(7)
+  binding = { author = author, rationale = "premise hole witness", audit-status = reviewed }
+
+leaf keep : evidence(7)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+arg arg-open : supports(claim-main) by pass from [keep]
+  open cq
+
+arg arg-wrap : supports(claim-main) by main from [arg-open]
+  assurance = trusted
+
+status claim-main

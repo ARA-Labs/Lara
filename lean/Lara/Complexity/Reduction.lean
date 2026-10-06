@@ -582,7 +582,8 @@ private theorem compile_reduce_nodes (φ : Formula3) :
     hsound.policy_eq
   have hterms : (acceptedUnitOfFormula φ).nodes.map (·.term) =
       (gadgetNodes φ).map GadgetNode.arg := by
-    rw [(acceptedUnitOfFormula φ).nodes_terms, hsound.args_eq]
+    rw [(acceptedUnitOfFormula φ).nodes_terms,
+      hsound.args_eq_of_complete (formulaArguments_supported φ)]
     exact formulaArguments_eq_gadget φ
   show (acceptedUnitOfFormula φ).nodes.map (·.conclusion) =
     (gadgetNodes φ).map GadgetNode.conclusion
@@ -632,11 +633,11 @@ private theorem compile_reduce_attack (φ : Formula3) (i j : Nat) :
   have hsound := Check.Unit.checkUnit_sound (checkUnit_formula_ok φ)
   have hargs : (acceptedUnitOfFormula φ).program.args =
       (gadgetNodes φ).map GadgetNode.arg :=
-    (hsound.args_eq :
+    (hsound.args_eq_of_complete (formulaArguments_supported φ) :
         (acceptedUnitOfFormula φ).program.args = formulaArguments φ).trans
       (formulaArguments_eq_gadget φ)
   have hatts : (acceptedUnitOfFormula φ).program.atts = formulaAttacks φ :=
-    hsound.atts_eq
+    hsound.atts_eq_of_complete (formulaArguments_supported φ)
   show Lara.Compile.edgeB (acceptedUnitOfFormula φ).program i j = _
   rw [decode_attack]
   unfold Lara.Compile.edgeB

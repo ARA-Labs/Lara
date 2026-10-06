@@ -19,8 +19,9 @@
 #     formalization as the annotation's coverage flag directs.
 #   * null_comparison's mandatory adequate_power CQ (powered) maps onto the annotation's mandatory
 #     "are the three deciding cell values reported with seeds or uncertainty?" — annotated
-#     unmet-gap (single-run F1; the BART0 margin is 1.4 points with no variance). An open mandatory
-#     obligation is IncompleteArgument, so NO complete arg is declarable: E2-style gap.
+#     unmet-gap (single-run F1; the BART0 margin is 1.4 points with no variance). The incomplete
+#     argument is declared as a located hole with `open adequate_power` (lowering re-done for
+#     issue #15 under `lara-core@0.3`); complete support stays empty.
 #   * baseline_parity (threshold tuned per config) and measurement_validity (one E01 pipeline,
 #     binary F1) are annotated met and their leaves are supplied. The FLAN-T5 mechanism-diagnosis
 #     CQ and the E02 transfer-scale CQ are further unmet CQs carried by the nl hedge.
@@ -58,11 +59,15 @@ leaf e3 : valid_measurement(forecasting_f1, e01)
   provenance = ai-executed
   refs       = [logic/experiments.md#E01-Procedure, logic/experiments.md#E01-Metrics]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... and the incomplete argument is a located hole ------------------------------------------
 
-# (Intentionally no `arg`: powered(e01) has no honest leaf — single-run F1 per deciding cell, no
-# seeds or uncertainty — and null_comparison makes that obligation mandatory. The FLAN-T5
-# mechanism diagnosis is a further unmet mandatory CQ. The complete-support set is empty.)
+# powered(e01) has no honest leaf — single-run F1 per deciding cell, no seeds or uncertainty — so
+# the mandatory adequate_power stays open. The FLAN-T5 mechanism diagnosis, a further unmet
+# annotated CQ, has no null_comparison question and stays in the nl hedge.
+arg a1 : supports(c03) by null_comparison(trainable_logit, threshold, forecasting_f1, flan_t5_configs, e01)
+  discharge baseline_parity      with e2
+  discharge measurement_validity with e3
+  open      adequate_power
 
 status c03
 
@@ -70,5 +75,6 @@ status c03
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
 # Compiled AF: no arguments.
+# Located hole: a1 (declaration index 0), open obligations [adequate_power]; sources no attacks.
 # Claim status:
-#   c03 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c03 -> gap (empty complete support; the hole a1 is reported, not a node; spec §8)

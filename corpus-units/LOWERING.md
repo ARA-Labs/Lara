@@ -7,7 +7,8 @@ Plan: M5 T2 corpus units (tracker #48; freeze `docs/m5-freeze-checklist.md`).
 Exemplars:
 
 - `sample-specific-masks/C06` — justified (all mandatory CQs met).
-- `adaptive-pruning/C03` — gap (mandatory CQ unmet ⇒ E2-style, no arg).
+- `adaptive-pruning/C03` — gap (mandatory CQ unmet ⇒ the arg is declared
+  with `open <question>` and reported as a located hole).
 - `test-time-model-adaptation/C04` — defeated (complete arg + licensed undercut).
 
 ## Unit shape
@@ -78,7 +79,7 @@ backends, noted per unit.
 Declare ONLY leaves the unit uses: the principal premise, each discharged CQ's
 leaf, and attack roots. Per-result-cell detail folds into the premise leaf's
 `refs` (per-result-cell is the corpus's dominant grain; the refs keep each
-cell addressable). Unused leaves are legal but noise — E2-style gap units keep
+cell addressable). Unused leaves are legal but noise — located-hole gap units keep
 exactly the leaves the paper does supply (premise + met CQs).
 
 - `kind = observed` for measured result cells / trace records; `attested` for
@@ -95,12 +96,20 @@ Map each annotated CQ onto the nearest policy CQ of the chosen rule; then:
 
 - annotated **met** → `discharge <question> with <leaf>` (leaf cites the
   annotation's basis).
-- annotated **unmet-gap** on a policy-MANDATORY question → **do not declare
-  the arg** (E2-style unit). An open mandatory obligation is an
-  IncompleteArgument rejection, never a hole in an accepted unit; `gap` is
-  produced exactly one way — empty complete support. This applies even when
-  the annotator rated the CQ optional (uniform-standard rule: the policy call
+- annotated **unmet-gap** on a policy-MANDATORY question → **declare the arg
+  with `open <question>`** (a *located hole*, `lara-core@0.3`,
+  `docs/located-gap-decision.md`). The checker accepts it, keeps it out of the
+  graph, and names it in the verdict's `holes` section with its open
+  obligations; the claim reports `gap`, because `gap` is still produced
+  exactly one way — empty complete support. This applies even when the
+  annotator rated the CQ optional (uniform-standard rule: the policy call
   wins; record the divergence in the header — see `adaptive-pruning/C03`).
+  Discharge every other question that has an honest leaf, and open the rest.
+  History: the units were first lowered under `lara-core@0.2`, where an open
+  mandatory obligation rejected the whole unit (`incomplete-argument`), so the
+  incomplete arg was omitted ("E2-style"). Issue #15 re-lowered every such
+  unit to declare it; a unit that still declares no arg is `gap` for another
+  reason, given in its header.
 - annotated **unmet-defeater** → the arg IS declared complete (discharge the
   contested question with the paper's own claimed basis) and the defeating
   evidence forms a leaf-rooted challenge arg concluding the rule's exception
@@ -108,7 +117,7 @@ Map each annotated CQ onto the nearest policy CQ of the chosen rule; then:
 - **no matching annotated CQ** for a policy-mandatory question → discharge
   ONLY with an honest, citable basis from the annotation (e.g. margins orders
   of magnitude beyond run noise), recording the judgment in the header;
-  otherwise the unit is E2-style gap.
+  otherwise open it, and the arg is a located hole (`gap`).
 - optional policy CQs: discharge when the annotation supports it; when unmet,
   declare the hole explicitly with `open <question>` (`lara-syntax@0.7`; the
   hole carries the question's own name — grammar Appendix F.3) — the
@@ -134,14 +143,19 @@ Pattern: `leaf uN : <exception atom instance>` (kind observed, refs = the
 dead-end/counter-evidence), `arg dN : challenges(<question>(a1)) by leaf(uN)`,
 `undercut dN a1.rule`. An unattacked undercutter drives the support out ⇒
 claim `defeated`. If a mandatory CQ of the same arg is independently
-unmet-gap, the gap rule wins (no arg to attack) and the undercut evidence
-stays as a header note — the status is `gap`, not `defeated`.
+unmet-gap, the gap rule wins: the arg is declared as a located hole, and the
+status is `gap`, not `defeated`. The undercut may still be declared against
+the hole's rule (`undercut dN aK.rule`): it type-checks and is inert, because
+no complete argument contains the attacked occurrence, so it adds no edge.
 
 ## After writing a unit
 
 Add its row to `corpus-units/MANIFEST.tsv`
-(`group  artifact  claim_id  claim_type  double_annotate  expected_status`,
-tab-separated, claim_type from `m0/sample.tsv`), then regenerate:
+(`group  artifact  claim_id  claim_type  double_annotate  expected_status
+located_holes`, tab-separated, claim_type from `m0/sample.tsv`;
+`located_holes` is the number of located holes the unit declares, `0` for a
+hole-free unit — the measurement then expects `accept-located-hole` for a
+unit with holes), then regenerate:
 
 ```
 cabal exec -- runghc --ghc-arg=-package --ghc-arg=lara scripts/gen-corpus-units.hs

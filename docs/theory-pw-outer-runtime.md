@@ -92,7 +92,11 @@ Stages run in this order, and the first refusal is the run's error:
    drivers do. A context is created by its first world, and that world fixes
    the context's environment: Σ, the policy, the leaf table and the theory
    table. Every later world of the context must declare the same environment.
-   Two worlds of one context may not have the same checked program.
+   Two worlds of one context may not have the same checked program: the same
+   AF arguments, compiled attacks and located holes. The holes are part of a
+   world's identity, so two worlds that differ only in their incomplete
+   alternatives are both loaded. Statuses still come from complete support
+   alone.
 2. **Bridges**: `Declared.load` over the loaded contexts. It refuses a
    duplicate ID, an unknown endpoint, a missing clause, and a failed `rule-ok`.
 3. **Edges**, in order. The bridge must exist, both worlds must exist, each

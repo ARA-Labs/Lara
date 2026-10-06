@@ -359,7 +359,7 @@ def attackElaborated (certificate : Cert) (coreAssur : Lara.Support.Assurance) :
       policy := toCorePolicy attackPolicy
       args := (attackKept certificate coreAssur).map (·.core)
       atts := [coreAttack coreAssur] }
-  claims := claimsOf (attackKept certificate coreAssur)
+  claimAlternatives := claimAlternativesOf (attackKept certificate coreAssur)
     (attackProgram (.cert certificate))
   argIds := (attackKept certificate coreAssur).map (·.argument.id)
   authoredObligations := authoredObligationsOf (attackProgram (.cert certificate))
@@ -716,6 +716,29 @@ theorem attack_attackComplete
   rw [attack_atts]
   exact List.mem_cons_self
 
+/-- Every declaration of the kernel fixture is complete. `CoreObligations`
+asks only that each declaration type; the transport instantiation needs this
+stronger fact. -/
+theorem attack_complete_kernel :
+    ∀ term ∈ (attackElaborated kernelCert kernelCoreAssur).unit.args, ∃ conclusion,
+      Lara.Support.HasSupport (fun source => source)
+        (attackElaborated kernelCert kernelCoreAssur).unit.policy.ruleLookup
+        (attackElaborated kernelCert kernelCoreAssur).gamma
+        (Lara.Support.certOkOf transportEnv.registry) term conclusion [] := by
+  intro term hterm
+  rw [attack_args] at hterm
+  simp only [List.mem_cons, List.not_mem_nil, or_false] at hterm
+  have hcert := attack_hasSupport_cert kernelCert kernelCoreAssur rfl (by decide)
+    transport_cert_accepted
+  rcases hterm with h | h | h <;> subst h
+  · exact ⟨.atom "q" .nil, hcert⟩
+  · exact ⟨.atom "s" .nil,
+      attack_hasSupport_plain kernelCert kernelCoreAssur
+        (attack_ruleLookup_s _ _) rfl rfl rfl rfl rfl hcert⟩
+  · exact ⟨.atom "t" .nil,
+      attack_hasSupport_plain kernelCert kernelCoreAssur
+        (attack_ruleLookup_t _ _) rfl rfl rfl rfl rfl hcert⟩
+
 theorem attack_coreObligations_kernel :
     CoreObligations transportEnv (attackElaborated kernelCert kernelCoreAssur) where
   sigmaWellFormed := by decide
@@ -735,20 +758,9 @@ theorem attack_coreObligations_kernel :
     subst hab
     exact ⟨by decide, by decide⟩
   argsNodup := by decide
-  supports := by
-    intro term hterm
-    rw [attack_args] at hterm
-    simp only [List.mem_cons, List.not_mem_nil, or_false] at hterm
-    have hcert := attack_hasSupport_cert kernelCert kernelCoreAssur rfl (by decide)
-      transport_cert_accepted
-    rcases hterm with h | h | h <;> subst h
-    · exact ⟨.atom "q" .nil, hcert⟩
-    · exact ⟨.atom "s" .nil,
-        attack_hasSupport_plain kernelCert kernelCoreAssur
-          (attack_ruleLookup_s _ _) rfl rfl rfl rfl rfl hcert⟩
-    · exact ⟨.atom "t" .nil,
-        attack_hasSupport_plain kernelCert kernelCoreAssur
-          (attack_ruleLookup_t _ _) rfl rfl rfl rfl rfl hcert⟩
+  supports := fun term hterm =>
+    let ⟨conclusion, h⟩ := attack_complete_kernel term hterm
+    ⟨conclusion, [], h⟩
   attacksTyped := by
     intro attack hattack
     rw [attack_atts] at hattack
@@ -773,6 +785,29 @@ theorem attack_coreObligations_kernel :
     exact List.mem_cons_of_mem _ (List.mem_cons_of_mem _ (List.mem_cons_self))
   attackComplete := attack_attackComplete kernelCert kernelCoreAssur
 
+/-- Every declaration of the wrapped fixture is complete. `CoreObligations`
+asks only that each declaration type; the transport instantiation needs this
+stronger fact. -/
+theorem attack_complete_wrapped :
+    ∀ term ∈ (attackElaborated wrappedCert wrappedCoreAssur).unit.args, ∃ conclusion,
+      Lara.Support.HasSupport (fun source => source)
+        (attackElaborated wrappedCert wrappedCoreAssur).unit.policy.ruleLookup
+        (attackElaborated wrappedCert wrappedCoreAssur).gamma
+        (Lara.Support.certOkOf transportEnvWrapped.registry) term conclusion [] := by
+  intro term hterm
+  rw [attack_args] at hterm
+  simp only [List.mem_cons, List.not_mem_nil, or_false] at hterm
+  have hcert := attack_hasSupport_cert wrappedCert wrappedCoreAssur rfl (by decide)
+    transport_cert_accepted_wrapped_raw
+  rcases hterm with h | h | h <;> subst h
+  · exact ⟨.atom "q" .nil, hcert⟩
+  · exact ⟨.atom "s" .nil,
+      attack_hasSupport_plain wrappedCert wrappedCoreAssur
+        (attack_ruleLookup_s _ _) rfl rfl rfl rfl rfl hcert⟩
+  · exact ⟨.atom "t" .nil,
+      attack_hasSupport_plain wrappedCert wrappedCoreAssur
+        (attack_ruleLookup_t _ _) rfl rfl rfl rfl rfl hcert⟩
+
 theorem attack_coreObligations_wrapped :
     CoreObligations transportEnvWrapped
       (attackElaborated wrappedCert wrappedCoreAssur) where
@@ -793,20 +828,9 @@ theorem attack_coreObligations_wrapped :
     subst hab
     exact ⟨by decide, by decide⟩
   argsNodup := by decide
-  supports := by
-    intro term hterm
-    rw [attack_args] at hterm
-    simp only [List.mem_cons, List.not_mem_nil, or_false] at hterm
-    have hcert := attack_hasSupport_cert wrappedCert wrappedCoreAssur rfl (by decide)
-      transport_cert_accepted_wrapped_raw
-    rcases hterm with h | h | h <;> subst h
-    · exact ⟨.atom "q" .nil, hcert⟩
-    · exact ⟨.atom "s" .nil,
-        attack_hasSupport_plain wrappedCert wrappedCoreAssur
-          (attack_ruleLookup_s _ _) rfl rfl rfl rfl rfl hcert⟩
-    · exact ⟨.atom "t" .nil,
-        attack_hasSupport_plain wrappedCert wrappedCoreAssur
-          (attack_ruleLookup_t _ _) rfl rfl rfl rfl rfl hcert⟩
+  supports := fun term hterm =>
+    let ⟨conclusion, h⟩ := attack_complete_wrapped term hterm
+    ⟨conclusion, [], h⟩
   attacksTyped := by
     intro attack hattack
     rw [attack_atts] at hattack
@@ -932,8 +956,10 @@ theorem surfaceTransportAttack_directAF_eq :
   refine Lara.Context.surface_directAF_relabel
     attack_checks_kernel hchecked₁ attack_checks_wrapped hchecked₂
     certSwap_injective ?_ ?_
-  · rw [hs₂.args_eq, hs₁.args_eq]; rfl
-  · rw [hs₂.atts_eq, hs₁.atts_eq]; rfl
+  · rw [hs₂.args_eq_of_complete attack_complete_wrapped,
+      hs₁.args_eq_of_complete attack_complete_kernel]; rfl
+  · rw [hs₂.atts_eq_of_complete attack_complete_wrapped,
+      hs₁.atts_eq_of_complete attack_complete_kernel]; rfl
 
 /-! ### Non-vacuity
 
@@ -961,13 +987,31 @@ theorem surfaceTransportAttack_relabel_moves_atts :
     and_true] at h
   exact absurd h.1 (by decide)
 
-/-- **The witnessed framework has an edge.** Node 1 is `a-s` and node 2 is
-`a-t` in retained declaration order, and the framework the surface layer
-exposes puts an attack between them — on both sides of the relabel. -/
+/-- **The witnessed framework has an edge.** Every retained argument is
+complete, so the direct complete-argument list is the retained list: node 1 is
+`a-s` and node 2 is `a-t` in retained declaration order, and the framework the
+surface layer exposes puts an attack between them — on both sides of the
+relabel. -/
 theorem surfaceTransportAttack_directAF_edge :
     (Lara.Surface.directAF attack_checks_kernel).attack 1 2 = true ∧
       (Lara.Surface.directAF attack_checks_wrapped).attack 1 2 = true := by
-  constructor <;> decide
+  have hkernel : Lara.Surface.directArgs transportEnv
+      (attackElaborated kernelCert kernelCoreAssur) =
+        (attackElaborated kernelCert kernelCoreAssur).unit.args :=
+    Lara.Check.completeArgs_eq_self attack_complete_kernel
+  have hwrapped : Lara.Surface.directArgs transportEnvWrapped
+      (attackElaborated wrappedCert wrappedCoreAssur) =
+        (attackElaborated wrappedCert wrappedCoreAssur).unit.args :=
+    Lara.Check.completeArgs_eq_self attack_complete_wrapped
+  constructor
+  · show Lara.Surface.directAttack _ _ 1 2 = true
+    unfold Lara.Surface.directAttack
+    rw [hkernel]
+    decide
+  · show Lara.Surface.directAttack _ _ 1 2 = true
+    unfold Lara.Surface.directAttack
+    rw [hwrapped]
+    decide
 
 /-- **The relabel actually moved the elaborated unit.** -/
 theorem surfaceTransportAttack_relabel_moves :

@@ -99,6 +99,18 @@ theorem mem_claimSupportFor_iff
       simp [hnode]
     exact ⟨(node, i), List.mem_of_getElem? hzipGet, by simp [hequiv]⟩
 
+/-- **Only incomplete alternatives report `gap` (spec §8).** When no retained
+complete node concludes `p` — every candidate for `p` is a hole, or there is
+none — the computed complete claim has status `gap`. The corollary of
+`Check.Unit.gap_of_only_holes` at `completeClaimFor`. -/
+theorem completeClaimFor_gap_of_only_holes
+    (unit : Unit.CheckedUnit canon Gamma CertOk) {p : Atom}
+    (hnone : ∀ node ∈ unit.nodes, ¬ equiv canon node.conclusion p) :
+    Grounded.statusC (Compile.checkedAF unit.program)
+      (completeClaimFor unit p) = .gap :=
+  Check.Unit.gap_of_only_holes unit
+    (fun _ hi => mem_claimSupportFor_iff.mp hi) hnone
+
 /-! ### Accepted-unit result 7 -/
 
 /-- Contrary retained arguments of an accepted unit cannot both occur in its

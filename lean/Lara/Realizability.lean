@@ -188,8 +188,8 @@ theorem node_conclusion_wellSorted
         R.accepted.program.args := by
     intro w hw l hl p hlookup
     apply R.ground_covers w ?_ l hl p hlookup
-    rw [← hargs]
-    exact hw
+    rw [hargs] at hw
+    exact Check.completeArgs_subset hw
   have hleaves : ∀ l ∈ Support.leaves node.term, ∀ p,
       R.Gamma l = some p → Sigma.WellSorted sigma p := by
     intro l hl p hlookup

@@ -2031,7 +2031,10 @@ def keptReconstructed (canon : String → String) (policy : Presentation.Policy)
         (admissionGroups program)
   pairs.filter fun pair => !Lara.Groups.usesLeaf removed pair.core
 
-/-- The root holes of a core support term. -/
+/-- The questions authored open at the root of a core support term. This is
+the authored diagnostic ledger, optional questions included; it is not the
+located-hole classification, which reads the core's mandatory, transitive
+obligation set. -/
 def rootHoles : Lara.Support.SupportTerm → List Lara.Support.QuestionId
   | .leaf _ => []
   | .inst _ _ _ _ holes _ => holes
@@ -2047,19 +2050,36 @@ def argSupportsClaim (claim : Presentation.PropId) : Presentation.ArgConcl → B
   | .supportsDerived id => decide (id = claim)
   | .challenges _ => false
 
-/-- The claim map: for each declared claim (including comparison-generated
-sub-claims), the positions of its complete supporting arguments and of its
-hole-bearing supporting alternatives, in the unit's argument order. -/
-def claimsOf (pairs : List ReconstructedArgument) (program : Presentation.Program) :
-    List (Presentation.PropId × Lara.Grounded.Claim) :=
+/-- The claim alternative ledger: for each declared claim (including
+comparison-generated sub-claims), the retained declaration positions of the
+arguments whose authored conclusion supports it, in the unit's argument order.
+It is syntax: whether an alternative is complete support or a located hole is
+the core's classification, applied by `claimsOf`. -/
+def claimAlternativesOf (pairs : List ReconstructedArgument)
+    (program : Presentation.Program) : List (Presentation.PropId × List Nat) :=
   (program.decls.filterMap fun
     | .claim claim => some claim
     | _ => none).map fun claim =>
-      let supporting := pairs.zipIdx.filter fun (pair, _) =>
-        argSupportsClaim claim.id pair.argument.concl
-      (claim.id,
-        { support := (supporting.filter fun (pair, _) => rootHoles pair.core = []).map (·.2)
-          holes := (supporting.filter fun (pair, _) => rootHoles pair.core != []).map (·.2) })
+      (claim.id, (pairs.zipIdx.filter fun (pair, _) =>
+        argSupportsClaim claim.id pair.argument.concl).map (·.2))
+
+/-- Classify one claim's alternatives by a declaration partition (spec §4.4,
+D5, D8). An alternative at the declaration of AF node `n` contributes the
+compact AF index `n` to `support`; one at a located hole contributes its
+declaration position to `holes`. On an accepted unit `nodeDecls` and
+`holeDecls` are the checked cache's maps, so the classification is the core's
+mandatory, transitive obligation set and not the authored root open set. -/
+def classifyClaim (nodeDecls holeDecls : List Nat) (alternatives : List Nat) :
+    Lara.Grounded.Claim :=
+  { support := alternatives.filterMap fun i => nodeDecls.idxOf? i
+    holes := alternatives.filter fun i => holeDecls.contains i }
+
+/-- The claim map: each claim's alternatives classified by one declaration
+partition. -/
+def claimsOf (nodeDecls holeDecls : List Nat)
+    (ledger : List (Presentation.PropId × List Nat)) :
+    List (Presentation.PropId × Lara.Grounded.Claim) :=
+  ledger.map fun row => (row.1, classifyClaim nodeDecls holeDecls row.2)
 
 /-- The authored obligations of the source program's arguments. -/
 def authoredObligationsOf (program : Presentation.Program) :
@@ -2559,7 +2579,9 @@ def assemble (env : Env canon) (input : Input) : Except Error (Elaborated canon)
               policy := toCorePolicy input.policy
               args := (keptReconstructed canon input.policy semantic pairs).map (·.core)
               atts := resolved }
-          claims := claimsOf (keptReconstructed canon input.policy semantic pairs) semantic
+          claimAlternatives :=
+            claimAlternativesOf (keptReconstructed canon input.policy semantic pairs)
+              semantic
           argIds := keptIds
           authoredObligations := authoredObligationsOf input.program
           openQuestions :=
@@ -2573,7 +2595,9 @@ def assemble (env : Env canon) (input : Input) : Except Error (Elaborated canon)
 /-- Declarative core-acceptance obligations carried by a surface derivation.
 No field invokes `checkUnit` or stores executable success: these are exactly
 the independent signature, policy, support/certificate, attack, endpoint, and
-conflict-completeness premises consumed by `Check.Unit.checkUnit_complete`. -/
+conflict-completeness premises consumed by `Check.Unit.checkUnit_complete_holes`.
+Every declaration must type, at whatever root obligation set it has: a
+declaration with open mandatory questions is a located hole, not a failure. -/
 structure CoreObligations (env : Env canon) (output : Elaborated canon) : Prop where
   sigmaWellFormed : Sigma.sigmaWellFormed output.unit.sigma = true
   policyWellSorted : Lara.policyWellSorted output.unit.sigma output.unit.policy = true
@@ -2584,9 +2608,9 @@ structure CoreObligations (env : Env canon) (output : Elaborated canon) : Prop w
   ruleIdsNodup : (output.unit.policy.rules.map (·.id)).Nodup
   policyWellFormed : Policy.WellFormed canon output.unit.policy
   argsNodup : output.unit.args.Nodup
-  supports : ∀ term ∈ output.unit.args, ∃ conclusion,
+  supports : ∀ term ∈ output.unit.args, ∃ conclusion obligations,
     Support.HasSupport canon output.unit.policy.ruleLookup output.gamma
-      (Support.certOkOf env.registry) term conclusion []
+      (Support.certOkOf env.registry) term conclusion obligations
   attacksTyped : ∀ attack ∈ output.unit.atts,
     Attack.HasAttack canon output.unit.policy.ruleLookup output.gamma
       (Support.certOkOf env.registry) output.unit.policy.defeat attack
@@ -2613,7 +2637,7 @@ theorem CoreObligations.checkUnit_complete
     ∃ checked,
       Check.Unit.checkUnit output.gamma env.registry output.ground output.unit =
         .ok checked :=
-  Check.Unit.checkUnit_complete h.signatureStage_none h.scopesWellFormed
+  Check.Unit.checkUnit_complete_holes h.signatureStage_none h.scopesWellFormed
     h.ruleIdsNodup h.policyWellFormed h.argsNodup h.supports h.attacksTyped
     h.sourcesDeclared h.targetsDeclared h.attackComplete
 
@@ -2628,56 +2652,22 @@ theorem CoreObligations.of_checkUnit_ok
       output.unit = .ok checked) : CoreObligations env output := by
   have hsound := Check.Unit.checkUnit_sound hchecked
   have sigmaEq := hsound.sigma_eq
-  have sigmaWf := hsound.sigma_wf
-  have policySorted := hsound.policy_sorted
-  have groundSorted := hsound.ground_sorted
-  have argsSorted := hsound.args_sorted
   have policyEq := hsound.policy_eq
-  have ruleIds := hsound.ruleIds_nodup
-  have policyWf := hsound.policy_wf
-  have argumentsEq := hsound.args_eq
-  have attacksEq := hsound.atts_eq
-  have attackComplete := hsound.attack_complete
-  have nodeTerms := hsound.nodes_terms
-  refine
-    { sigmaWellFormed := ?_
-      policyWellSorted := ?_
-      groundWellSorted := ?_
-      argsWellSorted := ?_
-      scopesWellFormed := ?_
-      ruleIdsNodup := ?_
-      policyWellFormed := ?_
-      argsNodup := ?_
-      supports := ?_
-      attacksTyped := ?_
-      sourcesDeclared := ?_
-      targetsDeclared := ?_
-      attackComplete := ?_ }
-  · simpa only [sigmaEq] using sigmaWf
-  · simpa only [sigmaEq, policyEq] using policySorted
-  · simpa only [sigmaEq] using groundSorted
-  · simpa only [sigmaEq, policyEq, argumentsEq] using argsSorted
-  · simpa only [policyEq] using checked.scopes_wf
-  · simpa only [policyEq] using ruleIds
-  · simpa only [policyEq] using policyWf
-  · simpa only [argumentsEq] using checked.program.nodup
-  · intro term member
-    obtain ⟨conclusion, valid⟩ := checked.program.complete term (by
-      simpa only [argumentsEq] using member)
-    exact ⟨conclusion, by simpa only [policyEq] using valid⟩
-  · intro attack member
-    have valid := checked.program.typed attack (by
-      simpa only [attacksEq] using member)
-    simpa only [policyEq] using valid
-  · intro attack member
-    have declared := checked.program.source_declared attack (by
-      simpa only [attacksEq] using member)
-    simpa only [argumentsEq] using declared
-  · intro attack member
-    have declared := checked.program.target_declared attack (by
-      simpa only [attacksEq] using member)
-    simpa only [argumentsEq] using declared
-  · simpa only [policyEq, argumentsEq, attacksEq] using attackComplete
+  exact
+    { sigmaWellFormed := by simpa only [sigmaEq] using hsound.sigma_wf
+      policyWellSorted := by
+        simpa only [sigmaEq, policyEq] using hsound.policy_sorted
+      groundWellSorted := by simpa only [sigmaEq] using hsound.ground_sorted
+      argsWellSorted := hsound.raw_sorted
+      scopesWellFormed := by simpa only [policyEq] using checked.scopes_wf
+      ruleIdsNodup := by simpa only [policyEq] using hsound.ruleIds_nodup
+      policyWellFormed := by simpa only [policyEq] using hsound.policy_wf
+      argsNodup := hsound.raw_nodup
+      supports := hsound.raw_support
+      attacksTyped := hsound.raw_typed
+      sourcesDeclared := hsound.raw_source
+      targetsDeclared := hsound.raw_target
+      attackComplete := hsound.raw_attack_complete }
 
 /-- The independent surface judgment. Its derivations reconstruct the
 presentation program syntax-directly; the output equalities identify each
@@ -2724,8 +2714,9 @@ structure Checks (env : Env canon) (input : Input) (output : Elaborated canon) :
       output.argIds ∧
     (keptReconstructed canon input.policy output.semanticProgram pairs).map (·.core) =
       output.unit.args ∧
-    claimsOf (keptReconstructed canon input.policy output.semanticProgram pairs)
-      output.semanticProgram = output.claims ∧
+    claimAlternativesOf
+        (keptReconstructed canon input.policy output.semanticProgram pairs)
+      output.semanticProgram = output.claimAlternatives ∧
     openQuestionsOf (keptReconstructed canon input.policy output.semanticProgram pairs) =
       output.openQuestions
   gamma : surfaceGamma canon input.policy output.semanticProgram = output.gamma
@@ -2891,7 +2882,7 @@ theorem assemble_complete (env : Env canon) (input : Input) (output : Elaborated
   have hauthored := h.authoredObligations
   apply congrArg Except.ok
   cases output with
-  | mk gamma ground unit claims argIds authoredObligations openQuestions
+  | mk gamma ground unit claimAlternatives argIds authoredObligations openQuestions
       resolvedAttacks semanticProgram =>
     cases unit with
     | mk sigma policy args atts =>

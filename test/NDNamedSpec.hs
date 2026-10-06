@@ -36,7 +36,7 @@ import Lara.Elaborate.NDNamed
   )
 import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
 import Lara.Replay
-  ( CoreVersion (LaraCoreV02)
+  ( CoreVersion (LaraCoreV03)
   , mkCheckInput
   , mkReplayId
   )
@@ -823,7 +823,7 @@ prop_r13Boundary = once $ ioProperty $ do
   let tampered = do
         (program, policy) <- parsed
         unit <- lowered
-        replayId <- either (Left . show) Right (mkReplayId LaraCoreV02 (AST.policyId policy) (AST.programBackends program) (map fst (AST.policyTheories policy)) (AST.programDigest program))
+        replayId <- either (Left . show) Right (mkReplayId LaraCoreV03 (AST.policyId policy) (AST.programBackends program) (map fst (AST.policyTheories policy)) (AST.programDigest program))
         tamperedCore <- either (Left . show) Right (parseSExpr (replaceFirst "(hyp 0)" "(hyp 9)" (printSExpr (encodeUnit unit))))
         tamperedUnit <- either (Left . show) Right (decodeUnit tamperedCore)
         input <- either (Left . show) Right (mkCheckInput replayId tamperedUnit)

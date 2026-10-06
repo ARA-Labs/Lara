@@ -14,9 +14,9 @@
 #     and refs. D = forgetting_configs names the 8 enumerated configurations.
 #   * The mandatory variance_reported CQ maps onto the annotation's mandatory "are F1 scores
 #     reported with seeds or uncertainty so per-column argmax is stable?" — annotated unmet-gap
-#     (no repeated runs, seeds, or intervals; several margins are small, e.g. 67.81 vs 68.37). An
-#     open mandatory obligation is IncompleteArgument, so NO complete arg is declarable: E2-style
-#     gap.
+#     (no repeated runs, seeds, or intervals; several margins are small, e.g. 67.81 vs 68.37). The
+#     incomplete argument is declared as a located hole with `open variance_reported` (lowering
+#     re-done for issue #15 under `lara-core@0.3`); complete support stays empty.
 #   * baseline_parity (baseline run in every config) and measurement_validity (one shared pipeline,
 #     binary F1 scored identically) are annotated met; scope_match (the single exception config
 #     identified and consistent with scope) is annotated met and maps onto corpus-v1's optional
@@ -62,11 +62,15 @@ leaf e4 : scope_matched(representation_with_prior, forecasting_f1, forgetting_co
   provenance = ai-executed
   refs       = [logic/experiments.md#E01-Expected-outcome, trace/exploration_tree.yaml#N04]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... and the incomplete argument is a located hole ------------------------------------------
 
-# (Intentionally no `arg`: variance_reported(e01) has no honest leaf — single-run F1 per cell, no
-# seeds or intervals, with sub-point margins carrying the 7-of-8 count — and controlled_comparison
-# makes that obligation mandatory. The complete-support set is therefore empty.)
+# variance_reported(e01) has no honest leaf — single-run F1 per cell, no seeds or intervals, with
+# sub-point margins carrying the 7-of-8 count — so the mandatory variance_reported stays open.
+arg a1 : supports(c01) by controlled_comparison(representation_with_prior, fixed_logit, forecasting_f1, forgetting_configs, e01)
+  discharge baseline_parity      with e2
+  discharge measurement_validity with e3
+  open      variance_reported
+  discharge scope_match          with e4
 
 status c01
 
@@ -74,5 +78,6 @@ status c01
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
 # Compiled AF: no arguments.
+# Located hole: a1 (declaration index 0), open obligations [variance_reported]; sources no attacks.
 # Claim status:
-#   c01 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c01 -> gap (empty complete support; the hole a1 is reported, not a node; spec §8)

@@ -17,8 +17,9 @@
 #     via corpus-v1's declared exception measurement : measurement_artifact.
 #
 # The reviewers ALSO note the kurtosis ablation is single-run ("add error bars"): that is not a
-# typed attack — it is the already-unmet mandatory variance CQ that keeps c_kurt `gap`. The
-# framework flagged it at submission; the reviewer merely agrees. Round 2 discharges it.
+# typed attack — it is the already-open mandatory variance CQ that makes a_kurt a located hole and
+# keeps c_kurt `gap`. The framework flagged it at submission, naming the open question in the
+# verdict's holes section; the reviewer merely agrees. Round 2 discharges it.
 #
 # Expected verdict is at the bottom of this file (golden oracle).
 
@@ -106,6 +107,13 @@ leaf pk3 : matched_protocol(e03)
   provenance = ai-executed
   refs       = [logic/experiments.md#E03-step-7]
 
+# Unchanged from round 0: variance_reported has no honest leaf, so it stays open and a_kurt is a
+# located hole, not an AF node.
+arg a_kurt : supports(c_kurt) by component_ablation(kurtosis_salience, apt_llama2_7b, openllm_avg, e03)
+  discharge single_variable   with pk2
+  discharge protocol_parity   with pk3
+  open      variance_reported
+
 # ===============================================================================================
 # THE REVIEW ROUND (new in round 1)
 # ===============================================================================================
@@ -169,6 +177,7 @@ status c_kurt
 # EXPECTED VERDICT (golden oracle) — verified by test/WorkedExamplesSpec.hs
 # ==============================================================================================
 # Compiled AF (declaration order): a_bench (0), a_meas (1), d_um (2), d_rebut (3), d_meas (4).
+# a_kurt is a hole (declaration index 2, obligation variance_reported), not an AF node.
 #   a_bench (0) -> out   (LOut; undermined by d_um (in) and rebutted by d_rebut; either drives it out)
 #   a_meas  (1) -> out   (LOut; undercut by the unattacked d_meas)
 #   d_um    (2) -> in    (LIn; leaf-rooted, unattacked)
@@ -177,8 +186,8 @@ status c_kurt
 # Claim statuses:
 #   c_bench   -> defeated  (support a_bench is out)
 #   c_measure -> defeated  (support a_meas is out)
-#   c_kurt    -> gap       (still empty complete support; the "add error bars" comment is the
-#                           unmet mandatory variance CQ, not a typed attack)
+#   c_kurt    -> gap       (still empty complete support: a_kurt is still a hole; the "add error
+#                           bars" comment is the open mandatory variance CQ, not a typed attack)
 #
 # Trajectory: c_bench justified -> defeated, c_measure justified -> defeated, c_kurt gap -> gap.
 # Round 2 (rebuttal) reinstates c_bench, concedes c_measure, and discharges c_kurt.

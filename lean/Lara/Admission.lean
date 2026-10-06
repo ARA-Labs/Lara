@@ -938,8 +938,11 @@ theorem policy_all_admit_group_identity (canon : String → String) (table : Lis
       decide (ra.endpoints.1 ∈ (Groups.quarantineArgs qs argsRaw).map (·.1)) &&
       decide (ra.endpoints.2 ∈ (Groups.quarantineArgs qs argsRaw).map (·.1))) rawAtts declared.resolved ∧
     p.removedAttacks = rawAtts.filter (fun ra => ! p.keepAttack ra) ∧
-    BlockedProgram.blockedQueries p.keep argsRaw declared.resolved p.keptAttacks =
-      BlockedProgram.blockedQueries (Groups.keepArg qs) argsRaw declared.resolved
+    ∀ (done : SupportTerm → Bool) (live : (String × SupportTerm) → Bool),
+      BlockedProgram.blockedQueries p.keep done live argsRaw declared.resolved
+          p.keptAttacks =
+        BlockedProgram.blockedQueries (Groups.keepArg qs) done live argsRaw
+          declared.resolved
         (selectAligned (fun ra : RawAttack =>
           decide (ra.endpoints.1 ∈ (Groups.quarantineArgs qs argsRaw).map (·.1)) &&
           decide (ra.endpoints.2 ∈ (Groups.quarantineArgs qs argsRaw).map (·.1))) rawAtts declared.resolved) := by
@@ -958,7 +961,7 @@ theorem policy_all_admit_group_identity (canon : String → String) (table : Lis
   rw [hseed]
   simp only [checkedLeafTable, hseed, List.nil_append]
   simp [Groups.quarantineArgs, Groups.keepArg]
-  repeat (first | constructor | rfl)
+  repeat (first | constructor | rfl | intro _ _)
 
 /-- The nondependent public outcome of `checkUnit`: exact rejection payload or
 successful acceptance. The proof-bearing accepted carrier remains inside the
@@ -1420,11 +1423,16 @@ theorem liftSupport_range_eq_of_mem {n : Nat} {support : List Nat}
       change head :: liftSupport (List.range n) rest = head :: rest
       rw [ih hrest]
 
+/-- With every declaration an AF argument and every declared attack compiled,
+the compact AF is the declared framework over the full index range. This is
+the hole-free, nothing-quarantined case; with holes the compact AF only embeds
+(`BlockedProgram.production_justified_nonpromotion_of_keep_all`). -/
 theorem checkedAF_eq_declaredAF
     (P : CheckedProgram canon Pi Gamma CertOk dp)
     (argsRaw : List (String × SupportTerm)) (atts : List Attack)
     (hargs : P.args = argsRaw.map (·.2)) (hatts : P.atts = atts) :
-    Compile.checkedAF P = BlockedProgram.declaredAF argsRaw atts := by
+    Compile.checkedAF P =
+      BlockedProgram.declaredAF argsRaw atts (List.range argsRaw.length) := by
   have hlen : P.args.length = argsRaw.length := by
     rw [hargs, List.length_map]
   have hedge : Compile.edgeB P = BlockedProgram.edgeIn argsRaw atts := by
@@ -1438,15 +1446,56 @@ theorem checkedAF_eq_declaredAF
 
 
 
+/-- Quarantining leaves leaves every other leaf's entry alone. -/
+theorem buildGamma_quarantineLeaves {qs : List LeafId}
+    (leaves : List (LeafId × Atom)) {l : LeafId} (hl : l ∉ qs) :
+    buildGamma (Groups.quarantineLeaves qs leaves) l = buildGamma leaves l := by
+  unfold buildGamma Groups.quarantineLeaves
+  congr 1
+  induction leaves with
+  | nil => rfl
+  | cons e rest ih =>
+      by_cases he : e.1 = l
+      · simp [he, hl]
+      · by_cases hq : e.1 ∈ qs
+        · simp only [List.filter_cons, hq, decide_true, Bool.not_true,
+            Bool.false_eq_true, if_false, List.find?_cons, he, decide_false]
+          exact ih
+        · simp only [List.filter_cons, hq, decide_false, Bool.not_false,
+            if_true, List.find?_cons, he]
+          exact ih
+
+/-- The checked context agrees with the full declared context on every leaf a
+retained argument uses: a retained argument uses no removed leaf, and the
+checked leaf table only drops removed leaves. -/
+theorem prune_gamma_agree (canon : String → String) (table : List AdmissionRow)
+    (metas : List LeafMeta) (leaves : List (LeafId × Atom))
+    (argsRaw : List (String × SupportTerm)) (rawAtts : List RawAttack)
+    (groups : List Groups.DupGroup) (declaredResolved : List Attack) :
+    let p := buildPrune canon table metas leaves argsRaw rawAtts groups declaredResolved
+    ∀ a, p.keep a = true → ∀ l ∈ Support.leaves a.2,
+      buildGamma p.checkedLeaves l = buildGamma leaves l := by
+  intro p a hkeep l hl
+  have hnot : l ∉ p.removedSeed :=
+    Groups.keepArg_leaves (qs := p.removedSeed) (a := a) hkeep l hl
+  exact buildGamma_quarantineLeaves leaves hnot
+
 /-- **Source `justified` non-promotion.**  Compose admission with the exact
 production blocking theorem: a query published `justified` by the checked
 source result — with the admission prune's exact keep predicates, retained
-arguments, and aligned attacks — remains `justified` in the declared
+arguments, and aligned attacks — remains `justified` in the declared reference
 framework with the policy- and group-quarantined material reinstated.
 
-The no-argument-prune fast path is discharged by identity: equal retained and
-declared lengths force every argument and every endpoint-valid raw attack to
-survive, so the checked and declared AFs coincide. -/
+The reference carrier is the specification one: the declarations that are
+complete or unclassified under the full declared leaf table, typed holes
+excluded. The public decision `hnot` is the executable one, which reads the
+checked cache on retained declarations; `prune_gamma_agree` supplies the
+leafwise agreement that makes the two carriers equal.
+
+The no-argument-prune fast path is discharged by an onto embedding: equal
+retained and declared lengths force every argument and every endpoint-valid raw
+attack to survive, so the general seed is empty. With holes the compact AF is
+not the declared one and `liftClaim` is not the identity. -/
 theorem source_justified_nonpromotion
     {canon : String → String}
     (reg : Lara.Support.BackendRegistry canon) (policy : Lara.Policy.Policy)
@@ -1463,12 +1512,18 @@ theorem source_justified_nonpromotion
       ({ sigma := sigma, policy := policy, args := r.prune.keptArgs.map (·.2), atts := r.prune.keptAttacks } : Lara.Unit) =
         .ok accepted)
     (hp : p ∈ queries)
-    (hnot : p ∉ BlockedProgram.blockedQueries r.prune.keep argsRaw declared.resolved
-      r.prune.keptAttacks (fun q => claimSupportFor accepted q) queries)
+    (hnot : p ∉ BlockedProgram.blockedQueries r.prune.keep (checkedDone accepted)
+      (referenceLive r.prune.keep (checkedDone accepted) policy.ruleLookup
+        (buildGamma leaves) reg)
+      argsRaw declared.resolved r.prune.keptAttacks
+      (fun q => claimSupportFor accepted q) queries)
     (hstatus : Grounded.statusC (Compile.checkedAF accepted.program)
       (completeClaimFor accepted p) = .justified) :
-    Grounded.statusC (BlockedProgram.declaredAF argsRaw declared.resolved)
-      (BlockedProgram.liftClaim (retainedIndices r.prune.keep argsRaw) (completeClaimFor accepted p)) =
+    Grounded.statusC
+      (BlockedProgram.declaredAF argsRaw declared.resolved
+        (retainedIndices (notHole policy.ruleLookup (buildGamma leaves) reg) argsRaw))
+      (BlockedProgram.liftClaim (checkedCarrier accepted r.prune.keep argsRaw)
+        (completeClaimFor accepted p)) =
         .justified := by
   have hp_eq : r.prune =
       buildPrune canon table metas leaves argsRaw rawAtts groups declared.resolved :=
@@ -1481,12 +1536,25 @@ theorem source_justified_nonpromotion
       selectAligned r.prune.keepAttack rawAtts declared.resolved := by
     rw [hp_eq]
     rfl
+  have hgamma : ∀ a, a ∈ argsRaw → r.prune.keep a = true →
+      ∀ l ∈ Support.leaves a.2,
+        buildGamma r.prune.checkedLeaves l = buildGamma leaves l := by
+    intro a _ ha
+    rw [hp_eq] at ha ⊢
+    exact prune_gamma_agree canon table metas leaves argsRaw rawAtts groups
+      declared.resolved a ha
+  rw [hkeep] at hcheck
+  rw [hatts] at hcheck hnot
+  rw [← referenceLive_indices_eq_notHole (buildGamma leaves) hcheck hgamma]
   by_cases hpruned : argsRaw.length = r.prune.keptArgs.length
   · have hretainedLen : argsRaw.length =
         (retainedArguments r.prune.keep argsRaw).length := by
       exact hpruned.trans (congrArg List.length hkeep)
-    obtain ⟨hretained, hindices⟩ :=
+    obtain ⟨hretained, _⟩ :=
       retained_identity_of_length_eq r.prune.keep argsRaw hretainedLen
+    have hall : ∀ a, a ∈ argsRaw → r.prune.keep a = true := by
+      rw [retainedArguments_eq_filter] at hretained
+      exact List.filter_eq_self.mp hretained
     have hpruneArgs : r.prune.keptArgs = argsRaw := hkeep.trans hretained
     have hidsDef : r.prune.keptIds = r.prune.keptArgs.map (·.1) := by
       rw [hp_eq]
@@ -1513,37 +1581,14 @@ theorem source_justified_nonpromotion
       rw [hrawFilter, declared.resolve_eq] at hcommute
       injection hcommute with heq
       exact heq.symm
-    have hpruneAtts : r.prune.keptAttacks = declared.resolved :=
-      hatts.trans hselected
-    have hsound := Lara.Check.Unit.checkUnit_sound hcheck
-    have hprogramArgs := hsound.args_eq
-    have hprogramAtts := hsound.atts_eq
-    rw [hpruneArgs] at hprogramArgs
-    rw [hpruneAtts] at hprogramAtts
-    have haf : Compile.checkedAF accepted.program =
-        BlockedProgram.declaredAF argsRaw declared.resolved :=
-      checkedAF_eq_declaredAF accepted.program argsRaw declared.resolved
-        hprogramArgs hprogramAtts
-    have hsupport : ∀ i, i ∈ (completeClaimFor accepted p).support →
-        i < argsRaw.length := by
-      intro i hi
-      have hi' : i ∈ claimSupportFor accepted p := hi
-      have himem := claimSupportFor_mem_checkedAF (accepted := accepted) i hi'
-      have hlt := List.mem_range.mp himem
-      rw [hprogramArgs, List.length_map] at hlt
-      exact hlt
-    have hlift :
-        liftClaim (List.range argsRaw.length) (completeClaimFor accepted p) =
-          completeClaimFor accepted p := by
-      unfold liftClaim
-      rw [liftSupport_range_eq_of_mem hsupport]
-    rw [hindices, hlift, ← haf]
-    exact hstatus
-  · rw [hkeep] at hcheck hpruned
-    rw [hatts] at hcheck hnot
+    exact production_justified_nonpromotion_of_keep_all accepted r.prune.keep
+      (checkedDone accepted) policy.ruleLookup (buildGamma leaves) reg argsRaw
+      declared.resolved _ p (checked_args_keepComplete hcheck)
+      (checked_atts_live hcheck) hall hselected hstatus
+  · rw [hkeep] at hpruned
     exact checked_production_justified_nonpromotion_of_not_blocked
       (RawAttack := Lara.RawAttack.RawAttack)
       reg policy accepted r.prune.keep argsRaw declared.resolved r.prune.keepAttack rawAtts queries p
-      sigma ground hcheck hpruned hp hnot hstatus
+      sigma ground (buildGamma leaves) hcheck hpruned hp hnot hstatus
 
 end Lara.Admission

@@ -13,8 +13,9 @@
 #     hypothesis) stays in nl and refs.
 #   * measurement's mandatory coverage CQ (covers_scope) maps onto the annotation's mandatory
 #     "does a single model pair (Falcon-7b-Base/Instruct) support the model-general wording?" —
-#     annotated unmet-gap (no second family is measured). An open mandatory obligation is
-#     IncompleteArgument, so NO complete arg is declarable: E2-style gap.
+#     annotated unmet-gap (no second family is measured). The incomplete argument is declared as
+#     a located hole with `open coverage` (lowering re-done for issue #15 under `lara-core@0.3`);
+#     confound_control (optional) has no leaf and is opened too. Complete support stays empty.
 #   * instrument_validity (mandatory) is annotated met (same P3 samples, same H(p) formula for all
 #     conditions) and its leaf is supplied. The annotation's "no stated statistical test for the
 #     4.7-vs-5.4 gap" hole has no distinct policy CQ in the measurement family; it is carried by
@@ -47,12 +48,14 @@ leaf e2 : valid_instrument(cfg_lowers_sampling_entropy, e04)
   provenance = ai-executed
   refs       = [logic/experiments.md#E04-Procedure-step-1]
 
-# --- ... but no complete argument is declarable -------------------------------------------------
+# --- ... and the incomplete argument is a located hole ------------------------------------------
 
-# (Intentionally no `arg`: covers_scope(e04, falcon7b) has no honest leaf — the entropy and
-# overlap analyses measure only the Falcon-7b-Base/Instruct pair while the claim's wording is
-# model-general — and measurement makes that obligation mandatory. The complete-support set is
-# therefore empty.)
+# covers_scope(e04, falcon7b) has no honest leaf — only the Falcon-7b-Base/Instruct pair is
+# measured while the claim's wording is model-general — so the mandatory coverage stays open.
+arg a1 : supports(c06) by measurement(cfg_lowers_sampling_entropy, falcon7b, e04)
+  discharge instrument_validity with e2
+  open      coverage
+  open      confound_control
 
 status c06
 
@@ -60,5 +63,6 @@ status c06
 # EXPECTED VERDICT (golden oracle)
 # ==============================================================================================
 # Compiled AF: no arguments.
+# Located hole: a1 (declaration index 0), open obligations [coverage]; sources no attacks.
 # Claim status:
-#   c06 -> gap (empty complete support; statusC = Gap iff null claimSupport, spec §8)
+#   c06 -> gap (empty complete support; the hole a1 is reported, not a node; spec §8)

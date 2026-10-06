@@ -771,7 +771,6 @@ rejectionText :: Rejection -> String
 rejectionText r = W.tagToString $ case r of
   DuplicateRule -> W.TDupRule
   DuplicateArgument -> W.TDupArgument
-  IncompleteArgument -> W.TIncompleteArgument
   MissingConflict -> W.TMissingConflict
   RejectClass c -> W.rejectClassTag c
 

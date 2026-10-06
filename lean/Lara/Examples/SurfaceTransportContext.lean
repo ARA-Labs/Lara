@@ -314,7 +314,7 @@ def contextElaborated (certificate : Cert) (coreAssur : Lara.Support.Assurance) 
       policy := toCorePolicy contextPolicy
       args := (contextKept certificate coreAssur).map (·.core)
       atts := [] }
-  claims := claimsOf (contextKept certificate coreAssur)
+  claimAlternatives := claimAlternativesOf (contextKept certificate coreAssur)
     (contextProgram (.cert certificate))
   argIds := (contextKept certificate coreAssur).map (·.argument.id)
   authoredObligations := authoredObligationsOf (contextProgram (.cert certificate))
@@ -472,6 +472,24 @@ theorem context_args_wrapped :
     (contextElaborated wrappedCert wrappedCoreAssur).unit.args
       = [ctxCore, transportCore wrappedCoreAssur] := rfl
 
+/-- Every declaration of the kernel fixture is complete. `CoreObligations`
+asks only that each declaration type; the transport instantiation needs this
+stronger fact. -/
+theorem context_complete_kernel :
+    ∀ term ∈ (contextElaborated kernelCert kernelCoreAssur).unit.args, ∃ conclusion,
+      Lara.Support.HasSupport (fun source => source)
+        (contextElaborated kernelCert kernelCoreAssur).unit.policy.ruleLookup
+        (contextElaborated kernelCert kernelCoreAssur).gamma
+        (Lara.Support.certOkOf transportEnv.registry) term conclusion [] := by
+  intro term hterm
+  rw [context_args_kernel] at hterm
+  simp only [List.mem_cons, List.not_mem_nil, or_false] at hterm
+  rcases hterm with h | h <;> subst h
+  · exact ⟨.atom "n" .nil, context_hasSupport_ctx rfl⟩
+  · exact ⟨.atom "q" .nil,
+      context_hasSupport_cert kernelCoreAssur rfl rfl (by decide)
+        transport_cert_accepted⟩
+
 theorem context_coreObligations_kernel :
     CoreObligations transportEnv (contextElaborated kernelCert kernelCoreAssur) where
   sigmaWellFormed := by decide
@@ -484,15 +502,9 @@ theorem context_coreObligations_kernel :
     intro p _ ab hab
     simp [contextElaborated, toCorePolicy, contextPolicy] at hab
   argsNodup := by decide
-  supports := by
-    intro term hterm
-    rw [context_args_kernel] at hterm
-    simp only [List.mem_cons, List.not_mem_nil, or_false] at hterm
-    rcases hterm with h | h <;> subst h
-    · exact ⟨.atom "n" .nil, context_hasSupport_ctx rfl⟩
-    · exact ⟨.atom "q" .nil,
-        context_hasSupport_cert kernelCoreAssur rfl rfl (by decide)
-          transport_cert_accepted⟩
+  supports := fun term hterm =>
+    let ⟨conclusion, h⟩ := context_complete_kernel term hterm
+    ⟨conclusion, [], h⟩
   attacksTyped := by intro attack hattack; simp [contextElaborated] at hattack
   sourcesDeclared := by intro attack hattack; simp [contextElaborated] at hattack
   targetsDeclared := by intro attack hattack; simp [contextElaborated] at hattack
@@ -500,6 +512,24 @@ theorem context_coreObligations_kernel :
     intro source _ target _ sourceConclusion targetConclusion _ _ hmatch
     obtain ⟨ab, hab, _⟩ := hmatch
     simp [contextElaborated, toCorePolicy, contextPolicy] at hab
+
+/-- Every declaration of the wrapped fixture is complete. `CoreObligations`
+asks only that each declaration type; the transport instantiation needs this
+stronger fact. -/
+theorem context_complete_wrapped :
+    ∀ term ∈ (contextElaborated wrappedCert wrappedCoreAssur).unit.args, ∃ conclusion,
+      Lara.Support.HasSupport (fun source => source)
+        (contextElaborated wrappedCert wrappedCoreAssur).unit.policy.ruleLookup
+        (contextElaborated wrappedCert wrappedCoreAssur).gamma
+        (Lara.Support.certOkOf transportEnvWrapped.registry) term conclusion [] := by
+  intro term hterm
+  rw [context_args_wrapped] at hterm
+  simp only [List.mem_cons, List.not_mem_nil, or_false] at hterm
+  rcases hterm with h | h <;> subst h
+  · exact ⟨.atom "n" .nil, context_hasSupport_ctx rfl⟩
+  · exact ⟨.atom "q" .nil,
+      context_hasSupport_cert wrappedCoreAssur rfl rfl (by decide)
+        transport_cert_accepted_wrapped_raw⟩
 
 theorem context_coreObligations_wrapped :
     CoreObligations transportEnvWrapped
@@ -514,15 +544,9 @@ theorem context_coreObligations_wrapped :
     intro p _ ab hab
     simp [contextElaborated, toCorePolicy, contextPolicy] at hab
   argsNodup := by decide
-  supports := by
-    intro term hterm
-    rw [context_args_wrapped] at hterm
-    simp only [List.mem_cons, List.not_mem_nil, or_false] at hterm
-    rcases hterm with h | h <;> subst h
-    · exact ⟨.atom "n" .nil, context_hasSupport_ctx rfl⟩
-    · exact ⟨.atom "q" .nil,
-        context_hasSupport_cert wrappedCoreAssur rfl rfl (by decide)
-          transport_cert_accepted_wrapped_raw⟩
+  supports := fun term hterm =>
+    let ⟨conclusion, h⟩ := context_complete_wrapped term hterm
+    ⟨conclusion, [], h⟩
   attacksTyped := by intro attack hattack; simp [contextElaborated] at hattack
   sourcesDeclared := by intro attack hattack; simp [contextElaborated] at hattack
   targetsDeclared := by intro attack hattack; simp [contextElaborated] at hattack
@@ -721,9 +745,9 @@ theorem linkSideOk_frag {reg : Lara.Support.BackendRegistry (fun source => sourc
 theorem contextLink_admissible :
     Lara.Context.Admissible registryEx linkCtx (linkFrag kernelCoreAssur) where
   guard := by decide
-  ctx := linkSideOk_ctx (reg := registryEx) (linkFrag kernelCoreAssur) rfl
-  frag := linkSideOk_frag (reg := registryEx) kernelCoreAssur rfl (by decide)
-    transport_cert_accepted
+  ctx := (linkSideOk_ctx (reg := registryEx) (linkFrag kernelCoreAssur) rfl).toHoles
+  frag := (linkSideOk_frag (reg := registryEx) kernelCoreAssur rfl (by decide)
+    transport_cert_accepted).toHoles
   signature :=
     Lara.Context.signatureStage_link (by decide) (by decide) (by decide)
       (by decide) (by decide) (by decide)

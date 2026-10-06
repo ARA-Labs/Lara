@@ -790,4 +790,128 @@ theorem SinkExtension.contested_not_defeated
   apply statusC_ne_defeated_of_undec (hsupport i hi)
   exact (extension.label_old (holdCarrier i hi)).trans hlabel
 
+/-! ### Embedding into a framework with added sinks -/
+
+/-- `larger` renames every argument of `smaller` by `f`, adds the arguments
+`sinks`, whose outgoing attack rows are empty, and preserves every old attack.
+Incoming attacks to the sinks are unrestricted.  `SinkExtension` is the case of
+one sink appended under the identity; this form also covers sinks inserted in
+the middle of the declaration order, which shifts the later indices. -/
+structure SinkEmbedding (smaller larger : AF) (f : Arg → Arg) (sinks : List Arg) :
+    Prop where
+  map_mem : ∀ a ∈ smaller.args, f a ∈ larger.args
+  mem_cases : ∀ b ∈ larger.args, b ∈ sinks ∨ ∃ a ∈ smaller.args, f a = b
+  old_attack : ∀ a ∈ smaller.args, ∀ b ∈ smaller.args,
+    larger.attack (f a) (f b) = smaller.attack a b
+  sink_no_out : ∀ s ∈ sinks, ∀ b, larger.attack s b = false
+
+mutual
+  /-- Adding sinks preserves every old direct-in derivation. -/
+  theorem SinkEmbedding.directIn_forward
+      (emb : SinkEmbedding smaller larger f sinks) :
+      ∀ {a}, DirectIn smaller a → DirectIn larger (f a)
+    | a, .intro ha defended => by
+        apply DirectIn.intro (emb.map_mem _ ha)
+        intro c hc hca
+        rcases emb.mem_cases c hc with hsink | ⟨b, hb, hfb⟩
+        · rw [emb.sink_no_out c hsink] at hca
+          contradiction
+        · have hba : smaller.attack b a = true := by
+            rw [← emb.old_attack b hb _ ha, hfb]
+            exact hca
+          have hout := emb.directOut_forward hb (defended b hb hba)
+          rw [hfb] at hout
+          exact hout
+
+  /-- Adding sinks preserves direct-out derivations at old arguments. -/
+  theorem SinkEmbedding.directOut_forward
+      (emb : SinkEmbedding smaller larger f sinks) :
+      ∀ {b}, b ∈ smaller.args → DirectOut smaller b → DirectOut larger (f b)
+    | _, hb, .intro hc hcb => by
+        apply DirectOut.intro (emb.directIn_forward hc)
+        rw [emb.old_attack _ (directIn_mem_args hc) _ hb]
+        exact hcb
+end
+
+mutual
+  /-- Adding sinks creates no new direct-in derivation for old arguments. -/
+  theorem SinkEmbedding.directIn_backward
+      (emb : SinkEmbedding smaller larger f sinks) :
+      ∀ {x}, DirectIn larger x → ∀ a ∈ smaller.args, f a = x → DirectIn smaller a
+    | x, .intro _ defended, a, ha, hfa => by
+        apply DirectIn.intro ha
+        intro b hb hba
+        have hattack : larger.attack (f b) x = true := by
+          rw [← hfa, emb.old_attack b hb a ha]
+          exact hba
+        exact emb.directOut_backward (defended (f b) (emb.map_mem b hb) hattack)
+          b hb rfl
+
+  /-- Adding sinks creates no new direct-out derivation at old arguments. -/
+  theorem SinkEmbedding.directOut_backward
+      (emb : SinkEmbedding smaller larger f sinks) :
+      ∀ {x}, DirectOut larger x → ∀ b ∈ smaller.args, f b = x → DirectOut smaller b
+    | _, .intro hc hcb, b, hb, hfb => by
+        rcases emb.mem_cases _ (directIn_mem_args hc) with hsink | ⟨a, ha, hfa⟩
+        · rw [emb.sink_no_out _ hsink] at hcb
+          contradiction
+        · have hab : smaller.attack a b = true := by
+            rw [← emb.old_attack a ha b hb, hfa, hfb]
+            exact hcb
+          exact DirectOut.intro (emb.directIn_backward hc a ha hfa) hab
+end
+
+/-- Old arguments keep exactly their grounded three-way label, under their new
+names, when sinks are added. -/
+theorem SinkEmbedding.label_old
+    (emb : SinkEmbedding smaller larger f sinks)
+    {a : Arg} (ha : a ∈ smaller.args) :
+    labelC larger (f a) = labelC smaller a := by
+  rw [labelC_spec, labelC_spec]
+  by_cases hin : DirectIn smaller a
+  · rw [if_pos hin, if_pos (emb.directIn_forward hin)]
+  · have hin' : ¬ DirectIn larger (f a) := fun h =>
+      hin (emb.directIn_backward h a ha rfl)
+    rw [if_neg hin, if_neg hin']
+    by_cases hout : DirectOut smaller a
+    · rw [if_pos hout, if_pos (emb.directOut_forward ha hout)]
+    · have hout' : ¬ DirectOut larger (f a) := fun h =>
+        hout (emb.directOut_backward h a ha rfl)
+      rw [if_neg hout, if_neg hout']
+
+/-- A justified old claim stays justified when sinks are added, provided the
+renamed old support indices are support indices of the enlarged claim. -/
+theorem SinkEmbedding.justified_preserved
+    (emb : SinkEmbedding smaller larger f sinks)
+    (holdCarrier : ∀ i ∈ oldClaim.support, i ∈ smaller.args)
+    (hsupport : ∀ i ∈ oldClaim.support, f i ∈ newClaim.support)
+    (hjustified : statusC smaller oldClaim = Status.justified) :
+    statusC larger newClaim = Status.justified := by
+  obtain ⟨i, hi, hlabel⟩ :=
+    (statusC_justified_iff smaller oldClaim).mp hjustified
+  apply (statusC_justified_iff larger newClaim).mpr
+  exact ⟨f i, hsupport i hi, (emb.label_old (holdCarrier i hi)).trans hlabel⟩
+
+/-- A contested old claim cannot become defeated when sinks are added,
+provided the renamed old support indices remain present. -/
+theorem SinkEmbedding.contested_not_defeated
+    (emb : SinkEmbedding smaller larger f sinks)
+    (holdCarrier : ∀ i ∈ oldClaim.support, i ∈ smaller.args)
+    (hsupport : ∀ i ∈ oldClaim.support, f i ∈ newClaim.support)
+    (hcontested : statusC smaller oldClaim = Status.contested) :
+    statusC larger newClaim ≠ Status.defeated := by
+  obtain ⟨i, hi, hlabel⟩ := statusC_contested_has_undec hcontested
+  apply statusC_ne_defeated_of_undec (hsupport i hi)
+  exact (emb.label_old (holdCarrier i hi)).trans hlabel
+
+/-- An argument no framework argument attacks is labelled `in`. -/
+theorem labelC_inn_of_unattacked {F : AF} {a : Arg} (ha : a ∈ F.args)
+    (hfree : ∀ b ∈ F.args, F.attack b a = false) :
+    labelC F a = Label.inn := by
+  apply (labelC_inn_iff a).mpr
+  apply DirectIn.intro ha
+  intro b hb hba
+  rw [hfree b hb] at hba
+  contradiction
+
 end Lara.Grounded

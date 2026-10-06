@@ -82,6 +82,10 @@
 --     missing conflict.
 --     CheckedUnit carries detailed attack completeness and exact retained
 --     checker nodes; support is not re-inferred — Lara.Unit / Lara.Check.Unit
+--   * located holes (lara-core@0.3, spec §4.4): typed arguments with open
+--     mandatory obligations are accepted, kept out of the AF and located;
+--     the specification views and the exact declaration partition —
+--     Lara.Check.Holes
 --   * downstream-only accepted-unit consistency (result 7 / C09): Path-B
 --     attackability, generic grounded conflict-freedom, self-conflict, exact
 --     completeClaimFor projection from retained nodes, and the computed-claim
@@ -94,7 +98,10 @@
 --     non-promotion result plus same-support status preservation — Lara.Blocked;
 --     a declared-index framework pair and the drivers' seed discharge the three
 --     abstract Blocking obligations — Lara.BlockedProgram. The reindexing and
---     support bridge to the compact production AF closes the loop.
+--     support bridge to the compact production AF closes the loop. With
+--     located holes the reference carrier excludes typed holes and keeps
+--     unclassified quarantined terms; its kernel-checked acceptance cases are
+--     Lara.Examples.EvidenceBlocked.
 --   * the `comparison` surface form's direction-of-goodness contract
 --     (lara-syntax@0.3 §1.2 / grammar Appendix B.3): the generated `ord@1` goal
 --     holds exactly when "ours is better than base" under the measurand's
@@ -360,6 +367,9 @@ import Lara.BlockedProgram
 import Lara.RawAttack
 import Lara.Admission
 import Lara.Update
+import Lara.Update.Discharge
+import Lara.Update.Completion
+import Lara.Update.Transitions
 import Lara.Attack
 import Lara.Compile
 import Lara.Observation
@@ -380,6 +390,7 @@ import Lara.Complexity.Reduction
 import Lara.Complexity
 import Lara.Examples
 import Lara.Examples.AttackCompleteness
+import Lara.Examples.EvidenceBlocked
 import Lara.Examples.PolicyAcceptance
 import Lara.Examples.GroundedConsistency
 import Lara.Examples.CompilerInvariants
@@ -392,9 +403,11 @@ import Lara.Examples.Realizability
 import Lara.Examples.BackendComposition
 import Lara.Examples.Semantics
 import Lara.Examples.Update
+import Lara.Examples.UpdateCompletion
 import Lara.ListRel
 import Lara.Context.Fragment
 import Lara.Context.Link
+import Lara.Context.LinkHoles
 import Lara.Map.Qualify
 import Lara.Map.Batch
 import Lara.Map.Link
@@ -408,6 +421,7 @@ import Lara.Context.Parametricity
 import Lara.Context.FiniteExtension
 import Lara.Context.Surface
 import Lara.Examples.Linking
+import Lara.Examples.LinkHoles
 import Lara.Examples.ContextSemantics
 import Lara.Examples.ContextualSeparation
 import Lara.Context.Holes.Transport
@@ -422,6 +436,8 @@ import Lara.Examples.SurfaceTransport
 import Lara.Examples.SurfaceTransportAttack
 -- The context-bearing surface-link witness, for the same reason.
 import Lara.Examples.SurfaceTransportContext
+-- The kernel-checked located-hole claim map, for the same reason.
+import Lara.Examples.SurfaceHoles
 import Lara.PW.Outer
 import Lara.PW.Uniform
 import Lara.PW.Compare
@@ -455,3 +471,4 @@ import Lara.Examples.PWFinite
 import Lara.Examples.PWFileHost
 -- The finite executable reference for `pw-run 1` documents.
 import Lara.PW.Run
+import Lara.Examples.PWRun

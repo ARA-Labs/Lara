@@ -14,8 +14,9 @@
 --
 -- The M5 T6 ablation baselines (@measurements\/ablation.{json,tsv}@) are a
 -- second projection of the same decode+check core: 'computeAblation' runs the
--- checker under an ablated 'CheckConfig' and records the misses ('AblationCell',
--- aggregated per expected class by 'classSummaries').
+-- checker under an ablated 'CheckConfig' and records what changed — missed
+-- rejects, new rejects, and shifted statuses ('AblationCell', aggregated per
+-- expected class by 'classSummaries').
 module Lara.Measure
   ( -- * Discovery
     InputKind (..)
@@ -52,12 +53,13 @@ module Lara.Measure
   , ablationTsvHeader
   ) where
 
+import Data.Char (isDigit)
 import Data.List (intercalate, isInfixOf, isPrefixOf, nub, sort)
 
 import Lara.AST (Label (..), RejectClass (..), Rejection (..), Status (..))
 import Lara.Check (CheckConfig, fullConfig, noCQConfig, noConflictScanConfig, noTypedConfig)
 import Lara.Diagnostics
-  ( Constituent
+  ( Constituent (..)
   , LocatedRejection (..)
   , SeededSites
   , constituentText
@@ -68,11 +70,12 @@ import Lara.Diagnostics
   )
 import Lara.Driver (runCheck, runCheckLocatedWith)
 import Lara.ExpectedJson (JValue (..), renderJson)
-import Lara.Mutate (Expected (..), parseExpected, parseFamily, statusText)
+import Lara.Mutate (Expected (..), expectedText, parseExpected, parseFamily, statusText)
 import Lara.Replay (CheckInput, inputReplayId)
 import Lara.Strict (SExpr (..))
 import Lara.Wire
-  ( Outcome (..)
+  ( HoleRow (..)
+  , Outcome (..)
   , PublicStatus (..)
   , isPublished
   , Verdict (..)
@@ -154,8 +157,13 @@ parseMutantManifest raw =
   , Just locs <- [parseConstituentList loc]
   ]
 
--- | Parse @corpus-units\/MANIFEST.tsv@ into input rows (6 columns; the
--- @expected_status@ column becomes an @accept-\<status\>@ expectation).
+-- | Parse @corpus-units\/MANIFEST.tsv@ into input rows (7 columns). A unit
+-- whose @located_holes@ column is positive is specified to carry a located
+-- hole, so it is measured as @accept-located-hole@ — the class the full
+-- system reports for it (spec §4.4) and the one @no-cq@ promotes — exactly
+-- as the hole mutants are; its claim status stays pinned by
+-- @test\/CorpusUnitsSpec.hs@. Any other unit's @expected_status@ column
+-- becomes an @accept-\<status\>@ expectation.
 parseCorpusManifest :: String -> [InputMeta]
 parseCorpusManifest raw =
   [ InputMeta
@@ -164,7 +172,7 @@ parseCorpusManifest raw =
       , imFamily = group
       , imOperator = Nothing
       , imExpected = e
-      , imExpectedText = "accept-" ++ status
+      , imExpectedText = expectedText e
       , imExpectedLocation = Nothing
       , imHsDiag = ""
       , imLeanDiag = ""
@@ -172,9 +180,14 @@ parseCorpusManifest raw =
       }
   | ln <- drop 1 (lines raw)
   , not (null ln)
-  , [group, artifact, claimId, _type, _dbl, status] <- [splitTab ln]
-  , Just e <- [parseExpected ("accept-" ++ status)]
+  , [group, artifact, claimId, _type, _dbl, status, holes] <- [splitTab ln]
+  , Just e <- [corpusExpected status holes]
   ]
+  where
+    corpusExpected status holes
+      | holes == "0" = parseExpected ("accept-" ++ status)
+      | all isDigit holes && not (null holes) = Just ExpectLocatedHole
+      | otherwise = Nothing
 
 splitTab :: String -> [String]
 splitTab s = case break (== '\t') s of
@@ -190,13 +203,16 @@ splitTab s = case break (== '\t') s of
 data Deterministic = Deterministic
   { detActual :: String -- ^ actual outcome text (@reject-Rn@ / @accept-\<status\>@ / @codec-fail@)
   , detClassMatch :: Bool -- ^ actual outcome matches the specified one
-  , detLocation :: Maybe Constituent -- ^ located defect constituent (rejects only)
+  , detLocation :: Maybe Constituent
+  -- ^ the located report: a reject's defect constituent, or an accept's first
+  -- located hole (its original argument index, spec §4.4); 'Nothing' otherwise
   , detLocationMatch :: Maybe Bool
   -- ^ located constituent ∈ the seeded ground-truth list — the faithfulness
-  -- claim ('-' off rejects)
+  -- claim ('-' off the seeded expectations)
   , detLocationPrimary :: Maybe Bool
   -- ^ located constituent '==' the list head (the spec-order-first site) —
-  -- the ordering claim, measured never gated ('-' off rejects)
+  -- the ordering claim, measured never gated ('-' off the seeded
+  -- expectations)
   , detReplayOk :: Maybe Bool -- ^ replay identity carried + stable (corpus units only)
   , detTotalBytes :: Int
   , detPolicyBytes :: Int -- ^ rendered bytes of the @(policy …)@ subtree
@@ -256,16 +272,20 @@ computeDeterministic im bytes = case rowOutcome fullConfig bytes of
      in base {detActual = codecFailText, detClassMatch = classMatch}
   RowChecked input verdict located ->
     let outcome = verdictOutcome verdict
-        loc = lrConstituent <$> located
+        loc = case located of
+          Just lr -> Just (lrConstituent lr)
+          Nothing -> case outcome of
+            Accept{verdictHoles = hole : _} -> Just (CArgument (hrIndex hole))
+            _ -> Nothing
      in base
           { detActual = actualText outcome
           , detClassMatch = classMatches (imExpected im) outcome
           , detLocation = loc
-          -- location metrics are defined on the seeded-reject expectations
-          -- only; both are measured, never gated
-          -- (docs/localization-metric-decision.md).
-          , detLocationMatch = onSeededReject (\_ locs -> maybe False (`elem` locs) loc)
-          , detLocationPrimary = onSeededReject (\primary _ -> maybe False (== primary) loc)
+          -- location metrics are defined on the seeded expectations only
+          -- (the seeded rejects and the seeded located hole); both are
+          -- measured, never gated (docs/localization-metric-decision.md).
+          , detLocationMatch = onSeeded (\_ locs -> maybe False (`elem` locs) loc)
+          , detLocationPrimary = onSeeded (\primary _ -> maybe False (== primary) loc)
           , detReplayOk = case imKind im of
               CorpusRow -> Just (replayStable input verdict)
               MutantRow -> Nothing
@@ -274,11 +294,11 @@ computeDeterministic im bytes = case rowOutcome fullConfig bytes of
     total = length bytes
     policy = policyBytes bytes
     -- The location metrics' shared domain guard: defined exactly on the
-    -- seeded-reject expectations with a non-empty ground-truth list, whose
-    -- head (the spec-order-first constituent) is passed alongside the list.
-    onSeededReject f = case imExpected im of
+    -- seeded expectations with a non-empty ground-truth list, whose head (the
+    -- spec-order-first constituent) is passed alongside the list.
+    onSeeded f = case imExpected im of
       ExpectClass _ -> withLocs f
-      ExpectIncompleteArgument -> withLocs f
+      ExpectLocatedHole -> withLocs f
       ExpectMissingConflict -> withLocs f
       _ -> Nothing
     withLocs f =
@@ -303,7 +323,7 @@ classMatches :: Expected -> Outcome -> Bool
 classMatches e outcome = case e of
   ExpectCodecReject -> False -- decoded cleanly; expected a codec failure
   ExpectClass c -> outcome == Reject (RejectClass c)
-  ExpectIncompleteArgument -> outcome == Reject IncompleteArgument
+  ExpectLocatedHole -> locatedHole outcome
   ExpectMissingConflict -> outcome == Reject MissingConflict
   ExpectAllContested -> allContested outcome
   ExpectEvidenceBlocked -> evidenceBlocked outcome
@@ -315,8 +335,11 @@ actualText outcome = case outcome of
   Reject r -> "reject-" ++ rejectionText r
   -- An @evidence-blocked@ query has no four-state public status — spec §4.3 —
   -- so it is its own class and never matches an expected status.
-  Accept _ _ statuses
+  Accept _ _ statuses _
     | evidenceBlocked outcome -> "accept-evidence-blocked"
+    -- A located hole is reported beside the statuses, never as one (spec
+    -- §4.4), so it is its own class and the statuses go to their own column.
+    | locatedHole outcome -> "accept-located-hole"
     | allContested outcome -> "accept-all-contested"
     | [(_, Published st)] <- statuses -> "accept-" ++ statusText st
     | otherwise -> "accept-other"
@@ -328,23 +351,29 @@ rejectionText r = case r of
 
 allContested :: Outcome -> Bool
 allContested outcome = case outcome of
-  Accept labels _ statuses ->
+  Accept labels _ statuses _ ->
     not (null labels)
       && all ((== LUndec) . snd) labels
       && not (null statuses)
       && all ((== Published Contested) . snd) statuses
   _ -> False
 
+-- | The verdict accepts and reports at least one located hole (spec §4.4).
+locatedHole :: Outcome -> Bool
+locatedHole outcome = case outcome of
+  Accept{verdictHoles = holes} -> not (null holes)
+  _ -> False
+
 -- | The verdict accepts and some queried claim's public status is
 -- @evidence-blocked@ (spec §4.3).
 evidenceBlocked :: Outcome -> Bool
 evidenceBlocked outcome = case outcome of
-  Accept _ _ statuses -> any (not . isPublished . snd) statuses
+  Accept _ _ statuses _ -> any (not . isPublished . snd) statuses
   _ -> False
 
 primaryStatus :: Outcome -> Maybe Status
 primaryStatus outcome = case outcome of
-  Accept _ _ [(_, Published st)] -> Just st
+  Accept _ _ [(_, Published st)] _ -> Just st
   _ -> Nothing
 
 -- | The verdict carries the input's replay identity, and re-checking is
@@ -382,8 +411,12 @@ findSection tag = go
 -- handled, so a future class or spelling cannot silently fall outside the
 -- partition. Drives the per-ablation table and the surgical assertions.
 data AblationBucket
-  = FlipUnderNoCQ
-    -- ^ the obligation gate is load-bearing (the hole-obligation mutants)
+  = ShiftUnderNoCQ
+    -- ^ node completeness is load-bearing (the located-hole mutants): the
+    -- full system accepts and reports the hole beside the AF, and @no-cq@
+    -- promotes it to a node, so the verdict changes while both accept — an
+    -- added label at least, and a shifted status where the hole was the
+    -- claim's only support (the paper's alarming case)
   | FlipUnderNoTyped
     -- ^ per-attack typing is load-bearing (R10\/R11 bad-attack-targets)
   | FlipUnderNoConflictScan
@@ -391,14 +424,15 @@ data AblationBucket
     -- mutants) — the isolating evidence for attack completeness
   | UnchangedUnderAblations
     -- ^ identical under every ablation: rejects decided by rules behind no
-    -- flag, codec rows (decode fails before any config), and all accepts
-    -- (monotonicity: the config only removes rejections)
+    -- flag, codec rows (decode fails before any config), and hole-free
+    -- accepts (the rejection-relaxing flags only remove rejections, and
+    -- promotion has nothing to promote)
   deriving (Eq, Ord, Show)
 
 -- | Which bucket an expected class belongs to.
 ablationBucket :: Expected -> AblationBucket
 ablationBucket e = case e of
-  ExpectIncompleteArgument -> FlipUnderNoCQ
+  ExpectLocatedHole -> ShiftUnderNoCQ
   ExpectMissingConflict -> FlipUnderNoConflictScan
   ExpectClass R10 -> FlipUnderNoTyped
   ExpectClass R11 -> FlipUnderNoTyped
@@ -411,7 +445,7 @@ ablationBucket e = case e of
   ExpectPrimaryStatus _ -> UnchangedUnderAblations
 
 -- | The named ablation runs the script and tests iterate, each with the
--- partition buckets it must flip (and must flip nothing else).
+-- partition buckets it must change (and must change nothing else).
 --
 -- @no-typed@ carries TWO buckets because it is the paper's \"nodes and
 -- arbitrary attack edges\" baseline: it drops the whole typed-attack bundle,
@@ -419,52 +453,94 @@ ablationBucket e = case e of
 -- @no-conflict-scan@ each carry one, and are therefore the isolating cells —
 -- the second exists precisely because the first-generation partition had
 -- no cell that separated the completeness scan from the typing it shipped with.
+--
+-- @no-cq@ is different in kind ('Lara.Check.PromoteTypedHoles'): it changes
+-- which declarations are AF nodes rather than removing a rejection arm, so its
+-- bucket shifts accepted verdicts instead of flipping rejects.
 ablationConfigs :: [(String, CheckConfig, [AblationBucket])]
 ablationConfigs =
-  [ ("no-cq", noCQConfig, [FlipUnderNoCQ])
+  [ ("no-cq", noCQConfig, [ShiftUnderNoCQ])
   , ("no-typed", noTypedConfig, [FlipUnderNoTyped, FlipUnderNoConflictScan])
   , ("no-conflict-scan", noConflictScanConfig, [FlipUnderNoConflictScan])
   ]
 
--- | One (input × ablation-config) measurement. No @status_shift@ column —
--- provably vacuous: the config only ever removes rejections, so on full-accepts
--- the ablation path is byte-identical (eng review D5). The informative datum on
--- a missed reject is the ablation's accept class (@accept-justified@ vs
--- @accept-gap@ — the former is the paper's alarming case), carried by
--- 'acAblationActual' via the shared outcome spelling.
+-- | One (input × ablation-config) measurement, recording change in __both__
+-- directions: a full-system reject the ablation accepts (the rejection-relaxing
+-- flags), a full-system accept the ablation rejects (possible under
+-- 'Lara.Check.PromoteTypedHoles', which can make a conflict required that the
+-- full checker never asks for), and an accept whose verdict changed. The
+-- per-query public statuses of both runs are kept, so a status that a promoted
+-- hole moves (@gap@ → @justified@ is the alarming case) is visible even when
+-- both outcome texts read @accept-located-hole@.
 data AblationCell = AblationCell
   { acMeta :: InputMeta
   , acFullActual :: String -- ^ the full system's outcome text
   , acAblationActual :: String -- ^ the ablation's outcome text
+  , acFullStatuses :: [String]
+  -- ^ the full system's public statuses, in query order (empty off accepts)
+  , acAblationStatuses :: [String] -- ^ the ablation's, likewise
   , acMissedReject :: Bool -- ^ the full system rejects, the ablation accepts
+  , acNewReject :: Bool -- ^ the full system accepts, the ablation rejects
+  , acChanged :: Bool -- ^ the two verdicts differ (never on a codec row)
   }
   deriving (Eq, Show)
 
 -- | Measure one input under an ablation config: both projections of the shared
--- 'rowOutcome' core, plus the miss flag.
+-- 'rowOutcome' core, plus the change flags.
 computeAblation :: CheckConfig -> InputMeta -> String -> AblationCell
 computeAblation cfg im bytes =
   AblationCell
     { acMeta = im
     , acFullActual = rowActual full
     , acAblationActual = rowActual ablated
-    , acMissedReject = rowRejects full && not (rowRejects ablated)
+    , acFullStatuses = rowStatuses full
+    , acAblationStatuses = rowStatuses ablated
+    , acMissedReject = rowRejects full && rowAccepts ablated
+    , acNewReject = rowAccepts full && rowRejects ablated
+    , acChanged = rowVerdict full /= rowVerdict ablated
     }
   where
     full = rowOutcome fullConfig bytes
     ablated = rowOutcome cfg bytes
+    rowAccepts row = case row of
+      RowChecked _ verdict _ -> case verdictOutcome verdict of
+        Accept{} -> True
+        Reject{} -> False
+      RowCodecFail _ -> False
+    rowVerdict row = case row of
+      RowChecked _ verdict _ -> Just verdict
+      RowCodecFail _ -> Nothing
+
+-- | The public statuses of an accepted row in query order, in report spelling
+-- (@evidence-blocked@ for a blocked query); empty for a reject or codec row.
+rowStatuses :: RowOutcome -> [String]
+rowStatuses row = case row of
+  RowChecked _ verdict _ -> case verdictOutcome verdict of
+    Accept{verdictStatuses = statuses} -> map (publicStatusText . snd) statuses
+    Reject{} -> []
+  RowCodecFail _ -> []
+  where
+    publicStatusText st = case st of
+      Published status -> statusText status
+      EvidenceBlocked _ -> "evidence-blocked"
 
 -- | Per-expected-class aggregate of one ablation run (one paper-table cell):
--- how many full-system rejects the ablation misses in the class, the
--- accept-class breakdown of those misses, and how many rows are unchanged (the
--- surgical check: outside the flipped bucket, @unchanged == total@).
+-- how many full-system rejects the ablation misses (with the accept-class
+-- breakdown of those misses), how many full-system accepts it newly rejects,
+-- how many accepts shift a status (with the @full->ablation@ breakdown), and
+-- how many rows are unchanged (the surgical check: outside the changed
+-- buckets, @unchanged == total@).
 data ClassSummary = ClassSummary
   { csExpected :: String -- ^ manifest expected spelling
   , csTotal :: Int
   , csMissed :: Int -- ^ full-system rejects the ablation accepts
   , csMissedAcceptClasses :: [(String, Int)]
     -- ^ ablation outcome text of the misses (sorted, counted)
-  , csUnchanged :: Int -- ^ rows whose ablation outcome equals the full one
+  , csNewRejects :: Int -- ^ full-system accepts the ablation rejects
+  , csStatusShifts :: Int -- ^ accepts under both whose statuses differ
+  , csShiftedStatuses :: [(String, Int)]
+    -- ^ @full->ablation@ per-query status pairs that differ (sorted, counted)
+  , csUnchanged :: Int -- ^ rows whose verdict is identical under the ablation
   }
   deriving (Eq, Show)
 
@@ -476,15 +552,29 @@ classSummaries cells =
       , csTotal = length inClass
       , csMissed = length missed
       , csMissedAcceptClasses = counted (map acAblationActual missed)
-      , csUnchanged = length [c | c <- inClass, acAblationActual c == acFullActual c]
+      , csNewRejects = length (filter acNewReject inClass)
+      , csStatusShifts = length shifted
+      , csShiftedStatuses =
+          counted
+            [ f ++ "->" ++ a
+            | c <- shifted
+            , (f, a) <- zip (acFullStatuses c) (acAblationStatuses c)
+            , f /= a
+            ]
+      , csUnchanged = length [c | c <- inClass, not (acChanged c)]
       }
   | cls <- nub (sort (map expectedOf cells))
   , let inClass = [c | c <- cells, expectedOf c == cls]
         missed = filter acMissedReject inClass
+        shifted = filter statusShift inClass
   ]
   where
     expectedOf = imExpectedText . acMeta
     counted xs = [(x, length [y | y <- xs, y == x]) | x <- nub (sort xs)]
+    statusShift c =
+      not (acMissedReject c)
+        && not (acNewReject c)
+        && acFullStatuses c /= acAblationStatuses c
 
 -- | One ablation run over the manifests: the named config's cells. The
 -- renderers derive the aggregate ('classSummaries') from the cells.
@@ -754,6 +844,8 @@ ablationAggregateJson cells =
   JObject
     [ ("count", JNumber (length cells))
     , ("missed-rejects", JNumber (sum (map csMissed sums)))
+    , ("new-rejects", JNumber (sum (map csNewRejects sums)))
+    , ("status-shifts", JNumber (sum (map csStatusShifts sums)))
     , ("unchanged", JNumber (sum (map csUnchanged sums)))
     , ("by-expected", JObject [(csExpected s, classSummaryJson s) | s <- sums])
     ]
@@ -766,21 +858,30 @@ classSummaryJson s =
     [ ("total", JNumber (csTotal s))
     , ("missed-rejects", JNumber (csMissed s))
     , ("missed-accept-classes", JObject [(cls, JNumber n) | (cls, n) <- csMissedAcceptClasses s])
+    , ("new-rejects", JNumber (csNewRejects s))
+    , ("status-shifts", JNumber (csStatusShifts s))
+    , ("shifted-statuses", JObject [(pair, JNumber n) | (pair, n) <- csShiftedStatuses s])
     , ("unchanged", JNumber (csUnchanged s))
     ]
 
 ablationCellJson :: AblationCell -> JValue
-ablationCellJson (AblationCell im fullActual ablActual missed) =
+ablationCellJson c =
   JObject
     [ ("input", JString (imPath im))
     , ("base", JString (imBase im))
     , ("family", JString (imFamily im))
     , ("operator", maybe JNull JString (imOperator im))
     , ("expected", JString (imExpectedText im))
-    , ("full-actual", JString fullActual)
-    , ("ablation-actual", JString ablActual)
-    , ("missed-reject", JBool missed)
+    , ("full-actual", JString (acFullActual c))
+    , ("ablation-actual", JString (acAblationActual c))
+    , ("full-statuses", JArray (map JString (acFullStatuses c)))
+    , ("ablation-statuses", JArray (map JString (acAblationStatuses c)))
+    , ("missed-reject", JBool (acMissedReject c))
+    , ("new-reject", JBool (acNewReject c))
+    , ("changed", JBool (acChanged c))
     ]
+  where
+    im = acMeta c
 
 -- | The flat @ablation.tsv@ columns (one row per ablation × input).
 ablationTsvHeader :: String
@@ -795,7 +896,11 @@ ablationTsvHeader =
     , "expected"
     , "full_actual"
     , "ablation_actual"
+    , "full_statuses"
+    , "ablation_statuses"
     , "missed_reject"
+    , "new_reject"
+    , "changed"
     ]
 
 -- | The full @ablation.tsv@ content (header + every run's rows, in run order).
@@ -807,7 +912,7 @@ ablationTsv reports =
     )
 
 ablationCellTsv :: String -> AblationCell -> String
-ablationCellTsv name (AblationCell im fullActual ablActual missed) =
+ablationCellTsv name c =
   intercalate
     "\t"
     [ name
@@ -816,7 +921,15 @@ ablationCellTsv name (AblationCell im fullActual ablActual missed) =
     , imFamily im
     , maybe "-" id (imOperator im)
     , imExpectedText im
-    , fullActual
-    , ablActual
-    , boolCell missed
+    , acFullActual c
+    , acAblationActual c
+    , statusesCell (acFullStatuses c)
+    , statusesCell (acAblationStatuses c)
+    , boolCell (acMissedReject c)
+    , boolCell (acNewReject c)
+    , boolCell (acChanged c)
     ]
+  where
+    im = acMeta c
+    statusesCell [] = "-"
+    statusesCell sts = intercalate "," sts

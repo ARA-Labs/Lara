@@ -133,10 +133,23 @@ data-only signature; the witness is the honest alternative.
 ## 3. The admissibility hypothesis is content, not scaffolding
 
 `Admissible reg C F` says: the guard passes, both sides' declared material is
-well-formed relative to the **linked** environment (`SideOk`), the linked
+well-formed relative to the **linked** environment (`SideOkHoles`), the linked
 program passes stage 2, and the shared policy is well-formed. Nothing in it
 mentions the conclusion, and `Examples.Linking.admissible_split` discharges it
 on a concrete pair, so it is inhabited rather than decorative.
+
+Since issue #13 a side may carry located holes: `SideOkHoles` asks each
+declared argument only to type, and a hole-free side enters through
+`SideOk.toHoles`. So the congruence, the registry-swap generalization and the
+relational parametricity theorems all cover fragments and contexts with holes.
+A relabel or a related backend keeps each declaration's obligation set, so
+holes stay holes. `Examples.LinkHoles.admissible_hole` discharges the
+hypothesis for a fragment with a hole. `obsGen_hole_blind` says what holes can
+change. Two fragments with the same interface, the same complete arguments and
+the same live attacks are observed alike in every context admissible for both.
+The live-attack premise cannot be dropped:
+`Examples.LinkHoles.hole_erasure_observable` deletes a hole together with an
+attack aimed inside it, and the link is then rejected.
 
 It cannot simply be dropped. `obs` distinguishes a checker rejection from an
 observed status list, and a *forward-only* acceptance hypothesis lets `reg₂`
@@ -338,7 +351,7 @@ one's to close; the no-contraries route above is precisely what keeps it
 
 Part A originally supplied only **leaf-name openness**. An unresolved mandatory
 critical question cannot cross `Compile.CheckedProgram.complete`
-(`Compile.lean:480`), and its discharge lives inside a support term rather than
+(`Compile.lean:590`), and its discharge lives inside a support term rather than
 in a name environment. Merely extending Γ therefore cannot provide it.
 
 The additive `Lara.Context.Holes` calculus now supplies the term-level remainder.
