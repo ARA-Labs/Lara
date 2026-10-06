@@ -1,4 +1,4 @@
--- | Golden verdicts for E1–E5 / R1–R3 plus strict-certificate example S1;
+-- | Golden verdicts for E1–E5 / R1–R4 plus strict-certificate example S1;
 -- the teaching examples A and B join them in 'examplePolicies' for the
 -- freshness and coverage properties, together with the D3 agreement-map and
 -- the three D1 rebuttal-replay rounds (round0–round2), and the two running-example
@@ -25,6 +25,7 @@
 --   * __R1__ @undeclared-leaf@ — 'Reject' R1  (leaf not in Γ).
 --   * __R2__ @strict-contrary@ — 'Reject' R12 (policy §8.1 Path-B well-formedness).
 --   * __R3__ @bad-attack-target@ — 'Reject' R10 (rebut on a leaf occurrence).
+--   * __R4__ @strict-target@ — 'Reject' R11 (undercut on a strict rule).
 --   * __S1__ @strict-cert@ — 'Accept'; nd@1 cert replay; status justified.
 --   * __S2__ @ord-cert@ — 'Accept'; ord@1 comparison cert replay plus the
 --     defeasible bridge rule consuming it; the comparative claim is justified.
@@ -1003,13 +1004,13 @@ attackCells u outcome = case outcome of
     lookupIndex x xs = lookup x (zip xs [0 :: Int ..])
 
 -- | The measured coverage of the whole suite: every accept status, every attack
--- kind, and the three rejection classes are __read off the elaborated units and
--- their verdicts__ (docs/worked-examples-plan.md §1, docs/m4a-checklist.md §2).
+-- kind, and rejection classes R1/R12/R10/R11 are __read off the elaborated units
+-- and their verdicts__ (docs/worked-examples-plan.md §1, docs/m4a-checklist.md §2).
 -- This turns the coverage matrix into evidence, not a prose claim: if some cell
 -- stops being witnessed (a status vanishes, an attack kind is dropped, a reject
 -- reclassifies), this fails.
 --
--- The suite is the §1 examples E1–E3 / R1–R3, the M5 worked cases E4/E5, the
+-- The suite is the §1 examples E1–E3 / R1–R3 plus R4, the M5 worked cases E4/E5, the
 -- two teaching examples A and B, strict-certificate example S1, plus the D3
 -- agreement-map and the three D1 rebuttal-replay rounds round0–round2 — all
 -- every entry in 'examplePolicies'.
@@ -1046,7 +1047,7 @@ prop_coverageMatrix = once $ ioProperty $ do
           (all (`elem` attackTags) ["rebut", "undercut", "undermine"])
       , counterexample
           ("rejection-class coverage incomplete — witnessed " ++ show rejects)
-          (all (`elem` rejects) [RejectClass R1, RejectClass R12, RejectClass R10])
+          (all (`elem` rejects) [RejectClass R1, RejectClass R12, RejectClass R10, RejectClass R11])
       , -- The M5/T4 label cells: every attack kind must be witnessed with an
         -- attacked target that survives (LIn — reinstatement, E4), one that is
         -- defeated (LOut — E3/A), and one left undecided (LUndec — contested
@@ -1119,5 +1120,5 @@ workedExamplesSpecProps =
   , ("expected JSON reports the escalated group-conflict (R9)", quickCheckResult prop_groupConflictExpectedJson)
   , ("worked-example .core.sexp anchors are fresh (parse+elaborate+encode == committed)", quickCheckResult prop_freshness)
   , ("worked-example expected.json goldens are fresh (elaborate+render == committed)", quickCheckResult prop_expectedJsonFresh)
-  , ("coverage matrix: every status, attack kind, kind×label cell, and R1/R12/R10 witnessed", quickCheckResult prop_coverageMatrix)
+  , ("coverage matrix: every status, attack kind, kind×label cell, and R1/R12/R10/R11 witnessed", quickCheckResult prop_coverageMatrix)
   ]

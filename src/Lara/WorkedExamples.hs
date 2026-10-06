@@ -52,6 +52,7 @@ workedExamples =
   , ("examples/R2", "strict-bad-v1.policy.lara")
   , ("examples/R2-sort", "ord-v1.policy.lara")
   , ("examples/R3", "empirical-v1.policy.lara")
+  , ("examples/R4", "strict-target-v1.policy.lara")
   , ("examples/S1", "strict-v1.policy.lara")
   , ("examples/S2", "ord-v1.policy.lara")
   , ("examples/S3", "ord-le-v1.policy.lara")

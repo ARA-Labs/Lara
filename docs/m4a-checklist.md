@@ -199,9 +199,10 @@ A0 records these; it does not resolve them. Resolution owners are noted.
    R12 ✓ match; **R7 was a mis-citation** (spec §10.1 R7 is the *assurance* class). The authored R3
    example (`examples/R3/example.lara`) is a `rebut` targeting a **leaf occurrence**, which
    `checkUnit` rejects **R10** (wrong occurrence kind), verified by `test/WorkedExamplesSpec.hs`. The
-   frozen R-series mapping is therefore **R1 / R12 / R10** (see §3). The strict-rule-not-rebuttable
-   teaching (which would be R11 `StrictTarget`) is deferred to `TODOS.md` — the defeasible-only M4a
-   suite does not author a strict support term.
+   frozen M4a R-series mapping is therefore **R1 / R12 / R10** (see §3). The
+   strict-rule-not-rebuttable teaching was deferred because the defeasible-only
+   M4a suite did not author a strict support term. It is now supplied by
+   `examples/R4`: an undercut on a valid strict step rejects R11 `StrictTarget`.
 
 3. **E2's gap mechanism is re-worded between §3 and A2.** `worked-examples-plan.md` §1/§3 describe E2's
    gap as arising from an **open mandatory CQ** (`open external_validity`; spelled

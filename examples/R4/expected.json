@@ -1,0 +1,24 @@
+{
+  "replay-id": {
+    "core": "lara-core@0.3",
+    "policy": "strict-target-v1",
+    "backends": [
+      "nd@1"
+    ],
+    "theories": [
+      "sha256:strict-target-v1-theory-0"
+    ],
+    "artifact": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  },
+  "verdict-class": "reject R11",
+  "located-diagnostic": {
+    "kind": "reject",
+    "class": "R11",
+    "stage": "typed-attack",
+    "constituent": {
+      "kind": "attack",
+      "index": 0,
+      "attack": "undercut d1 a1"
+    }
+  }
+}
