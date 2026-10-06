@@ -407,7 +407,9 @@ the completed program once, so whenever that program is accepted the batch is
 (`atomic_completion_complete`). An in-place discharge rewrites the hole itself:
 the old hole leaves the report when the discharge completes it, and every other
 hole stays (`dischargeOpen_hole_becomes_node`, `dischargeOpen_others_persist`).
-§6a records both designs.
+Neither completion update has an unrestricted status-transition theorem; the
+restricted ones, and the counterexamples that bound them, are in §6a. §6a
+records both designs.
 
 ## 6a. Update vocabulary for completion
 
@@ -455,12 +457,29 @@ at position `π` (spec §7, `π ::= ε | π.i | π.q`) inside the declared argum
   report under both its old and its new term, and moves every claim equivalent
   to its conclusion out of `gap` under every extension semantics
   (`dischargeOpen_hole_becomes_node`).
-- *Not claimed*: no status matrix and no gap-monotonicity theorem. The site may
-  hold an *optional* open question of a complete argument; then an AF node's
-  term changes, and if `v` is itself incomplete the node becomes a hole and its
-  claim can enter `gap`. Even a hole-to-hole discharge can change an edge: an
-  attack from a complete source onto a position on the root-to-`π` path now
-  addresses the rewritten occurrence (D6).
+- *Transitions* (`lean/Lara/Update/Transitions.lean`): stated for a discharge
+  that completes a retained hole, which inserts one AF node where its row
+  stands. No claim enters `gap`, and only a claim equivalent to the completed
+  conclusion leaves it, under every extension semantics
+  (`dischargeOpen_completion_no_gap_entry`, `dischargeOpen_completion_gap_fixed`).
+  If no raw attack names the discharged argument, the condition freshness gives
+  a fresh `addInstance`, the new node is a sink and the grounded guarantees of
+  `addInstance_sink_status_monotone` hold
+  (`dischargeOpen_completion_sink_status_monotone`). If no compiled attack of
+  the target reaches the completed argument, every claim equivalent to its
+  conclusion is `justified`, and publicly so unless it is blocked
+  (`dischargeOpen_completion_justified`), which a clean source run rules out
+  (`dischargeOpen_completion_public_justified`).
+- *Not claimed*: no status matrix and no unrestricted transition theorem. The
+  site may hold an *optional* open question of a complete argument; then an AF
+  node's term changes, and if `v` is itself incomplete the node becomes a hole
+  and its claim enters `gap` (`Examples.UpdateCompletion.discharge_optional_enters_gap`).
+  A raw attack declared while its source was a hole fires once the discharge
+  completes it, so an old `justified` claim can become `refuted`
+  (`discharge_outgoing_defeats`). Even a hole-to-hole discharge can change an
+  edge: an attack from a complete source onto a position on the root-to-`π`
+  path now addresses the rewritten occurrence (D6); the no-attack premise above
+  excludes this case, and no separate witness is pinned for it.
 
 **D14 — Atomic multi-edit completion (`atomic`, issue #11).** `atomic edits`
 applies a list of raw edits — `addLeaf`, `addInstance`, `addAttack` and
@@ -482,9 +501,21 @@ order, then runs admission and `checkUnit` exactly once on the final raw state.
   intermediate state is checked, which is what the sequential route lacks.
 - *Identities*: every successful batch keeps every raw attack and every
   argument name at its declaration index. A batch without discharge keeps every
-  argument row (`applyBatchFrom_prefix`). If its new leaves are admitted, it
-  also keeps the source's complete arguments and reported holes as prefixes of
-  the target's (`atomic_additive_checked_prefix`).
+  argument row (`applyBatchFrom_prefix`), and, whether or not its new leaves
+  are admitted, the source's complete arguments and reported holes as prefixes
+  of the target's (`atomic_additive_checked_prefix`,
+  `atomic_additive_checked_split`). A quarantined new leaf prunes only new
+  rows: the removed seed grows by exactly the quarantined new leaves
+  (`atomic_additive_kept`), and a pruned row is never an AF argument or a
+  reported hole (`AcceptedRun.pruned_not_reported`).
+- *Transitions*: over a batch without discharge the per-constructor results
+  compose this far. No claim enters `gap` (`atomic_additive_no_gap_entry`); a
+  batch with no `addInstance` keeps `gap` (`atomic_instanceFree_gap_fixed`); a
+  batch with no `addAttack` keeps the `addInstance` sink guarantees
+  (`atomic_attackFree_sink_status_monotone`). One `addAttack` already reaches
+  every non-`gap` transition, so nothing more composes. After an admitted batch
+  from a clean source run, an unattacked complete row justifies its conclusion
+  in the core and in the public report (`atomic_completion_justified`).
 - *Why no `tighten`*: tightening never completes a gap. Leaving it out keeps
   every batch without discharge inside the additive metatheory.
 
@@ -506,8 +537,9 @@ The Haskell mirror (`src/Lara/Update.hs`) carries both constructors, the site
 decider, the rewrite and the raw stage of a batch, and `make
 update-differential` diffs them exhaustively against Lean. Batch acceptance is
 Lean-only, like `applyUpdate`. The update golden prints the completion
-witnesses (`Examples.UpdateCompletion.completionWitnessReport`); no transition
-matrix is computed for the two new constructors.
+witnesses and counterexamples (`Examples.UpdateCompletion.completionWitnessReport`);
+no transition matrix is computed for the two new constructors, whose transition
+results are the restricted theorems above.
 
 ## 7. Rejected alternatives
 

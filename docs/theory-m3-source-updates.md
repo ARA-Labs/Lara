@@ -151,9 +151,9 @@ non-`gap`; `tighten` is outside its scope. `Update.nonInstance_gap_fixed`
 covers the three `Update.NonInstanceUpdate` constructors and maps source `gap`
 to target `gap`. `addInstance` is deliberately outside its scope.
 `addInstance` is the only constructor that may move from a source `gap` to a
-non-`gap` target. These are M3's only update-transition claims that are not
-restricted to grounded semantics. The matrix claims instantiate
-`Semantics.groundedSem`.
+non-`gap` target. For the first fragment these are the only non-grounded
+update-transition claims (completion: "Holes and the AGM Probe"). The matrix
+claims instantiate `Semantics.groundedSem`.
 
 `Lara.Update.PublicReport` has five constructors: `gap`, `justified`,
 `contested`, `defeated`, and `evidenceBlocked`. Its publication labels are
@@ -357,10 +357,31 @@ fresh instances or an in-place discharge, and the needed attacks is accepted,
 the batch yields exactly that program (`atomic_completion_complete`,
 `atomic_discharge_completion_complete`). Every batch keeps raw attacks and
 argument names at their indices, and a batch without discharge keeps every
-argument row (`applyBatchFrom_prefix`). With its new leaves admitted, it keeps
-the old complete arguments and the old reported holes as prefixes of the new
-ones (`atomic_additive_checked_prefix`, witnessed by
-`Examples.UpdateCompletion.atomic_keeps_old_hole`).
+argument row (`applyBatchFrom_prefix`). Whether or not its new leaves are
+admitted, it keeps the old complete arguments and the old reported holes as
+prefixes of the new ones (`atomic_additive_checked_prefix`, exact form
+`atomic_additive_checked_split`, witnessed by
+`Examples.UpdateCompletion.atomic_keeps_old_hole`). A quarantined new leaf
+prunes only new rows: the removed seed grows by exactly the quarantined new
+leaves, so every old kept row stays kept under the same checker context
+(`atomic_additive_kept`), and a pruned row is neither an AF argument nor a
+reported hole (`AcceptedRun.pruned_not_reported`, witnessed by
+`atomic_quarantined_leaf_pruned`). An admitted batch keeps a clean source run
+clean (`atomic_additive_clean_target`).
+
+The per-constructor transition results compose over an additive batch as far
+as follows (`lean/Lara/Update/Transitions.lean`). No claim enters `gap`, under
+every extension semantics (`atomic_additive_no_gap_entry`). A batch with no
+`addInstance` keeps every `gap` claim in `gap` (`atomic_instanceFree_gap_fixed`).
+A batch with no `addAttack` adds only fresh sinks, so a grounded `justified`
+claim stays `justified` and a `contested` one is not `defeated`
+(`atomic_attackFree_sink_status_monotone`). Nothing else composes: one
+`addAttack` already reaches every transition among the three non-`gap`
+statuses. After an admitted batch from a clean source run, a complete target
+row that no compiled attack reaches justifies every claim equivalent to its
+conclusion, in the core and in the public report (`atomic_completion_justified`,
+run-level form `AcceptedRun.justified_of_unattacked_row`, witnessed by
+`atomic_completion_public_justified`).
 
 *In place* (D13). `dischargeOpen` answers an open question of a declared
 argument under its own name. The term-level results in
@@ -377,11 +398,31 @@ leaves `gap` under every extension semantics
 (`dischargeOpen_hole_becomes_node`, witnessed by
 `Examples.UpdateCompletion.discharge_hole_becomes_node`). Because the
 discharged argument keeps its declared name, its covering attack can also be
-added first, one update at a time (`discharge_needs_attack`). `dischargeOpen`
-has no gap-monotonicity theorem: discharging an optional question of a complete
-argument with an incomplete term turns an AF node into a hole. The update
-golden prints the completion witnesses below the matrices; no transition matrix
-is computed for `dischargeOpen` or `atomic`.
+added first, one update at a time (`discharge_needs_attack`).
+
+`dischargeOpen` has no unrestricted transition theorem. Discharging an optional
+question of a complete argument with a hole turns an AF node into a hole, and
+its claim moves from `justified` to `gap`
+(`Examples.UpdateCompletion.discharge_optional_enters_gap`). Completing a hole
+that a declared raw attack already names as its source makes that attack fire,
+and the attacked claim moves from `justified` to `refuted`
+(`discharge_outgoing_defeats`). The transition results are therefore stated for
+a discharge that completes a retained hole, which inserts one AF node into the
+old framework. No claim enters `gap` (`dischargeOpen_completion_no_gap_entry`),
+and only a claim equivalent to the completed conclusion leaves it
+(`dischargeOpen_completion_gap_fixed`), under every extension semantics. When,
+in addition, no raw attack names the discharged argument, which is what
+freshness gives `addInstance`, the compiled attacks are unchanged and the new
+node is a sink, so `addInstance_sink_status_monotone` carries over
+(`dischargeOpen_completion_sink_status_monotone`). A completed argument that no
+compiled attack of the target reaches justifies every claim equivalent to its
+conclusion, in the core and in the public report unless the claim is blocked
+(`dischargeOpen_completion_justified`), which a clean source run rules out
+(`dischargeOpen_completion_public_justified`, witnessed by
+`discharge_completion_public_justified`). The grounded results rest on
+`Grounded.SinkEmbedding`, which inserts sinks anywhere in the declaration order.
+The update golden prints the completion witnesses and the counterexamples below
+the matrices; no transition matrix is computed for `dischargeOpen` or `atomic`.
 
 `Lara.Update.beliefSet sem unit p` means
 `coreObs sem unit p = observed justified`. The M3 AGM comparison fixes
@@ -410,7 +451,8 @@ The paper may claim:
   `evidence-blocked`;
 - the full semantics-parametric gap boundary: `addAttack` preserves `gap`,
   additive updates cannot enter `gap`, and every non-instance update preserves
-  a source `gap`; these are M3's only non-grounded update-transition claims;
+  a source `gap`; for the first fragment these are the only non-grounded
+  update-transition claims;
 - from a justified target public report, under `CleanBase` on the exact source
   run, an exact successful `tighten`, and its `NonInstanceUpdate` hypotheses,
   the matrix-to-legacy `Update.quarantine_nonpromotion_corollary` for the
@@ -421,14 +463,22 @@ The paper may claim:
 - two completion constructors with exact acceptance characterizations: in-place
   discharge with position, conclusion, typing and obligation preservation, and
   atomic batches that are all-or-nothing and complete for completion, with the
-  concrete sequential-failure counterexample.
+  concrete sequential-failure counterexample;
+- restricted transitions for both: a discharge that completes a retained hole
+  never enters `gap` and exits it only for the completed conclusion, keeps the
+  `addInstance` sink guarantees when no raw attack names the argument, and
+  justifies an unattacked completion; an additive batch never enters `gap`,
+  keeps `gap` without `addInstance`, and keeps the sink guarantees without
+  `addAttack`; with the two discharge counterexamples that bound these
+  restrictions.
 
 The paper must not claim:
 
 - an unindexed four-valued general-semantics matrix;
 - public additive behavior equals core behavior without `CleanBase`;
 - unconditional `addInstance` admissibility;
-- a transition matrix, or gap monotonicity, for `dischargeOpen` or `atomic`;
+- a transition matrix for `dischargeOpen` or `atomic`, or a transition result
+  for either without the restrictions above;
 - a theory of update composition beyond one atomic batch, removal, or
   un-tightening;
 - a CLI or runtime update feature;
@@ -475,7 +525,7 @@ cabal build lara-test
 cabal test lara-test --test-show-details=direct
 make update-goldens
 make update-goldens UPDATE=1   # deterministic regeneration, then review the diff
-cd lean && lake build Lara.Update Lara.Update.Completion Lara.Examples.Update Lara.Examples.UpdateCompletion
+cd lean && lake build Lara.Update Lara.Update.Completion Lara.Update.Transitions Lara.Examples.Update Lara.Examples.UpdateCompletion
 ```
 
 `make update-goldens` rebuilds `Lara.Examples.Update`, runs
