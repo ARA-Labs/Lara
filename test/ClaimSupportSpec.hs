@@ -558,8 +558,8 @@ prop_deadEndAudit =
       urDeadEndAttacks deadEndRecord === 1
   where
     traceLeaves =
-      [ Leaf primaryLeafId primaryProp Observed AiExecuted [SourceRef "trace/exploration_tree.yaml#N1"]
-      , Leaf secondaryLeafId secondaryProp Attested AiExecuted [SourceRef "synthetic#l2"]
+      [ Leaf primaryLeafId primaryProp Observed AiExecuted [SourceRef "trace/exploration_tree.yaml#N1"] Nothing
+      , Leaf secondaryLeafId secondaryProp Attested AiExecuted [SourceRef "synthetic#l2"] Nothing
       ]
     traceCoreLeaves = [(leafId leaf, leafProp leaf) | leaf <- traceLeaves]
     traceSource =
@@ -1120,8 +1120,8 @@ auditRecordWithModeAndDerivedAndSurfaceLeaves ruleModeOf coreLeaves surfaceLeave
 
 syntheticLeaves :: [Leaf]
 syntheticLeaves =
-  [ Leaf primaryLeafId primaryProp Observed AiExecuted [SourceRef "synthetic#l1"]
-  , Leaf secondaryLeafId secondaryProp Attested AiExecuted [SourceRef "synthetic#l2"]
+  [ Leaf primaryLeafId primaryProp Observed AiExecuted [SourceRef "synthetic#l1"] Nothing
+  , Leaf secondaryLeafId secondaryProp Attested AiExecuted [SourceRef "synthetic#l2"] Nothing
   ]
 
 primaryClaim, secondaryClaim :: Claim

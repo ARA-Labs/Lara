@@ -113,6 +113,7 @@ import Lara.Grounded (AF (..), completeClaimFor, labelC, statusC)
 import Lara.Policy (lookupRule)
 import Lara.Runtime (runtimeAF)
 import Lara.Prop (Prop)
+import Lara.Reporting (ClaimReport, claimReports, nodeArgIds)
 import Lara.SupportTerm
   ( BackendReason (..)
   , CertOk
@@ -180,7 +181,7 @@ runCheckLocatedReported
   -> CheckInput
   -> (Verdict, Maybe LocatedRejection, [String])
 runCheckLocatedReported cfg input =
-  let (verdict, located, diagnostics, slots, _) =
+  let (verdict, located, diagnostics, slots, _, _) =
         runCheckReported cfg input (prune (inputUnit input))
    in (verdict, located, diagnostics ++ slotMappingLines slots)
 
@@ -194,32 +195,29 @@ runCheckLocatedReported cfg input =
 -- @
 runCheckWithPrune :: CheckConfig -> CheckInput -> Prune -> (Verdict, Maybe LocatedRejection)
 runCheckWithPrune cfg input pruned =
-  let (verdict, located, _, _, _) = runCheckReported cfg input pruned
+  let (verdict, located, _, _, _, _) = runCheckReported cfg input pruned
    in (verdict, located)
 
--- | 'runCheckWithPrune' plus the @stderr@ lines the rejection warrants and the
--- accepted unit's certificate dependency report, all from __one__ pass: the
--- verdict, its located rejection, its diagnostics, and its report are four
--- readings of the same decision, so a diagnostic can never explain a rejection
--- the driver did not make and a report can never describe a unit the driver did
--- not accept.
+-- | 'runCheckWithPrune' plus rejection diagnostics, certificate dependencies,
+-- claim reports, and AF-node names, all from __one__ pass. Every projection
+-- describes the same decision and the same accepted cache.
 --
 -- That single-pass property is the whole reason this exists. The alternative —
 -- computing diagnostics from the input in a second traversal — either re-runs
 -- the checker (doubling the work the E1 bench measures) or reconstructs the
 -- decision independently and risks disagreeing with it.
 --
--- __The report costs nothing unless demanded__. The fifth component is
--- built lazily from the accepted unit, so a caller that only wants the verdict
--- — every earlier caller, including @lara check@ and the E1 bench — never
--- forces 'unitCertDeps' and never replays a certificate for it. It is @[]@ on
--- every rejecting path, which is not an approximation: a rejected unit has no
--- accepted checked term for the accounting to range over.
+-- __The reports cost nothing unless demanded__. The fifth component is
+-- the certificate dependency report and the sixth retains claim reports and
+-- AF-node names from the accepted cache. They are built lazily, so callers that
+-- only want the verdict never force these reports or replay a certificate for
+-- accounting. All report lists are empty on rejection: a rejected unit has no
+-- accepted checked term for the reporting to range over.
 runCheckReported
   :: CheckConfig
   -> CheckInput
   -> Prune
-  -> (Verdict, Maybe LocatedRejection, [String], [SlotSource], [(ArgId, [CertDep])])
+  -> (Verdict, Maybe LocatedRejection, [String], [SlotSource], [(ArgId, [CertDep])], ([ClaimReport], [ArgId]))
 runCheckReported cfg input pruned =
   let replayId = inputReplayId input
       verdict outcome = Verdict replayId outcome
@@ -230,6 +228,7 @@ runCheckReported cfg input pruned =
           , [replayFailureMessage failure]
           , []
           , []
+          , ([], [])
           )
         Nothing
           | groupConflictRejectPrune pruned ->
@@ -238,6 +237,7 @@ runCheckReported cfg input pruned =
               , maybe [] (: []) (groupConflictMessageWithPrune pruned)
               , []
               , []
+              , ([], [])
               )
           | otherwise ->
               let checked = pruneChecked pruned
@@ -248,6 +248,7 @@ runCheckReported cfg input pruned =
                       , maybe [] (: []) (backendRejectionMessage err)
                       , backendRejectionSlots err
                       , []
+                      , ([], [])
                       )
                     Right accepted ->
                       ( verdict (buildAccept pruned accepted)
@@ -255,6 +256,7 @@ runCheckReported cfg input pruned =
                       , []
                       , []
                       , unitCertDeps checked
+                      , (claimReports checked accepted, nodeArgIds checked accepted)
                       )
 
 -- | The checked unit and accepted cache behind a raw-door accepting verdict:
@@ -588,7 +590,7 @@ unitCertDeps unit =
 -- The report therefore rides beside the verdict, never inside it.
 runCheckDeps :: CheckConfig -> CheckInput -> (Verdict, [(ArgId, [CertDep])])
 runCheckDeps cfg input =
-  let (verdict, _, _, _, deps) =
+  let (verdict, _, _, _, deps, _) =
         runCheckReported cfg input (prune (inputUnit input))
    in (verdict, deps)
 

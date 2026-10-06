@@ -302,3 +302,15 @@ deferred.
   for any two attack-free single-argument programs. Non-vacuity guards on the
   relabel do not establish non-degeneracy of the framework equality. Tracked
   as open follow-up work; `surface_directAF_link` remains open.
+
+## ARA-packaged certified evidence (implemented)
+
+- **Status:** Implemented and gate-passing on `feat/enforce-certified-leaf-checker` (PR 19, commit `fd8b74d`); `lara-core@0.3` and its wire format unchanged.
+- **Constraint:** A certified leaf must be reproduced by a policy-approved checker from manifest-listed, hash-pinned source files included in its ARA package. A URL or prose assertion alone does not satisfy package membership. Missing or mismatching evidence prevents certification without silently relabeling the leaf, and a captured object is usable only under the manifest entry it was captured for.
+- **Boundary:** Enforce this at source admission, outside the symbolic argumentation core; every source door without an evidence context rejects a certified declaration at R8. Assumptions and attestations remain declared evidence; certification does not establish empirical truth, scientific validity, or immunity from attacks.
+- **Trusted base:** the concrete CSV/JSON byte parsers, SHA-256, the POSIX capture shim and the Haskell/Lean compilers. The finite model's 50-case typed differential is conformance evidence, not a parser proof.
+- **Evidence:** `ara/evidence/results/certified_evidence_landing_2026-10-06.md`; `docs/evidence-admission-decision.md` §9; `docs/evidence-admission-inventory.md`; package acceptance and `make local-gates` pass on the real binary.
+- **Provenance:** ai-executed
+- **Sources:** `docs/evidence-admission-decision.md` §9 (settled `lara-evidence@0.1` contract); `ara/evidence/results/certified_evidence_landing_2026-10-06.md` (verbatim gate output); `docs/evidence-admission-inventory.md` (ten-leaf original-byte portfolio)
+- **Open:** human payload-to-proposition faithfulness review and the additive measured-input / report freeze — [issue 20](https://github.com/ARA-Labs/Lara/issues/20)
+- **Last revised:** 2026-10-06 (2026-10-06_001#5)

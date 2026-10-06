@@ -235,7 +235,7 @@ def transportPolicy : Policy :=
     measurands := []
     comparisonSchemes := [] }
 
-def leafP : Leaf := ⟨leafPId, .atom "p" .nil, .observed, .user, []⟩
+def leafP : Leaf := ⟨leafPId, .atom "p" .nil, .observed, .user, [], none⟩
 
 /-- The one argument, parameterised by its assurance so the two programs differ
 in exactly the certificate and nothing else. -/

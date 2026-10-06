@@ -1,4 +1,4 @@
-# Evidence-admission gated tasks (`lara-evidence@0.1` — not planned)
+# Evidence-admission gated tasks (`lara-evidence@0.1` — archival design record)
 
 _Status: archival design record. The roadmap's evidence-admission scope
 decision closed 2026-08-26 as **not planned**: "The approved scope is
@@ -10,6 +10,8 @@ It replaces `plans/2026-08-04-rit-informed-evidence-admission.md` Tasks 3, 4,
 `docs/evidence-admission-decision.md`, `docs/registration-receipt-contract.md`.
 Read this as "if the inventory gate below is ever met and
 a researcher explicitly approves the work," not as scheduled work._
+
+_Execution update, 2026-10-06 (revised): the layer is now **implemented**, not gated. [Issue #8](https://github.com/ARA-Labs/Lara/issues/8) closes with the feature: the [original-output inventory](evidence-admission-inventory.md) passed after the approved CSV-row + JSON-pointer portfolio revision, the runtime and `lara check-ara` package door landed, `test/evidence-cli.sh` (58 scenarios) and `scripts/evidence-differential.sh` (64 typed cases) pin them, and `make local-gates` passes. The settled contract lives in `docs/evidence-admission-decision.md` §9; the plan that carried it was deleted once executed. The additive evaluation and measured-input/report freeze remain outstanding on [issue #20](https://github.com/ARA-Labs/Lara/issues/20). The task sketch below is kept as the historical design record; where it and the decision record disagree, the decision record governs._
 
 The design boundary, judgment forms, outcome join, and negative guarantees
 this layer would have to respect are already frozen in

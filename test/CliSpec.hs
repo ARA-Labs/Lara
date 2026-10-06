@@ -1269,7 +1269,8 @@ precedenceArtifact badBackend =
     ++ admissionLeaf "e_reject" "r8" "assumed" "ai-executed"
     ++ admissionLeaf "e_g1" "group_one" "observed" "user"
     ++ admissionLeaf "e_g2" "group_two" "attested" "user"
-    ++ admissionLeaf "e_core" "core" "certified" "user"
+    -- This matrix isolates ordinary R8/R13/R9, not package certification.
+    ++ admissionLeaf "e_core" "core" "assumed" "user"
     ++ unlines
       [ "group g = [e_g1, e_g2]"
       , "arg a_core : supports(core_claim) by leaf(e_core)"

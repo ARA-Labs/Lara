@@ -29,6 +29,7 @@ import Lara.AST
   , RuleId (..)
   )
 import Lara.Driver (slotMappingLines)
+import Lara.Evidence.Admission (renderEvidenceRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
   , prepareSource
@@ -238,6 +239,7 @@ authorLines programSource policySource = do
     Left invalid -> Left ("source invalid: " ++ renderSourceInvalid invalid)
     Right (SourceRejected rejection) ->
       Left ("admission rejection: " ++ renderAdmissionRejection rejection)
+    Right (SourceEvidenceRejected rejection) -> Left (renderEvidenceRejection rejection)
     Right (SourceAccepted input) ->
       Right (sourceResultAuthorDiagnostics (runSourceCheck input))
 
@@ -250,6 +252,7 @@ structuralSlots programSource policySource = do
     Left invalid -> Left ("source invalid: " ++ renderSourceInvalid invalid)
     Right (SourceRejected rejection) ->
       Left ("admission rejection: " ++ renderAdmissionRejection rejection)
+    Right (SourceEvidenceRejected rejection) -> Left (renderEvidenceRejection rejection)
     Right (SourceAccepted input) ->
       Right (sourceResultSlotSources (runSourceCheck input))
 
@@ -260,6 +263,7 @@ authoredMap programSource policySource = do
     Left invalid -> Left ("source invalid: " ++ renderSourceInvalid invalid)
     Right (SourceRejected rejection) ->
       Left ("admission rejection: " ++ renderAdmissionRejection rejection)
+    Right (SourceEvidenceRejected rejection) -> Left (renderEvidenceRejection rejection)
     Right (SourceAccepted input) ->
       Right (sourceResultAuthoredSlots (runSourceCheck input))
 

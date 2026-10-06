@@ -255,15 +255,15 @@ private def allFormsProgram : Program :=
     valueBindings := [⟨⟨"threshold"⟩, .num "7"⟩]
     decls :=
       [ .leaf ⟨resultLeaf, atom "reported" [systemA, quality, dataset, .num "7"],
-          .observed, .user, [⟨"source:e"⟩]⟩
+          .observed, .user, [⟨"source:e"⟩], none⟩
       , .leaf ⟨baselineLeaf, atom "reported" [systemB, quality, dataset, .num "5"],
-          .attested, .aiExecuted, []⟩
+          .attested, .aiExecuted, [], none⟩
       , .leaf ⟨bindingLeaf,
           atom "binding" [systemA, systemB, quality, dataset, .num "7", .num "5"],
-          .assumed, .checker "checker" "1", []⟩
-      , .leaf ⟨proofLeaf, atom "score" [.num "7"], .certified, .user, []⟩
-      , .leaf ⟨verdictProLeaf, atom "verdict" [.num "1"], .observed, .user, []⟩
-      , .leaf ⟨verdictConLeaf, atom "verdict" [.num "0"], .observed, .user, []⟩
+          .assumed, .checker "checker" "1", [], none⟩
+      , .leaf ⟨proofLeaf, atom "score" [.num "7"], .certified, .user, [], none⟩
+      , .leaf ⟨verdictProLeaf, atom "verdict" [.num "1"], .observed, .user, [], none⟩
+      , .leaf ⟨verdictConLeaf, atom "verdict" [.num "0"], .observed, .user, [], none⟩
       , .claim ⟨claimMain, "threshold {threshold}; observed {cell e}",
           atom "score" [con0 "threshold"], binding⟩
       , .arg explicitArgument
@@ -648,7 +648,7 @@ private def nonCellClaim : Decl → Decl
 
 def declaredNonCellInterpolationInput : Lara.Surface.Input :=
   ⟨{ allFormsProgram with decls :=
-      (.leaf ⟨⟨"not-cell"⟩, atom "flag" [], .observed, .user, []⟩) ::
+      (.leaf ⟨⟨"not-cell"⟩, atom "flag" [], .observed, .user, [], none⟩) ::
         allFormsProgram.decls.map nonCellClaim }, allFormsPolicy⟩
 
 theorem declaredNonCellInterpolation_unsupported :
@@ -1238,12 +1238,12 @@ private def expandedValueProgram : Program :=
   { allFormsProgram with
     valueBindings := []
     decls :=
-      [ .leaf ⟨resultLeaf, atom "reported" [systemA, quality, dataset, .num "7"], .observed, .user, [⟨"source:e"⟩]⟩
-      , .leaf ⟨baselineLeaf, atom "reported" [systemB, quality, dataset, .num "5"], .attested, .aiExecuted, []⟩
-      , .leaf ⟨bindingLeaf, atom "binding" [systemA, systemB, quality, dataset, .num "7", .num "5"], .assumed, .checker "checker" "1", []⟩
-      , .leaf ⟨proofLeaf, atom "score" [.num "7"], .certified, .user, []⟩
-      , .leaf ⟨verdictProLeaf, atom "verdict" [.num "1"], .observed, .user, []⟩
-      , .leaf ⟨verdictConLeaf, atom "verdict" [.num "0"], .observed, .user, []⟩
+      [ .leaf ⟨resultLeaf, atom "reported" [systemA, quality, dataset, .num "7"], .observed, .user, [⟨"source:e"⟩], none⟩
+      , .leaf ⟨baselineLeaf, atom "reported" [systemB, quality, dataset, .num "5"], .attested, .aiExecuted, [], none⟩
+      , .leaf ⟨bindingLeaf, atom "binding" [systemA, systemB, quality, dataset, .num "7", .num "5"], .assumed, .checker "checker" "1", [], none⟩
+      , .leaf ⟨proofLeaf, atom "score" [.num "7"], .certified, .user, [], none⟩
+      , .leaf ⟨verdictProLeaf, atom "verdict" [.num "1"], .observed, .user, [], none⟩
+      , .leaf ⟨verdictConLeaf, atom "verdict" [.num "0"], .observed, .user, [], none⟩
       , .claim ⟨claimMain, "threshold 7; observed 7", atom "score" [.num "7"], binding⟩
       , .arg substitutedExplicitArgument
       , .arg inferredArgument

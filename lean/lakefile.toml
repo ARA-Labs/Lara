@@ -1,5 +1,5 @@
 name = "lara"
-defaultTargets = ["Lara", "lara-driver", "lara-map-driver", "presentation-shape", "surface-conformance", "pw-example", "pw-run", "axiom-withdrawal"]
+defaultTargets = ["Lara", "lara-driver", "lara-map-driver", "presentation-shape", "surface-conformance", "pw-example", "pw-run", "axiom-withdrawal", "evidence-driver"]
 
 # Mechanized reference semantics for the LARA claim-support calculus.
 # No Mathlib dependency: the frozen nf/≡ carve-out (spec §9 result 11) and the
@@ -70,3 +70,7 @@ root = "Lara.PW.RunMain"
 [[lean_exe]]
 name = "axiom-withdrawal"
 root = "Lara.AxiomWithdrawalMain"
+
+[[lean_exe]]
+name = "evidence-driver"
+root = "Lara.EvidenceDriver"

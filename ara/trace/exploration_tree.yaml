@@ -10245,3 +10245,174 @@ tree:
   status: resolved
   also_depends_on:
   - N351_updates
+- id: N352_ara_evidence
+  type: decision
+  title: Require ARA-packaged source files for certified evidence
+  provenance: user
+  timestamp: 2026-10-06T06:48+00:00
+  choice: >-
+    In the issue #8 design discussion, the researcher directed that the result file backing
+    certified evidence be part of the ARA, because Lara serves as its meta-language.
+    This records the packaging direction, not approval of an implementation contract or
+    satisfaction of the existing evidence-admission inventory gate.
+  alternatives:
+  - Allow certified evidence to reference files outside the ARA package
+  evidence:
+  - https://github.com/ARA-Labs/Lara/issues/8
+  - docs/corpus-map.md
+  - docs/evidence-admission-decision.md
+  - ara/trace/sessions/2026-10-06_001.yaml
+  status: resolved
+- id: N353_evidence_plan
+  type: decision
+  title: Approve the ARA evidence boundary and write its implementation plan
+  provenance: user-revised
+  timestamp: 2026-10-06T07:06+00:00
+  choice: >-
+    The researcher affirmed ARA package membership, hash-pinned bytes and approved
+    checker replay at source admission, then requested an implementation plan and
+    an account of new metatheory. The plan preserves the symbolic core and keeps
+    the original-output inventory as a prerequisite. Detailed source fields,
+    checker candidates, error ordering and proof statements remain planning targets.
+  alternatives:
+  - Resolve issue 8 by deleting the unenforced requirement from the specification
+  - Check only witness metadata without replaying extraction
+  evidence:
+  - docs/evidence-admission-decision.md
+  - plans/2026-10-06-ara-certified-evidence.md
+  - ara/logic/solution/constraints.md#ara-packaged-certified-evidence-planned
+  status: resolved
+  also_depends_on:
+  - N352_ara_evidence
+- id: N354_evidence_inventory
+  type: experiment
+  title: Inspect original-output formats before evidence runtime implementation
+  provenance: ai-executed
+  timestamp: 2026-10-06T07:41+00:00
+  result: >-
+    Initialized the existing corpus pin and scanned all 32 packages: 529 evidence
+    files are Markdown; the two JSON questionnaires contain prose, not numeric
+    results. Candidate TSV/decimal probes reject. Acquired genuine NanoGPT/METR
+    logs and CompoNet/Simformer CSV plus the original Simformer notebook; the
+    latter matches the corpus byte-for-byte. Original formats, CSV quoting,
+    repeated row keys and saved loss strings require a reviewed portfolio/encoding
+    revision. No approved two-family ten-leaf mapping or runtime gate pass.
+  evidence:
+  - ara/evidence/results/certified_evidence_inventory_2026-10-06.md
+  - docs/evidence-admission-inventory.md
+  status: resolved
+  also_depends_on:
+  - N353_evidence_plan
+- id: N355_evidence_gate_stop
+  type: decision
+  title: Stop at the original-output gate and keep issue 8 unresolved
+  provenance: ai-executed
+  timestamp: 2026-10-06T07:41+00:00
+  choice: >-
+    Applied the approved plan's gate-failure branch: no evidence runtime,
+    source-contract migration, new Lean theorem, golden or refreeze. Expanded
+    decision section 9 and retained the partially executed plan. Reported the
+    blocker and remaining acquisition, review, implementation and evaluation
+    costs on issue 8. An inventory/docs PR does not close the issue.
+  alternatives:
+  - Treat converted TSV or reconstructed prose as original-output evidence
+  - Implement the approved candidate families without their mandatory inventory
+  evidence:
+  - N354_evidence_inventory
+  - docs/evidence-admission-decision.md
+  - https://github.com/ARA-Labs/Lara/issues/8#issuecomment-6011704289
+  status: resolved
+  also_depends_on:
+  - N354_evidence_inventory
+- id: N356_evidence_landed
+  type: decision
+  title: Land the certified-evidence package door and its finite model
+  provenance: ai-executed
+  timestamp: 2026-10-06T09:10+00:00
+  choice: >-
+    Implemented the approved boundary end to end: manifest-verified capture,
+    approved-checker replay over the declared objects, the check-ara package
+    door with report/identity/publication, the R8 no-context rejection on every
+    source door, and the finite Lean model. Verified by real-package acceptance
+    and by make local-gates, not by a mocked runner.
+  alternatives:
+  - Land the runtime without a cross-language differential
+  - Keep the layer documentation-only and leave the unenforced-witness note in place
+  evidence:
+  - ara/evidence/results/certified_evidence_landing_2026-10-06.md
+  - https://github.com/ARA-Labs/Lara/pull/19
+  status: resolved
+  also_depends_on:
+  - N353_evidence_plan
+  - N354_evidence_inventory
+- id: N357_capture_seal
+  type: decision
+  title: Close the borrowed-capture promotion gap at the admission boundary
+  provenance: ai-executed
+  timestamp: 2026-10-06T09:20+00:00
+  choice: >-
+    An independent security review of the landed runtime found that snapshot
+    lookup keys on the object ID alone, so an object captured for different
+    metadata could be replayed against a source bound to this manifest and
+    promoted to evidence-checked assurance. Closed by comparing the captured
+    object's metadata with the request-declared manifest entry
+    (Admission.captureRejection, the runtime twin of the model's captureStage).
+    The regression was shown to falsify with the check removed and to pass with
+    it in place; the package path is unaffected because there the snapshot is
+    built from the manifest's own entries.
+  alternatives:
+  - Key the snapshot by metadata instead of ID
+  - Let the loader-only consistency argument stand and leave the public promotion boundary unchecked
+  evidence:
+  - src/Lara/Evidence/Admission.hs
+  - test/EvidenceAdmissionSpec.hs
+  - ara/evidence/results/certified_evidence_landing_2026-10-06.md
+  status: resolved
+  also_depends_on:
+  - N356_evidence_landed
+- id: N358_rejection_encoding
+  type: decision
+  title: Locate typed rejections at an artifact only where the failure is located at one
+  provenance: ai-executed
+  timestamp: 2026-10-06T09:30+00:00
+  choice: >-
+    The typed differential disagreed on 20 of 50 cases: the Haskell side named
+    the offending object for extraction-stage failures while the finite model's
+    replayLeaf reports none, and one fixture's ordinary unit leaf table did not
+    match its evidence leaves. Settled on the model's rule -- capture failures
+    name the object they could not capture, extraction failures are located at
+    the leaf and carry none -- and aligned the adapter, the typed corpus oracle
+    and the misaligned fixture to it. 50/50 cases then agreed byte-for-byte.
+  alternatives:
+  - Carry the object in the Lean model's extraction errors and re-prove the admission layer
+  - Keep both encodings and special-case the differential comparison
+  evidence:
+  - fixtures/evidence/model/MANIFEST.tsv
+  - scripts/evidence-differential.hs
+  - ara/evidence/results/certified_evidence_landing_2026-10-06.md
+  status: resolved
+  also_depends_on:
+  - N356_evidence_landed
+- id: N359_plan_retired
+  type: decision
+  title: Retire the executed plan and record the deferred evaluation work
+  provenance: ai-executed
+  timestamp: 2026-10-06T09:40+00:00
+  choice: >-
+    The plan's Tasks 0-7 landed, so the plan was deleted and its durable content
+    moved into docs: the settled contract, the migration rule, the rejection
+    locating rule and the trusted base live in the evidence decision record and
+    inventory, which the spec's R8 row, the gated-tasks sketch and the docs index
+    now point at. The two pieces that did not land -- the human
+    payload-to-proposition faithfulness review and the additive measured-input /
+    report freeze -- were opened as issue 20 rather than left in the plan.
+  alternatives:
+  - Keep the plan as a living document with a status banner
+  - Leave the deferred evaluation recorded only in the decision record
+  evidence:
+  - docs/evidence-admission-decision.md
+  - docs/evidence-admission-inventory.md
+  - https://github.com/ARA-Labs/Lara/issues/20
+  status: resolved
+  also_depends_on:
+  - N356_evidence_landed

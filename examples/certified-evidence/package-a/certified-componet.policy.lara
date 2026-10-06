@@ -1,0 +1,10 @@
+policy certified-componet
+
+pred forward_time_s(Num, Str, Num, Num)
+
+rule record_forward(I, M, N, T)
+  mode = defeasible
+  premises = [ forward_time_s(I, M, N, T) ]
+  conclusion = forward_time_s(I, M, N, T)
+
+evidence-checkers = (checkers (csv-row 1))

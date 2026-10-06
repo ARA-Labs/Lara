@@ -29,6 +29,7 @@ module Main (main) where
 
 import Lara.AST (PolicyId (..), Program (..))
 import Lara.Admission (renderAdmissionAudit, renderAdmissionRejection)
+import Lara.Evidence.Admission (renderEvidenceRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
   , prepareSource
@@ -97,6 +98,7 @@ loadPolicyAndElaborate artifactPath policyPath prog = do
     Left invalid -> fail (artifactPath ++ ": source invalid: " ++ renderSourceInvalid invalid)
     Right (SourceRejected rejection) ->
       fail (artifactPath ++ ": admission rejection: " ++ renderAdmissionRejection rejection)
+    Right (SourceEvidenceRejected rejection) -> fail (artifactPath ++ ": " ++ renderEvidenceRejection rejection)
     Right (SourceAccepted source) ->
       case sourceResultCheckInput (runSourceCheck source) of
         Left audit ->

@@ -1718,3 +1718,37 @@ entries:
   notes:
   - Logged the transition results as one experiment node (N351_transitions); O183 not crystallized - no researcher comment on the claim itself, only on scope.
   - No C-claim touched; the update metatheory has no crystallized claim to reconcile.
+
+- turn: 2026-10-06_001#2
+  notes:
+  - Recorded the researcher's ARA membership direction as N352_ara_evidence; did not treat it as approval to bypass the evidence-admission inventory gate.
+  - Staged the proposed admission-boundary enforcement as O184; the user specified membership, not the full manifest or replay contract.
+  - No logic claims revised or prior observations promoted; this packaging discussion provides no empirical result or closure signal for existing claims.
+
+- turn: 2026-10-06_001#3
+  notes:
+  - The user's explicit affirmation closes O184; promoted the package/replay boundary to the existing constraints file without claiming it is implemented.
+  - Staged O185 because the new proof obligations are planning proposals, not proved results or a user-endorsed theorem list.
+  - Reused the presentation-only Policy convention after inspecting AST.hs; no parallel source-policy wrapper or core-wire extension is required.
+  - Kept the original-output inventory gate; the empty local corpus checkout is not evidence that the upstream inventory fails.
+  - No existing scientific claim changed status; planning approval is not empirical confirmation or a new metatheory result.
+
+- turn: 2026-10-06_001#4
+  notes:
+  - Routed executed inventory/selector probes as N354 and the plan-mandated stop as N355; no claim that the reviewed feature or issue 8 is complete.
+  - Staged O186 as architecture: CSV/JSON loss decoding is a proposed replacement contract, not an approved portfolio or generalized soundness claim.
+  - Did not promote O185: the user requested execution of the plan, but no new evidence theorem was proved, merged or expressly affirmed this turn.
+  - Kept the current planned packaging constraint and scientific claims unchanged; a portfolio inventory failure does not refute the package/replay requirement.
+  - No new stale flags from calendar time alone; earlier observations' topics were not audited for generous revisit matching in this bounded evidence session.
+  - The consistency pass found historical O176/O177 identifier collisions. Tracked their append-only-safe repair in issue 18; did not edit either past observation or promote through an ambiguous identifier.
+
+- turn: 2026-10-06_001#5
+  notes:
+  - "Routed the landing as N356 (decision, direct): the gate output is journey fact, not a claim — no scientific claim changed status this turn."
+  - "Promoted O185 and O186 on artifact-commitment, not on the user's plan approval: what closed them is that the theorems and the ten-leaf portfolio are in the commit and their gates pass. Restated the constraint section rather than adding a new one, and kept the trusted base explicit so the differential is not read as a parser proof."
+  - "Recorded the borrowed-capture seal as N357 rather than folding it into the landing node: a security review found a defect that the loader-only consistency argument had hidden, and the reusable lesson is the general rule in O187, so the staged observation carries the lesson while the trace keeps the fix."
+  - "Did NOT promote O187/O188/O189: they were written this turn, so no closure signal (abandonment, affirmation, empirical resolution, downstream commitment) can exist yet. Their content is a how-to for the next model or harness, not a settled result."
+  - "Did NOT touch the other crystallized claims: the evidence layer is a boundary constraint on leaf admission, so its landing gives no empirical signal about the argumentation or measurement claims, and no dependency of those claims changed status."
+  - "Recorded the plan deletion as N359 with the destination of every durable piece; a plan is not the record, and the two pieces that did not land were routed to issue 20 instead of dying with the plan."
+  - "Chose the model's extraction-location rule over production's richer payload when the differential disagreed, and logged the alternative: the object column is a differential encoding contract, the leaf already locates extraction failures, and changing the proven replay definitions carried more risk than aligning the adapter and the corpus oracle."
+  - "Number grounding: every figure in the landing evidence file is copied from the gate log or the package-door run; the three package report lines are marked as elided excerpts."

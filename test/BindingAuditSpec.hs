@@ -11,6 +11,7 @@ import System.Directory
   ( canonicalizePath
   , createDirectory
   , createDirectoryLink
+  , createFileLink
   , doesPathExist
   , getTemporaryDirectory
   , listDirectory
@@ -1681,16 +1682,17 @@ prop_cliContract =
     let forbidden = canonicalRoot </> ".task3-cli-forbidden"
         malformed = parent </> "malformed"
         prepared = parent </> "prepared"
+    binary <- buildBindingAudit (parent </> "objects") (parent </> "run")
     withCleanPath forbidden $ do
       createDirectory malformed
       mapM_
         (\name -> BS.writeFile (malformed </> name) (asciiBytes "invalid\n"))
         packetFileNames
-      invalidResult <- runBindingAudit []
-      summarizeResult <- runBindingAudit ["summarize"]
-      forbiddenResult <- runBindingAudit ["prepare", forbidden]
-      malformedResult <- runBindingAudit ["validate", malformed]
-      successResult <- runBindingAudit ["prepare", prepared]
+      invalidResult <- runBindingAudit binary []
+      summarizeResult <- runBindingAudit binary ["summarize"]
+      forbiddenResult <- runBindingAudit binary ["prepare", forbidden]
+      malformedResult <- runBindingAudit binary ["validate", malformed]
+      successResult <- runBindingAudit binary ["prepare", prepared]
       preparedNames <-
         case successResult of
           (ExitSuccess, _, _) -> sort <$> listDirectory prepared
@@ -1841,12 +1843,32 @@ makeTempDirectory prefix = do
   createDirectory path
   pure path
 
-runBindingAudit :: [String] -> IO (ExitCode, String, String)
-runBindingAudit arguments =
-  readProcessWithExitCode
-    "runghc"
-    (["-isrc", "scripts/binding-audit.hs"] ++ arguments)
-    ""
+runBindingAudit :: FilePath -> [String] -> IO (ExitCode, String, String)
+runBindingAudit binary arguments = readProcessWithExitCode binary arguments ""
+
+-- | @scripts\/binding-audit.hs@ reaches @Lara.Elaborate@, which now carries the
+-- evidence runtime's POSIX C shim. @runghc@ links no C objects, so the script
+-- can no longer be interpreted; compile it once against the built library
+-- (intermediates in @objectDir@) and invoke the binary through a
+-- @binding-audit.hs@ symlink, because the script's usage text names @argv[0]@
+-- and this property pins that name.
+buildBindingAudit :: FilePath -> FilePath -> IO FilePath
+buildBindingAudit objectDir parent = do
+  createDirectory objectDir
+  createDirectory parent
+  let binary = parent </> "binding-audit"
+      link = binary ++ ".hs"
+  (code, _, err) <-
+    readProcessWithExitCode
+      "cabal"
+      ( [ "exec", "--", "ghc", "--make", "-package", "lara"
+        , "-outputdir", objectDir, "-o", binary, "scripts/binding-audit.hs" ] )
+      ""
+  case code of
+    ExitSuccess -> pure ()
+    _ -> fail ("binding-audit harness could not compile scripts/binding-audit.hs: " ++ err)
+  createFileLink "binding-audit" link
+  pure link
 countOccurrences :: String -> String -> Int
 countOccurrences needle = go
   where

@@ -46,8 +46,10 @@ front-end),
 [`ord1-corpus-extension-decision.md`](ord1-corpus-extension-decision.md) and
 [`insp1-code-inspection-decision.md`](insp1-code-inspection-decision.md)
 (what the `ord@1` / `insp@1` backends certify),
-[`evidence-admission-decision.md`](evidence-admission-decision.md) (gated
-byte-level evidence layer),
+[`evidence-admission-decision.md`](evidence-admission-decision.md) (ARA-packaged
+evidence replay, `lara-evidence@0.1`, implemented; [issue #8](https://github.com/ARA-Labs/Lara/issues/8);
+[original-output inventory](evidence-admission-inventory.md); [issue #20](https://github.com/ARA-Labs/Lara/issues/20)
+for the outstanding evaluation),
 [`located-gap-decision.md`](located-gap-decision.md) (`lara-core@0.3`:
 incomplete arguments accepted as located holes),
 [`registration-receipt-contract.md`](registration-receipt-contract.md)
@@ -117,9 +119,14 @@ side result
   and
   [`theory-pw-t9-path-composition.md`](theory-pw-t9-path-composition.md).
 
+The certified-evidence admission and source-composition results are recorded in
+[`theory-evidence-admission.md`](theory-evidence-admission.md), with explicit
+limits for byte parsing, cryptography and operating-system capture.
+
 ## Subdirectories
 
 - [`demos/`](demos/) — the prose-first demo write-ups (see entry
   points above).
 - `references/` — long-form reading notes on external sources feeding the
   related-work and annotation vocabulary.
+

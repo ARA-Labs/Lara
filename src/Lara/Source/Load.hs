@@ -9,6 +9,8 @@
 -- resolve its co-located policy file, parse that — therefore have to live
 -- somewhere outside it, and until now the copy the /product/ used lived inside
 -- @app\/Main.hs@, unavailable to anything else.
+-- This door has no evidence context: 'prepareSource' returns the outer
+-- evidence R8 case for every certified declaration, even an unused one.
 --
 -- It was never the only copy. Five harness scripts spell the same four steps
 -- for themselves — @scripts\/infer-sigma.hs@,

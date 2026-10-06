@@ -3158,7 +3158,7 @@ def renameSemanticDecl (ρg : Binding.GlobalRenaming) :
     Presentation.Decl → Presentation.Decl
   | .leaf leaf =>
       .leaf ⟨ρg.leaf leaf.id, renameResidualAtom ρg leaf.prop,
-        leaf.kind, leaf.provenance, leaf.refs.map ρg.source⟩
+        leaf.kind, leaf.provenance, leaf.refs.map ρg.source, leaf.extraction⟩
   | .claim claim =>
       .claim ⟨ρg.prop claim.id, claim.nl,
         renameResidualAtom ρg claim.formal, claim.binding⟩

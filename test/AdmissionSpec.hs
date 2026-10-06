@@ -27,6 +27,7 @@ import Lara.Admission
   , renderAdmissionRejection
   , validateAdmissionKeys
   )
+import Lara.Evidence.Admission (renderEvidenceRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
   , SourceCheckInput
@@ -57,7 +58,7 @@ apat0 p = AtomPat (Pred p) []
 
 leafD :: String -> String -> LeafKind -> Provenance -> Decl
 leafD lid p k provenance =
-  DeclLeaf (Leaf (LeafId lid) (atom0 p) k provenance [])
+  DeclLeaf (Leaf (LeafId lid) (atom0 p) k provenance [] Nothing)
 
 claimD :: String -> String -> Decl
 claimD cid p =
@@ -115,30 +116,28 @@ surfaceAttack k = case k of
 
 policy :: [((LeafKind, Provenance), Admission)] -> GroupConflictMode -> Policy
 policy admission groupMode =
-  Policy
-    { policyId = PolicyId "p"
-    , policySigma =
-        -- One authored fixture signature over this file's whole nullary-atom
-        -- vocabulary (@lara-core\@0.2@, D8): every admission fixture is
-        -- propositional, so no sort or constructor is needed.
-        sigmaOf
-          []
-          []
-          [ (h, [])
-          | h <-
-              [ "attacker", "discharged", "nested", "not_p", "one", "other"
-              , "p", "q", "r", "removed", "s", "target", "two"
-              ]
-          ]
-    , policyRules = []
-    , policyContraries = []
-    , policyExceptions = []
-    , policyAdmission = admission
-    , policyTheories = []
-    , policyGroupMode = groupMode
-    , policyMeasurands = []
-    , policyComparisonSchemes = []
-    }
+  Policy { policyId = PolicyId "p"
+  , policySigma =
+      -- One authored fixture signature over this file's whole nullary-atom
+      -- vocabulary (@lara-core\@0.2@, D8): every admission fixture is
+      -- propositional, so no sort or constructor is needed.
+      sigmaOf
+        []
+        []
+        [ (h, [])
+        | h <-
+            [ "attacker", "discharged", "nested", "not_p", "one", "other"
+            , "p", "q", "r", "removed", "s", "target", "two"
+            ]
+        ]
+  , policyRules = []
+  , policyContraries = []
+  , policyExceptions = []
+  , policyAdmission = admission
+  , policyTheories = []
+  , policyGroupMode = groupMode
+  , policyMeasurands = []
+  , policyComparisonSchemes = [], policyEvidenceCheckers = [] }
 
 accepted :: Program -> Policy -> (SourceCheckInput -> Property) -> Property
 accepted prog pol k =
@@ -146,6 +145,7 @@ accepted prog pol k =
     Left invalid -> counterexample ("unexpected source invalidity: " ++ show invalid) False
     Right (SourceRejected rejection) ->
       counterexample ("unexpected R8: " ++ renderAdmissionRejection rejection) False
+    Right (SourceEvidenceRejected rejection) -> counterexample (renderEvidenceRejection rejection) False
     Right (SourceAccepted input) -> k input
 
 -- | Omitted, empty, and unmatched tables all implement the total default-admit
@@ -315,6 +315,7 @@ prop_admissionRejectGolden =
     Nothing -> counterexample "admissionReject has no policy" False
     Just pol -> case prepareSource (negProgram admissionReject) pol of
       Left invalid -> counterexample ("R8 misclassified as invalid: " ++ show invalid) False
+      Right (SourceEvidenceRejected rejection) -> counterexample ("policy R8 lost precedence: " ++ renderEvidenceRejection rejection) False
       Right (SourceAccepted _) -> counterexample "R8 unexpectedly accepted" False
       Right (SourceRejected rejection) ->
         conjoin
@@ -466,7 +467,9 @@ prop_combinedAuditCanonical =
         ( [ leafD "e1" "p" Observed User
           , leafD "e2" "q" Attested User
           , leafD "e3" "r" Assumed User
-          , leafD "e4" "s" Certified User
+          -- Certification is not this audit-order property's subject; package
+          -- tests separately cover certified replay before quarantine.
+          , leafD "e4" "s" Assumed User
           , DeclGroup (DupGroup (GroupId "g1") [LeafId "e1", LeafId "e2"])
           , DeclGroup (DupGroup (GroupId "g2") [LeafId "e1", LeafId "e3"])
           , argLeaf "a3" "e3"
@@ -589,6 +592,38 @@ prop_policyPrunedRejectionKeepsLocation =
         ]
     pol = policy [((Observed, User), Quarantine)] QuarantineOnConflict
 
+-- | Checker-stage indices still address the retained program when the removal
+-- comes from an incompatible group rather than a policy admission row.
+prop_groupPrunedRejectionKeepsIdentity :: Property
+prop_groupPrunedRejectionKeepsIdentity =
+  accepted prog pol $ \input ->
+    let result = runSourceCheck input
+     in conjoin
+          [ verdictOutcome (sourceResultVerdict result) === Reject (RejectClass R1)
+          , sourceRejectDiagnostic (sourceResultJsonValue result)
+              === Just
+                ( "R1"
+                , "support"
+                , JObject
+                    [ ("kind", JString "argument")
+                    , ("id", JString "a_bad")
+                    , ("index", JNumber 0)
+                    ]
+                , []
+                )
+          ]
+  where
+    prog =
+      program
+        []
+        [ leafD "e_drop" "p" Observed User
+        , leafD "e_conflict" "r" Attested User
+        , DeclGroup (DupGroup (GroupId "incompatible") [LeafId "e_drop", LeafId "e_conflict"])
+        , argLeaf "a_drop" "e_drop"
+        , argLeaf "a_bad" "e_missing"
+        ]
+    pol = policy [] QuarantineOnConflict
+
 -- | @(class, stage, constituent, messages)@ of a rendered source rejection.
 sourceRejectDiagnostic :: JValue -> Maybe (String, String, JValue, [String])
 sourceRejectDiagnostic (JObject top) = do
@@ -637,4 +672,6 @@ admissionSpecProps =
   , ("admission quarantine applies blocked overlay", quickCheckResult prop_policyQuarantineBlockedOverlay)
   , ("admission pruned rejection keeps its located stage/constituent",
       quickCheckResult prop_policyPrunedRejectionKeepsLocation)
+  , ("admission group-pruned checker rejection keeps retained argument identity",
+      quickCheckResult prop_groupPrunedRejectionKeepsIdentity)
   ]

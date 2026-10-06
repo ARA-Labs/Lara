@@ -1,0 +1,16 @@
+policy certified-simformer
+
+pred training_time_s(Str, Str, Num)
+pred training_loss(Num)
+
+rule record_training(M, T, R)
+  mode = defeasible
+  premises = [ training_time_s(M, T, R) ]
+  conclusion = training_time_s(M, T, R)
+
+rule record_loss(X)
+  mode = defeasible
+  premises = [ training_loss(X) ]
+  conclusion = training_loss(X)
+
+evidence-checkers = (checkers (csv-row 1) (json-pointer 1))

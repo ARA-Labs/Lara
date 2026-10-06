@@ -26,6 +26,7 @@ library
     import:           warnings
     hs-source-dirs:   src
     other-modules:    Lara.Admission.Internal
+                      Lara.Evidence.Internal
                       Lara.Driver.Internal
                       Lara.Mutate.Accept.Build
                       Lara.Mutate.Accept.Ops
@@ -53,6 +54,18 @@ library
                       Lara.Syntax
                       Lara.Elaborate
                       Lara.Source.Load
+                      Lara.Evidence.Types
+                      Lara.Evidence.Syntax
+                      Lara.Evidence.Decimal
+                      Lara.Evidence.Manifest
+                      Lara.Evidence.Snapshot
+                      Lara.Evidence.Registry
+                      Lara.Evidence.Runner
+                      Lara.Evidence.CSV
+                      Lara.Evidence.JSON
+                      Lara.Evidence.Admission
+                      Lara.Evidence.Load
+                      Lara.Evidence.Report
                       Lara.Elaborate.Internal
                       Lara.Elaborate.Error
                       Lara.Elaborate.CertSlots
@@ -124,6 +137,8 @@ library
                     , process
                     , text
                     , unix
+                    , cryptohash-sha256
+    c-sources:        cbits/evidence_posix.c
     default-language: GHC2021
 
 executable lara
@@ -176,6 +191,19 @@ executable map-envelope-differential
                     , lara
     default-language: GHC2021
 
+executable evidence-differential
+    import:           warnings
+    hs-source-dirs:   scripts test
+    main-is:          evidence-differential.hs
+    other-modules:    Lara.AdmissionFixture
+                      SigmaFixture
+    build-depends:    base >=4 && <5
+                    , bytestring
+                    , containers
+                    , lara
+                    , text
+    default-language: GHC2021
+
 test-suite lara-test
     import:           warnings
     type:             exitcode-stdio-1.0
@@ -184,6 +212,11 @@ test-suite lara-test
     other-modules:    SigmaFixture
                       CorpusUnitsSpec
                       AdmissionSpec
+                      EvidenceExtractSpec
+                      EvidenceSnapshotSpec
+                      EvidenceAdmissionSpec
+                      EvidenceReportSpec
+                      EvidenceFixture
                       BindingAuditSpec
                       Lara.AdmissionFixture
                       Lara.TempTree

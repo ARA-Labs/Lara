@@ -71,6 +71,7 @@ import System.Process (CreateProcess (..), proc, readCreateProcessWithExitCode)
 import Test.QuickCheck
 
 import Lara.AST (ArgId (..), Label (..), PropId (..), Status (..))
+import Lara.Evidence.Admission (renderEvidenceRejection)
 import Lara.Elaborate (PreparedSource (..), runSourceCheck, sourceResultVerdict)
 import Lara.Map.Driver (encodeMapCheckInput, mapCheckInput, runMap)
 import Lara.Map.Load (loadMap)
@@ -212,6 +213,7 @@ soloOutcome path = do
     Left err -> Left (renderSourceLoadError err)
     Right source -> case loadedPrepared source of
       SourceRejected _ -> Left "admission rejection"
+      SourceEvidenceRejected rejection -> Left (renderEvidenceRejection rejection)
       SourceAccepted input ->
         case verdictOutcome (sourceResultVerdict (runSourceCheck input)) of
           Reject rejection -> Left ("reject " ++ show rejection)

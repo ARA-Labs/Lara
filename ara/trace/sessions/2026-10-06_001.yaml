@@ -2,9 +2,9 @@ session:
   id: 2026-10-06_001
   date: '2026-10-06'
   started: 2026-10-06T03:30+00:00
-  last_turn: 2026-10-06T05:40+00:00
-  turn_count: 1
-  summary: Finished the narrowed #11/#14 results in PR #12 (completion transitions, justified completion, quarantined batch leaves); local gates pass.
+  last_turn: 2026-10-06T09:45+00:00
+  turn_count: 5
+  summary: Approved and then landed the issue 8 certified-evidence layer - package door, finite model, capture seal, differential alignment - with make local-gates and cabal test all passing.
 events_logged:
 - turn: 1
   type: experiment
@@ -18,6 +18,18 @@ events_logged:
   routing: direct
   provenance: user
   summary: user chose to finish the three narrowed results in PR 12 rather than open a follow-up issue
+- turn: 2
+  type: decision
+  id: N352_ara_evidence
+  routing: direct
+  provenance: user
+  summary: require the result file backing certified evidence to be part of ARA
+- turn: 2
+  type: observation
+  id: O184
+  routing: staged
+  provenance: ai-suggested
+  summary: package-local hash-pinned replay at admission, without changing the symbolic core
 ai_actions:
 - turn: 1
   action: One agent proved the three remaining update results; verified build and gates; pushed and updated PR 12 to close 11/13/14/15/16
@@ -29,12 +41,308 @@ ai_actions:
   - lean/Lara/Grounded.lean
   - docs/located-gap-decision.md
   - docs/theory-m3-source-updates.md
+- turn: 2
+  action: Read the ARA corpus mapping and recorded the packaging direction separately from the proposed enforcement contract; no runtime code changed or checks run
+  provenance: ai-executed
+  files_changed:
+  - ara/trace/exploration_tree.yaml
+  - ara/staging/observations.yaml
+  - ara/trace/sessions/2026-10-06_001.yaml
+  - ara/trace/sessions/session_index.yaml
+  - ara/trace/pm_reasoning_log.yaml
 claims_touched: []
 logic_revisions: []
 key_context:
 - turn: 1
   excerpt: 'User: finish all three here; update the PR description to close those related issues.'
+- turn: 2
+  excerpt: "User: since we are acting as the meta-language of ARA, let's require that file to be part of ARA"
 open_threads:
 - PR 12 review and merge; m5-freeze-v8 tag on the merge commit
+- Issue 8 evidence-admission design and original-output inventory gate; packaging direction recorded, implementation contract unsettled
 ai_suggestions_pending:
 - O183 (atomic completion complete) now has its transition theorems; still staged
+- O184 proposes package-local replay enforcement; not yet an approved implementation design
+
+turn_3:
+  events_logged:
+  - turn: 3
+    type: decision
+    id: N353_evidence_plan
+    routing: direct
+    provenance: user-revised
+    summary: approved the ARA evidence boundary and requested its implementation plan
+  - turn: 3
+    type: architecture
+    id: O184
+    routing: crystallized
+    provenance: user-revised
+    summary: recorded the affirmed package/replay constraint in the current logic layer
+  - turn: 3
+    type: observation
+    id: O185
+    routing: staged
+    provenance: ai-suggested
+    summary: new admission and replay proof obligations reuse existing core metatheory
+  ai_actions:
+  - turn: 3
+    action: >-
+      Inspected Haskell source entry points and Lean reuse with two read-only scouts;
+      wrote the implementation plan and updated the evidence decision and docs index.
+      Plan style and existing-path/link checks pass. No evidence runtime code,
+      new Lean proofs, experiment inventory, build or runtime tests were executed.
+    provenance: ai-executed
+    files_changed:
+    - plans/2026-10-06-ara-certified-evidence.md
+    - docs/evidence-admission-decision.md
+    - docs/evidence-admission-gated-tasks.md
+    - docs/README.md
+    - ara/logic/solution/constraints.md
+    - ara/staging/observations.yaml
+    - ara/trace/exploration_tree.yaml
+    - ara/trace/sessions/2026-10-06_001.yaml
+    - ara/trace/sessions/session_index.yaml
+    - ara/trace/pm_reasoning_log.yaml
+  claims_touched: []
+  logic_revisions:
+  - turn: 3
+    entry: logic/solution/constraints.md#ara-packaged-certified-evidence-planned
+    field: section
+    before: null
+    after: >-
+      Approved planned constraint requiring ARA-contained, manifest-listed,
+      hash-pinned source bytes and approved-checker replay for certified leaves,
+      enforced outside the symbolic core without a truth guarantee.
+    signal: verbal-affirmation
+    provenance: user-revised
+    note: Crystallized O184; implementation remains gated.
+  key_context:
+  - turn: 3
+    excerpt: "User: sure. let's write down the plan for how to implement this. and for this, do we introduce new meta-theory?"
+  open_threads:
+  - PR 12 freeze-tag follow-through recorded by the earlier turn
+  - Issue 8 Task 0 original-output inventory and review of the concrete evidence contract
+  ai_suggestions_pending:
+  - O185 proof obligations and the plan's detailed checker/manifest/source contracts remain implementation targets
+
+turn_4:
+  events_logged:
+  - turn: 4
+    type: experiment
+    id: N354_evidence_inventory
+    routing: direct
+    provenance: ai-executed
+    summary: acquired original log/CSV/notebook bytes and ran inventory/selector probes; approved TSV/JSON gate not passed
+  - turn: 4
+    type: decision
+    id: N355_evidence_gate_stop
+    routing: direct
+    provenance: ai-executed
+    summary: followed the plan's gate-failure branch; documented blocker and kept issue 8 open
+  - turn: 4
+    type: observation
+    id: O186
+    routing: staged
+    provenance: ai-suggested
+    summary: CSV-row plus a scoped JSON saved-loss encoding may be an inventory-backed replacement portfolio
+  ai_actions:
+  - turn: 4
+    action: >-
+      Initialized the pinned corpus; two read-only scouts investigated original
+      acquisition branches. Ran byte/hash, archive-member, exact-decimal, TSV,
+      CSV-key and JSON-pointer probes. Acquired and compared original Simformer
+      notebook bytes. Updated inventory, decision section 9, docs index, historical
+      sketch pointer and living plan. Reported the gate blocker and costs on issue
+      8. Documented log reproduction and local Markdown checks pass; inventory
+      style is clean. No Haskell/Lean runtime, wire, golden or freeze change.
+    provenance: ai-executed
+    files_changed:
+    - docs/evidence-admission-inventory.md
+    - docs/evidence-admission-decision.md
+    - docs/evidence-admission-gated-tasks.md
+    - docs/README.md
+    - plans/2026-10-06-ara-certified-evidence.md
+    - ara/evidence/results/certified_evidence_inventory_2026-10-06.md
+    - ara/evidence/README.md
+    - ara/trace/exploration_tree.yaml
+    - ara/staging/observations.yaml
+    - ara/trace/sessions/2026-10-06_001.yaml
+    - ara/trace/sessions/session_index.yaml
+    - ara/trace/pm_reasoning_log.yaml
+  - turn: 4
+    action: >-
+      Epilogue checks pass for strict YAML, session-index/source spans, trace IDs,
+      new O186 binding and claim dependency references. The broader observation
+      ID audit found historical duplicate O176/O177; opened issue 18 instead of
+      rewriting append-only records. No claim that all observation IDs are unique.
+    provenance: ai-executed
+    files_changed: []
+  claims_touched: []
+  logic_revisions: []
+  key_context:
+  - turn: 4
+    excerpt: >-
+      User requested finishing the approved plan, updating docs especially
+      decision section 9, recording the session and opening a PR. The plan
+      explicitly forbids runtime implementation before the original-output gate
+      and requires stopping/reporting if it fails.
+  open_threads:
+  - PR 12 review/merge and m5-freeze-v8 tag follow-through from earlier turns
+  - Issue 8 portfolio/encoding review, ten-leaf original-output mapping and remaining Tasks 0 through 7
+  - Issue 18 historical duplicate O176/O177 provenance and cross-reference audit
+  ai_suggestions_pending:
+  - O185 proof obligations remain unimplemented and staged
+  - O186 proposes CSV-row and scoped JSON loss decoding; review and approval still required
+
+turn_5:
+  events_logged:
+  - turn: 5
+    type: experiment
+    id: N356_evidence_landed
+    routing: direct
+    provenance: ai-executed
+    summary: landed the evidence runtime, package door and finite Lean model; real packages accepted and make local-gates passes
+  - turn: 5
+    type: decision
+    id: N357_capture_seal
+    routing: direct
+    provenance: ai-executed
+    summary: closed the borrowed-capture promotion gap at the admission boundary; regression falsified before the fix, passes after
+  - turn: 5
+    type: decision
+    id: N358_rejection_encoding
+    routing: direct
+    provenance: ai-executed
+    summary: extraction rejections are leaf-located and capture rejections name the object; aligned adapter, typed corpus and a misaligned fixture to 50/50
+  - turn: 5
+    type: decision
+    id: N359_plan_retired
+    routing: direct
+    provenance: ai-executed
+    summary: deleted the executed plan, moved durable content into docs, opened issue 20 for the deferred evaluation
+  - turn: 5
+    type: architecture
+    id: O185
+    routing: crystallized
+    provenance: ai-executed
+    summary: recorded the discharged evidence-layer proof obligations in the logic layer; parsers, OS and cryptography stay trusted
+  - turn: 5
+    type: architecture
+    id: O186
+    routing: crystallized
+    provenance: ai-executed
+    summary: recorded the landed CSV-row plus scoped JSON-pointer portfolio and its ten original-byte leaves
+  - turn: 5
+    type: observation
+    id: O187
+    routing: staged
+    provenance: ai-suggested
+    summary: key-addressed lookups are membership by name; pair them with equality against the declared entry
+  - turn: 5
+    type: observation
+    id: O188
+    routing: staged
+    provenance: ai-suggested
+    summary: this Lean toolchain needs two definitional Except-bind lemmas for do-block proofs
+  - turn: 5
+    type: observation
+    id: O189
+    routing: staged
+    provenance: ai-suggested
+    summary: a fixture family with its own harness must be excluded from wire-anchor discovery in both the script and the generator
+  ai_actions:
+  - turn: 5
+    action: >-
+      Finished the Lean evidence model (Admission, Composition, driver and the
+      source boundary) to a sorry-free, axiom-trio build; fixed the source
+      term/argument surface gap that blocked the original packages; ran the real
+      package door on both original packages and the quarantine package; added
+      the capture seal and its regression; aligned the typed differential and its
+      corpus; excluded the evidence trees from wire-anchor discovery; regenerated
+      the surface golden; updated the spec, decision record, inventory and gated
+      sketch; deleted the executed plan; committed fd8b74d and updated PR 19.
+      make local-gates and cabal test all pass.
+    provenance: ai-executed
+    files_changed:
+    - src/Lara/Evidence/Admission.hs
+    - src/Lara/Elaborate.hs
+    - src/Lara/Syntax.hs
+    - lean/Lara/Evidence/Types.lean
+    - lean/Lara/Evidence/Runner.lean
+    - lean/Lara/Evidence/Admission.lean
+    - lean/Lara/Evidence/Composition.lean
+    - lean/Lara/EvidenceDriver.lean
+    - lean/Lara/Surface/Source.lean
+    - lean/Lara/SurfaceConformanceMain.lean
+    - lean/AxCheck.lean
+    - scripts/evidence-differential.hs
+    - scripts/differential.sh
+    - scripts/gen-anchor-manifest.sh
+    - fixtures/evidence/model/MANIFEST.tsv
+    - fixtures/evidence/model/capture-manifest-order.sexp
+    - test/BindingAuditSpec.hs
+    - test/SurfaceConformanceSpec.hs
+    - test/EvidenceAdmissionSpec.hs
+    - test/surface-conformance.golden
+    - docs/spec.md
+    - docs/evidence-admission-decision.md
+    - docs/evidence-admission-inventory.md
+    - docs/evidence-admission-gated-tasks.md
+    - docs/README.md
+    - fixtures/ANCHORS.tsv
+    - examples/certified-evidence
+    - plans/2026-10-06-ara-certified-evidence.md
+    - ara/evidence/results/certified_evidence_landing_2026-10-06.md
+    - ara/logic/solution/constraints.md
+    - ara/staging/observations.yaml
+    - ara/trace/exploration_tree.yaml
+    - ara/trace/sessions/2026-10-06_001.yaml
+    - ara/trace/sessions/session_index.yaml
+    - ara/trace/pm_reasoning_log.yaml
+  claims_touched: []
+  logic_revisions:
+  - turn: 5
+    entry: logic/solution/constraints.md#ara-packaged-certified-evidence-planned
+    field: section
+    before: >-
+      Section "ARA-packaged certified evidence (planned)": Status "Approved design
+      direction; implementation remains subject to the original-output inventory
+      gate"; Sources cited the living plan.
+    after: >-
+      Section "ARA-packaged certified evidence (implemented)": Status implemented
+      and gate-passing at fd8b74d; adds the captured-object-under-its-own-entry
+      rule, the explicit trusted base, the gate evidence pointer and the open
+      evaluation on issue 20; Sources point at the decision record, the landing
+      evidence and the inventory.
+    signal: artifact-commitment
+    provenance: ai-executed
+    note: Crystallized O185 and O186; the section anchor moved, so O184's promoted_to pointer was updated in place.
+  - turn: 5
+    entry: logic/claims.md:210,241,912
+    field: Sources
+    before: "docs/spec.md:1078 / :1490 / :1497"
+    after: "docs/spec.md:1082 / :1494 / :1501"
+    signal: dependency-change
+    provenance: ai-executed
+    note: The spec's §4.3 witness note grew by four lines in this turn's R8 enforcement edit, so the located quotations moved; the quoted text did not change.
+  - turn: 5
+    entry: logic/claims.md:39,157,182
+    field: Sources
+    before: "docs/spec.md:1221 / :1246 / :1424 / :1419-1420"
+    after: "docs/spec.md:1225 / :1250 / :1428 / :1423-1424"
+    signal: dependency-change
+    provenance: ai-executed
+    note: Same four-line shift; `scripts/check_ara_source_spans.py` now passes over 66 quotations.
+  key_context:
+  - turn: 5
+    excerpt: >-
+      User asked to complete the feature end to end on branch
+      feat/enforce-certified-leaf-checker, running enough verification to be
+      certain, and to keep a failure log; review and the eventual merge are the
+      user's.
+  open_threads:
+  - PR 19 review and merge (draft); issue 8 closes with it
+  - Issue 20 human faithfulness review and measured-input/report freeze
+  - PR 12 review/merge and m5-freeze-v8 tag follow-through from earlier turns
+  ai_suggestions_pending:
+  - O187 key-addressed lookup rule; O188 Except-bind proof lemmas; O189 harness-owned fixture exclusion

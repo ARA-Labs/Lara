@@ -8,7 +8,7 @@ claim claim-main
   binding = { author = author, rationale = "nd alpha", audit-status = reviewed }
 
 leaf proof : score(7)
-  kind       = certified
+  kind       = assumed
   provenance = user
   refs       = []
 

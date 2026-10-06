@@ -7,6 +7,7 @@ import Test.QuickCheck
 import Lara.Prop (FunSym (..), Pred (..), Prop (..), Term (..))
 
 import Lara.AST
+import Lara.Evidence.Admission (renderEvidenceRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
   , prepareSource
@@ -409,6 +410,7 @@ checkedVerdictJson source = do
   prepared <- either (Left . show) Right (prepareSource program policy)
   result <- case prepared of
     SourceRejected rejection -> Left ("unexpected admission rejection: " ++ show rejection)
+    SourceEvidenceRejected rejection -> Left (renderEvidenceRejection rejection)
     SourceAccepted sourceInput -> Right (runSourceCheck sourceInput)
   let verdict = sourceResultVerdict result
   case verdict of

@@ -309,7 +309,8 @@ skipSpace p =
 -- code, and which @scripts/differential.sh@ would otherwise misread as a checker
 -- rejection (exit 1). Comfortably above any real artifact's structural depth:
 -- @scripts\/differential.sh@ measures the deepest committed @.sexp@\/@.laramap@\/
--- @.lara@ tree on every run and fails if the margin ever narrows.
+-- @.lara@ tree on every run, currently bounded at 135 levels by the typed
+-- evidence-model JSON boundary fixtures, and fails if the margin ever narrows.
 --
 -- Part of the shared reader contract, not a Haskell-only boundary: Lean's
 -- @Lara.Driver.maxDepth@ carries the same value and its reader refuses at the

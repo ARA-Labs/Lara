@@ -10,7 +10,7 @@ constructor shape as the Haskell record or sum it models:
 * `measurandCtor` pins `Measurand` to `(MeasurandId, TermSort, Option Polarity)` —
   the `lara-syntax@0.3` shape of `AST.Measurand`, with an arbitrary declared
   sort and the `Num`-gated *optional* polarity clause.
-* `policyCtor` pins `Policy` to the ten fields of `AST.Policy` **in order**,
+* `policyCtor` pins `Policy` to the eleven fields of `AST.Policy` **in order**,
   including `policySigma` in second position.
 
 Changing any Lean record field count or type stops this file compiling. Named
@@ -79,6 +79,7 @@ namespace Lara.PresentationParity
 
 open Lara (Term Terms Atom)
 open Lara.Presentation
+open Lara.Evidence
 
 -- Without this, an unknown type name in a signature below would be silently
 -- auto-bound as an implicit universe-polymorphic variable and unify with
@@ -148,7 +149,8 @@ def dischargeEntryCtor :
 
 def atomPatCtor : String → Pats → AtomPat := AtomPat.mk
 
-def leafCtor : LeafId → Atom → LeafKind → Provenance → List SourceRef → Leaf := Leaf.mk
+def leafCtor : LeafId → Atom → LeafKind → Provenance → List SourceRef →
+    Option ExtractionRequest → Leaf := Leaf.mk
 
 def bindingCtor : String → String → AuditStatus → Binding := Binding.mk
 
@@ -183,12 +185,32 @@ def measurandCtor :
 def comparisonSchemeCtor :
     Relation → Polarity → RuleId → RuleId → ComparisonScheme := ComparisonScheme.mk
 
-/-- `AST.Policy`: ten fields, `policySigma` second. -/
+/-- `AST.Policy`: eleven fields, `policySigma` second; evidence allowlist last. -/
 def policyCtor :
     PolicyId → Sigma → List Rule → List Contrary → List Exception →
     List ExpectedAdmissionEntry → List ExpectedTheoryEntry → GroupConflictMode →
-    List Measurand → List ComparisonScheme → Policy := Policy.mk
+    List Measurand → List ComparisonScheme →
+    List (LeafCheckerId × CheckerVersion) → Policy := Policy.mk
 
+
+abbrev ExpectedJsonPath := List JsonToken
+abbrev EvidenceCheckerEntry := LeafCheckerId × CheckerVersion
+abbrev ExpectedEvidenceCheckerEntry := LeafCheckerId × CheckerVersion
+def checkerVersionCtor : Int → CheckerVersion := CheckerVersion.mk
+def objectIdCtor : String → ObjectId := ObjectId.mk
+def columnNameCtor : String → ColumnName := ColumnName.mk
+def jsonTokenCtor : String → JsonToken := JsonToken.mk
+def csvSelectorCtor : ColumnName → TermEncoding → CsvSelector := CsvSelector.mk
+def jsonSelectorCtor : JsonPath → TermEncoding → JsonSelector := JsonSelector.mk
+def csvRowRequestCtor : CheckerVersion → ObjectId → ColumnName → String →
+    List CsvSelector → String → ExtractionRequest := ExtractionRequest.csvRowRequest
+def jsonPointerRequestCtor : CheckerVersion → ObjectId → List JsonSelector →
+    String → ExtractionRequest := ExtractionRequest.jsonPointerRequest
+def leafCheckerTag : LeafCheckerId → String := checkerName
+def termEncodingTag : TermEncoding → String := encodingName
+def extractionTag : ExtractionRequest → String
+  | .csvRowRequest .. => "csv-row"
+  | .jsonPointerRequest .. => "json-pointer"
 /-- Exemption 2: `payload` is the native S-expression type and is not compared. -/
 def certCtor : BackendId → Int → TheoryDigest → Sx → Cert := Cert.mk
 
@@ -457,7 +479,7 @@ def shapeRows : List (String × List String) :=
   , ("ArgConcl", ["supports-claim", "supports-derived", "challenges"])
   , ("Decl", ["leaf", "claim", "arg", "attack", "status", "group", "comparison"])
   , ("AtomPat", ["pred", "args"])
-  , ("Leaf", ["id", "prop", "kind", "provenance", "refs"])
+  , ("Leaf", ["id", "prop", "kind", "provenance", "refs", "extraction"])
   , ("Binding", ["author", "rationale", "audit-status"])
   , ("Claim", ["id", "nl", "formal", "binding"])
   , ("Question", ["id", "answer", "necessity"])
@@ -475,7 +497,7 @@ def shapeRows : List (String × List String) :=
   , ("ComparisonScheme", ["relation", "polarity", "recheck", "bridge"])
   , ("Policy",
       [ "id", "sigma", "rules", "contraries", "exceptions", "admission"
-      , "theories", "group-mode", "measurands", "comparison-schemes" ])
+      , "theories", "group-mode", "measurands", "comparison-schemes", "evidence-checkers" ])
   , ("Cert", ["backend", "version", "theory", "payload"])
   , ("SRule", ["rule", "subst", "premises", "discharge", "holes", "assurance"])
   , ("ArgRef", ["val"])
@@ -503,6 +525,19 @@ def shapeRows : List (String × List String) :=
       , "bridge-arg", "result", "baseline", "binding", "claim", "supports" ])
   , ("M5.ValueBinding", ["name", "term"])
   , ("M5.Cert", ["backend", "version", "theory", "payload"])
+  , ("LeafCheckerId", ["csv-row", "json-pointer"])
+  , ("CheckerVersion", ["val"])
+  , ("ObjectId", ["val"])
+  , ("ColumnName", ["val"])
+  , ("JsonToken", ["val"])
+  , ("JsonPath", ["tokens:List JsonToken"])
+  , ("TermEncoding", ["decimal", "text", "decimal-line"])
+  , ("CsvSelector", ["column", "encoding"])
+  , ("JsonSelector", ["path", "encoding"])
+  , ("ExtractionRequest", ["csv-row", "json-pointer"])
+  , ("CsvRowRequest", ["version", "object", "key-column", "key-value", "selectors", "predicate"])
+  , ("JsonPointerRequest", ["version", "object", "selectors", "predicate"])
+  , ("EvidenceCheckerEntry", ["checker:LeafCheckerId", "version:CheckerVersion"])
   ]
 
 /-- The inventory as the guard's normalized TSV: one row per line, name first,
@@ -567,6 +602,7 @@ def normalizeFieldName : String → String
   | "allowTrusted" => "allow-trusted"
   | "groupMode" => "group-mode"
   | "comparisonSchemes" => "comparison-schemes"
+  | "evidenceCheckers" => "evidence-checkers"
   | "recheckArg" => "recheck-arg"
   | "bridgeArg" => "bridge-arg"
   | "nlRaw" => "nl-raw"
@@ -700,6 +736,20 @@ def shapeChecks : List (String × ShapeCheck) :=
   , ("M5.Comparison", .fields ``Lara.Presentation.Comparison)
   , ("M5.ValueBinding", .fields ``Lara.Presentation.ValueBinding)
   , ("M5.Cert", .fields ``Lara.Presentation.Cert)
+  , ("LeafCheckerId", .ctors ``Lara.Evidence.LeafCheckerId)
+  , ("CheckerVersion", .fields ``Lara.Evidence.CheckerVersion)
+  , ("ObjectId", .fields ``Lara.Evidence.ObjectId)
+  , ("ColumnName", .fields ``Lara.Evidence.ColumnName)
+  , ("JsonToken", .fields ``Lara.Evidence.JsonToken)
+  , ("JsonPath", .aliasDefEq ``Lara.Evidence.JsonPath ``Lara.PresentationParity.ExpectedJsonPath 1)
+  , ("TermEncoding", .ctors ``Lara.Evidence.TermEncoding)
+  , ("CsvSelector", .fields ``Lara.Evidence.CsvSelector)
+  , ("JsonSelector", .fields ``Lara.Evidence.JsonSelector)
+  , ("ExtractionRequest", .ctors ``Lara.Evidence.ExtractionRequest)
+  , ("CsvRowRequest", .ctorArity ``Lara.Evidence.ExtractionRequest.csvRowRequest)
+  , ("JsonPointerRequest", .ctorArity ``Lara.Evidence.ExtractionRequest.jsonPointerRequest)
+  , ("EvidenceCheckerEntry", .aliasDefEq ``Lara.PresentationParity.EvidenceCheckerEntry
+      ``Lara.PresentationParity.ExpectedEvidenceCheckerEntry 2)
   ]
 
 open Lean Meta in

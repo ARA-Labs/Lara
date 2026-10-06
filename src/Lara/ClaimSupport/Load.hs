@@ -11,6 +11,9 @@
 -- A decode\/parse failure or a non-accept verdict is a hard 'error': every
 -- frozen corpus unit is accept-class with a well-formed surface, so any failure
 -- here means the freeze or a decode path drifted.
+--
+-- This is raw declared-evidence corpus accounting, not source admission or
+-- package certification. Structural metadata here never mints byte assurance.
 module Lara.ClaimSupport.Load
   ( loadPolicy
   , loadUnitRecord

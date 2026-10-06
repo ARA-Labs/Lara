@@ -60,6 +60,7 @@ import Lara.AST
   , Unit (..)
   )
 import Lara.Admission (renderAdmissionRejection)
+import Lara.Evidence.Admission (renderEvidenceRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
   , elabErrorMessage
@@ -110,6 +111,7 @@ runToVerdict :: Policy -> Program -> Either String Verdict
 runToVerdict pol prog = case prepareSource prog pol of
   Left invalid -> Left ("source invalid: " ++ renderSourceInvalid invalid)
   Right (SourceRejected r) -> Left ("admission rejection: " ++ renderAdmissionRejection r)
+  Right (SourceEvidenceRejected rejection) -> Left (renderEvidenceRejection rejection)
   Right (SourceAccepted input) -> Right (sourceResultVerdict (runSourceCheck input))
 
 -- | The generated sub-claim's @formal@ — the goal atom the block emitted —

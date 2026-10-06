@@ -53,6 +53,7 @@ import Lara.AST
   )
 import qualified Lara.AST as AST
 import Lara.Driver (runCheck)
+import Lara.Evidence.Admission (renderEvidenceRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
   , prepareSource
@@ -1345,6 +1346,7 @@ e2eVerdict decls = do
     Left invalid -> Left ("source invalid: " ++ renderSourceInvalid invalid)
     Right (SourceRejected rejection) ->
       Left ("admission rejection: " ++ renderAdmissionRejection rejection)
+    Right (SourceEvidenceRejected rejection) -> Left (renderEvidenceRejection rejection)
     Right (SourceAccepted input) -> Right (sourceResultVerdict (runSourceCheck input))
 
 -- | The replay identity + check input over a (possibly rewritten) unit — the

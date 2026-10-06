@@ -114,13 +114,11 @@ atom p = Prop (Pred p)
 
 leafD :: String -> Prop -> LeafKind -> Provenance -> Leaf
 leafD lid p k prov =
-  Leaf
-    { leafId = LeafId lid
-    , leafProp = p
-    , leafKind = k
-    , leafProvenance = prov
-    , leafRefs = []
-    }
+  Leaf { leafId = LeafId lid
+  , leafProp = p
+  , leafKind = k
+  , leafProvenance = prov
+  , leafRefs = [], leafExtraction = Nothing }
 
 claimD :: String -> String -> Prop -> Claim
 claimD cid nl formal =
@@ -320,25 +318,23 @@ premiseMismatch =
           ]
     , negPolicy =
         Just $
-          Policy
-            { policyId = PolicyId "empirical-v1"
-            , policySigma = empiricalNegativesSigma
-            , policyRules =
-                [ defeasibleRule
-                    "controlled_experiment"
-                    ["M", "Acc", "D", "Delta"]
-                    [AtomPat (Pred "reports") [PCon (FunSym "exp_3") [], PCon (FunSym "effect") [PVar (Param "M"), PVar (Param "Acc"), PVar (Param "D"), PVar (Param "Delta")]]]
-                    (AtomPat (Pred "improves") [PVar (Param "M"), PVar (Param "Acc"), PVar (Param "D")])
-                    []
-                ]
-            , policyContraries = []
-            , policyExceptions = []
-            , policyAdmission = []
-            , policyTheories = []
-            , policyGroupMode = QuarantineOnConflict
-            , policyMeasurands = []
-            , policyComparisonSchemes = []
-            }
+          Policy { policyId = PolicyId "empirical-v1"
+          , policySigma = empiricalNegativesSigma
+          , policyRules =
+              [ defeasibleRule
+                  "controlled_experiment"
+                  ["M", "Acc", "D", "Delta"]
+                  [AtomPat (Pred "reports") [PCon (FunSym "exp_3") [], PCon (FunSym "effect") [PVar (Param "M"), PVar (Param "Acc"), PVar (Param "D"), PVar (Param "Delta")]]]
+                  (AtomPat (Pred "improves") [PVar (Param "M"), PVar (Param "Acc"), PVar (Param "D")])
+                  []
+              ]
+          , policyContraries = []
+          , policyExceptions = []
+          , policyAdmission = []
+          , policyTheories = []
+          , policyGroupMode = QuarantineOnConflict
+          , policyMeasurands = []
+          , policyComparisonSchemes = [], policyEvidenceCheckers = [] }
     , negDiagnostic =
         "arg 'a', premise 0: concl(e1) = reports(exp_3, effect(m, accuracy, d_shift, 2.1)) "
           ++ "does not match P0·theta = reports(exp_3, effect(m, accuracy, d, 2.1))"
@@ -389,25 +385,23 @@ unaccountedQuestion =
           ]
     , negPolicy =
         Just $
-          Policy
-            { policyId = PolicyId "empirical-v1"
-            , policySigma = empiricalNegativesSigma
-            , policyRules =
-                [ defeasibleRule
-                    "controlled_experiment"
-                    ["M", "Acc", "D", "Delta"]
-                    [AtomPat (Pred "reports") [PCon (FunSym "exp_3") [], PCon (FunSym "effect") [PVar (Param "M"), PVar (Param "Acc"), PVar (Param "D"), PVar (Param "Delta")]]]
-                    (AtomPat (Pred "improves") [PVar (Param "M"), PVar (Param "Acc"), PVar (Param "D")])
-                    [Question (QuestionId "randomization") (AtomPat (Pred "randomized") [PVar (Param "M")]) Mandatory]
-                ]
-            , policyContraries = []
-            , policyExceptions = []
-            , policyAdmission = []
-            , policyTheories = []
-            , policyGroupMode = QuarantineOnConflict
-            , policyMeasurands = []
-            , policyComparisonSchemes = []
-            }
+          Policy { policyId = PolicyId "empirical-v1"
+          , policySigma = empiricalNegativesSigma
+          , policyRules =
+              [ defeasibleRule
+                  "controlled_experiment"
+                  ["M", "Acc", "D", "Delta"]
+                  [AtomPat (Pred "reports") [PCon (FunSym "exp_3") [], PCon (FunSym "effect") [PVar (Param "M"), PVar (Param "Acc"), PVar (Param "D"), PVar (Param "Delta")]]]
+                  (AtomPat (Pred "improves") [PVar (Param "M"), PVar (Param "Acc"), PVar (Param "D")])
+                  [Question (QuestionId "randomization") (AtomPat (Pred "randomized") [PVar (Param "M")]) Mandatory]
+              ]
+          , policyContraries = []
+          , policyExceptions = []
+          , policyAdmission = []
+          , policyTheories = []
+          , policyGroupMode = QuarantineOnConflict
+          , policyMeasurands = []
+          , policyComparisonSchemes = [], policyEvidenceCheckers = [] }
     , negDiagnostic =
         "arg 'a': question 'randomization' of rule 'controlled_experiment' is "
           ++ "neither discharged nor declared as an open hole"
@@ -457,21 +451,19 @@ illTypedAttack =
           ]
     , negPolicy =
         Just $
-          Policy
-            { policyId = PolicyId "mixed-v1"
-            , policySigma = sigmaOf [] [] [("p", []), ("q", []), ("not_q", []), ("grounds_not_q", [])]
-            , policyRules =
-                [ strictRule "deductive_step" [] [AtomPat (Pred "p") []] (AtomPat (Pred "q") []) True []
-                , defeasibleRule "presumption" [] [AtomPat (Pred "grounds_not_q") []] (AtomPat (Pred "not_q") []) []
-                ]
-            , policyContraries = [Contrary (AtomPat (Pred "q") []) (AtomPat (Pred "not_q") [])]
-            , policyExceptions = []
-            , policyAdmission = []
-            , policyTheories = []
-            , policyGroupMode = QuarantineOnConflict
-            , policyMeasurands = []
-            , policyComparisonSchemes = []
-            }
+          Policy { policyId = PolicyId "mixed-v1"
+          , policySigma = sigmaOf [] [] [("p", []), ("q", []), ("not_q", []), ("grounds_not_q", [])]
+          , policyRules =
+              [ strictRule "deductive_step" [] [AtomPat (Pred "p") []] (AtomPat (Pred "q") []) True []
+              , defeasibleRule "presumption" [] [AtomPat (Pred "grounds_not_q") []] (AtomPat (Pred "not_q") []) []
+              ]
+          , policyContraries = [Contrary (AtomPat (Pred "q") []) (AtomPat (Pred "not_q") [])]
+          , policyExceptions = []
+          , policyAdmission = []
+          , policyTheories = []
+          , policyGroupMode = QuarantineOnConflict
+          , policyMeasurands = []
+          , policyComparisonSchemes = [], policyEvidenceCheckers = [] }
     , negDiagnostic =
         "attack 'rebut d a_strict': target's top rule 'deductive_step' is strict; "
           ++ "strict rules are unattackable (§7)"
@@ -503,21 +495,19 @@ strictReachableContrary =
           ]
     , negPolicy =
         Just $
-          Policy
-            { policyId = PolicyId "illformed-policy-v1"
-            , policySigma = sigmaOf ["Item"] [("x", [], "Item")] [("basis", ["Item"]), ("derived", ["Item"]), ("refuted", ["Item"])]
-            , policyRules =
-                [ strictRule "deductive_step" ["X"] [AtomPat (Pred "basis") [PVar (Param "X")]] (AtomPat (Pred "derived") [PVar (Param "X")]) True []
-                ]
-            , -- derived(X) is strict-reachable, yet it appears here:
-              policyContraries = [Contrary (AtomPat (Pred "derived") [PVar (Param "X")]) (AtomPat (Pred "refuted") [PVar (Param "X")])]
-            , policyExceptions = []
-            , policyAdmission = []
-            , policyTheories = []
-            , policyGroupMode = QuarantineOnConflict
-            , policyMeasurands = []
-            , policyComparisonSchemes = []
-            }
+          Policy { policyId = PolicyId "illformed-policy-v1"
+          , policySigma = sigmaOf ["Item"] [("x", [], "Item")] [("basis", ["Item"]), ("derived", ["Item"]), ("refuted", ["Item"])]
+          , policyRules =
+              [ strictRule "deductive_step" ["X"] [AtomPat (Pred "basis") [PVar (Param "X")]] (AtomPat (Pred "derived") [PVar (Param "X")]) True []
+              ]
+          , -- derived(X) is strict-reachable, yet it appears here:
+            policyContraries = [Contrary (AtomPat (Pred "derived") [PVar (Param "X")]) (AtomPat (Pred "refuted") [PVar (Param "X")])]
+          , policyExceptions = []
+          , policyAdmission = []
+          , policyTheories = []
+          , policyGroupMode = QuarantineOnConflict
+          , policyMeasurands = []
+          , policyComparisonSchemes = [], policyEvidenceCheckers = [] }
     , negDiagnostic =
         "policy 'illformed-policy-v1': strict-reachable proposition 'derived(X)' "
           ++ "(conclusion of strict rule 'deductive_step') appears in contrary pair "
@@ -555,18 +545,16 @@ admissionReject =
           ]
     , negPolicy =
         Just $
-          Policy
-            { policyId = PolicyId "strict-admission-v1"
-            , policySigma = sigmaOf [] [] [("a", [])]
-            , policyRules = []
-            , policyContraries = []
-            , policyExceptions = []
-            , policyAdmission = [((Assumed, AiExecuted), Reject)]
-            , policyTheories = []
-            , policyGroupMode = QuarantineOnConflict
-            , policyMeasurands = []
-            , policyComparisonSchemes = []
-            }
+          Policy { policyId = PolicyId "strict-admission-v1"
+          , policySigma = sigmaOf [] [] [("a", [])]
+          , policyRules = []
+          , policyContraries = []
+          , policyExceptions = []
+          , policyAdmission = [((Assumed, AiExecuted), Reject)]
+          , policyTheories = []
+          , policyGroupMode = QuarantineOnConflict
+          , policyMeasurands = []
+          , policyComparisonSchemes = [], policyEvidenceCheckers = [] }
     , negDiagnostic =
         "leaf 'e_assumed': kind=assumed, provenance=ai-executed matched "
           ++ "admission row (assumed, ai-executed) = reject (R8)"
@@ -590,26 +578,24 @@ strictAssuranceViolation =
         (prog "strict-cert-v1" decls) {programBackends = [(BackendId "nd", "1")]}
     , negPolicy =
         Just $
-          Policy
-            { policyId = PolicyId "strict-cert-v1"
-            , policySigma = sigmaOf [] [] [("p", []), ("q", [])]
-            , policyRules =
-                [ strictRule
-                    "deductive_step"
-                    []
-                    [AtomPat (Pred "p") []]
-                    (AtomPat (Pred "q") [])
-                    False -- allow-trusted = false
-                    [CertRef (BackendId "nd") 1 (TheoryDigest "sha256:theory…")]
-                ]
-            , policyContraries = []
-            , policyExceptions = []
-            , policyAdmission = []
-            , policyTheories = []
-            , policyGroupMode = QuarantineOnConflict
-            , policyMeasurands = []
-            , policyComparisonSchemes = []
-            }
+          Policy { policyId = PolicyId "strict-cert-v1"
+          , policySigma = sigmaOf [] [] [("p", []), ("q", [])]
+          , policyRules =
+              [ strictRule
+                  "deductive_step"
+                  []
+                  [AtomPat (Pred "p") []]
+                  (AtomPat (Pred "q") [])
+                  False -- allow-trusted = false
+                  [CertRef (BackendId "nd") 1 (TheoryDigest "sha256:theory…")]
+              ]
+          , policyContraries = []
+          , policyExceptions = []
+          , policyAdmission = []
+          , policyTheories = []
+          , policyGroupMode = QuarantineOnConflict
+          , policyMeasurands = []
+          , policyComparisonSchemes = [], policyEvidenceCheckers = [] }
     , negDiagnostic =
         "arg 'a': assurance = trusted, but rule 'deductive_step' has "
           ++ "allow-trusted = false; a certificate cert(nd@1, …) is required (§4)"
@@ -667,18 +653,16 @@ duplicateReportGroupConflict =
           ]
     , negPolicy =
         Just $
-          Policy
-            { policyId = PolicyId "dup-report-v1"
-            , policySigma = sigmaOf ["Direction"] [("up", [], "Direction"), ("down", [], "Direction")] [("effect", ["Direction"])]
-            , policyRules = []
-            , policyContraries = []
-            , policyExceptions = []
-            , policyAdmission = []
-            , policyTheories = []
-            , policyGroupMode = RejectOnConflict
-            , policyMeasurands = []
-            , policyComparisonSchemes = []
-            }
+          Policy { policyId = PolicyId "dup-report-v1"
+          , policySigma = sigmaOf ["Direction"] [("up", [], "Direction"), ("down", [], "Direction")] [("effect", ["Direction"])]
+          , policyRules = []
+          , policyContraries = []
+          , policyExceptions = []
+          , policyAdmission = []
+          , policyTheories = []
+          , policyGroupMode = RejectOnConflict
+          , policyMeasurands = []
+          , policyComparisonSchemes = [], policyEvidenceCheckers = [] }
     , negDiagnostic =
         "group 'g1': members e1, e2 report one cell with ≢ propositions and "
           ++ "the policy escalates conflicts to reject (§4.3)"

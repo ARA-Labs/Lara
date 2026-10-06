@@ -1,0 +1,124 @@
+artifact certified_simformer at git:a35055613aaae7c84067416932e5636ef34b2ed2
+policy certified-simformer
+use backends []
+
+claim c-train-0
+  nl = "The original saved training-runtime record 0 reports seconds."
+  formal = training_time_s("score_transformer","two_moons_all_cond",977.5672931671144)
+  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+
+leaf train-0 : training_time_s("score_transformer","two_moons_all_cond",977.5672931671144)
+  kind = certified
+  provenance = checker(csv-row, 1)
+  refs = [evidence/summary.csv]
+  extract = (csv-row 1 summary (key model_id "0") (select (method text) (task text) (time_train decimal)) (predicate training_time_s))
+
+arg a-train-0 : supports(c-train-0) by record_training from [train-0]
+
+status c-train-0
+
+claim c-train-1
+  nl = "The original saved training-runtime record 1 reports seconds."
+  formal = training_time_s("score_transformer_joint","two_moons_all_cond",1047.1436779499054)
+  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+
+leaf train-1 : training_time_s("score_transformer_joint","two_moons_all_cond",1047.1436779499054)
+  kind = certified
+  provenance = checker(csv-row, 1)
+  refs = [evidence/summary.csv]
+  extract = (csv-row 1 summary (key model_id "1") (select (method text) (task text) (time_train decimal)) (predicate training_time_s))
+
+arg a-train-1 : supports(c-train-1) by record_training from [train-1]
+
+status c-train-1
+
+claim c-train-2
+  nl = "The original saved training-runtime record 2 reports seconds."
+  formal = training_time_s("score_transformer_undirected","slcp_all_cond",2717.260816335678)
+  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+
+leaf train-2 : training_time_s("score_transformer_undirected","slcp_all_cond",2717.260816335678)
+  kind = certified
+  provenance = checker(csv-row, 1)
+  refs = [evidence/summary.csv]
+  extract = (csv-row 1 summary (key model_id "2") (select (method text) (task text) (time_train decimal)) (predicate training_time_s))
+
+arg a-train-2 : supports(c-train-2) by record_training from [train-2]
+
+status c-train-2
+
+claim c-loss-0
+  nl = "The original saved notebook output 0 reports mean denoising loss for a block of 5000 updates."
+  formal = training_loss(46.13004)
+  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+
+leaf loss-0 : training_loss(46.13004)
+  kind = certified
+  provenance = checker(json-pointer, 1)
+  refs = [evidence/1_minimal_code_example.ipynb]
+  extract = (json-pointer 1 notebook (select ("/cells/19/outputs/0/text/0" decimal-line)) (predicate training_loss))
+
+arg a-loss-0 : supports(c-loss-0) by record_loss from [loss-0]
+
+status c-loss-0
+
+claim c-loss-1
+  nl = "The original saved notebook output 1 reports mean denoising loss for a block of 5000 updates."
+  formal = training_loss(45.541588)
+  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+
+leaf loss-1 : training_loss(45.541588)
+  kind = certified
+  provenance = checker(json-pointer, 1)
+  refs = [evidence/1_minimal_code_example.ipynb]
+  extract = (json-pointer 1 notebook (select ("/cells/19/outputs/0/text/1" decimal-line)) (predicate training_loss))
+
+arg a-loss-1 : supports(c-loss-1) by record_loss from [loss-1]
+
+status c-loss-1
+
+claim c-loss-2
+  nl = "The original saved notebook output 2 reports mean denoising loss for a block of 5000 updates."
+  formal = training_loss(45.425938)
+  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+
+leaf loss-2 : training_loss(45.425938)
+  kind = certified
+  provenance = checker(json-pointer, 1)
+  refs = [evidence/1_minimal_code_example.ipynb]
+  extract = (json-pointer 1 notebook (select ("/cells/19/outputs/0/text/2" decimal-line)) (predicate training_loss))
+
+arg a-loss-2 : supports(c-loss-2) by record_loss from [loss-2]
+
+status c-loss-2
+
+claim c-loss-3
+  nl = "The original saved notebook output 3 reports mean denoising loss for a block of 5000 updates."
+  formal = training_loss(45.380486)
+  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+
+leaf loss-3 : training_loss(45.380486)
+  kind = certified
+  provenance = checker(json-pointer, 1)
+  refs = [evidence/1_minimal_code_example.ipynb]
+  extract = (json-pointer 1 notebook (select ("/cells/19/outputs/0/text/3" decimal-line)) (predicate training_loss))
+
+arg a-loss-3 : supports(c-loss-3) by record_loss from [loss-3]
+
+status c-loss-3
+
+claim c-loss-4
+  nl = "The original saved notebook output 4 reports mean denoising loss for a block of 5000 updates."
+  formal = training_loss(45.31089)
+  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+
+leaf loss-4 : training_loss(45.31089)
+  kind = certified
+  provenance = checker(json-pointer, 1)
+  refs = [evidence/1_minimal_code_example.ipynb]
+  extract = (json-pointer 1 notebook (select ("/cells/19/outputs/0/text/4" decimal-line)) (predicate training_loss))
+
+arg a-loss-4 : supports(c-loss-4) by record_loss from [loss-4]
+
+status c-loss-4
+

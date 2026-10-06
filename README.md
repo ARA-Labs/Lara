@@ -66,15 +66,15 @@ validates it. Lara verifies the numerical consequences of the declared
 evidence and checks the arguments that connect that evidence to claims. Both
 checks are conditional on the reported measurements and on how they are bound
 to their sources: Lara does not rerun the experiment, and it does not establish
-that a measurement is true. If the file says "the experiment reported 0.74,"
-Lara takes 0.74 as given, records where it came from, and checks everything
-built on it.
+that a measurement is true. On the ordinary source path, a reported value such
+as 0.74 is taken as given. The separate `check-ara` command can also check
+that a certified value matches its pinned evidence file.
 
 | | Checked by Lara | Taken as given |
 |---|---|---|
 | **Arithmetic on results** | Comparisons and calculations over declared result cells, recomputed exactly by a strict backend: `ord@1` re-checks an ordering such as `0.71 < 0.74`, `ra@1` recomputes a relative drop. The certificate must cite the premise cells it computes on. | The reported values themselves |
 | **Results to claim** | The argument from results to an empirical claim is well formed under the declared, versioned policy, answers that policy's critical questions, and survives every declared attack, including an attack on whether two results are comparable at all | That the policy's reasoning schemes and critical questions suit the field |
-| **Evidence** | Each leaf declares its kind, provenance, and source references; the policy can reject or quarantine leaves by kind and provenance | Where a measurement came from, that it was extracted faithfully from the raw evidence, that the evaluator was correct, and that the experiment reproduces |
+| **Evidence** | Policy checks over kind and provenance; `check-ara` also reproduces certified leaf propositions from hash-pinned package files with an approved checker | That the chosen mapping captures the intended scientific meaning, that the evaluator was correct, and that the experiment reproduces |
 | **Claim text** | The formal spelling of each claim | That the formal spelling says what the natural-language text says; the claim's `binding` records who vouched for that |
 
 [`examples/S4/`](examples/S4/) shows the split. `ord@1` certifies
@@ -224,6 +224,34 @@ reading, the demo write-ups reconstruct checked artifacts as a
 [philosophy-of-mathematics debate](docs/demos/d4-philmath.md), and
 [withdrawing an assumed axiom](docs/demos/d5-axiom-withdrawal.md).
 
+## Checking evidence files in a package
+
+`check-ara` checks that every certified leaf matches the output of an approved
+checker over files included in the package. It uses a canonical
+`lara-evidence.sexp` manifest to locate and pin the paper, source, policy and
+evidence files. The shipped examples use original CSV and saved notebook
+outputs:
+
+```sh
+cabal run lara -- check-ara examples/certified-evidence/package-a
+cabal run lara -- check-ara examples/certified-evidence/package-b
+```
+
+`--policy FILE` replaces the package policy with a verifier-supplied policy;
+the report records its digest and origin. `--out DIR` publishes
+`report.sexp` and `core-verdict.sexp` together in a new directory without
+overwriting an existing destination. Unlike `check --out FILE`, it also
+prints the accepted report to stdout.
+
+The report separates checked leaves from declared leaves and preserves the
+ordinary claim verdict. Certification checks the bytes and extraction, not
+the experiment's validity or whether the chosen mapping expresses the intended
+scientific claim. These examples still declare `audit-status = unreviewed`.
+Missing or mismatching certified evidence rejects; ordinary source commands
+without a package context reject certified declarations at R8. See
+[the package contract](docs/evidence-admission-decision.md#9-ara-packaging-direction-and-task-0-outcome-for-issue-8)
+and [the proof boundaries](docs/theory-evidence-admission.md).
+
 ## How checking works
 
 `lara check` goes through four stages:
@@ -306,7 +334,7 @@ a PR in the optional Lean workflow when a reviewer adds the `lean` label, while
 
 ## Syntax versions
 
-The `.lara` surface syntax is versioned (current: `lara-syntax@0.10`) and each
+The `.lara` surface syntax is versioned (current: `lara-syntax@0.11`) and each
 version's additions are specified as appendices of the
 [surface grammar](docs/lara-surface-grammar.md). The invariant across all of
 them: a source name that resolves to no target, or ambiguously, is a located
@@ -329,7 +357,7 @@ Start with the [documentation index](docs/README.md) for reading paths and theor
 | Document | What it covers |
 | --- | --- |
 | [`docs/spec.md`](docs/spec.md) | The **v0.1 language specification** (frozen; current core `lara-core@0.3`): TCB, propositions and `nf`/`≡`, policies, strict backends, support-term and attack typing, compilation and grounded semantics, rejection classes |
-| [`docs/lara-surface-grammar.md`](docs/lara-surface-grammar.md) | The `.lara` presentation syntax (current: **`lara-syntax@0.10`**), with per-version appendices — comparison blocks, value bindings, inferred instantiation, named certificate premise slots, surface strictness, premise-label citation, named `nd@1` proof terms, and source-authored `nd@1` formula annotations |
+| [`docs/lara-surface-grammar.md`](docs/lara-surface-grammar.md) | The `.lara` presentation syntax (current: **`lara-syntax@0.11`**), with per-version appendices — comparison blocks, value bindings, inferred instantiation, named certificate premise slots, surface strictness, premise-label citation, named `nd@1` proof terms, source-authored `nd@1` formula annotations, and certified-evidence requests |
 | [`docs/foundations.md`](docs/foundations.md) | The four lines of work Lara builds on: abstract and structured argumentation, argumentation schemes, proof-carrying code / LCF |
 | [`docs/novelty-and-related-work.md`](docs/novelty-and-related-work.md) | The novelty claim and the delta table against prior art (Micropublications, AIF, EG-VAR, Pandžić, ASPIC+, Dung, PCC/FPC) |
 | [`docs/claim-support-calculus-decision.md`](docs/claim-support-calculus-decision.md) | Why one unified support-term calculus (strict/defeasible as a rule mode) |

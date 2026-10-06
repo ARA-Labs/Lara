@@ -1,4 +1,4 @@
-# Lara surface grammar — frozen (`lara-syntax@0.10`)
+# Lara surface grammar — frozen (`lara-syntax@0.11`)
 
 _Task **A0.5** of M4a (tracker `docs/m4a-checklist.md`).
 This document **freezes** the concrete `.lara` grammar so that Task A1's parser +
@@ -13,7 +13,7 @@ concrete `.lara` syntax: what the parser accepts, what the printer emits, and
 how each surface form lowers to the abstract syntax the checker consumes. Its
 audience is implementers of the parser/printer/elaborator and readers writing
 or reviewing `.lara` files by hand. The main body defines the grammar; the
-appendices (A–I) each specify one later surface version (`@0.2` through `@0.10`; most are
+appendices (A–J) each specify one later surface version (`@0.2` through `@0.11`; most are
 additive, and F, `@0.7`, only removes syntax), and the
 version paragraphs below record what changed when. If you are new to Lara,
 read the [README](../README.md) and a worked example
@@ -50,11 +50,11 @@ they remove surface and add none, so the AST, the wire, and `lara-core@0.2` are
 again unchanged. `@0.8` lets a certificate premise reference cite the citing
 rule's declared premise **label** beside the `@0.6` leaf and prior-argument
 names (Appendix G). `@0.9` gives `nd@1` a named proof-term presentation over
-its unchanged de Bruijn kernel (Appendix H). The current surface is `@0.10`,
-which lets those `nd@1` proof terms author their formula annotations as source
-propositions instead of opaque encoded atom keys (Appendix I).
-None of these additions changes a lexer or parser rule, and each successful
-named form lowers to the numeric spelling's exact bytes.
+its unchanged de Bruijn kernel (Appendix H). `@0.10` lets those proof terms
+author their formula annotations as source propositions instead of opaque
+encoded atom keys (Appendix I). The current surface, `@0.11`, adds typed
+evidence extraction requests and a checker allowlist (Appendix J).
+Named certificate forms still lower to the numeric spelling's exact bytes.
 
 That byte-identity is the executable form of a standing policy: this surface
 gets *more readable*, never *natural*, and every convenience must remove
@@ -64,8 +64,8 @@ language **is** admitted (the untrusted producer) and where it is free
 read it before proposing a surface addition.
 
 Versioning: the presentation surface is versioned **separately** from the core
-(`docs/spec.md` §2.1). This document defines `lara-syntax@0.10`; it decodes to
-`lara-core@0.2`. Signature declarations lower to `unitSigma`; the additive
+(`docs/spec.md` §2.1). This document defines `lara-syntax@0.11`; the current
+core is `lara-core@0.3`. Signature declarations lower to `unitSigma`; the additive
 `@0.3` forms, `@0.4` value bindings, `@0.5` inferred-theta form, and the `@0.6`
 symbolic, `@0.8` premise-label, and `@0.9`/`@0.10` named-`nd@1` certificate
 spellings
@@ -89,7 +89,7 @@ positions remain assertions. The guard documents two representation exemptions
 
 The runtime semantics of the existing `admission` and `duplicate-reports`
 constructs are frozen separately in `docs/policy-admission-calculus-decision.md`.
-Byte-level `lara-evidence@0.1` syntax and verification remain gated (`docs/evidence-admission-decision.md`).
+Byte-level `lara-evidence@0.1` is implemented through `lara check-ara`; Appendix J defines its source fields and `docs/evidence-admission-decision.md` §9 defines the package contract.
 
 ---
 
@@ -311,6 +311,7 @@ leafDecl  ::= "leaf" ident ":" prop
               "kind"       "=" leafKind
               "provenance" "=" provenance
               "refs"       "=" refsList
+              [ "extract" "=" extractionRequest ]    -- @0.11, Appendix J
 
 refsList  ::= "[" [ sourceRef { "," sourceRef } ] "]"   -- lexed in ref-list mode (§1.2)
 
@@ -369,6 +370,7 @@ policyTop  ::= "policy" ident { policyDecl }
 
 policyDecl ::= sortDecl | conDecl | predDecl
              | ruleDecl | contraryDecl | exceptionDecl | admissionDecl | groupModeDecl
+             | "evidence-checkers" "=" evidenceCheckers  -- @0.11, Appendix J
 
 -- The signature blocks (spec §2, §3.4; lara-core@0.2). Unlike everything else
 -- in this grammar these are NOT presentation-only: they lower to `unitSigma`
@@ -2445,3 +2447,54 @@ opaque.
 What remains unmapped is the binder names — see H.5 for why that half is a seam
 change rather than a rendering one, left as
 separate follow-up work.
+
+## Appendix J — `lara-syntax@0.11` (certified-evidence requests, 2026-10-06)
+
+### J.1 Which source fields were added?
+
+A leaf may carry one `extract` field immediately after `refs`. A policy may carry one `evidence-checkers` field among its policy declarations. Both contain embedded S-expressions decoded by `Lara.Evidence.Syntax`; they are presentation data, not fields in the core wire.
+
+```text
+leaf evidence : result(7)
+  kind = certified
+  provenance = checker(csv-row, 1)
+  refs = [evidence/results.csv]
+  extract = (csv-row 1 results
+    (key "id" "run-a")
+    (select ("score" decimal))
+    (predicate result))
+
+evidence-checkers = (checkers (csv-row 1) (json-pointer 1))
+```
+
+The object identifier `results` must resolve to a manifest entry whose path matches a leaf reference before its `#` fragment. The request's checker and version must match the provenance and the policy allowlist. Omission of the policy field means an empty allowlist; omission of a request on a certified leaf rejects at R8.
+
+### J.2 What is the extraction-request grammar?
+
+```text
+extractionRequest ::= "(" "csv-row" version objectId
+                        "(" "key" atom atom ")"
+                        "(" "select" { csvSelector } ")"
+                        "(" "predicate" atom ")" ")"
+                    | "(" "json-pointer" version objectId
+                        "(" "select" { jsonSelector } ")"
+                        "(" "predicate" atom ")" ")"
+csvSelector       ::= "(" atom ("decimal" | "text") ")"
+jsonSelector      ::= "(" atom ("decimal" | "text" | "decimal-line") ")"
+evidenceCheckers   ::= "(" "checkers" { "(" checker version ")" } ")"
+checker            ::= "csv-row" | "json-pointer"
+```
+
+Here `atom` is a bare or quoted S-expression atom, not the source proposition grammar. `version` is a canonical natural number; the implemented registry accepts version `1`. `objectId` is an S-expression atom in the manifest's object namespace. Selector order determines output argument order, and each request accepts at most 256 selectors.
+
+CSV selection requires exactly one row with the exact raw key. `decimal` decodes exact decimal or scientific notation and `text` preserves a string. JSON selectors use RFC 6901 pointers: `""` selects the root, `/` separates tokens, `~0` encodes `~`, and `~1` encodes `/`. Array indices must be canonical nonnegative integers. `decimal` selects a JSON number, `text` selects a JSON string, and `decimal-line` selects a string containing a decimal followed by exactly one LF. CSV does not accept `decimal-line`.
+
+### J.3 Where do malformed or unsupported requests fail?
+
+Duplicate request fields, duplicate allowlist fields or entries, unknown checker names or encodings, malformed selectors or pointers, and noncanonical version spellings are source parse errors (exit 2). A decoded but unsupported version, a noncertified leaf with an extraction request, or a mismatch among provenance, allowlist and manifest reference is an evidence-binding rejection at R8. The exact numeric and byte bounds live in [the evidence decision record §9](evidence-admission-decision.md#9-ara-packaging-direction-and-task-0-outcome-for-issue-8).
+
+`lara check-ara ROOT [--policy FILE] [--out DIR]` supplies the captured package context needed to certify a leaf. Ordinary source commands, including `check`, `deps`, map and possible-world source loaders, reject certified declarations without that context. A decoded request alone does not grant assurance. Raw `.sexp` checking remains conditional on declared evidence.
+
+### J.4 Which checks cover this surface extension?
+
+The Haskell printer emits `extract` after `refs` and emits a policy allowlist only when nonempty. `Lara.Presentation` mirrors the request and allowlist types without adding fields to `Lara.Unit`. `make presentation-parity surface-conformance` checks the two representations; `make evidence-cli evidence-differential` exercises the real package command and the finite typed model separately. The model's proofs and its trusted byte-parser boundary are documented in [the evidence theory note](theory-evidence-admission.md).

@@ -93,6 +93,7 @@ import Lara.Admission
   ( AdmissionCause (..), admissionAuditLeaves, admissionAuditArgs
   , admissionRejectionLeaf, renderAdmissionAudit, renderAdmissionRejection
   )
+import Lara.Evidence.Admission (renderEvidenceRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
   , SourceResult
@@ -103,6 +104,7 @@ import Lara.Elaborate
   , runSourceCheck
   , sourceResultCheckInput
   , sourceResultCertDeps
+  , sourceResultCheckedArgIds
   , sourceResultAudit
   , sourceResultVerdict
   )
@@ -110,7 +112,7 @@ import Lara.Elaborate
 -- output (the @.core.sexp@ anchors), so it is one of the sanctioned
 -- escape-hatch callers described in the "Lara.Elaborate.Internal" header.
 import Lara.Elaborate.Internal (elaborate)
-import Lara.ExpectedJson (JValue (..), expectedJson, expectedJsonValue)
+import Lara.ExpectedJson (JValue (..), expectedJson, expectedJsonValue, renderJson, sourceResultJsonValue)
 import Lara.Replay
   ( CoreVersion (..)
   , mkCheckInput
@@ -226,6 +228,7 @@ preparedResult prog pol =
     Left invalid -> Left ("source invalid: " ++ renderSourceInvalid invalid)
     Right (SourceRejected rejection) ->
       Left ("admission rejection: " ++ renderAdmissionRejection rejection)
+    Right (SourceEvidenceRejected rejection) -> Left (renderEvidenceRejection rejection)
     Right (SourceAccepted input) -> Right (runSourceCheck input)
 
 -- ---------------------------------------------------------------------------
@@ -774,6 +777,62 @@ prop_R3 = once $ ioProperty $
     counterexample ("R3: expected reject R10, got " ++ show v) $
       verdictOutcome v === Reject (RejectClass R10)
 
+-- | The source renderer preserves ordinary accepted golden fields without
+-- exporting the checked core or re-running the checker at render time.
+prop_sourceAcceptedJsonGoldens :: Property
+prop_sourceAcceptedJsonGoldens = once $ ioProperty $ do
+  checks <- mapM checkOne
+    [ ("examples/E1", "example.lara", empiricalBase)
+    , ("examples/E2", "example.lara", empiricalBase)
+    , ("examples/E4", "example.lara", "empirical-v2.policy.lara")
+    , ("examples/E5", "example.lara", "empirical-v2.policy.lara")
+    , ("corpus-units/adaptive-pruning/C04", "unit.lara", "../../corpus-v1.policy.lara")
+    ]
+  pure (conjoin checks)
+  where
+    checkOne (dir, sourceFile, policyFile) = do
+      prog <- loadProgram (dir ++ "/" ++ sourceFile)
+      pol <- loadPolicy (dir ++ "/" ++ policyFile)
+      golden <- readFile (dir ++ "/expected.json")
+      pure $ case preparedResult prog pol of
+        Left err -> counterexample (dir ++ ": " ++ err) False
+        Right result ->
+          counterexample dir (renderJson (sourceResultJsonValue result) === golden)
+
+-- | Replay preflight visits declared arguments even if a later group prune
+-- would remove them; its structured identity must agree with its message.
+prop_sourcePreflightDeclaredIdentity :: Property
+prop_sourcePreflightDeclaredIdentity = once $ ioProperty $ do
+  prog <- loadProgram "corpus-units/adaptive-pruning/C04/unit.lara"
+  pol <- loadPolicy "corpus-units/corpus-v1.policy.lara"
+  let modified = prog
+        { programBackends = [(BackendId "nd", "1")]
+        , programDecls = programDecls prog
+            ++ [DeclGroup (DupGroup (GroupId "incompatible") [LeafId "e4", LeafId "e5"])]
+        }
+  pure $ case preparedResult modified pol of
+    Left err -> counterexample err False
+    Right result -> conjoin
+      [ sourceResultCheckedArgIds result === [ArgId "a2"]
+      , verdictOutcome (sourceResultVerdict result) === Reject (RejectClass R13)
+      , case sourceResultJsonValue result of
+          JObject top -> case lookup "located-diagnostic" top of
+            Just (JObject diagnostic) -> conjoin
+              [ lookup "stage" diagnostic === Just (JString "backend")
+              , lookup "constituent" diagnostic === Just (JObject
+                  [ ("kind", JString "argument")
+                  , ("id", JString "a1")
+                  , ("index", JNumber 0)
+                  ])
+              , case lookup "messages" diagnostic of
+                  Just (JArray [JString message]) ->
+                    counterexample message ("a1" `isInfixOf` message)
+                  other -> counterexample (show other) False
+              ]
+            other -> counterexample (show other) False
+          other -> counterexample (show other) False
+      ]
+
 prop_replayPreflightExpectedJson :: Property
 prop_replayPreflightExpectedJson =
   once $
@@ -1118,6 +1177,8 @@ workedExamplesSpecProps =
   , ("R3 bad-attack-target → reject R10", quickCheckResult prop_R3)
   , ("expected JSON reports every replay preflight reason", quickCheckResult prop_replayPreflightExpectedJson)
   , ("expected JSON reports the escalated group-conflict (R9)", quickCheckResult prop_groupConflictExpectedJson)
+  , ("source accepted JSON retains ordinary golden reports and AF names", quickCheckResult prop_sourceAcceptedJsonGoldens)
+  , ("source replay preflight retains declared identity across group prune", quickCheckResult prop_sourcePreflightDeclaredIdentity)
   , ("worked-example .core.sexp anchors are fresh (parse+elaborate+encode == committed)", quickCheckResult prop_freshness)
   , ("worked-example expected.json goldens are fresh (elaborate+render == committed)", quickCheckResult prop_expectedJsonFresh)
   , ("coverage matrix: every status, attack kind, kind×label cell, and R1/R12/R10/R11 witnessed", quickCheckResult prop_coverageMatrix)

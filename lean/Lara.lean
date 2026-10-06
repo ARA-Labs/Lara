@@ -472,3 +472,9 @@ import Lara.Examples.PWFileHost
 -- The finite executable reference for `pw-run 1` documents.
 import Lara.PW.Run
 import Lara.Examples.PWRun
+import Lara.Evidence.Types
+import Lara.Evidence.Extract
+import Lara.Evidence.Runner
+import Lara.Evidence.Admission
+import Lara.Surface.Source
+import Lara.Evidence.Composition

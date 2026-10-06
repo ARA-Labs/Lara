@@ -116,6 +116,9 @@ import qualified GHC.Foreign
 import GHC.IO.Encoding (getFileSystemEncoding, setFileSystemEncoding, setLocaleEncoding, utf8)
 import System.IO (hPutStrLn, hSetEncoding, mkTextEncoding, stderr, stdout)
 
+import Lara.Evidence.Admission (renderEvidenceRejection)
+import Lara.Evidence.Load (checkPackage, packageErrorExitCode, renderPackageError)
+import Lara.Evidence.Report (evidenceReportBytes, writeEvidenceBundle)
 import Lara.AST (ArgId)
 import Lara.AtomicWrite (atomicWriteFile)
 import Lara.Admission
@@ -170,6 +173,9 @@ main = do
   case args of
     ["check", file] -> check file ToStdout
     ["check", file, "--out", out] -> check file (ToFile out)
+    "check-ara":root:options -> case araOptions options of
+      Left reason -> die2 ("lara: " ++ reason)
+      Right (policy,out) -> checkAra root policy out
     ["deps", file] -> deps file
     ["map-input", file] -> mapInput file
     ["pw", file] -> pwRun file
@@ -190,6 +196,7 @@ usage = do
   hPutStrLn
     stderr
     "       lara pw-input <run.sexp>         (print the run with every world source inline)"
+  hPutStrLn stderr "       lara check-ara <root> [--policy <file>] [--out <directory>]"
 
 -- | Dispatch on the artifact extension: a @.laramap@ path runs the map
 -- pipeline (#303), a @.lara@ path the presentation pipeline (parse +
@@ -274,6 +281,9 @@ checkLara file sink = do
   case prepared of
     SourceRejected rejection -> do
       hPutStrLn stderr ("lara: " ++ renderAdmissionRejection rejection)
+      exitWith (ExitFailure 1)
+    SourceEvidenceRejected rejection -> do
+      hPutStrLn stderr ("lara: " ++ renderEvidenceRejection rejection)
       exitWith (ExitFailure 1)
     SourceAccepted input -> do
       let result = runSourceCheck input
@@ -457,6 +467,9 @@ depsLara file = do
   prepared <- loadPrepared file
   case prepared of
     SourceRejected _ -> emitReport file Nothing
+    SourceEvidenceRejected rejection -> do
+      hPutStrLn stderr ("lara: " ++ renderEvidenceRejection rejection)
+      exitWith (ExitFailure 1)
     SourceAccepted input -> do
       let result = runSourceCheck input
       emitReport
@@ -652,3 +665,28 @@ readFileBytesEither file = try $ do
 -- as an arm of a @case@ whose other arms produce a value ('loadPrepared').
 die2 :: String -> IO a
 die2 msg = hPutStrLn stderr msg >> exitWith (ExitFailure 2)
+
+araOptions :: [String] -> Either String (Maybe FilePath, Maybe FilePath)
+araOptions = go Nothing Nothing
+  where
+    go policy out [] = Right (policy,out)
+    go Nothing out ("--policy":file:rest) = go (Just file) out rest
+    go policy Nothing ("--out":file:rest) = go policy (Just file) rest
+    go _ _ _ = Left "usage: lara check-ara ROOT [--policy FILE] [--out DIR]"
+
+checkAra :: FilePath -> Maybe FilePath -> Maybe FilePath -> IO ()
+checkAra root policy out = do
+  checked <- checkPackage root policy
+  case checked of
+    Left err -> do
+      hPutStrLn stderr ("lara: " ++ renderPackageError err)
+      exitWith (ExitFailure (packageErrorExitCode err))
+    Right result -> do
+      case out of
+        Nothing -> pure ()
+        Just destination -> do
+          published <- writeEvidenceBundle destination result
+          case published of
+            Left reason -> die2 ("lara: cannot publish evidence bundle: " ++ reason)
+            Right () -> pure ()
+      B.putStr (evidenceReportBytes result)

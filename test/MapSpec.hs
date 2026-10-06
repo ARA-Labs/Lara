@@ -78,6 +78,7 @@ import Lara.AST
   , Status (..)
   , Unit (..)
   )
+import Lara.Evidence.Admission (renderEvidenceRejection)
 import Lara.Elaborate (PreparedSource (..), runSourceCheck, sourceResultVerdict)
 import Lara.Map.Driver
   ( EnvTag
@@ -1227,6 +1228,7 @@ soloStatuses path = do
     Left err -> error ("MapSpec: fixture member did not load: " ++ renderSourceLoadError err)
     Right source -> case loadedPrepared source of
       SourceRejected _ -> error "MapSpec: fixture member was rejected by policy admission"
+      SourceEvidenceRejected rejection -> error (renderEvidenceRejection rejection)
       SourceAccepted input -> case verdictOutcome (sourceResultVerdict (runSourceCheck input)) of
         Reject _ -> error "MapSpec: fixture member does not check on its own"
         Accept{verdictStatuses = statuses} ->
