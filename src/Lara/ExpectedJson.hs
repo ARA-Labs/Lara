@@ -66,8 +66,6 @@ import Lara.Driver
   , groupConflictMessage
   , groupConflictReject
   , groupConsistent
-  , prune
-  , pruneChecked
   , runCheck
   )
 import Lara.Elaborate
@@ -75,6 +73,9 @@ import Lara.Elaborate
   , sourceResultEvidence
   , sourceResultDeclaredLeafIds
   , sourceResultCheckedArgIds
+  , sourceResultDeclaredArgIds
+  , sourceResultClaimReports
+  , sourceResultNodeArgIds
   , sourceResultDiagnostics
   , sourceResultLocatedRejection
   , sourceResultVerdict
@@ -208,8 +209,8 @@ sourceResultJsonValue result =
               , ( "located-diagnostic"
                 , JObject
                     ( [ ("kind", JString "accept")
-                      , ("statuses", JArray (map sourceStatusEntry statuses))
-                      , ("labels", JArray (map sourceLabelEntry labels))
+                      , ("statuses", JArray (zipWith reportStatusEntry statuses (sourceResultClaimReports result)))
+                      , ("labels", JArray (map (argLabelEntry (sourceResultNodeArgIds result)) labels))
                       ]
                         ++ [("holes", JArray (map holeEntry holes)) | not (null holes)]
                     )
@@ -238,19 +239,31 @@ sourceResultJsonValue result =
               ] | j <- judgments])
           ])
       | not (null judgments) ]
-    sourceStatusEntry (p, status) =
-      JObject $
-        [ ("claim", JString (prettyProp p))
-        , ("status", JString (publicStatusString status))
-        ]
-          ++ [ ("conditional-status", JString (statusString (conditionalStatus status)))
-             | not (isPublished status)
-             ]
-    sourceLabelEntry (i, label) =
-      JObject
-        [ ("index", JNumber i)
-        , ("label", JString (labelString label))
-        ]
+
+-- | Public statuses come from the verdict (including the blocked overlay);
+-- support and hole details come from its accepted cache's report.
+reportStatusEntry :: (Prop, PublicStatus) -> ClaimReport -> JValue
+reportStatusEntry (p, status) rep =
+  JObject $
+    [ ("claim", JString (prettyProp p))
+    , ("status", JString (publicStatusString status))
+    , ("complete-support", JNumber (length (claimSupport (crClaim rep))))
+    , ("holes", JNumber (length (claimHoles (crClaim rep))))
+    , ("incomplete-alternative", JBool (crIncompleteAlternative rep))
+    ]
+      ++ [ ("conditional-status", JString (statusString (conditionalStatus status)))
+         | not (isPublished status)
+         ]
+
+-- | AF indices name complete nodes, not checked or declared argument slots.
+argLabelEntry :: [ArgId] -> (Int, Label) -> JValue
+argLabelEntry afArgIds (i, label) =
+  JObject
+    ( [("arg", JString a) | Just (ArgId a) <- [safeIndex afArgIds i]]
+        ++ [ ("index", JNumber i)
+           , ("label", JString (labelString label))
+           ]
+    )
 
 -- | One verdict @holes@ row as JSON: the hole's original declaration index
 -- and id, its root obligations, each obligation's sites — the rule
@@ -302,11 +315,13 @@ sourceRejectDiagnostic result rejection =
       Nothing -> []
       Just (LocatedRejection _ stage constituent) ->
         [ ("stage", JString (diagnosticStageString (CheckerStage stage)))
-        , ("constituent", sourceConstituentValue (sourceResultCheckedArgIds result) constituent)
+        , ("constituent", sourceConstituentValue (argumentIds stage) constituent)
         ]
+    argumentIds StageReplayPreflight = sourceResultDeclaredArgIds result
+    argumentIds _ = sourceResultCheckedArgIds result
 
--- | Render a located constituent against the __checked__ argument ids (the
--- indices the checker used after the prune — see 'sourceResultCheckedArgIds').
+-- | Render against the ids used by the failing stage: declared for replay
+-- preflight, checked (post-prune) for checker constituents.
 -- Attacks are named by index only: the source boundary deliberately does not
 -- export the checked unit, so there is no attack list to spell here.
 sourceConstituentValue :: [ArgId] -> Constituent -> JValue
@@ -382,38 +397,12 @@ expectedJsonValue input =
     acceptDiag lbls statuses holes =
       JObject
         ( [ ("kind", JString "accept")
-          , ("statuses", JArray (zipWith statusEntry statuses reports))
-          , ("labels", JArray (map labelEntry lbls))
+          , ("statuses", JArray (zipWith reportStatusEntry statuses reports))
+          , ("labels", JArray (map (argLabelEntry afArgIds) lbls))
           ]
             ++ [("holes", JArray (map holeEntry holes)) | not (null holes)]
         )
 
-
-    statusEntry :: (Prop, PublicStatus) -> ClaimReport -> JValue
-    statusEntry (p, st) rep =
-      JObject $
-        [ ("claim", JString (prettyProp p))
-        , ("status", JString (publicStatusString st))
-        , ("complete-support", JNumber (length (claimSupport (crClaim rep))))
-        , ("holes", JNumber (length (claimHoles (crClaim rep))))
-        , ("incomplete-alternative", JBool (crIncompleteAlternative rep))
-        ]
-          -- Spec §4.3: an @evidence-blocked@ claim's four-state
-          -- label is a conditional diagnostic, so it goes in its own field —
-          -- mirroring the wire's statuses/conditional split — and never under
-          -- @status@, which must agree with the verdict.
-          ++ [ ("conditional-status", JString (statusString (conditionalStatus st)))
-             | not (isPublished st)
-             ]
-
-    labelEntry :: (Int, Label) -> JValue
-    labelEntry (i, lbl) =
-      JObject
-        ( [("arg", JString a) | Just (ArgId a) <- [safeIndex afArgIds i]]
-            ++ [ ("index", JNumber i)
-               , ("label", JString (labelString lbl))
-               ]
-        )
 
     -- Reject: the located diagnostic recovered from the checker's UnitError —
     -- the wire class + stage + constituent, enriched with the offending

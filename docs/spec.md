@@ -1803,9 +1803,11 @@ rejection. The two readers therefore share the bound, the message and the
 column; `scripts/differential.sh`, `scripts/check-map-conformance.sh` and
 `scripts/check-pw-conformance.py` each carry a case on either side of it, and
 each reads the constant out of both sources so a one-sided change fails loudly. The bound
-sits far above the deepest committed artifact — no
-`.sexp`, `.laramap` or `.lara` tree in the repository nests more than 20 levels,
-which `scripts/differential.sh` measures on every run rather than assuming — so
+sits far above the deepest committed artifact: no
+`.sexp`, `.laramap` or `.lara` tree in the repository nests more than 135 levels.
+The evidence-model JSON depth-boundary fixtures reach that ceiling;
+`scripts/differential.sh` measures it on every run rather than assuming. The
+reader's 10000-level limit is unchanged, so
 it bounds no expressible program: it is a refusal boundary, not a grammar
 restriction, and raising it is a reader change on both sides at once rather than
 a wire-version change.

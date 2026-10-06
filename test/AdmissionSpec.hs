@@ -592,6 +592,38 @@ prop_policyPrunedRejectionKeepsLocation =
         ]
     pol = policy [((Observed, User), Quarantine)] QuarantineOnConflict
 
+-- | Checker-stage indices still address the retained program when the removal
+-- comes from an incompatible group rather than a policy admission row.
+prop_groupPrunedRejectionKeepsIdentity :: Property
+prop_groupPrunedRejectionKeepsIdentity =
+  accepted prog pol $ \input ->
+    let result = runSourceCheck input
+     in conjoin
+          [ verdictOutcome (sourceResultVerdict result) === Reject (RejectClass R1)
+          , sourceRejectDiagnostic (sourceResultJsonValue result)
+              === Just
+                ( "R1"
+                , "support"
+                , JObject
+                    [ ("kind", JString "argument")
+                    , ("id", JString "a_bad")
+                    , ("index", JNumber 0)
+                    ]
+                , []
+                )
+          ]
+  where
+    prog =
+      program
+        []
+        [ leafD "e_drop" "p" Observed User
+        , leafD "e_conflict" "r" Attested User
+        , DeclGroup (DupGroup (GroupId "incompatible") [LeafId "e_drop", LeafId "e_conflict"])
+        , argLeaf "a_drop" "e_drop"
+        , argLeaf "a_bad" "e_missing"
+        ]
+    pol = policy [] QuarantineOnConflict
+
 -- | @(class, stage, constituent, messages)@ of a rendered source rejection.
 sourceRejectDiagnostic :: JValue -> Maybe (String, String, JValue, [String])
 sourceRejectDiagnostic (JObject top) = do
@@ -640,4 +672,6 @@ admissionSpecProps =
   , ("admission quarantine applies blocked overlay", quickCheckResult prop_policyQuarantineBlockedOverlay)
   , ("admission pruned rejection keeps its located stage/constituent",
       quickCheckResult prop_policyPrunedRejectionKeepsLocation)
+  , ("admission group-pruned checker rejection keeps retained argument identity",
+      quickCheckResult prop_groupPrunedRejectionKeepsIdentity)
   ]

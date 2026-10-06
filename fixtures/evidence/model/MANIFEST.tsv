@@ -49,3 +49,17 @@ codec-version.sexp	codec-invalid	-	-	-	-	-	-
 codec-duplicate-object.sexp	codec-invalid	-	-	-	-	-	-
 codec-duplicate-leaf.sexp	codec-invalid	-	-	-	-	-	-
 codec-duplicate-allowlist.sexp	codec-invalid	-	-	-	-	-	-
+json-depth-127-empty-array.sexp	accepted	-	-	-	measured	-	measured
+json-depth-128-empty-array.sexp	accepted	-	-	-	measured	-	measured
+json-depth-129-empty-array.sexp	extraction	measured	-	json-selection	-	-	-
+json-depth-127-empty-object.sexp	accepted	-	-	-	measured	-	measured
+json-depth-128-empty-object.sexp	accepted	-	-	-	measured	-	measured
+json-depth-129-empty-object.sexp	extraction	measured	-	json-selection	-	-	-
+json-depth-127-scalar.sexp	accepted	-	-	-	measured	-	measured
+json-depth-128-scalar.sexp	accepted	-	-	-	measured	-	measured
+json-depth-129-scalar.sexp	extraction	measured	-	json-selection	-	-	-
+codec-csv-decimal-line.sexp	codec-invalid	-	-	-	-	-	-
+csv-selectors-256.sexp	accepted	-	-	-	measured	-	measured
+codec-csv-selectors-257.sexp	codec-invalid	-	-	-	-	-	-
+json-selectors-256.sexp	accepted	-	-	-	measured	-	measured
+codec-json-selectors-257.sexp	codec-invalid	-	-	-	-	-	-

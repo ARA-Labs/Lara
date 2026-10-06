@@ -519,13 +519,12 @@ printf 'shared nesting bound: %s\n' "$hs_depth"
 #
 # `docs/spec.md` §10.1, `src/Lara/Wire.hs` and `lean/Lara/Driver.lean` all say
 # the bound sits far above anything committed, and §10.1's sentence is normative
-# inside a frozen section. Nothing measured it: every gate reads `maxDepth` out
-# of source and none looks at the artifacts. So a depth-25 fixture could land and
-# silently falsify a frozen spec sentence. Measure it here — the scan is over
-# every committed .sexp/.laramap/.lara tree, all 960 of them, and costs
-# milliseconds — and fail above the low-water mark the spec states.
+# inside a frozen section. Measure every committed .sexp/.laramap/.lara tree
+# rather than silently letting a new fixture falsify that inventory sentence.
+# Evidence-model JSON depth boundaries reach 135 S-expression levels; the
+# shared reader still permits 10000. Fail if that measured margin narrows.
 # ---------------------------------------------------------------------------
-corpus_depth_ceiling=20
+corpus_depth_ceiling=135
 corpus_depth_prog='
 BEGIN { maxd = 0; maxf = "-" }
 FNR == 1 { d = 0; instr = 0; esc = 0 }

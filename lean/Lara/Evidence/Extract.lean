@@ -321,9 +321,11 @@ end
 
 mutual
   def jsonMeasure : JsonValue → Nat × Nat
+    | .object .nil => (1, 0)
     | .object entries =>
       let m := jsonEntriesMeasure entries
       (m.1 + 1, m.2 + 1)
+    | .array .nil => (1, 0)
     | .array values =>
       let m := jsonValuesMeasure values
       (m.1 + 1, m.2 + 1)
@@ -344,6 +346,77 @@ end
 def jsonWithinBounds (value : JsonValue) : Bool :=
   let m := jsonMeasure value
   decide (m.1 ≤ 100000 ∧ m.2 ≤ 128)
+
+theorem jsonMeasure_empty_object : jsonMeasure (.object .nil) = (1, 0) := rfl
+theorem jsonMeasure_empty_array : jsonMeasure (.array .nil) = (1, 0) := rfl
+
+theorem jsonMeasure_object_cons (key : JsonToken) (value : JsonValue) (rest : JsonEntries) :
+    jsonMeasure (.object (.cons key value rest)) =
+      ((jsonMeasure value).1 + (jsonEntriesMeasure rest).1 + 1,
+        max (jsonMeasure value).2 (jsonEntriesMeasure rest).2 + 1) := rfl
+
+theorem jsonMeasure_array_cons (value : JsonValue) (rest : JsonValues) :
+    jsonMeasure (.array (.cons value rest)) =
+      ((jsonMeasure value).1 + (jsonValuesMeasure rest).1 + 1,
+        max (jsonMeasure value).2 (jsonValuesMeasure rest).2 + 1) := rfl
+
+theorem jsonMeasure_object_singleton (key : JsonToken) (value : JsonValue) :
+    jsonMeasure (.object (.cons key value .nil)) =
+      ((jsonMeasure value).1 + 1, (jsonMeasure value).2 + 1) := by
+  simp [jsonMeasure_object_cons, jsonEntriesMeasure]
+
+theorem jsonMeasure_array_singleton (value : JsonValue) :
+    jsonMeasure (.array (.cons value .nil)) =
+      ((jsonMeasure value).1 + 1, (jsonMeasure value).2 + 1) := by
+  simp [jsonMeasure_array_cons, jsonValuesMeasure]
+
+theorem jsonMeasure_nodes_positive (value : JsonValue) : 0 < (jsonMeasure value).1 := by
+  cases value with
+  | object entries =>
+    cases entries <;> exact Nat.zero_lt_succ _
+  | array values =>
+    cases values <;> exact Nat.zero_lt_succ _
+  | string _ => exact Nat.zero_lt_succ _
+  | number _ => exact Nat.zero_lt_succ _
+  | bool _ => exact Nat.zero_lt_succ _
+  | null => exact Nat.zero_lt_succ _
+
+/-- Root-zero depth is attained at every natural, with exactly one node per level. -/
+theorem jsonMeasure_every_depth (depth : Nat) :
+    ∃ value, jsonMeasure value = (depth + 1, depth) := by
+  induction depth with
+  | zero => exact ⟨.null, rfl⟩
+  | succ depth ih =>
+    obtain ⟨value, h⟩ := ih
+    refine ⟨.array (.cons value .nil), ?_⟩
+    rw [jsonMeasure_array_singleton, h]
+
+theorem jsonWithinBounds_iff (value : JsonValue) :
+    jsonWithinBounds value = true ↔
+      (jsonMeasure value).1 ≤ 100000 ∧ (jsonMeasure value).2 ≤ 128 := by
+  simp [jsonWithinBounds]
+
+theorem jsonWithinBounds_array_singleton_iff (value : JsonValue) :
+    jsonWithinBounds (.array (.cons value .nil)) = true ↔
+      (jsonMeasure value).1 < 100000 ∧ (jsonMeasure value).2 < 128 := by
+  rw [jsonWithinBounds_iff, jsonMeasure_array_singleton]
+  exact and_congr (Nat.succ_le_iff) (Nat.succ_le_iff)
+
+theorem jsonWithinBounds_reject_depth (value : JsonValue)
+    (h : 128 < (jsonMeasure value).2) : jsonWithinBounds value = false := by
+  cases hb : jsonWithinBounds value with
+  | false => rfl
+  | true =>
+    exact False.elim ((Nat.not_le_of_gt h) ((jsonWithinBounds_iff value).mp hb).2)
+
+theorem jsonWithinBounds_depth_boundary :
+    (∃ value, (jsonMeasure value).2 = 128 ∧ jsonWithinBounds value = true) ∧
+      (∃ value, (jsonMeasure value).2 = 129 ∧ jsonWithinBounds value = false) := by
+  obtain ⟨atLimit, hlimit⟩ := jsonMeasure_every_depth 128
+  obtain ⟨overLimit, hover⟩ := jsonMeasure_every_depth 129
+  constructor
+  · exact ⟨atLimit, by simp [hlimit], by simp [jsonWithinBounds, hlimit]⟩
+  · exact ⟨overLimit, by simp [hover], by simp [jsonWithinBounds, hover]⟩
 
 def termsOfList : List Term → Terms
   | [] => .nil

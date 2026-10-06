@@ -90,6 +90,19 @@ assert len({case["case"] for case in cases}) == len(cases), "duplicate manifest 
 assert {case["case"] for case in cases} == {path.name for path in root.glob("*.sexp")}, "manifest/fixture mismatch"
 required = {"accepted", "binding", "capture", "extraction", "policy", "codec-invalid"}
 assert {case["outcome"] for case in cases} == required, "missing or unknown boundary class"
+depth_boundaries = {
+    f"json-depth-{depth}-{terminal}.sexp": "accepted" if depth <= 128 else "extraction"
+    for depth in (127, 128, 129)
+    for terminal in ("empty-array", "empty-object", "scalar")
+}
+request_boundaries = {
+    "codec-csv-decimal-line.sexp": "codec-invalid",
+    **{f"{family}-selectors-256.sexp": "accepted" for family in ("csv", "json")},
+    **{f"codec-{family}-selectors-257.sexp": "codec-invalid" for family in ("csv", "json")},
+}
+manifest_outcomes = {case["case"]: case["outcome"] for case in cases}
+for name, outcome in (depth_boundaries | request_boundaries).items():
+    assert manifest_outcomes.get(name) == outcome, f"missing or misclassified boundary fixture: {name}"
 commands = [sys.argv[1], sys.argv[2]]
 failures = []
 

@@ -17,15 +17,24 @@ import qualified Lara.Syntax as Syntax
 import Lara.Wire (Outcome (..), Verdict (..))
 
 data PolicyOrigin = PackagePolicy | VerifierPolicy deriving (Eq,Ord,Show)
-data PackageResult = PackageResult
-  { packageSourceResult :: SourceResult
-  , packageManifestHash :: Sha256
-  , packageSourceHash :: Sha256
-  , packagePolicyHash :: Sha256
-  , packagePolicyOrigin :: PolicyOrigin
-  , packageDeclaredLeaves :: [LeafId]
-  , packageCapturedMetadata :: [ObjectMeta]
-  }
+-- Export ordinary projections, not record labels: policy origin and evidence
+-- partitions must remain the facts established by 'checkPackage'.
+data PackageResult = PackageResult SourceResult Sha256 Sha256 Sha256 PolicyOrigin [LeafId] [ObjectMeta]
+
+packageSourceResult :: PackageResult -> SourceResult
+packageSourceResult (PackageResult result _ _ _ _ _ _) = result
+packageManifestHash :: PackageResult -> Sha256
+packageManifestHash (PackageResult _ digest _ _ _ _ _) = digest
+packageSourceHash :: PackageResult -> Sha256
+packageSourceHash (PackageResult _ _ digest _ _ _ _) = digest
+packagePolicyHash :: PackageResult -> Sha256
+packagePolicyHash (PackageResult _ _ _ digest _ _ _) = digest
+packagePolicyOrigin :: PackageResult -> PolicyOrigin
+packagePolicyOrigin (PackageResult _ _ _ _ origin _ _) = origin
+packageDeclaredLeaves :: PackageResult -> [LeafId]
+packageDeclaredLeaves (PackageResult _ _ _ _ _ leaves _) = leaves
+packageCapturedMetadata :: PackageResult -> [ObjectMeta]
+packageCapturedMetadata (PackageResult _ _ _ _ _ _ metadata) = metadata
 data PackageError = PackageInvalid String | PackageAdmissionRejected String
   | PackageEvidenceRejected EvidenceRejection | PackageCoreRejected SourceResult
 packageErrorExitCode :: PackageError -> Int

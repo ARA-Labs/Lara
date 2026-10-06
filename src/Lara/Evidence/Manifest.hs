@@ -37,9 +37,17 @@ decodeSha256 s = case splitAt 7 s of
 hashBytes :: B.ByteString -> Sha256
 hashBytes bytes = Sha256 ("sha256:" ++ concatMap hex (B.unpack (SHA.hash bytes)))
   where hex w = [intToDigit (fromIntegral w `div` 16),intToDigit (fromIntegral w `mod` 16)]
-data ObjectMeta = ObjectMeta
-  { objectId :: ObjectId, objectPath :: PackagePath, objectLength :: Integer, objectDigest :: Sha256
-  } deriving (Eq,Ord,Show)
+-- Ordinary projections keep smart-constructor and decoder invariants sealed;
+-- exporting a record label would permit updates even with hidden constructors.
+data ObjectMeta = ObjectMeta ObjectId PackagePath Integer Sha256 deriving (Eq,Ord,Show)
+objectId :: ObjectMeta -> ObjectId
+objectId (ObjectMeta ident _ _ _) = ident
+objectPath :: ObjectMeta -> PackagePath
+objectPath (ObjectMeta _ path _ _) = path
+objectLength :: ObjectMeta -> Integer
+objectLength (ObjectMeta _ _ len _) = len
+objectDigest :: ObjectMeta -> Sha256
+objectDigest (ObjectMeta _ _ _ digest) = digest
 makeObjectMeta :: ObjectId -> String -> Integer -> Sha256 -> Either String ObjectMeta
 makeObjectMeta ident@(ObjectId raw) path len digest = do
   unless (not (null raw) && '\0' `notElem` raw) (Left "invalid object identifier")
@@ -47,9 +55,15 @@ makeObjectMeta ident@(ObjectId raw) path len digest = do
   unless (len >= 0 && len <= 8*1024*1024) (Left "object length bound exceeded")
   unless (path `notElem` ["lara-evidence.sexp","report.sexp","core-verdict.sexp"]) (Left "manifest may not hash itself or generated reports")
   pure (ObjectMeta ident validated len digest)
-data Manifest = Manifest
-  { manifestPaper :: ObjectId, manifestSource :: ObjectId, manifestPolicy :: ObjectId, manifestObjects :: [ObjectMeta]
-  } deriving (Eq,Show)
+data Manifest = Manifest ObjectId ObjectId ObjectId [ObjectMeta] deriving (Eq,Show)
+manifestPaper :: Manifest -> ObjectId
+manifestPaper (Manifest paper _ _ _) = paper
+manifestSource :: Manifest -> ObjectId
+manifestSource (Manifest _ source _ _) = source
+manifestPolicy :: Manifest -> ObjectId
+manifestPolicy (Manifest _ _ policy _) = policy
+manifestObjects :: Manifest -> [ObjectMeta]
+manifestObjects (Manifest _ _ _ objects) = objects
 lookupObject :: Manifest -> ObjectId -> Maybe ObjectMeta
 lookupObject manifest ident = case filter ((==ident) . objectId) (manifestObjects manifest) of [o] -> Just o; _ -> Nothing
 objectSExpr :: ObjectMeta -> SExpr

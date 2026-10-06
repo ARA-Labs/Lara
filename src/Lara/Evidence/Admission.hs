@@ -23,7 +23,12 @@ renderEvidenceRejection err = "leaf '" ++ lid ++ "': certified evidence " ++ sta
   where
     LeafId lid = evidenceLeaf err
     stage = case evidenceStage err of BindingStage -> "binding"; CaptureStage -> "capture"; ExtractionStage -> "extraction"
-data BoundRequest = BoundRequest { boundLeaf :: Leaf, boundRequest :: ExtractionRequest } deriving (Eq,Show)
+-- Only the binding checks may establish the leaf/request relationship.
+data BoundRequest = BoundRequest Leaf ExtractionRequest deriving (Eq,Show)
+boundLeaf :: BoundRequest -> Leaf
+boundLeaf (BoundRequest leaf _) = leaf
+boundRequest :: BoundRequest -> ExtractionRequest
+boundRequest (BoundRequest _ request) = request
 
 noEvidenceRejection :: [Leaf] -> Maybe EvidenceRejection
 noEvidenceRejection leaves = fmap (\leaf -> EvidenceRejection BindingStage (leafId leaf) Nothing "no evidence context")

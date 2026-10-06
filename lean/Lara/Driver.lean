@@ -281,8 +281,9 @@ Haskell/Lean differential gates would misread.
 
 The two readers share the bound, the message and the column, so an over-deep
 input is refused identically by both runtimes. Comfortably above any real
-artifact's structural depth; `scripts/differential.sh` measures the deepest
-anchor it discovers and fails if the margin ever narrows. -/
+artifact's structural depth; `scripts/differential.sh` measures every committed
+tree, including the 135-level typed evidence-model JSON boundary fixtures, and
+fails if the margin ever narrows. -/
 def maxDepth : Nat := 10000
 
 /-- The one spelling of the depth refusal, shared by the reader and its

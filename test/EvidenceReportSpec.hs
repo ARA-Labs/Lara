@@ -6,11 +6,12 @@ import qualified Data.ByteString.Char8 as B
 import Data.List (isPrefixOf)
 import System.Directory (createDirectory, doesDirectoryExist, listDirectory)
 import System.FilePath ((</>))
+import System.Exit (ExitCode (..))
+import System.Process (readProcessWithExitCode)
 import Test.QuickCheck
 import EvidenceFixture
 import Lara.TempTree
 import Lara.Evidence.Load
-import Lara.Evidence.Manifest
 import Lara.Evidence.Report
 import Lara.Evidence.Snapshot (publishNoReplace)
 import Lara.Strict (SExpr (..))
@@ -21,6 +22,7 @@ evidenceReportSpecProps :: [(String,IO Result)]
 evidenceReportSpecProps =
   [ ("evidence: exact partitions and policy origin bind report identity",quickCheckResult (once (ioProperty identity)))
   , ("evidence: immutable output publication rejects existing and racing destinations",quickCheckResult (once (ioProperty transaction)))
+  , ("evidence: public projections are readable but cannot update sealed carriers",quickCheckResult (once (ioProperty publicBoundary)))
   ]
   where
     identity = withTempDirectory "evidence-report" $ \root -> do
@@ -72,6 +74,41 @@ evidenceReportSpecProps =
         , property (not (any (".bundle.evidence-" `isPrefixOf`) entries))
         , property (raceA /= raceB && exists)
         ])
+    publicBoundary = withTempDirectory "evidence-public-client" $ \root -> do
+      let imports =
+            [ "module PublicClient where"
+            , "import Lara.Evidence.Admission"
+            , "import Lara.Evidence.Load"
+            , "import Lara.Evidence.Manifest"
+            , "import Lara.Evidence.Runner"
+            , "import Lara.Evidence.Snapshot"
+            ]
+          projections =
+            [ ("PackageResult", ["packageSourceResult", "packageManifestHash", "packageSourceHash", "packagePolicyHash", "packagePolicyOrigin", "packageDeclaredLeaves", "packageCapturedMetadata"])
+            , ("ObjectMeta", ["objectId", "objectPath", "objectLength", "objectDigest"])
+            , ("Manifest", ["manifestPaper", "manifestSource", "manifestPolicy", "manifestObjects"])
+            , ("BoundRequest", ["boundLeaf", "boundRequest"])
+            , ("CapturedObject", ["capturedMetadata", "capturedBytes"])
+            , ("Snapshot", ["snapshotMetadata"])
+            , ("SuccessfulJudgment", ["judgmentLeaf", "judgmentRequest", "judgmentProp", "judgmentDeps"])
+            ]
+          compile name body = do
+            let client = root </> name ++ ".hs"
+            writeFile client (unlines (imports ++ body))
+            readProcessWithExitCode "cabal"
+              ["exec", "--", "ghc", "-fno-code", "-fforce-recomp", "-package", "lara", "-outputdir", root, client] ""
+          positive = concat
+            [ [field ++ "Client x = " ++ field ++ " x"]
+            | (_, fields) <- projections, field <- fields
+            ]
+      (positiveCode, _, positiveError) <- compile "Positive" positive
+      negative <- mapM (\(carrier, field) -> do
+        (code, _, err) <- compile field
+          ["forge :: " ++ carrier ++ " -> " ++ carrier, "forge x = x { " ++ field ++ " = " ++ field ++ " x }"]
+        pure (counterexample (field ++ ": " ++ err)
+          (code /= ExitSuccess)))
+        [(carrier, field) | (carrier, fields) <- projections, field <- fields]
+      pure (conjoin (counterexample positiveError (positiveCode === ExitSuccess) : negative))
     checked = either (fail . renderPackageError) pure
     attempt from to = do r <- try (publishNoReplace from to) :: IO (Either IOException ()); pure (case r of Right () -> True; Left _ -> False)
     isLeft (Left _) = True

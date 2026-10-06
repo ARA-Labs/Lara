@@ -25,6 +25,7 @@ The scope is every declared certified leaf, including unused leaves and leaves l
 | --- | --- | --- |
 | Scalar and ordered selection | `decodeScalar_iff`, `csvSelect_iff`, `jsonColumns_iff` | Executable selection agrees with the corresponding relations |
 | Unique row and exact output | `csv_unique_row`, `extract_csv_exact`, `extract_json_exact` | A unique selected row or valid selected JSON scalars construct the ordered proposition |
+| Root-zero JSON depth and bounds | `jsonMeasure_empty_object`, `jsonMeasure_empty_array`, `jsonMeasure_every_depth`, `jsonWithinBounds_iff`, `jsonWithinBounds_depth_boundary` | Empty containers count as one node at depth zero; depth 128 is reachable and admitted within the node bound, while depth 129 is rejected |
 | Runner-owned dependencies | `run_dependencies`, `run_exact_declared_dependencies`, `run_snapshot_membership` | Reported metadata is exactly the supplied declared-object list |
 | Local replay | `run_locality`, `admission_locality` | Equal lookup results on requested objects preserve successes and failures |
 | Registry replacement | `run_registry_replacement`, `admission_registry_replacement` | Equal registry results on supplied objects preserve the admission result |

@@ -33,7 +33,10 @@ def decodePath (path : String) : Except String JsonPath :=
       pure ⟨String.ofList (← pointerToken token.toList)⟩
   else .error "pointer must begin with slash"
 def decodeCsvSelector : Sx → Except String CsvSelector
-  | .list [.atom column, encoding] => do pure ⟨⟨column⟩, ← decodeEncoding encoding⟩
+  | .list [.atom column, encoding] => do
+    let encoding ← decodeEncoding encoding
+    if encoding = .decimalLine then .error "decimal-line is JSON-only"
+    else pure ⟨⟨column⟩, encoding⟩
   | _ => .error "csv selector"
 def decodeJsonSelector : Sx → Except String JsonSelector
   | .list [.atom path, encoding] => do pure ⟨← decodePath path, ← decodeEncoding encoding⟩
@@ -42,10 +45,14 @@ def decodeRequest : Sx → Except String ExtractionRequest
   | .list [.atom "csv-row", .atom v, .atom id,
       .list [.atom "key", .atom column, .atom raw],
       .list (.atom "select" :: sels), .list [.atom "predicate", .atom pred]] => do
-    pure (.csvRowRequest (← version v) ⟨id⟩ ⟨column⟩ raw (← sels.mapM decodeCsvSelector) pred)
+    let v ← version v
+    if sels.length > 256 then .error "selector bound exceeded" else
+      pure (.csvRowRequest v ⟨id⟩ ⟨column⟩ raw (← sels.mapM decodeCsvSelector) pred)
   | .list [.atom "json-pointer", .atom v, .atom id,
       .list (.atom "select" :: sels), .list [.atom "predicate", .atom pred]] => do
-    pure (.jsonPointerRequest (← version v) ⟨id⟩ (← sels.mapM decodeJsonSelector) pred)
+    let v ← version v
+    if sels.length > 256 then .error "selector bound exceeded" else
+      pure (.jsonPointerRequest v ⟨id⟩ (← sels.mapM decodeJsonSelector) pred)
   | _ => .error "extraction request"
 def decodeMeta : Sx → Except String ObjectMeta
   | .list [.atom "object", .atom id, .atom path, .atom length, .atom digest] => do
