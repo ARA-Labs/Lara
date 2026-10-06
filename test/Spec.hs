@@ -63,6 +63,10 @@ import PWSpec (pwSpecProps)
 import UpdateSpec (updateSpecProps)
 import ThetaInferenceSpec (thetaInferenceSpecProps)
 import WorkedExamplesSpec (workedExamplesSpecProps)
+import EvidenceExtractSpec (evidenceExtractSpecProps)
+import EvidenceSnapshotSpec (evidenceSnapshotSpecProps)
+import EvidenceAdmissionSpec (evidenceAdmissionSpecProps)
+import EvidenceReportSpec (evidenceReportSpecProps)
 
 -- ---------------------------------------------------------------------------
 -- Generators
@@ -238,6 +242,10 @@ main = do
         ++ [run name act | (name, act) <- runningExampleSpecProps]
         ++ [run name act | (name, act) <- ablationSpecProps]
         ++ [run name act | (name, act) <- admissionSpecProps]
+        ++ [run name act | (name, act) <- evidenceExtractSpecProps]
+        ++ [run name act | (name, act) <- evidenceSnapshotSpecProps]
+        ++ [run name act | (name, act) <- evidenceAdmissionSpecProps]
+        ++ [run name act | (name, act) <- evidenceReportSpecProps]
         ++ [run name act | (name, act) <- runtimeSpecProps]
         ++ [run name act | (name, act) <- reportingSpecProps]
         ++ [run name act | (name, act) <- thetaInferenceSpecProps]

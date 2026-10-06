@@ -36,6 +36,7 @@ import Data.List (group, sort)
 import System.Directory (doesFileExist, listDirectory)
 
 import Lara.Admission (renderAdmissionAudit, renderAdmissionRejection)
+import Lara.Evidence.Admission (renderEvidenceRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
   , prepareSource
@@ -111,6 +112,7 @@ deriveInput dir = do
         Left invalid -> Left (dir ++ ": source invalid: " ++ renderSourceInvalid invalid)
         Right (SourceRejected rejection) ->
           Left (dir ++ ": admission rejection: " ++ renderAdmissionRejection rejection)
+        Right (SourceEvidenceRejected rejection) -> Left (dir ++ ": " ++ renderEvidenceRejection rejection)
         Right (SourceAccepted input) ->
           case sourceResultCheckInput (runSourceCheck input) of
             Left audit ->

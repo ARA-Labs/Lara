@@ -28,21 +28,19 @@ sourceProgram =
 
 sourcePolicy :: Policy
 sourcePolicy =
-  Policy
-    { policyId = PolicyId "empirical-v1"
-    , policySigma = structuralSigma
-    , policyRules = []
-    , policyContraries = []
-    , policyExceptions = []
-    , policyAdmission = []
-    , policyTheories =
-        [ (TheoryDigest "sha256:z", [])
-        , (TheoryDigest "sha256:a", [])
-        ]
-    , policyGroupMode = QuarantineOnConflict
-    , policyMeasurands = []
-    , policyComparisonSchemes = []
-    }
+  Policy { policyId = PolicyId "empirical-v1"
+  , policySigma = structuralSigma
+  , policyRules = []
+  , policyContraries = []
+  , policyExceptions = []
+  , policyAdmission = []
+  , policyTheories =
+      [ (TheoryDigest "sha256:z", [])
+      , (TheoryDigest "sha256:a", [])
+      ]
+  , policyGroupMode = QuarantineOnConflict
+  , policyMeasurands = []
+  , policyComparisonSchemes = [], policyEvidenceCheckers = [] }
 
 sourceUnit :: Unit
 sourceUnit = emptyUnit {unitTheories = policyTheories sourcePolicy}

@@ -32,6 +32,7 @@ module Lara.RunningExample
 
 import Lara.AST (PolicyId (..), programPolicy)
 import Lara.Admission (renderAdmissionRejection)
+import Lara.Evidence.Admission (renderEvidenceRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
   , prepareSource
@@ -78,6 +79,7 @@ checkRun progText polText = do
     (prepareSource prog pol)
   case prepared of
     SourceRejected rejection -> Left ("admission rejection: " ++ renderAdmissionRejection rejection)
+    SourceEvidenceRejected rejection -> Left (renderEvidenceRejection rejection)
     SourceAccepted input -> pure (sourceResultVerdict (runSourceCheck input))
 
 -- | Render the pinned document: for each run, the CLI command line, the

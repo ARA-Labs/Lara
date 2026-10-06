@@ -107,6 +107,7 @@ module Lara.AST
 import Lara.Prop (FunSym (..), Pred (..), Prop, Term)
 import Lara.Sigma (Sigma, Sort)
 import Lara.Strict (SExpr)
+import Lara.Evidence.Types (ExtractionRequest, LeafCheckerId, CheckerVersion)
 
 -- ---------------------------------------------------------------------------
 -- Names (spec §2)
@@ -199,6 +200,7 @@ data Leaf = Leaf
   , leafKind :: LeafKind
   , leafProvenance :: Provenance
   , leafRefs :: [SourceRef]
+  , leafExtraction :: Maybe ExtractionRequest
   }
   deriving (Eq, Show)
 
@@ -475,6 +477,7 @@ data Policy = Policy
   , policyComparisonSchemes :: [ComparisonScheme]
     -- ^ Declared comparison schemes (@lara-syntax\@0.3@, grammar App. B.2),
     -- keyed by @(relation, polarity)@. __Presentation-only__, as above.
+  , policyEvidenceCheckers :: [(LeafCheckerId, CheckerVersion)]
   }
   deriving (Eq, Show)
 

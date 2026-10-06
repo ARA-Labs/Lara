@@ -1,18 +1,18 @@
-# Evidence-admission decision record (`lara-evidence@0.1` — gated)
+# Evidence-admission decision record (`lara-evidence@0.1`)
 
-_Status: implementation blocked at Task 0 for [issue #8](https://github.com/ARA-Labs/Lara/issues/8), after the 2026-10-06 original-output inventory failed to establish the required package/leaf/checker coverage. The researcher approved ARA-packaged, hash-pinned files and approved-checker replay as the intended boundary. The [inventory record](evidence-admission-inventory.md) reports the inspected bytes and rejected candidates. The [active plan](../plans/2026-10-06-ara-certified-evidence.md) remains partially executed; Tasks 1 through 7 have not started. This is not a shipped feature or a change to `lara-core@0.3`._
+_Status: implemented and in review on `feat/enforce-certified-leaf-checker` (PR #19), 2026-10-06. The layer is a separate package door — `lara check-ara ROOT [--policy FILE] [--out DIR]` — so `lara-core@0.3`, its wire codec and the argumentation semantics are unchanged; a door that supplies no evidence context rejects a `certified` declaration at R8 instead of checking it. `examples/certified-evidence/package-a` (CompoNet, 2 leaves) and `package-b` (Simformer, 8 leaves) are accepted with `assurance evidence-checked`; the synthetic quarantine fixture is accepted with `checked drop`, `declared keep`, `assurance mixed`. `test/evidence-cli.sh` (58 scenarios) pins the package door's behavior and `scripts/evidence-differential.sh` pins the finite model over `fixtures/evidence/model/`; both are `make cross-check` members (`evidence-cli`, `evidence-differential`). This remains a claim about bytes, never about science or prose: the packages declare `audit-status = unreviewed`, and [issue #20](https://github.com/ARA-Labs/Lara/issues/20) tracks the human faithfulness review plus the measured-input/report freeze the additive evaluation still owes. Trusted base: the concrete byte parsers, SHA-256, the POSIX capture shim and the Haskell/Lean compilers; the Lean model is finite, so the typed differential is conformance evidence rather than a parser proof._
 
 Vocabulary for cold readers: a *leaf* is a declared piece of evidence; a
 support *scheme* and its *critical questions* decide whether an admitted leaf
 may support a claim; and a claim's *grounded status* is the checker's final
-per-claim verdict (spec §0 has the full vocabulary). This layer, if ever
-built, would sit before all of that: it would certify that a leaf's bytes
-really are the output of a named checker, and nothing more.
+per-claim verdict (spec §0 has the full vocabulary). This layer sits before
+all of that: it certifies that a leaf's bytes really are the output of a
+named checker, and nothing more.
 
-## 1. What this layer would be, and what it is not
+## 1. What this layer is, and what it is not
 
 Byte-level evidence admission is a deterministic judgment *before* the
-`.lara` source boundary: it would establish that a certified leaf is the
+`.lara` source boundary: it establishes that a certified leaf is the
 exact output of a named, closed, versioned checker over hash-pinned artifact
 bytes and a pinned mapping payload. It composes with — and never replaces —
 the frozen argumentation judgment: a support scheme and its critical
@@ -168,30 +168,89 @@ never silently changes the argumentation calculus.
 
 The approved direction requires result files used to certify a leaf to be included in the ARA package. A prose assertion or an external URL is not package membership. Original bytes may be copied into `evidence/` with their origin recorded; membership does not imply that ARA generated them. The existing ARA-to-Lara map places leaf references under that directory (`docs/corpus-map.md` §3).
 
-### What certification would require
+### What certification requires
 
 Certification requires safe package capture, matching length and SHA-256 metadata, a policy-approved implemented checker/version, and replay that independently constructs the declared normalized proposition. Missing, unsafe, altered or mismatching evidence rejects; there is no silent downgrade to observed evidence. Every declared certified leaf must pass, including unused leaves and leaves later quarantined by existing policy/group handling. Assumptions and attestations remain declared evidence, and certification does not protect a leaf from attacks.
 
-The intended capture boundary uses an explicit root and a canonical `lara-evidence.sexp` manifest. It pins `PAPER.md`, the source, package policy and evidence objects. Descriptor-relative traversal must reject symlinks and non-regular files; checkers receive captured bytes and never reopen live paths. Each typed request declares its complete dependencies before replay. The runner builds the dependency report from that list. The earlier access-logging read-program sketch in §2 is historical; the proposed families do not require dynamic reads.
+The capture boundary uses an explicit root and a canonical `lara-evidence.sexp` manifest. It pins `PAPER.md`, the source, package policy and evidence objects. Descriptor-relative traversal rejects symlinks and non-regular files; checkers receive captured bytes and never reopen live paths. Each typed request declares its complete dependencies before replay. The runner builds the dependency report from that list. The earlier access-logging read-program sketch in §2 is historical; the shipped families do not require dynamic reads.
 
-The intended `check-ara ROOT [--policy FILE] [--out DIR]` command distinguishes package policy from verifier policy. A verifier policy replaces the package policy for the whole run. Reports and replay identities name its digest and origin; a package's own allowlist cannot be presented as verifier approval. Reports must separate checked leaves from declared leaves and keep the evidence identity separate from the unchanged core replay tuple. Persisted reports would publish as a complete directory by atomic rename, without overwriting an existing run.
+The `check-ara ROOT [--policy FILE] [--out DIR]` command distinguishes package policy from verifier policy. A verifier policy replaces the package policy for the whole run. Reports and replay identities name its digest and origin; a package's own allowlist cannot be presented as verifier approval. Reports must separate checked leaves from declared leaves and keep the evidence identity separate from the unchanged core replay tuple. Persisted reports publish as a complete directory by atomic rename, without overwriting an existing run.
 
 ### Which boundaries must remain unchanged
 
 The enforcement point must include public `prepareSource`, its exportable projections and all source-level callers, not just the proposed command. Source doors without an evidence context must reject certified declarations at R8. Raw core `.sexp` inputs continue to check conditionally against supplied `Gamma` and cannot mint package assurance. Raw exports intentionally lose that assurance. The core wire, strict backends, four statuses and located holes stay unchanged.
 
-The plan specifies structural/source invalidity before policy R8, certified-evidence R8, strict replay R13, group R9 and core outcomes. Package-global capture/integrity failures exit 2; evidence-object failures exit 1 with a located R8 and empty stdout. Source/policy capture is a prerequisite to semantic policy decisions. Policy R8 must precede evidence-object integrity and extraction failures. These are reviewed implementation targets; collision tests and the inventory-backed contract review still have to establish the executable behavior.
+The review fixed this order: structural/source invalidity before policy R8, certified-evidence R8, strict replay R13, group R9 and core outcomes. Package-global capture/integrity failures exit 2; evidence-object failures exit 1 with a located R8 and empty stdout. Source/policy capture is a prerequisite to semantic policy decisions. Policy R8 precedes evidence-object integrity and extraction failures. `test/evidence-cli.sh` exercises each class against the real binary, including the whole-policy-before-broken-bytes collision and the empty-stdout rule for every rejection.
 
 Certified-evidence failures reject instead of adding an evidence-quarantine outcome. The general three-outcome sketch in §§2–3 is historical for this implementation. Existing policy/group quarantine and its single combined prune remain intact, with the directed `evidence-blocked` public overlay. Successful replay cannot override policy rejection or make a quarantined leaf available.
 
-### What the metatheory would establish
+### What the metatheory establishes
 
-The proposed Lean development proves executable/declarative admission equivalence, replay coverage for all declared certified leaves, dependency confinement and locality, deterministic first errors, and composition with the existing checked-source guarantees. Conservativity preserves the conditional core judgment when the ordinary source input is unchanged. A composition corollary must use `source_justified_nonpromotion` with its actual query-membership and unblocked-query premises. Accepted source may still contain located holes.
+The Lean development proves executable/declarative admission equivalence, replay coverage for all declared certified leaves, dependency confinement and locality, deterministic first errors, and composition with the existing checked-source guarantees. Conservativity preserves the conditional core judgment when the ordinary source input is unchanged. A composition corollary uses `source_justified_nonpromotion` with its actual query-membership and unblocked-query premises. Accepted source may still contain located holes. The model's admission judgment also carries the capture obligation the runtime enforces at the promotion boundary: `Admitted.capture` requires every request-declared manifest object to be present *and* to be that entry, which is what makes a snapshot captured for different metadata unusable.
 
-No evidence theorem has landed. Filesystem capture, SHA-256 assumptions, compiler/runtime behavior and concrete TSV/JSON byte-parser refinement remain separate from the proposed finite-snapshot model. Differential tests would provide conformance evidence, not proofs of those concrete parsers. Neither replay nor a justified conditional status proves scientific validity, natural-language faithfulness or empirical truth.
+Those theorems live in `lean/Lara/Evidence/` and are audited by `lean/AxCheck.lean` (`make axiom-audit`), `sorry`-free and restricted to the standard axiom trio. Filesystem capture, SHA-256 assumptions, compiler/runtime behavior and concrete CSV/JSON byte-parser refinement remain outside the finite-snapshot model. `scripts/evidence-differential.sh` provides conformance evidence over typed fixtures, not proofs about those concrete parsers. Neither replay nor a justified conditional status proves scientific validity, natural-language faithfulness or empirical truth.
 
-### What Task 0 actually established
+### What Task 0 established after portfolio revision
 
-The [2026-10-06 inventory](evidence-admission-inventory.md) inspected the pinned corpus, documented format examples and original upstream outputs. The available question JSON contains expected-result prose; paper tables are reconstructed Markdown; candidate row files are CSV, not original TSV. Genuine NanoGPT and METR result logs were acquired and inspected, but require a different extraction contract. Independently produced CompoNet and Simformer CSV outputs were also acquired, and the original Simformer notebook matches the corpus copy byte-for-byte. Those are concrete candidates for a reviewed portfolio revision, including an explicit treatment of saved loss strings, not a pass for the approved portfolio. No complete reviewed ten-leaf mapping demonstrated all gate conditions. The proposed `tsv-row@1` / `json-pointer@1` portfolio therefore has not cleared §7.
+The earlier `tsv-row@1` portfolio failed: the available row outputs are original CSV, not TSV, and reconstructed Markdown or expected-result prose cannot substitute for measured bytes. The approved plan permits revision against actual original formats. The revised [inventory](evidence-admission-inventory.md) preserves complete pinned CompoNet and Simformer originals and demonstrates ten exact leaves across two independently authored packages, three narrow claim families and two independently specified checker families. `csv-row@1` replaces `tsv-row@1`; `json-pointer@1` includes the explicit decimal-line encoding required by the saved original notebook outputs. This is not CSV converted to TSV or an invented success fixture.
 
-Implementation stopped before evidence runtime or source-contract edits, as the plan requires on gate failure. No concrete syntax, numeric bound, manifest/report codec or evidence theorem was frozen, and no source fixture or measurement was relabeled or regenerated. The spec's unenforced certified-witness note remains accurate. Issue #8 stays open: resumption requires traceable original-output acquisition and, where observed formats demand it, a reviewed portfolio revision before the remaining contract review and Tasks 1 through 7. The additive evaluation and freeze change remain costs of that work, not claims established by this inventory.
+Concrete-contract review completed through independent capture/security and semantic/composition reviews. Their fixes are incorporated: reject NUL paths before POSIX conversion and require atomic no-replace publication without a check-then-rename fallback. A later independent security review of the landed runtime found one further gap — a captured object was usable under any manifest entry with the same ID — closed by `Admission.captureRejection` and pinned by the `EvidenceAdmissionSpec` borrowed-capture regression. The runtime, the `check-ara` package command, its acceptance suite and the Lean model have since landed, and `make local-gates` passes for them: Lean build, axiom audit over the whole tree, the core/admission/evidence typed differentials, the 58-scenario package acceptance suite, and presentation/surface/map/PW conformance. Additive evaluation and a measured-input/report freeze remain outstanding and are tracked on issue #20; historical core measurements retain their declared-evidence interpretation.
+
+### Migration of certified `.lara` fixture sources
+
+Raw `.sexp` inputs (`examples/S*/example.core.sexp`, `fixtures/admission/`, `fixtures/mutants/`) are unaffected. Six `kind = certified` declarations remain under `fixtures/surface/`, and every one of them sits in a fixture whose subject is a rejection: `ambiguous-premise-reject.lara` and `attack-path-reject.lara` still fail structural source validation *before* R8, as does `capture-reject.lara`. `admission-prune-open.lara` is the policy-quarantined certified case: its manifest row is now the rejection case `admission-prune-no-context` (no evidence context), and the replay path it used to stand in for is covered instead by the synthetic `fixtures/evidence/quarantined` package through the package door. The fixtures that were accepted while incidentally declaring `certified` — `all-forms.lara`, `nd-alpha-left.lara`, `nd-alpha-right.lara` — now declare non-certified kinds (`observed`, `attested`, `assumed`), so no accepting fixture depends on an evidence context it cannot have. No bulk relabeling: each decision is visible as a row of `fixtures/surface/MANIFEST.tsv`, and `make surface-conformance` diffs both runtimes against one golden over the whole manifest. Test-only synthetic packages exercise error paths and never count toward the original-output gate.
+
+### Concrete source and byte contract
+
+The source syntax target is `lara-syntax@0.11`, independently versioned evidence is `lara-evidence@0.1`, and core wire remains `lara-core@0.3`. Presentation leaves gain an optional typed extraction request; presentation policies gain an exact checker/version allowlist. A leaf accepts at most one `extract` field and a policy at most one allowlist field:
+
+```text
+extract = (csv-row 1 object-id
+  (key "column" "exact raw key")
+  (select ("column" decimal) ("column" text))
+  (predicate pred))
+
+extract = (json-pointer 1 object-id
+  (select ("/cells/19/outputs/0/text/0" decimal-line))
+  (predicate training_loss))
+
+evidence-checkers = (checkers (csv-row 1) (json-pointer 1))
+```
+
+Fixed checker and encoding vocabularies are closed sums. Identifiers, column names, JSON tokens, versions and digests are distinct types. The two v1 families declare exactly one object. The request must match a certified leaf's checker provenance, be approved by policy, and resolve an existing leaf reference to the manifest object's path. Noncertified extraction requests reject at R8. Duplicate fields or duplicate allowlist entries are structural errors; unsupported versions and binding disagreements are R8. The checker never receives the expected proposition: it constructs the ordered proposition from selected values, then the runner compares it with the once-expanded semantic leaf using existing normalization.
+
+CSV is strict UTF-8 with comma-separated fields, a unique header row, LF or CRLF record endings and an optional final record ending. An empty header name is permitted because the original Pandas index uses it. Quoted commas and record endings are preserved; doubled quotes escape a quote. Bare CR outside quotes, unquoted quotes, trailing garbage after a quoted field, duplicate headers and ragged rows reject. The entire table is decoded before unique key-row selection; there is no first-match or aggregation rule.
+
+JSON is strict UTF-8 JSON. Duplicate keys reject before a last-key-wins representation can erase them. Pointers decode RFC 6901 escapes into typed tokens; array indices must be canonical nonnegative decimal integers, while numeric object keys remain keys. Scalar types are explicit: `decimal` selects a JSON number, `text` selects a JSON string, and `decimal-line` selects a JSON string consisting of a decimal followed by exactly one LF. CSV uses only `decimal` and `text`. There is no generic whitespace stripping, null/boolean coercion, approximate comparison, aggregation, unit conversion or inferred ground-term decoding.
+
+Decimal fields use `[+-]?[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?`. Bound the mantissa at 256 digits and the exponent at three digits with absolute value at most 256, before integer parsing, exponentiation or padding. Normalize exactly into the existing decimal representation, including scientific notation, trailing zeros and negative zero; never use binary floating point. The capture limits are 1 MiB per manifest, 8 MiB per object, 256 manifest objects and 16 MiB per requested snapshot. CSV is bounded at 100000 rows and 256 columns/selectors; JSON at depth 128 and 100000 nodes. The original notebook's long image strings remain within the object-byte bound.
+
+### Canonical manifest and capture contract
+
+The canonical UTF-8 encoding is `printSExpr` followed by exactly one LF:
+
+```text
+(lara-evidence 1
+  (paper paper-id)
+  (source source-id)
+  (policy policy-id)
+  (objects (object ID PATH LENGTH SHA256) ...))
+```
+
+Lengths are canonical decimal naturals and digests are `sha256:` followed by 64 lowercase hexadecimal digits. Required global entries have distinct IDs and paths; the paper path is exactly `PAPER.md`. Unknown, missing or duplicate fields, duplicate IDs/paths, unsafe path components (including NUL anywhere in a path), manifest/report self-references and noncanonical bytes reject. Reject NUL before POSIX string conversion, with a defensive shim check. The source artifact's declared digest is independent of the enclosing manifest, avoiding a hash cycle.
+
+Capture traverses package paths relative to held directory descriptors with no symlink following, checks regular files, and bounds reads. A nonblocking open prevents a FIFO from hanging before the regular-file check. Hashing and decoding consume the same immutable bytes. Global manifest, paper, source and package-policy capture precedes source parsing. A verifier policy is captured and hashed once and replaces the entire package policy. After structural validation and policy rejection, request bindings are checked in leaf order and requested evidence objects are captured in manifest order. Only captured dependencies receive byte assurance; unrequested manifest entries are not certified package members. Extractors receive exactly the request's captured objects and cannot perform IO.
+
+A captured object is usable only under the manifest entry it was captured for. Snapshot lookup keys on the object ID alone, so the promotion boundary additionally compares the snapshot object's metadata with the request-declared manifest entry (`Admission.captureRejection`, the runtime twin of the model's `captureStage`) and refuses an ID-only match. A snapshot captured for different bytes under the same ID therefore cannot be replayed against a source bound to this manifest, and the recorded dependency metadata always equals the manifest entry the binding validated. The package path is unaffected because there the snapshot is built from the manifest's own entries. `EvidenceAdmissionSpec` pins this through the public `admitSourceEvidence` boundary.
+
+### Error, identity and publication contract
+
+The ordered boundaries are global capture/manifest/source invalidity (exit 2), existing policy R8, evidence binding R8 in leaf order, requested-object capture/integrity R8 in manifest order, extraction/mismatch R8 in leaf order, strict replay R13, group R9 and core outcomes. Locate an object failure at the earliest leaf referencing it: the typed rejection names an artifact only where the failure is located at one, so a capture failure names the object it could not capture while an extraction failure is leaf-located and carries no object (`none`), matching the finite model's `replayLeaf`. `fixtures/evidence/model/MANIFEST.tsv` is the typed corpus's oracle for that encoding. Replay-identity construction errors remain source invalidity. Every R8 has empty stdout and no output bundle. Existing source doors without an evidence context reject certified declarations; map contract comparison still precedes admission. Raw export discards assurance and remains conditional declared evidence.
+
+The canonical `lara-evidence-report 1` envelope carries the unchanged core verdict, separate core and evidence identities, exact checked/declared leaf partitions, normalized requests and checker versions, and runner-owned object metadata. The evidence digest covers format versions, manifest/source hashes, policy hash and origin, the core replay tuple, normalized requests and the canonical dependency-report digest and metadata. It excludes its own digest. Policy origin is always `package` or `verifier`; a package policy cannot mint a verifier-approved label. Assurance is `evidence-checked` only with a nonempty checked partition and no declared leaves, `mixed` with both partitions, and `evidence-declared` with no checked leaves.
+
+`check-ara ROOT [--policy FILE] [--out DIR]` emits an accepted report only after the complete source/core check. Persist `report.sexp` and `core-verdict.sexp` through a temporary sibling directory and an atomic no-replace rename; reject an existing or racing destination and remove temporary output on failure. Use Linux `renameat2(RENAME_NOREPLACE)` or an equivalent supported primitive, failing closed if unavailable; no check-then-ordinary-rename fallback. Publish requested output before accepted stdout. No stored receipt authorizes skipping fresh replay. Existing public `evidence-blocked` overlays remain distinct from certification failure, and all result renderers consume the sealed source result rather than rerunning raw core.
+
+The finite Lean model must independently characterize executable admission, all-declared and retained witnesses, exact typed selection, dependency confinement/locality, ordered failures, registry replacement and successful-check conservativity. Composition must apply the existing unblocked justified-safety theorem with query membership and preserve located holes. OS capture, cryptographic assumptions, concrete byte-decoder refinement and runtime/compiler behavior remain explicit trusted boundaries; typed differential tests are conformance evidence, not parser proofs.
+
+The package door's own behavior is pinned by `test/evidence-cli.sh` (real binary over copied original packages, manifest/source mutation, no-evidence-context doors, publication atomicity), and the finite model's by `scripts/evidence-differential.sh` over `fixtures/evidence/model/`. Both are `make cross-check`/`make local-gates` members (`evidence-cli`, `evidence-differential`).

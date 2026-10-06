@@ -72,12 +72,16 @@ import Lara.Driver
   )
 import Lara.Elaborate
   ( SourceResult
-  , sourceResultCheckInput
+  , sourceResultEvidence
+  , sourceResultDeclaredLeafIds
   , sourceResultCheckedArgIds
   , sourceResultDiagnostics
   , sourceResultLocatedRejection
   , sourceResultVerdict
   )
+import Lara.Evidence.Runner (judgmentLeaf, judgmentRequest, judgmentDeps)
+import Lara.Evidence.Manifest (objectSExpr)
+import Lara.Evidence.Syntax (encodeRequest)
 import Lara.Grounded (Claim (..))
 import Lara.Replay
   ( CheckInput
@@ -115,6 +119,7 @@ import Lara.Wire
   , isPublished
   , rejectClassTag
   , tagToString
+  , printSExpr
   )
 
 -- ---------------------------------------------------------------------------
@@ -192,30 +197,24 @@ renderString s = '"' : concatMap esc s ++ "\""
 expectedJson :: CheckInput -> String
 expectedJson = renderJson . expectedJsonValue
 
--- | Render a source result without discarding its admission prune.  When the
--- audit is empty, the legacy raw-core rendering remains byte-identical.  A
--- policy-pruned result is rendered directly from its public verdict; rebuilding
--- it through 'runCheck' would lose the policy seed and blocked-status overlay.
+-- | Render only the stored source decision; never re-run a raw-core export.
 sourceResultJsonValue :: SourceResult -> JValue
 sourceResultJsonValue result =
-  case sourceResultCheckInput result of
-    Right input -> expectedJsonValue input
-    Left _ ->
       case sourceResultVerdict result of
         Verdict replayId (Accept labels _edges statuses holes) ->
           JObject
-            [ ("replay-id", replayIdValue replayId)
-            , ("verdict-class", JString (tagToString TAccept))
-            , ( "located-diagnostic"
-              , JObject
-                  ( [ ("kind", JString "accept")
-                    , ("statuses", JArray (map sourceStatusEntry statuses))
-                    , ("labels", JArray (map sourceLabelEntry labels))
-                    ]
-                      ++ [("holes", JArray (map holeEntry holes)) | not (null holes)]
-                  )
-              )
-            ]
+            ( [ ("replay-id", replayIdValue replayId)
+              , ("verdict-class", JString (tagToString TAccept))
+              , ( "located-diagnostic"
+                , JObject
+                    ( [ ("kind", JString "accept")
+                      , ("statuses", JArray (map sourceStatusEntry statuses))
+                      , ("labels", JArray (map sourceLabelEntry labels))
+                      ]
+                        ++ [("holes", JArray (map holeEntry holes)) | not (null holes)]
+                    )
+                )
+              ] ++ evidenceFields )
         Verdict replayId (Reject rejection) ->
           JObject
             [ ("replay-id", replayIdValue replayId)
@@ -223,6 +222,22 @@ sourceResultJsonValue result =
             , ("located-diagnostic", sourceRejectDiagnostic result rejection)
             ]
   where
+    judgments = sourceResultEvidence result
+    checkedIds = map judgmentLeaf judgments
+    declaredIds = filter (`notElem` checkedIds) (sourceResultDeclaredLeafIds result)
+    leafName (LeafId name) = JString name
+    evidenceFields =
+      [ ("evidence", JObject
+          [ ("assurance", JString (if null declaredIds then "evidence-checked" else "mixed"))
+          , ("checked", JArray (map leafName checkedIds))
+          , ("declared", JArray (map leafName declaredIds))
+          , ("replays", JArray [JObject
+              [ ("leaf", leafName (judgmentLeaf j))
+              , ("request", JString (printSExpr (encodeRequest (judgmentRequest j))))
+              , ("dependencies", JArray [JString (printSExpr (objectSExpr dep)) | dep <- judgmentDeps j])
+              ] | j <- judgments])
+          ])
+      | not (null judgments) ]
     sourceStatusEntry (p, status) =
       JObject $
         [ ("claim", JString (prettyProp p))

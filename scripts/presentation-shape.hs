@@ -83,6 +83,7 @@ import Lara.AST
 import Lara.Sigma
 import Lara.Strict (SExpr)
 import qualified Lara.Prop as P
+import Lara.Evidence.Types
 
 -- ---------------------------------------------------------------------------
 -- Identifier and symbol witnesses
@@ -194,7 +195,7 @@ argDischargeWitness = id
 atomPatCtor :: Pred -> [Pat] -> AtomPat
 atomPatCtor = AtomPat
 
-leafCtor :: LeafId -> P.Prop -> LeafKind -> Provenance -> [SourceRef] -> Leaf
+leafCtor :: LeafId -> P.Prop -> LeafKind -> Provenance -> [SourceRef] -> Maybe ExtractionRequest -> Leaf
 leafCtor = Leaf
 
 bindingCtor :: String -> String -> AuditStatus -> Binding
@@ -241,7 +242,7 @@ comparisonSchemeCtor = ComparisonScheme
 policyCtor ::
   PolicyId -> Sigma -> [Rule] -> [Contrary] -> [Exception] ->
   [ExpectedAdmissionEntry] -> [ExpectedTheoryEntry] ->
-  GroupConflictMode -> [Measurand] -> [ComparisonScheme] -> Policy
+  GroupConflictMode -> [Measurand] -> [ComparisonScheme] -> [(LeafCheckerId,CheckerVersion)] -> Policy
 policyCtor = Policy
 
 -- | Exemption 2: @payload@ is the native S-expression type and is not compared.
@@ -581,6 +582,9 @@ witnesses =
   , used assuranceTag, used supportTermTag, used stepTag, used attackTag
   , used surfaceStepTag, used surfaceAttackTag, used challengeTargetTag
   , used argConclTag, used argInstantiationTag, used declTag
+  , used checkerVersionCtor, used objectIdCtor, used columnNameCtor, used jsonTokenCtor
+  , used csvSelectorCtor, used jsonSelectorCtor, used csvRowRequestCtor, used jsonPointerRequestCtor
+  , used jsonPathWitness, used checkerTag, used encodingTag, used requestTag
   ]
   where
     used :: a -> ()
@@ -638,7 +642,7 @@ shapeRows =
   , ("ArgConcl", ["supports-claim", "supports-derived", "challenges"])
   , ("Decl", ["leaf", "claim", "arg", "attack", "status", "group", "comparison"])
   , ("AtomPat", ["pred", "args"])
-  , ("Leaf", ["id", "prop", "kind", "provenance", "refs"])
+  , ("Leaf", ["id", "prop", "kind", "provenance", "refs", "extraction"])
   , ("Binding", ["author", "rationale", "audit-status"])
   , ("Claim", ["id", "nl", "formal", "binding"])
   , ("Question", ["id", "answer", "necessity"])
@@ -658,7 +662,7 @@ shapeRows =
   , ("ComparisonScheme", ["relation", "polarity", "recheck", "bridge"])
   , ( "Policy"
     , [ "id", "sigma", "rules", "contraries", "exceptions", "admission"
-      , "theories", "group-mode", "measurands", "comparison-schemes"
+      , "theories", "group-mode", "measurands", "comparison-schemes", "evidence-checkers"
       ]
     )
   , ("Cert", ["backend", "version", "theory", "payload"])
@@ -692,6 +696,19 @@ shapeRows =
     )
   , ("M5.ValueBinding", ["name", "term"])
   , ("M5.Cert", ["backend", "version", "theory", "payload"])
+  , ("LeafCheckerId", ["csv-row","json-pointer"])
+  , ("CheckerVersion", ["val"])
+  , ("ObjectId", ["val"])
+  , ("ColumnName", ["val"])
+  , ("JsonToken", ["val"])
+  , ("JsonPath", ["tokens:List JsonToken"])
+  , ("TermEncoding", ["decimal","text","decimal-line"])
+  , ("CsvSelector", ["column","encoding"])
+  , ("JsonSelector", ["path","encoding"])
+  , ("ExtractionRequest", ["csv-row","json-pointer"])
+  , ("CsvRowRequest", ["version","object","key-column","key-value","selectors","predicate"])
+  , ("JsonPointerRequest", ["version","object","selectors","predicate"])
+  , ("EvidenceCheckerEntry", ["checker:LeafCheckerId","version:CheckerVersion"])
   ]
 
 renderRow :: (String, [String]) -> String
@@ -932,6 +949,15 @@ deriving instance Generic ComparisonClaim
 deriving instance Generic Comparison
 deriving instance Generic ValueBinding
 deriving instance Generic Program
+deriving instance Generic LeafCheckerId
+deriving instance Generic CheckerVersion
+deriving instance Generic ObjectId
+deriving instance Generic ColumnName
+deriving instance Generic JsonToken
+deriving instance Generic TermEncoding
+deriving instance Generic CsvSelector
+deriving instance Generic JsonSelector
+deriving instance Generic ExtractionRequest
 
 -- | One entry per 'shapeRows' entry, same order and same row name.
 --
@@ -1020,6 +1046,19 @@ shapeChecks =
   , ("M5.Comparison", namedRecordOf @Comparison "cmp")
   , ("M5.ValueBinding", namedRecordOf @ValueBinding "value")
   , ("M5.Cert", namedRecordOf @Cert "cert")
+  , ("LeafCheckerId", SumOf (ctorsOf @LeafCheckerId))
+  , ("CheckerVersion", RecordOf (ctorsOf @CheckerVersion))
+  , ("ObjectId", RecordOf (ctorsOf @ObjectId))
+  , ("ColumnName", RecordOf (ctorsOf @ColumnName))
+  , ("JsonToken", RecordOf (ctorsOf @JsonToken))
+  , ("JsonPath", AliasOf 1)
+  , ("TermEncoding", SumOf (ctorsOf @TermEncoding))
+  , ("CsvSelector", RecordOf (ctorsOf @CsvSelector))
+  , ("JsonSelector", RecordOf (ctorsOf @JsonSelector))
+  , ("ExtractionRequest", SumOf (ctorsOf @ExtractionRequest))
+  , ("CsvRowRequest", CtorOf "CsvRowRequest" (ctorsOf @ExtractionRequest))
+  , ("JsonPointerRequest", CtorOf "JsonPointerRequest" (ctorsOf @ExtractionRequest))
+  , ("EvidenceCheckerEntry", RecordOf (ctorsOf @(LeafCheckerId,CheckerVersion)))
   ]
 
 -- | Refuse to print unless every row's part count equals the real shape of the
@@ -1068,3 +1107,32 @@ main = do
   witnesses `seq` pure ()
   checkShape
   putStr (unlines (map renderRow shapeRows))
+
+checkerVersionCtor :: Integer -> CheckerVersion
+checkerVersionCtor = CheckerVersion
+objectIdCtor :: String -> ObjectId
+objectIdCtor = ObjectId
+columnNameCtor :: String -> ColumnName
+columnNameCtor = ColumnName
+jsonTokenCtor :: String -> JsonToken
+jsonTokenCtor = JsonToken
+csvSelectorCtor :: ColumnName -> TermEncoding -> CsvSelector
+csvSelectorCtor = CsvSelector
+jsonSelectorCtor :: JsonPath -> TermEncoding -> JsonSelector
+jsonSelectorCtor = JsonSelector
+csvRowRequestCtor :: CheckerVersion -> ObjectId -> ColumnName -> String -> [CsvSelector] -> Pred -> ExtractionRequest
+csvRowRequestCtor = CsvRowRequest
+jsonPointerRequestCtor :: CheckerVersion -> ObjectId -> [JsonSelector] -> Pred -> ExtractionRequest
+jsonPointerRequestCtor = JsonPointerRequest
+jsonPathWitness :: JsonPath -> [JsonToken]
+jsonPathWitness = id
+checkerTag :: LeafCheckerId -> String
+checkerTag CsvRow = "csv-row"
+checkerTag JsonPointer = "json-pointer"
+encodingTag :: TermEncoding -> String
+encodingTag Decimal = "decimal"
+encodingTag Text = "text"
+encodingTag DecimalLine = "decimal-line"
+requestTag :: ExtractionRequest -> String
+requestTag (CsvRowRequest _ _ _ _ _ _) = "csv-row"
+requestTag (JsonPointerRequest _ _ _ _) = "json-pointer"

@@ -16,6 +16,15 @@
 # Regenerate after adding or removing an anchor:
 #
 #     bash scripts/gen-anchor-manifest.sh
+#
+# Families with their own harness are excluded from discovery, each for the
+# reason recorded at the `find` in scripts/differential.sh: malformed/,
+# mutants/, admission/, pw/ and evidence/ (the `evidence-model 1` envelopes of
+# fixtures/evidence/model/ and the ARA checking package under
+# fixtures/evidence/quarantined/), the certified-evidence portfolio under
+# examples/certified-evidence/ (whose `lara-evidence.sexp` files are ARA
+# checking manifests, not check inputs), plus the two committed map artifacts
+# by name.
 bundles/walking-skeleton/emitted.core.sexp
 corpus-units/adaptive-pruning/C03/unit.core.sexp
 corpus-units/adaptive-pruning/C04/unit.core.sexp

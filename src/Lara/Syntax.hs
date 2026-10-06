@@ -157,8 +157,10 @@ import Lara.Sigma
   , sortText
   )
 import Lara.Prop (Prop (..), Term (..))
-import Lara.Strict (SExpr)
+import Lara.Strict (SExpr (..))
 import Lara.Wire (parseSExpr, printSExpr)
+import Lara.Evidence.Types
+import Lara.Evidence.Syntax
 
 -- ---------------------------------------------------------------------------
 -- Located parse errors
@@ -343,6 +345,23 @@ stringLit = do
         '"' : _ -> body <$ advanceP
         _ -> failP "unterminated string literal"
     _ -> failP "expected a string literal"
+
+-- | Quoted term data uses the wire atom escapes, not the prose brace grammar.
+termStringLit :: P String
+termStringLit = do
+  symbol '"'
+  raw <- scan ['"'] False
+  case parseSExpr raw of
+    Right (SAtom value) -> pure value
+    _ -> failP "malformed quoted term"
+  where
+    scan acc escaped = do
+      input <- getInput
+      case input of
+        [] -> failP "unterminated quoted term"
+        '\n' : _ -> failP "unterminated quoted term"
+        '"' : _ | not escaped -> reverse ('"' : acc) <$ advanceP
+        c : _ -> advanceP >> scan (c : acc) (c == '\\' && not escaped)
 
 -- | The directive head reserved for premise-cell interpolation.
 nlCellDirective :: String
@@ -616,7 +635,15 @@ provenanceP = do
       symbol '('
       name <- identifier
       symbol ','
-      ver <- identifier
+      ver <- do
+        c <- peekChar
+        case c of
+          Just ch | isDigit ch -> do
+            ds <- takeWhileP isDigit
+            case ds of
+              '0' : _ : _ -> failP "checker version has a leading zero"
+              _ -> pure ds
+          _ -> identifier
       symbol ')'
       pure (Checker name ver)
     _ -> failP "expected provenance (user | ai-executed | checker(name, version))"
@@ -631,11 +658,12 @@ provenanceStr p = case p of
 -- Shared sub-grammars: terms, propositions, patterns (grammar §2)
 -- ---------------------------------------------------------------------------
 
--- | @term ::= number | ident | ident \"(\" term,… \")\"@.
+-- | @term ::= number | quoted-string | ident | ident \"(\" term,… \")\"@.
 termP :: P Term
 termP = do
   c <- peekChar
   case c of
+    Just '"' -> TStr <$> termStringLit
     Just ch
       | ch == '+' || ch == '-' || isDigit ch -> TNum <$> numberLit
       | isIdentStart ch -> do
@@ -665,13 +693,14 @@ propP = do
 parseProp :: String -> Either ParseError Prop
 parseProp = runCompleteWith WhitespaceOnlyTrivia (propP <* eof)
 
--- | @pat ::= number | ident | ident \"(\" pat,… \")\"@. A bare identifier is
+-- | @pat ::= number | quoted-string | ident | ident \"(\" pat,… \")\"@.
 -- recorded as 'PVar'; the elaborator reclassifies it to a ground literal when
 -- it is not one of the enclosing rule's parameters (grammar §2).
 patP :: P Pat
 patP = do
   c <- peekChar
   case c of
+    Just '"' -> PLit . TStr <$> termStringLit
     Just ch
       | ch == '+' || ch == '-' || isDigit ch -> PLit . TNum <$> numberLit
       | isIdentStart ch -> do
@@ -890,14 +919,24 @@ leafP = do
   keyword "refs"
   symbol '='
   refs <- refsListP
+  extraction <- do
+    mw <- peekIdent
+    case mw of
+      Just "extract" -> do
+        keyword "extract"; symbol '='
+        expr <- sexpLitP
+        req <- either failP pure (decodeRequest expr)
+        next <- peekIdent
+        case next of
+          Just "extract" -> failP "duplicate leaf extraction request"
+          _ -> pure (Just req)
+      _ -> pure Nothing
   pure
-    Leaf
-      { leafId = LeafId lid
-      , leafProp = p
-      , leafKind = k
-      , leafProvenance = prov
-      , leafRefs = refs
-      }
+    Leaf { leafId = LeafId lid
+    , leafProp = p
+    , leafKind = k
+    , leafProvenance = prov
+    , leafRefs = refs, leafExtraction = extraction }
 
 -- | @group ident = [ leafId,… ]@ (grammar §3): a duplicate-report group over
 -- declared leaf ids (spec §4.3). The named id lets an R9 data-integrity
@@ -1284,76 +1323,64 @@ policyP :: P Policy
 policyP = do
   keyword "policy"
   pid <- identifier
-  PolicyAcc sg rs cs es adm ts gm ms schs <-
-    policyDecls (PolicyAcc emptySigma [] [] [] [] [] QuarantineOnConflict [] [])
+  (PolicyAcc sg rs cs es adm ts gm ms schs, checkers) <-
+    policyDecls Nothing (PolicyAcc emptySigma [] [] [] [] [] QuarantineOnConflict [] [])
   pure
-    Policy
-      { policyId = PolicyId pid
-      , policySigma = sg
-      , policyRules = rs
-      , policyContraries = cs
-      , policyExceptions = es
-      , policyAdmission = adm
-      , policyTheories = ts
-      , policyGroupMode = gm
-      , policyMeasurands = ms
-      , policyComparisonSchemes = schs
-      }
+    Policy { policyId = PolicyId pid
+    , policySigma = sg
+    , policyRules = rs
+    , policyContraries = cs
+    , policyExceptions = es
+    , policyAdmission = adm
+    , policyTheories = ts
+    , policyGroupMode = gm
+    , policyMeasurands = ms
+    , policyComparisonSchemes = schs, policyEvidenceCheckers = maybe [] id checkers }
 
-policyDecls :: PolicyAcc -> P PolicyAcc
-policyDecls acc@(PolicyAcc sg rs cs es adm ts gm ms schs) = do
+policyDecls :: Maybe [(LeafCheckerId,CheckerVersion)] -> PolicyAcc -> P (PolicyAcc, Maybe [(LeafCheckerId,CheckerVersion)])
+policyDecls checkers acc@(PolicyAcc sg rs cs es adm ts gm ms schs) = do
   mw <- peekIdent
+  let again = policyDecls checkers
   case mw of
-    -- The signature blocks (grammar §4.0). Duplicate detection is Σ
-    -- well-formedness, decided by the checker as R2 — the parser is a decode
-    -- boundary and records what was written, exactly as it does for a rule id
-    -- declared twice.
+    Just "evidence-checkers" -> do
+      case checkers of Just _ -> failP "duplicate evidence-checkers field"; Nothing -> pure ()
+      keyword "evidence-checkers"; symbol '='
+      expr <- sexpLitP
+      entries <- either failP pure (decodeCheckers expr)
+      policyDecls (Just entries) acc
     Just "sort" -> do
       ns <- sortLineP
-      policyDecls (PolicyAcc sg{sigmaSorts = sigmaSorts sg ++ ns} rs cs es adm ts gm ms schs)
+      again (PolicyAcc sg{sigmaSorts = sigmaSorts sg ++ ns} rs cs es adm ts gm ms schs)
     Just "con" -> do
       c <- conLineP
-      policyDecls (PolicyAcc sg{sigmaCons = sigmaCons sg ++ [c]} rs cs es adm ts gm ms schs)
+      again (PolicyAcc sg{sigmaCons = sigmaCons sg ++ [c]} rs cs es adm ts gm ms schs)
     Just "pred" -> do
       pr <- predLineP
-      policyDecls (PolicyAcc sg{sigmaPreds = sigmaPreds sg ++ [pr]} rs cs es adm ts gm ms schs)
-    Just "rule" -> do r <- ruleP; policyDecls (PolicyAcc sg (rs ++ [r]) cs es adm ts gm ms schs)
-    Just "contrary" -> do c <- contraryP; policyDecls (PolicyAcc sg rs (cs ++ [c]) es adm ts gm ms schs)
-    Just "exception" -> do e <- exceptionP; policyDecls (PolicyAcc sg rs cs (es ++ [e]) adm ts gm ms schs)
-    Just "admission" -> do a <- admissionP; policyDecls (PolicyAcc sg rs cs es (adm ++ a) ts gm ms schs)
+      again (PolicyAcc sg{sigmaPreds = sigmaPreds sg ++ [pr]} rs cs es adm ts gm ms schs)
+    Just "rule" -> do r <- ruleP; again (PolicyAcc sg (rs ++ [r]) cs es adm ts gm ms schs)
+    Just "contrary" -> do c <- contraryP; again (PolicyAcc sg rs (cs ++ [c]) es adm ts gm ms schs)
+    Just "exception" -> do e <- exceptionP; again (PolicyAcc sg rs cs (es ++ [e]) adm ts gm ms schs)
+    Just "admission" -> do a <- admissionP; again (PolicyAcc sg rs cs es (adm ++ a) ts gm ms schs)
     Just "duplicate-reports" -> do
-      keyword "duplicate-reports"
-      symbol '='
+      keyword "duplicate-reports"; symbol '='
       gm' <- enumFromTable "a group conflict mode (quarantine | reject)" groupModeTable
-      policyDecls (PolicyAcc sg rs cs es adm ts gm' ms schs)
+      again (PolicyAcc sg rs cs es adm ts gm' ms schs)
     Just "theory" -> do
       t@(TheoryDigest d, _) <- theoryLineP
       if any (\(TheoryDigest d', _) -> d' == d) ts
         then failP ("duplicate theory digest: " ++ d)
-        else policyDecls (PolicyAcc sg rs cs es adm (ts ++ [t]) gm ms schs)
-    -- A duplicate measurand is rejected inline, like a duplicate theory digest
-    -- and for the same reason (grammar App. B.1): a silent first-wins lookup
-    -- would pick a polarity the author did not intend, flipping the generated
-    -- goal of every comparison on that measurand.
+        else again (PolicyAcc sg rs cs es adm (ts ++ [t]) gm ms schs)
     Just "measurand" -> do
       m <- measurandLineP
       if any ((== measurandId m) . measurandId) ms
         then failP ("duplicate measurand: " ++ let MeasurandId n = measurandId m in n)
-        else policyDecls (PolicyAcc sg rs cs es adm ts gm (ms ++ [m]) schs)
-    -- Schemes are keyed by the (relation, polarity) __pair__, so that is the
-    -- duplicate key (grammar App. B.2); there are at most four entries.
+        else again (PolicyAcc sg rs cs es adm ts gm (ms ++ [m]) schs)
     Just "comparison-scheme" -> do
       sch <- comparisonSchemeP
       if any (\s -> (csRelation s, csPolarity s) == (csRelation sch, csPolarity sch)) schs
-        then
-          failP
-            ( "duplicate comparison-scheme for "
-                ++ relationStr (csRelation sch)
-                ++ " "
-                ++ polarityStr (csPolarity sch)
-            )
-        else policyDecls (PolicyAcc sg rs cs es adm ts gm ms (schs ++ [sch]))
-    _ -> pure acc
+        then failP ("duplicate comparison-scheme for " ++ relationStr (csRelation sch) ++ " " ++ polarityStr (csPolarity sch))
+        else again (PolicyAcc sg rs cs es adm ts gm ms (schs ++ [sch]))
+    _ -> pure (acc,checkers)
 
 -- | @sortLine ::= \"sort\" ident { \",\" ident }@ (grammar §4.0).
 sortLineP :: P [SortName]
@@ -1887,6 +1914,7 @@ printLeaf l =
   , "  provenance = " ++ provenanceStr (leafProvenance l)
   , "  refs = [" ++ intercalate ", " [r | SourceRef r <- leafRefs l] ++ "]"
   ]
+    ++ [ "  extract = " ++ printSExpr (encodeRequest request) | Just request <- [leafExtraction l] ]
 
 printArg :: Arg -> [String]
 printArg a =
@@ -2007,6 +2035,8 @@ printPolicy p =
       ++ printTheories (policyTheories p)
       ++ printMeasurands (policyMeasurands p)
       ++ printSchemes (policyComparisonSchemes p)
+      ++ [ "evidence-checkers = " ++ printSExpr (encodeCheckers (policyEvidenceCheckers p))
+         | not (null (policyEvidenceCheckers p)) ]
   where
     prependBlank [] = []
     prependBlank xs = "" : xs
@@ -2122,7 +2152,7 @@ printProp (Prop (Pred h) ts) = h ++ "(" ++ intercalate ", " (map printTerm ts) +
 printTerm :: Term -> String
 printTerm t = case t of
   TNum s -> s
-  TStr s -> quote s -- not surface-representable in a term; totality only
+  TStr s -> quoteTerm s
   TCon (FunSym k) [] -> k
   TCon (FunSym k) ts -> k ++ "(" ++ intercalate ", " (map printTerm ts) ++ ")"
 
@@ -2134,10 +2164,15 @@ printPat :: Pat -> String
 printPat p = case p of
   PVar (Param x) -> x
   PLit (TNum s) -> s
-  PLit (TStr s) -> quote s -- not surface-representable; totality only
+  PLit (TStr s) -> quoteTerm s
   PLit (TCon (FunSym k) []) -> k
   PLit (TCon (FunSym k) ts) -> k ++ "(" ++ intercalate ", " (map printTerm ts) ++ ")"
   PCon (FunSym k) ps -> k ++ "(" ++ intercalate ", " (map printPat ps) ++ ")"
+
+quoteTerm :: String -> String
+quoteTerm value = case printSExpr (SAtom value) of
+  rendered@('"' : _) -> rendered
+  rendered -> quote rendered
 
 -- | Emit a single-line double-quoted string (grammar §1.3).
 quote :: String -> String

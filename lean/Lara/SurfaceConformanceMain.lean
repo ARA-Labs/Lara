@@ -16,6 +16,7 @@ instance substitution keys alpha-normalized to `$0`, `$1`, ... .
 -/
 import Lara.Examples.Surface
 import Lara.PresentationParity
+import Lara.Surface.Source
 
 namespace Lara.SurfaceConformance
 
@@ -182,7 +183,7 @@ private def explicitRuleTerm (rule : RuleId) (term : Term)
 
 private def leaf (id : String) (proposition : Atom) (kind : LeafKind)
     (provenance : Provenance) (refs : List String := []) : Decl :=
-  .leaf ⟨⟨id⟩, proposition, kind, provenance, refs.map (fun ref => ⟨ref⟩)⟩
+  .leaf ⟨⟨id⟩, proposition, kind, provenance, refs.map (fun ref => ⟨ref⟩), none⟩
 
 private def claim (id nl : String) (formal : Atom) (rationale : String) : Decl :=
   .claim ⟨⟨id⟩, nl, formal, binding rationale⟩
@@ -205,8 +206,8 @@ private def baseProgram : Program :=
       , leaf "binding" (atom "binding" [con0 "system-a", con0 "system-b",
           con0 "quality", con0 "dataset", .num "7", .num "5"])
           .assumed (.checker "checker" "v1")
-      , leaf "proof" (atom "score" [.num "7"]) .certified .user ["source/proof"]
-      , leaf "pass-proof" (atom "evidence" [.num "7"]) .certified .user
+      , leaf "proof" (atom "score" [.num "7"]) .assumed .user ["source/proof"]
+      , leaf "pass-proof" (atom "evidence" [.num "7"]) .assumed .user
       , leaf "verdict-pro" (atom "verdict" [.num "1"]) .observed .user
       , leaf "verdict-con" (atom "verdict" [.num "0"]) .observed .user
       , .arg ⟨⟨"arg-strict"⟩, .supportsClaim ⟨"claim-main"⟩,
@@ -251,7 +252,8 @@ private def namedProgram (binder : String) (payload : Option Sx := none) : Progr
           (if binder == "evidence" then "captured binder" else "named binder left")
           (atom "score" [.num "7"])
           (if binder == "evidence" then "negative" else "nd alpha")
-      , leaf "proof" (atom "score" [.num "7"]) .certified .user
+      , leaf "proof" (atom "score" [.num "7"])
+          (if binder == "evidence" then .certified else .assumed) .user
       , .arg ⟨⟨"arg-strict"⟩, .supportsClaim ⟨"claim-main"⟩,
           .explicitTheta (explicitRuleTerm mainId (.num "7") []
             (namedCert (payload.getD (ndPayload binder))))⟩
@@ -523,8 +525,8 @@ private def caseById (id : String) : Option Case :=
   | "group-member-undeclared-reject" =>
       some ⟨id, "group-member-undeclared-reject.lara", "surface.policy.lara",
         "reject:group-member-undeclared", ⟨danglingGroupMemberProgram, surfacePolicy⟩⟩
-  | "admission-prune-accept" => some ⟨id, "admission-prune-open.lara",
-      "admission-prune.policy.lara", "accept",
+  | "admission-prune-no-context" => some ⟨id, "admission-prune-open.lara",
+      "admission-prune.policy.lara", "reject:certified-evidence",
       ⟨admissionPruneOpenProgram, surfacePolicy "X" false true⟩⟩
   | "observation-gap" => some ⟨id, "observation-gap.lara",
       "observation-gap.policy.lara", "accept",
@@ -1153,11 +1155,20 @@ private def validateManifestCase (row : ManifestRow) : Except String Case := do
     .error (row.caseId ++ ": expected outcome disagrees with case definition")
   else .ok spec
 
+private def sourceErrorTag (input : Lara.Surface.Input) : Surface.SourceError → Option String
+  | .structural error => errorTag input error
+  | .evidence _ => some "certified-evidence"
+  | .evidenceSyntax => some "evidence-syntax"
+private def sourceErrorText : Surface.SourceError → String
+  | .structural error => surfaceErrorText error
+  | .evidence _ => "certified-evidence"
+  | .evidenceSyntax => "evidence-syntax"
+
 private def evaluateCase (row : ManifestRow) : Except String OutputRow := do
   let spec ← validateManifestCase row
   let ast := inputFingerprint spec.input
-  match hchecked : Surface.check conformanceEnv spec.input,
-      Surface.elaborate conformanceEnv spec.input with
+  match hchecked : Surface.sourceWithoutEvidence conformanceEnv spec.input,
+      Surface.elaborateSourceWithoutEvidence conformanceEnv spec.input with
   | .ok output, .ok _ => do
       if row.expected != "accept" then
         .error (row.caseId ++ ": accepted but manifest expects " ++ row.expected)
@@ -1177,11 +1188,11 @@ private def evaluateCase (row : ManifestRow) : Except String OutputRow := do
           locatedHoles := renderList holes
           attacks := renderList attacks
           observations := renderList (observationCells spec.input output
-            (Surface.check_sound conformanceEnv spec.input output hchecked)) }
+            (Surface.sourceWithoutEvidence_sound hchecked)) }
   | .error checkError, .error elaborateError => do
       if checkError != elaborateError then
         .error (row.caseId ++ ": check/elaborate structural errors differ")
-      let tag ← match errorTag spec.input checkError with
+      let tag ← match sourceErrorTag spec.input checkError with
         | some tag => .ok tag
         | none => .error (row.caseId ++ ": unexpected structural rejection")
       let outcome := "reject:" ++ tag
@@ -1195,10 +1206,10 @@ private def evaluateCase (row : ManifestRow) : Except String OutputRow := do
   | .error surfaceError, .ok output =>
       match Check.Unit.checkUnit output.gamma conformanceEnv.registry output.ground output.unit with
       | .error error => .error (row.caseId ++ ": check rejected (" ++
-          surfaceErrorText surfaceError ++ "/" ++ unitErrorText error ++
+          sourceErrorText surfaceError ++ "/" ++ unitErrorText error ++
           ") but elaborate accepted")
       | .ok _ => .error (row.caseId ++ ": check rejected (" ++
-          surfaceErrorText surfaceError ++ ") but direct core check accepted")
+          sourceErrorText surfaceError ++ ") but direct core check accepted")
 
 private def outputHeader : String :=
   "case_id\tast_fingerprint\toutcome\tcore_fingerprint\tauthored_open\tlocated_holes\tattacks\tobservations"

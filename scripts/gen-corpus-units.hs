@@ -29,6 +29,7 @@ module Main (main) where
 
 import Data.List (isPrefixOf)
 import Lara.Admission (renderAdmissionAudit, renderAdmissionRejection)
+import Lara.Evidence.Admission (renderEvidenceRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
   , prepareSource
@@ -74,6 +75,7 @@ main = do
         Left invalid -> fail (unitPath ++ ": source invalid: " ++ renderSourceInvalid invalid)
         Right (SourceRejected rejection) ->
           fail (unitPath ++ ": admission rejection: " ++ renderAdmissionRejection rejection)
+        Right (SourceEvidenceRejected rejection) -> fail (unitPath ++ ": " ++ renderEvidenceRejection rejection)
         Right (SourceAccepted source) ->
           case sourceResultCheckInput (runSourceCheck source) of
             Left audit ->

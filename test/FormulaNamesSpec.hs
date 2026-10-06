@@ -20,6 +20,7 @@ import Test.QuickCheck
 
 import Lara.AST (LeafId (..), Policy, Program)
 import Lara.Admission (renderAdmissionRejection)
+import Lara.Evidence.Admission (renderEvidenceRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
   , prepareSource
@@ -116,6 +117,7 @@ authorLines programSource = do
     Left invalid -> Left ("source invalid: " ++ renderSourceInvalid invalid)
     Right (SourceRejected rejection) ->
       Left ("admission rejection: " ++ renderAdmissionRejection rejection)
+    Right (SourceEvidenceRejected rejection) -> Left (renderEvidenceRejection rejection)
     Right (SourceAccepted input) ->
       Right (sourceResultAuthorDiagnostics (runSourceCheck input))
 
@@ -127,6 +129,7 @@ authoredFormulas programSource = do
     Left invalid -> Left ("source invalid: " ++ renderSourceInvalid invalid)
     Right (SourceRejected rejection) ->
       Left ("admission rejection: " ++ renderAdmissionRejection rejection)
+    Right (SourceEvidenceRejected rejection) -> Left (renderEvidenceRejection rejection)
     Right (SourceAccepted input) ->
       Right (sourceResultAuthoredFormulas (runSourceCheck input))
 

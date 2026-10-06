@@ -55,13 +55,11 @@ atom p = Prop (Pred p)
 -- | A leaf supporting itself as evidence, with kind and provenance.
 leaf :: String -> Prop -> LeafKind -> Provenance -> [String] -> Leaf
 leaf lid p k prov refs =
-  Leaf
-    { leafId = LeafId lid
-    , leafProp = p
-    , leafKind = k
-    , leafProvenance = prov
-    , leafRefs = map SourceRef refs
-    }
+  Leaf { leafId = LeafId lid
+  , leafProp = p
+  , leafKind = k
+  , leafProvenance = prov
+  , leafRefs = map SourceRef refs, leafExtraction = Nothing }
 
 -- | A defeasible rule instance with premises, discharge map, and holes.
 inst

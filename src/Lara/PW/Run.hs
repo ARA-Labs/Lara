@@ -78,6 +78,7 @@ import Lara.Check (CheckedUnit, checkUnitWith, cuNodes, cuProgram, fullConfig)
 import Lara.Compile (CheckedProgram)
 import Lara.Diagnostics (rejectionOf)
 import Lara.Driver (buildCertOk, buildGamma)
+import Lara.Evidence.Admission (renderEvidenceRejection)
 import Lara.Elaborate (PreparedSource (..), preparedCheckInput)
 import Lara.Grounded (AF, completeClaimFor, statusC)
 import Lara.Prop (FunSym (..), Pred (..), Prop)
@@ -547,6 +548,7 @@ readSource dir source = case source of
       Left err -> Left (renderSourceLoadError err)
       Right src -> case loadedPrepared src of
         SourceRejected rejection -> Left (renderAdmissionRejection rejection)
+        SourceEvidenceRejected rejection -> Left (renderEvidenceRejection rejection)
         SourceAccepted prepared -> case preparedCheckInput prepared of
           Left audit -> Left (quarantineDetail audit)
           Right input -> Right (W.encodeCheckInput input)

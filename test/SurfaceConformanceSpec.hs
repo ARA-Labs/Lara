@@ -57,7 +57,7 @@ orderedCases =
   , "group-repeated-member-reject"
   , "group-too-few-members-reject"
   , "group-member-undeclared-reject"
-  , "admission-prune-accept"
+  , "admission-prune-no-context"
   , "observation-gap"
   , "observation-defeated"
   , "observation-contested"
@@ -248,12 +248,17 @@ prop_namedNegativeOutcomes = once $ ioProperty $ do
 prop_admissionPrunedOpenObligation :: Property
 prop_admissionPrunedOpenObligation = once $ ioProperty $ do
   parsed <- loadRows
-  pure $ case parsed >>= rowNamed "admission-prune-accept" of
+  pure $ case parsed >>= rowNamed "admission-prune-no-context" of
     Left err -> counterexample err False
     Right row ->
       counterexample (show row) $
-        -- An optional open question is authored data, never a hole (D8).
-        rowAuthoredOpen row === "arg-open:cq" .&&. rowLocatedHoles row === "-"
+        -- The fixture still declares a quarantined certified leaf. Without an
+        -- evidence context that declaration cannot be replayed, so the row is
+        -- a rejection rather than the accepted row that published the former
+        -- open observation, and no obligation cells survive.
+        rowOutcome row === "reject:certified-evidence"
+          .&&. rowAuthoredOpen row === "-" .&&. rowLocatedHoles row === "-"
+          .&&. rowAttacks row === "-" .&&. rowObservations row === "-"
 
 -- | The located-gap rows (D8/D10): a hole is classified by the core's
 -- mandatory transitive obligation set, so an obligation inherited through a
@@ -347,7 +352,7 @@ surfaceConformanceSpecProps =
   , ("surface alpha pairs change AST bytes but preserve core bytes", quickCheckResult prop_alphaPairs)
   , ("surface negatives retain stable structural outcomes", quickCheckResult prop_namedNegativeOutcomes)
   , ("surface located-gap rows classify holes by core obligations", quickCheckResult prop_locatedGapRows)
-  , ("surface obligations report the retained admission-pruned open case",
+  , ("surface: a no-context admission-pruned certified case is rejected, publishing no obligation",
       quickCheckResult prop_admissionPrunedOpenObligation)
   , ("surface observation branches have exact attack and semantic cells",
       quickCheckResult prop_observationBranches)

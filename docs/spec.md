@@ -567,8 +567,12 @@ total because an omitted table, an empty table, and every unmatched key default 
 table keys are source invalidity rather than first- or last-row-wins. Duplicate `LeafId` declarations
 are likewise source invalidity. A `certified` leaf is additionally
 admitted only if it carries a checker witness `(name, version)` listed in `Pi` and a replayable
-reference. *(Not enforced in v0.1: `Policy` carries no witness list and no checker stage tests this
-requirement; R8 is currently raised only by a `reject` admission row.)* The outcomes:
+reference. *(Enforced by the `lara-evidence@0.1` package door, which requires an inspection
+manifest, pins the referenced bytes by length and SHA-256, and replays the approved checker against
+them — `docs/evidence-admission-decision.md` §9. It is not enforced by a policy witness list inside
+`lara-core@0.3`, whose `Policy` still carries no checker stage, so a source door with no evidence
+context rejects a `certified` declaration at R8 rather than checking the witness; R8 is otherwise
+raised only by a `reject` admission row.)* The outcomes:
 
 - `admit` — the leaf enters `Gamma` and is usable by the leaf rule.
 - `quarantine` — the leaf stays out of `Gamma`; its declaration is retained and reported for
@@ -1781,7 +1785,7 @@ share one spine: every class must be exercised by at least one rejected example 
 | **R5** question-accounting | a declared question in neither discharge map nor hole set, or a discharge/hole naming an undeclared question (`D ⊎ H` violation) | the instance | §4.2, §6.1 |
 | **R6** discharge | discharging term's conclusion `≢` instantiated answer pattern | position `π.q` | §4.2, §6.1 |
 | **R7** assurance | `trusted` without `allow-trusted`; `cert` without matching certifier entry; any assurance on a defeasible rule; strict rule with a discharge map or holes | the instance | §4, §5, §6.1 |
-| **R8** admission | leaf `reject`-classed by the admission table; `certified` leaf without a listed checker witness (not enforced in v0.1, §4.3) | the leaf declaration | §4.3 |
+| **R8** admission | leaf `reject`-classed by the admission table; `certified` leaf without a listed checker witness (the `lara-evidence@0.1` package door enforces the witness by replaying the approved checker over hash-pinned bytes; a source door with no evidence context rejects the declaration, §4.3) | the leaf declaration | §4.3 |
 | **R9** data-integrity | duplicate-report group with `≢` members, escalated to `reject` by policy | the group declaration | §4.3 |
 | **R10** attack-position | attack position undefined (`u@π` lookup fails) or wrong occurrence kind for the attack kind | the attack declaration | §7.1 |
 | **R11** attack-relation | no declared contrary pair matches (rebut/undermine); no declared exception matches (undercut); target rule strict | the attack declaration | §7.1 |

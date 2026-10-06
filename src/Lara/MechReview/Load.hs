@@ -3,6 +3,8 @@
 -- Each surface is elaborated once against the supplied policy. The decoded core
 -- must equal that elaboration's 'Unit', and the renderer receives the exact
 -- semantic 'Program' returned by the same pass.
+-- This historical raw-core accounting path remains evidence-declared; it does
+-- not certify source leaves or substitute for the sealed package result.
 module Lara.MechReview.Load
   ( loadReviewUnit
   , loadReviewUnits

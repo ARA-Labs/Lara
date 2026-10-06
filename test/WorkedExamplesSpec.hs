@@ -92,6 +92,7 @@ import Lara.Admission
   ( AdmissionCause (..), admissionAuditLeaves, admissionAuditArgs
   , admissionRejectionLeaf, renderAdmissionAudit, renderAdmissionRejection
   )
+import Lara.Evidence.Admission (renderEvidenceRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
   , SourceResult
@@ -225,6 +226,7 @@ preparedResult prog pol =
     Left invalid -> Left ("source invalid: " ++ renderSourceInvalid invalid)
     Right (SourceRejected rejection) ->
       Left ("admission rejection: " ++ renderAdmissionRejection rejection)
+    Right (SourceEvidenceRejected rejection) -> Left (renderEvidenceRejection rejection)
     Right (SourceAccepted input) -> Right (runSourceCheck input)
 
 -- ---------------------------------------------------------------------------

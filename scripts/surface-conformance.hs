@@ -46,6 +46,7 @@ import qualified Lara.Strict.RA as RA
 import Lara.SupportTerm (CertOutcome (..))
 import qualified Lara.SupportTerm as SupportTerm
 import Lara.Syntax (parsePolicy, parseProgram)
+import Lara.Evidence.Types
 import qualified Lara.Wire as Wire
 
 -- --------------------------------------------------------------------------
@@ -123,7 +124,7 @@ loadManifest path = do
 -- Structured presentation encoding (independent mirror of Lean)
 -- --------------------------------------------------------------------------
 
-data Sx = SStr String | SInt Int | SNode String [Sx]
+data Sx = SStr String | SInt Int | SBigInt Integer | SNode String [Sx]
 
 sxList :: (a -> Sx) -> [a] -> Sx
 sxList encoder = SNode "l" . map encoder
@@ -258,12 +259,26 @@ sxBinding binding = SNode "bind"
   , sxAudit (bindingAuditStatus binding)
   ]
 
+sxExtraction :: ExtractionRequest -> Sx
+sxExtraction request = case request of
+  CsvRowRequest (CheckerVersion v) (ObjectId object) (ColumnName key) raw selectors (P.Pred predicate) ->
+    SNode (checkerText CsvRow) [SBigInt v,SStr object,SStr key,SStr raw,sxList csvSelector selectors,SStr predicate]
+  JsonPointerRequest (CheckerVersion v) (ObjectId object) selectors (P.Pred predicate) ->
+    SNode (checkerText JsonPointer) [SBigInt v,SStr object,sxList jsonSelector selectors,SStr predicate]
+  where
+    encoding enc = SNode (encodingText enc) []
+    csvSelector (CsvSelector (ColumnName column) enc) = SNode "select" [SStr column,encoding enc]
+    jsonSelector (JsonSelector tokens enc) = SNode "select" [sxList (\(JsonToken token) -> SStr token) tokens,encoding enc]
+sxEvidenceChecker :: (LeafCheckerId,CheckerVersion) -> Sx
+sxEvidenceChecker (checker,CheckerVersion version) =
+  SNode "p" [SNode (checkerText checker) [],SBigInt version]
 sxLeaf :: Leaf -> Sx
 sxLeaf leaf = SNode "leaf"
   [ let LeafId name = leafId leaf in SStr name
   , sxAtom (leafProp leaf), sxLeafKind (leafKind leaf)
   , sxProvenance (leafProvenance leaf)
   , sxList (\(SourceRef source) -> SStr source) (leafRefs leaf)
+  , sxOpt sxExtraction (leafExtraction leaf)
   ]
 
 sxClaim :: Claim -> Sx
@@ -331,6 +346,7 @@ sxPolicy policy = SNode "policy"
   , sxGroupMode (policyGroupMode policy)
   , sxList sxMeasurand (policyMeasurands policy)
   , sxList sxScheme (policyComparisonSchemes policy)
+  , sxList sxEvidenceChecker (policyEvidenceCheckers policy)
   ]
 
 sxSurfaceStep :: SurfaceStep -> Sx
@@ -446,6 +462,7 @@ failUtf8 message = do
 renderSx :: Sx -> String
 renderSx (SStr value) = "s" ++ show (utf8Length value) ++ ":" ++ value
 renderSx (SInt value) = "i" ++ show value ++ ";"
+renderSx (SBigInt value) = "i" ++ show value ++ ";"
 renderSx (SNode tag children) =
   "n" ++ show (utf8Length tag) ++ ":" ++ tag ++ show (length children)
     ++ "[" ++ concatMap renderSx children ++ "]"
@@ -720,6 +737,11 @@ evaluateRow manifestPath row = do
         rejected ast tag
     Right (SourceRejected rejection) ->
       failUtf8 (contextual "unexpected admission rejection" rejection)
+    Right (SourceEvidenceRejected rejection) -> do
+      let actual = "reject:certified-evidence"
+      unless (manifestExpected row == actual) $
+        failUtf8 (contextual "expected outcome mismatch" (manifestExpected row,actual,rejection))
+      rejected ast "certified-evidence"
     Right (SourceAccepted sourceInput) -> do
       let sourceResult = runSourceCheck sourceInput
       case Wire.verdictOutcome (sourceResultVerdict sourceResult) of

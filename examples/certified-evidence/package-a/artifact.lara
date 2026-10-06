@@ -1,0 +1,34 @@
+artifact certified_componet at git:7257a17e9dbb50f81482da65cdae2086c761aaa2
+policy certified-componet
+use backends []
+
+claim c-forward-1631
+  nl = "The original saved forward-runtime record 1631 has the displayed method, prior-module count and runtime in seconds."
+  formal = forward_time_s(1631,"ProgressiveNet",10,0.0030154159758239985)
+  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+
+leaf forward-1631 : forward_time_s(1631,"ProgressiveNet",10,0.0030154159758239985)
+  kind = certified
+  provenance = checker(csv-row, 1)
+  refs = [evidence/benchmarking.csv]
+  extract = (csv-row 1 benchmarking (key "" "1631") (select ("" decimal) (method text) ("num prevs" decimal) (time decimal)) (predicate forward_time_s))
+
+arg a-forward-1631 : supports(c-forward-1631) by record_forward from [forward-1631]
+
+status c-forward-1631
+
+claim c-forward-1632
+  nl = "The original saved forward-runtime record 1632 has the displayed method, prior-module count and runtime in seconds."
+  formal = forward_time_s(1632,"ProgressiveNet",10,0.0030042969156056643)
+  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+
+leaf forward-1632 : forward_time_s(1632,"ProgressiveNet",10,0.0030042969156056643)
+  kind = certified
+  provenance = checker(csv-row, 1)
+  refs = [evidence/benchmarking.csv]
+  extract = (csv-row 1 benchmarking (key "" "1632") (select ("" decimal) (method text) ("num prevs" decimal) (time decimal)) (predicate forward_time_s))
+
+arg a-forward-1632 : supports(c-forward-1632) by record_forward from [forward-1632]
+
+status c-forward-1632
+

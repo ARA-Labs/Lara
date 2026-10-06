@@ -111,6 +111,7 @@ import Lara.Admission
   , renderAdmissionAudit
   , renderAdmissionRejection
   )
+import Lara.Evidence.Admission (renderEvidenceRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
   , runSourceCheck
@@ -477,6 +478,7 @@ loadMember cache manifest contract (member, path) = do
     -- fails the policy rather than merely needing a feature v1 declined to
     -- ship. See both constructors' notes in "Lara.Map.Types".
     SourceRejected rejection -> reject (MRMemberAdmissionStop alias (renderAdmissionRejection rejection))
+    SourceEvidenceRejected rejection -> reject (MRMemberAdmissionStop alias (renderEvidenceRejection rejection))
     SourceAccepted prepared -> pure prepared
   let result = runSourceCheck input
       audit = sourceResultAudit result

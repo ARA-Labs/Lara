@@ -47,8 +47,9 @@ front-end),
 [`insp1-code-inspection-decision.md`](insp1-code-inspection-decision.md)
 (what the `ord@1` / `insp@1` backends certify),
 [`evidence-admission-decision.md`](evidence-admission-decision.md) (ARA-packaged
-evidence replay; [issue #8 implementation plan](../plans/2026-10-06-ara-certified-evidence.md),
-blocked at Task 0; [original-output inventory](evidence-admission-inventory.md)),
+evidence replay, `lara-evidence@0.1`, implemented; [issue #8](https://github.com/ARA-Labs/Lara/issues/8);
+[original-output inventory](evidence-admission-inventory.md); [issue #20](https://github.com/ARA-Labs/Lara/issues/20)
+for the outstanding evaluation),
 [`located-gap-decision.md`](located-gap-decision.md) (`lara-core@0.3`:
 incomplete arguments accepted as located holes),
 [`registration-receipt-contract.md`](registration-receipt-contract.md)

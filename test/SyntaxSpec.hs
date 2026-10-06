@@ -142,8 +142,7 @@ genSourceRef = do
 -- Terms, propositions, patterns
 -- ---------------------------------------------------------------------------
 
--- | A surface term: a numeric literal or a constructor. 'TStr' has no surface
--- spelling in a term position, so it is never generated.
+-- | Surface numerals, quoted strings, and constructors.
 genTerm :: Gen Term
 genTerm = sized go
   where
@@ -151,6 +150,7 @@ genTerm = sized go
       | n <= 0 =
           oneof
             [ TNum <$> genNumStr
+            , TStr <$> smallListOf (elements ['a', '"', '\\', '\n', '\r', '\t', 'λ', '{', '}'])
             , (\k -> TCon (FunSym k) []) <$> genIdent
             ]
       | otherwise =
@@ -162,11 +162,9 @@ genTerm = sized go
 genProp :: Gen Prop
 genProp = Prop <$> (Pred <$> genIdent) <*> smallListOf genTerm
 
--- | A surface pattern. A bare ident is 'PVar' (the parser defers the
--- param-vs-constant call to the elaborator); numeric literals are 'PLit'
--- ('TNum'); applied heads are 'PCon' with at least one sub-pattern. Nullary
--- 'PCon' and 'PLit' of a 'TCon'\/'TStr' have no distinct surface spelling and
--- are not generated.
+-- | Bare identifiers are 'PVar'; numerals and strings are 'PLit'. Applied
+-- heads are 'PCon'. Nullary 'PCon' and 'PLit' of a 'TCon' have no distinct
+-- surface spelling and are not generated.
 genPat :: Gen Pat
 genPat = sized go
   where
@@ -175,6 +173,7 @@ genPat = sized go
           oneof
             [ PVar . Param <$> genIdent
             , PLit . TNum <$> genNumStr
+            , PLit . TStr <$> smallListOf (elements ['a', '"', '\\', '\n', '\r', '\t', 'λ', '{', '}'])
             ]
       | otherwise =
           frequency
@@ -207,6 +206,7 @@ genLeaf =
     <*> elements [Observed, Attested, Assumed, Certified]
     <*> genProvenance
     <*> smallListOf (SourceRef <$> genSourceRef)
+    <*> pure Nothing
 
 genBinding :: Gen Binding
 genBinding =
@@ -555,18 +555,16 @@ genPolicy = do
   schs <- genSchemes
   sg <- genSigma
   pure
-    Policy
-      { policyId = pid
-      , policySigma = sg
-      , policyRules = rs
-      , policyContraries = cs
-      , policyExceptions = es
-      , policyAdmission = adm
-      , policyTheories = ts
-      , policyGroupMode = gm
-      , policyMeasurands = ms
-      , policyComparisonSchemes = schs
-      }
+    Policy { policyId = pid
+    , policySigma = sg
+    , policyRules = rs
+    , policyContraries = cs
+    , policyExceptions = es
+    , policyAdmission = adm
+    , policyTheories = ts
+    , policyGroupMode = gm
+    , policyMeasurands = ms
+    , policyComparisonSchemes = schs, policyEvidenceCheckers = [] }
 
 -- | The measurand table (grammar App. B.1). Ids are index-derived because a
 -- duplicate measurand is a parse error — the same construction the theory-digest

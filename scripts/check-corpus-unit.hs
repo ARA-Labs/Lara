@@ -18,6 +18,7 @@
 module Main (main) where
 
 import Lara.Admission (renderAdmissionRejection)
+import Lara.Evidence.Admission (renderEvidenceRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
   , prepareSource
@@ -46,6 +47,7 @@ main = do
     Left invalid -> die (unitPath ++ ": source invalid: " ++ renderSourceInvalid invalid)
     Right (SourceRejected rejection) ->
       die (unitPath ++ ": admission rejection: " ++ renderAdmissionRejection rejection)
+    Right (SourceEvidenceRejected rejection) -> die (unitPath ++ ": " ++ renderEvidenceRejection rejection)
     Right (SourceAccepted source) ->
       pure (runSourceCheck source)
   let value = sourceResultJsonValue result

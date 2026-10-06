@@ -24,6 +24,9 @@
 -- outcome, never silently repaired or dropped.
 module Lara.AdmissionFixture
   ( admissionOutcome
+  , admissionTypedOutcome
+  , decodeKind, decodeProvenance, decodeDecision, encodeAttack
+  , decodeTable
   ) where
 
 import Data.List (find)
@@ -278,7 +281,7 @@ bindLeaves metas leaves = mapM bindOne metas
   where
     bindOne (lid, kind, provenance) =
       case find ((== lid) . fst) leaves of
-        Just (_, prop) -> Right (Leaf lid prop kind provenance [])
+        Just (_, prop) -> Right (Leaf lid prop kind provenance [] Nothing)
         Nothing -> Left ("fixture: meta without declared leaf: " ++ unLeafId lid)
 
 -- ---------------------------------------------------------------------------
@@ -417,3 +420,20 @@ admissionOutcome contents = do
                         let policySeed = policyQuarantineSeed (fxTable fx) boundLeaves
                          in buildAdmissionAudit (pruneWithPolicySeed policySeed declared)
               finish (encodeOutcome (Right ()) rejection audit)
+
+-- Typed driver reuse of the existing production admission/prune observer.
+admissionTypedOutcome :: [((LeafKind,Provenance),Admission)] -> [Leaf] -> Unit -> SExpr
+admissionTypedOutcome table leaves unit =
+  case validateAdmissionKeys table of
+    invalid@(Left _) -> encodeOutcome invalid Nothing emptyAudit
+    Right () -> case firstDuplicateLeafId (map leafId leaves) of
+      Just dup -> SList [SAtom "invalid",SList [SAtom "duplicate-leaf-id",SAtom (unLeafId dup)]]
+      Nothing
+        | [(leafId leaf,leafProp leaf) | leaf <- leaves] /= unitLeaves unit ->
+            SList [SAtom "invalid",SAtom "metadata-leaf-misalignment"]
+        | otherwise ->
+            let rejection = firstAdmissionRejection table leaves
+                audit = case rejection of
+                  Just _ -> emptyAudit
+                  Nothing -> buildAdmissionAudit (pruneWithPolicySeed (policyQuarantineSeed table leaves) unit)
+            in encodeOutcome (Right ()) rejection audit

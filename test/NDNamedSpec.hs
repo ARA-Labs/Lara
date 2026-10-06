@@ -19,6 +19,7 @@ import Lara.AST
   )
 import qualified Lara.AST as AST
 import Lara.Driver (runCheck)
+import Lara.Evidence.Admission (renderEvidenceRejection)
 import Lara.Elaborate
   ( PreparedSource (..)
   , prepareSource
@@ -657,6 +658,7 @@ sourceVerdictS1 payload = do
     case prepareSource program policy of
       Left invalid -> Left (show invalid)
       Right SourceRejected{} -> Left "unexpected admission rejection"
+      Right (SourceEvidenceRejected rejection) -> Left (renderEvidenceRejection rejection)
       Right (SourceAccepted input) -> Right (sourceResultVerdict (runSourceCheck input))
 
 prop_s1NamedPremiseTwin :: Property

@@ -12,6 +12,7 @@ Lean trio (`propext`, `Classical.choice`, `Quot.sound`). See `lean/README.md`.
 -/
 import Lara.Prop
 import Lara.Presentation
+import Lara.Evidence.Composition
 import Lara.ND
 import Lara.NDNamed
 import Lara.Strict
@@ -4728,3 +4729,90 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.AxiomWithdrawal.leafCheck_iff
 #print axioms Lara.Examples.AxiomWithdrawal.leaf_controls
 #print axioms Lara.Examples.AxiomWithdrawal.no_withdrawn_bridge
+
+#print axioms Lara.Evidence.except_bind_error
+#print axioms Lara.Evidence.except_bind_ok
+#print axioms Lara.Evidence.checkerName_injective
+#print axioms Lara.Evidence.encodingName_injective
+#print axioms Lara.Evidence.requestObjects_singleton
+#print axioms Lara.Presentation.un_sxLeafChecker
+#print axioms Lara.Presentation.un_sxCheckerVersion
+#print axioms Lara.Presentation.un_sxEvidenceChecker
+#print axioms Lara.Presentation.un_sxList_EvidenceChecker
+#print axioms Lara.Presentation.un_sxEncoding
+#print axioms Lara.Presentation.un_sxJsonToken
+#print axioms Lara.Presentation.un_sxJsonPath
+#print axioms Lara.Presentation.un_sxCsvSelector
+#print axioms Lara.Presentation.un_sxCsvSelectors
+#print axioms Lara.Presentation.un_sxJsonSelector
+#print axioms Lara.Presentation.un_sxJsonSelectors
+#print axioms Lara.Presentation.un_sxExtractionRequest
+#print axioms Lara.Presentation.un_sxOpt_ExtractionRequest
+#print axioms Lara.Presentation.sxExtractionRequest_injective
+#print axioms Lara.Evidence.decodeScalar_iff
+#print axioms Lara.Evidence.column_iff
+#print axioms Lara.Evidence.csvColumns_iff
+#print axioms Lara.Evidence.pointer_iff
+#print axioms Lara.Evidence.pointer_unique
+#print axioms Lara.Evidence.jsonColumns_iff
+#print axioms Lara.Evidence.csv_unique_row
+#print axioms Lara.Evidence.csvWellFormed_iff
+#print axioms Lara.Evidence.csvSelect_iff
+#print axioms Lara.Evidence.extract_csv_exact
+#print axioms Lara.Evidence.extract_json_exact
+#print axioms Lara.Evidence.extracted_normal_form
+#print axioms Lara.Evidence.lookup_id
+#print axioms Lara.Evidence.run_dependencies
+#print axioms Lara.Evidence.supply_membership
+#print axioms Lara.Evidence.run_snapshot_membership
+#print axioms Lara.Evidence.supply_locality
+#print axioms Lara.Evidence.run_locality
+#print axioms Lara.Evidence.missing_dependency
+#print axioms Lara.Evidence.run_registry_replacement
+#print axioms Lara.Evidence.supply_exact_ids
+#print axioms Lara.Evidence.run_exact_declared_dependencies
+#print axioms Lara.Evidence.run_deterministic
+#print axioms Lara.Evidence.firstInvalid_none_iff
+#print axioms Lara.Evidence.firstInvalid_prefix
+#print axioms Lara.Evidence.replayLeaf_iff
+#print axioms Lara.Evidence.replayLeaves_iff
+#print axioms Lara.Evidence.admit_iff
+#print axioms Lara.Evidence.all_declared_supported
+#print axioms Lara.Evidence.declared_replay_witness
+#print axioms Lara.Evidence.retained_supported
+#print axioms Lara.Evidence.admission_deterministic
+#print axioms Lara.Evidence.binding_precedes_capture
+#print axioms Lara.Evidence.capture_precedes_extraction
+#print axioms Lara.Evidence.firstInvalid_mem
+#print axioms Lara.Evidence.firstInvalid_congr
+#print axioms Lara.Evidence.replayLeaf_registry_congr
+#print axioms Lara.Evidence.replayLeaves_registry_congr
+#print axioms Lara.Evidence.admission_registry_replacement
+#print axioms Lara.Evidence.request_local_of_source_local
+#print axioms Lara.Evidence.replayLeaves_locality
+#print axioms Lara.Evidence.admission_locality
+#print axioms Lara.Evidence.all_declared_certified_witness
+#print axioms Lara.Evidence.retained_certified_witness
+#print axioms Lara.Evidence.replayLeaves_first_error
+#print axioms Lara.Evidence.admission_first_extraction_error
+#print axioms Lara.Evidence.checked_partition_exact
+#print axioms Lara.Surface.sourceWithoutEvidence_core
+#print axioms Lara.Surface.sourceWithoutEvidence_sound
+#print axioms Lara.Surface.sourceWithEvidence_sound
+#print axioms Lara.Evidence.successful_gate_conservativity
+#print axioms Lara.Evidence.package_checked_context_exact
+#print axioms Lara.Evidence.package_retained_gamma_agree
+#print axioms Lara.Evidence.package_source_preserves
+#print axioms Lara.Evidence.package_holes_iff
+#print axioms Lara.Evidence.package_hole_reports_exact
+#print axioms Lara.Evidence.package_source_justified_nonpromotion
+#print axioms Lara.Surface.sourceWithEvidence_semantic
+#print axioms Lara.Evidence.package_same_source_witness
+#print axioms Lara.Evidence.concrete_admission_refinement
+#print axioms Lara.Evidence.replay_checked_partition
+#print axioms Lara.Surface.finishAssembled_eq_check
+#print axioms Lara.Surface.elaborateSourceWithoutEvidence_assembled
+#print axioms Lara.Surface.sourceWithEvidence_core_and_semantic
+#print axioms Lara.Evidence.binding_stage_first_error
+#print axioms Lara.Evidence.capture_stage_first_error
+#print axioms Lara.Surface.sourceWithoutEvidence_conservative

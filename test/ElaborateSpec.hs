@@ -772,7 +772,7 @@ withExtraLeaves ls p = p {programDecls = map DeclLeaf ls ++ programDecls p}
 
 -- | An observed leaf carrying one reported cell.
 cellLeaf :: String -> Prop -> Leaf
-cellLeaf l p = Leaf (LeafId l) p Observed AiExecuted []
+cellLeaf l p = Leaf (LeafId l) p Observed AiExecuted [] Nothing
 
 reportsCell :: String -> String -> String -> String -> String -> String -> Prop
 reportsCell pr experiment system measurand dataset value =
@@ -1074,7 +1074,7 @@ prop_negatives = once $ ioProperty $ do
       --    leaf/prior-argument collision remains covered by ThetaInferenceSpec.
       dupE1 =
         DeclLeaf
-          (Leaf (LeafId "e1_dup") (leafPropOf "e1" decls) Observed AiExecuted [])
+          (Leaf (LeafId "e1_dup") (leafPropOf "e1" decls) Observed AiExecuted [] Nothing)
       progDupE1 = withDecls (decls ++ [dupE1]) progA
 
       -- Explicit syntax retains the legacy premise resolver. Keep both

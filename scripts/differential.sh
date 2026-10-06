@@ -124,7 +124,18 @@ for root in fixtures examples bundles corpus-units; do
   # there is a setup failure in that gate rather than a free pass here. And a
   # map's two committed artifacts are a map-check-input@1 parity envelope and a
   # map-verdict@2 composite golden, which scripts/check-map-conformance.sh and
-  # test/MapSpec.hs own.
+  # test/MapSpec.hs own. The sixth family is the certified-evidence tree
+  # (fixtures/evidence/): fixtures/evidence/model/ holds versioned
+  # `evidence-model 1` envelopes that scripts/evidence-differential.sh decodes
+  # and asserts totality over, and fixtures/evidence/quarantined/ is an ARA
+  # checking package (manifest plus `.lara` source) driven by the package door,
+  # test/EvidenceAdmissionSpec.hs and test/evidence-cli.sh. Neither is a
+  # check-input@1 envelope, and both are pinned file-exact by their own gates.
+  # The seventh is the shipped certified-evidence portfolio
+  # (examples/certified-evidence/): each `package-*` directory is a checking
+  # package whose `lara-evidence.sexp` is a canonical ARA manifest and whose
+  # `artifact.lara` is driven by `lara check-ara` — the acceptance suite for it
+  # is test/evidence-cli.sh, and its byte identities are pinned there.
   #
   # Why the exclusions are not the safeguard. This positive half treats "both
   # drivers exit 2 with empty stdout" as agreement, so ANY .sexp under these
@@ -136,7 +147,8 @@ for root in fixtures examples bundles corpus-units; do
   # its own manifest: a stray unlisted file is a setup failure, never a free
   # pass.
   if ! find "$root" -name '*.sexp' -not -path "$root/malformed/*" -not -path "$root/mutants/*" \
-      -not -path "$root/admission/*" -not -path "$root/pw/*" \
+      -not -path "$root/admission/*" -not -path "$root/pw/*" -not -path "$root/evidence/*" \
+      -not -path "$root/certified-evidence/*" \
       -not -name 'map.core.sexp' -not -name 'map.verdict.sexp' \
       -print >"$root_anchor_list"; then
     echo "FAIL: could not discover anchors under $root"

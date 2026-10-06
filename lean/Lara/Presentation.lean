@@ -2,7 +2,7 @@
 Mechanized codec round-trip for the LARA **presentation AST** (spec §9 result 12).
 
 This module models the complete live presentation `Program`/`Policy` shape of
-`src/Lara/AST.hs` at `lara-syntax@0.10` — every field of both top-levels,
+`src/Lara/AST.hs` at `lara-syntax@0.11` — every field of both top-levels,
 including inferred argument instantiations and the `lara-core@0.2` `policySigma`,
 below — defines a **structured serializer** `printProgram`/`printPolicy` into an
 S-expression wire value `Sx`, an inverse **parser** `parseProgram`/`parsePolicy`,
@@ -37,12 +37,10 @@ value. This mirrors the existing verified structured codecs in the development:
 ## Scope
 
 Verified against the complete live presentation `Program`/`Policy` shape of
-`src/Lara/AST.hs` at `lara-syntax@0.10`, described here (the model was written
-against the `@0.6` AST and still holds verbatim: `@0.7` restricts the concrete
-`.lara` surface only — grammar Appendix F — `@0.8` widens the name class a
-certificate premise reference may carry — Appendix G — and `@0.9`/`@0.10`
-lower named `nd@1` payload atoms without changing the presentation AST —
-Appendices H/I — so neither changes a `Lara.AST` type):
+`src/Lara/AST.hs` at `lara-syntax@0.11`. Earlier increments retain named
+`nd@1` payload lowering; `@0.11` adds source-only extraction requests and an
+evidence checker allowlist. Both fields round-trip here without changing the
+core signature, evidence context, policy or wire unit.
 
 * **Both presentation top-levels**: every `Program` field and every `Policy`
   field, `policySigma` included; every arm of `Decl` (including `DeclGroup` and
@@ -121,10 +119,14 @@ Deviations a reader should not mistake for parity:
 -/
 import Lara.Prop
 import Lara.Sigma
+import Lara.Evidence.Types
 
 namespace Lara.Presentation
 
 open Lara (Term Terms Atom)
+
+open Lara.Evidence (LeafCheckerId CheckerVersion ObjectId ColumnName JsonToken
+  JsonPath TermEncoding CsvSelector JsonSelector ExtractionRequest)
 
 /-! ## The structured wire value `Sx`
 
@@ -840,23 +842,123 @@ codec, packaged as one `@[simp]` lemma so the record proofs close by `simp`. -/
 
 /-! ## Record layer (spec §3, §4) -/
 
+/-! Source-only evidence codecs. Symbolic types live below this module to avoid
+a Presentation/Sx dependency cycle. -/
+def sxLeafChecker (c : LeafCheckerId) : Sx := .node (Lara.Evidence.checkerName c) .nil
+def unLeafChecker : Sx → Option LeafCheckerId
+  | .node name .nil =>
+    if name = Lara.Evidence.checkerName .csvRow then some .csvRow else
+    if name = Lara.Evidence.checkerName .jsonPointer then some .jsonPointer else none
+  | _ => none
+@[simp] theorem un_sxLeafChecker (c : LeafCheckerId) :
+    unLeafChecker (sxLeafChecker c) = some c := by cases c <;> rfl
+def sxCheckerVersion (v : CheckerVersion) : Sx := .int v.val
+def unCheckerVersion : Sx → Option CheckerVersion
+  | .int v => some ⟨v⟩
+  | _ => none
+@[simp] theorem un_sxCheckerVersion (v : CheckerVersion) :
+    unCheckerVersion (sxCheckerVersion v) = some v := rfl
+def sxEvidenceChecker := sxPair sxLeafChecker sxCheckerVersion
+def unEvidenceChecker := unSxPair unLeafChecker unCheckerVersion
+@[simp] theorem un_sxEvidenceChecker (p : LeafCheckerId × CheckerVersion) :
+    unEvidenceChecker (sxEvidenceChecker p) = some p :=
+  unSxPair_sxPair un_sxLeafChecker un_sxCheckerVersion p
+@[simp] theorem un_sxList_EvidenceChecker (ps : List (LeafCheckerId × CheckerVersion)) :
+    unSxList unEvidenceChecker (sxList sxEvidenceChecker ps) = some ps :=
+  unSxList_sxList un_sxEvidenceChecker ps
+def sxEncoding (e : TermEncoding) : Sx := .node (Lara.Evidence.encodingName e) .nil
+def unEncoding : Sx → Option TermEncoding
+  | .node name .nil =>
+    if name = Lara.Evidence.encodingName .decimal then some .decimal else
+    if name = Lara.Evidence.encodingName .text then some .text else
+    if name = Lara.Evidence.encodingName .decimalLine then some .decimalLine else none
+  | _ => none
+@[simp] theorem un_sxEncoding (e : TermEncoding) :
+    unEncoding (sxEncoding e) = some e := by cases e <;> rfl
+def sxJsonToken (t : JsonToken) : Sx := .str t.val
+def unJsonToken : Sx → Option JsonToken
+  | .str t => some ⟨t⟩
+  | _ => none
+@[simp] theorem un_sxJsonToken (t : JsonToken) :
+    unJsonToken (sxJsonToken t) = some t := rfl
+@[simp] theorem un_sxJsonPath (p : JsonPath) :
+    unSxList unJsonToken (sxList sxJsonToken p) = some p :=
+  unSxList_sxList un_sxJsonToken p
+def sxCsvSelector (s : CsvSelector) : Sx :=
+  .node "select" (.cons (.str s.column.val) (.cons (sxEncoding s.encoding) .nil))
+def unCsvSelector : Sx → Option CsvSelector
+  | .node "select" (.cons (.str c) (.cons e .nil)) => do
+    let e ← unEncoding e
+    some ⟨⟨c⟩, e⟩
+  | _ => none
+@[simp] theorem un_sxCsvSelector (s : CsvSelector) :
+    unCsvSelector (sxCsvSelector s) = some s := by cases s; simp [sxCsvSelector, unCsvSelector]
+@[simp] theorem un_sxCsvSelectors (ss : List CsvSelector) :
+    unSxList unCsvSelector (sxList sxCsvSelector ss) = some ss :=
+  unSxList_sxList un_sxCsvSelector ss
+def sxJsonSelector (s : JsonSelector) : Sx :=
+  .node "select" (.cons (sxList sxJsonToken s.path) (.cons (sxEncoding s.encoding) .nil))
+def unJsonSelector : Sx → Option JsonSelector
+  | .node "select" (.cons p (.cons e .nil)) => do
+    let p ← unSxList unJsonToken p
+    let e ← unEncoding e
+    some ⟨p, e⟩
+  | _ => none
+@[simp] theorem un_sxJsonSelector (s : JsonSelector) :
+    unJsonSelector (sxJsonSelector s) = some s := by cases s; simp [sxJsonSelector, unJsonSelector]
+@[simp] theorem un_sxJsonSelectors (ss : List JsonSelector) :
+    unSxList unJsonSelector (sxList sxJsonSelector ss) = some ss :=
+  unSxList_sxList un_sxJsonSelector ss
+def sxExtractionRequest : ExtractionRequest → Sx
+  | .csvRowRequest v o k raw sels pred =>
+    .node "csv-row" (.cons (sxCheckerVersion v) (.cons (.str o.val)
+      (.cons (.str k.val) (.cons (.str raw)
+      (.cons (sxList sxCsvSelector sels) (.cons (.str pred) .nil))))))
+  | .jsonPointerRequest v o sels pred =>
+    .node "json-pointer" (.cons (sxCheckerVersion v) (.cons (.str o.val)
+      (.cons (sxList sxJsonSelector sels) (.cons (.str pred) .nil))))
+def unExtractionRequest : Sx → Option ExtractionRequest
+  | .node "csv-row" (.cons v (.cons (.str o) (.cons (.str k)
+      (.cons (.str raw) (.cons sels (.cons (.str pred) .nil)))))) => do
+    let v ← unCheckerVersion v
+    let sels ← unSxList unCsvSelector sels
+    some (.csvRowRequest v ⟨o⟩ ⟨k⟩ raw sels pred)
+  | .node "json-pointer" (.cons v (.cons (.str o)
+      (.cons sels (.cons (.str pred) .nil)))) => do
+    let v ← unCheckerVersion v
+    let sels ← unSxList unJsonSelector sels
+    some (.jsonPointerRequest v ⟨o⟩ sels pred)
+  | _ => none
+@[simp] theorem un_sxExtractionRequest (r : ExtractionRequest) :
+    unExtractionRequest (sxExtractionRequest r) = some r := by
+  cases r <;> simp [sxExtractionRequest, unExtractionRequest]
+@[simp] theorem un_sxOpt_ExtractionRequest (r : Option ExtractionRequest) :
+    unOpt unExtractionRequest (sxOpt sxExtractionRequest r) = some r :=
+  unOpt_sxOpt un_sxExtractionRequest r
+theorem sxExtractionRequest_injective : Function.Injective sxExtractionRequest := by
+  intro a b h
+  have := congrArg unExtractionRequest h
+  simpa using this
+
 structure Leaf where
-  mk :: (id : LeafId) (prop : Atom) (kind : LeafKind) (provenance : Provenance) (refs : List SourceRef)
+  mk :: (id : LeafId) (prop : Atom) (kind : LeafKind) (provenance : Provenance) (refs : List SourceRef) (extraction : Option ExtractionRequest := none)
   deriving DecidableEq
 def sxLeaf (l : Leaf) : Sx :=
   .node "leaf" (.cons l.id.sx (.cons (sxAtom l.prop) (.cons l.kind.sx
-    (.cons l.provenance.sx (.cons (sxList SourceRef.sx l.refs) .nil)))))
+    (.cons l.provenance.sx (.cons (sxList SourceRef.sx l.refs)
+    (.cons (sxOpt sxExtractionRequest l.extraction) .nil))))))
 def unLeaf : Sx → Option Leaf
-  | .node "leaf" (.cons i (.cons pr (.cons k (.cons pv (.cons rf .nil))))) => do
+  | .node "leaf" (.cons i (.cons pr (.cons k (.cons pv (.cons rf (.cons ex .nil)))))) => do
       let ii ← unLeafId i
       let pp ← unAtom pr
       let kk ← unLeafKind k
       let vv ← unProvenance pv
       let rr ← unSxList unSourceRef rf
-      some ⟨ii, pp, kk, vv, rr⟩
+      let xx ← unOpt unExtractionRequest ex
+      some ⟨ii, pp, kk, vv, rr, xx⟩
   | _ => none
 @[simp] theorem un_sxLeaf (l : Leaf) : unLeaf (sxLeaf l) = some l := by
-  cases l with | mk i p k v r => simp [sxLeaf, unLeaf]
+  cases l with | mk i p k v r e => simp [sxLeaf, unLeaf]
 
 structure Binding where
   mk :: (author : String) (rationale : String) (auditStatus : AuditStatus)
@@ -1078,15 +1180,17 @@ structure Policy where
   (exceptions : List Exception) (admission : List AdmissionEntry)
   (theories : List TheoryEntry) (groupMode : GroupConflictMode)
   (measurands : List Measurand) (comparisonSchemes : List ComparisonScheme)
+  (evidenceCheckers : List (LeafCheckerId × CheckerVersion) := [])
   deriving DecidableEq
 def printPolicy (p : Policy) : Sx :=
   .node "policy" (.cons p.id.sx (.cons (sxSigma p.sigma) (.cons (sxList sxRule p.rules)
     (.cons (sxList sxContrary p.contraries) (.cons (sxList sxException p.exceptions)
     (.cons (sxList sxAdmEntry p.admission) (.cons (sxList sxTheoryEntry p.theories)
     (.cons p.groupMode.sx (.cons (sxList sxMeasurand p.measurands)
-    (.cons (sxList sxComparisonScheme p.comparisonSchemes) .nil))))))))))
+    (.cons (sxList sxComparisonScheme p.comparisonSchemes)
+    (.cons (sxList sxEvidenceChecker p.evidenceCheckers) .nil)))))))))))
 def parsePolicy : Sx → Option Policy
-  | .node "policy" (.cons i (.cons sg (.cons rs (.cons cs (.cons es (.cons am (.cons th (.cons gm (.cons ms (.cons sch .nil)))))))))) => do
+  | .node "policy" (.cons i (.cons sg (.cons rs (.cons cs (.cons es (.cons am (.cons th (.cons gm (.cons ms (.cons sch (.cons ec .nil))))))))))) => do
       let ii ← unPolicyId i
       let gs ← unSigma sg
       let rr ← unSxList unRule rs
@@ -1097,7 +1201,8 @@ def parsePolicy : Sx → Option Policy
       let gg ← unGroupConflictMode gm
       let mm ← unSxList unMeasurand ms
       let ss ← unSxList unComparisonScheme sch
-      some ⟨ii, gs, rr, cc, ee, aa, tt, gg, mm, ss⟩
+      let ec ← unSxList unEvidenceChecker ec
+      some ⟨ii, gs, rr, cc, ee, aa, tt, gg, mm, ss, ec⟩
   | _ => none
 
 /-! ## Positional attacks, argument conclusions, declarations (spec §7, §4.4, §2) -/
@@ -1480,6 +1585,6 @@ theorem parse_printProgram (p : Program) : parseProgram (printProgram p) = some 
   cases p with | mk ar dg pl bk vb ds => simp [printProgram, parseProgram]
 
 theorem parse_printPolicy (q : Policy) : parsePolicy (printPolicy q) = some q := by
-  cases q with | mk i sg rs cs es am th gm ms sch => simp [printPolicy, parsePolicy]
+  cases q with | mk i sg rs cs es am th gm ms sch ec => simp [printPolicy, parsePolicy]
 
 end Lara.Presentation

@@ -29,12 +29,12 @@ leaf binding : binding(system-a, system-b, quality, dataset, 7, 5)
   refs       = []
 
 leaf proof : score(7)
-  kind       = certified
+  kind       = assumed
   provenance = user
   refs       = [source/proof]
 
 leaf pass-proof : evidence(7)
-  kind       = certified
+  kind       = assumed
   provenance = user
   refs       = []
 
