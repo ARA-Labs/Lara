@@ -717,8 +717,8 @@ sessions:
 
 - id: 2026-10-06_001
   date: '2026-10-06'
-  summary: 'Finished narrowed update results in PR 12; approved the issue 8 plan, then ran its original-output inventory and stopped before runtime edits pending portfolio review.'
-  turn_count: 4
-  events_count: 10
+  summary: 'Approved and then landed the issue 8 certified-evidence layer: package door, finite model, capture seal and differential alignment, with make local-gates and cabal test all passing.'
+  turn_count: 5
+  events_count: 19
   claims_touched: []
   open_threads: 3

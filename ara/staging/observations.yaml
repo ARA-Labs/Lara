@@ -4011,7 +4011,7 @@ observations:
   bound_to:
   - N352_ara_evidence
   promoted: true
-  promoted_to: logic/solution/constraints.md#ara-packaged-certified-evidence-planned
+  promoted_to: logic/solution/constraints.md#ara-packaged-certified-evidence-implemented
   crystallized_via: verbal-affirmation
   stale: false
 - id: O185
@@ -4030,9 +4030,9 @@ observations:
   potential_type: architecture
   bound_to:
   - N353_evidence_plan
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
+  promoted: true
+  promoted_to: logic/solution/constraints.md#ara-packaged-certified-evidence-implemented
+  crystallized_via: artifact-commitment
   stale: false
 - id: O186
   timestamp: 2026-10-06T07:41+00:00
@@ -4051,6 +4051,76 @@ observations:
   potential_type: architecture
   bound_to:
   - N354_evidence_inventory
+  promoted: true
+  promoted_to: logic/solution/constraints.md#ara-packaged-certified-evidence-implemented
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O187
+  timestamp: 2026-10-06T09:20+00:00
+  provenance: ai-suggested
+  content: >-
+    An ID-keyed snapshot lookup is membership by name, not by bytes: two
+    artifacts can share an ID while differing in path, length and digest, so a
+    promotion boundary that trusts the key alone can replay borrowed bytes under
+    the manifest entry it never captured. Pairing the lookup with equality
+    against the request-declared entry is cheap and makes the check's absence
+    observable; the same pattern applies to any future key-addressed store
+    (caches, receipts, snapshots).
+  context: >-
+    Independent security review of the landed evidence runtime, plus the
+    before/after regression in test/EvidenceAdmissionSpec.hs. Recorded at
+    N357_capture_seal; the general rule is the reusable part.
+  potential_type: constraint
+  bound_to:
+  - N357_capture_seal
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O188
+  timestamp: 2026-10-06T09:25+00:00
+  provenance: ai-suggested
+  content: >-
+    In this Lean toolchain (v4.32) the simplifier does not reduce an Except
+    do-block whose scrutinee is a literal constructor, and there is no
+    Except.bind_ok or Except.bind_error to cite, so do-block proofs stall with
+    the monadic bind unreduced. Two definitional rfl lemmas -- bind (Except.error
+    e) f = Except.error e and bind (Except.ok a) f = f a -- declared once as
+    simp lemmas make every such proof a simp-level argument (pattern: simp only
+    [def, hypotheses, except_bind_error, except_bind_ok] at h; close
+    constructor-clash branches with plain simp; use injection for ok = ok list
+    equalities).
+  context: >-
+    Fixing the evidence model's runner proofs; the lemmas now live in
+    lean/Lara/Evidence/Types.lean and are audited in AxCheck.lean. Reusable for
+    any future Lean model proof over Except-valued definitions.
+  potential_type: heuristic
+  bound_to:
+  - N356_evidence_landed
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O189
+  timestamp: 2026-10-06T09:35+00:00
+  provenance: ai-suggested
+  content: >-
+    The core wire differential discovers anchors by globbing *.sexp under
+    fixtures/, examples/, bundles/ and corpus-units/ and pins the discovered set
+    against fixtures/ANCHORS.tsv, so a new fixture tree whose files are not
+    check-input@1 envelopes fails the pin rather than being skipped. A family
+    that has its own harness must be excluded from discovery in BOTH
+    scripts/differential.sh and scripts/gen-anchor-manifest.sh, with the reason
+    recorded at the find; here that was fixtures/evidence/ (evidence-model
+    envelopes and a checking package) and examples/certified-evidence/ (ARA
+    checking manifests).
+  context: >-
+    make local-gates failed at the differential gate after the evidence trees
+    landed; the exclusion and its comment now mirror in the script, the generator
+    and the ANCHORS.tsv header.
+  potential_type: constraint
+  bound_to:
+  - N356_evidence_landed
   promoted: false
   promoted_to: null
   crystallized_via: null

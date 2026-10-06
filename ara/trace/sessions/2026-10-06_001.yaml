@@ -2,9 +2,9 @@ session:
   id: 2026-10-06_001
   date: '2026-10-06'
   started: 2026-10-06T03:30+00:00
-  last_turn: 2026-10-06T07:41+00:00
-  turn_count: 4
-  summary: Finished narrowed update results in PR 12; approved the issue 8 evidence plan, then executed its original-output inventory and stopped before runtime edits pending a reviewed portfolio revision.
+  last_turn: 2026-10-06T09:45+00:00
+  turn_count: 5
+  summary: Approved and then landed the issue 8 certified-evidence layer - package door, finite model, capture seal, differential alignment - with make local-gates and cabal test all passing.
 events_logged:
 - turn: 1
   type: experiment
@@ -193,3 +193,156 @@ turn_4:
   ai_suggestions_pending:
   - O185 proof obligations remain unimplemented and staged
   - O186 proposes CSV-row and scoped JSON loss decoding; review and approval still required
+
+turn_5:
+  events_logged:
+  - turn: 5
+    type: experiment
+    id: N356_evidence_landed
+    routing: direct
+    provenance: ai-executed
+    summary: landed the evidence runtime, package door and finite Lean model; real packages accepted and make local-gates passes
+  - turn: 5
+    type: decision
+    id: N357_capture_seal
+    routing: direct
+    provenance: ai-executed
+    summary: closed the borrowed-capture promotion gap at the admission boundary; regression falsified before the fix, passes after
+  - turn: 5
+    type: decision
+    id: N358_rejection_encoding
+    routing: direct
+    provenance: ai-executed
+    summary: extraction rejections are leaf-located and capture rejections name the object; aligned adapter, typed corpus and a misaligned fixture to 50/50
+  - turn: 5
+    type: decision
+    id: N359_plan_retired
+    routing: direct
+    provenance: ai-executed
+    summary: deleted the executed plan, moved durable content into docs, opened issue 20 for the deferred evaluation
+  - turn: 5
+    type: architecture
+    id: O185
+    routing: crystallized
+    provenance: ai-executed
+    summary: recorded the discharged evidence-layer proof obligations in the logic layer; parsers, OS and cryptography stay trusted
+  - turn: 5
+    type: architecture
+    id: O186
+    routing: crystallized
+    provenance: ai-executed
+    summary: recorded the landed CSV-row plus scoped JSON-pointer portfolio and its ten original-byte leaves
+  - turn: 5
+    type: observation
+    id: O187
+    routing: staged
+    provenance: ai-suggested
+    summary: key-addressed lookups are membership by name; pair them with equality against the declared entry
+  - turn: 5
+    type: observation
+    id: O188
+    routing: staged
+    provenance: ai-suggested
+    summary: this Lean toolchain needs two definitional Except-bind lemmas for do-block proofs
+  - turn: 5
+    type: observation
+    id: O189
+    routing: staged
+    provenance: ai-suggested
+    summary: a fixture family with its own harness must be excluded from wire-anchor discovery in both the script and the generator
+  ai_actions:
+  - turn: 5
+    action: >-
+      Finished the Lean evidence model (Admission, Composition, driver and the
+      source boundary) to a sorry-free, axiom-trio build; fixed the source
+      term/argument surface gap that blocked the original packages; ran the real
+      package door on both original packages and the quarantine package; added
+      the capture seal and its regression; aligned the typed differential and its
+      corpus; excluded the evidence trees from wire-anchor discovery; regenerated
+      the surface golden; updated the spec, decision record, inventory and gated
+      sketch; deleted the executed plan; committed fd8b74d and updated PR 19.
+      make local-gates and cabal test all pass.
+    provenance: ai-executed
+    files_changed:
+    - src/Lara/Evidence/Admission.hs
+    - src/Lara/Elaborate.hs
+    - src/Lara/Syntax.hs
+    - lean/Lara/Evidence/Types.lean
+    - lean/Lara/Evidence/Runner.lean
+    - lean/Lara/Evidence/Admission.lean
+    - lean/Lara/Evidence/Composition.lean
+    - lean/Lara/EvidenceDriver.lean
+    - lean/Lara/Surface/Source.lean
+    - lean/Lara/SurfaceConformanceMain.lean
+    - lean/AxCheck.lean
+    - scripts/evidence-differential.hs
+    - scripts/differential.sh
+    - scripts/gen-anchor-manifest.sh
+    - fixtures/evidence/model/MANIFEST.tsv
+    - fixtures/evidence/model/capture-manifest-order.sexp
+    - test/BindingAuditSpec.hs
+    - test/SurfaceConformanceSpec.hs
+    - test/EvidenceAdmissionSpec.hs
+    - test/surface-conformance.golden
+    - docs/spec.md
+    - docs/evidence-admission-decision.md
+    - docs/evidence-admission-inventory.md
+    - docs/evidence-admission-gated-tasks.md
+    - docs/README.md
+    - fixtures/ANCHORS.tsv
+    - examples/certified-evidence
+    - plans/2026-10-06-ara-certified-evidence.md
+    - ara/evidence/results/certified_evidence_landing_2026-10-06.md
+    - ara/logic/solution/constraints.md
+    - ara/staging/observations.yaml
+    - ara/trace/exploration_tree.yaml
+    - ara/trace/sessions/2026-10-06_001.yaml
+    - ara/trace/sessions/session_index.yaml
+    - ara/trace/pm_reasoning_log.yaml
+  claims_touched: []
+  logic_revisions:
+  - turn: 5
+    entry: logic/solution/constraints.md#ara-packaged-certified-evidence-planned
+    field: section
+    before: >-
+      Section "ARA-packaged certified evidence (planned)": Status "Approved design
+      direction; implementation remains subject to the original-output inventory
+      gate"; Sources cited the living plan.
+    after: >-
+      Section "ARA-packaged certified evidence (implemented)": Status implemented
+      and gate-passing at fd8b74d; adds the captured-object-under-its-own-entry
+      rule, the explicit trusted base, the gate evidence pointer and the open
+      evaluation on issue 20; Sources point at the decision record, the landing
+      evidence and the inventory.
+    signal: artifact-commitment
+    provenance: ai-executed
+    note: Crystallized O185 and O186; the section anchor moved, so O184's promoted_to pointer was updated in place.
+  - turn: 5
+    entry: logic/claims.md:210,241,912
+    field: Sources
+    before: "docs/spec.md:1078 / :1490 / :1497"
+    after: "docs/spec.md:1082 / :1494 / :1501"
+    signal: dependency-change
+    provenance: ai-executed
+    note: The spec's §4.3 witness note grew by four lines in this turn's R8 enforcement edit, so the located quotations moved; the quoted text did not change.
+  - turn: 5
+    entry: logic/claims.md:39,157,182
+    field: Sources
+    before: "docs/spec.md:1221 / :1246 / :1424 / :1419-1420"
+    after: "docs/spec.md:1225 / :1250 / :1428 / :1423-1424"
+    signal: dependency-change
+    provenance: ai-executed
+    note: Same four-line shift; `scripts/check_ara_source_spans.py` now passes over 66 quotations.
+  key_context:
+  - turn: 5
+    excerpt: >-
+      User asked to complete the feature end to end on branch
+      feat/enforce-certified-leaf-checker, running enough verification to be
+      certain, and to keep a failure log; review and the eventual merge are the
+      user's.
+  open_threads:
+  - PR 19 review and merge (draft); issue 8 closes with it
+  - Issue 20 human faithfulness review and measured-input/report freeze
+  - PR 12 review/merge and m5-freeze-v8 tag follow-through from earlier turns
+  ai_suggestions_pending:
+  - O187 key-addressed lookup rule; O188 Except-bind proof lemmas; O189 harness-owned fixture exclusion

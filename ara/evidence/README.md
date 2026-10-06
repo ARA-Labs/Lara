@@ -67,3 +67,5 @@ not a data figure.
 - [Backend mutation v6](results/backend_mutation_v6.md): clean S2/S9 corpus refresh, additive deltas, and measured ablations.
 
 - [Certified-evidence inventory](results/certified_evidence_inventory_2026-10-06.md): Task 0 original-byte acquisitions and extraction probes; proposed TSV/JSON gate not passed; CSV/log/notebook alternatives remain pending contract review.
+
+- [Certified-evidence landing gates](results/certified_evidence_landing_2026-10-06.md): verbatim `make local-gates` and `cabal test all` output, package-door acceptance for both original packages and the quarantine fixture, and the before/after borrowed-capture regression.
