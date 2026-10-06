@@ -1,0 +1,29 @@
+# strict-target-v1 — R4's strict inference and attempted undercut
+#
+# The strict step has the same premise-reuse shape as S1: nd@1 certifies
+# only that the conclusion follows from the supplied premise, not that the
+# audit is faithful. Artifact and theory digests are illustrative identities.
+
+policy strict-target-v1
+
+sort Property, Scope
+con D : Scope
+con safety_invariant : Property
+pred holds(Property, Scope)
+pred audit_challenged(Property, Scope)
+
+rule certified_citation(X, D)
+  mode       = strict
+  premises   = [ holds(X, D) ]
+  conclusion = holds(X, D)
+  allow-trusted = false
+  certifiers = [ (nd@1, sha256:strict-target-v1-theory-0) ]
+
+theory sha256:strict-target-v1-theory-0 = []
+
+# This matches d1's conclusion at a1's substitution, but exception matching
+# licenses undercuts only on DEFEASIBLE rules. The target's strict mode is
+# checked first and rejects R11 StrictTarget despite this declaration.
+exception certified_citation : audit_challenged(X, D)
+
+# No contrary pair touches holds: the policy passes the Path B validator.

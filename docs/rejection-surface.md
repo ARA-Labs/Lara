@@ -380,7 +380,7 @@ reproduce the class shown.
 | R7 assurance | `trusted` without `allow-trusted`; `cert` with no matching certifier entry; assurance on a defeasible rule; a strict rule carrying a discharge map or holes | `fixtures/mutants/A--trusted-assurance-0.sexp` | `reject R7` |
 | R9 data-integrity | duplicate-report group with `≢` members, escalated to `reject` by policy | `fixtures/corpus/reject-r9.sexp` | `reject R9` |
 | R10 attack-position | attack position undefined, or wrong occurrence kind for the attack kind | `examples/R3` | `lara check examples/R3/example.lara` → `reject R10` |
-| R11 attack-relation | no declared contrary pair licenses the rebut/undermine; no declared exception licenses the undercut | `fixtures/mutants/A--unlicensed-attack-0.sexp` | `reject R11` |
+| R11 attack-relation | no declared contrary pair licenses the rebut/undermine; no declared exception licenses the undercut; rebut or undercut targets a strict rule | `fixtures/mutants/A--unlicensed-attack-0.sexp` (unlicensed); `examples/R4` (strict target) | both reject `R11`; `lara check examples/R4/example.lara` → `reject R11` |
 | R12 policy-wf | a rule pattern variable falls outside its declared parameters (spec §4.1), or a `contrary` side may overlap a strict-reachable pattern (spec §8.1 Path B) | `fixtures/mutants/self-expansion.C04--out-of-scope-var-0.sexp` (scope); `examples/R2` (Path B) | both reject `R12` |
 | R13 backend | certificate replay rejects; unknown backend/version; theory digest not allowlisted. Since `lara-syntax@0.6`, a malformed premise-slot spelling under a matching `ord@1`/`ra@1`/`insp@1` schema on the `.lara` door rejects at elaboration instead of here (§1.2; grammar Appendix E). At `@0.9`/`@0.10` the same source-boundary migration applies only to `nd@1` payloads containing one of D7's five named markers (§1.4; grammar Appendices H and I); marker-free and raw `.sexp` payloads remain backend-owned — acceptance unchanged. The reason is followed by the slot → source mapping on both doors (§1.5) | `fixtures/corpus/ord-lt-boundary-reject.sexp` | `reject R13`, stderr: `certificate replay: ord@1 (theory t0) rejected the certificate: the claimed comparison does not hold: 5 < 5 is false` then `  slot 0 = leaf e0` |
 | R14 codec | wire program fails to decode: malformed S-expression, S-expression nesting deeper than the readers' shared `maxDepth` (see the bound note below), unknown fields, presentation parse error | `fixtures/mutants/malformed/A--codec-core-version-0.sexp` | exit 2, stderr: `lara: codec error at replay-id: unsupported core version: "lara-core@0.1"`, **nothing on stdout** |
@@ -597,7 +597,7 @@ document should not be read as implying it does.
 ## See also
 
 - `docs/spec.md` §10.1 — the frozen class table this document adds anchors and prose to.
-- `examples/README.md` — the worked-example suite (`A`, `B`, `E1`–`E5`, `R1`–`R3`, `R2-sort`,
+- `examples/README.md` — the worked-example suite (`A`, `B`, `E1`–`E5`, `R1`–`R4`, `R2-sort`,
   `S1`–`S9`, `P1`, plus the demo directories), several
   of which are the anchors above.
 - `fixtures/mutants/README.md` and `MANIFEST.tsv` — the generated mutation suite that exercises every

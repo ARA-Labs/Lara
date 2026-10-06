@@ -20,7 +20,7 @@
 -- header, then writes @DIR/emitted.core.sexp@ through the same derivation. This
 -- is the minimal bundle-input mode used by the replay-bundle freezer.
 --
--- The reject examples (R1/R2/R3) still elaborate to a structurally-valid 'Unit';
+-- The reject examples (R1/R2/R3/R4) still elaborate to a structurally-valid 'Unit';
 -- the checker (not the elaborator) rejects them, so every example below produces
 -- a @.core.sexp@. The suite happens to carry constant atoms only; numeric
 -- literals are nevertheless safe because both production drivers share

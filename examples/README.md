@@ -36,7 +36,7 @@ than purported quotations.
 Each example is a **self-contained directory** `examples/<NAME>/` (a paper
 artifact): the surface `example.lara`, its co-located policy (`empirical-v1.policy.lara`,
 `empirical-v2.policy.lara` for E4/E5, `philmath-v1.policy.lara` for P1,
-`strict-bad-v1.policy.lara` for R2, or
+`strict-bad-v1.policy.lara` for R2, `strict-target-v1.policy.lara` for R4, or
 `strict-v1.policy.lara` for S1), the
 derived `example.core.sexp` wire anchor, and the derived `expected.json` golden.
 Both derived files are regenerated
@@ -74,6 +74,7 @@ compare the two drivers, and `map.verdict.sexp` is a golden pinned by
 | `A/example.lara` | one paper attacks its own headline claim | rebut + undercut + undermine (all three), all in-paper | **defeated** | "a paper can't rebut itself" is a category error; self-attacks = the paper's honesty about its limits |
 | `B/example.lara` | two papers, contrary conclusions | rebut (mutual, a 2-cycle) | **contested** ×2 | no new calculus for corpus scale; and the attack only forms because both claims hit the *same atoms* under `≡` |
 | `P1/example.lara` | a philosophy-of-mathematics debate; every leaf is assumed or attested | undermine + rebut + undercut | **contested** ×2, **justified** ×3 (including reinstatement), **defeated** ×2 | policy supplies the subject matter; an unresolved set/structure dispute coexists with a defended fictionalist argument. The [D4 write-up](../docs/demos/d4-philmath.md) states the policy and binding caveats; the [worlds decision](../docs/non-empirical-worlds-decision.md) records the original CLI limitation; [D5](../docs/demos/d5-axiom-withdrawal.md) supplies the separate Lean axiom-withdrawal witness. |
+| `R4/example.lara` | an attempted undercut on S1's valid strict-certificate shape (policy `strict-target-v1`) | undercut (rejected) | **reject R11** | the target position is a rule and the exception matches, but `StrictTarget` refuses an undercut of a strict inference; strict protects the inference, not the truth of its attested premise |
 | `S1/example.lara` | strict rule with an `nd@1` certificate | — | **justified** | closes the frontend certificate path: surface assurance + policy theory → elaboration → replay |
 | `S2/example.lara` | `ord@1` comparison certificate + a defeasible bridge rule, authored as one `comparison` block (policy `ord-v1`) | — | **justified** | the §3.6 layering: an accepted comparison atom is *terminal* until a rule binds it to systems and measurand. Strict arithmetic, defeasible bridge — and the author writes neither the `num_lt` argument order, the certificate slots, nor the θ vectors |
 | `S3/example.lara` | the same certificate shape at the **tie**, `relation = at-least-as-good` (policy `ord-le-v1`) | — | **justified** (`at_least_as_good`) | the family's two members separate here: `num_le` accepts on two equal cells where `num_lt` is an R13 replay rejection, so no certificate can upgrade "at least as good" to "beats". S3 is S2 with three lines changed, under a different policy — which is why the block names a *relation* and lets the policy name its own rules |
@@ -108,6 +109,14 @@ with the same `example.lara` + policy + `example.core.sexp` layout.
 `num_lt(sys_new, accuracy)` under `ord-v1`'s declared `pred num_lt(Num, Num)`,
 rejected as `R2` at the signature stage rather than surfacing later as an
 `ord@1` replay failure.
+
+`R4/` adds the strict-target negative: `undercut d1 a1.rule` targets a valid
+strict `nd@1` step and rejects as `R11` (`StrictTarget certified_citation`) at
+the typed-attack stage. Its policy declares the matching exception, isolating
+strictness from a missing license. It declares no contrary pair on the strict
+conclusion, avoiding R2's earlier `R12` policy rejection. Compare S4: a review
+can attack a policy-licensed premise or defeasible bridge without undercutting
+the certified strict inference itself.
 
 - **A** overlaps E3 (`defeat-suite`) on attack coverage but foregrounds *self-attack from a single
   artifact* — the specific intuition to dislodge. Its `distribution_shift` undercut is literally the
@@ -219,8 +228,8 @@ their verdicts, not from prose — that the suite witnesses every claim status
 (justified / gap / contested / defeated), every attack kind (rebut / undercut /
 undermine), every attack-kind × target-label cell (each kind with an attacked
 target that is `in`, `out`, and `undec` — E4/E5 close the `in`/`undec`-beyond-
-rebut cells), a gap claim in an attack-carrying unit, and the three rejection
-classes (R1 / R12 / R10).
+rebut cells), a gap claim in an attack-carrying unit, and rejection
+classes R1 / R12 / R10 / R11.
 
 For the full rejection-class picture — all fourteen classes with a runnable anchor each, the
 source-boundary-vs-checker exit-code story, and why an unsupported claim (`gap`, as in `E2`) is not

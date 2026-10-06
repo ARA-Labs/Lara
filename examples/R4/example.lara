@@ -1,0 +1,55 @@
+# R4 — strict-target (rejected: spec class R11)
+#
+# A valid strict certificate does not make its rule application defeasible.
+# a1 reuses the audited premise via nd@1, exactly as S1 does. The reviewer
+# supplies the policy's declared exception, but an undercut may target only
+# a defeasible rule application: `undercut d1 a1.rule` is rejected with
+# CE_R11 (StrictTarget certified_citation) at the typed-attack stage.
+#
+# The position exists and names a rule, so this is not R10. The exception
+# matches, so this is not an unlicensed undercut either. No contrary is
+# declared on the strict conclusion, so policy validation does not reject R12.
+
+artifact strict_target at sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+policy strict-target-v1
+use backends [nd@1]
+
+claim c1
+  nl      = "The safety invariant holds for deployment D"
+  formal  = holds(safety_invariant, D)
+  binding = { author = alice, rationale = "Certified reuse of the audited safety invariant.", audit-status = reviewed }
+
+leaf e1 : holds(safety_invariant, D)
+  kind       = attested
+  provenance = user
+  refs       = [evidence/safety_audit.txt#section=invariants]
+
+arg a1 : supports(c1) by certified_citation from [e1]
+  assurance = cert(nd@1, sha256:strict-target-v1-theory-0, (hyp 0))
+
+# The source of the attempted undercut is a valid leaf-rooted argument.
+claim c_review
+  nl      = "The safety audit for deployment D is challenged"
+  formal  = audit_challenged(safety_invariant, D)
+  binding = { author = bob, rationale = "The review disputes the audit's evidence, not certificate replay.", audit-status = reviewed }
+
+leaf e2 : audit_challenged(safety_invariant, D)
+  kind       = attested
+  provenance = user
+  refs       = [evidence/review.txt#section=audit]
+
+arg d1 : supports(c_review) by leaf(e2)
+
+# ILLEGAL: an exception declaration cannot authorize an undercut on a strict step.
+undercut d1 a1.rule
+
+status c1
+
+# EXPECTED VERDICT — verified by test/WorkedExamplesSpec.hs:
+# reject R11, exit 1; located diagnostic: typed-attack, attack index 0,
+# `undercut d1 a1` (root position; source spelling: `a1.rule`).
+# Removing this attack leaves a justified claim.
+#
+# Teaching point: strict protects the inference, not the truth of its inputs.
+# A review disputing the attested premise must use a policy-licensed undermine
+# of that leaf (as S4 disputes a binding leaf), not an undercut of the strict step.
