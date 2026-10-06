@@ -1,12 +1,12 @@
 # Evidence-admission decision record (`lara-evidence@0.1` — gated)
 
-_Status: gated design record, 2026-08-06. This document freezes the design
-boundary and the paper claim for byte-level evidence admission, per the
-2026-08-26 scope decision. It authorizes no implementation: the layer is
-deferred, blocked on the corpus inventory gate below plus explicit researcher
-approval. Nothing here is part of the frozen core specification (`lara-core@0.1` when
-this was recorded, `lara-core@0.3` now),
-and `docs/spec.md` intentionally does not specify this layer._
+_Status: implementation planning reopened for [issue #8](https://github.com/ARA-Labs/Lara/issues/8)
+on 2026-10-06. The researcher approved ARA-packaged, hash-pinned source files and
+approved-checker replay as the certification boundary. The original 2026-08-26
+deferral remains historical; the inventory gate in §7 still blocks implementation
+until demonstrated. The active plan is
+[`../plans/2026-10-06-ara-certified-evidence.md`](../plans/2026-10-06-ara-certified-evidence.md).
+This is not a shipped feature or a change to the frozen `lara-core@0.3` contract._
 
 Vocabulary for cold readers: a *leaf* is a declared piece of evidence; a
 support *scheme* and its *critical questions* decide whether an admitted leaf
@@ -156,11 +156,11 @@ work — an acceptable outcome, not a failure):
 - at least two closed leaf-checker families with deterministic,
   byte-addressed extraction.
 
-The gated implementation tasks (abstract calculus mechanization, `tsv-row@1`,
-integration, and the promotion-gate evaluation) are enumerated in
-`docs/evidence-admission-gated-tasks.md`; the scope decision closed
-2026-08-26 as not planned. Task 5 in particular changes replay identity and
-combined-report bytes — an M5-scale refreeze.
+The earlier implementation sketch is preserved in
+`docs/evidence-admission-gated-tasks.md`; its 2026-08-26 scope decision closed as
+not planned. The active issue #8 plan supersedes that sketch for new work. Replay
+identity and combined-report changes still require an explicitly budgeted evaluation
+refreeze rather than reusing the old measured assurance claims.
 
 ## 8. Versioning
 
@@ -169,3 +169,38 @@ many-sorted signature, and then `lara-core@0.3`, located gaps, since) — checke
 statements — is preserved unchanged. Evidence admission, if built, is an independently
 versioned source layer (`lara-evidence@0.1`) so concrete checker evolution
 never silently changes the argumentation calculus.
+
+## 9. ARA packaging direction approved for issue #8
+
+The result files used to certify a leaf must be included in the ARA package.
+A prose assertion or an external URL is not package membership. Original output
+bytes may be copied into the package with their origin recorded; membership does
+not imply that ARA generated them. The existing ARA-to-Lara map already places
+leaf evidence references under `evidence/` (`docs/corpus-map.md` §3).
+
+Certification requires package membership, a matching content hash, a
+policy-approved checker name/version, and successful replay yielding the declared
+proposition. Missing files, mismatched bytes, or a different extracted proposition
+must prevent certification; there is no silent downgrade to observed evidence.
+Assumptions and attestations remain explicitly declared evidence. This layer
+does not make certified leaves immune to attacks.
+
+The requirement belongs at the ARA source-admission boundary. The symbolic core
+still checks arguments relative to its supplied leaf environment, and raw core
+input cannot claim package verification. The active plan specifies the proposed
+presentation fields, rejection precedence, checker families, proof obligations, and
+migration. Those implementation details are planning targets, not frozen runtime
+guarantees.
+
+For this plan, certified-evidence failures reject rather than introduce a new
+quarantine outcome. The general three-outcome sketch in §§2–3 is historical;
+do not implement its extra evidence-quarantine seed as part of issue #8.
+Existing policy/group quarantine and its single combined prune remain intact.
+
+The new metatheory concerns admission and its composition with the existing
+checker: admitted certified leaves have replay witnesses; replay dependencies
+identify the bytes actually consulted; and certification preserves the old
+conditional core judgment when retained propositions are unchanged. It does not
+introduce a new defeat relation, a fifth core status, or a theorem of empirical
+truth. Filesystem capture, cryptographic integrity, and concrete parser
+correctness must be distinguished from the abstract Lean model.

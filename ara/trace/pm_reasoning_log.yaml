@@ -1718,3 +1718,17 @@ entries:
   notes:
   - Logged the transition results as one experiment node (N351_transitions); O183 not crystallized - no researcher comment on the claim itself, only on scope.
   - No C-claim touched; the update metatheory has no crystallized claim to reconcile.
+
+- turn: 2026-10-06_001#2
+  notes:
+  - Recorded the researcher's ARA membership direction as N352_ara_evidence; did not treat it as approval to bypass the evidence-admission inventory gate.
+  - Staged the proposed admission-boundary enforcement as O184; the user specified membership, not the full manifest or replay contract.
+  - No logic claims revised or prior observations promoted; this packaging discussion provides no empirical result or closure signal for existing claims.
+
+- turn: 2026-10-06_001#3
+  notes:
+  - The user's explicit affirmation closes O184; promoted the package/replay boundary to the existing constraints file without claiming it is implemented.
+  - Staged O185 because the new proof obligations are planning proposals, not proved results or a user-endorsed theorem list.
+  - Reused the presentation-only Policy convention after inspecting AST.hs; no parallel source-policy wrapper or core-wire extension is required.
+  - Kept the original-output inventory gate; the empty local corpus checkout is not evidence that the upstream inventory fails.
+  - No existing scientific claim changed status; planning approval is not empirical confirmation or a new metatheory result.

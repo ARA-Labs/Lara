@@ -3994,3 +3994,43 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+- id: O184
+  timestamp: 2026-10-06T06:48+00:00
+  provenance: ai-suggested
+  content: >-
+    Enforce ARA package membership at the certified-evidence admission boundary, not
+    in the symbolic argumentation core. Require manifest-listed package-local bytes,
+    matching content hashes, and successful replay by a policy-approved checker.
+    Package membership alone does not certify a measurement or its scientific validity.
+    External links alone cannot satisfy certification; declared evidence remains distinct.
+  context: >-
+    Proposed operational interpretation of the researcher's ARA membership requirement
+    for issue #8. Exact package contract, extraction families, and inventory gate remain
+    unsettled; no runtime implementation or certification result is claimed.
+  potential_type: architecture
+  bound_to:
+  - N352_ara_evidence
+  promoted: true
+  promoted_to: logic/solution/constraints.md#ara-packaged-certified-evidence-planned
+  crystallized_via: verbal-affirmation
+  stale: false
+- id: O185
+  timestamp: 2026-10-06T07:06+00:00
+  provenance: ai-suggested
+  content: >-
+    The certified-evidence extension needs executable admission characterization,
+    runner dependency completeness and local replay, and composition proofs reusing
+    existing prune, blocked-report and hole results. It does not require a new
+    defeat relation or core status. Byte parser, filesystem capture and cryptographic
+    assumptions remain explicit unless separately verified.
+  context: >-
+    Source and Lean inspection for the issue 8 implementation plan. Proposed proof
+    obligations are recorded in plans/2026-10-06-ara-certified-evidence.md; none of
+    these new evidence theorems is implemented or claimed proved.
+  potential_type: architecture
+  bound_to:
+  - N353_evidence_plan
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

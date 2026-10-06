@@ -2,9 +2,9 @@ session:
   id: 2026-10-06_001
   date: '2026-10-06'
   started: 2026-10-06T03:30+00:00
-  last_turn: 2026-10-06T05:40+00:00
-  turn_count: 1
-  summary: Finished the narrowed #11/#14 results in PR #12 (completion transitions, justified completion, quarantined batch leaves); local gates pass.
+  last_turn: 2026-10-06T07:06+00:00
+  turn_count: 3
+  summary: Finished the narrowed update results in PR 12; approved ARA-packaged certified evidence and wrote the issue 8 implementation plan with new admission proof obligations.
 events_logged:
 - turn: 1
   type: experiment
@@ -18,6 +18,18 @@ events_logged:
   routing: direct
   provenance: user
   summary: user chose to finish the three narrowed results in PR 12 rather than open a follow-up issue
+- turn: 2
+  type: decision
+  id: N352_ara_evidence
+  routing: direct
+  provenance: user
+  summary: require the result file backing certified evidence to be part of ARA
+- turn: 2
+  type: observation
+  id: O184
+  routing: staged
+  provenance: ai-suggested
+  summary: package-local hash-pinned replay at admission, without changing the symbolic core
 ai_actions:
 - turn: 1
   action: One agent proved the three remaining update results; verified build and gates; pushed and updated PR 12 to close 11/13/14/15/16
@@ -29,12 +41,86 @@ ai_actions:
   - lean/Lara/Grounded.lean
   - docs/located-gap-decision.md
   - docs/theory-m3-source-updates.md
+- turn: 2
+  action: Read the ARA corpus mapping and recorded the packaging direction separately from the proposed enforcement contract; no runtime code changed or checks run
+  provenance: ai-executed
+  files_changed:
+  - ara/trace/exploration_tree.yaml
+  - ara/staging/observations.yaml
+  - ara/trace/sessions/2026-10-06_001.yaml
+  - ara/trace/sessions/session_index.yaml
+  - ara/trace/pm_reasoning_log.yaml
 claims_touched: []
 logic_revisions: []
 key_context:
 - turn: 1
   excerpt: 'User: finish all three here; update the PR description to close those related issues.'
+- turn: 2
+  excerpt: "User: since we are acting as the meta-language of ARA, let's require that file to be part of ARA"
 open_threads:
 - PR 12 review and merge; m5-freeze-v8 tag on the merge commit
+- Issue 8 evidence-admission design and original-output inventory gate; packaging direction recorded, implementation contract unsettled
 ai_suggestions_pending:
 - O183 (atomic completion complete) now has its transition theorems; still staged
+- O184 proposes package-local replay enforcement; not yet an approved implementation design
+
+turn_3:
+  events_logged:
+  - turn: 3
+    type: decision
+    id: N353_evidence_plan
+    routing: direct
+    provenance: user-revised
+    summary: approved the ARA evidence boundary and requested its implementation plan
+  - turn: 3
+    type: architecture
+    id: O184
+    routing: crystallized
+    provenance: user-revised
+    summary: recorded the affirmed package/replay constraint in the current logic layer
+  - turn: 3
+    type: observation
+    id: O185
+    routing: staged
+    provenance: ai-suggested
+    summary: new admission and replay proof obligations reuse existing core metatheory
+  ai_actions:
+  - turn: 3
+    action: >-
+      Inspected Haskell source entry points and Lean reuse with two read-only scouts;
+      wrote the implementation plan and updated the evidence decision and docs index.
+      Plan style and existing-path/link checks pass. No evidence runtime code,
+      new Lean proofs, experiment inventory, build or runtime tests were executed.
+    provenance: ai-executed
+    files_changed:
+    - plans/2026-10-06-ara-certified-evidence.md
+    - docs/evidence-admission-decision.md
+    - docs/evidence-admission-gated-tasks.md
+    - docs/README.md
+    - ara/logic/solution/constraints.md
+    - ara/staging/observations.yaml
+    - ara/trace/exploration_tree.yaml
+    - ara/trace/sessions/2026-10-06_001.yaml
+    - ara/trace/sessions/session_index.yaml
+    - ara/trace/pm_reasoning_log.yaml
+  claims_touched: []
+  logic_revisions:
+  - turn: 3
+    entry: logic/solution/constraints.md#ara-packaged-certified-evidence-planned
+    field: section
+    before: null
+    after: >-
+      Approved planned constraint requiring ARA-contained, manifest-listed,
+      hash-pinned source bytes and approved-checker replay for certified leaves,
+      enforced outside the symbolic core without a truth guarantee.
+    signal: verbal-affirmation
+    provenance: user-revised
+    note: Crystallized O184; implementation remains gated.
+  key_context:
+  - turn: 3
+    excerpt: "User: sure. let's write down the plan for how to implement this. and for this, do we introduce new meta-theory?"
+  open_threads:
+  - PR 12 freeze-tag follow-through recorded by the earlier turn
+  - Issue 8 Task 0 original-output inventory and review of the concrete evidence contract
+  ai_suggestions_pending:
+  - O185 proof obligations and the plan's detailed checker/manifest/source contracts remain implementation targets

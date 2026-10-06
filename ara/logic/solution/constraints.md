@@ -302,3 +302,12 @@ deferred.
   for any two attack-free single-argument programs. Non-vacuity guards on the
   relabel do not establish non-degeneracy of the framework equality. Tracked
   as open follow-up work; `surface_directAF_link` remains open.
+
+## ARA-packaged certified evidence (planned)
+
+- **Status:** Approved design direction; implementation remains subject to the original-output inventory gate.
+- **Constraint:** A certified leaf must be reproduced by a policy-approved checker from manifest-listed, hash-pinned source files included in its ARA package. A URL or prose assertion alone does not satisfy package membership. Missing or mismatching evidence prevents certification without silently relabeling the leaf.
+- **Boundary:** Enforce this at source admission, outside the symbolic argumentation core. Assumptions and attestations remain declared evidence; certification does not establish empirical truth, scientific validity, or immunity from attacks.
+- **Provenance:** user-revised
+- **Sources:** `docs/evidence-admission-decision.md` §9; `plans/2026-10-06-ara-certified-evidence.md`
+- **Last revised:** 2026-10-06 (2026-10-06_001#3)

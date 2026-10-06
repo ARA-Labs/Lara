@@ -46,8 +46,9 @@ front-end),
 [`ord1-corpus-extension-decision.md`](ord1-corpus-extension-decision.md) and
 [`insp1-code-inspection-decision.md`](insp1-code-inspection-decision.md)
 (what the `ord@1` / `insp@1` backends certify),
-[`evidence-admission-decision.md`](evidence-admission-decision.md) (gated
-byte-level evidence layer),
+[`evidence-admission-decision.md`](evidence-admission-decision.md) (ARA-packaged
+evidence replay; [issue #8 implementation plan](../plans/2026-10-06-ara-certified-evidence.md),
+still subject to the original-output inventory gate),
 [`located-gap-decision.md`](located-gap-decision.md) (`lara-core@0.3`:
 incomplete arguments accepted as located holes),
 [`registration-receipt-contract.md`](registration-receipt-contract.md)

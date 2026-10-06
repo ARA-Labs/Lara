@@ -10245,3 +10245,42 @@ tree:
   status: resolved
   also_depends_on:
   - N351_updates
+- id: N352_ara_evidence
+  type: decision
+  title: Require ARA-packaged source files for certified evidence
+  provenance: user
+  timestamp: 2026-10-06T06:48+00:00
+  choice: >-
+    In the issue #8 design discussion, the researcher directed that the result file backing
+    certified evidence be part of the ARA, because Lara serves as its meta-language.
+    This records the packaging direction, not approval of an implementation contract or
+    satisfaction of the existing evidence-admission inventory gate.
+  alternatives:
+  - Allow certified evidence to reference files outside the ARA package
+  evidence:
+  - https://github.com/ARA-Labs/Lara/issues/8
+  - docs/corpus-map.md
+  - docs/evidence-admission-decision.md
+  - ara/trace/sessions/2026-10-06_001.yaml
+  status: resolved
+- id: N353_evidence_plan
+  type: decision
+  title: Approve the ARA evidence boundary and write its implementation plan
+  provenance: user-revised
+  timestamp: 2026-10-06T07:06+00:00
+  choice: >-
+    The researcher affirmed ARA package membership, hash-pinned bytes and approved
+    checker replay at source admission, then requested an implementation plan and
+    an account of new metatheory. The plan preserves the symbolic core and keeps
+    the original-output inventory as a prerequisite. Detailed source fields,
+    checker candidates, error ordering and proof statements remain planning targets.
+  alternatives:
+  - Resolve issue 8 by deleting the unenforced requirement from the specification
+  - Check only witness metadata without replaying extraction
+  evidence:
+  - docs/evidence-admission-decision.md
+  - plans/2026-10-06-ara-certified-evidence.md
+  - ara/logic/solution/constraints.md#ara-packaged-certified-evidence-planned
+  status: resolved
+  also_depends_on:
+  - N352_ara_evidence
