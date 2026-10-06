@@ -466,3 +466,9 @@ reported as a located hole in the verdict's `holes` section, and logged as the
 task-4 holes in provenance). No rebut pair arises: all claim/attack atoms live in disjoint
 `(method, quality, distribution)` contexts, and no `not_improves` argument is
 ever assembled.
+
+The independent oracle in `test/walking-skeleton-golden.sh` checks the full
+verdict, including the located hole: original declaration index `2`, id `a_me`,
+obligations `adequate_power` and `external_validity`, each at root site `(pos)`,
+and no outgoing attacks. It remains separate from `verdict.txt` so replacing
+the committed verdict and manifest together cannot silently change this outcome.

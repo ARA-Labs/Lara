@@ -115,13 +115,13 @@ if [ "$checker_exit" -ne "$expected_exit" ]; then
   failed=1
 fi
 
-# Independent replay + B0 §9 semantic oracle: the verdict carries the source
-# replay identity and accepts with openweb justified, python_code defeated, and
-# mobile_edge gap. This exact expected verdict keeps a self-consistent
-# substitution of verdict.txt + manifest from blessing a change.
+# Independent replay + B0 §9 semantic oracle: source replay identity, openweb
+# justified, python_code defeated, mobile_edge gap; a_me is hole 2 with both
+# mandatory questions open at the root and no outgoing attacks. Exact bytes
+# prevent a verdict.txt + manifest substitution from blessing a change.
 semantic_oracle="$tmp_root/semantic-oracle.txt"
 cat >"$semantic_oracle" <<'EOF'
-(verdict (replay-id (core lara-core@0.3) (policy empirical-v1) (backends (backend nd 1)) (theories) (artifact sha256:5ca1e...)) accept (labels (0 in) (1 out) (2 in) (3 in)) (edges (2 1) (3 1)) (statuses (status (atom improves (con kv_quant) (con latency) (con openweb)) justified) (status (atom improves (con kv_quant) (con latency) (con python_code)) defeated) (status (atom improves (con kv_quant) (con latency) (con mobile_edge)) gap)))
+(verdict (replay-id (core lara-core@0.3) (policy empirical-v1) (backends (backend nd 1)) (theories) (artifact sha256:5ca1e...)) accept (labels (0 in) (1 out) (2 in) (3 in)) (edges (2 1) (3 1)) (statuses (status (atom improves (con kv_quant) (con latency) (con openweb)) justified) (status (atom improves (con kv_quant) (con latency) (con python_code)) defeated) (status (atom improves (con kv_quant) (con latency) (con mobile_edge)) gap)) (holes (arg 2 a_me (obligations (obligation adequate_power (pos)) (obligation external_validity (pos))) (attacks))))
 EOF
 if ! cmp -s "$semantic_oracle" "$checker_stdout"; then
   echo "ERROR: checker stdout does not match the independent B0 section 9 oracle" >&2
