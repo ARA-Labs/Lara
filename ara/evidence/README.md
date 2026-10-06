@@ -65,3 +65,5 @@ not a data figure.
 [proofs/m4_finite_extension_279.md](proofs/m4_finite_extension_279.md) records the finite realization and the unrestricted-extension counterexample correcting C53.
 
 - [Backend mutation v6](results/backend_mutation_v6.md): clean S2/S9 corpus refresh, additive deltas, and measured ablations.
+
+- [Certified-evidence inventory](results/certified_evidence_inventory_2026-10-06.md): Task 0 original-byte acquisitions and extraction probes; proposed TSV/JSON gate not passed; CSV/log/notebook alternatives remain pending contract review.

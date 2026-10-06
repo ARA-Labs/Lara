@@ -1,12 +1,6 @@
 # Evidence-admission decision record (`lara-evidence@0.1` — gated)
 
-_Status: implementation planning reopened for [issue #8](https://github.com/ARA-Labs/Lara/issues/8)
-on 2026-10-06. The researcher approved ARA-packaged, hash-pinned source files and
-approved-checker replay as the certification boundary. The original 2026-08-26
-deferral remains historical; the inventory gate in §7 still blocks implementation
-until demonstrated. The active plan is
-[`../plans/2026-10-06-ara-certified-evidence.md`](../plans/2026-10-06-ara-certified-evidence.md).
-This is not a shipped feature or a change to the frozen `lara-core@0.3` contract._
+_Status: implementation blocked at Task 0 for [issue #8](https://github.com/ARA-Labs/Lara/issues/8), after the 2026-10-06 original-output inventory failed to establish the required package/leaf/checker coverage. The researcher approved ARA-packaged, hash-pinned files and approved-checker replay as the intended boundary. The [inventory record](evidence-admission-inventory.md) reports the inspected bytes and rejected candidates. The [active plan](../plans/2026-10-06-ara-certified-evidence.md) remains partially executed; Tasks 1 through 7 have not started. This is not a shipped feature or a change to `lara-core@0.3`._
 
 Vocabulary for cold readers: a *leaf* is a declared piece of evidence; a
 support *scheme* and its *critical questions* decide whether an admitted leaf
@@ -170,37 +164,34 @@ statements — is preserved unchanged. Evidence admission, if built, is an indep
 versioned source layer (`lara-evidence@0.1`) so concrete checker evolution
 never silently changes the argumentation calculus.
 
-## 9. ARA packaging direction approved for issue #8
+## 9. ARA packaging direction and Task 0 outcome for issue #8
 
-The result files used to certify a leaf must be included in the ARA package.
-A prose assertion or an external URL is not package membership. Original output
-bytes may be copied into the package with their origin recorded; membership does
-not imply that ARA generated them. The existing ARA-to-Lara map already places
-leaf evidence references under `evidence/` (`docs/corpus-map.md` §3).
+The approved direction requires result files used to certify a leaf to be included in the ARA package. A prose assertion or an external URL is not package membership. Original bytes may be copied into `evidence/` with their origin recorded; membership does not imply that ARA generated them. The existing ARA-to-Lara map places leaf references under that directory (`docs/corpus-map.md` §3).
 
-Certification requires package membership, a matching content hash, a
-policy-approved checker name/version, and successful replay yielding the declared
-proposition. Missing files, mismatched bytes, or a different extracted proposition
-must prevent certification; there is no silent downgrade to observed evidence.
-Assumptions and attestations remain explicitly declared evidence. This layer
-does not make certified leaves immune to attacks.
+### What certification would require
 
-The requirement belongs at the ARA source-admission boundary. The symbolic core
-still checks arguments relative to its supplied leaf environment, and raw core
-input cannot claim package verification. The active plan specifies the proposed
-presentation fields, rejection precedence, checker families, proof obligations, and
-migration. Those implementation details are planning targets, not frozen runtime
-guarantees.
+Certification requires safe package capture, matching length and SHA-256 metadata, a policy-approved implemented checker/version, and replay that independently constructs the declared normalized proposition. Missing, unsafe, altered or mismatching evidence rejects; there is no silent downgrade to observed evidence. Every declared certified leaf must pass, including unused leaves and leaves later quarantined by existing policy/group handling. Assumptions and attestations remain declared evidence, and certification does not protect a leaf from attacks.
 
-For this plan, certified-evidence failures reject rather than introduce a new
-quarantine outcome. The general three-outcome sketch in §§2–3 is historical;
-do not implement its extra evidence-quarantine seed as part of issue #8.
-Existing policy/group quarantine and its single combined prune remain intact.
+The intended capture boundary uses an explicit root and a canonical `lara-evidence.sexp` manifest. It pins `PAPER.md`, the source, package policy and evidence objects. Descriptor-relative traversal must reject symlinks and non-regular files; checkers receive captured bytes and never reopen live paths. Each typed request declares its complete dependencies before replay. The runner builds the dependency report from that list. The earlier access-logging read-program sketch in §2 is historical; the proposed families do not require dynamic reads.
 
-The new metatheory concerns admission and its composition with the existing
-checker: admitted certified leaves have replay witnesses; replay dependencies
-identify the bytes actually consulted; and certification preserves the old
-conditional core judgment when retained propositions are unchanged. It does not
-introduce a new defeat relation, a fifth core status, or a theorem of empirical
-truth. Filesystem capture, cryptographic integrity, and concrete parser
-correctness must be distinguished from the abstract Lean model.
+The intended `check-ara ROOT [--policy FILE] [--out DIR]` command distinguishes package policy from verifier policy. A verifier policy replaces the package policy for the whole run. Reports and replay identities name its digest and origin; a package's own allowlist cannot be presented as verifier approval. Reports must separate checked leaves from declared leaves and keep the evidence identity separate from the unchanged core replay tuple. Persisted reports would publish as a complete directory by atomic rename, without overwriting an existing run.
+
+### Which boundaries must remain unchanged
+
+The enforcement point must include public `prepareSource`, its exportable projections and all source-level callers, not just the proposed command. Source doors without an evidence context must reject certified declarations at R8. Raw core `.sexp` inputs continue to check conditionally against supplied `Gamma` and cannot mint package assurance. Raw exports intentionally lose that assurance. The core wire, strict backends, four statuses and located holes stay unchanged.
+
+The plan specifies structural/source invalidity before policy R8, certified-evidence R8, strict replay R13, group R9 and core outcomes. Package-global capture/integrity failures exit 2; evidence-object failures exit 1 with a located R8 and empty stdout. Source/policy capture is a prerequisite to semantic policy decisions. Policy R8 must precede evidence-object integrity and extraction failures. These are reviewed implementation targets; collision tests and the inventory-backed contract review still have to establish the executable behavior.
+
+Certified-evidence failures reject instead of adding an evidence-quarantine outcome. The general three-outcome sketch in §§2–3 is historical for this implementation. Existing policy/group quarantine and its single combined prune remain intact, with the directed `evidence-blocked` public overlay. Successful replay cannot override policy rejection or make a quarantined leaf available.
+
+### What the metatheory would establish
+
+The proposed Lean development proves executable/declarative admission equivalence, replay coverage for all declared certified leaves, dependency confinement and locality, deterministic first errors, and composition with the existing checked-source guarantees. Conservativity preserves the conditional core judgment when the ordinary source input is unchanged. A composition corollary must use `source_justified_nonpromotion` with its actual query-membership and unblocked-query premises. Accepted source may still contain located holes.
+
+No evidence theorem has landed. Filesystem capture, SHA-256 assumptions, compiler/runtime behavior and concrete TSV/JSON byte-parser refinement remain separate from the proposed finite-snapshot model. Differential tests would provide conformance evidence, not proofs of those concrete parsers. Neither replay nor a justified conditional status proves scientific validity, natural-language faithfulness or empirical truth.
+
+### What Task 0 actually established
+
+The [2026-10-06 inventory](evidence-admission-inventory.md) inspected the pinned corpus, documented format examples and original upstream outputs. The available question JSON contains expected-result prose; paper tables are reconstructed Markdown; candidate row files are CSV, not original TSV. Genuine NanoGPT and METR result logs were acquired and inspected, but require a different extraction contract. Independently produced CompoNet and Simformer CSV outputs were also acquired, and the original Simformer notebook matches the corpus copy byte-for-byte. Those are concrete candidates for a reviewed portfolio revision, including an explicit treatment of saved loss strings, not a pass for the approved portfolio. No complete reviewed ten-leaf mapping demonstrated all gate conditions. The proposed `tsv-row@1` / `json-pointer@1` portfolio therefore has not cleared §7.
+
+Implementation stopped before evidence runtime or source-contract edits, as the plan requires on gate failure. No concrete syntax, numeric bound, manifest/report codec or evidence theorem was frozen, and no source fixture or measurement was relabeled or regenerated. The spec's unenforced certified-witness note remains accurate. Issue #8 stays open: resumption requires traceable original-output acquisition and, where observed formats demand it, a reviewed portfolio revision before the remaining contract review and Tasks 1 through 7. The additive evaluation and freeze change remain costs of that work, not claims established by this inventory.

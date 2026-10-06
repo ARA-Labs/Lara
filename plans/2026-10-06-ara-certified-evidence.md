@@ -10,7 +10,7 @@
 
 **Tech stack:** Haskell implementation, Lean metatheory and executable differential model, the existing S-expression codecs and exact numeric normalization, SHA-256 artifact identities, and existing Cabal/Make verification gates.
 
-**Status:** **Approved 2026-10-06** after review (revisions listed below); implementation not started. The researcher approved ARA package membership and actual checker replay. The detailed contracts below are implementation targets to freeze at the Task 0 checkpoint. The original-output inventory gate remains mandatory: approval of this plan is not a gate pass. Issue #8 tracks the work; this file is the living implementation plan, not a separate backlog. Delete it after execution, preserving settled contracts in `docs/`.
+**Status:** **Partially executed; blocked at Task 0 (2026-10-06).** The approved plan's original-output gate did not pass in the [recorded inventory](../docs/evidence-admission-inventory.md). The corpus was initialized and candidate byte hashes, package sizes, saved notebook outputs and rejected extraction probes were inspected. No evidence runtime was written. Tasks 1 through 7 and the inventory-backed contract review remain unexecuted; issue #8 stays open with the acquisition/portfolio blocker. Approval of the plan is not a gate pass. Keep this living plan while work remains; delete it only after execution, preserving settled contracts in `docs/`.
 
 **Review revisions (2026-10-06):**
 - Replaced the dynamic read-program runner with *static* per-request dependencies. Both shipped families read exactly one named object, so an interpreter with data-dependent reads would be machinery no shipped checker uses, and its tests would need a test-only checker. Confinement now holds by construction and is still proved over the runner model.
@@ -31,7 +31,7 @@ The current specification requires a listed checker witness and a replayable ref
 
 The approved direction is stronger: the result file must be inside the ARA package and the extraction must run. `docs/corpus-map.md` §3 already maps leaf references to ARA evidence paths. The upstream [ARA anatomy](https://github.com/ARA-Labs/Agent-Native-Research-Artifact#under-the-hood--the-artifact-anatomy) describes `PAPER.md`, `logic/`, `src/`, `trace/`, and `evidence/`; it does not by itself define the machine-readable manifest proposed here. This plan introduces a Lara checking profile for that package, not an unannounced change to the upstream ARA standard.
 
-The checked-out `corpus/ara-paperbench/` directory is empty. No inventory result is claimed. Existing lowered Lara corpus units are not a substitute for original experiment outputs.
+At planning time the checked-out `corpus/ara-paperbench/` directory was empty. Task 0 has now initialized its existing pin and recorded the [inventory result](../docs/evidence-admission-inventory.md): the gate has not passed. Existing lowered Lara corpus units and reconstructed paper tables are not substitutes for original experiment outputs.
 
 ## Constraints
 
@@ -188,6 +188,8 @@ git submodule update --init corpus/ara-paperbench
 
 Expected: the source corpus is available for inspection. This command alone does not establish the inventory gate. A valid gate record includes reproducible extraction evidence; no gate pass is claimed by this plan.
 
+**Execution checkpoint (2026-10-06):** The [inventory](../docs/evidence-admission-inventory.md) did not establish the required original-output coverage. The available question JSON is prose, reconstructed evidence is Markdown, and candidate row data is CSV rather than original TSV. No synthetic success package was substituted. Runtime Tasks 1 through 7 are blocked; remaining Task 0 work is original-output acquisition, any inventory-backed portfolio revision, and review of the concrete contract. This checkpoint does not freeze syntax, numeric bounds, manifests or report codecs. The Task 0 checkboxes remain open because none of their full acceptance conditions was met.
+
 ### Task 1: Define the source-only contract and its Lean model
 
 **Modify:** `src/Lara/AST.hs`, `src/Lara/Syntax.hs`, `src/Lara/Elaborate.hs`, `src/Lara/Source/Load.hs`, `lean/Lara/Presentation.lean`, `lean/Lara/Surface/Elaborate.lean`, `lean/Lara/Surface/Check.lean`, `lean/Lara/Surface/Correctness.lean`, `test/SyntaxSpec.hs`, `test/SurfaceConformanceSpec.hs`, `scripts/surface-conformance.hs`, and `docs/lara-surface-grammar.md`. **Create:** `src/Lara/Evidence/Types.hs`, `src/Lara/Evidence/Syntax.hs`, `lean/Lara/Evidence/Types.lean`. Extend presentation-only records; keep the core-reachable projection unchanged.
@@ -302,4 +304,4 @@ Expected at the final checkpoint: builds, all existing tests, all Lean/axiom/cro
 
 ## Next Steps
 
-Execute Task 0 first. Review the inventory-backed contract before runtime edits, then land the source model, runner proofs, extractors and admission integration in dependency order. Do not close issue #8 until the certified source path is enforced end to end. This planning change runs documentation and research-record checks only; it does not claim that any of the future implementation gates have passed.
+Resume the remaining Task 0 work from the [inventory](../docs/evidence-admission-inventory.md) and issue #8. Acquire traceable original outputs and review any format-driven portfolio change, then demonstrate the gate and review the concrete contract before runtime edits. Tasks 1 through 7 and the acceptance checklist remain open. Do not close issue #8 or delete this partially executed plan until the certified source path is enforced end to end. The Task 0 outcome is documented; no implementation, Lean or package-command gate pass is claimed.

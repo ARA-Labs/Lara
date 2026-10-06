@@ -4034,3 +4034,24 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+- id: O186
+  timestamp: 2026-10-06T07:41+00:00
+  provenance: ai-suggested
+  content: >-
+    Original CompoNet and Simformer outputs motivate revising the row family to
+    CSV with real quote handling. The Simformer notebook provides independently
+    pinned saved loss strings, but interpreting their trailing LF as numeric
+    output needs an explicit encoding contract. A CSV-row and scoped JSON-pointer
+    portfolio may satisfy the original-byte requirement without conversion.
+  context: >-
+    Task 0 acquisitions and probes are recorded in
+    ara/evidence/results/certified_evidence_inventory_2026-10-06.md and
+    docs/evidence-admission-inventory.md. The replacement portfolio and
+    claim-linked ten-leaf mapping have not been reviewed or approved.
+  potential_type: architecture
+  bound_to:
+  - N354_evidence_inventory
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

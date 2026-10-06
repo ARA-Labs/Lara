@@ -11,12 +11,7 @@ It replaces `plans/2026-08-04-rit-informed-evidence-admission.md` Tasks 3, 4,
 Read this as "if the inventory gate below is ever met and
 a researcher explicitly approves the work," not as scheduled work._
 
-_Planning update, 2026-10-06: [issue #8](https://github.com/ARA-Labs/Lara/issues/8)
-has reopened implementation planning with an ARA-package membership requirement.
-Use [`../plans/2026-10-06-ara-certified-evidence.md`](../plans/2026-10-06-ara-certified-evidence.md)
-for new work. The inventory gate still applies. The tasks below are historical,
-not an executable plan against the current source-admission and located-hole
-contracts._
+_Execution update, 2026-10-06: [issue #8](https://github.com/ARA-Labs/Lara/issues/8) remains open. The [active implementation plan](../plans/2026-10-06-ara-certified-evidence.md) stopped at Task 0 because the [original-output inventory](evidence-admission-inventory.md) did not demonstrate the required coverage for its proposed checker portfolio. No evidence runtime landed. The tasks below remain historical, not an executable plan against the current source-admission and located-hole contracts._
 
 The design boundary, judgment forms, outcome join, and negative guarantees
 this layer would have to respect are already frozen in

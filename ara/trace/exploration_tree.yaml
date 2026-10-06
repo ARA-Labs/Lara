@@ -10284,3 +10284,43 @@ tree:
   status: resolved
   also_depends_on:
   - N352_ara_evidence
+- id: N354_evidence_inventory
+  type: experiment
+  title: Inspect original-output formats before evidence runtime implementation
+  provenance: ai-executed
+  timestamp: 2026-10-06T07:41+00:00
+  result: >-
+    Initialized the existing corpus pin and scanned all 32 packages: 529 evidence
+    files are Markdown; the two JSON questionnaires contain prose, not numeric
+    results. Candidate TSV/decimal probes reject. Acquired genuine NanoGPT/METR
+    logs and CompoNet/Simformer CSV plus the original Simformer notebook; the
+    latter matches the corpus byte-for-byte. Original formats, CSV quoting,
+    repeated row keys and saved loss strings require a reviewed portfolio/encoding
+    revision. No approved two-family ten-leaf mapping or runtime gate pass.
+  evidence:
+  - ara/evidence/results/certified_evidence_inventory_2026-10-06.md
+  - docs/evidence-admission-inventory.md
+  status: resolved
+  also_depends_on:
+  - N353_evidence_plan
+- id: N355_evidence_gate_stop
+  type: decision
+  title: Stop at the original-output gate and keep issue 8 unresolved
+  provenance: ai-executed
+  timestamp: 2026-10-06T07:41+00:00
+  choice: >-
+    Applied the approved plan's gate-failure branch: no evidence runtime,
+    source-contract migration, new Lean theorem, golden or refreeze. Expanded
+    decision section 9 and retained the partially executed plan. Reported the
+    blocker and remaining acquisition, review, implementation and evaluation
+    costs on issue 8. An inventory/docs PR does not close the issue.
+  alternatives:
+  - Treat converted TSV or reconstructed prose as original-output evidence
+  - Implement the approved candidate families without their mandatory inventory
+  evidence:
+  - N354_evidence_inventory
+  - docs/evidence-admission-decision.md
+  - https://github.com/ARA-Labs/Lara/issues/8#issuecomment-6011704289
+  status: resolved
+  also_depends_on:
+  - N354_evidence_inventory

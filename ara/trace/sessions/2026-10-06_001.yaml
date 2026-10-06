@@ -2,9 +2,9 @@ session:
   id: 2026-10-06_001
   date: '2026-10-06'
   started: 2026-10-06T03:30+00:00
-  last_turn: 2026-10-06T07:06+00:00
-  turn_count: 3
-  summary: Finished the narrowed update results in PR 12; approved ARA-packaged certified evidence and wrote the issue 8 implementation plan with new admission proof obligations.
+  last_turn: 2026-10-06T07:41+00:00
+  turn_count: 4
+  summary: Finished narrowed update results in PR 12; approved the issue 8 evidence plan, then executed its original-output inventory and stopped before runtime edits pending a reviewed portfolio revision.
 events_logged:
 - turn: 1
   type: experiment
@@ -124,3 +124,72 @@ turn_3:
   - Issue 8 Task 0 original-output inventory and review of the concrete evidence contract
   ai_suggestions_pending:
   - O185 proof obligations and the plan's detailed checker/manifest/source contracts remain implementation targets
+
+turn_4:
+  events_logged:
+  - turn: 4
+    type: experiment
+    id: N354_evidence_inventory
+    routing: direct
+    provenance: ai-executed
+    summary: acquired original log/CSV/notebook bytes and ran inventory/selector probes; approved TSV/JSON gate not passed
+  - turn: 4
+    type: decision
+    id: N355_evidence_gate_stop
+    routing: direct
+    provenance: ai-executed
+    summary: followed the plan's gate-failure branch; documented blocker and kept issue 8 open
+  - turn: 4
+    type: observation
+    id: O186
+    routing: staged
+    provenance: ai-suggested
+    summary: CSV-row plus a scoped JSON saved-loss encoding may be an inventory-backed replacement portfolio
+  ai_actions:
+  - turn: 4
+    action: >-
+      Initialized the pinned corpus; two read-only scouts investigated original
+      acquisition branches. Ran byte/hash, archive-member, exact-decimal, TSV,
+      CSV-key and JSON-pointer probes. Acquired and compared original Simformer
+      notebook bytes. Updated inventory, decision section 9, docs index, historical
+      sketch pointer and living plan. Reported the gate blocker and costs on issue
+      8. Documented log reproduction and local Markdown checks pass; inventory
+      style is clean. No Haskell/Lean runtime, wire, golden or freeze change.
+    provenance: ai-executed
+    files_changed:
+    - docs/evidence-admission-inventory.md
+    - docs/evidence-admission-decision.md
+    - docs/evidence-admission-gated-tasks.md
+    - docs/README.md
+    - plans/2026-10-06-ara-certified-evidence.md
+    - ara/evidence/results/certified_evidence_inventory_2026-10-06.md
+    - ara/evidence/README.md
+    - ara/trace/exploration_tree.yaml
+    - ara/staging/observations.yaml
+    - ara/trace/sessions/2026-10-06_001.yaml
+    - ara/trace/sessions/session_index.yaml
+    - ara/trace/pm_reasoning_log.yaml
+  - turn: 4
+    action: >-
+      Epilogue checks pass for strict YAML, session-index/source spans, trace IDs,
+      new O186 binding and claim dependency references. The broader observation
+      ID audit found historical duplicate O176/O177; opened issue 18 instead of
+      rewriting append-only records. No claim that all observation IDs are unique.
+    provenance: ai-executed
+    files_changed: []
+  claims_touched: []
+  logic_revisions: []
+  key_context:
+  - turn: 4
+    excerpt: >-
+      User requested finishing the approved plan, updating docs especially
+      decision section 9, recording the session and opening a PR. The plan
+      explicitly forbids runtime implementation before the original-output gate
+      and requires stopping/reporting if it fails.
+  open_threads:
+  - PR 12 review/merge and m5-freeze-v8 tag follow-through from earlier turns
+  - Issue 8 portfolio/encoding review, ten-leaf original-output mapping and remaining Tasks 0 through 7
+  - Issue 18 historical duplicate O176/O177 provenance and cross-reference audit
+  ai_suggestions_pending:
+  - O185 proof obligations remain unimplemented and staged
+  - O186 proposes CSV-row and scoped JSON loss decoding; review and approval still required

@@ -717,8 +717,8 @@ sessions:
 
 - id: 2026-10-06_001
   date: '2026-10-06'
-  summary: 'Finished narrowed update results in PR 12; approved ARA-packaged certified evidence and wrote the issue 8 implementation plan with admission proof obligations.'
-  turn_count: 3
-  events_count: 7
+  summary: 'Finished narrowed update results in PR 12; approved the issue 8 plan, then ran its original-output inventory and stopped before runtime edits pending portfolio review.'
+  turn_count: 4
+  events_count: 10
   claims_touched: []
-  open_threads: 2
+  open_threads: 3
