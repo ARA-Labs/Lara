@@ -1689,6 +1689,15 @@ outside the public audit surface. -/
 #print axioms Lara.Grounded.statusC_ne_defeated_of_undec
 #print axioms Lara.Grounded.SinkExtension.justified_preserved
 #print axioms Lara.Grounded.SinkExtension.contested_not_defeated
+#print axioms Lara.Grounded.SinkEmbedding
+#print axioms Lara.Grounded.SinkEmbedding.directIn_forward
+#print axioms Lara.Grounded.SinkEmbedding.directOut_forward
+#print axioms Lara.Grounded.SinkEmbedding.directIn_backward
+#print axioms Lara.Grounded.SinkEmbedding.directOut_backward
+#print axioms Lara.Grounded.SinkEmbedding.label_old
+#print axioms Lara.Grounded.SinkEmbedding.justified_preserved
+#print axioms Lara.Grounded.SinkEmbedding.contested_not_defeated
+#print axioms Lara.Grounded.labelC_inn_of_unattacked
 
 #print axioms Lara.Consistency.claimSupportFor
 #print axioms Lara.Consistency.completeClaimFor
