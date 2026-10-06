@@ -10227,3 +10227,21 @@ tree:
   also_depends_on:
   - N351_relower
   - N351_sites
+- id: N351_transitions
+  type: experiment
+  title: Status transitions, justified completion and quarantined batch leaves for the completion updates
+  provenance: ai-executed
+  timestamp: 2026-10-06T05:30+00:00
+  result: >-
+    A dischargeOpen that completes a retained hole behaves like a fresh addInstance (no gap entry, gap exit
+    only for equivalent claims, sink monotonicity when no raw attack names the argument); additive atomic
+    batches never enter gap; a complete unattacked completion makes equivalent claims justified (core, and
+    public when unblocked); quarantined new batch leaves preserve old arguments and holes exactly. The
+    unrestricted dischargeOpen statement is false (discharge_optional_enters_gap, discharge_outgoing_defeats).
+  evidence:
+  - lean/Lara/Update/Transitions.lean
+  - lean/Lara/Examples/UpdateCompletion.lean
+  - docs/located-gap-decision.md
+  status: resolved
+  also_depends_on:
+  - N351_updates

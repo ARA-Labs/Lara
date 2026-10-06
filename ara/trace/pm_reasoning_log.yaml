@@ -1713,3 +1713,8 @@ entries:
   - O181 (node completeness load-bearing for status) gains corpus evidence (46/48 gap->justified under no-cq) but stays staged; considered artifact commitment because the freeze checklist now cites the corpus headline, rejected - a doc citing a measurement is not a dependent artifact.
   - Staged O182 (holes not observationally inert under composition) and O183 (atomic completion complete, sequential not) rather than crystallizing; proved results but no researcher comment yet.
   - Recorded the corpus re-lowering, the hole-obligation operator restriction, and the load-bearing audit rule as one decision node (N351_relower) since they were forced together by the regeneration.
+
+- turn: 2026-10-06_001#1
+  notes:
+  - Logged the transition results as one experiment node (N351_transitions); O183 not crystallized - no researcher comment on the claim itself, only on scope.
+  - No C-claim touched; the update metatheory has no crystallized claim to reconcile.
