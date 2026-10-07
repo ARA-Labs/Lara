@@ -84,6 +84,12 @@ jobs:
       - name: Container benchmark runner unit tests
         run: python3 -m unittest scripts/test_bench_container.py -v
 
+      - name: Certified-evidence measurement unit tests
+        run: make evidence-measured-test
+
+      - name: Certified-evidence corpus and frozen reports reproduce
+        run: make evidence-measured
+
       - name: ARA source-span unit tests
         run: python3 -m unittest scripts/test_check_ara_source_spans.py -v
 
@@ -95,6 +101,12 @@ jobs:
 
       - name: ARA session index is total, unique, and agrees with its files
         run: uv run --no-project --with pyyaml python scripts/check_ara_session_index.py
+
+      - name: ARA observation lookup unit tests
+        run: uv run --no-project --with pyyaml python -m unittest scripts/test_check_ara_observations.py -v
+
+      - name: ARA observation identifiers and historical references are unambiguous
+        run: uv run --no-project --with pyyaml python scripts/check_ara_observations.py
 
       - name: Policy-copy authenticity (T7)
         run: |

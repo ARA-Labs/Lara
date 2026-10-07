@@ -569,7 +569,7 @@ are likewise source invalidity. A `certified` leaf is additionally
 admitted only if it carries a checker witness `(name, version)` listed in `Pi` and a replayable
 reference. *(Enforced by the `lara-evidence@0.1` package door, which requires an inspection
 manifest, pins the referenced bytes by length and SHA-256, and replays the approved checker against
-them — `docs/evidence-admission-decision.md` §9. It is not enforced by a policy witness list inside
+them — [the evidence-admission design](evidence-admission-design.md#concrete-package-contract). It is not enforced by a policy witness list inside
 `lara-core@0.3`, whose `Policy` still carries no checker stage, so a source door with no evidence
 context rejects a `certified` declaration at R8 rather than checking the witness; R8 is otherwise
 raised only by a `reject` admission row.)* The outcomes:
@@ -774,7 +774,7 @@ pruned graph's label.
 
 Byte-level evidence admission — checking that a certified leaf is the exact output of a registered
 checker over pinned artifact bytes — is **not** part of v0.1; leaves on every v0.1 path are
-*evidence declared*, and the gated design record is `evidence-admission-decision.md`.
+*evidence declared*. The separate implemented extension has its own [evidence-admission design](evidence-admission-design.md).
 
 ### 4.4 Instantiation in programs
 

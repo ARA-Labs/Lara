@@ -89,7 +89,7 @@ positions remain assertions. The guard documents two representation exemptions
 
 The runtime semantics of the existing `admission` and `duplicate-reports`
 constructs are frozen separately in `docs/policy-admission-calculus-decision.md`.
-Byte-level `lara-evidence@0.1` is implemented through `lara check-ara`; Appendix J defines its source fields and `docs/evidence-admission-decision.md` §9 defines the package contract.
+Byte-level `lara-evidence@0.1` is implemented through `lara check-ara`; Appendix J defines its source fields and the [evidence-admission design](evidence-admission-design.md#concrete-package-contract) defines the package contract.
 
 ---
 
@@ -2491,7 +2491,7 @@ CSV selection requires exactly one row with the exact raw key. `decimal` decodes
 
 ### J.3 Where do malformed or unsupported requests fail?
 
-Duplicate request fields, duplicate allowlist fields or entries, unknown checker names or encodings, malformed selectors or pointers, and noncanonical version spellings are source parse errors (exit 2). A decoded but unsupported version, a noncertified leaf with an extraction request, or a mismatch among provenance, allowlist and manifest reference is an evidence-binding rejection at R8. The exact numeric and byte bounds live in [the evidence decision record §9](evidence-admission-decision.md#9-ara-packaging-direction-and-task-0-outcome-for-issue-8).
+Duplicate request fields, duplicate allowlist fields or entries, unknown checker names or encodings, malformed selectors or pointers, and noncanonical version spellings are source parse errors (exit 2). A decoded but unsupported version, a noncertified leaf with an extraction request, or a mismatch among provenance, allowlist and manifest reference is an evidence-binding rejection at R8. The exact numeric and byte bounds live in [the evidence-admission design](evidence-admission-design.md#concrete-package-contract).
 
 `lara check-ara ROOT [--policy FILE] [--out DIR]` supplies the captured package context needed to certify a leaf. Ordinary source commands, including `check`, `deps`, map and possible-world source loaders, reject certified declarations without that context. A decoded request alone does not grant assurance. Raw `.sexp` checking remains conditional on declared evidence.
 

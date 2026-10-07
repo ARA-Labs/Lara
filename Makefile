@@ -1,7 +1,7 @@
 # Convenience targets. The repo's source of truth stays cabal + scripts/;
 # these wrap the common entry points.
 
-.PHONY: build test doctest docs docs-haskell docs-lean bench bench-map bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry semantics-registry-test backend-deps-golden update-goldens update-differential differential admission-differential evidence-differential evidence-cli ara-source-spans ara-session-index map-check map-conformance pw-conformance lean-build pw-example axiom-withdrawal-example axiom-audit lean-gate cross-check local-gates
+.PHONY: build test doctest docs docs-haskell docs-lean bench bench-map bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry semantics-registry-test backend-deps-golden update-goldens update-differential differential admission-differential evidence-differential evidence-cli evidence-measured evidence-measured-test ara-source-spans ara-session-index map-check map-conformance pw-conformance lean-build pw-example axiom-withdrawal-example axiom-audit lean-gate cross-check local-gates
 
 build:
 	cabal build all
@@ -62,7 +62,7 @@ docs-lean:
 
 lean-gate: lean-build pw-example axiom-withdrawal-example axiom-audit semantics-registry semantics-registry-test
 
-cross-check: presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens backend-deps-golden update-goldens update-differential differential admission-differential evidence-differential evidence-cli map-conformance pw-conformance
+cross-check: presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens backend-deps-golden update-goldens update-differential differential admission-differential evidence-differential evidence-cli evidence-measured evidence-measured-test map-conformance pw-conformance
 
 local-gates: lean-gate cross-check
 
@@ -103,6 +103,24 @@ evidence-differential:
 # publication atomicity (test/evidence-cli.sh).
 evidence-cli:
 	bash test/evidence-cli.sh
+
+# The additive certified-evidence measured-input evaluation
+# (`evidence-measured-inputs@2`, issue #20). The committed corpus fixtures must
+# regenerate byte-identically, and the harness must reproduce the frozen report
+# over the real `lara check-ara` door. Needs the built binary only — no Lean
+# build. The frozen snapshot is produced by `scripts/evidence-measure.py` and
+# committed under measurements/frozen/ (protocol and budget:
+# measurements/frozen/evidence-measured-inputs-v2.md); prior snapshots remain
+# immutable when the active freeze changes.
+evidence-measured:
+	python3 scripts/gen-evidence-measured.py --check
+	cabal build exe:lara
+	scripts/evidence-measure.py --check
+
+# The pure stdlib helpers of the measured-input harness and the corpus
+# manifest's structural validation.
+evidence-measured-test:
+	python3 -m unittest scripts/test_evidence_measure.py -v
 
 # Cross-language presentation-AST shape parity (result 12): both runtimes emit
 # the same normalized ordered inventory, protected by compiler witnesses and
@@ -160,6 +178,14 @@ ara-source-spans:
 # script under `uv run --with pyyaml`.
 ara-session-index:
 	python3 scripts/check_ara_session_index.py
+
+# Unique effective observation IDs and append-only historical reference bindings.
+.PHONY: ara-observations ara-observations-test
+ara-observations:
+	python3 scripts/check_ara_observations.py
+
+ara-observations-test:
+	python3 -m unittest scripts/test_check_ara_observations.py -v
 
 # Check one multi-artifact map. PHONY on purpose: a map is a RECHECK, not
 # a build, so this must run every time it is invoked — GNU Make guarantees that

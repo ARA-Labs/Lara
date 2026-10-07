@@ -544,7 +544,7 @@ results are the restricted theorems above.
 ## 7. Rejected alternatives
 
 **Keep rejecting (the `@0.2` contract).** Rejection was a v0.1 scope decision,
-not a soundness requirement (`docs/evidence-admission-decision.md` §6). It
+not a soundness requirement ([evidence-admission alternatives](evidence-admission-design.md#alternatives-considered)). It
 forced an honest author to delete the argument, so the verdict could say a
 claim had no support but not which question was missing. It also let the
 earliest incomplete argument mask any later support or attack defect in the

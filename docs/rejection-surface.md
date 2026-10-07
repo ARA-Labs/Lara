@@ -588,11 +588,10 @@ resolution, not the core judgment.)
 
 ## Out of scope
 
-**Byte-level evidence admission** (gated design — `docs/evidence-admission-decision.md`).
-A leaf is *declared* evidence, checked for admission (kind × provenance) and, for `certified` leaves,
-for a checker witness — it is not byte-checked against the underlying artifact. No rejection class in
-§2 covers "the number is not actually in the artifact"; that guarantee does not exist yet, and this
-document should not be read as implying it does.
+**Raw-core byte-level evidence verification** ([evidence-admission design](evidence-admission-design.md)).
+Raw `.sexp` leaves remain declared evidence checked relative to the caller's `Gamma`;
+the core rejection classes do not inspect artifact bytes. Byte checking belongs to
+the separate `check-ara` package command described below, not the raw core.
 
 ## See also
 
@@ -607,7 +606,7 @@ document should not be read as implying it does.
 
 `lara check-ara ROOT [--policy FILE] [--out DIR]` captures package files before checking source. Invalid or noncanonical manifests and capture/integrity failures of the paper, source or policy are package-global errors (exit 2). Evidence binding, requested-object capture/integrity, and extraction/proposition mismatches are located R8 rejections (exit 1). Both classes leave stdout empty and publish no accepted output bundle.
 
-After global capture and source validation, existing policy R8 precedes evidence binding, requested-object capture and extraction. Evidence failure precedes strict replay R13, group R9 and core outcomes. Binding and extraction select errors in leaf order; requested objects use manifest order and name the earliest referencing leaf. The exact contract is in [the evidence decision record §9](evidence-admission-decision.md#9-ara-packaging-direction-and-task-0-outcome-for-issue-8).
+After global capture and source validation, existing policy R8 precedes evidence binding, requested-object capture and extraction. Evidence failure precedes strict replay R13, group R9 and core outcomes. Binding and extraction select errors in leaf order; requested objects use manifest order and name the earliest referencing leaf. The exact contract is in [the evidence-admission design](evidence-admission-design.md#concrete-package-contract).
 
 Ordinary `.lara` commands without a package context refuse certified declarations at R8, including `check`, `deps`, map member loading and possible-world source loading. PW retains its existing stdout-only `pw-error` world-input envelope rather than the package command's empty-stdout convention. Raw core `.sexp` checking remains conditional declared-evidence checking.
 

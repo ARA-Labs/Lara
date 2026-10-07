@@ -1,0 +1,1648 @@
+{
+  "format": "lara-evidence-measure-report@1",
+  "freeze": "evidence-measured-inputs@2",
+  "scope": {
+    "door": "lara check-ara (real CLI binary)",
+    "language": "lara-syntax@0.11",
+    "evidence": "lara-evidence@0.1",
+    "core": "lara-core@0.3",
+    "measures": "package capture, request binding, extraction, core replay verdict, evidence-report identities",
+    "excludes": "scientific interpretation, semantic faithfulness, independent mapping review"
+  },
+  "environment": {
+    "git-rev": "2b9146f25c95e6c83fa231c17799b3c8e32ec3eb",
+    "git-dirty": true,
+    "lara-bin": "/home/yfhe/ara/Lara/dist-newstyle/build/x86_64-linux/ghc-9.10.3/lara-0.1.0.0/x/lara/build/lara/lara",
+    "lara-bin-sha256": "sha256:e3aceccb5c6d2355674e7f50d9a4da8a4de531e20c366ad1e8abec8a34cf8ccd",
+    "ghc": "9.10.3",
+    "python": "3.14.8",
+    "os": "linux",
+    "cpu": "x86_64"
+  },
+  "corpus": {
+    "manifest": "fixtures/evidence/measured/MANIFEST.tsv",
+    "manifest-sha256": "sha256:5d1db05a90b588fb417d9667faebb4e05c20dfc71cbabb0845bf390dae8580f6",
+    "inputs": 10,
+    "identity": "sha256:afc0295efc1cabc0790a7716d34ab80e39238efb57141c3e4858ee8e7789650b"
+  },
+  "aggregate": {
+    "count": 10,
+    "class-match-rate": {
+      "matched": 10,
+      "total": 10
+    },
+    "class-accuracy": {
+      "accepted": {
+        "matched": 4,
+        "total": 4
+      },
+      "binding": {
+        "matched": 1,
+        "total": 1
+      },
+      "capture": {
+        "matched": 1,
+        "total": 1
+      },
+      "extraction": {
+        "matched": 2,
+        "total": 2
+      },
+      "invalid": {
+        "matched": 1,
+        "total": 1
+      },
+      "policy": {
+        "matched": 1,
+        "total": 1
+      }
+    },
+    "checked-leaves": 13,
+    "declared-leaves": 1,
+    "assurances": {
+      "evidence-checked": 3,
+      "mixed": 1
+    }
+  },
+  "records": [
+    {
+      "input": "package-a",
+      "root": "examples/certified-evidence/package-a",
+      "policy": "-",
+      "input-digest": "sha256:cda184a53533df2a79f30b5165f1baf87d4a2da7b7589602aced6e7c5a5e3e80",
+      "policy-digest": "-",
+      "expected": "accepted",
+      "expected-exit": 0,
+      "actual": "accepted",
+      "exit": 0,
+      "stage": "-",
+      "leaf": "-",
+      "object": "-",
+      "reason": "-",
+      "stdout-sha256": "sha256:fc48550b80ca172e590a5443fd42dcc59c5b50f4607ef005db74559e04b8a647",
+      "stderr-sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "versions": [
+        "lara-syntax@0.11",
+        "lara-evidence@0.1"
+      ],
+      "assurance": "evidence-checked",
+      "checked": [
+        "forward-1631",
+        "forward-1632"
+      ],
+      "declared": [],
+      "manifest-sha256": "sha256:1552b0e5694a6c1ec79f354d06e5db6aa715a4601e2325250168a61cd738b812",
+      "source-sha256": "sha256:03993eb5e7e20a7c6e86c39ad982358e3690578bdbcdda105cc7ab0b64aa9a64",
+      "policy-origin": "package",
+      "policy-sha256": "sha256:3735727d8a60f92ad3dee2c8ea50b48cabd1fbf32c5bd994a242c49aa56d7915",
+      "core-replay": [
+        "replay-id",
+        [
+          "core",
+          "lara-core@0.3"
+        ],
+        [
+          "policy",
+          "certified-componet"
+        ],
+        [
+          "backends"
+        ],
+        [
+          "theories"
+        ],
+        [
+          "artifact",
+          "git:7257a17e9dbb50f81482da65cdae2086c761aaa2"
+        ]
+      ],
+      "core-outcome": "accept",
+      "core-verdict": [
+        "verdict",
+        [
+          "replay-id",
+          [
+            "core",
+            "lara-core@0.3"
+          ],
+          [
+            "policy",
+            "certified-componet"
+          ],
+          [
+            "backends"
+          ],
+          [
+            "theories"
+          ],
+          [
+            "artifact",
+            "git:7257a17e9dbb50f81482da65cdae2086c761aaa2"
+          ]
+        ],
+        "accept",
+        [
+          "labels",
+          [
+            "0",
+            "in"
+          ],
+          [
+            "1",
+            "in"
+          ]
+        ],
+        [
+          "edges"
+        ],
+        [
+          "statuses",
+          [
+            "status",
+            [
+              "atom",
+              "forward_time_s",
+              [
+                "num",
+                "1631"
+              ],
+              [
+                "str",
+                "ProgressiveNet"
+              ],
+              [
+                "num",
+                "10"
+              ],
+              [
+                "num",
+                "0.0030154159758239985"
+              ]
+            ],
+            "justified"
+          ],
+          [
+            "status",
+            [
+              "atom",
+              "forward_time_s",
+              [
+                "num",
+                "1632"
+              ],
+              [
+                "str",
+                "ProgressiveNet"
+              ],
+              [
+                "num",
+                "10"
+              ],
+              [
+                "num",
+                "0.0030042969156056643"
+              ]
+            ],
+            "justified"
+          ]
+        ]
+      ],
+      "replays": [
+        [
+          "leaf",
+          "forward-1631",
+          [
+            "csv-row",
+            "1",
+            "benchmarking",
+            [
+              "key",
+              "",
+              "1631"
+            ],
+            [
+              "select",
+              [
+                "",
+                "decimal"
+              ],
+              [
+                "method",
+                "text"
+              ],
+              [
+                "num prevs",
+                "decimal"
+              ],
+              [
+                "time",
+                "decimal"
+              ]
+            ],
+            [
+              "predicate",
+              "forward_time_s"
+            ]
+          ],
+          [
+            "deps",
+            [
+              "object",
+              "benchmarking",
+              "evidence/benchmarking.csv",
+              "298568",
+              "sha256:d346381c8af21c6b51440a181af3bf475edca0ce63c5e95362845a23a30261f6"
+            ]
+          ]
+        ],
+        [
+          "leaf",
+          "forward-1632",
+          [
+            "csv-row",
+            "1",
+            "benchmarking",
+            [
+              "key",
+              "",
+              "1632"
+            ],
+            [
+              "select",
+              [
+                "",
+                "decimal"
+              ],
+              [
+                "method",
+                "text"
+              ],
+              [
+                "num prevs",
+                "decimal"
+              ],
+              [
+                "time",
+                "decimal"
+              ]
+            ],
+            [
+              "predicate",
+              "forward_time_s"
+            ]
+          ],
+          [
+            "deps",
+            [
+              "object",
+              "benchmarking",
+              "evidence/benchmarking.csv",
+              "298568",
+              "sha256:d346381c8af21c6b51440a181af3bf475edca0ce63c5e95362845a23a30261f6"
+            ]
+          ]
+        ]
+      ],
+      "captured": [
+        [
+          "object",
+          "paper",
+          "PAPER.md",
+          "6353",
+          "sha256:e2c9a1871d95ee2252505a9652cd3a9cef8020cb7988a988da514bb3a85522ca"
+        ],
+        [
+          "object",
+          "source",
+          "artifact.lara",
+          "1987",
+          "sha256:03993eb5e7e20a7c6e86c39ad982358e3690578bdbcdda105cc7ab0b64aa9a64"
+        ],
+        [
+          "object",
+          "policy",
+          "certified-componet.policy.lara",
+          "250",
+          "sha256:3735727d8a60f92ad3dee2c8ea50b48cabd1fbf32c5bd994a242c49aa56d7915"
+        ],
+        [
+          "object",
+          "benchmarking",
+          "evidence/benchmarking.csv",
+          "298568",
+          "sha256:d346381c8af21c6b51440a181af3bf475edca0ce63c5e95362845a23a30261f6"
+        ]
+      ],
+      "dependency-report-digest": "sha256:2034d23e88b715b280ff4281bc00270354cd14b0a58b1c04ceeac0b4ce61fb0b",
+      "evidence-digest": "sha256:8bb950953348190e82181a67a6fb58c52c28ed6474445ee3d274cb20eb5299e1",
+      "verified": {
+        "report-canonical": true,
+        "versions": true,
+        "core-accept": true,
+        "manifest-sha256": true,
+        "source-sha256": true,
+        "policy-sha256": true,
+        "policy-origin": true,
+        "core-replay": true,
+        "replays-match-checked": true,
+        "replay-requests": true,
+        "dependency-report-digest": true,
+        "captured": true,
+        "evidence-digest": true,
+        "partition-disjoint": true,
+        "declared-is-declared": true,
+        "assurance": true,
+        "empty-stderr": true,
+        "checked-partition": true,
+        "declared-partition": true,
+        "assurance-label": true
+      },
+      "class-match": true
+    },
+    {
+      "input": "package-b",
+      "root": "examples/certified-evidence/package-b",
+      "policy": "-",
+      "input-digest": "sha256:5e83e1a3f0a1c45ce14cb51230300481c7bff80f8aa817aa356d6ed599037dc1",
+      "policy-digest": "-",
+      "expected": "accepted",
+      "expected-exit": 0,
+      "actual": "accepted",
+      "exit": 0,
+      "stage": "-",
+      "leaf": "-",
+      "object": "-",
+      "reason": "-",
+      "stdout-sha256": "sha256:807d035b48c588112419f86aae83168f1fad422e9a4650ab49a5af22bacd92e1",
+      "stderr-sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "versions": [
+        "lara-syntax@0.11",
+        "lara-evidence@0.1"
+      ],
+      "assurance": "evidence-checked",
+      "checked": [
+        "train-0",
+        "train-1",
+        "train-2",
+        "loss-0",
+        "loss-1",
+        "loss-2",
+        "loss-3",
+        "loss-4"
+      ],
+      "declared": [],
+      "manifest-sha256": "sha256:2674c18e630642912b75792b2d41e942cf66cdc056ab035029a678c8a448effe",
+      "source-sha256": "sha256:5da99d4512aa14a4ac891b50c139271e6b91fca736fc28d64602689590bbdb2d",
+      "policy-origin": "package",
+      "policy-sha256": "sha256:b0b6cf84695796e9b4b4a9247240cf9fce56e0724d69cfae8a0ac0ab4a16a0f7",
+      "core-replay": [
+        "replay-id",
+        [
+          "core",
+          "lara-core@0.3"
+        ],
+        [
+          "policy",
+          "certified-simformer"
+        ],
+        [
+          "backends"
+        ],
+        [
+          "theories"
+        ],
+        [
+          "artifact",
+          "git:a35055613aaae7c84067416932e5636ef34b2ed2"
+        ]
+      ],
+      "core-outcome": "accept",
+      "core-verdict": [
+        "verdict",
+        [
+          "replay-id",
+          [
+            "core",
+            "lara-core@0.3"
+          ],
+          [
+            "policy",
+            "certified-simformer"
+          ],
+          [
+            "backends"
+          ],
+          [
+            "theories"
+          ],
+          [
+            "artifact",
+            "git:a35055613aaae7c84067416932e5636ef34b2ed2"
+          ]
+        ],
+        "accept",
+        [
+          "labels",
+          [
+            "0",
+            "in"
+          ],
+          [
+            "1",
+            "in"
+          ],
+          [
+            "2",
+            "in"
+          ],
+          [
+            "3",
+            "in"
+          ],
+          [
+            "4",
+            "in"
+          ],
+          [
+            "5",
+            "in"
+          ],
+          [
+            "6",
+            "in"
+          ],
+          [
+            "7",
+            "in"
+          ]
+        ],
+        [
+          "edges"
+        ],
+        [
+          "statuses",
+          [
+            "status",
+            [
+              "atom",
+              "training_time_s",
+              [
+                "str",
+                "score_transformer"
+              ],
+              [
+                "str",
+                "two_moons_all_cond"
+              ],
+              [
+                "num",
+                "977.5672931671144"
+              ]
+            ],
+            "justified"
+          ],
+          [
+            "status",
+            [
+              "atom",
+              "training_time_s",
+              [
+                "str",
+                "score_transformer_joint"
+              ],
+              [
+                "str",
+                "two_moons_all_cond"
+              ],
+              [
+                "num",
+                "1047.1436779499054"
+              ]
+            ],
+            "justified"
+          ],
+          [
+            "status",
+            [
+              "atom",
+              "training_time_s",
+              [
+                "str",
+                "score_transformer_undirected"
+              ],
+              [
+                "str",
+                "slcp_all_cond"
+              ],
+              [
+                "num",
+                "2717.260816335678"
+              ]
+            ],
+            "justified"
+          ],
+          [
+            "status",
+            [
+              "atom",
+              "training_loss",
+              [
+                "num",
+                "46.13004"
+              ]
+            ],
+            "justified"
+          ],
+          [
+            "status",
+            [
+              "atom",
+              "training_loss",
+              [
+                "num",
+                "45.541588"
+              ]
+            ],
+            "justified"
+          ],
+          [
+            "status",
+            [
+              "atom",
+              "training_loss",
+              [
+                "num",
+                "45.425938"
+              ]
+            ],
+            "justified"
+          ],
+          [
+            "status",
+            [
+              "atom",
+              "training_loss",
+              [
+                "num",
+                "45.380486"
+              ]
+            ],
+            "justified"
+          ],
+          [
+            "status",
+            [
+              "atom",
+              "training_loss",
+              [
+                "num",
+                "45.31089"
+              ]
+            ],
+            "justified"
+          ]
+        ]
+      ],
+      "replays": [
+        [
+          "leaf",
+          "train-0",
+          [
+            "csv-row",
+            "1",
+            "summary",
+            [
+              "key",
+              "model_id",
+              "0"
+            ],
+            [
+              "select",
+              [
+                "method",
+                "text"
+              ],
+              [
+                "task",
+                "text"
+              ],
+              [
+                "time_train",
+                "decimal"
+              ]
+            ],
+            [
+              "predicate",
+              "training_time_s"
+            ]
+          ],
+          [
+            "deps",
+            [
+              "object",
+              "summary",
+              "evidence/summary.csv",
+              "4397",
+              "sha256:9274a5de460f391d6862f256433cb004c7d4356c7e43b34f447f4bcdd5d09297"
+            ]
+          ]
+        ],
+        [
+          "leaf",
+          "train-1",
+          [
+            "csv-row",
+            "1",
+            "summary",
+            [
+              "key",
+              "model_id",
+              "1"
+            ],
+            [
+              "select",
+              [
+                "method",
+                "text"
+              ],
+              [
+                "task",
+                "text"
+              ],
+              [
+                "time_train",
+                "decimal"
+              ]
+            ],
+            [
+              "predicate",
+              "training_time_s"
+            ]
+          ],
+          [
+            "deps",
+            [
+              "object",
+              "summary",
+              "evidence/summary.csv",
+              "4397",
+              "sha256:9274a5de460f391d6862f256433cb004c7d4356c7e43b34f447f4bcdd5d09297"
+            ]
+          ]
+        ],
+        [
+          "leaf",
+          "train-2",
+          [
+            "csv-row",
+            "1",
+            "summary",
+            [
+              "key",
+              "model_id",
+              "2"
+            ],
+            [
+              "select",
+              [
+                "method",
+                "text"
+              ],
+              [
+                "task",
+                "text"
+              ],
+              [
+                "time_train",
+                "decimal"
+              ]
+            ],
+            [
+              "predicate",
+              "training_time_s"
+            ]
+          ],
+          [
+            "deps",
+            [
+              "object",
+              "summary",
+              "evidence/summary.csv",
+              "4397",
+              "sha256:9274a5de460f391d6862f256433cb004c7d4356c7e43b34f447f4bcdd5d09297"
+            ]
+          ]
+        ],
+        [
+          "leaf",
+          "loss-0",
+          [
+            "json-pointer",
+            "1",
+            "notebook",
+            [
+              "select",
+              [
+                "/cells/19/outputs/0/text/0",
+                "decimal-line"
+              ]
+            ],
+            [
+              "predicate",
+              "training_loss"
+            ]
+          ],
+          [
+            "deps",
+            [
+              "object",
+              "notebook",
+              "evidence/1_minimal_code_example.ipynb",
+              "286082",
+              "sha256:3e0d0055bb4688f6753ccb3a14a313a666a883d3a2b38a3f2a04bc85865a9869"
+            ]
+          ]
+        ],
+        [
+          "leaf",
+          "loss-1",
+          [
+            "json-pointer",
+            "1",
+            "notebook",
+            [
+              "select",
+              [
+                "/cells/19/outputs/0/text/1",
+                "decimal-line"
+              ]
+            ],
+            [
+              "predicate",
+              "training_loss"
+            ]
+          ],
+          [
+            "deps",
+            [
+              "object",
+              "notebook",
+              "evidence/1_minimal_code_example.ipynb",
+              "286082",
+              "sha256:3e0d0055bb4688f6753ccb3a14a313a666a883d3a2b38a3f2a04bc85865a9869"
+            ]
+          ]
+        ],
+        [
+          "leaf",
+          "loss-2",
+          [
+            "json-pointer",
+            "1",
+            "notebook",
+            [
+              "select",
+              [
+                "/cells/19/outputs/0/text/2",
+                "decimal-line"
+              ]
+            ],
+            [
+              "predicate",
+              "training_loss"
+            ]
+          ],
+          [
+            "deps",
+            [
+              "object",
+              "notebook",
+              "evidence/1_minimal_code_example.ipynb",
+              "286082",
+              "sha256:3e0d0055bb4688f6753ccb3a14a313a666a883d3a2b38a3f2a04bc85865a9869"
+            ]
+          ]
+        ],
+        [
+          "leaf",
+          "loss-3",
+          [
+            "json-pointer",
+            "1",
+            "notebook",
+            [
+              "select",
+              [
+                "/cells/19/outputs/0/text/3",
+                "decimal-line"
+              ]
+            ],
+            [
+              "predicate",
+              "training_loss"
+            ]
+          ],
+          [
+            "deps",
+            [
+              "object",
+              "notebook",
+              "evidence/1_minimal_code_example.ipynb",
+              "286082",
+              "sha256:3e0d0055bb4688f6753ccb3a14a313a666a883d3a2b38a3f2a04bc85865a9869"
+            ]
+          ]
+        ],
+        [
+          "leaf",
+          "loss-4",
+          [
+            "json-pointer",
+            "1",
+            "notebook",
+            [
+              "select",
+              [
+                "/cells/19/outputs/0/text/4",
+                "decimal-line"
+              ]
+            ],
+            [
+              "predicate",
+              "training_loss"
+            ]
+          ],
+          [
+            "deps",
+            [
+              "object",
+              "notebook",
+              "evidence/1_minimal_code_example.ipynb",
+              "286082",
+              "sha256:3e0d0055bb4688f6753ccb3a14a313a666a883d3a2b38a3f2a04bc85865a9869"
+            ]
+          ]
+        ]
+      ],
+      "captured": [
+        [
+          "object",
+          "paper",
+          "PAPER.md",
+          "7236",
+          "sha256:594ee37e59c2583280e30fba09bd3ec87e49faf8f65edded6db2b380b055796b"
+        ],
+        [
+          "object",
+          "source",
+          "artifact.lara",
+          "6595",
+          "sha256:5da99d4512aa14a4ac891b50c139271e6b91fca736fc28d64602689590bbdb2d"
+        ],
+        [
+          "object",
+          "policy",
+          "certified-simformer.policy.lara",
+          "389",
+          "sha256:b0b6cf84695796e9b4b4a9247240cf9fce56e0724d69cfae8a0ac0ab4a16a0f7"
+        ],
+        [
+          "object",
+          "summary",
+          "evidence/summary.csv",
+          "4397",
+          "sha256:9274a5de460f391d6862f256433cb004c7d4356c7e43b34f447f4bcdd5d09297"
+        ],
+        [
+          "object",
+          "notebook",
+          "evidence/1_minimal_code_example.ipynb",
+          "286082",
+          "sha256:3e0d0055bb4688f6753ccb3a14a313a666a883d3a2b38a3f2a04bc85865a9869"
+        ]
+      ],
+      "dependency-report-digest": "sha256:0e2b6b09d2ba421bf24669f6c5c17d7049f14c903671483e5a410a5d5abc858c",
+      "evidence-digest": "sha256:f008c91b66c4b229eaff55d99d7c632e50bce25d976be17fc0e9dcafad236c0b",
+      "verified": {
+        "report-canonical": true,
+        "versions": true,
+        "core-accept": true,
+        "manifest-sha256": true,
+        "source-sha256": true,
+        "policy-sha256": true,
+        "policy-origin": true,
+        "core-replay": true,
+        "replays-match-checked": true,
+        "replay-requests": true,
+        "dependency-report-digest": true,
+        "captured": true,
+        "evidence-digest": true,
+        "partition-disjoint": true,
+        "declared-is-declared": true,
+        "assurance": true,
+        "empty-stderr": true,
+        "checked-partition": true,
+        "declared-partition": true,
+        "assurance-label": true
+      },
+      "class-match": true
+    },
+    {
+      "input": "package-a-verifier-policy",
+      "root": "examples/certified-evidence/package-a",
+      "policy": "examples/certified-evidence/package-a/certified-componet.policy.lara",
+      "input-digest": "sha256:cda184a53533df2a79f30b5165f1baf87d4a2da7b7589602aced6e7c5a5e3e80",
+      "policy-digest": "sha256:3735727d8a60f92ad3dee2c8ea50b48cabd1fbf32c5bd994a242c49aa56d7915",
+      "expected": "accepted",
+      "expected-exit": 0,
+      "actual": "accepted",
+      "exit": 0,
+      "stage": "-",
+      "leaf": "-",
+      "object": "-",
+      "reason": "-",
+      "stdout-sha256": "sha256:8d3201f32e733dedba08c3bd2ddc44f4e48107b2bee93e8b73eeaa8299d03a1d",
+      "stderr-sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "versions": [
+        "lara-syntax@0.11",
+        "lara-evidence@0.1"
+      ],
+      "assurance": "evidence-checked",
+      "checked": [
+        "forward-1631",
+        "forward-1632"
+      ],
+      "declared": [],
+      "manifest-sha256": "sha256:1552b0e5694a6c1ec79f354d06e5db6aa715a4601e2325250168a61cd738b812",
+      "source-sha256": "sha256:03993eb5e7e20a7c6e86c39ad982358e3690578bdbcdda105cc7ab0b64aa9a64",
+      "policy-origin": "verifier",
+      "policy-sha256": "sha256:3735727d8a60f92ad3dee2c8ea50b48cabd1fbf32c5bd994a242c49aa56d7915",
+      "core-replay": [
+        "replay-id",
+        [
+          "core",
+          "lara-core@0.3"
+        ],
+        [
+          "policy",
+          "certified-componet"
+        ],
+        [
+          "backends"
+        ],
+        [
+          "theories"
+        ],
+        [
+          "artifact",
+          "git:7257a17e9dbb50f81482da65cdae2086c761aaa2"
+        ]
+      ],
+      "core-outcome": "accept",
+      "core-verdict": [
+        "verdict",
+        [
+          "replay-id",
+          [
+            "core",
+            "lara-core@0.3"
+          ],
+          [
+            "policy",
+            "certified-componet"
+          ],
+          [
+            "backends"
+          ],
+          [
+            "theories"
+          ],
+          [
+            "artifact",
+            "git:7257a17e9dbb50f81482da65cdae2086c761aaa2"
+          ]
+        ],
+        "accept",
+        [
+          "labels",
+          [
+            "0",
+            "in"
+          ],
+          [
+            "1",
+            "in"
+          ]
+        ],
+        [
+          "edges"
+        ],
+        [
+          "statuses",
+          [
+            "status",
+            [
+              "atom",
+              "forward_time_s",
+              [
+                "num",
+                "1631"
+              ],
+              [
+                "str",
+                "ProgressiveNet"
+              ],
+              [
+                "num",
+                "10"
+              ],
+              [
+                "num",
+                "0.0030154159758239985"
+              ]
+            ],
+            "justified"
+          ],
+          [
+            "status",
+            [
+              "atom",
+              "forward_time_s",
+              [
+                "num",
+                "1632"
+              ],
+              [
+                "str",
+                "ProgressiveNet"
+              ],
+              [
+                "num",
+                "10"
+              ],
+              [
+                "num",
+                "0.0030042969156056643"
+              ]
+            ],
+            "justified"
+          ]
+        ]
+      ],
+      "replays": [
+        [
+          "leaf",
+          "forward-1631",
+          [
+            "csv-row",
+            "1",
+            "benchmarking",
+            [
+              "key",
+              "",
+              "1631"
+            ],
+            [
+              "select",
+              [
+                "",
+                "decimal"
+              ],
+              [
+                "method",
+                "text"
+              ],
+              [
+                "num prevs",
+                "decimal"
+              ],
+              [
+                "time",
+                "decimal"
+              ]
+            ],
+            [
+              "predicate",
+              "forward_time_s"
+            ]
+          ],
+          [
+            "deps",
+            [
+              "object",
+              "benchmarking",
+              "evidence/benchmarking.csv",
+              "298568",
+              "sha256:d346381c8af21c6b51440a181af3bf475edca0ce63c5e95362845a23a30261f6"
+            ]
+          ]
+        ],
+        [
+          "leaf",
+          "forward-1632",
+          [
+            "csv-row",
+            "1",
+            "benchmarking",
+            [
+              "key",
+              "",
+              "1632"
+            ],
+            [
+              "select",
+              [
+                "",
+                "decimal"
+              ],
+              [
+                "method",
+                "text"
+              ],
+              [
+                "num prevs",
+                "decimal"
+              ],
+              [
+                "time",
+                "decimal"
+              ]
+            ],
+            [
+              "predicate",
+              "forward_time_s"
+            ]
+          ],
+          [
+            "deps",
+            [
+              "object",
+              "benchmarking",
+              "evidence/benchmarking.csv",
+              "298568",
+              "sha256:d346381c8af21c6b51440a181af3bf475edca0ce63c5e95362845a23a30261f6"
+            ]
+          ]
+        ]
+      ],
+      "captured": [
+        [
+          "object",
+          "paper",
+          "PAPER.md",
+          "6353",
+          "sha256:e2c9a1871d95ee2252505a9652cd3a9cef8020cb7988a988da514bb3a85522ca"
+        ],
+        [
+          "object",
+          "source",
+          "artifact.lara",
+          "1987",
+          "sha256:03993eb5e7e20a7c6e86c39ad982358e3690578bdbcdda105cc7ab0b64aa9a64"
+        ],
+        [
+          "object",
+          "policy",
+          "certified-componet.policy.lara",
+          "250",
+          "sha256:3735727d8a60f92ad3dee2c8ea50b48cabd1fbf32c5bd994a242c49aa56d7915"
+        ],
+        [
+          "object",
+          "benchmarking",
+          "evidence/benchmarking.csv",
+          "298568",
+          "sha256:d346381c8af21c6b51440a181af3bf475edca0ce63c5e95362845a23a30261f6"
+        ]
+      ],
+      "dependency-report-digest": "sha256:2034d23e88b715b280ff4281bc00270354cd14b0a58b1c04ceeac0b4ce61fb0b",
+      "evidence-digest": "sha256:bb97f49e251d41239474609e7634547862fde3e499d3fd029daaa94f2520d2bf",
+      "verified": {
+        "report-canonical": true,
+        "versions": true,
+        "core-accept": true,
+        "manifest-sha256": true,
+        "source-sha256": true,
+        "policy-sha256": true,
+        "policy-origin": true,
+        "core-replay": true,
+        "replays-match-checked": true,
+        "replay-requests": true,
+        "dependency-report-digest": true,
+        "captured": true,
+        "evidence-digest": true,
+        "partition-disjoint": true,
+        "declared-is-declared": true,
+        "assurance": true,
+        "empty-stderr": true,
+        "checked-partition": true,
+        "declared-partition": true,
+        "assurance-label": true,
+        "identical-verifier-policy": true
+      },
+      "class-match": true
+    },
+    {
+      "input": "quarantined-mixed",
+      "root": "fixtures/evidence/quarantined",
+      "policy": "-",
+      "input-digest": "sha256:a01ef2bc693a502ff853b2fc87820be4c268119cc656ab94dcaf392f5dab1e7b",
+      "policy-digest": "-",
+      "expected": "accepted",
+      "expected-exit": 0,
+      "actual": "accepted",
+      "exit": 0,
+      "stage": "-",
+      "leaf": "-",
+      "object": "-",
+      "reason": "-",
+      "stdout-sha256": "sha256:dc02ba5c83166648495a7e3547e58fa4cabba3a20bff0b84b0f394b21b7f37bd",
+      "stderr-sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "versions": [
+        "lara-syntax@0.11",
+        "lara-evidence@0.1"
+      ],
+      "assurance": "mixed",
+      "checked": [
+        "drop"
+      ],
+      "declared": [
+        "keep"
+      ],
+      "manifest-sha256": "sha256:274ccb41124a3b039e42451e4068a06f2200bfa432afd5353f2618b42ced6e1d",
+      "source-sha256": "sha256:ddb852720f71eae63599e2be4732d0996a8c35cc01d67bf07f6ad0affcde6db6",
+      "policy-origin": "package",
+      "policy-sha256": "sha256:1b920ba7fc508ffb6da21200b5790426e9a284c45faf0692a002bf2dfd56d3ae",
+      "core-replay": [
+        "replay-id",
+        [
+          "core",
+          "lara-core@0.3"
+        ],
+        [
+          "policy",
+          "surface-policy"
+        ],
+        [
+          "backends"
+        ],
+        [
+          "theories",
+          "sha256:theory"
+        ],
+        [
+          "artifact",
+          "sha256:admission-prune-open"
+        ]
+      ],
+      "core-outcome": "accept",
+      "core-verdict": [
+        "verdict",
+        [
+          "replay-id",
+          [
+            "core",
+            "lara-core@0.3"
+          ],
+          [
+            "policy",
+            "surface-policy"
+          ],
+          [
+            "backends"
+          ],
+          [
+            "theories",
+            "sha256:theory"
+          ],
+          [
+            "artifact",
+            "sha256:admission-prune-open"
+          ]
+        ],
+        "accept",
+        [
+          "labels",
+          [
+            "0",
+            "in"
+          ]
+        ],
+        [
+          "edges"
+        ],
+        [
+          "statuses"
+        ]
+      ],
+      "replays": [
+        [
+          "leaf",
+          "drop",
+          [
+            "csv-row",
+            "1",
+            "measurements",
+            [
+              "key",
+              "id",
+              "drop"
+            ],
+            [
+              "select",
+              [
+                "value",
+                "decimal"
+              ]
+            ],
+            [
+              "predicate",
+              "evidence"
+            ]
+          ],
+          [
+            "deps",
+            [
+              "object",
+              "measurements",
+              "evidence/measurements.csv",
+              "23",
+              "sha256:5ee578ead610eaf3fba2d20756de973aafc01205f38e41b0164b7c058ee1fba1"
+            ]
+          ]
+        ]
+      ],
+      "captured": [
+        [
+          "object",
+          "paper",
+          "PAPER.md",
+          "325",
+          "sha256:16b34f2145bd282cfc1c53e846deb9fec5f3174b4bfb5c856f2d7647c7013554"
+        ],
+        [
+          "object",
+          "source",
+          "artifact.lara",
+          "724",
+          "sha256:ddb852720f71eae63599e2be4732d0996a8c35cc01d67bf07f6ad0affcde6db6"
+        ],
+        [
+          "object",
+          "policy",
+          "surface-policy.policy.lara",
+          "1552",
+          "sha256:1b920ba7fc508ffb6da21200b5790426e9a284c45faf0692a002bf2dfd56d3ae"
+        ],
+        [
+          "object",
+          "measurements",
+          "evidence/measurements.csv",
+          "23",
+          "sha256:5ee578ead610eaf3fba2d20756de973aafc01205f38e41b0164b7c058ee1fba1"
+        ]
+      ],
+      "dependency-report-digest": "sha256:937b08f855394a90c36a80c115ef6633acfafbd5d94a9e08420013646485e13f",
+      "evidence-digest": "sha256:19a0cb0870d295af887e3eafe3469d0fbf0776c5be46f4a2c81162b1914dc6bc",
+      "verified": {
+        "report-canonical": true,
+        "versions": true,
+        "core-accept": true,
+        "manifest-sha256": true,
+        "source-sha256": true,
+        "policy-sha256": true,
+        "policy-origin": true,
+        "core-replay": true,
+        "replays-match-checked": true,
+        "replay-requests": true,
+        "dependency-report-digest": true,
+        "captured": true,
+        "evidence-digest": true,
+        "partition-disjoint": true,
+        "declared-is-declared": true,
+        "assurance": true,
+        "empty-stderr": true,
+        "checked-partition": true,
+        "declared-partition": true,
+        "assurance-label": true
+      },
+      "class-match": true
+    },
+    {
+      "input": "reject-admission",
+      "root": "fixtures/evidence/measured/reject-admission",
+      "policy": "-",
+      "input-digest": "sha256:a5a97e86fcea220411cf4cdf767e26179b6860005538ef8c00a009fd0615a66d",
+      "policy-digest": "-",
+      "expected": "policy",
+      "expected-exit": 1,
+      "actual": "policy",
+      "exit": 1,
+      "stage": "admission",
+      "leaf": "drop",
+      "object": "-",
+      "reason": "-",
+      "stdout-sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr-sha256": "sha256:96319de82c1b2a5cbe2e6eb5432ddd3a75f82a34181786672e3a2c50ed340200",
+      "versions": null,
+      "assurance": null,
+      "checked": null,
+      "declared": null,
+      "manifest-sha256": null,
+      "source-sha256": null,
+      "policy-origin": null,
+      "policy-sha256": null,
+      "core-replay": null,
+      "core-outcome": null,
+      "core-verdict": null,
+      "replays": null,
+      "captured": null,
+      "dependency-report-digest": null,
+      "evidence-digest": null,
+      "verified": {
+        "empty-stdout": true
+      },
+      "class-match": true
+    },
+    {
+      "input": "reject-binding",
+      "root": "fixtures/evidence/measured/reject-binding",
+      "policy": "-",
+      "input-digest": "sha256:2d0fe1abec24600a9437ee4936426eebdcbc7eed99ee4849f923af8bc80ce8a2",
+      "policy-digest": "-",
+      "expected": "binding",
+      "expected-exit": 1,
+      "actual": "binding",
+      "exit": 1,
+      "stage": "binding",
+      "leaf": "drop",
+      "object": "-",
+      "reason": "object does not resolve an existing leaf reference",
+      "stdout-sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr-sha256": "sha256:fa57a41f46542179fc2f7cd4e3df419f0260027df4ba870073ef2aa3e7976503",
+      "versions": null,
+      "assurance": null,
+      "checked": null,
+      "declared": null,
+      "manifest-sha256": null,
+      "source-sha256": null,
+      "policy-origin": null,
+      "policy-sha256": null,
+      "core-replay": null,
+      "core-outcome": null,
+      "core-verdict": null,
+      "replays": null,
+      "captured": null,
+      "dependency-report-digest": null,
+      "evidence-digest": null,
+      "verified": {
+        "empty-stdout": true
+      },
+      "class-match": true
+    },
+    {
+      "input": "reject-capture",
+      "root": "fixtures/evidence/measured/reject-capture",
+      "policy": "-",
+      "input-digest": "sha256:44c402920996312b9f45bfce36b78f1c640e623baa67f1fc318f942d5567b5e6",
+      "policy-digest": "-",
+      "expected": "capture",
+      "expected-exit": 1,
+      "actual": "capture",
+      "exit": 1,
+      "stage": "capture",
+      "leaf": "drop",
+      "object": "-",
+      "reason": "object SHA256 mismatch",
+      "stdout-sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr-sha256": "sha256:37fbde40f2c590db72f77df406e523e834ae6e6a1617a4f7a317f627c9695f6a",
+      "versions": null,
+      "assurance": null,
+      "checked": null,
+      "declared": null,
+      "manifest-sha256": null,
+      "source-sha256": null,
+      "policy-origin": null,
+      "policy-sha256": null,
+      "core-replay": null,
+      "core-outcome": null,
+      "core-verdict": null,
+      "replays": null,
+      "captured": null,
+      "dependency-report-digest": null,
+      "evidence-digest": null,
+      "verified": {
+        "empty-stdout": true
+      },
+      "class-match": true
+    },
+    {
+      "input": "reject-extraction",
+      "root": "fixtures/evidence/measured/reject-extraction",
+      "policy": "-",
+      "input-digest": "sha256:11c0ac03e7288930d88275e566cf0037ec9345a458bbdf0053ef70c668810b99",
+      "policy-digest": "-",
+      "expected": "extraction",
+      "expected-exit": 1,
+      "actual": "extraction",
+      "exit": 1,
+      "stage": "extraction",
+      "leaf": "drop",
+      "object": "-",
+      "reason": "extracted proposition mismatch",
+      "stdout-sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr-sha256": "sha256:756c0b463fd2eb557e96850c4f4594bbc1a500291324710d157f23eb70d51e04",
+      "versions": null,
+      "assurance": null,
+      "checked": null,
+      "declared": null,
+      "manifest-sha256": null,
+      "source-sha256": null,
+      "policy-origin": null,
+      "policy-sha256": null,
+      "core-replay": null,
+      "core-outcome": null,
+      "core-verdict": null,
+      "replays": null,
+      "captured": null,
+      "dependency-report-digest": null,
+      "evidence-digest": null,
+      "verified": {
+        "empty-stdout": true
+      },
+      "class-match": true
+    },
+    {
+      "input": "reject-selection",
+      "root": "fixtures/evidence/measured/reject-selection",
+      "policy": "-",
+      "input-digest": "sha256:512d0ad8e1380ae60af530c294d647a440f1c7d750840974c7a3333ab37b69f3",
+      "policy-digest": "-",
+      "expected": "extraction",
+      "expected-exit": 1,
+      "actual": "extraction",
+      "exit": 1,
+      "stage": "extraction",
+      "leaf": "drop",
+      "object": "-",
+      "reason": "missing CSV key row",
+      "stdout-sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr-sha256": "sha256:c3901965f1458cd20b3df398cd0002c4a95f56fd98d77cc5dfc3305cf240fd91",
+      "versions": null,
+      "assurance": null,
+      "checked": null,
+      "declared": null,
+      "manifest-sha256": null,
+      "source-sha256": null,
+      "policy-origin": null,
+      "policy-sha256": null,
+      "core-replay": null,
+      "core-outcome": null,
+      "core-verdict": null,
+      "replays": null,
+      "captured": null,
+      "dependency-report-digest": null,
+      "evidence-digest": null,
+      "verified": {
+        "empty-stdout": true
+      },
+      "class-match": true
+    },
+    {
+      "input": "invalid-global-digest",
+      "root": "fixtures/evidence/measured/invalid-global-digest",
+      "policy": "-",
+      "input-digest": "sha256:a572c15bc607be8751d74d947a6ff55061ad4c3df011b59475d0793bd9145289",
+      "policy-digest": "-",
+      "expected": "invalid",
+      "expected-exit": 2,
+      "actual": "invalid",
+      "exit": 2,
+      "stage": "-",
+      "leaf": "-",
+      "object": "-",
+      "reason": "object SHA256 mismatch",
+      "stdout-sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr-sha256": "sha256:ee368940e7a2645aa5ba664b0d9350fc20fe4e92276312d57ff7bfa442d4fd85",
+      "versions": null,
+      "assurance": null,
+      "checked": null,
+      "declared": null,
+      "manifest-sha256": null,
+      "source-sha256": null,
+      "policy-origin": null,
+      "policy-sha256": null,
+      "core-replay": null,
+      "core-outcome": null,
+      "core-verdict": null,
+      "replays": null,
+      "captured": null,
+      "dependency-report-digest": null,
+      "evidence-digest": null,
+      "verified": {
+        "empty-stdout": true
+      },
+      "class-match": true
+    }
+  ]
+}

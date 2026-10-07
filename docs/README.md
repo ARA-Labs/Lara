@@ -17,9 +17,9 @@ at the v0.1.0 release; the development history before it is not included.
 Records written before the release cite commits, git objects, and tags of that
 history (the evaluation-freeze tags `m5-freeze-v1` through `m5-freeze-v6`, and
 `spec-v0.1`). They are kept as the provenance of each record, but they do not
-resolve here: the only tag in this repository is `v0.1.0`. The frozen content
-those anchors pinned is checked in, and its tree hashes are in
-[`m5-freeze-checklist.md`](m5-freeze-checklist.md).
+resolve here. The release tag is `v0.1.0`; the separate evidence evaluation uses
+`evidence-measured-inputs-v2`. The historical frozen content is checked in, and
+its tree hashes are in [`m5-freeze-checklist.md`](m5-freeze-checklist.md).
 
 ## Entry points
 
@@ -46,10 +46,14 @@ front-end),
 [`ord1-corpus-extension-decision.md`](ord1-corpus-extension-decision.md) and
 [`insp1-code-inspection-decision.md`](insp1-code-inspection-decision.md)
 (what the `ord@1` / `insp@1` backends certify),
-[`evidence-admission-decision.md`](evidence-admission-decision.md) (ARA-packaged
-evidence replay, `lara-evidence@0.1`, implemented; [issue #8](https://github.com/ARA-Labs/Lara/issues/8);
-[original-output inventory](evidence-admission-inventory.md); [issue #20](https://github.com/ARA-Labs/Lara/issues/20)
-for the outstanding evaluation),
+[`evidence-admission-design.md`](evidence-admission-design.md) (the canonical
+ARA-packaged evidence design, `lara-evidence@0.1`, implemented;
+[issue #8](https://github.com/ARA-Labs/Lara/issues/8);
+[original-output inventory](evidence-admission-inventory.md); the additive
+measured-input freeze [`evidence-measured-inputs@2`](../measurements/frozen/evidence-measured-inputs-v2.md);
+[accepted independent review](certified-evidence-human-review-worklist.md#accepted-independent-review)
+and [applied source metadata](certified-evidence-human-review-worklist.md#published-reviewed-bindings);
+[issue #20](https://github.com/ARA-Labs/Lara/issues/20))),
 [`located-gap-decision.md`](located-gap-decision.md) (`lara-core@0.3`:
 incomplete arguments accepted as located holes),
 [`registration-receipt-contract.md`](registration-receipt-contract.md)
@@ -65,6 +69,8 @@ and [`localization-metric-decision.md`](localization-metric-decision.md)
 [`ara-session-record-decision.md`](ara-session-record-decision.md) (the
 session-file schema, what `session_index.yaml` rows project from it, and why
 `logic_revisions` entries are append-only history),
+[`ara-observation-identity-decision.md`](ara-observation-identity-decision.md)
+(unique observation lookup and append-only historical-reference repair),
 [`multi-artifact-composition-decision.md`](multi-artifact-composition-decision.md)
 (the `.laramap` contract: linking members and generating cross-paper attacks),
 [`non-empirical-worlds-decision.md`](non-empirical-worlds-decision.md)

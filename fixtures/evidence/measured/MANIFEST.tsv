@@ -1,0 +1,11 @@
+case	root	policy	expect	leaf	reason	checked	declared	assurance
+package-a	examples/certified-evidence/package-a	-	accepted	-	-	forward-1631,forward-1632	-	evidence-checked
+package-b	examples/certified-evidence/package-b	-	accepted	-	-	train-0,train-1,train-2,loss-0,loss-1,loss-2,loss-3,loss-4	-	evidence-checked
+package-a-verifier-policy	examples/certified-evidence/package-a	examples/certified-evidence/package-a/certified-componet.policy.lara	accepted	-	-	forward-1631,forward-1632	-	evidence-checked
+quarantined-mixed	fixtures/evidence/quarantined	-	accepted	-	-	drop	keep	mixed
+reject-admission	fixtures/evidence/measured/reject-admission	-	policy	drop	-	-	-	-
+reject-binding	fixtures/evidence/measured/reject-binding	-	binding	drop	object does not resolve an existing leaf reference	-	-	-
+reject-capture	fixtures/evidence/measured/reject-capture	-	capture	drop	object SHA256 mismatch	-	-	-
+reject-extraction	fixtures/evidence/measured/reject-extraction	-	extraction	drop	extracted proposition mismatch	-	-	-
+reject-selection	fixtures/evidence/measured/reject-selection	-	extraction	drop	missing CSV key row	-	-	-
+invalid-global-digest	fixtures/evidence/measured/invalid-global-digest	-	invalid	-	object SHA256 mismatch	-	-	-

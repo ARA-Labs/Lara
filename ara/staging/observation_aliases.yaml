@@ -1,0 +1,166 @@
+# Forward records only: never edit the historical observations or reference lines.
+schema_version: 1
+recorded_at: '2026-10-06'
+issue: https://github.com/ARA-Labs/Lara/issues/18
+aliases:
+- canonical_id: O190
+  historical_id: O176
+  timestamp: 2026-09-12T01:38+00:00
+  bound_to:
+  - N326_consistent_groups
+  record_sha256: b51e87bfc5432ef66cb2a5fe2bf61837f111c2d9370faba64c26526061bacdb2
+  prior_ids:
+  - O174
+- canonical_id: O191
+  historical_id: O177
+  timestamp: 2026-09-12T01:38+00:00
+  bound_to:
+  - N327_lara_sources
+  - N326_327_conformance
+  record_sha256: 12a1857476f97f69d066a89dbf721c913fc0909ad717e94e99a07d9d3fe2a7bb
+  prior_ids:
+  - O175
+- canonical_id: O192
+  historical_id: O176
+  timestamp: 2026-09-12T05:54+00:00
+  bound_to:
+  - N334_cli_text_boundary
+  - N334_solo_locale_gate
+  record_sha256: 91cf267b155460b78bfa46b10aee6ed31704ca04a63915b5a1135c1667a9f650
+- canonical_id: O193
+  historical_id: O177
+  timestamp: 2026-09-12T05:54+00:00
+  bound_to:
+  - N334_solo_locale_gate
+  record_sha256: 1308a2bcb0a5dcd76a52172122bee63cd053c138f0aefe270df9f596d422a99f
+references:
+- path: ara/evidence/results/certified_evidence_inventory_2026-10-06.md
+  line: 69
+  line_sha256: 27247a5b06ce359d4aa601d6739b40bdcd6df2681b79e4892fde63c39022eb2d
+  kind: aggregate
+  reason: Historical duplicate finding / repair worklist names identifier collisions, not individual
+    observation contents; non-lookup aggregate.
+  bindings: []
+- path: ara/trace/pm_reasoning_log.yaml
+  line: 1611
+  line_sha256: ee2c4991d1a3b1e14a1b97817763b7cd248dc21f8999363b5d90706a99bd2ec6
+  kind: lookup
+  reason: Turn 1 names identity-of-empty-edit and derivation door; the next two lines explain pre-merge
+    renumbering.
+  bindings:
+  - historical_id: O176
+    canonical_id: O190
+    record_sha256: b51e87bfc5432ef66cb2a5fe2bf61837f111c2d9370faba64c26526061bacdb2
+  - historical_id: O177
+    canonical_id: O191
+    record_sha256: 12a1857476f97f69d066a89dbf721c913fc0909ad717e94e99a07d9d3fe2a7bb
+- path: ara/trace/pm_reasoning_log.yaml
+  line: 1634
+  line_sha256: 87c70c44ce03e7b50fc20161c1eb3a6396b53bba0fa60b4b71e7c70544702e6b
+  kind: lookup
+  reason: Turn 3 names the process-wide text boundary and child-stream locale decoder.
+  bindings:
+  - historical_id: O176
+    canonical_id: O192
+    record_sha256: 91cf267b155460b78bfa46b10aee6ed31704ca04a63915b5a1135c1667a9f650
+  - historical_id: O177
+    canonical_id: O193
+    record_sha256: 1308a2bcb0a5dcd76a52172122bee63cd053c138f0aefe270df9f596d422a99f
+- path: ara/trace/pm_reasoning_log.yaml
+  line: 1680
+  line_sha256: 28849d8c99313c41ccf5f2a059a1641baed10bcf02de4ffcd9276c7c64defce8
+  kind: aggregate
+  reason: Same-day staleness summary covers all four occurrences. It is an aggregate status statement,
+    not a single-observation lookup.
+  bindings: []
+- path: ara/trace/pm_reasoning_log.yaml
+  line: 1743
+  line_sha256: d159f04814408a35b9e105a63c79a108cb8aaca76bf9f00a2573ea41ce7ea9cd
+  kind: aggregate
+  reason: Historical duplicate finding / repair worklist names identifier collisions, not individual
+    observation contents; non-lookup aggregate.
+  bindings: []
+- path: ara/trace/sessions/2026-09-12_001.yaml
+  line: 74
+  line_sha256: f6c4182cc58c9847bea248ff8bce589d7163bc9d4a93a3fcb6a9489a21145359
+  kind: lookup
+  reason: Turn 1 identity-of-empty-edit occurrence retains its pre-merge ID; reasoning log turn 1
+    records renumbering. Global O174 remains the nesting refusal heuristic.
+  bindings:
+  - historical_id: O174
+    canonical_id: O190
+    record_sha256: b51e87bfc5432ef66cb2a5fe2bf61837f111c2d9370faba64c26526061bacdb2
+- path: ara/trace/sessions/2026-09-12_001.yaml
+  line: 81
+  line_sha256: 5bee2bba658615e2cfee20af709041c20017be531d2cd534f218a6ea54a55fcc
+  kind: lookup
+  reason: Turn 1 derivation-door occurrence retains its pre-merge ID; reasoning log turn 1 records
+    renumbering. Global O175 remains the constant-agreement heuristic.
+  bindings:
+  - historical_id: O175
+    canonical_id: O191
+    record_sha256: 12a1857476f97f69d066a89dbf721c913fc0909ad717e94e99a07d9d3fe2a7bb
+- path: ara/trace/sessions/2026-09-12_001.yaml
+  line: 107
+  line_sha256: 8b85a61d7a33dbfed09803dc9bb8f08bb074c403122ebd324c6451b2e055c34c
+  kind: lookup
+  reason: Observation event in turn 3 explicitly summarizes the process-wide text boundary.
+  bindings:
+  - historical_id: O176
+    canonical_id: O192
+    record_sha256: 91cf267b155460b78bfa46b10aee6ed31704ca04a63915b5a1135c1667a9f650
+- path: ara/trace/sessions/2026-09-12_001.yaml
+  line: 114
+  line_sha256: b46ba2976e44eb0bf80b8d75096b7e87922f99375c90ab65e896b94a397fd3bc
+  kind: lookup
+  reason: Observation event in turn 3 explicitly summarizes child-stream locale decoding.
+  bindings:
+  - historical_id: O177
+    canonical_id: O193
+    record_sha256: 1308a2bcb0a5dcd76a52172122bee63cd053c138f0aefe270df9f596d422a99f
+- path: ara/trace/sessions/2026-09-12_001.yaml
+  line: 358
+  line_sha256: a2f3d8b489d01db5db204b01db982cc4205cdfa46203d5db9538d54eb52d3317
+  kind: lookup
+  reason: Turn 1 identity-of-empty-edit occurrence retains its pre-merge ID; reasoning log turn 1
+    records renumbering. Global O174 remains the nesting refusal heuristic.
+  bindings:
+  - historical_id: O174
+    canonical_id: O190
+    record_sha256: b51e87bfc5432ef66cb2a5fe2bf61837f111c2d9370faba64c26526061bacdb2
+- path: ara/trace/sessions/2026-09-12_001.yaml
+  line: 359
+  line_sha256: 3a9b0e2d8b8236fe0f224c692aaac7edc1711e02c5fb18e97ad3b17e2376eb5f
+  kind: lookup
+  reason: Turn 1 derivation-door occurrence retains its pre-merge ID; reasoning log turn 1 records
+    renumbering. Global O175 remains the constant-agreement heuristic.
+  bindings:
+  - historical_id: O175
+    canonical_id: O191
+    record_sha256: 12a1857476f97f69d066a89dbf721c913fc0909ad717e94e99a07d9d3fe2a7bb
+- path: ara/trace/sessions/2026-09-12_001.yaml
+  line: 361
+  line_sha256: 6a6989a6b5601a99a23cc07722012ae7d4d41df89875002321cedbb77d021f2e
+  kind: lookup
+  reason: Pending-observation list explicitly says both observations are from turn 3.
+  bindings:
+  - historical_id: O176
+    canonical_id: O192
+    record_sha256: 91cf267b155460b78bfa46b10aee6ed31704ca04a63915b5a1135c1667a9f650
+  - historical_id: O177
+    canonical_id: O193
+    record_sha256: 1308a2bcb0a5dcd76a52172122bee63cd053c138f0aefe270df9f596d422a99f
+- path: ara/trace/sessions/2026-10-06_001.yaml
+  line: 176
+  line_sha256: 54e10704efc14615478213b6e1d1be14da1d819353472dfd8f3519fa0ecbdb0e
+  kind: aggregate
+  reason: Historical duplicate finding / repair worklist names identifier collisions, not individual
+    observation contents; non-lookup aggregate.
+  bindings: []
+- path: ara/trace/sessions/2026-10-06_001.yaml
+  line: 192
+  line_sha256: d2459906ef49ebd6edfd72779872898314c0a06e0d5858b8f499165d24d870b0
+  kind: aggregate
+  reason: Historical duplicate finding / repair worklist names identifier collisions, not individual
+    observation contents; non-lookup aggregate.
+  bindings: []

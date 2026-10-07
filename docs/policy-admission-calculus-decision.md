@@ -20,10 +20,10 @@ already-frozen core checker. It is not an alternative support calculus, it does
 not turn quarantine into falsity, and it does not change the raw core `.sexp`
 interface, replay identity, frozen corpus, or the four core statuses.
 
-The byte-level `lara-evidence@0.1` work (`docs/evidence-admission-decision.md`) remains gated and
-out of scope. In particular, this decision does not make source references
-byte-checked and does not add a leaf-certificate format or evidence-checker
-registry.
+The byte-level `lara-evidence@0.1` layer
+([design](evidence-admission-design.md)) is separate and outside this decision's scope.
+This policy-admission contract does not make source references byte-checked or add a
+leaf-certificate format or evidence-checker registry.
 
 ## 2. Total policy lookup and source validity
 
@@ -149,7 +149,7 @@ mechanized metatheory. It does not change:
   semantics;
 - raw `.sexp` checking relative to a caller-supplied `Gamma`;
 - replay identity or the frozen corpus; or
-- byte-level evidence verification, which remains gated (`docs/evidence-admission-decision.md`).
+- byte-level evidence verification, which has its own [design](evidence-admission-design.md).
 
 This contract has landed. The runtime lives in
 `src/Lara/Admission.hs` and `src/Lara/Admission/`, threaded through
