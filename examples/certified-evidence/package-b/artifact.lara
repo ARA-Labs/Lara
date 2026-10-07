@@ -5,7 +5,7 @@ use backends []
 claim c-train-0
   nl = "The original saved training-runtime record 0 reports seconds."
   formal = training_time_s("score_transformer","two_moons_all_cond",977.5672931671144)
-  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+  binding = { author = ai_inventory, rationale = "Exact saved output record; independent reviewer openai-codex/gpt-6-astra found faithful on 2026-10-07; maintainer accepted; review: https://github.com/ARA-Labs/Lara/issues/20#issuecomment-6027990904", audit-status = reviewed }
 
 leaf train-0 : training_time_s("score_transformer","two_moons_all_cond",977.5672931671144)
   kind = certified
@@ -20,7 +20,7 @@ status c-train-0
 claim c-train-1
   nl = "The original saved training-runtime record 1 reports seconds."
   formal = training_time_s("score_transformer_joint","two_moons_all_cond",1047.1436779499054)
-  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+  binding = { author = ai_inventory, rationale = "Exact saved output record; independent reviewer openai-codex/gpt-6-astra found faithful on 2026-10-07; maintainer accepted; review: https://github.com/ARA-Labs/Lara/issues/20#issuecomment-6027990904", audit-status = reviewed }
 
 leaf train-1 : training_time_s("score_transformer_joint","two_moons_all_cond",1047.1436779499054)
   kind = certified
@@ -35,7 +35,7 @@ status c-train-1
 claim c-train-2
   nl = "The original saved training-runtime record 2 reports seconds."
   formal = training_time_s("score_transformer_undirected","slcp_all_cond",2717.260816335678)
-  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+  binding = { author = ai_inventory, rationale = "Exact saved output record; independent reviewer openai-codex/gpt-6-astra found faithful on 2026-10-07; maintainer accepted; review: https://github.com/ARA-Labs/Lara/issues/20#issuecomment-6027990904", audit-status = reviewed }
 
 leaf train-2 : training_time_s("score_transformer_undirected","slcp_all_cond",2717.260816335678)
   kind = certified
@@ -50,7 +50,7 @@ status c-train-2
 claim c-loss-0
   nl = "The original saved notebook output 0 reports mean denoising loss for a block of 5000 updates."
   formal = training_loss(46.13004)
-  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+  binding = { author = ai_inventory, rationale = "Exact saved output record; independent reviewer openai-codex/gpt-6-astra found faithful on 2026-10-07; maintainer accepted; review: https://github.com/ARA-Labs/Lara/issues/20#issuecomment-6027990904", audit-status = reviewed }
 
 leaf loss-0 : training_loss(46.13004)
   kind = certified
@@ -65,7 +65,7 @@ status c-loss-0
 claim c-loss-1
   nl = "The original saved notebook output 1 reports mean denoising loss for a block of 5000 updates."
   formal = training_loss(45.541588)
-  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+  binding = { author = ai_inventory, rationale = "Exact saved output record; independent reviewer openai-codex/gpt-6-astra found faithful on 2026-10-07; maintainer accepted; review: https://github.com/ARA-Labs/Lara/issues/20#issuecomment-6027990904", audit-status = reviewed }
 
 leaf loss-1 : training_loss(45.541588)
   kind = certified
@@ -80,7 +80,7 @@ status c-loss-1
 claim c-loss-2
   nl = "The original saved notebook output 2 reports mean denoising loss for a block of 5000 updates."
   formal = training_loss(45.425938)
-  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+  binding = { author = ai_inventory, rationale = "Exact saved output record; independent reviewer openai-codex/gpt-6-astra found faithful on 2026-10-07; maintainer accepted; review: https://github.com/ARA-Labs/Lara/issues/20#issuecomment-6027990904", audit-status = reviewed }
 
 leaf loss-2 : training_loss(45.425938)
   kind = certified
@@ -95,7 +95,7 @@ status c-loss-2
 claim c-loss-3
   nl = "The original saved notebook output 3 reports mean denoising loss for a block of 5000 updates."
   formal = training_loss(45.380486)
-  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+  binding = { author = ai_inventory, rationale = "Exact saved output record; independent reviewer openai-codex/gpt-6-astra found faithful on 2026-10-07; maintainer accepted; review: https://github.com/ARA-Labs/Lara/issues/20#issuecomment-6027990904", audit-status = reviewed }
 
 leaf loss-3 : training_loss(45.380486)
   kind = certified
@@ -110,7 +110,7 @@ status c-loss-3
 claim c-loss-4
   nl = "The original saved notebook output 4 reports mean denoising loss for a block of 5000 updates."
   formal = training_loss(45.31089)
-  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+  binding = { author = ai_inventory, rationale = "Exact saved output record; independent reviewer openai-codex/gpt-6-astra found faithful on 2026-10-07; maintainer accepted; review: https://github.com/ARA-Labs/Lara/issues/20#issuecomment-6027990904", audit-status = reviewed }
 
 leaf loss-4 : training_loss(45.31089)
   kind = certified

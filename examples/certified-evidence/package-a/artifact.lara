@@ -5,7 +5,7 @@ use backends []
 claim c-forward-1631
   nl = "The original saved forward-runtime record 1631 has the displayed method, prior-module count and runtime in seconds."
   formal = forward_time_s(1631,"ProgressiveNet",10,0.0030154159758239985)
-  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+  binding = { author = ai_inventory, rationale = "Exact saved output record; independent reviewer openai-codex/gpt-6-astra found faithful on 2026-10-07; maintainer accepted; review: https://github.com/ARA-Labs/Lara/issues/20#issuecomment-6027990904", audit-status = reviewed }
 
 leaf forward-1631 : forward_time_s(1631,"ProgressiveNet",10,0.0030154159758239985)
   kind = certified
@@ -20,7 +20,7 @@ status c-forward-1631
 claim c-forward-1632
   nl = "The original saved forward-runtime record 1632 has the displayed method, prior-module count and runtime in seconds."
   formal = forward_time_s(1632,"ProgressiveNet",10,0.0030042969156056643)
-  binding = { author = ai_inventory, rationale = "Exact saved output record; human semantic-faithfulness audit not performed", audit-status = unreviewed }
+  binding = { author = ai_inventory, rationale = "Exact saved output record; independent reviewer openai-codex/gpt-6-astra found faithful on 2026-10-07; maintainer accepted; review: https://github.com/ARA-Labs/Lara/issues/20#issuecomment-6027990904", audit-status = reviewed }
 
 leaf forward-1632 : forward_time_s(1632,"ProgressiveNet",10,0.0030042969156056643)
   kind = certified

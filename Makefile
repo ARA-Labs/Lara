@@ -105,13 +105,13 @@ evidence-cli:
 	bash test/evidence-cli.sh
 
 # The additive certified-evidence measured-input evaluation
-# (`evidence-measured-inputs@1`, issue #20). The committed corpus fixtures must
+# (`evidence-measured-inputs@2`, issue #20). The committed corpus fixtures must
 # regenerate byte-identically, and the harness must reproduce the frozen report
 # over the real `lara check-ara` door. Needs the built binary only — no Lean
 # build. The frozen snapshot is produced by `scripts/evidence-measure.py` and
 # committed under measurements/frozen/ (protocol and budget:
-# measurements/frozen/evidence-measured-inputs-v1.md); `evidence-measured`
-# fails until that snapshot is cut, by design.
+# measurements/frozen/evidence-measured-inputs-v2.md); prior snapshots remain
+# immutable when the active freeze changes.
 evidence-measured:
 	python3 scripts/gen-evidence-measured.py --check
 	cabal build exe:lara

@@ -15,7 +15,7 @@ own scope identities and every independent re-verification of them.
 This is a *measured-input* evaluation: it measures package capture, request
 binding, extraction, and the core replay verdict.  It does not measure, and
 must not be read as, scientific correctness or semantic faithfulness of the
-ten certified leaves; those stay human and unreviewed (issue #20).
+ten certified leaves; the independent mapping review is recorded separately.
 
 ``--check`` recomputes the whole report and compares every deterministic block
 (format, freeze, scope, corpus identity, aggregate, records) with the committed
@@ -23,9 +23,8 @@ frozen snapshot, ignoring only the per-machine environment block.  It is the
 standing gate that a frozen report still describes the committed corpus and the
 current door.
 
-The freeze identifier is ``evidence-measured-inputs@1``; it is independent of
-the ``m5-freeze-*`` evaluation snapshots, whose numbers this change never
-touches.
+The current freeze identifier is ``evidence-measured-inputs@2``. The first
+evidence snapshot and the historical ``m5-freeze-*`` snapshots remain unchanged.
 """
 
 from __future__ import annotations
@@ -40,7 +39,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import evidence_measured as em  # noqa: E402
 
-FROZEN_DEFAULT = Path("measurements/frozen/evidence-report.json")
+FROZEN_DEFAULT = Path("measurements/frozen/evidence-report-v2.json")
 MEASURED_JSON = Path("measurements/evidence-report.json")
 MEASURED_TSV = Path("measurements/evidence-report.tsv")
 
@@ -66,7 +65,7 @@ SCOPE = {
     "evidence": em.EVIDENCE_VERSION,
     "core": em.CORE_VERSION,
     "measures": "package capture, request binding, extraction, core replay verdict, evidence-report identities",
-    "excludes": "scientific interpretation, semantic faithfulness, human review (issue #20)",
+    "excludes": "scientific interpretation, semantic faithfulness, independent mapping review",
 }
 
 
@@ -378,8 +377,8 @@ def main(argv: list[str]) -> int:
             "  scripts/gen-evidence-measured.py --check\n"
             "  cabal build exe:lara\n"
             "  scripts/evidence-measure.py\n"
-            "  cp measurements/evidence-report.json measurements/evidence-report.tsv "
-            "measurements/frozen/",
+            f"  cp measurements/evidence-report.json {FROZEN_DEFAULT}\n"
+            f"  cp measurements/evidence-report.tsv {FROZEN_DEFAULT.with_suffix('.tsv')}",
             file=sys.stderr,
         )
         return 2

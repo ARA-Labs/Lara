@@ -58,7 +58,7 @@ These theorems identify the failing declaration or object and the valid prefix b
 
 `concrete_admission_refinement` explicitly assumes equality between a concrete implementation's result and the finite model's result. It transfers a successful result through that premise; it does not prove the premise. `TypedParserRefinement` similarly states a decoder-to-typed-payload relation rather than verifying the CSV or JSON byte parser. Hash collision resistance, descriptor-relative capture and compiler/runtime correctness remain outside the finite model.
 
-The implementation checks pinned bytes and a selected mapping. It does not rerun an experiment, authenticate its author, prove that a column expresses the intended scientific quantity, or establish that prose matches formal claims. The original-output examples declare `audit-status = unreviewed`. [Issue #20](https://github.com/ARA-Labs/Lara/issues/20) tracks human mapping review and additive measured-input/report freezing; historical raw-core measurements retain their declared-evidence meaning.
+The implementation checks pinned bytes and a selected mapping. It does not rerun an experiment, authenticate its author, prove that a column expresses the intended scientific quantity, or establish that prose matches formal claims. The original-output examples now declare `audit-status = reviewed` after the separately [accepted independent mapping review](certified-evidence-human-review-worklist.md#accepted-independent-review). The [second additive freeze](../measurements/frozen/evidence-measured-inputs-v2.md) records the re-pinned packages; historical raw-core measurements retain their declared-evidence meaning.
 
 ## How can the implementation and proofs be checked?
 
@@ -77,4 +77,4 @@ The package acceptance gate runs the real binary over copied original packages a
 ## Next Steps
 
 1. Review the runtime contract alongside these theorem premises; do not replace typed-model conformance with a byte-parser soundness claim.
-2. Apply the accepted independent review and complete the source re-pinning and next report/freeze/tag tracked in issue #20 before extending the frozen measured-input scope. Review acceptance does not satisfy the separate [archival paper-promotion gate](evidence-admission-design.md#archival-paper-promotion-gate).
+2. Review changed mappings and record a new additive freeze before extending the measured-input scope. The accepted review and current freeze do not satisfy the separate [archival paper-promotion gate](evidence-admission-design.md#archival-paper-promotion-gate).

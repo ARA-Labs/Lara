@@ -1,6 +1,6 @@
 # Certified-evidence independent review record (`evidence-measured-inputs@1`)
 
-Review status: accepted on 2026-10-07. `openai-codex/gpt-6-astra` independently reviewed all ten mappings and returned ten faithful verdicts; the maintainer looked at the review and agreed. The package sources still carry `author = ai_inventory`, `audit-status = unreviewed`: applying the accepted verdicts, re-pinning the sources and recording the next report/freeze remain tracked by [issue #20](https://github.com/ARA-Labs/Lara/issues/20). The [first measured report](../measurements/frozen/evidence-measured-inputs-v1.md) remains unchanged and is not semantic-review evidence.
+Review status: accepted and applied on 2026-10-07. `openai-codex/gpt-6-astra` independently reviewed all ten mappings and returned ten faithful verdicts; the maintainer looked at the review and agreed. The package bindings retain `author = ai_inventory` and now carry `audit-status = reviewed` with the reviewer and accepted review link in their rationales. The [publication record](#published-reviewed-bindings) identifies the re-pinned sources and [second freeze](../measurements/frozen/evidence-measured-inputs-v2.md). The [first measured report](../measurements/frozen/evidence-measured-inputs-v1.md) remains unchanged and is not semantic-review evidence.
 
 Follow the [step-by-step review instructions](certified-evidence-review-instructions.md) to inspect the originals and record your verdicts.
 
@@ -117,3 +117,27 @@ c0e186ef3622e67a5f6eef88537b6a9121336ccdf6037d702fe013a8bcba97be  package-a/arti
 5c6e1dd40391a18e2d35d073280dc9b3ff41d90bd2adbdb7346ab1d61b94bfa2  package-b/artifact.lara
 0959e239d2e7fd075e7626617cb5b0fdb1cd9a1baad72dd13e68ea4f3d338f1f  package-b/lara-evidence.sexp
 ```
+
+## Published reviewed bindings
+
+Recorded 2026-10-07. All ten accepted verdicts are applied to the source audit
+metadata. Only binding annotations changed; prose, formal propositions,
+extraction requests, original evidence and producer bytes are unchanged.
+Both packages pass `lara check-ara`. Their core replay identities, verdicts
+and dependency digests match the first freeze; their evidence identities
+change because the source capture and manifest pins change.
+
+The inspected hashes above remain the review's historical input identities.
+The published source and manifest SHA-256 values are:
+
+```text
+03993eb5e7e20a7c6e86c39ad982358e3690578bdbcdda105cc7ab0b64aa9a64  package-a/artifact.lara
+1552b0e5694a6c1ec79f354d06e5db6aa715a4601e2325250168a61cd738b812  package-a/lara-evidence.sexp
+5da99d4512aa14a4ac891b50c139271e6b91fca736fc28d64602689590bbdb2d  package-b/artifact.lara
+2674c18e630642912b75792b2d41e942cf66cdc056ab035029a678c8a448effe  package-b/lara-evidence.sexp
+```
+
+[`evidence-measured-inputs@2`](../measurements/frozen/evidence-measured-inputs-v2.md)
+records the ten-case rerun and matching `evidence-measured-inputs-v2` Git tag.
+Issue #20 closes when the publishing PR merges. This publication does not
+relabel the agent review as a human audit or establish scientific validity.

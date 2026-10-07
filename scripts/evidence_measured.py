@@ -19,9 +19,9 @@ byte equality instead of trusting a hand-rolled formatter.
 
 Scope: this measures package capture, request binding, extraction, the core
 replay verdict, and the evidence-report identities.  It does not measure
-scientific interpretation, semantic faithfulness, or reviewer judgment. Applying
-the accepted independent review to the ten certified leaves' audit metadata is
-separate work (see ``docs/certified-evidence-human-review-worklist.md``).
+scientific interpretation, semantic faithfulness, or reviewer judgment. The
+certified leaves' reviewed audit metadata records the separately accepted
+independent review (see ``docs/certified-evidence-human-review-worklist.md``).
 """
 
 from __future__ import annotations
@@ -39,7 +39,7 @@ BASE_PACKAGE = REPO_ROOT / "fixtures/evidence/quarantined"
 EVIDENCE_MANIFEST = "lara-evidence.sexp"
 
 #: Freeze identifier for this additive, independently versioned evaluation.
-FREEZE_ID = "evidence-measured-inputs@1"
+FREEZE_ID = "evidence-measured-inputs@2"
 #: Report envelope format (distinct from the door's own ``lara-evidence-report``).
 REPORT_FORMAT = "lara-evidence-measure-report@1"
 #: Public versions the measured door must report; core stays untouched.

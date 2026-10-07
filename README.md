@@ -246,7 +246,9 @@ prints the accepted report to stdout.
 The report separates checked leaves from declared leaves and preserves the
 ordinary claim verdict. Certification checks the bytes and extraction, not
 the experiment's validity or whether the chosen mapping expresses the intended
-scientific claim. These examples still declare `audit-status = unreviewed`.
+scientific claim. The ten example bindings declare `audit-status = reviewed`
+after the [accepted independent mapping review](docs/certified-evidence-human-review-worklist.md#accepted-independent-review);
+their original `author = ai_inventory` remains unchanged.
 Missing or mismatching certified evidence rejects; ordinary source commands
 without a package context reject certified declarations at R8. See
 [the package contract](docs/evidence-admission-design.md#concrete-package-contract)

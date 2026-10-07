@@ -3,7 +3,7 @@
 
 ## TL;DR
 
-Issue [#20](https://github.com/ARA-Labs/Lara/issues/20) accepts independent agent or human review of the ten AI-authored mappings. Lara checks the pinned bytes and declared extraction requests, but those checks do not establish what a measurement means. Inspect the original cells, producer code and Lara claims, then record a verdict for each leaf with the reviewer identity and reviewed source hashes. Astra's ten faithful verdicts and the maintainer's agreement are recorded in the [accepted review](certified-evidence-human-review-worklist.md#accepted-independent-review). Applying them to the source audit labels and publishing the next freeze remain separate work.
+Issue [#20](https://github.com/ARA-Labs/Lara/issues/20) accepts independent agent or human review of the ten AI-authored mappings. Lara checks the pinned bytes and declared extraction requests, but those checks do not establish what a measurement means. Inspect the original cells, producer code and Lara claims, then record a verdict for each leaf with the reviewer identity and reviewed source hashes. Astra's ten faithful verdicts and the maintainer's agreement are recorded in the [accepted review](certified-evidence-human-review-worklist.md#accepted-independent-review). They are now applied to the source bindings and recorded in [the second freeze](../measurements/frozen/evidence-measured-inputs-v2.md).
 
 ## Why does this need an independent review?
 
@@ -107,10 +107,10 @@ Rationale, original cell/pointer and producer-code location:
 
 Leave the package source, manifest and frozen reports unchanged while reviewing them. A maintainer can then apply each accepted `faithful` verdict to the corresponding claim binding, preserve `author = ai_inventory`, update its outdated rationale and set `audit-status = reviewed` with a pointer to the review record. `unfaithful` or `unclear` rows remain unresolved until a mapping correction and another independent review are recorded.
 
-Those source edits change pinned hashes. The maintainer must re-pin the affected source entries, rerun both package checks and record a new measured-input freeze without overwriting the first snapshot. The existing measurement gate deliberately rejects drift from `evidence-measured-inputs@1`. Release tagging and issue closure remain maintainer actions; review acceptance alone does not complete those steps.
+Those source edits change pinned hashes. The maintainer must re-pin the affected source entries, rerun both package checks and record a new measured-input freeze without overwriting prior snapshots. The current measurement gate rejects drift from `evidence-measured-inputs@2`; the first snapshot remains historical. The [publication record](certified-evidence-human-review-worklist.md#published-reviewed-bindings) records the completed application, rerun and matching tag. Future review acceptance alone does not complete those publication steps.
 
 ## Next Steps
 
 1. Run the read-only commands and compare all ten mappings with the original outputs and producer code.
 2. Record the reviewer identity, date, verdicts and reviewed source identities, keeping any maintainer acceptance separate.
-3. Have the maintainer apply supported verdicts, verify the changed packages, record the next freeze and check issue #20's remaining acceptance criteria.
+3. Have the maintainer apply supported verdicts, verify the changed packages and record the next freeze and matching tag. Preserve prior review inputs and snapshots.
