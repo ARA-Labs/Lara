@@ -249,7 +249,7 @@ the experiment's validity or whether the chosen mapping expresses the intended
 scientific claim. These examples still declare `audit-status = unreviewed`.
 Missing or mismatching certified evidence rejects; ordinary source commands
 without a package context reject certified declarations at R8. See
-[the package contract](docs/evidence-admission-decision.md#9-ara-packaging-direction-and-task-0-outcome-for-issue-8)
+[the package contract](docs/evidence-admission-design.md#concrete-package-contract)
 and [the proof boundaries](docs/theory-evidence-admission.md).
 
 ## How checking works

@@ -71,6 +71,6 @@ semantics, history rewrite, and availability before any code is written.
 3. No goal or attempt event automatically changes a Lara claim status.
 4. This contract adds no module, schema, or runtime dependency.
 
-Related record: `docs/evidence-admission-decision.md`
-records the gated evidence-admission layer this seam deliberately stays
+Related record: [the evidence-admission design](evidence-admission-design.md)
+records the separately implemented layer this receipt seam deliberately stays
 outside of.

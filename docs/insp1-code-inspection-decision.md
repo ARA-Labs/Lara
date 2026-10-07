@@ -159,11 +159,11 @@ references for it, and the wire grammar would stop being a fixed-arity keyword a
 enumeration belongs in one premise because it is one observation.
 
 **Certifying over source bytes directly.** This is what an author actually wants, and it is
-precisely `lara-evidence@0.1` — byte-level evidence admission, gated (`docs/evidence-admission-decision.md`) and explicitly
-out of v0.1 (spec §4.3). Building it into a strict backend would have moved a defeasible
-measurement into the TCB by the back door. The split taken here is the honest one: the backend owns
-the inference, the leaf layer owns the observation, and when byte-level admission ships it
-strengthens the leaf without touching this adapter.
+precisely the separately implemented `lara-evidence@0.1` layer
+([design](evidence-admission-design.md)), outside v0.1 (spec §4.3). Building it into a strict
+backend would have moved a defeasible measurement into the TCB by the back door.
+The backend owns the inference, the leaf layer owns the observation, and byte-level
+admission strengthens the leaf without touching this adapter.
 
 **A `code_diff` spelling for the diff member.** Rejected for `code_planned_not_shipped` on the §4.5
 naming taste already settled for the scheme vocabulary: the target reader is a Python-literate

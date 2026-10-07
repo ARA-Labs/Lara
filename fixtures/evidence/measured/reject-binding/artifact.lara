@@ -1,0 +1,25 @@
+artifact admission_prune_open at sha256:admission-prune-open
+policy surface-policy
+use backends []
+
+claim claim-main
+  nl      = "admission-pruned open obligation"
+  formal  = score(7)
+  binding = { author = author, rationale = "obligation witness", audit-status = reviewed }
+
+leaf keep : evidence(7)
+  kind       = observed
+  provenance = user
+  refs       = []
+
+leaf drop : evidence(7)
+  kind       = certified
+  provenance = checker(csv-row, 1)
+  refs       = [evidence/other.csv]
+  extract = (csv-row 1 measurements (key id drop) (select (value decimal)) (predicate evidence))
+
+arg arg-open : supports(claim-main) by pass from [keep]
+  open cq
+
+arg arg-pruned : supports(claim-main) by pass from [drop]
+  open cq

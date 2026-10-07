@@ -13,6 +13,13 @@ points._
 ARA checks, the policy-copy authenticity check, the walking-skeleton golden,
 replay and tamper gates, and the mutation-suite freshness check. No step in it installs Lean or runs `lake`.
 
+The ARA checks cover source quotations, session-index consistency and unique
+effective observation lookup. The observation gate validates append-only
+aliases and qualified historical references; it does not rewrite the trace.
+Its contract is recorded in [the observation identity decision](ara-observation-identity-decision.md).
+The additive certified-evidence corpus and frozen JSON/TSV reports are also
+rechecked against the built Haskell binary; that gate does not need Lean.
+
 It was previously the two-job `CI` workflow (`ci.yml`). It is named for what it
 gates, next to `Lean`, rather than for a step (`cabal build` undersells the ARA
 and replay checks it also runs). The job name, `Haskell (cabal build + test)`,

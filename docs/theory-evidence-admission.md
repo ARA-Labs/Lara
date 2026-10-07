@@ -4,7 +4,7 @@
 
 ## TL;DR
 
-`lara-evidence@0.1` checks that a certified leaf is the approved checker's output over package-captured evidence. The Lean development proves this guarantee for a finite snapshot and typed selection model, then combines it with the existing source and argument checker. Successful admission preserves the ordinary retained context and located holes; it does not bypass policy quarantine or make a scientific claim true. The concrete byte parsers, SHA-256, operating-system capture and compilers remain trusted. Use [the package contract](evidence-admission-decision.md#9-ara-packaging-direction-and-task-0-outcome-for-issue-8) for runtime details and the theorem map below for proof scope.
+`lara-evidence@0.1` checks that a certified leaf is the approved checker's output over package-captured evidence. The Lean development proves this guarantee for a finite snapshot and typed selection model, then combines it with the existing source and argument checker. Successful admission preserves the ordinary retained context and located holes; it does not bypass policy quarantine or make a scientific claim true. The concrete byte parsers, SHA-256, operating-system capture and compilers remain trusted. Use [the package contract](evidence-admission-design.md#concrete-package-contract) for runtime details and the theorem map below for proof scope.
 
 ## What does successful admission prove?
 
@@ -77,4 +77,4 @@ The package acceptance gate runs the real binary over copied original packages a
 ## Next Steps
 
 1. Review the runtime contract alongside these theorem premises; do not replace typed-model conformance with a byte-parser soundness claim.
-2. Complete the human faithfulness review and additive evaluation tracked in issue #20 before claiming a paper-level result or extending the frozen measured-input scope.
+2. Apply the accepted independent review and complete the source re-pinning and next report/freeze/tag tracked in issue #20 before extending the frozen measured-input scope. Review acceptance does not satisfy the separate [archival paper-promotion gate](evidence-admission-design.md#archival-paper-promotion-gate).

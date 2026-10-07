@@ -1,0 +1,11 @@
+input	root	policy	expected	actual	class_match	exit	leaf	reason	assurance	checked	declared	evidence_digest
+package-a	examples/certified-evidence/package-a	-	accepted	accepted	true	0	-	-	evidence-checked	forward-1631,forward-1632	-	sha256:5afe983bb24715f0cc18714c0cbf1baeef858ea7bf5fa10fa7a09dfdf5cf1041
+package-b	examples/certified-evidence/package-b	-	accepted	accepted	true	0	-	-	evidence-checked	train-0,train-1,train-2,loss-0,loss-1,loss-2,loss-3,loss-4	-	sha256:8f9ec75dc21bcb3899f3aba4cc2ffc4bbc5bad054d81f76603c134d8861f680a
+package-a-verifier-policy	examples/certified-evidence/package-a	examples/certified-evidence/package-a/certified-componet.policy.lara	accepted	accepted	true	0	-	-	evidence-checked	forward-1631,forward-1632	-	sha256:c780e7d2e9e04d1946a2ccaac8c67a4627a5f0401befbfdd865f3a96274b1866
+quarantined-mixed	fixtures/evidence/quarantined	-	accepted	accepted	true	0	-	-	mixed	drop	keep	sha256:19a0cb0870d295af887e3eafe3469d0fbf0776c5be46f4a2c81162b1914dc6bc
+reject-admission	fixtures/evidence/measured/reject-admission	-	policy	policy	true	1	drop	-	-	-	-	-
+reject-binding	fixtures/evidence/measured/reject-binding	-	binding	binding	true	1	drop	object does not resolve an existing leaf reference	-	-	-	-
+reject-capture	fixtures/evidence/measured/reject-capture	-	capture	capture	true	1	drop	object SHA256 mismatch	-	-	-	-
+reject-extraction	fixtures/evidence/measured/reject-extraction	-	extraction	extraction	true	1	drop	extracted proposition mismatch	-	-	-	-
+reject-selection	fixtures/evidence/measured/reject-selection	-	extraction	extraction	true	1	drop	missing CSV key row	-	-	-	-
+invalid-global-digest	fixtures/evidence/measured/invalid-global-digest	-	invalid	invalid	true	2	-	object SHA256 mismatch	-	-	-	-
