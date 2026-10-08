@@ -52,6 +52,19 @@ import Lara.BHL.StatisticalRules
 import Lara.Examples.BHLSoundnessDataset
 import Lara.Examples.BHLSoundnessScience
 import Lara.Examples.BHLSoundness
+import Lara.BHL.ControlCoding
+import Lara.BHL.ControlMetadata
+import Lara.BHL.WeakestLiberal
+import Lara.BHL.WlpRepresentation
+import Lara.BHL.ControlLogData
+import Lara.BHL.ControlLogLaws
+import Lara.BHL.ControlLogSyntax
+import Lara.BHL.ControlLogTerms
+import Lara.BHL.CompletenessCore
+import Lara.BHL.ControlLogEdges
+import Lara.BHL.ControlLogBinders
+import Lara.BHL.Completeness
+import Lara.Examples.BHLCompleteness
 import Lara.ND
 import Lara.NDNamed
 import Lara.Strict
@@ -5998,3 +6011,192 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.BHLSoundness.rows_compute
 #print axioms Lara.Examples.BHLSoundness.otherChecks_compute
 #print axioms Lara.Examples.BHLSoundness.rows_all_true
+
+-- BHL PR06: actual finite assertion expressiveness and relative completeness.
+#print axioms Lara.BHL.Program.controlCode_none
+#print axioms Lara.BHL.Program.controlCode_nonneg
+#print axioms Lara.BHL.Program.controlCode_le_length
+#print axioms Lara.BHL.Program.controlCode_lt_length
+#print axioms Lara.BHL.Program.controlCode_lt_length_iff
+#print axioms Lara.BHL.Program.controlCode_eq_length_of_not_mem
+#print axioms Lara.BHL.Program.controlNode_natCast
+#print axioms Lara.BHL.Program.controlNode_of_nonneg
+#print axioms Lara.BHL.Program.controlNode_of_neg
+#print axioms Lara.BHL.Program.controlNode_eq_none_iff
+#print axioms Lara.BHL.Program.controlNode_of_ge_length
+#print axioms Lara.BHL.Program.controlNode_eq_some_iff
+#print axioms Lara.BHL.Program.controlNode_mem
+#print axioms Lara.BHL.Program.controlNode_bounds
+#print axioms Lara.BHL.Program.controlNode_getElem
+#print axioms Lara.BHL.Program.controlNode_zero
+#print axioms Lara.BHL.Program.controlNode_controlCode
+#print axioms Lara.BHL.Program.controlNode_controlCode_iff
+#print axioms Lara.BHL.Program.controlCode_injective
+#print axioms Lara.BHL.Program.controlCode_eq_iff
+#print axioms Lara.BHL.Program.controlCode_some_pos
+#print axioms Lara.BHL.Program.controlCode_some_ne_zero
+#print axioms Lara.BHL.Program.controlCode_eq_zero_iff
+#print axioms Lara.BHL.Program.controlCode_source_pos
+#print axioms Lara.BHL.Program.controlCode_source_wellFormed
+#print axioms Lara.BHL.Program.controlCode_terminal_wellFormed
+#print axioms Lara.BHL.Program.control_edge_target_mem_controlNodes
+#print axioms Lara.BHL.Program.controlCode_edge_target_wellFormed
+#print axioms Lara.BHL.World.appendStates_initial
+#print axioms Lara.BHL.World.appendStates_rest
+#print axioms Lara.BHL.World.appendStates_nil
+#print axioms Lara.BHL.World.appendStates_singleton
+#print axioms Lara.BHL.World.appendStates_assoc
+#print axioms Lara.BHL.World.appendStates_trace
+#print axioms Lara.BHL.World.appendStates_trace_length
+#print axioms Lara.BHL.World.appendStates_trace_prefix
+#print axioms Lara.BHL.World.appendStates_take_trace_prefix
+#print axioms Lara.BHL.World.appendStates_current
+#print axioms Lara.BHL.World.appendStates_take_zero
+#print axioms Lara.BHL.World.appendStates_take_succ
+#print axioms Lara.BHL.World.appendStates_take_succ_current
+#print axioms Lara.BHL.World.appendStates_start_prefix
+#print axioms Lara.BHL.LogCell.control_variable_id
+#print axioms Lara.BHL.LogCell.commands_variable_id
+#print axioms Lara.BHL.LogCell.distinct_ids
+#print axioms Lara.BHL.LogCell.variable_id_injective
+#print axioms Lara.BHL.LogCell.variable_injective
+#print axioms Lara.BHL.LogCell.distinct_variables
+#print axioms Lara.BHL.ControlMetadata.memory_read_control
+#print axioms Lara.BHL.ControlMetadata.memory_read_commands
+#print axioms Lara.BHL.ControlMetadata.memory_read_other_integer
+#print axioms Lara.BHL.ControlMetadata.memory_read_other_sort
+#print axioms Lara.BHL.ControlMetadata.memory_hidden
+#print axioms Lara.BHL.ControlMetadata.memory_read_invisible
+#print axioms Lara.BHL.ControlMetadata.memory_eq_of_hidden_eq
+#print axioms Lara.BHL.ControlMetadata.memory_memory
+#print axioms Lara.BHL.ControlMetadata.state_memory
+#print axioms Lara.BHL.ControlMetadata.state_datasets
+#print axioms Lara.BHL.ControlMetadata.state_history
+#print axioms Lara.BHL.ControlMetadata.state_action
+#print axioms Lara.BHL.ControlMetadata.state_hidden
+#print axioms Lara.BHL.ControlMetadata.state_read_control
+#print axioms Lara.BHL.ControlMetadata.state_read_commands
+#print axioms Lara.BHL.ControlMetadata.state_read_invisible
+#print axioms Lara.BHL.ControlMetadata.state_state
+#print axioms Lara.BHL.ControlMetadata.seed_initial
+#print axioms Lara.BHL.ControlMetadata.seed_rest
+#print axioms Lara.BHL.ControlMetadata.seed_current
+#print axioms Lara.BHL.ControlMetadata.seed_read_control
+#print axioms Lara.BHL.ControlMetadata.seed_read_commands
+#print axioms Lara.BHL.ControlMetadata.trace_nil
+#print axioms Lara.BHL.ControlMetadata.trace_cons
+#print axioms Lara.BHL.ControlMetadata.trace_singleton
+#print axioms Lara.BHL.ControlMetadata.trace_length
+#print axioms Lara.BHL.ControlMetadata.trace_append
+#print axioms Lara.BHL.ControlMetadata.trace_take
+#print axioms Lara.BHL.ControlMetadata.trace_getElem
+#print axioms Lara.BHL.ControlMetadata.world_initial
+#print axioms Lara.BHL.ControlMetadata.world_rest
+#print axioms Lara.BHL.ControlMetadata.world_trace
+#print axioms Lara.BHL.ControlMetadata.world_nil
+#print axioms Lara.BHL.ControlMetadata.world_append
+#print axioms Lara.BHL.ControlMetadata.world_append_singleton
+#print axioms Lara.BHL.ControlMetadata.world_current_getLast
+#print axioms Lara.BHL.ControlMetadata.world_prefix
+#print axioms Lara.BHL.ControlMetadata.prefix_trace
+#print axioms Lara.BHL.ControlMetadata.prefix_eq_world_take
+#print axioms Lara.BHL.ControlMetadata.prefix_zero
+#print axioms Lara.BHL.ControlMetadata.prefix_zero_current
+#print axioms Lara.BHL.ControlMetadata.prefix_succ
+#print axioms Lara.BHL.ControlMetadata.prefix_succ_current
+#print axioms Lara.BHL.ControlMetadata.prefix_of_length_le
+#print axioms Lara.BHL.ControlMetadata.prefix_trace_prefix
+#print axioms Lara.BHL.ControlMetadata.prefix_zero_read_control
+#print axioms Lara.BHL.ControlMetadata.prefix_zero_read_commands
+#print axioms Lara.BHL.ControlMetadata.prefix_succ_read_control
+#print axioms Lara.BHL.ControlMetadata.prefix_succ_read_commands
+#print axioms Lara.BHL.ControlMetadata.prefix_current_cases
+#print axioms Lara.BHL.ControlMetadata.prefix_current_invariants
+#print axioms Lara.BHL.ControlMetadata.prefix_current_read_invisible
+#print axioms Lara.BHL.ControlMetadata.world_constantHidden
+#print axioms Lara.BHL.ControlMetadata.evalTerm_valueRead_currentView
+#print axioms Lara.BHL.ControlMetadata.evalTerm_appendWorld
+#print axioms Lara.BHL.ControlMetadata.evalTerm_traceTake_ofNat
+#print axioms Lara.BHL.ControlMetadata.evalTerm_appendWorld_traceTake
+#print axioms Lara.BHL.ControlMetadata.evalTerm_prefix_zero_control
+#print axioms Lara.BHL.ControlMetadata.evalTerm_prefix_zero_commands
+#print axioms Lara.BHL.ControlMetadata.evalTerm_prefix_succ_control
+#print axioms Lara.BHL.ControlMetadata.evalTerm_prefix_succ_commands
+#print axioms Lara.BHL.valid_iff_entails_wlp
+#print axioms Lara.BHL.wlp_mono
+#print axioms Lara.BHL.wlp_command_iff
+#print axioms Lara.BHL.wlp_skip_iff
+#print axioms Lara.BHL.wlp_seq_iff
+#print axioms Lara.BHL.wlp_ite_iff
+#print axioms Lara.BHL.wlp_ite_undefined
+#print axioms Lara.BHL.wlp_loop_body
+#print axioms Lara.BHL.wlp_loop_exit
+#print axioms Lara.BHL.wlp_loop_undefined
+#print axioms Lara.BHL.wlp_parallel_iff
+#print axioms Lara.BHL.wlp_true_loop
+#print axioms Lara.BHL.ControlLabel.viewEffect_replay
+#print axioms Lara.BHL.ControlLabel.effect_viewEffect
+#print axioms Lara.BHL.ControlLog.append_source
+#print axioms Lara.BHL.ControlLog.append_program_length
+#print axioms Lara.BHL.ControlLog.append_control_length
+#print axioms Lara.BHL.ControlLog.append_programPrefix
+#print axioms Lara.BHL.ControlLog.append_readCell
+#print axioms Lara.BHL.ControlLog.append_readCell_end_control
+#print axioms Lara.BHL.ControlLog.append_readCell_end_commands
+#print axioms Lara.BHL.ControlLog.append_terminal
+#print axioms Lara.BHL.ControlLog.programPrefix_length
+#print axioms Lara.BHL.ControlLog.programPrefix_zero
+#print axioms Lara.BHL.ControlLog.append_edge_previous
+#print axioms Lara.BHL.ControlLog.append_ready
+#print axioms Lara.BHL.ControlLog.ready_valid
+#print axioms Lara.BHL.ControlLog.terminal_admitted
+#print axioms Lara.BHL.ControlLog.decode_suffix
+#print axioms Lara.BHL.ControlLog.decode
+#print axioms Lara.BHL.Steps.controlLog_encode
+#print axioms Lara.BHL.ControlLog.encode
+#print axioms Lara.BHL.ControlLogSyntax.Terms.denotes_bound
+#print axioms Lara.BHL.ControlLogSyntax.Terms.denotes_rename
+#print axioms Lara.BHL.ControlLogSyntax.Terms.eval_traceTake
+#print axioms Lara.BHL.ControlLogSyntax.Terms.eval_metadataWorld
+#print axioms Lara.BHL.ControlLogSyntax.Terms.eval_cell
+#print axioms Lara.BHL.ControlLogSyntax.Terms.eval_count
+#print axioms Lara.BHL.ControlLogSyntax.Terms.eval_programWorld
+#print axioms Lara.BHL.ControlLogSyntax.Terms.eval_programView
+#print axioms Lara.BHL.ControlLogSyntax.Terms.eval_terminal
+#print axioms Lara.BHL.ControlLogSyntax.Terms.eval_programLength
+#print axioms Lara.BHL.ControlLogSyntax.Terms.eval_controlLength
+#print axioms Lara.BHL.ControlLogSyntax.reindex_original
+#print axioms Lara.BHL.ControlLogSyntax.eval_nextIndex
+#print axioms Lara.BHL.canonical_derivation
+#print axioms Lara.BHL.relative_completeness_of_family
+#print axioms Lara.BHL.derivation_iff_valid_of_family
+#print axioms Lara.BHL.ControlLogSyntax.conjunction_satisfaction
+#print axioms Lara.BHL.ControlLogSyntax.disjunction_satisfaction
+#print axioms Lara.BHL.ControlLogSyntax.edge_satisfaction
+#print axioms Lara.BHL.ControlLogSyntax.edges_satisfaction
+#print axioms Lara.BHL.ControlLogSyntax.header_satisfaction
+#print axioms Lara.BHL.ControlLogSyntax.validLocalLog_satisfaction
+#print axioms Lara.BHL.ControlLogSyntax.representative_reference_iff
+#print axioms Lara.BHL.control_log_represents_wlp
+#print axioms Lara.BHL.weakest_liberal_assertion_represents
+#print axioms Lara.BHL.weakest_liberal_assertion_derivation
+#print axioms Lara.BHL.relative_completeness
+#print axioms Lara.BHL.derivation_iff_valid
+#print axioms Lara.BHL.malformed_program_not_derivable
+#print axioms Lara.BHL.malformed_program_vacuously_valid
+#print axioms Lara.Examples.BHLCompleteness.loop_body_semantically_preserves
+#print axioms Lara.Examples.BHLCompleteness.loop_exit_entails_three
+#print axioms Lara.Examples.BHLCompleteness.loop_semantically_valid
+#print axioms Lara.Examples.BHLCompleteness.loop_reconstructed
+#print axioms Lara.Examples.BHLCompleteness.canonical_loop_inhabited
+#print axioms Lara.Examples.BHLCompleteness.canonical_loop_preserves
+#print axioms Lara.Examples.BHLCompleteness.canonical_loop_exit
+#print axioms Lara.Examples.BHLCompleteness.parallel_semantically_valid
+#print axioms Lara.Examples.BHLCompleteness.parallel_reconstructed
+#print axioms Lara.Examples.BHLCompleteness.divergent_loop_precondition
+#print axioms Lara.Examples.BHLCompleteness.divergent_loop_reconstructed
+#print axioms Lara.Examples.BHLCompleteness.incompatible_parallel_vacuously_valid
+#print axioms Lara.Examples.BHLCompleteness.incompatible_parallel_not_reconstructed
+#print axioms Lara.Examples.BHLCompleteness.loop_counts
+#print axioms Lara.Examples.BHLCompleteness.left_counts
+#print axioms Lara.Examples.BHLCompleteness.right_counts
