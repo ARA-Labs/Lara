@@ -48,6 +48,17 @@ Model denotations must remain separate from symbolic identifiers. Prove that con
 Run a throwaway Lean main over the real model/history operations. Observe the test counts before and after a repeated execution, the effect of dataset aliasing, and the different history observations for the same final memory. Fail on a discrepancy. Elaborate the theorem-bearing examples, run `make local-gates`, and update the durable theorem map in this PR. No assertion or BHL derivation result is claimed yet.
 
 
+### What design should the server continuation preserve?
+
+The following is an unimplemented design from the contract audit, not checked model evidence:
+
+- Separate typed visible bindings from immutable ordinary hidden bindings. Derived history counts are not independently writable hidden variables.
+- Keep `RawWorld` as an initial state plus finite later states. Define admitted worlds by empty initial ledger, constant ordinary hidden memory, independent initial-evidence conditions and independently checked adjacent command/sampling edges. Admit every trace satisfying those local conditions, rather than a caller-selected universe.
+- A primitive command effect receives only visible memory and yields visible memory plus a finite test-event delta. Sampling is a separate historical action, not a testing-program constructor. History edges compare count denotations, not event-list order.
+- Define `TraceAllowed h observations`, derive `compatibleHidden w`, and construct `rebuildHidden w h` for every compatible hidden memory. Prove prefix closure, lawful extension and accessible forth/back; none is a model field asserting the desired modal theorem.
+- Derive sampling provenance from actual adjacent sampling transitions, never an initial-state action label.
+- Define the assertion view by current visible memory, canonical ledger, actual ordinary hidden memory, exact compatible-hidden set and derived sampling provenance. Its carrier is the image of admitted worlds. Prove the bounded-morphism correspondence to full ordered observation accessibility; do not replace that reference relation with endpoint equality.
+
 ## Alternatives considered
 
 A set of tests drops repeated execution. History indexed only by fresh author-chosen dataset names permits an alias to reset accounting. A final-memory-only world representation cannot support the separating witness.

@@ -10559,3 +10559,74 @@ tree:
     No search for external mechanizations, Lean proof, implementation or
     empirical experiment was performed in this documentation turn. The reuse
     audit remains an obligation of PR 01.
+- id: N370_bhl_corrected_contract
+  type: decision
+  title: Adopt documented BHL corrections and a pinned actual-real probability carrier
+  provenance: user-revised
+  timestamp: "2026-10-07T23:09:00-07:00"
+  choice: >-
+    After the reference audit exposed predicate-stability, alias-history and
+    modal loop-encoding defects, the researcher selected proceeding with
+    documented corrections and exact Mathlib revision
+    81a5d257c8e410db227a6665ed08f64fea08e997 for Lean 4.32.0.
+    Preserve every required deliverable. Reconstruct the logic in Lean;
+    the scoped StatWhy audit does not supply compatible checked dependencies.
+    All stage PRs target feat/belief-hoare-logic, retaining the planning commit
+    and one stage commit; only complete joined acceptance permits the later
+    version bump, merge commit to main and release.
+  alternatives:
+  - Literal transcription of the inconsistent source definitions
+  - A rational-only replacement for the general real/probability semantics
+  - Waive soundness, relative completeness or the concrete/bridge obligations
+  evidence:
+  - docs/belief-hoare-logic-assessment.md
+  - docs/theory-bhl-decision.md
+  - lean/Lara/BHL/ReferenceAudit.lean
+  - https://github.com/ARA-Labs/Lara/issues/24#issuecomment-6052983323
+  status: resolved
+  also_depends_on:
+  - N369_bhl_mechanization_strategy
+- id: N371_bhl_contract_verification
+  type: experiment
+  title: Check initial BHL vocabulary, source countermodels and real probability lemmas
+  provenance: ai-executed
+  timestamp: "2026-10-07T23:09:00-07:00"
+  result: >-
+    Focused modules and a library-based symbolic/audit smoke passed.
+    Integrated axiom coverage passed for 3614 declarations, including all
+    36 new BHL theorems, using only the standard trio. macOS full local-gates
+    later failed at the existing Linux-only no-replace publication primitive.
+    Two Linux 16 GiB attempts OOM-killed the existing Surface example.
+    A temporary 32 GiB Linux run passed its 2799-job Lean build, 24-case PW
+    gate and axiom audit, then was stopped at the handoff request before
+    complete registry/cross-check acceptance. The final interruption is not
+    another observed OOM. No full gate pass or completed BHL stage is claimed.
+  evidence:
+  - ara/evidence/results/bhl-reference-contract-2026-10-07.log
+  - docs/theory-bhl.md
+  - lean/Lara/BHL/Types.lean
+  - lean/Lara/BHL/ReferenceAudit.lean
+  - lean/Lara/BHL/Numeric.lean
+  - https://github.com/ARA-Labs/Lara/issues/24#issuecomment-6053276486
+  verification_kind: Formal theory/carrier and runtime-witness verification, not an empirical protocol
+  also_depends_on:
+  - N370_bhl_corrected_contract
+- id: N372_bhl_server_handoff
+  type: pivot
+  title: Preserve partial PR 01 as a draft for server continuation
+  provenance: user
+  timestamp: "2026-10-07T23:09:00-07:00"
+  from: Complete all nine BHL implementation stages and release from the local workstation
+  to: Commit partial reference-contract work and continue implementation on a server
+  trigger: >-
+    Researcher reports the machine memory limit and requests committing the
+    existing work and opening a draft PR. Opened draft PR 25 targeting
+    feat/belief-hoare-logic; retained every living plan, marked PR 01 partial
+    and later stages unstarted. Stopped the owned verification workload,
+    restored the original VM cap and preserved unproved design notes.
+  evidence:
+  - https://github.com/ARA-Labs/Lara/pull/25
+  - plans/belief-hoare-logic/README.md
+  - docs/theory-bhl.md
+  also_depends_on:
+  - N371_bhl_contract_verification

@@ -1781,3 +1781,11 @@ entries:
   - "Kept existing approval and dependencies. Reuse means a checked Lean dependency with any required correspondence, not a paper citation or an added soundness axiom."
   - "No scientific claim or staged observation changed: this is a proof-engineering decision, not evidence that an external mechanization exists or a theorem has been proved."
   - "The earlier BHL constraint remains compatible; no logic-layer rewrite or unrelated observation promotion was needed."
+
+- turn: 2026-10-07_002#5
+  notes:
+  - "Recorded source/numeric approvals as N370, actual verification as N371, and the user-requested server handoff as N372. The interrupted larger-memory run is not mislabeled as another OOM."
+  - "Staged O206 without promotion: coordinated theory designs are unimplemented; persisting a plan does not prove the proposed view correspondence or finite-syntax representation."
+  - "Updated only the current BHL constraint status/evidence with complete before/after records. No scientific claim changed status, and no full stage or workstream completion is claimed."
+  - "Preserved append-only history and every living plan. Issue 24 tracks remaining stage gates, integration and release; issue 23 retains broader process theory and the empirical-design boundary."
+  - "Allocated O206 against both raw observation identities and the canonical alias registry; no historical observation identity was reused."

@@ -13,6 +13,9 @@ Lean trio (`propext`, `Classical.choice`, `Quot.sound`). See `lean/README.md`.
 import Lara.Prop
 import Lara.Presentation
 import Lara.Evidence.Composition
+import Lara.BHL.Types
+import Lara.BHL.Numeric
+import Lara.BHL.ReferenceAudit
 import Lara.ND
 import Lara.NDNamed
 import Lara.Strict
@@ -4828,3 +4831,40 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Evidence.binding_stage_first_error
 #print axioms Lara.Evidence.capture_stage_first_error
 #print axioms Lara.Surface.sourceWithoutEvidence_conservative
+
+#print axioms Lara.BHL.varId_index_injective
+#print axioms Lara.BHL.testId_index_injective
+#print axioms Lara.BHL.datasetId_index_injective
+#print axioms Lara.BHL.hypothesisId_index_injective
+#print axioms Lara.BHL.ghostId_index_injective
+#print axioms Lara.BHL.variable_id_injective
+#print axioms Lara.BHL.ReferenceAudit.equal_memory_equal_valuation
+#print axioms Lara.BHL.ReferenceAudit.assignment_substitution_counterexample
+#print axioms Lara.BHL.ReferenceAudit.alias_history_consistent
+#print axioms Lara.BHL.ReferenceAudit.history_assertion_counterexample
+#print axioms Lara.BHL.ReferenceAudit.named_history_update_inconsistent
+#print axioms Lara.BHL.ReferenceAudit.modal_memory_encoding_counterexample
+#print axioms Lara.BHL.ReferenceAudit.equality_threshold_not_monotone
+#print axioms Lara.BHL.eventProbability_nonneg
+#print axioms Lara.BHL.eventProbability_le_one
+#print axioms Lara.BHL.eventProbability_empty
+#print axioms Lara.BHL.eventProbability_univ
+#print axioms Lara.BHL.eventProbability_mono
+#print axioms Lara.BHL.eventProbability_union_le
+#print axioms Lara.BHL.eventProbability_inter_le_min
+#print axioms Lara.BHL.eventProbability_map
+#print axioms Lara.BHL.NumericTest.measurable_tailEvent
+#print axioms Lara.BHL.NumericTest.tailProbability_nonneg
+#print axioms Lara.BHL.NumericTest.tailProbability_le_one
+#print axioms Lara.BHL.NumericTest.tailProbability_mono
+#print axioms Lara.BHL.ProbabilityCoupling.left_event
+#print axioms Lara.BHL.ProbabilityCoupling.right_event
+#print axioms Lara.BHL.ProbabilityCoupling.union_le
+#print axioms Lara.BHL.ProbabilityCoupling.inter_le_min
+#print axioms Lara.BHL.NumericTest.coupled_tail_union_le
+#print axioms Lara.BHL.NumericTest.coupled_tail_inter_le_min
+#print axioms Lara.BHL.eventProbability_dirac_of_mem
+#print axioms Lara.BHL.eventProbability_dirac_of_notMem
+#print axioms Lara.BHL.realDiracTest_inhabits
+#print axioms Lara.BHL.realDiracTest_tailProbability_zero
+#print axioms Lara.BHL.realDiracTest_tailProbability_one

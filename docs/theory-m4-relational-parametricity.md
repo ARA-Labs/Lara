@@ -96,9 +96,9 @@ the semantics-parametric form is an instantiation and not a second proof.
 | `backend_replacement_parametricity_local_sem` | `registry_swap_congruence_sem` (`lean/Lara/Context/Observation.lean:345`) | ″ |
 
 `Lara.Forall₂` (`lean/Lara/ListRel.lean`) is the pointwise list relation the
-development consumes. **Core Lean 4.32.0 has no `List.Forall₂`** — it is a
-Mathlib name, and this repository has no Mathlib dependency — so the family and
-its nine lemmas are authored locally. Its own module because it has its own
+development consumes. Core Lean 4.32.0 has no `List.Forall₂`; this core module
+does not import Mathlib, so the family and its nine lemmas are authored locally.
+BHL's numeric theory separately imports pinned Mathlib. `Lara.Forall₂` has its own
 vocabulary (lists, not certificates), its own dependencies (core only), and its
 own reason to be read alone: CLAUDE.md's seam test.
 

@@ -1,0 +1,66 @@
+# BHL reference-contract handoff: direct verification excerpts
+# Partial PR 01, draft PR https://github.com/ARA-Labs/Lara/pull/25.
+# These are selected observed output lines, not a complete gate transcript.
+# No full make local-gates pass is established.
+# Linux 32 GiB run: artifact://136, lines 4848-4851, 4890, 8920-8957.
+# Command: docker exec --env PATH=/root/.ghcup/bin:/root/.cabal/bin:/root/.elan/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --env LEAN_NUM_THREADS=2 lara-bhl-gates make local-gates
+Build completed successfully (2799 jobs).
+python3 scripts/check-pw-example.py
+PW file-driven gate passed (24 cases).
+python3 scripts/check-axiom-withdrawal.py
+AxCheck coverage passed (3614 declarations).
+'Lara.BHL.varId_index_injective' depends on axioms: [propext]
+'Lara.BHL.testId_index_injective' depends on axioms: [propext]
+'Lara.BHL.datasetId_index_injective' depends on axioms: [propext]
+'Lara.BHL.hypothesisId_index_injective' depends on axioms: [propext]
+'Lara.BHL.ghostId_index_injective' depends on axioms: [propext]
+'Lara.BHL.variable_id_injective' depends on axioms: [propext]
+'Lara.BHL.ReferenceAudit.equal_memory_equal_valuation' does not depend on any axioms
+'Lara.BHL.ReferenceAudit.assignment_substitution_counterexample' does not depend on any axioms
+'Lara.BHL.ReferenceAudit.alias_history_consistent' does not depend on any axioms
+'Lara.BHL.ReferenceAudit.history_assertion_counterexample' does not depend on any axioms
+'Lara.BHL.ReferenceAudit.named_history_update_inconsistent' does not depend on any axioms
+'Lara.BHL.ReferenceAudit.modal_memory_encoding_counterexample' does not depend on any axioms
+'Lara.BHL.ReferenceAudit.equality_threshold_not_monotone' does not depend on any axioms
+'Lara.BHL.eventProbability_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.eventProbability_le_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.eventProbability_empty' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.eventProbability_univ' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.eventProbability_mono' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.eventProbability_union_le' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.eventProbability_inter_le_min' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.eventProbability_map' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.NumericTest.measurable_tailEvent' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.NumericTest.tailProbability_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.NumericTest.tailProbability_le_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.NumericTest.tailProbability_mono' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.ProbabilityCoupling.left_event' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.ProbabilityCoupling.right_event' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.ProbabilityCoupling.union_le' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.ProbabilityCoupling.inter_le_min' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.NumericTest.coupled_tail_union_le' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.NumericTest.coupled_tail_inter_le_min' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.eventProbability_dirac_of_mem' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.eventProbability_dirac_of_notMem' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.realDiracTest_inhabits' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.realDiracTest_tailProbability_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.BHL.realDiracTest_tailProbability_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+Axiom audit passed.
+python3 scripts/check-semantics-registry.py
+# This larger-memory run was stopped at the researcher's server-handoff request.
+# Its exit 137 is an interruption, not a third observed OOM.
+# Earlier Linux attempts: artifact://116 and artifact://122.
+error: Lean exited with code 137
+# Subsequent kernel cgroup memory.events observation:
+oom_kill 2
+# Earlier macOS full local-gates: artifact://108, lines 13891-13892.
+stderr=b'lara: cannot publish evidence bundle: publish evidence bundle (RENAME_NOREPLACE): unsupported operation (Function not implemented)\n'
+make: *** [evidence-cli] Error 1
+# ARA gates immediately before research handoff capture:
+ARA source spans: PASS (66 quotations)
+ARA session index: PASS (83 sessions, one row each, every row agreeing with its file)
+ARA observations: PASS (191 unique effective observations, 2 ambiguous historical IDs, 14 audited reference lines)
+# Final ARA handoff-capture validation:
+ARA source spans: PASS (66 quotations)
+ARA session index: PASS (83 sessions, one row each, every row agreeing with its file)
+ARA observations: PASS (192 unique effective observations, 2 ambiguous historical IDs, 14 audited reference lines)

@@ -478,3 +478,6 @@ import Lara.Evidence.Runner
 import Lara.Evidence.Admission
 import Lara.Surface.Source
 import Lara.Evidence.Composition
+import Lara.BHL.Types
+import Lara.BHL.Numeric
+import Lara.BHL.ReferenceAudit

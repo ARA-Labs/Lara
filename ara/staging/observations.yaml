@@ -4170,3 +4170,30 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+- id: O206
+  timestamp: "2026-10-07T23:09:00-07:00"
+  provenance: ai-suggested
+  content: >-
+    Proposed corrected completeness design separates fixed full-world/trace
+    ghosts from ambient semantic views. A saturated locally lawful world model
+    constructs compatible hidden alternatives; the view retains endpoint
+    memory, canonical history, exact possibilities and sampling provenance.
+    A finite control-graph edge formula validates an arbitrarily long ghost
+    log, then decoding reconstructs a real run from the literal starting world.
+    No ambient raw-trace inspection, opaque WLP atom or assumed Par invariance
+    is used. Every correspondence and legal finite representation still needs
+    its Lean proof.
+  context: >-
+    Two coordinated design reviews identified the ambient raw-world ghost
+    order leak and proposed a noncircular modal-aware representation.
+    Continuation notes are preserved in plans 02, 03 and 06 and the audited
+    decision. No model, assertion or completeness implementation exists yet.
+    Draft PR 25 is partial and issue 24 retains every required stage.
+  potential_type: architecture
+  bound_to:
+  - N370_bhl_corrected_contract
+  - N372_bhl_server_handoff
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

@@ -57,6 +57,19 @@ cd lean
 lake build
 ```
 
+The BHL numeric theory uses Mathlib pinned in `lakefile.toml` and
+`lake-manifest.json`, matching this project's Lean toolchain. The first build
+needs network access to resolve the packages. Mathlib's update hook fetches
+compiled caches; an explicit cache fetch is also available:
+
+```sh
+lake exe cache get
+```
+
+The existing compiler calculus keeps its core-Lean-only imports. BHL's actual
+real probability carrier, exact finite execution boundary and source audit are
+documented in [the BHL theorem record](../docs/theory-bhl.md).
+
 API documentation (doc-gen4) is built from the docstrings by a separate Lake
 project so its dependencies stay out of this one's `lakefile.toml`:
 

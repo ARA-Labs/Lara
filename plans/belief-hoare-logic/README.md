@@ -5,7 +5,7 @@
 
 Develop Belief Hoare Logic (BHL) as Lara's statistical-method semantics within its role as a lower-level language for Agent-Native Research Artifacts (ARA). Define the artifact-level meaning and assumption boundaries first, then mechanize the reference logic and its composition with checked arguments. Retain soundness, relative completeness, concrete statistical instances and executable checking. The Lara-specific work must explain how evidence changes affect methodological warrant; attaching two successful checks is insufficient.
 
-Plan status: approved by the researcher on 2026-10-07. Implementation status: pending for every PR. Approval covers the revised scope, dependency graph and acceptance obligations; it does not claim that the paper audit, numeric choices, definitions or proofs have been completed. [Issue #24](https://github.com/ARA-Labs/Lara/issues/24) tracks the work. The settled architectural decision is [recorded in docs](../../docs/theory-bhl-decision.md).
+Plan status: approved by the researcher on 2026-10-07. Implementation status: PR 01 is partial and being handed off as a draft; PR 02-09 have not started. The reference assessment, corrected artifact/numeric decisions and 36 initial Lean theorems are present. Full `make local-gates` acceptance remains incomplete, so no implementation stage is complete. The researcher requested a commit and draft PR for continuation on a server after local memory failures. [Issue #24](https://github.com/ARA-Labs/Lara/issues/24) tracks all remaining work. The settled architectural decision is [recorded in docs](../../docs/theory-bhl-decision.md), and exercised checks and continuation steps are in the [theorem record](../../docs/theory-bhl.md#what-was-verified-before-the-server-handoff).
 
 ## Problem
 
@@ -23,7 +23,7 @@ Lara support for an assumption does not prove the assumption or BHL knowledge of
 
 BHL observation-based accessibility is an equivalence relation. Lara's existing possible-world context bridges need not satisfy those frame laws. Keep both relations and modalities distinct; any translation requires stated hypotheses and a preservation proof.
 
-Every frozen corpus-independent definition must land with the metatheory provable at that step. Proofs must be `sorry`-free and use only `propext`, `Classical.choice`, and `Quot.sound`; add every new theorem to `lean/AxCheck.lean`. Do not use `native_decide`, `Lean.ofReduceBool`, or an unproved probability axiom in theorem dependencies. The current `lean/lakefile.toml` has no Mathlib dependency. B0 must resolve the real-number and probability representation before implementation; no dependency is added implicitly, and rational arithmetic must not be presented as an exact implementation of arbitrary real-valued tests.
+Every frozen corpus-independent definition must land with the metatheory provable at that step. Proofs must be `sorry`-free and use only `propext`, `Classical.choice`, and `Quot.sound`; add every new theorem to `lean/AxCheck.lean`. Do not use `native_decide`, `Lean.ofReduceBool`, or an unproved probability axiom in theorem dependencies. During PR 01 the researcher explicitly approved Mathlib revision `81a5d257c8e410db227a6665ed08f64fea08e997` for real/probability semantics and documented corrections to the audited source discrepancies. The corrected contract is in `docs/theory-bhl-decision.md`. Rational arithmetic is not an exact implementation of arbitrary real-valued tests.
 
 No core or wire migration, legacy corpus regeneration, mutation-base rewrite, or freeze-tag bump is planned. Any proof or integration need that changes those contracts requires a separately approved change with regeneration and rerun costs in the tracker. This branch introduces no receipt service, authenticated history capture, statistical-test marketplace, general experiment orchestrator, or empirical protocol.
 
@@ -47,9 +47,11 @@ PR numbers identify plans; they do not impose a total merge order.
 | 08 | [Executable proof checking and finite semantics](08-executable-checking.md) | B6 | PR 07 |
 | 09 | [Lara composition and acceptance](09-lara-bridge-and-acceptance.md) | B7, evidence-sensitive warrant and revision witnesses | PR 08 |
 
-After PR 05, PR 06 and the PR 07-09 branch can proceed independently. Relative completeness remains mandatory, but concrete tests and the bridge use soundness rather than completeness. Base each implementation PR on current main after its listed dependencies land. Keep the existing plan filenames and avoid importing unmerged definitions.
+After PR 05, PR 06 and the PR 07-09 branch can proceed independently. Relative completeness remains mandatory, but concrete tests and the bridge use soundness rather than completeness. Base each implementation PR on `feat/belief-hoare-logic` after its listed dependencies land there. Keep the existing plan filenames and avoid importing unmerged definitions.
 
-B8 is the final acceptance join of PR 06 and PR 09. Whichever PR is ready last must base or rebase on main containing the other, reconcile the complete theorem inventory, and execute the integrated acceptance commands on its candidate tree before review. Record workstream completion only after both merge. If PR 09 lands first, it reports bridge completion with B8 still pending; it cannot close issue #24. No separate acceptance-only PR or deferred-proof bucket is introduced.
+B8 is the final acceptance join of PR 06 and PR 09. Whichever PR is ready last must contain the other's integrated work, reconcile the complete theorem inventory, and execute the integrated acceptance commands on its candidate tree before review. Record workstream completion only after both merge to `feat/belief-hoare-logic`. If PR 09 lands first, it reports bridge completion with B8 still pending; it cannot close issue #24. No separate acceptance-only PR or deferred-proof bucket is introduced.
+
+The researcher's implementation instruction supersedes the numbered plans' former `main` base references: every stage PR targets `feat/belief-hoare-logic`. Preserve planning/research commit `46a9747` and land one verified commit per stage. After the full joined-tree acceptance, bump the release version and merge the integration branch to `main` with a merge commit, then publish and verify the release.
 
 ### Which interfaces and meanings are shared?
 
