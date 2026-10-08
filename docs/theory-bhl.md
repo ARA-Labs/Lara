@@ -69,7 +69,7 @@ The Dirac witness proves nonemptiness, not calibration of the final binary test.
 
 ## What was verified before the server handoff?
 
-The researcher requested a partial commit and draft PR, with continuation on a server. PR 01 remains incomplete; later implementation stages have not started.
+The researcher requested a partial commit and draft PR, with continuation on a server. At that handoff PR 01 was incomplete and later implementation stages had not started. The server acceptance below supersedes that implementation status without changing the historical outcomes.
 
 | Check | Observed result and coverage |
 | --- | --- |
@@ -82,21 +82,23 @@ The researcher requested a partial commit and draft PR, with continuation on a s
 | Linux container, temporary 32 GiB VM cap | Lean build passed (2,799 jobs), PW file-driven gate passed (24 cases), and the 3,614-declaration axiom audit passed; stopped at the researcher's handoff request before the complete registry/cross-check gate finished |
 | ARA gates before handoff capture | Source spans passed (66 quotations); session index passed (83 sessions); observations passed (191 unique effective observations, two ambiguous historical IDs, 14 audited reference lines) |
 
-No complete `make local-gates` pass is claimed. The owned verification container was stopped and OrbStack's original 16 GiB setting restored. No gate or existing publication behavior was weakened.
+At handoff no complete `make local-gates` pass was available. The owned verification container was stopped and OrbStack's original 16 GiB setting restored. No gate or existing publication behavior was weakened.
 
-On the server, fetch `theory/bhl-01-reference-contract`, retain the approved Lean/Mathlib pins and resolve the cache:
+## What completed PR 01 on the server?
 
-```sh
-git fetch origin
-git switch --track origin/theory/bhl-01-reference-contract
-cd lean
-lake exe cache get
-cd ..
-make local-gates
-make ara-source-spans ara-session-index ara-observations
-```
+PR 01's reference, artifact and numeric contract passed acceptance on 2026-10-08. The reference inventory now retains the complete corrected BHκ equivalence `κS ↔ PκS ↔ KκS`, with observable dataset terms, canonical ledger and full-history observations. In particular, the possibility-to-history direction used by the hidden-test argument is an explicit PR 03 proof obligation, not a theorem already supplied by this stage.
 
-Use a fresh scratch Lean main importing the three BHL modules to repeat the recorded symbolic/audit smoke. The earlier throwaway mains are not repository deliverables. Finish PR 01's remaining acceptance and remove its plan only after durable evidence is updated. Keep its stage changes as one commit, then merge the draft into `feat/belief-hoare-logic` before starting PR 02. All later stage PRs target that integration branch; the eventual version bump, merge commit to `main` and release remain unperformed.
+| Executed command | Observed result and coverage |
+| --- | --- |
+| `(cd lean && lake exe cache get)` | Resolved the approved manifest and downloaded/decompressed all 8,639 cache files |
+| `(cd lean && lake build Lara.BHL.Types Lara.BHL.ReferenceAudit Lara.BHL.Numeric)` | Passed, 2,548 jobs |
+| `(cd lean && lake env lean --run BHLStageSmoke.lean)` | Passed: typed identities; assignment pre=true/post=false; dataset aliases both count one; name-count equation=false; selected-name-only update inconsistent. The Dirac probability identities elaborated; no arbitrary-real runtime computation was claimed |
+| `make local-gates` | Passed the complete Linux Lean and cross-check gate. Lean build: 2,799 jobs; axiom coverage: 3,614 declarations, including all 36 BHL theorems, with only the standard trio; semantics registry: 168 modules; evidence CLI: 58 scenarios; frozen evidence inputs: all 10 reproduced byte-identically; map differential: 1,651 cases, no failures |
+| `make ara-source-spans ara-session-index ara-observations` | Passed: 66 quotations, 83 agreeing sessions, 192 unique effective observations, two ambiguous historical IDs and 14 audited reference lines |
+
+Independent specification reviews covered the source/artifact contract and frozen numeric code. The missing BHκ directions were corrected and rechecked; code-quality review approved the frozen modules. The scratch main was removed after the run. The executed PR 01 plan is retired; its durable contract and source inventory remain in this record, the assessment and the architectural decision.
+
+PR 02-09 remain mandatory. This acceptance establishes the audited contract and initial carriers, not BHL execution, soundness, completeness, calibrated binary tests or the Lara bridge.
 
 ## What remains required?
 

@@ -5,7 +5,7 @@
 
 Develop Belief Hoare Logic (BHL) as Lara's statistical-method semantics within its role as a lower-level language for Agent-Native Research Artifacts (ARA). Define the artifact-level meaning and assumption boundaries first, then mechanize the reference logic and its composition with checked arguments. Retain soundness, relative completeness, concrete statistical instances and executable checking. The Lara-specific work must explain how evidence changes affect methodological warrant; attaching two successful checks is insufficient.
 
-Plan status: approved by the researcher on 2026-10-07. Implementation status: PR 01 is partial and being handed off as a draft; PR 02-09 have not started. The reference assessment, corrected artifact/numeric decisions and 36 initial Lean theorems are present. Full `make local-gates` acceptance remains incomplete, so no implementation stage is complete. The researcher requested a commit and draft PR for continuation on a server after local memory failures. [Issue #24](https://github.com/ARA-Labs/Lara/issues/24) tracks all remaining work. The settled architectural decision is [recorded in docs](../../docs/theory-bhl-decision.md), and exercised checks and continuation steps are in the [theorem record](../../docs/theory-bhl.md#what-was-verified-before-the-server-handoff).
+Plan status: approved by the researcher on 2026-10-07. Implementation status: PR 01 passed server acceptance on 2026-10-08; PR 02-09 remain unimplemented. The reference assessment, corrected artifact/numeric decisions and 36 initial Lean theorems passed the fresh smoke, complete `make local-gates` and all three ARA gates. PR [#25](https://github.com/ARA-Labs/Lara/pull/25) owns this stage's integration into `feat/belief-hoare-logic`. [Issue #24](https://github.com/ARA-Labs/Lara/issues/24) tracks the remaining work. The settled architectural decision is [recorded in docs](../../docs/theory-bhl-decision.md), and historical handoff and current acceptance evidence are in the [theorem record](../../docs/theory-bhl.md).
 
 ## Problem
 
@@ -37,7 +37,7 @@ PR numbers identify plans; they do not impose a total merge order.
 
 | PR | Plan | Original scope | Depends on |
 | --- | --- | --- | --- |
-| 01 | [Reference and artifact contract](01-reference-contract.md) | B0, artifact judgment and cross-layer witness specification | None |
+| 01 | [Completed reference and artifact contract](../../docs/theory-bhl.md#what-completed-pr-01-on-the-server), [PR #25](https://github.com/ARA-Labs/Lara/pull/25) | B0, artifact judgment and cross-layer witness specification | None |
 | 02 | [Epistemic model and test history](02-model-and-history.md) | B1 | PR 01 |
 | 03 | [Assertions, substitution and statistical belief](03-assertions-and-belief.md) | B2 | PR 02 |
 | 04 | [Program execution and parallel correspondence](04-program-semantics.md) | B3 | PR 03 |
