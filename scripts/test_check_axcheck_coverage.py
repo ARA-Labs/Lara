@@ -79,6 +79,32 @@ end Lara
         self.assertIn("AxCheck coverage passed (2 declarations).", result.stdout)
         self.assertNotIn("Lara.Nested.sectionHidden", result.stderr)
 
+    def test_noncomputable_section_keeps_enclosing_namespace(self) -> None:
+        result = self.run_checker(
+            """\
+namespace Lara.BHL
+noncomputable section
+theorem inside : True := by trivial
+end
+theorem after : True := by trivial
+namespace Nested
+noncomputable section Local
+theorem nested : True := by trivial
+end Local
+theorem nestedAfter : True := by trivial
+end Nested
+end Lara.BHL
+""",
+            """\
+#print axioms Lara.BHL.inside
+#print axioms Lara.BHL.after
+#print axioms Lara.BHL.Nested.nested
+#print axioms Lara.BHL.Nested.nestedAfter
+""",
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("AxCheck coverage passed (4 declarations).", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()
