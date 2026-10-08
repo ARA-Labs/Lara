@@ -725,8 +725,8 @@ sessions:
 
 - id: 2026-10-07_002
   date: '2026-10-07'
-  summary: 'Approved BHL artifact semantics and checked-proof reuse/reconstruction strategy; implementation and the external mechanization audit remain pending.'
-  turn_count: 4
-  events_count: 7
+  summary: 'Audited BHL corrections and approved pinned Mathlib; initial proofs/audit passed, partial PR 01 preserved as draft PR 25 for server continuation; full gates and later stages remain incomplete.'
+  turn_count: 5
+  events_count: 11
   claims_touched: []
-  open_threads: 2
+  open_threads: 4

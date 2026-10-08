@@ -2,13 +2,14 @@ session:
   id: 2026-10-07_002
   date: '2026-10-07'
   started: "2026-10-07T15:27:16-07:00"
-  last_turn: "2026-10-07T21:58:31-07:00"
-  turn_count: 4
+  last_turn: "2026-10-07T23:09:00-07:00"
+  turn_count: 5
   summary: >-
-    Opened, split and approved the BHL artifact-semantics plans, then added
-    the checked-proof reuse and reconstruction strategy. Completeness remains
-    mandatory on an independent branch. Implementation and the external
-    mechanization audit are pending; no new Lean proof or empirical experiment.
+    Audited the BHL source and adopted documented corrections with pinned
+    Mathlib; initial vocabulary/countermodel/probability proofs and axiom
+    audit passed. Partial PR 01 is draft PR 25 for server continuation after
+    local resource/platform failures; full gates and every later stage remain
+    incomplete. No main merge, version bump, release or empirical protocol.
 events_logged:
 - turn: 1
   type: decision
@@ -52,6 +53,30 @@ events_logged:
   routing: direct
   provenance: user-revised
   summary: Require checked BHL proof reuse or reconstruction and separate Lara correspondence/composition proofs.
+- turn: 5
+  type: decision
+  id: N370_bhl_corrected_contract
+  routing: direct
+  provenance: user-revised
+  summary: Approve documented source corrections and pinned actual-real Mathlib semantics.
+- turn: 5
+  type: experiment
+  id: N371_bhl_contract_verification
+  routing: direct
+  provenance: ai-executed
+  summary: Initial proofs and smoke passed; full acceptance did not finish.
+- turn: 5
+  type: pivot
+  id: N372_bhl_server_handoff
+  routing: direct
+  provenance: user
+  summary: Commit partial PR 01 and open draft PR 25 for continuation on a server.
+- turn: 5
+  type: observation
+  id: O206
+  routing: staged
+  provenance: ai-suggested
+  summary: Preserve unproved full-world/view and legal finite-log representation design.
 ai_actions:
 - turn: 1
   action: >-
@@ -132,6 +157,35 @@ ai_actions:
   - ara/trace/sessions/2026-10-07_002.yaml
   - ara/trace/sessions/session_index.yaml
   - ara/trace/pm_reasoning_log.yaml
+- turn: 5
+  action: >-
+    Audited the primary source, Appendix B and author-linked StatWhy artifact.
+    Implemented Types, ReferenceAudit and Numeric with 36 theorem audit rows;
+    resolved the approved Mathlib pin. Ran actual symbolic/audit smoke,
+    integrated Lean builds and axiom audits. Recorded failed macOS publication,
+    two confirmed Linux OOM kills and the interrupted larger-memory run.
+    Committed partial work and opened verified open/draft PR 25 against
+    feat/belief-hoare-logic. Preserved all plans and unproved design notes.
+    Stopped/removed the owned container, restored the original VM cap and
+    removed throwaway scripts. Full gates, stage merges and release remain open.
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/BHL/
+  - lean/AxCheck.lean
+  - lean/Lara.lean
+  - lean/lakefile.toml
+  - lean/lake-manifest.json
+  - docs/belief-hoare-logic-assessment.md
+  - docs/theory-bhl-decision.md
+  - docs/theory-bhl.md
+  - plans/belief-hoare-logic/
+  - ara/evidence/results/bhl-reference-contract-2026-10-07.log
+  - ara/logic/solution/constraints.md
+  - ara/trace/exploration_tree.yaml
+  - ara/staging/observations.yaml
+  - ara/trace/sessions/2026-10-07_002.yaml
+  - ara/trace/sessions/session_index.yaml
+  - ara/trace/pm_reasoning_log.yaml
 claims_touched: []
 logic_revisions:
 - turn: 3
@@ -157,6 +211,29 @@ logic_revisions:
     User approved revising the plans around the reviewed artifact semantics.
     O204's baseline is retained; O205's sequential order is explicitly superseded
     by N368, not promoted unchanged. This is an approved requirement, not proof.
+- turn: 5
+  entry: logic/solution/constraints.md#bhl-artifact-semantics-approved-implementation-pending
+  field: Status
+  before: Approved architecture; the paper audit, exact mathematical contract, numeric-library choice and implementation remain pending.
+  after: Approved corrected contract and numeric dependency; reference audit and initial vocabulary/countermodel/real-probability results are present in draft PR 25. PR 01 acceptance and all later stages remain incomplete.
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: Record partial checked carrier/audit evidence without promoting the workstream to complete.
+- turn: 5
+  entry: logic/solution/constraints.md#bhl-artifact-semantics-approved-implementation-pending
+  field: Evidence
+  before: '`docs/theory-bhl-decision.md`; `plans/belief-hoare-logic/README.md`; `ara/trace/exploration_tree.yaml:N368_bhl_artifact_approval`. These are approved requirements, not proof evidence.'
+  after: '`docs/theory-bhl-decision.md`; `docs/belief-hoare-logic-assessment.md`; `docs/theory-bhl.md`; `ara/trace/exploration_tree.yaml:N370_bhl_corrected_contract`; [draft PR 25](https://github.com/ARA-Labs/Lara/pull/25). The theorem record separates checked initial results from unimplemented obligations; no full BHL soundness, completeness or bridge theorem is claimed.'
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: Bind current status to audited source, theorem record and the unmerged draft.
+- turn: 5
+  entry: logic/solution/constraints.md#bhl-artifact-semantics-approved-implementation-pending
+  field: Last revised
+  before: 2026-10-07 (2026-10-07_002#3)
+  after: 2026-10-07 (2026-10-07_002#5)
+  signal: artifact-commitment
+  provenance: ai-suggested
 key_context:
 - turn: 1
   excerpt: >-
@@ -186,9 +263,20 @@ key_context:
     supplying a machine-checked dependency. Reuse compatible checked proofs
     where available; otherwise mechanize the paper's arguments and separately
     prove Lara's implementation correspondence and composition.
+- turn: 5
+  excerpt: >-
+    Researcher requested all stage PRs targeting feat/belief-hoare-logic,
+    one planning/research commit and one implementation commit per stage,
+    followed by joined acceptance, version bump, merge commit to main and release.
+- turn: 5
+  excerpt: >-
+    User: seems like we encountered memory limit on this machine, commit what
+    we have and open a draft pr, and I will continue on a server
 open_threads:
 - Execute approved PR 01 artifact/paper contract and numeric dependency review, tracked by issue 24.
 - Complete bounded BHL composition while preserving issue 23's wider theory gate before experiment design.
+- Finish partial PR 01 acceptance on a server using draft PR 25; issue 24 retains all nine stages and the integration/release obligations.
+- Prove the unimplemented saturated-world/view and finite ghost-log design rather than assuming expressiveness or parallel invariance, tracked by issue 24.
 ai_suggestions_pending: []
 verification:
   scope: Planning documents and research records only; no implementation exists.
@@ -232,3 +320,19 @@ turn_4_verification:
   limitations:
   - External mechanization availability has not been audited; PR 01 owns that search.
   - No BHL runtime, new Lean proof, implementation local-gates or empirical evaluation ran.
+turn_5_verification:
+  scope: Partial reference-contract proofs and actual smoke; no full BHL semantics or completed stage.
+  results:
+  - Focused BHL module builds and actual symbolic/audit library smoke passed.
+  - "Integrated axiom coverage passed: 3614 declarations, including 36 new BHL theorems; standard trio only."
+  - "Larger-memory Linux build passed: 2799 jobs; PW gate passed: 24 cases; axiom audit passed."
+  - "Draft PR 25 verified OPEN, isDraft true, base feat/belief-hoare-logic, head theory/bhl-01-reference-contract."
+  - ARA gates passed before epilogue; final capture validation is recorded by the publication step.
+  limitations:
+  - Full make local-gates remains incomplete; macOS publication fails closed and earlier Linux builds OOM-killed.
+  - Final larger-memory Linux run was deliberately stopped at the handoff request, not observed to OOM.
+  - No PR merged, stage completed, version bumped, release published or empirical protocol executed.
+  evidence:
+  - ara/evidence/results/bhl-reference-contract-2026-10-07.log
+  - docs/theory-bhl.md
+  - https://github.com/ARA-Labs/Lara/pull/25

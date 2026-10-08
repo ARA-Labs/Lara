@@ -5,7 +5,7 @@
 
 Lara is a lower-level language for expressing the semantics of Agent-Native Research Artifacts (ARA). Belief Hoare Logic (BHL) is approved as its statistical-method component, alongside argumentation and context semantics. The implementation must distinguish conditional procedure validity, application in a mathematical model, and defeasible artifact warrant under residual assumptions. The Lara-specific targets concern dependency-sensitive warrant and revision; the existing BHL metatheory remains attributed to its source.
 
-Decision status: approved by the researcher on 2026-10-07. Implementation status: pending. This record settles the architectural role and acceptance boundaries. The exact mathematical definitions, paper audit and numeric-library decision remain work for PR 01; no new BHL theorem or runtime capability is established here.
+Decision status: the researcher approved the architectural role on 2026-10-07 and explicitly approved documented reference corrections and the pinned Mathlib numeric dependency during implementation. The reference audit is recorded in [the assessment](belief-hoare-logic-assessment.md). Implementation proceeds through the nine required stages; this decision does not assert their soundness or relative completeness before the corresponding Lean proofs land.
 
 ## Problem
 
@@ -68,6 +68,34 @@ The [living plans](../plans/belief-hoare-logic/README.md) retain their PR identi
 
 Final acceptance B8 belongs to the last-ready PR among PR 06 and PR 09. It must include the other's merged work, reconcile the full theorem inventory and run integrated gates on its candidate tree before review. Workstream completion is recorded only after both merge. This removes an unnecessary dependency without dropping a theorem or creating a separate acceptance-only PR.
 
+### Which reference corrections are required?
+
+The [reference assessment](belief-hoare-logic-assessment.md) distinguishes the published statements from the contracts required to prove them. Ordinary predicate meanings must be rigid relations on explicit arguments, or supply a proved preimage operation for their declared dependencies. Test execution has distinct syntax from pure assignment. Statistical atoms take explicit dataset terms. These choices prevent assignment substitution from overlooking state changes hidden in a predicate name.
+
+History is a canonical finite multiset indexed by dataset values and test identities. A history-variable lookup reads its count from that multiset, so equal dataset values share counts even through different names. Dataset reassignment changes the lookup, not the historical ledger. Exact-history assertions compare the value-indexed multisets; they do not use the paper's alias-inconsistent name-count conjunction. Test execution records multiplicity, including aliases and repeated tests.
+
+Knowledge uses equality of complete observation traces. Admissible worlds must satisfy the prefix, extension and accessibility-lifting conditions used by modal substitution and parallel correspondence. Equal final memory and test history alone cannot establish modal equivalence. Prove the required correspondence before using the parallel rule. Threshold monotonicity uses `≤`, while equality-indexed beliefs retain their distinct meaning.
+
+The reference's integer-tuple loop encoding cannot represent arbitrary real values or substitute an actual hidden value under knowledge. The completeness branch must use a typed, finite assertion syntax with explicit encoding of runs and epistemic evaluation. It must prove representability against independent execution; an opaque weakest-precondition atom or an assumed completeness result is excluded. Quantified run/value carriers must state their sorts and legal scope. The general theorem remains relative to the named assertion-theory premises, and its concrete expressiveness obligation remains mandatory in PR 06.
+
+The corrected assertion syntax separates fixed ghost worlds/traces from the ambient world. Ambient terms expose memory, the canonical ledger, derived sampling provenance and the derived hidden-possibility view, not the ambient raw action trace, last action or trace length. A raw world ghost retains its own trace; matching it to the ambient world compares the complete semantic view. Otherwise a ghost naming the left-then-right schedule could distinguish it from an independent right-then-left schedule and invalidate `Par`. The model and assertion stages must prove the full-observation/view correspondence structurally, including nested knowledge and unchanged ghost environments. Completeness must expand finite local control/effect equations and reconstruct an actual prefix-extending execution, not treat a list of endpoint witnesses as an execution by definition.
+
+### Which numeric dependency is approved?
+
+Use Mathlib revision `81a5d257c8e410db227a6665ed08f64fea08e997` with Lara's existing `leanprover/lean4:v4.32.0`. The researcher selected this pin explicitly. Mathlib supplies actual real numbers and countably additive probability measures under Apache-2.0. Import only the modules the BHL theory uses; `lean/lake-manifest.json` records the transitive dependency pins. The existing compiler calculus remains independent of Mathlib imports.
+
+A test's p-value is its null distribution's measure of the declared tail event. Statistic and tail-event measurability, normalization and the binding of that distribution to the null model must be explicit. Combination bounds require a coupling and its marginal equations; independence is unnecessary for the union bound or intersection bound. These local mathematical obligations cannot be replaced by a field asserting BHL soundness.
+
+The finite statistical instance uses exact rational masses and a non-strict tail including ties. It must prove normalization, event probability, calibration and its correspondence to the real probability interpretation. Rational execution covers that instance only. No equality between rational arithmetic and arbitrary real or continuous models is claimed.
+
+### What exactly does the independent artifact judgment require?
+
+Let `s` be the declared source snapshot, `r` its exact accepted admission/checker run, `k` a claim identifier, and `ι(k)` its declared hypothesis interpretation. A method binding retains the model `M`, assertions `P,Q`, program `C`, derivation premises, initial/final worlds `w,w'`, selected raw argument identities, applicability dependencies, evidence snapshot/manifest/registry identities, residual assumptions and history coverage. Field identity means equality of the actual carriers or a proved interpretation-preserving map, rather than equality of author-chosen labels.
+
+`ConditionalMethod(M,P,C,Q)` means every independent terminating execution `Exec M C w w'` from a world satisfying `P` ends in a world satisfying `Q`. `ModeledApplication` adds satisfaction of `P` at the exact bound initial world and that exact execution. Its postcondition follows by applying conditional validity; it is not a certificate premise. `ArtifactWarrant` requires the selected argument and each declared applicability dependency to survive ordinary admission, typecheck in the accepted source, have the required grounded justification and remain unblocked. It binds their conclusions to `k` and its explicit interpretation. A warrant for a conditional payload retains its residual assumptions without asserting a modeled application.
+
+Certificate checking must establish this reference meaning. Quarantine removes eligibility by pruning the selected raw dependency, while leaving the conditional method theorem untouched. Rebinding across a source edit requires exact method/run/interpretation preservation, recomputed source and evidence admission, and proved preservation of the relevant support and complete attack/defense component. A fresh unrelated admitted leaf supplies the harmless-edit witness; the old snapshot-bound certificate still fails. A partial-record projection must exhibit compatible complete histories with different method conclusions before any complete-history inference is rejected.
+
 ## Alternatives considered
 
 | Alternative | Decision |
@@ -82,14 +110,14 @@ Final acceptance B8 belongs to the last-ready PR among PR 06 and PR 09. It must 
 
 Early artifact contracts add design work before the paper formalization. They expose errors that would otherwise appear only when connecting the checker to actual source and evidence semantics. The bounded revision and record witnesses add Lean proof and execution work without claiming to complete the wider process calculus.
 
-Keeping physical sampling, interpretation and record completeness as external obligations limits what checking can establish. It also prevents a successful checker result from being reported as empirical truth. The exact real-number and probability-library cost remains unresolved until PR 01 completes its audit.
+Keeping physical sampling, interpretation and record completeness as external obligations limits what checking can establish. It also prevents a successful checker result from being reported as empirical truth. The approved Mathlib pin supplies the real/probability carrier; later stages must discharge each model's measurability, calibration and transport obligations.
 
 ## Migration
 
-The revised plans are approved; their implementation is pending. No existing runtime or frozen contract changes in this planning revision. PR 01 extends this decision with the audited mathematical and numeric contract, and implementation PRs add only proved results to `docs/theory-bhl.md` as they land. Executed living plans are removed after their durable decisions and theorem evidence have moved into documentation.
+The reference audit, corrected contract and numeric dependency decision are recorded here and in the assessment. The remaining implementation stages retain their full proof and runtime obligations. Existing compiler, wire and frozen corpus contracts remain unchanged. Each stage adds proved results to `docs/theory-bhl.md`; its executed living plan is removed after durable decisions and theorem evidence have moved into documentation.
 
 ## Recommendations
 
-1. Execute PR 01 with the artifact judgment and cross-layer examples included in its contract review.
+1. Use the audited reference and independent artifact judgment when freezing later definitions.
 2. Prove the bounded revalidation and separation results alongside the faithful BHL baseline.
 3. Complete both dependency branches and the B8 joined-tree gates before closing issue #24.

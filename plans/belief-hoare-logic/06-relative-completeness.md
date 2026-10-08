@@ -63,6 +63,16 @@ Run `(cd lean && lake exe bhl-examples)`, `make local-gates` with the shared mac
 If PR 09 remains pending, record relative completeness as complete only after its own proofs and gates pass, leave B8 open, and hand the final join to PR 09. The last-landing PR supplies the integrated record before review; record whole-workstream completion only after both PRs merge. A pending completeness branch prevents PR 09 from calling the whole workstream complete.
 
 
+### What concrete representation design should the server preserve?
+
+This construction remains unimplemented; it is not an expressiveness proof. Compile each finite program into a finite control graph with explicit guard/epsilon/primitive edges and finite products for parallel control locations. Prove both simulations against independent execution. Administrative transitions do not append world states; primitive skip/assignment/test transitions append their actual actions.
+
+Use a trace ghost of type `List (Nat × World)` plus a terminal world ghost. Expand a finite disjunction of local graph-edge equations, and an outer natural-index binder validating every adjacent log entry. Check entry/exit locations and complete start/end semantic views. Do not require the ghost worlds themselves to extend one another: the decoding proof must replay from the literal starting world, construct the actual prefix-extending run and prove terminal view equality.
+
+The proposed finite representative is `∀ trace, ∀ terminalWorld, validLocalLog → Q at terminalWorld`. It must be constructed from legal AST nodes, not an opaque run/WLP predicate. Prove representation by actual-run encoding and local-log decoding, with modal satisfaction transferred through the proved view correspondence. Run length changes the ghost list value, not formula size or binder count. No quantifier goes underneath `K`.
+
+Build canonical derivations by structural induction generalized over the postcondition. Sequence uses the child's representative as intermediate assertion; loops use the loop representative as the realizable invariant; parallel uses child derivations plus the independent sequential/parallel universal-outcome theorem. Only the named assertion-implication oracle remains relative. None of these design notes discharges a Lean obligation.
+
 ## Alternatives considered
 
 A finite model checker may decide examples but does not prove the general relative-completeness theorem. A semantic-validity constructor or an assumption equal to the theorem makes the result circular. The plan rejects both.

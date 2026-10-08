@@ -47,6 +47,14 @@ Do not use extensional equality of symbols to discharge an interpretation assump
 Elaborate the countermodel and positive examples. Execute a throwaway Lean main evaluating satisfaction in their concrete decidable submodels using the real definitions; this witness evaluation does not claim a general finite checker. Observe belief=true with alternative=false in the exceptional-sample case and fail if truth elimination slips into the implementation. Run `make local-gates` and add every proved statement to the theorem record and axiom audit.
 
 
+### What syntax seam should the server continuation preserve?
+
+This design is proposed, not implemented or proved. Use distinct assertion-only ghost sorts, intrinsically scoped bound ghosts, rigid ghost terms and ambient view terms. Arbitrary real/list/distribution values enter through typed ghosts or interpreted symbolic constants, not function-valued AST fields. Keep user functions/predicates restricted to explicit value arguments so they cannot conceal execution or satisfaction.
+
+Use a quantifier-free modal AST and an outer assertion AST with binders; `K` cannot contain the outer AST. A full-world ghost may inspect its own fixed trace. Ambient terms cannot obtain the raw current world/trace, last action or trace length. Scoped `atWorld` targets the same ghost value; an `atView` target is a realized semantic view and is reevaluated at each accessible alternative under `K`, never frozen at the actual hidden value.
+
+Prove full-world/view satisfaction correspondence, identical-ghost-environment schedule invariance, capture-avoiding ghost substitution and primitive memory/history preimages separately. Partial primitive enabledness must remain explicit: a liberal preimage is true when no successor exists. Exact primitive effect formulas expand visible evaluation, typed writes, pre-state ledger updates and preserved information/provenance; they are not whole-execution atoms.
+
 ## Alternatives considered
 
 A primitive `Permits` flag would omit the published epistemic meaning. Treating a small decidable example as a complete assertion solver would exceed its checked model. Both alternatives are excluded.

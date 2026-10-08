@@ -29,9 +29,9 @@ doctest:
 #   make docs-lean        # doc-gen4 for lean/, via the lean/docbuild side project
 #
 # The Lean docs are a separate Lake project (lean/docbuild/) so that doc-gen4's
-# own dependencies never enter lean/lakefile.toml: `lake build` for the proofs
-# stays offline. The first run clones doc-gen4 from GitHub and builds it, which
-# takes a few minutes; later runs are incremental.
+# own dependencies never enter lean/lakefile.toml. BHL's separately pinned
+# Mathlib dependency is resolved by the proof project. The first documentation
+# run clones doc-gen4 from GitHub; later runs are incremental.
 docs: docs-haskell docs-lean
 
 docs-haskell:
