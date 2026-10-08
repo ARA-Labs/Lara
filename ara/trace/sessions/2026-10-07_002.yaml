@@ -1,0 +1,234 @@
+session:
+  id: 2026-10-07_002
+  date: '2026-10-07'
+  started: "2026-10-07T15:27:16-07:00"
+  last_turn: "2026-10-07T21:58:31-07:00"
+  turn_count: 4
+  summary: >-
+    Opened, split and approved the BHL artifact-semantics plans, then added
+    the checked-proof reuse and reconstruction strategy. Completeness remains
+    mandatory on an independent branch. Implementation and the external
+    mechanization audit are pending; no new Lean proof or empirical experiment.
+events_logged:
+- turn: 1
+  type: decision
+  id: N366_bhl_plan
+  routing: direct
+  provenance: user
+  summary: Request a dedicated main-based branch and BHL plan.
+- turn: 1
+  type: observation
+  id: O204
+  routing: staged
+  provenance: ai-suggested
+  summary: Propose faithful BHL theory, finite execution and conservative Lara composition.
+- turn: 2
+  type: decision
+  id: N367_bhl_pr_split
+  routing: direct
+  provenance: user-revised
+  summary: Replace the monolithic BHL plan with one plan per implementation PR.
+- turn: 2
+  type: observation
+  id: O205
+  routing: staged
+  provenance: ai-suggested
+  summary: Propose separate soundness/completeness PRs and combine bridge/final acceptance.
+- turn: 3
+  type: decision
+  id: N368_bhl_artifact_approval
+  routing: direct
+  provenance: user-revised
+  summary: Approve revised BHL artifact semantics, bounded revision obligations and dependency graph.
+- turn: 3
+  type: observation
+  id: O204
+  routing: crystallized
+  provenance: user-revised
+  summary: Affirm the faithful BHL baseline architecture as a constraint, with implementation pending.
+- turn: 4
+  type: decision
+  id: N369_bhl_mechanization_strategy
+  routing: direct
+  provenance: user-revised
+  summary: Require checked BHL proof reuse or reconstruction and separate Lara correspondence/composition proofs.
+ai_actions:
+- turn: 1
+  action: >-
+    Fetched origin/main, observed local main and origin/main at e1d0486, and
+    switched the clean worktree directly from main to research/belief-hoare-logic.
+    Read the existing process/inquiry plans before switching; reviewed the BHL
+    primary source's introduction, state/history and program semantics, plus
+    current Lean source/evidence and local-gate boundaries. Full paper-rule and
+    Appendix B proof audit remains B0, not a completed literature verification.
+  provenance: ai-executed
+  files_changed: []
+- turn: 1
+  action: >-
+    Wrote plans/belief-hoare-logic.md with B0-B8 dependencies, theorem obligations,
+    actual source/evidence composition, dependency review and executable acceptance.
+    Applied plain-language and humanizer passes. Opened issue 24. Recorded the
+    direction and staged the detailed architecture without promoting a claim.
+  provenance: ai-executed
+  files_changed:
+  - plans/belief-hoare-logic.md
+  - ara/trace/exploration_tree.yaml
+  - ara/staging/observations.yaml
+  - ara/trace/sessions/2026-10-07_002.yaml
+  - ara/trace/sessions/session_index.yaml
+  - ara/trace/pm_reasoning_log.yaml
+- turn: 2
+  action: >-
+    Replaced plans/belief-hoare-logic.md with a shared README and nine complete
+    numbered PR plans. Preserved original obligations and added per-PR
+    dependencies, files, proof/witness acceptance and immediate gates.
+    Updated issue 24 without marking implementation work complete.
+    Preserved append-only historical citations with the original Git revision.
+  provenance: ai-executed
+  files_changed:
+  - plans/belief-hoare-logic.md
+  - plans/belief-hoare-logic/
+  - ara/trace/exploration_tree.yaml
+  - ara/staging/observations.yaml
+  - ara/trace/sessions/2026-10-07_002.yaml
+  - ara/trace/sessions/session_index.yaml
+  - ara/trace/pm_reasoning_log.yaml
+- turn: 3
+  action: >-
+    Revised the shared index and all numbered BHL plans, marked them approved
+    with implementation pending, and wrote the durable architectural decision.
+    Added residual-assumption, modality, dependency-quarantine, safe-rebinding
+    and partial-record separation obligations. Updated issue 24 and clarified
+    the boundary on issue 23. Applied plain-language and humanizer prose passes.
+    The installed style checker passed; approval/dependency and local-link
+    checks passed. Recorded the approved constraint without claiming a theorem.
+  provenance: ai-executed
+  files_changed:
+  - plans/belief-hoare-logic/
+  - docs/theory-bhl-decision.md
+  - ara/logic/solution/constraints.md
+  - ara/trace/exploration_tree.yaml
+  - ara/staging/observations.yaml
+  - ara/trace/sessions/2026-10-07_002.yaml
+  - ara/trace/sessions/session_index.yaml
+  - ara/trace/pm_reasoning_log.yaml
+- turn: 4
+  action: >-
+    Added the mechanization strategy to the shared contract and PR 01, 05, 06,
+    08 and 09, and extended the durable architectural decision. Kept approved
+    status, pending implementation and the existing dependency graph. Applied
+    plain-language and humanizer prose passes. Documentation style and local
+    structure/link checks passed. No external artifact search or proof work ran.
+  provenance: ai-executed
+  files_changed:
+  - plans/belief-hoare-logic/README.md
+  - plans/belief-hoare-logic/01-reference-contract.md
+  - plans/belief-hoare-logic/05-derivations-and-soundness.md
+  - plans/belief-hoare-logic/06-relative-completeness.md
+  - plans/belief-hoare-logic/08-executable-checking.md
+  - plans/belief-hoare-logic/09-lara-bridge-and-acceptance.md
+  - docs/theory-bhl-decision.md
+  - ara/trace/exploration_tree.yaml
+  - ara/trace/sessions/2026-10-07_002.yaml
+  - ara/trace/sessions/session_index.yaml
+  - ara/trace/pm_reasoning_log.yaml
+claims_touched: []
+logic_revisions:
+- turn: 3
+  entry: logic/solution/constraints.md#bhl-artifact-semantics-approved-implementation-pending
+  field: section
+  before: null
+  after: |
+    ## BHL artifact semantics (approved, implementation pending)
+
+    - **Status:** Approved architecture; the paper audit, exact mathematical contract, numeric-library choice and implementation remain pending.
+    - **Constraint:** Lara expresses research-artifact semantics as a lower-level language of ARA. BHL supplies statistical-method semantics alongside argumentation and context semantics. Preserve the faithful general reference logic, soundness and relative completeness, exact finite instances and checked source/evidence composition.
+    - **Assumption boundary:** Conditional method validity, modeled application and defeasible artifact warrant are separate judgments. Actual modeled precondition satisfaction and a bound run are required to derive the modeled postcondition. Supported applicability establishes neither the assumption nor BHL knowledge of it; residual assumptions stay visible. Statistical belief does not imply empirical truth.
+    - **Composition boundary:** Require exact source, claim interpretation, model, method, execution and evidence bindings. Prove selected-dependency warrant loss under quarantine without invalidating the conditional theorem, and safe-update transport through explicit rebinding. Alternative support may survive. A conjunction of two accepted certificates alone does not discharge these obligations.
+    - **History and context boundary:** BHL observation equivalence and Lara accepted-context bridges have distinct modalities. The BHL baseline models complete histories; the artifact bridge must exhibit the limit of incomplete submitted records without claiming physical completeness. The general partial-history calculus and broader revision remain in the wider process-theory workstream.
+    - **Evidence:** `docs/theory-bhl-decision.md`; `plans/belief-hoare-logic/README.md`; `ara/trace/exploration_tree.yaml:N368_bhl_artifact_approval`. These are approved requirements, not proof evidence.
+    - **Provenance:** user-revised
+    - **Open:** [BHL implementation](https://github.com/ARA-Labs/Lara/issues/24) and [wider process theory](https://github.com/ARA-Labs/Lara/issues/23); empirical experiment design remains behind the wider theory acceptance.
+    - **Last revised:** 2026-10-07 (2026-10-07_002#3)
+  signal: verbal-affirmation
+  provenance: user-revised
+  from_staging: O204
+  note: >-
+    User approved revising the plans around the reviewed artifact semantics.
+    O204's baseline is retained; O205's sequential order is explicitly superseded
+    by N368, not promoted unchanged. This is an approved requirement, not proof.
+key_context:
+- turn: 1
+  excerpt: >-
+    User: let's checkout a new branch for researching and implementing BHL,
+    from main directly with the BHL plan.
+- turn: 1
+  excerpt: >-
+    Prior process planning is referenced at revision
+    5ba5f63838fae765ebc5fda1818710bbefd8d5b8, without importing its unrelated changes.
+    Detailed BHL scope and numeric-library choices require B0 review.
+- turn: 2
+  excerpt: >-
+    User asks whether to finish all BHL work in a single PR and requests plans
+    in a folder with one file per PR if not; subsequent instructions say continue.
+- turn: 3
+  excerpt: "User: I agree. revise then plan as you see fit, then mark it approved"
+- turn: 3
+  excerpt: >-
+    The affirmed review treats Lara as a lower-level semantic language for ARA,
+    with BHL as one method component. Approval covers the revised plan;
+    mathematical definitions, paper/numeric choices and implementation remain due.
+- turn: 4
+  excerpt: "User: sure, add this to the plans"
+- turn: 4
+  excerpt: >-
+    The approved explanation distinguishes citing existing mathematics from
+    supplying a machine-checked dependency. Reuse compatible checked proofs
+    where available; otherwise mechanize the paper's arguments and separately
+    prove Lara's implementation correspondence and composition.
+open_threads:
+- Execute approved PR 01 artifact/paper contract and numeric dependency review, tracked by issue 24.
+- Complete bounded BHL composition while preserving issue 23's wider theory gate before experiment design.
+ai_suggestions_pending: []
+verification:
+  scope: Planning documents and research records only; no implementation exists.
+  results:
+  - Plan house-style, local links and B0-B8 ordering checks passed.
+  - "make ara-source-spans: PASS, 66 quotations."
+  - "make ara-session-index: PASS, 83 sessions."
+  - "make ara-observations: PASS, 190 unique effective observations."
+  limitations:
+  - Installed write-doc check-style.sh was unavailable; equivalent inline checks ran.
+  - >-
+    GitHub lookup of prior local revision 5ba5f63838fae765ebc5fda1818710bbefd8d5b8
+    returned HTTP 422. The plan now uses local git show provenance commands.
+  - No BHL runtime, Lean proof check or empirical evaluation ran.
+turn_2_verification:
+  scope: PR-plan documents and research records; no Lean or runtime implementation changed.
+  results:
+  - Nine numbered plans and the shared index passed navigation, dependency, heading, fence and local-link checks.
+  - Original B0-B8 owners, contract paragraphs, paper-component inventory and proposed modules retained coverage.
+  - Former single-file plan removed; committed original verified at 2ffbbf7.
+  - "make ara-source-spans: PASS, 66 quotations."
+  - "make ara-session-index: PASS, 83 sessions."
+  - "make ara-observations: PASS, 191 unique effective observations."
+  limitations:
+  - No BHL runtime, new Lean proof, implementation local-gates or empirical evaluation ran.
+  - The installed style checker remains unavailable; equivalent inline document checks ran.
+turn_3_verification:
+  scope: Approved plans, architectural decision and research records; no runtime implementation.
+  results:
+  - Installed write-doc/scripts/check-style.sh passed for all numbered plans, the index and the decision record.
+  - Nine approved/pending plan banners and the revised dependency graph passed the inline contract check.
+  - All 33 local Markdown links and fragments in the plan set and decision record resolved.
+  - Issue 24 updated successfully; issue 23 ownership comment published at issuecomment-6052392374.
+  limitations:
+  - No BHL runtime, new Lean proof, implementation local-gates or empirical evaluation ran.
+turn_4_verification:
+  scope: Mechanization-plan documentation and research records only.
+  results:
+  - Installed write-doc/scripts/check-style.sh passed for the full plan set and architectural decision.
+  - Nine approved/pending plans retained the dependency graph; code fences and all 33 local links/fragments passed.
+  limitations:
+  - External mechanization availability has not been audited; PR 01 owns that search.
+  - No BHL runtime, new Lean proof, implementation local-gates or empirical evaluation ran.

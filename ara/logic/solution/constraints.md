@@ -314,3 +314,15 @@ deferred.
 - **Sources:** `docs/evidence-admission-decision.md` §9 (settled `lara-evidence@0.1` contract); `ara/evidence/results/certified_evidence_landing_2026-10-06.md` (verbatim gate output); `docs/evidence-admission-inventory.md` (ten-leaf original-byte portfolio)
 - **Open:** human payload-to-proposition faithfulness review and the additive measured-input / report freeze — [issue 20](https://github.com/ARA-Labs/Lara/issues/20)
 - **Last revised:** 2026-10-06 (2026-10-06_001#5)
+
+## BHL artifact semantics (approved, implementation pending)
+
+- **Status:** Approved architecture; the paper audit, exact mathematical contract, numeric-library choice and implementation remain pending.
+- **Constraint:** Lara expresses research-artifact semantics as a lower-level language of ARA. BHL supplies statistical-method semantics alongside argumentation and context semantics. Preserve the faithful general reference logic, soundness and relative completeness, exact finite instances and checked source/evidence composition.
+- **Assumption boundary:** Conditional method validity, modeled application and defeasible artifact warrant are separate judgments. Actual modeled precondition satisfaction and a bound run are required to derive the modeled postcondition. Supported applicability establishes neither the assumption nor BHL knowledge of it; residual assumptions stay visible. Statistical belief does not imply empirical truth.
+- **Composition boundary:** Require exact source, claim interpretation, model, method, execution and evidence bindings. Prove selected-dependency warrant loss under quarantine without invalidating the conditional theorem, and safe-update transport through explicit rebinding. Alternative support may survive. A conjunction of two accepted certificates alone does not discharge these obligations.
+- **History and context boundary:** BHL observation equivalence and Lara accepted-context bridges have distinct modalities. The BHL baseline models complete histories; the artifact bridge must exhibit the limit of incomplete submitted records without claiming physical completeness. The general partial-history calculus and broader revision remain in the wider process-theory workstream.
+- **Evidence:** `docs/theory-bhl-decision.md`; `plans/belief-hoare-logic/README.md`; `ara/trace/exploration_tree.yaml:N368_bhl_artifact_approval`. These are approved requirements, not proof evidence.
+- **Provenance:** user-revised
+- **Open:** [BHL implementation](https://github.com/ARA-Labs/Lara/issues/24) and [wider process theory](https://github.com/ARA-Labs/Lara/issues/23); empirical experiment design remains behind the wider theory acceptance.
+- **Last revised:** 2026-10-07 (2026-10-07_002#3)
