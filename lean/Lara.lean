@@ -530,3 +530,10 @@ import Lara.BHL.ControlLogEdges
 import Lara.BHL.ControlLogBinders
 import Lara.BHL.Completeness
 import Lara.Examples.BHLCompleteness
+import Lara.BHL.FiniteProbability
+import Lara.BHL.Tests.Binary
+import Lara.Examples.BHLBinaryModel
+import Lara.Examples.BHLBinaryScience
+import Lara.Examples.BHLBinaryRuns
+import Lara.Examples.BHLStatistical
+import Lara.Examples.BHLFiniteBelief
