@@ -517,3 +517,16 @@ import Lara.BHL.StatisticalRules
 import Lara.Examples.BHLSoundnessDataset
 import Lara.Examples.BHLSoundnessScience
 import Lara.Examples.BHLSoundness
+import Lara.BHL.ControlCoding
+import Lara.BHL.ControlMetadata
+import Lara.BHL.WeakestLiberal
+import Lara.BHL.WlpRepresentation
+import Lara.BHL.ControlLogData
+import Lara.BHL.ControlLogLaws
+import Lara.BHL.ControlLogSyntax
+import Lara.BHL.ControlLogTerms
+import Lara.BHL.CompletenessCore
+import Lara.BHL.ControlLogEdges
+import Lara.BHL.ControlLogBinders
+import Lara.BHL.Completeness
+import Lara.Examples.BHLCompleteness
