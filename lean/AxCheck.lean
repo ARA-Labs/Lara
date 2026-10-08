@@ -16,6 +16,14 @@ import Lara.Evidence.Composition
 import Lara.BHL.Types
 import Lara.BHL.Numeric
 import Lara.BHL.ReferenceAudit
+import Lara.BHL.Value
+import Lara.BHL.History
+import Lara.BHL.State
+import Lara.BHL.Trace
+import Lara.BHL.TraceLaws
+import Lara.BHL.Model
+import Lara.BHL.ModelLaws
+import Lara.Examples.BHLModel
 import Lara.ND
 import Lara.NDNamed
 import Lara.Strict
@@ -4868,3 +4876,158 @@ context's own arguments make unavailable. -/
 #print axioms Lara.BHL.realDiracTest_inhabits
 #print axioms Lara.BHL.realDiracTest_tailProbability_zero
 #print axioms Lara.BHL.realDiracTest_tailProbability_one
+
+#print axioms Lara.BHL.History.empty_count
+#print axioms Lara.BHL.History.empty_eq_zero
+#print axioms Lara.BHL.History.eq_iff_counts
+#print axioms Lara.BHL.History.recordRepeated_count_other
+#print axioms Lara.BHL.History.recordRepeated_count_self
+#print axioms Lara.BHL.History.recordRepeated_succ
+#print axioms Lara.BHL.History.recordRepeated_zero
+#print axioms Lara.BHL.History.record_card
+#print axioms Lara.BHL.History.record_comm
+#print axioms Lara.BHL.History.record_count_other
+#print axioms Lara.BHL.History.record_count_self
+#print axioms Lara.BHL.History.record_ne_self
+#print axioms Lara.BHL.History.record_preserves_entries
+#print axioms Lara.BHL.History.record_strict
+#print axioms Lara.BHL.Memory.assemble_projections
+#print axioms Lara.BHL.Memory.ext
+#print axioms Lara.BHL.Memory.hidden_assemble
+#print axioms Lara.BHL.Memory.memory_update_typed
+#print axioms Lara.BHL.Memory.observable_assemble
+#print axioms Lara.BHL.Memory.read_empty
+#print axioms Lara.BHL.Memory.read_rename
+#print axioms Lara.BHL.Memory.read_update_invisible
+#print axioms Lara.BHL.Memory.read_update_other
+#print axioms Lara.BHL.Memory.read_update_self
+#print axioms Lara.BHL.Memory.rename_binding_preserves
+#print axioms Lara.BHL.Memory.rename_comp
+#print axioms Lara.BHL.Memory.rename_empty
+#print axioms Lara.BHL.Memory.rename_id
+#print axioms Lara.BHL.Memory.rename_symm
+#print axioms Lara.BHL.Memory.rename_update
+#print axioms Lara.BHL.Memory.update_overwrite
+#print axioms Lara.BHL.Model.accessible_equivalence
+#print axioms Lara.BHL.Model.accessible_refl
+#print axioms Lara.BHL.Model.accessible_symm
+#print axioms Lara.BHL.Model.accessible_trans
+#print axioms Lara.BHL.Model.validView_nonempty
+#print axioms Lara.BHL.Model.validWorld_nonempty
+#print axioms Lara.BHL.Model.viewOf_back
+#print axioms Lara.BHL.Model.viewOf_forth
+#print axioms Lara.BHL.Model.viewOf_surjective
+#print axioms Lara.BHL.Model.view_accessible_back
+#print axioms Lara.BHL.Model.view_accessible_forth
+#print axioms Lara.BHL.ModelExamples.alias_count_one
+#print axioms Lara.BHL.ModelExamples.alias_names_distinct
+#print axioms Lara.BHL.ModelExamples.aliases_have_equal_values
+#print axioms Lara.BHL.ModelExamples.different_histories
+#print axioms Lara.BHL.ModelExamples.hidden_alternatives_accessible
+#print axioms Lara.BHL.ModelExamples.hidden_alternatives_different
+#print axioms Lara.BHL.ModelExamples.histories_initially_empty
+#print axioms Lara.BHL.ModelExamples.initial_admitted
+#print axioms Lara.BHL.ModelExamples.initial_has_defined_result
+#print axioms Lara.BHL.ModelExamples.lawful_prefix
+#print axioms Lara.BHL.ModelExamples.mathematical_carriers_defined
+#print axioms Lara.BHL.ModelExamples.model_inhabited
+#print axioms Lara.BHL.ModelExamples.reassignment_changes_lookup_not_ledger
+#print axioms Lara.BHL.ModelExamples.recordSnapshot_admitted
+#print axioms Lara.BHL.ModelExamples.repeated_admitted
+#print axioms Lara.BHL.ModelExamples.repeated_combination_keeps_multiplicity
+#print axioms Lara.BHL.ModelExamples.repeated_count_two
+#print axioms Lara.BHL.ModelExamples.same_final_memory
+#print axioms Lara.BHL.ModelExamples.same_memory_different_observations
+#print axioms Lara.BHL.ModelExamples.single_admitted
+#print axioms Lara.BHL.State.withHidden_hidden
+#print axioms Lara.BHL.State.withHidden_history
+#print axioms Lara.BHL.State.withHidden_visible
+#print axioms Lara.BHL.Variable.rename_comp
+#print axioms Lara.BHL.Variable.rename_id
+#print axioms Lara.BHL.Variable.rename_symm
+#print axioms Lara.BHL.World.extend_current
+#print axioms Lara.BHL.World.extend_prefix
+#print axioms Lara.BHL.World.extend_trace
+#print axioms Lara.BHL.World.initial_history
+#print axioms Lara.BHL.World.rebuildHidden_current
+#print axioms Lara.BHL.World.rebuildHidden_current_hidden
+#print axioms Lara.BHL.World.rebuildHidden_initial_hidden
+#print axioms Lara.BHL.World.rebuildHidden_samplingProvenance
+#print axioms Lara.BHL.World.rebuildHidden_trace
+#print axioms Lara.BHL.World.samplingProvenance_extend_command
+#print axioms Lara.BHL.World.samplingProvenance_extend_sample
+#print axioms Lara.BHL.World.start_current
+#print axioms Lara.BHL.World.trace_nonempty
+#print axioms Lara.BHL.accessible_current_observation
+#print axioms Lara.BHL.accessible_current_visible
+#print axioms Lara.BHL.accessible_dataset_eq
+#print axioms Lara.BHL.accessible_history_eq
+#print axioms Lara.BHL.accessible_refl
+#print axioms Lara.BHL.accessible_sampling_provenance
+#print axioms Lara.BHL.accessible_symm
+#print axioms Lara.BHL.accessible_trans
+#print axioms Lara.BHL.accessible_visible_eq
+#print axioms Lara.BHL.admitted_current_hidden
+#print axioms Lara.BHL.admitted_current_hidden_binding
+#print axioms Lara.BHL.admitted_extend
+#print axioms Lara.BHL.admitted_hidden
+#print axioms Lara.BHL.admitted_hidden_mem_compatible
+#print axioms Lara.BHL.admitted_initial
+#print axioms Lara.BHL.admitted_initial_hidden_mem_compatible
+#print axioms Lara.BHL.admitted_prefix
+#print axioms Lara.BHL.admitted_rebuildHidden_iff
+#print axioms Lara.BHL.admitted_sample_transition
+#print axioms Lara.BHL.admitted_start
+#print axioms Lara.BHL.compatibleHidden_eq_of_accessible
+#print axioms Lara.BHL.compatibleHidden_rebuildHidden
+#print axioms Lara.BHL.constantHidden_binding
+#print axioms Lara.BHL.constantHidden_current
+#print axioms Lara.BHL.constantHidden_extend
+#print axioms Lara.BHL.constantHidden_prefix
+#print axioms Lara.BHL.constantHidden_rebuildHidden
+#print axioms Lara.BHL.decompose_conj
+#print axioms Lara.BHL.decompose_conj_assoc
+#print axioms Lara.BHL.decompose_conj_comm
+#print axioms Lara.BHL.decompose_count_conj
+#print axioms Lara.BHL.decompose_count_disj
+#print axioms Lara.BHL.decompose_count_leaf_self
+#print axioms Lara.BHL.decompose_disj
+#print axioms Lara.BHL.decompose_disj_assoc
+#print axioms Lara.BHL.decompose_disj_comm
+#print axioms Lara.BHL.decompose_leaf
+#print axioms Lara.BHL.decompose_repeated_pair_conj
+#print axioms Lara.BHL.decompose_repeated_pair_disj
+#print axioms Lara.BHL.extend_accessible_iff
+#print axioms Lara.BHL.history_count_alias
+#print axioms Lara.BHL.history_count_lookup
+#print axioms Lara.BHL.history_count_reassignment
+#print axioms Lara.BHL.history_count_update_other
+#print axioms Lara.BHL.history_count_update_self
+#print axioms Lara.BHL.model_has_world
+#print axioms Lara.BHL.observeState_withHidden
+#print axioms Lara.BHL.observe_current
+#print axioms Lara.BHL.observe_extend
+#print axioms Lara.BHL.observe_rebuildHidden
+#print axioms Lara.BHL.populationId_index_injective
+#print axioms Lara.BHL.rebuildHidden_accessible
+#print axioms Lara.BHL.semanticView_rebuildHidden
+#print axioms Lara.BHL.traceEdges_append
+#print axioms Lara.BHL.traceEdges_prefix
+#print axioms Lara.BHL.traceEdges_sample
+#print axioms Lara.BHL.traceEdges_take
+#print axioms Lara.BHL.traceEdges_take_drop
+#print axioms Lara.BHL.view_accessible_back
+#print axioms Lara.BHL.view_accessible_equivalence
+#print axioms Lara.BHL.view_accessible_forth
+#print axioms Lara.BHL.view_accessible_refl
+#print axioms Lara.BHL.view_accessible_symm
+#print axioms Lara.BHL.view_accessible_trans
+#print axioms Lara.BHL.measurable_list_coordinate
+#print axioms Lara.BHL.value_population_carrier
+#print axioms Lara.BHL.value_measurable_product
+#print axioms Lara.BHL.value_population_mass
+#print axioms Lara.BHL.value_nonempty
+#print axioms Lara.BHL.ModelExamples.joint_list_boolean_laws_inhabit_memory
+#print axioms Lara.BHL.ModelExamples.joint_law_normalized
+#print axioms Lara.BHL.traceAllowed_extend
+#print axioms Lara.BHL.compatibleHidden_extend_command
