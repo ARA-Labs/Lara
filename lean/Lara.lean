@@ -489,3 +489,17 @@ import Lara.BHL.TraceLaws
 import Lara.BHL.Model
 import Lara.BHL.ModelLaws
 import Lara.Examples.BHLModel
+import Lara.BHL.Ghost
+import Lara.BHL.NumericalEvent
+import Lara.BHL.Syntax
+import Lara.BHL.Interpretation
+import Lara.BHL.Assertion
+import Lara.BHL.AssertionLaws
+import Lara.BHL.Belief
+import Lara.BHL.GhostTransforms
+import Lara.BHL.GhostSubstitution
+import Lara.BHL.Substitution
+import Lara.BHL.BeliefEventLaws
+import Lara.BHL.BeliefLaws
+import Lara.BHL.Dependencies
+import Lara.Examples.BHLBelief
