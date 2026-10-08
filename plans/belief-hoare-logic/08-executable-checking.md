@@ -69,7 +69,7 @@ Exact finite execution is reproducible but narrower than general BHL semantics. 
 
 ## Migration
 
-This PR establishes standalone BHL execution without adding the Lara bridge. Existing verdict bytes, anchor discovery and source/evidence behavior stay unchanged. PR 09 consumes the exact evidence and extends the same runner with bridge outcomes; it may land before PR 06. For the mandatory B8 join, the last-landing PR must base or rebase on main containing the other branch, record the complete inventory and run integrated gates on its candidate tree before review. Record workstream completion only after both PR 06 and PR 09 merge. Remove this plan after its executable and proofs land.
+This PR establishes standalone BHL execution without adding the Lara bridge. Existing verdict bytes, anchor discovery and source/evidence behavior stay unchanged. PR 09 consumes the exact evidence and extends the same runner with bridge outcomes. Every stage PR targets `feat/belief-hoare-logic`; PR 06 has already landed there. PR 09 must execute B8's joined inventory and integrated gates on that integration candidate before review. Record workstream completion only after PR 06 and PR 09 land, then bump the version, merge the completed feature to main with a merge commit, and publish and verify the release. Remove this plan after its executable and proofs land.
 
 ## Recommendations
 

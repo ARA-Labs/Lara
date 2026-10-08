@@ -5,7 +5,7 @@
 
 Develop Belief Hoare Logic (BHL) as Lara's statistical-method semantics within its role as a lower-level language for Agent-Native Research Artifacts (ARA). Define the artifact-level meaning and assumption boundaries first, then mechanize the reference logic and its composition with checked arguments. Retain soundness, relative completeness, concrete statistical instances and executable checking. The Lara-specific work must explain how evidence changes affect methodological warrant; attaching two successful checks is insufficient.
 
-Plan status: approved by the researcher on 2026-10-07. Implementation status: PR 01–06 passed server acceptance on 2026-10-08, including concrete WLP representation, instantiated relative completeness, actual runtime smoke and complete local gates. PR 07–09 remain unimplemented. The inventory through PR 06 has 1,306 mapped BHL theorems. PR 01–02 also passed the three ARA gates; the qualifying research record is captured at the end of the implementation session. Every stage targets `feat/belief-hoare-logic`. [Issue #24](https://github.com/ARA-Labs/Lara/issues/24) tracks remaining work. The [architectural decision](../../docs/theory-bhl-decision.md) owns the contract; the [theorem record](../../docs/theory-bhl.md) owns exact assumptions and exercised acceptance evidence.
+Plan status: approved by the researcher on 2026-10-07. Implementation status: PR 01–07 passed server acceptance on 2026-10-08, including concrete WLP representation, instantiated relative completeness, informative calibrated binary tests, actual statistical procedures/countermodels, runtime smoke and complete local gates. PR 08–09 remain unimplemented. The inventory through PR 07 has 1,491 mapped BHL theorems. PR 01–02 also passed the three ARA gates; the qualifying research record is captured at the end of the implementation session. Every stage targets `feat/belief-hoare-logic`. [Issue #24](https://github.com/ARA-Labs/Lara/issues/24) tracks remaining work. The [architectural decision](../../docs/theory-bhl-decision.md) owns the contract; the [theorem record](../../docs/theory-bhl.md) owns exact assumptions and exercised acceptance evidence.
 
 ## Problem
 
@@ -43,7 +43,7 @@ PR numbers identify plans; they do not impose a total merge order.
 | 04 | [Completed program execution and parallel correspondence](../../docs/theory-bhl.md#what-completed-pr-04-on-the-server) | B3 | PR 03 |
 | 05 | [Completed independent derivations and soundness](../../docs/theory-bhl.md#what-completed-pr-05-on-the-server) | B4, soundness | PR 04 |
 | 06 | [Completed legal representation and relative completeness](../../docs/theory-bhl.md#what-completed-pr-06-on-the-server) | B4, completeness | PR 05 |
-| 07 | [Exact finite statistical instance](07-finite-statistical-instance.md) | B5 | PR 05 |
+| 07 | [Completed exact finite statistical instance](../../docs/theory-bhl.md#what-completed-pr-07-on-the-server) | B5 | PR 05 |
 | 08 | [Executable proof checking and finite semantics](08-executable-checking.md) | B6 | PR 07 |
 | 09 | [Lara composition and acceptance](09-lara-bridge-and-acceptance.md) | B7, evidence-sensitive warrant and revision witnesses | PR 08 |
 
