@@ -481,3 +481,11 @@ import Lara.Evidence.Composition
 import Lara.BHL.Types
 import Lara.BHL.Numeric
 import Lara.BHL.ReferenceAudit
+import Lara.BHL.Value
+import Lara.BHL.History
+import Lara.BHL.State
+import Lara.BHL.Trace
+import Lara.BHL.TraceLaws
+import Lara.BHL.Model
+import Lara.BHL.ModelLaws
+import Lara.Examples.BHLModel
