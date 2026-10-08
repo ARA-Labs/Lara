@@ -537,3 +537,8 @@ import Lara.Examples.BHLBinaryScience
 import Lara.Examples.BHLBinaryRuns
 import Lara.Examples.BHLStatistical
 import Lara.Examples.BHLFiniteBelief
+import Lara.BHL.RuleCode
+import Lara.BHL.Check
+import Lara.BHL.FiniteModel
+import Lara.BHL.FiniteExecution
+import Lara.BHL.CheckedMethods

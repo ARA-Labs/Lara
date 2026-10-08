@@ -1,5 +1,5 @@
 name = "lara"
-defaultTargets = ["Lara", "lara-driver", "lara-map-driver", "presentation-shape", "surface-conformance", "pw-example", "pw-run", "axiom-withdrawal", "evidence-driver"]
+defaultTargets = ["Lara", "lara-driver", "lara-map-driver", "presentation-shape", "surface-conformance", "pw-example", "pw-run", "bhl-examples", "axiom-withdrawal", "evidence-driver"]
 
 # The core calculus remains independent of Mathlib. BHL uses the explicitly
 # approved pin for genuine real numbers and probability measures.
@@ -78,3 +78,7 @@ root = "Lara.AxiomWithdrawalMain"
 [[lean_exe]]
 name = "evidence-driver"
 root = "Lara.EvidenceDriver"
+
+[[lean_exe]]
+name = "bhl-examples"
+root = "Lara.BHL.ExampleMain"
