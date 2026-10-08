@@ -72,6 +72,11 @@ import Lara.Examples.BHLBinaryScience
 import Lara.Examples.BHLBinaryRuns
 import Lara.Examples.BHLStatistical
 import Lara.Examples.BHLFiniteBelief
+import Lara.BHL.RuleCode
+import Lara.BHL.Check
+import Lara.BHL.FiniteModel
+import Lara.BHL.FiniteExecution
+import Lara.BHL.CheckedMethods
 import Lara.ND
 import Lara.NDNamed
 import Lara.Strict
@@ -6394,3 +6399,92 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.BHLFiniteBelief.accounted_pair_checked
 #print axioms Lara.Examples.BHLFiniteBelief.exceptional_checked_false_alternative
 #print axioms Lara.Examples.BHLFiniteBelief.hidden_checked_report_unchanged
+
+-- PR08: executable rule decoding, declared finite semantics, exhaustive runs, and exact applications.
+-- Lara.BHL.RuleCode: 4 public theorems.
+#print axioms Lara.BHL.Primitive.pureAssignmentCheck_iff
+#print axioms Lara.BHL.EntailmentBinding.entails
+#print axioms Lara.BHL.DerivationCodeBinding.derivation
+#print axioms Lara.BHL.DerivationSlotBinding.derivation
+-- Lara.BHL.Check: 20 public theorems.
+#print axioms Lara.BHL.EntailmentEvidence.bound
+#print axioms Lara.BHL.checkDerivation_derivation
+#print axioms Lara.BHL.checkDerivation_sound
+#print axioms Lara.BHL.checkDerivation_application
+#print axioms Lara.BHL.checkDerivation_wellFormed
+#print axioms Lara.BHL.DerivationCheckExamples.reflexiveConsequence_accepted
+#print axioms Lara.BHL.DerivationCheckExamples.assignment_accepted
+#print axioms Lara.BHL.DerivationCheckExamples.testRule_accepted
+#print axioms Lara.BHL.DerivationCheckExamples.skipSequence_accepted
+#print axioms Lara.BHL.DerivationCheckExamples.skipConditional_accepted
+#print axioms Lara.BHL.DerivationCheckExamples.skipLoop_accepted
+#print axioms Lara.BHL.DerivationCheckExamples.skipParallel_accepted
+#print axioms Lara.BHL.DerivationCheckExamples.missingImplication_rejected
+#print axioms Lara.BHL.DerivationCheckExamples.missingFinalImplication_rejected
+#print axioms Lara.BHL.DerivationCheckExamples.invalidImplication_rejected
+#print axioms Lara.BHL.DerivationCheckExamples.missingPremise_rejected
+#print axioms Lara.BHL.DerivationCheckExamples.invalidAssignment_rejected
+#print axioms Lara.BHL.DerivationCheckExamples.testViaAssign_rejected
+#print axioms Lara.BHL.DerivationCheckExamples.invalidRecursivePremise_rejected
+#print axioms Lara.BHL.DerivationCheckExamples.noninterferingFailure_rejected
+-- Lara.BHL.FiniteModel: 20 public theorems.
+#print axioms Lara.BHL.FiniteModel.hiddenCarrier_complete
+#print axioms Lara.BHL.FiniteModel.admitted_hidden_canonical
+#print axioms Lara.BHL.FiniteModel.endpoint_hidden
+#print axioms Lara.BHL.FiniteModel.endpoint_datasets
+#print axioms Lara.BHL.FiniteModel.accessible_endpoint_coverage
+#print axioms Lara.BHL.FiniteModel.accessible_view_coverage
+#print axioms Lara.BHL.FiniteModel.carrier_endpoint_admitted
+#print axioms Lara.BHL.FiniteModel.accessible_views_exact
+#print axioms Lara.BHL.FiniteModel.evalBoolean_correct
+#print axioms Lara.BHL.FiniteModel.evalDataset_correct
+#print axioms Lara.BHL.FiniteModel.evalModal_correct
+#print axioms Lara.BHL.FiniteModel.evalFinite_reference_correct
+#print axioms Lara.BHL.FiniteModel.evalFinite_correct
+#print axioms Lara.BHL.FiniteModel.checkFiniteEntailment_correct
+#print axioms Lara.BHL.FiniteModel.checkSatisfaction_correct
+#print axioms Lara.BHL.FiniteModel.checkSatisfaction_pre_false
+#print axioms Lara.BHL.FiniteModel.checkSatisfaction_post_false
+#print axioms Lara.BHL.FiniteModel.Examples.quantified_examples
+#print axioms Lara.BHL.FiniteModel.Examples.epistemic_examples
+#print axioms Lara.BHL.FiniteModel.Examples.belief_ledger_examples
+-- Lara.BHL.FiniteExecution: 28 public theorems.
+#print axioms Lara.BHL.FiniteExecution.integer_correspondence
+#print axioms Lara.BHL.FiniteExecution.guard_correspondence
+#print axioms Lara.BHL.FiniteExecution.command_effect
+#print axioms Lara.BHL.FiniteExecution.command_ledger
+#print axioms Lara.BHL.FiniteExecution.nextAll_correspondence
+#print axioms Lara.BHL.FiniteExecution.nextAll_complete
+#print axioms Lara.BHL.FiniteExecution.nextAll_empty_iff
+#print axioms Lara.BHL.FiniteExecution.explore_correspondence
+#print axioms Lara.BHL.FiniteExecution.explore_coverage
+#print axioms Lara.BHL.FiniteExecution.exhaustiveRun_correspondence
+#print axioms Lara.BHL.FiniteExecution.exhaustiveRun_coverage
+#print axioms Lara.BHL.FiniteExecution.exhaustiveRun_executes
+#print axioms Lara.BHL.FiniteExecution.replay_correspondence
+#print axioms Lara.BHL.FiniteExecution.scheduledRun_correspondence
+#print axioms Lara.BHL.FiniteExecution.scheduledRun_executes
+#print axioms Lara.BHL.FiniteExecution.Smoke.nested_successor_codes
+#print axioms Lara.BHL.FiniteExecution.Smoke.terminal_zero
+#print axioms Lara.BHL.FiniteExecution.Smoke.nonterminal_zero
+#print axioms Lara.BHL.FiniteExecution.Smoke.completed_cases
+#print axioms Lara.BHL.FiniteExecution.Smoke.mixed_command_order
+#print axioms Lara.BHL.FiniteExecution.Smoke.all_nested_orders
+#print axioms Lara.BHL.FiniteExecution.Smoke.undefined_guard
+#print axioms Lara.BHL.FiniteExecution.Smoke.malformed_parallel
+#print axioms Lara.BHL.FiniteExecution.Smoke.fuel_exhaustion
+#print axioms Lara.BHL.FiniteExecution.Smoke.repeated_full_ledger
+#print axioms Lara.BHL.FiniteExecution.Smoke.pvalue_no_ledger
+#print axioms Lara.BHL.FiniteExecution.Smoke.protected_old_report
+#print axioms Lara.BHL.FiniteExecution.Smoke.calibrated_report
+-- Lara.BHL.CheckedMethods: 10 public theorems.
+#print axioms Lara.BHL.CheckedMethods.method_checked
+#print axioms Lara.BHL.CheckedMethods.method_derivation
+#print axioms Lara.BHL.CheckedMethods.method_valid
+#print axioms Lara.BHL.CheckedMethods.method_run_completed
+#print axioms Lara.BHL.CheckedMethods.point_reifies
+#print axioms Lara.BHL.CheckedMethods.method_run_endpoint
+#print axioms Lara.BHL.CheckedMethods.method_initial
+#print axioms Lara.BHL.CheckedMethods.method_execution
+#print axioms Lara.BHL.CheckedMethods.conditional_false_not_applicable
+#print axioms Lara.BHL.CheckedMethods.application_post
