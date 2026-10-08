@@ -5,7 +5,7 @@
 
 Develop Belief Hoare Logic (BHL) as Lara's statistical-method semantics within its role as a lower-level language for Agent-Native Research Artifacts (ARA). Define the artifact-level meaning and assumption boundaries first, then mechanize the reference logic and its composition with checked arguments. Retain soundness, relative completeness, concrete statistical instances and executable checking. The Lara-specific work must explain how evidence changes affect methodological warrant; attaching two successful checks is insufficient.
 
-Plan status: approved by the researcher on 2026-10-07. Implementation status: PR 01–04 passed server acceptance on 2026-10-08; PR 05–09 remain unimplemented. Accepted stages have 814 mapped BHL theorems with actual smoke and complete `make local-gates` evidence. PR 01–02 also passed the three ARA gates; the qualifying research record is captured at the end of the implementation session. Every stage targets `feat/belief-hoare-logic`. [Issue #24](https://github.com/ARA-Labs/Lara/issues/24) tracks the remaining work. The settled architectural decision is [recorded in docs](../../docs/theory-bhl-decision.md), and exact theorem assumptions and current acceptance evidence are in the [theorem record](../../docs/theory-bhl.md).
+Plan status: approved by the researcher on 2026-10-07. Implementation status: PR 01–05 passed server acceptance on 2026-10-08; PR 06–09 remain unimplemented. Accepted stages have 1,119 mapped BHL theorems with actual smoke and complete `make local-gates` evidence. PR 01–02 also passed the three ARA gates; the qualifying research record is captured at the end of the implementation session. Every stage targets `feat/belief-hoare-logic`. [Issue #24](https://github.com/ARA-Labs/Lara/issues/24) tracks the remaining work. The settled architectural decision is [recorded in docs](../../docs/theory-bhl-decision.md), and exact theorem assumptions and current acceptance evidence are in the [theorem record](../../docs/theory-bhl.md).
 
 ## Problem
 
@@ -41,7 +41,7 @@ PR numbers identify plans; they do not impose a total merge order.
 | 02 | [Completed epistemic model and test history](../../docs/theory-bhl.md#what-completed-pr-02-on-the-server) | B1 | PR 01 |
 | 03 | [Completed assertions, substitution and statistical belief](../../docs/theory-bhl.md#what-completed-pr-03-on-the-server) | B2 | PR 02 |
 | 04 | [Completed program execution and parallel correspondence](../../docs/theory-bhl.md#what-completed-pr-04-on-the-server) | B3 | PR 03 |
-| 05 | [BHL derivations and soundness](05-derivations-and-soundness.md) | B4, soundness | PR 04 |
+| 05 | [Completed independent derivations and soundness](../../docs/theory-bhl.md#what-completed-pr-05-on-the-server) | B4, soundness | PR 04 |
 | 06 | [Relative completeness](06-relative-completeness.md) | B4, completeness | PR 05 |
 | 07 | [Exact finite statistical instance](07-finite-statistical-instance.md) | B5 | PR 05 |
 | 08 | [Executable proof checking and finite semantics](08-executable-checking.md) | B6 | PR 07 |

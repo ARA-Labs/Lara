@@ -510,3 +510,10 @@ import Lara.BHL.ExecutionLaws
 import Lara.BHL.ControlGraph
 import Lara.BHL.Parallel
 import Lara.Examples.BHLExecution
+import Lara.BHL.Derivation
+import Lara.BHL.Soundness
+import Lara.BHL.StatisticalFrame
+import Lara.BHL.StatisticalRules
+import Lara.Examples.BHLSoundnessDataset
+import Lara.Examples.BHLSoundnessScience
+import Lara.Examples.BHLSoundness
