@@ -83,6 +83,16 @@ class SemanticsRegistryTests(unittest.TestCase):
         self.assertIn("unregistered", result.stdout.lower())
         self.assertIn("omittedUnimported", result.stdout)
 
+    def test_library_main_collision_does_not_hide_unregistered_declaration(self):
+        first = self.fixture("def main : IO Unit := pure ()\n", "First")
+        second = self.fixture(
+            "def main : IO Unit := pure ()\n"
+            "def omittedAfterCollision : ExtensionSemantics := groundedSem\n", "Second")
+        result = self.check(first, second)
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("unregistered", result.stdout.lower())
+        self.assertIn("omittedAfterCollision", result.stdout)
+
     def test_root_scripts_with_separate_main_declarations_pass(self):
         modules = []
         for suffix in ("One", "Two"):

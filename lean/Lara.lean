@@ -503,3 +503,10 @@ import Lara.BHL.BeliefEventLaws
 import Lara.BHL.BeliefLaws
 import Lara.BHL.Dependencies
 import Lara.Examples.BHLBelief
+import Lara.BHL.Program
+import Lara.BHL.Execution
+import Lara.BHL.ProgramLaws
+import Lara.BHL.ExecutionLaws
+import Lara.BHL.ControlGraph
+import Lara.BHL.Parallel
+import Lara.Examples.BHLExecution

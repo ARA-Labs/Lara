@@ -28,6 +28,18 @@ Use the exact assertion and execution semantics merged in PR 03-04. Derivability
 
 Implement the rule inventory frozen in PR 01. Connect assignment rules to PR 03's actual substitution theorem, loop rules to invariant preservation, and parallel rules to PR 04's noninterference/correspondence results. Statistical rules must use the reviewed local test conditions, not a model field that asserts the desired global conclusion.
 
+### Which interfaces must the implementation freeze?
+
+`ValidTriple ctx P C Q` quantifies over every typed ghost environment and actual terminating `executes` witness. `AssertionEntails ctx P Q` carries a proof of the corresponding assertion implication in that exact interpretation/model/context. Neither is a Boolean flag. `Derivation` has exactly the eight constructors named in the assessment; the assignment constructor accepts only pure value/dataset assignments, while the test constructor uses its complete result-and-ledger preimage. Prove `Derivation.wellFormed` and each local soundness lemma before global induction.
+
+Use the faithful program-expression translation for both guard values. A false guard means successful evaluation to `some false`, not failure of evaluation to `some true`: an undefined guard has no transition. This distinction is required for completeness when an undefined loop guard has no terminating outcome. Explain its correspondence to the printed negated guard under definedness; do not change execution or assume every memory read is defined.
+
+Add `StatisticalFrame.lean` and `StatisticalRules.lean` for the five required derived rules. Structural frame certificates must preserve arbitrary legal outer binders and nested knowledge through actual command accessibility forth/back. Reject dependence on the written report or ambient ledger, including alias-sensitive counts; fixed ghost-world/view bodies remain legal when their target is stable. The existing read-support inventory is not already a modal frame theorem.
+
+Derive statistical bookkeeping first: preserved shared assertion, complete canonical ledger, actual report/event equality and report bounds. Then use the proved observable-exception and actual coupling lemmas in ordinary Consequence implications. Keep source meaningfulness, possible alternatives, scientific null-law bindings, distinct outputs and protected first report/dataset explicit. Do not accept the desired whole postcondition preimage or whole-triple validity as a side-condition field. Multiple tests retain the full pair multiset, including repeated equal value/test entries, and consume the selected coupling with both proved marginals.
+
+Reuse actual admitted execution fixtures for inhabited derivations and evaluative smoke. The side-condition counterexample must itself satisfy public `executes`; a noninterfering-check failure alone cannot supply one because well-formedness already excludes that parallel program. Use a well-formed extra test that breaks the proposed exact single-test ledger/postcondition when freshness is omitted.
+
 ### How is the soundness proof constructed?
 
 Use the audited published argument, or the compatible checked proof selected in PR 01 with its representation correspondence. For a local reconstruction, prove global soundness by induction on the explicit `Derivation`. Prove each rule case against satisfaction and execution defined independently in PR 03-04.
