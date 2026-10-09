@@ -2,8 +2,8 @@ import Lean
 import Lara.Semantics.Registry
 
 /-! Repository declaration coverage, separate from the open mathematical interface.
-Each requested module gets a fresh environment so executable `main` declarations
-cannot collide. Registration names come from the core object map's actual body. -/
+Compatible library modules share one environment and declaration scan. Conflicting
+imports split into separate audits; standalone scripts remain isolated. -/
 open Lean Meta
 
 namespace SemanticsRegistryAudit
@@ -23,7 +23,7 @@ private def normalizeType (type : Expr) (fuel : Nat := 128) : MetaM Expr := do
 private def isClosedSemantics (info : ConstantInfo) : MetaM Bool := do
   return (← normalizeType info.type).isConstOf ``Lara.Semantics.ExtensionSemantics
 
-private def audit (target : Name) : MetaM (Array Name) := do
+private def audit (targets : Array Name) : MetaM (Array (Name × Name)) := do
   let env ← getEnv
   let registry ← getConstInfo ``Lara.Semantics.Registry.semanticsInstance
   let some body := registry.value? | throwError "semantics registry has no inspectable object map"
@@ -33,38 +33,62 @@ private def audit (target : Name) : MetaM (Array Name) := do
       registered := registered.insert name
   if registered.isEmpty then
     throwError "semantics registry object map references no closed semantics"
+  let requested : NameSet := targets.foldl (fun names name => names.insert name) {}
   let mut missing := #[]
   for (name, info) in env.constants.toList do
     let some idx := env.getModuleIdxFor? name | continue
-    if env.header.moduleNames[idx.toNat]! != target then continue
+    let target := env.header.moduleNames[idx.toNat]!
+    if !requested.contains target then continue
     if (← isClosedSemantics info) && !registered.contains name then
-      missing := missing.push name
-  return missing.qsort (fun a b => a.toString < b.toString)
+      missing := missing.push (target, name)
+  return missing.qsort (fun a b =>
+    a.1.toString < b.1.toString ||
+      (a.1 == b.1 && a.2.toString < b.2.toString))
 
 end SemanticsRegistryAudit
+
+private unsafe def auditModules (targets : Array Name) : IO Bool := do
+  try
+    -- Consume imported names before withImportModules releases compacted regions.
+    return ← withImportModules
+      ((targets.map fun target => { module := target }).push
+        { module := `Lara.Semantics.Registry }) {} fun env => do
+      let (missing, _) ← (SemanticsRegistryAudit.audit targets).run'.toIO
+        { fileName := "<semantics-registry-audit>", fileMap := default }
+        { env := env }
+      for (target, name) in missing do
+        IO.eprintln s!"semantics registry: unregistered closed declaration {name} (module {target})"
+      return !missing.isEmpty
+  catch ex =>
+    -- Split conflicting imports regardless of filename. Single-module failures
+    -- are reported without skipping the remaining requested modules.
+    if targets.size ≤ 1 then
+      IO.eprintln s!"semantics registry: cannot audit {targets[0]!}: {ex}"
+      return true
+    let middle := targets.size / 2
+    let left ← auditModules (targets.extract 0 middle)
+    let right ← auditModules (targets.extract middle targets.size)
+    return left || right
 
 unsafe def main (args : List String) : IO UInt32 := do
   if args.isEmpty then
     IO.eprintln "usage: SemanticsRegistryAudit.lean MODULE..."
     return 2
   initSearchPath (← findSysroot)
+  let (library, standalone) := args.partition fun name =>
+    name == "Lara" || name.startsWith "Lara."
   let mut failed := false
-  for arg in args do
-    let target := arg.toName
+  if !library.isEmpty then
     try
-      -- Only a Bool escapes this callback: imported names and expressions are
-      -- consumed before withImportModules releases their compacted regions.
-      let moduleFailed ← withImportModules #[{ module := target },
-        { module := `Lara.Semantics.Registry }] {} fun env => do
-        let (missing, _) ← (SemanticsRegistryAudit.audit target).run'.toIO
-          { fileName := "<semantics-registry-audit>", fileMap := default }
-          { env := env }
-        for name in missing do
-          IO.eprintln s!"semantics registry: unregistered closed declaration {name} (module {target})"
-        return !missing.isEmpty
-      failed := failed || moduleFailed
+      failed ← auditModules (library.toArray.map String.toName)
     catch ex =>
-      IO.eprintln s!"semantics registry: cannot audit {target}: {ex}"
+      IO.eprintln s!"semantics registry: cannot audit library modules: {ex}"
+      failed := true
+  for arg in standalone do
+    try
+      failed := (← auditModules #[arg.toName]) || failed
+    catch ex =>
+      IO.eprintln s!"semantics registry: cannot audit {arg}: {ex}"
       failed := true
   if failed then return 1
   IO.println s!"Semantics registry audit passed ({args.length} modules)."

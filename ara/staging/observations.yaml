@@ -4125,3 +4125,94 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+- id: O204
+  timestamp: "2026-10-07T15:27:16-07:00"
+  provenance: ai-suggested
+  content: >-
+    Proposed BHL implementation separates the published epistemic/program logic,
+    its general soundness and relative-completeness proofs, an exact finite
+    statistical execution instance, and an outer bridge to actual Lara
+    source/evidence runs. The paper audit must resolve numeric dependencies and
+    theorem assumptions before code lands. General semantics is not bounded by
+    executable fuel; finite checking is not unrestricted proof search.
+  context: >-
+    Researcher requested the main-based BHL workstream, not the detailed B0-B8
+    architecture. plans/belief-hoare-logic.md and issue 24 contain the proposal.
+    No new Lean definition, theorem, BHL runtime or empirical result exists.
+    O194-O203 are allocated on the prior research branch; O190-O193 are reserved
+    in the canonical alias registry.
+  potential_type: architecture
+  bound_to:
+  - N366_bhl_plan
+  promoted: true
+  promoted_to: logic/solution/constraints.md#bhl-artifact-semantics-implemented-corrected-baseline
+  crystallized_via: verbal-affirmation
+  stale: false
+- id: O205
+  timestamp: "2026-10-07T20:09:47-07:00"
+  provenance: ai-suggested
+  content: >-
+    Proposed BHL delivery uses nine sequential PR plans. The B4 soundness and
+    relative-completeness proofs get separate review boundaries; B7 source
+    composition and B8 integrated acceptance share the final PR. Each predecessor
+    already lands its own available proofs, witnesses, theorem record and gates.
+    This changes review units, not the mathematical target or the wider
+    process-theory gate before empirical experiment design.
+  context: >-
+    Researcher requested a multi-file PR split if preferable to one PR, then
+    asked to continue. The assistant chose the detailed boundaries in
+    plans/belief-hoare-logic/README.md and its nine numbered plans. Issue 24
+    tracks the entire sequence. No implementation or new proof exists.
+  potential_type: architecture
+  bound_to:
+  - N367_bhl_pr_split
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O206
+  timestamp: "2026-10-07T23:09:00-07:00"
+  provenance: ai-suggested
+  content: >-
+    Proposed corrected completeness design separates fixed full-world/trace
+    ghosts from ambient semantic views. A saturated locally lawful world model
+    constructs compatible hidden alternatives; the view retains endpoint
+    memory, canonical history, exact possibilities and sampling provenance.
+    A finite control-graph edge formula validates an arbitrarily long ghost
+    log, then decoding reconstructs a real run from the literal starting world.
+    No ambient raw-trace inspection, opaque WLP atom or assumed Par invariance
+    is used. Every correspondence and legal finite representation still needs
+    its Lean proof.
+  context: >-
+    Two coordinated design reviews identified the ambient raw-world ghost
+    order leak and proposed a noncircular modal-aware representation.
+    Continuation notes are preserved in plans 02, 03 and 06 and the audited
+    decision. No model, assertion or completeness implementation exists yet.
+    Draft PR 25 is partial and issue 24 retains every required stage.
+  potential_type: architecture
+  bound_to:
+  - N370_bhl_corrected_contract
+  - N372_bhl_server_handoff
+  promoted: true
+  promoted_to: logic/solution/constraints.md#bhl-artifact-semantics-implemented-corrected-baseline
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O207
+  timestamp: '2026-10-09T01:04:30Z'
+  provenance: ai-suggested
+  content: The proved latest-test record witness separates compatible complete executions with opposite
+    equality-indexed method conclusions. This bounds inference from that submitted projection without
+    implying that every partial record is useless, or that the artifact now has a general compatible-completion
+    calculus.
+  context: The joined PR06/PR09 candidate has actual reference executions, computed finite endpoints and
+    independent satisfaction correspondence. Formal acceptance does not establish physical log capture,
+    empirical outcome improvement or novelty.
+  potential_type: claim
+  bound_to:
+  - N375_bhl_artifact_composition
+  - N376_bhl_integrated_acceptance
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

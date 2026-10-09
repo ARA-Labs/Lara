@@ -32,7 +32,7 @@ an old `CI` run needs a fresh run before a publication bench.
 
 | Check | Local | On GitHub |
 |---|---|---|
-| `lake build`, PW example, axiom-withdrawal example, `AxCheck.lean` axiom audit, semantics registry | `make lean-gate` | Lean workflow, when a reviewer adds the `lean` label to a PR (or `gh workflow run lean.yml --ref <branch>`) |
+| `lake build`, PW example, BHL checker/finite-semantics runner (`bhl-theory`), axiom-withdrawal example, `AxCheck.lean` axiom audit, semantics registry | `make lean-gate` | Lean workflow, when a reviewer adds the `lean` label to a PR (or `gh workflow run lean.yml --ref <branch>`) |
 | Haskell-Lean cross-checks: presentation parity, surface conformance and its gate test, semantics / certDeps / update-matrix goldens, update differential, wire differential, admission differential, map conformance, PW conformance | `make cross-check` | not run |
 
 `make local-gates` runs both.

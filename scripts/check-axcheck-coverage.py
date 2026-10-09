@@ -25,7 +25,9 @@ DECLARATION_RE = re.compile(
     r"(?P<name>[^\s:{(\[]+)"
 )
 NAMESPACE_RE = re.compile(r"^\s*namespace\s+([A-Za-z_][\w'.]*(?:\.[A-Za-z_][\w']*)*)")
-SECTION_RE = re.compile(r"^\s*(private\s+)?section(?:\s+([A-Za-z_][\w']*))?\s*$")
+SECTION_RE = re.compile(
+    r"^\s*(private\s+)?(?:noncomputable\s+)?section(?:\s+([A-Za-z_][\w']*))?\s*$"
+)
 MUTUAL_RE = re.compile(r"^\s*mutual\s*$")
 END_RE = re.compile(r"^\s*end(?:\s+[A-Za-z_][\w'.]*)?\s*$")
 AXCHECK_RE = re.compile(r"^\s*#print\s+axioms\s+([^\s]+)", re.MULTILINE)

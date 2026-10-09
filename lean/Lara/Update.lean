@@ -1842,6 +1842,61 @@ private theorem applyUpdate_tighten_target {canon : String → String}
   · exact acceptEdited_ok_target h
   · contradiction
 
+private theorem decisionFor_quarantine_map (table : List Admission.AdmissionRow)
+    (key : LeafKind × Provenance)
+    (present : table.any (fun row => decide (row.key = key)) = true) :
+    Admission.decisionFor
+      (table.map (fun row => if row.key = key then { row with decision := .quarantine } else row))
+      key.1 key.2 = .quarantine := by
+  rcases key with ⟨kind, provenance⟩
+  induction table with
+  | nil => simp at present
+  | cons row rest ih =>
+      by_cases hkey : row.key = (kind, provenance)
+      · simp [Admission.decisionFor, List.find?, hkey]
+      · have tailPresent : rest.any (fun item => decide (item.key = (kind, provenance))) = true := by
+          simpa [hkey] using present
+        simpa [Admission.decisionFor, List.find?, hkey] using ih tailPresent
+
+private theorem decisionFor_quarantine_append (table : List Admission.AdmissionRow)
+    (key : LeafKind × Provenance)
+    (absent : ∀ row ∈ table, row.key ≠ key) :
+    Admission.decisionFor (table ++ [{ key := key, decision := .quarantine }])
+      key.1 key.2 = .quarantine := by
+  rcases key with ⟨kind, provenance⟩
+  induction table with
+  | nil => simp [Admission.decisionFor]
+  | cons row rest ih =>
+      have first := absent row (by simp)
+      have tail : ∀ item ∈ rest, item.key ≠ (kind, provenance) :=
+        fun item member => absent item (by simp [member])
+      simpa [Admission.decisionFor, List.find?, first] using ih tail
+
+private theorem decisionFor_tightenTable (table : List Admission.AdmissionRow)
+    (key : LeafKind × Provenance) :
+    Admission.decisionFor (tightenTable table key) key.1 key.2 = .quarantine := by
+  unfold tightenTable
+  by_cases present : table.any (fun row => decide (row.key = key)) = true
+  · simp only [present, if_true]
+    exact decisionFor_quarantine_map table key present
+  · simp only [present, if_false]
+    apply decisionFor_quarantine_append
+    intro row member hkey
+    apply present
+    exact List.any_eq_true.mpr ⟨row, member, by simp [hkey]⟩
+
+/-- Successful tightening keeps the raw dependency material and policy unchanged
+and actually quarantines the selected key. No revalidation path is replaced. -/
+theorem applyUpdate_tighten_material {canon : String → String}
+    {reg : BackendRegistry canon} {source target : SourceState}
+    {key : LeafKind × Provenance}
+    (success : applyUpdate reg source (.tighten key) = .ok target) :
+    target.metas = source.metas ∧ target.leaves = source.leaves ∧
+      target.argsRaw = source.argsRaw ∧ target.policy = source.policy ∧
+      Admission.decisionFor target.table key.1 key.2 = .quarantine := by
+  rw [applyUpdate_tighten_target success]
+  exact ⟨rfl, rfl, rfl, rfl, decisionFor_tightenTable source.table key⟩
+
 private theorem applyUpdate_addAttack_target {canon : String → String}
     {reg : BackendRegistry canon} {source target : SourceState}
     {raw : RawAttack.RawAttack}

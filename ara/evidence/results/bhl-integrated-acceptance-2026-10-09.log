@@ -1,0 +1,73 @@
+# BHL joined PR06/PR09 candidate: directly observed acceptance excerpts
+# Command: time make local-gates; exit 0; wall 1016.87 seconds.
+# These are verbatim selected output lines, not a full transcript.
+# Formal/kernel and computed conformance verification, not an empirical experiment.
+
+Build completed successfully (6811 jobs).
+python3 scripts/check-pw-example.py
+PW file-driven gate passed (24 cases).
+
+modeled Lara.BHL.CheckedMethods.Method.two: emitted=[312], H card=1, report=some (1 : Rat)/4
+modeled Lara.BHL.CheckedMethods.Method.low: emitted=[312], H card=1, report=some (1 : Rat)/4
+modeled Lara.BHL.CheckedMethods.Method.up: emitted=[312], H card=1, report=some (1 : Rat)/4
+modeled Lara.BHL.CheckedMethods.Method.disjunction: emitted=[314], H card=2, report=some (1 : Rat)/4
+modeled Lara.BHL.CheckedMethods.Method.conjunction: emitted=[314], H card=2, report=some (1 : Rat)/4
+exact model/P/C/Q/run mismatches rejected; conditional validity with false P retained, modeled application rejected
+partial record: [{ target := { index := 12 }, test := { index := 0 }, datum := true, value := (1 : Rat)/4 }]; complete H counts=1/2, finite method conclusions=true/false
+Lara bridge: actual source/tighten/addLeaf/evidence runs; dependency loss, surviving alternative, fresh rebind, stale/copy/blocked/defeated/false-precondition boundaries checked
+Actual bridge located-hole projection: [(1, hole)]; raw masks=[false, true, true]/[false]; exact mandatory root-site and retained raw-coordinate checks passed
+BHL examples: all computed checker, semantic, execution, application, partial-record and Lara-bridge checks passed
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.107s
+
+OK
+AxCheck coverage passed (5332 declarations).
+
+'Lara.Examples.BHLBridge.certified_declared_claim' depends on axioms: [propext]
+'Lara.Examples.BHLBridge.certified_unknown_claim_copy' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.BHLBridge.certified_unknown_claim_native_failure' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Lara.Examples.BHLBridge.incompatible_claim_copy' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.BHLBridge.incompatible_claim_native_failure' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.BHLBridge.incompatible_origin_copy' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Lara.Examples.BHLBridge.incompatible_origin_native_failure' depends on axioms: [propext, Classical.choice, Quot.sound]
+Axiom audit passed.
+python3 scripts/check-semantics-registry.py
+Semantics registry audit passed (233 modules).
+python3 -m unittest scripts/test_check_semantics_registry.py -v
+test_closed_value_alias_is_rejected (scripts.test_check_semantics_registry.SemanticsRegistryTests.test_closed_value_alias_is_rejected) ... ok
+test_example_qualified_constructor_names_remain_available (scripts.test_check_semantics_registry.SemanticsRegistryTests.test_example_qualified_constructor_names_remain_available) ... ok
+test_library_main_collision_does_not_hide_unregistered_declaration (scripts.test_check_semantics_registry.SemanticsRegistryTests.test_library_main_collision_does_not_hide_unregistered_declaration) ... ok
+test_opaque_type_does_not_hide_declaration (scripts.test_check_semantics_registry.SemanticsRegistryTests.test_opaque_type_does_not_hide_declaration) ... ok
+test_opaque_value_is_rejected (scripts.test_check_semantics_registry.SemanticsRegistryTests.test_opaque_value_is_rejected) ... ok
+test_private_definition_is_rejected (scripts.test_check_semantics_registry.SemanticsRegistryTests.test_private_definition_is_rejected) ... ok
+test_registered_import_and_parameterized_family_pass (scripts.test_check_semantics_registry.SemanticsRegistryTests.test_registered_import_and_parameterized_family_pass) ... ok
+test_root_scripts_with_separate_main_declarations_pass (scripts.test_check_semantics_registry.SemanticsRegistryTests.test_root_scripts_with_separate_main_declarations_pass) ... ok
+test_type_abbreviation_does_not_hide_declaration (scripts.test_check_semantics_registry.SemanticsRegistryTests.test_type_abbreviation_does_not_hide_declaration) ... ok
+test_whole_tree_discovers_module_outside_root_imports (scripts.test_check_semantics_registry.SemanticsRegistryTests.test_whole_tree_discovers_module_outside_root_imports) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 304.982s
+
+OK
+bash scripts/check-presentation-parity.sh
+presentation parity: PASS (91 rows)
+bash scripts/check-surface-conformance.sh
+surface conformance: PASS (28 cases)
+bash test/surface-conformance-gate.sh
+surface gate test: PASS
+bash scripts/check-semantics-goldens.sh
+Semantics registry audit passed (233 modules).
+
+Ran 28 tests in 0.048s
+
+OK
+# Command: make ara-source-spans ara-session-index ara-observations; exit 0.
+python3 scripts/check_ara_source_spans.py
+ARA source spans: PASS (66 quotations)
+python3 scripts/check_ara_session_index.py
+ARA session index: PASS (84 sessions, one row each, every row agreeing with its file)
+python3 scripts/check_ara_observations.py
+ARA observations: PASS (193 unique effective observations, 2 ambiguous historical IDs, 14 audited reference lines)

@@ -80,7 +80,7 @@ default, Rocq if a collaborator's expertise dominates). Rationale:
 
 - Mathlib has the order-theory / fixpoint infrastructure for result 5 (complete lattices, monotone
   maps, `OrderHom`) and finite-set machinery for the AF. (In the event result 5 was proved in core
-  Lean 4 without it; the project has no Mathlib dependency.)
+  Lean 4 without it; only the later BHL numeric theory imports Mathlib.)
 - Lean's `Decidable` typeclass makes results 1 and 11 executable *and* proved-decidable in one
   artifact — which is what the differential-testing anchor (§3) needs.
 - Community familiarity among PL researchers is high.

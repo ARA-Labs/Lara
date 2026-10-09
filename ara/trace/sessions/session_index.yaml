@@ -722,3 +722,19 @@ sessions:
   events_count: 19
   claims_touched: []
   open_threads: 3
+
+- id: 2026-10-07_002
+  date: '2026-10-07'
+  summary: 'Audited BHL corrections and approved pinned Mathlib; initial proofs/audit passed, partial PR 01 preserved as draft PR 25 for server continuation; full gates and later stages remain incomplete.'
+  turn_count: 5
+  events_count: 11
+  claims_touched: []
+  open_threads: 4
+
+- id: 2026-10-09_001
+  date: '2026-10-09'
+  summary: 'All nine corrected BHL/artifact stages implemented; eight squash-integrated, joined completeness/bridge kernel and native gates pass, exact inventory complete; stage09 integration and release remain operational requirements.'
+  turn_count: 1
+  events_count: 7
+  claims_touched: []
+  open_threads: 3

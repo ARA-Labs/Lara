@@ -70,12 +70,12 @@ quantified over `ExtensionSemantics` say something about it.
 An extension is an order-preserving subsequence of `F.args`. `Semantics.subseqs`
 and its characterization (`mem_subseqs`, `sublist_ext`, `subseqs_ext`,
 `subseqs_nodup`, `nodup_flatMap_pair`) live in `Lara/Semantics/Sublists.lean`.
-Core Lean at `leanprover/lean4:v4.32.0` has no `List.sublists`, and this project
-carries no Mathlib dependency today, so the module is a hand-rolled stand-in for
-Mathlib's `List.sublists`. That is a statement about the current build, not a
-closed door: result 5, once the planned reason for Mathlib, was proved in core
-Lean 4, but a later milestone that takes Mathlib on could replace this module. See
-§10, whose first follow-up needs exactly that machinery. `candidates` stays in
+Core Lean at `leanprover/lean4:v4.32.0` has no `List.sublists`. This module
+imports core Lean only, so it implements the required subsequence enumeration
+locally. BHL's separate numeric theory now imports pinned Mathlib; it does not
+change this module's dependency boundary. Result 5 was also proved in core
+Lean 4. A replacement here would be a separate change, not part of BHL. See
+§10 for the enumeration follow-up. `candidates` stays in
 `Lara/Semantics.lean` because it takes an `AF`.
 
 The carrier bound lives inside the predicates (`Bounded` is a conjunct of
