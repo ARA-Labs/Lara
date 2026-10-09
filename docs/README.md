@@ -29,7 +29,7 @@ its tree hashes are in [`m5-freeze-checklist.md`](m5-freeze-checklist.md).
 | [`lara-surface-grammar.md`](lara-surface-grammar.md) | The concrete `.lara` syntax contract, with per-version appendices |
 | [`foundations.md`](foundations.md) | The four lines of prior work Lara builds on |
 | [`novelty-and-related-work.md`](novelty-and-related-work.md) | The novelty claim and the delta table against prior art |
-| [`demos/`](demos/) | Prose-first walkthroughs of checked artifacts: a rebuttal exchange (D1), mechanical review comments (D2), a cross-paper agreement map (D3), a philosophy debate (D4), and [axiom withdrawal](demos/d5-axiom-withdrawal.md) (D5) |
+| [`demos/`](demos/) | Prose-first walkthroughs of checked artifacts: a rebuttal exchange (D1), mechanical review comments (D2), a cross-paper agreement map (D3), a philosophy debate (D4), [axiom withdrawal](demos/d5-axiom-withdrawal.md) (D5), and [a checked statistical method and its limits](demos/d6-bhl-method-support.md) (D6) |
 
 ## Decision records
 
@@ -128,6 +128,12 @@ side result
 The certified-evidence admission and source-composition results are recorded in
 [`theory-evidence-admission.md`](theory-evidence-admission.md), with explicit
 limits for byte parsing, cryptography and operating-system capture.
+
+The [Belief Hoare Logic theory record](theory-bhl.md) combines its architectural
+rationale, frozen statistical-method and artifact-binding contracts, mechanized
+results and acceptance evidence. The [reference assessment](belief-hoare-logic-assessment.md)
+audits the published source; the [exact theorem inventory](bhl-theorem-inventory.jsonl)
+records kernel types and axiom-audit locations.
 
 ## Subdirectories
 

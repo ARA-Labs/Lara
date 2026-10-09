@@ -1,15 +1,91 @@
-# Belief Hoare Logic theorem record
-**Date:** 2026-10-08
+# Belief Hoare Logic: contracts and theorem record
+**Date:** 2026-10-09
 
 ## TL;DR
 
-Lara's Belief Hoare Logic (BHL) has an audited mathematical contract, typed mathematical values, canonical test histories, a nonempty observation-based model, assertion/execution semantics, independent derivation soundness, a proved legal finite representation for relative completeness and an informative calibrated binary instance with actual statistical procedures and countermodels. Published-reference discrepancies have checked countermodels and documented corrections. PR 08's executable checker passed acceptance; PR 09's exact source composition and record-separation declarations are recorded below with joined acceptance still pending. This record distinguishes source declarations from exercised compilation, runtime and axiom evidence.
+Lara's Belief Hoare Logic (BHL) checks statistical methods under explicit assumptions and connects those methods to evidence-dependent claim support. The corrected Lean development includes soundness, relative completeness, a calibrated finite statistical instance, executable checking and source/evidence composition. PRs 01–09 are complete, and their joined acceptance passed on 2026-10-09 as recorded below. This document owns the architectural rationale, frozen contracts, theorem assumptions and observed verification; the [reference assessment](belief-hoare-logic-assessment.md) records the source audit.
+
+## Why is BHL part of Lara?
+
+A research artifact can report a result and support a claim without specifying whether its statistical procedure warrants that inference. BHL expresses that methodological meaning through preconditions, programs, epistemic postconditions and test histories. The reference is Kawamoto, Sato and Suenaga, [Sound and Relatively Complete Belief Hoare Logic for Statistical Hypothesis Testing Programs](https://arxiv.org/html/2208.07074v3). History sensitivity, statistical-belief semantics, soundness and relative completeness are prior results, not Lara novelty claims.
+
+Lara uses BHL as its statistical-method component alongside argumentation and context semantics. Its artifact binding connects method judgments to claims, interpretations, evidence and source revisions. Merely packaging a method certificate beside an accepted argument would not establish how those meanings interact. The researcher approved this architectural role on 2026-10-07, then approved the documented reference corrections and pinned Mathlib dependency.
+
+[Issue #24](https://github.com/ARA-Labs/Lara/issues/24) owns the complete-history baseline, artifact binding, bounded evidence-sensitive revalidation, partial-record witness and delivery trail. [Issue #23](https://github.com/ARA-Labs/Lara/issues/23) retains the general compatible-history calculus, broader claim/model revision, representation adequacy and inquiry/impact composition. Completing the baseline does not discharge that wider theory or release an empirical protocol.
+
+## What are the architectural boundaries?
+
+Neither statistical belief nor Lara support implies empirical truth. Support for an assumption cannot establish that assumption or knowledge of it in BHL. Residual assumptions remain visible even when evidence supports their applicability. Interpretation fidelity, physical sampling, capture adequacy and runtime refinement remain external obligations.
+
+BHL's observation-equivalence relation differs from Lara's accepted-context bridge relation. The former supports its epistemic laws; the latter generally lacks the stronger frame laws, as recorded in the [PW0 theory](theory-pw0-outer-model.md). There is no modality coercion. Any future translation must state and prove its required conditions.
+
+The baseline preserves existing core, admission, quarantine, evidence and public-status semantics. It introduces no `.lara` syntax, core/wire migration, corpus regeneration, mutation-base rewrite or freeze-tag bump. It does not add physical history capture or a receipt service. Those changes would require separate approval and explicit costs.
+
+### What exactly does the independent artifact judgment require?
+
+A method binding retains the exact accepted source snapshot, claim and hypothesis interpretation, model, precondition/program/postcondition, derivation premises, initial/final worlds and execution, selected support and applicability dependencies, residual assumptions and declared history coverage. Certified inputs also bind their evidence snapshot, manifest and registry. Identity means equality of actual carriers or a proved interpretation-preserving map, not equality of author-chosen labels.
+
+| Judgment | Required evidence | Conclusion boundary |
+| --- | --- | --- |
+| Conditional method validity | A checked derivation with valid underlying premises and model side conditions | Every terminating modeled run from a precondition-satisfying world has the stated postcondition |
+| Modeled application | Conditional validity, actual initial-world precondition satisfaction and the bound execution | The modeled final world satisfies the postcondition |
+| Artifact warrant under residual assumptions | Exact accepted run, raw/checked typing, retention, grounded in-label and unblocked status for selected support and every named dependency | Selected supports remain eligible; independent `ArtifactMeaning` also requires claim association, conditional validity and applied-mode application, without proving residual assumptions true |
+
+`ConditionalMethod` is independent triple validity. `ModeledApplication` supplies genuine precondition satisfaction and the exact execution; its postcondition is derived, not supplied as a certificate premise. `ArtifactWarrant` requires selected support and every named dependency to survive admission and checking and remain justified and unblocked. A conditional payload retains its assumptions without asserting a modeled application. The [implemented bridge contract](#which-pr-09-source-and-claim-contracts-are-implemented) gives the exact source-facing declarations.
+
+A claim identifier does not prove interpretation fidelity. A modeled execution does not prove that physical sampling occurred as modeled. Complete modeled history does not prove completeness of a submitted log.
+
+### What does composition establish?
+
+The bridge uses actual accepted source/evidence runs, preserves ordinary observations when method metadata is forgotten, and derives warrant loss or transport from source changes. These results are not obtained merely by projecting fields from two successful checks.
+
+| Case | Established distinction |
+| --- | --- |
+| Quarantine of selected applicability evidence | An accepted source loses that dependent warrant while the conditional method theorem remains valid |
+| Safe source update | An explicitly rebound warrant survives under binding, admission, support and attack-preservation hypotheses |
+| Stale or incompatible certificate | A copied certificate cannot attest a different source snapshot, hypothesis interpretation, model or dependency binding |
+| Supported applicability with a false assumption | Lara support cannot discharge a mathematical precondition or knowledge premise |
+| Partial submitted record | Two compatible complete histories can disagree on the method conclusion despite the same nonempty submitted record |
+
+Quarantine concerns a selected dependency witness; independent alternative support can preserve another warrant for the same claim. Source acceptance, public claim status, mathematical validity and applicability warrant remain distinct. The [revision results](#which-revision-conditions-derive-loss-or-transport) state sufficient rebinding conditions, not a theorem for every harmless edit. The [partial-record result](#what-does-the-nonempty-submitted-record-fail-to-determine) concerns a latest-test projection, not every partial record or a general compatible-completion calculus.
+
+## Which reference corrections define the local contract?
+
+The [reference assessment](belief-hoare-logic-assessment.md) distinguishes published statements from the corrected proof contracts. Ordinary predicate meanings are rigid relations on explicit arguments, or require a proved preimage operation for their declared dependencies. Test execution has distinct syntax from pure assignment; statistical atoms take explicit dataset terms. This prevents assignment substitution from overlooking state changes hidden in predicate names.
+
+History is a canonical finite multiset indexed by dataset values and test identities. Named history lookup derives counts from this ledger, so aliases share counts and reassignment changes lookup without changing history. Exact-history assertions compare complete value-indexed multisets, including repeated tests, rather than the paper's alias-inconsistent name-count conjunction.
+
+Knowledge uses equality of complete observation traces, not just final memory and history. Admitted worlds support the prefix, extension and accessibility-lifting laws needed by substitution and parallel correspondence. Threshold monotonicity uses `≤`; equality-indexed belief retains its distinct, nonmonotone meaning.
+
+The corrected assertion syntax separates fixed ghost worlds/traces from the ambient semantic view. Ambient terms expose memory, history, derived sampling provenance and compatible hidden alternatives, not raw action trace, last action or length. A fixed ghost retains its own trace, but comparison with the ambient world uses the full semantic view. Otherwise a ghost naming one schedule could distinguish independent schedules and invalidate `Par`. The [assertion laws](#which-assertion-and-statistical-belief-laws-are-checked) cover nested knowledge and unchanged ghost environments. Relative completeness uses typed finite assertion syntax, explicit local control/effect equations and reconstruction of actual prefix-extending execution; it neither assumes an opaque weakest-precondition atom nor defines execution as endpoint witnesses. The theorem remains relative to its stated assertion-theory premises.
+
+## Which numeric dependency and proof discipline apply?
+
+The approved dependency is Mathlib revision `81a5d257c8e410db227a6665ed08f64fea08e997` with `leanprover/lean4:v4.32.0`. Mathlib supplies actual reals and countably additive probability measures under Apache-2.0; `lean/lake-manifest.json` pins transitive dependencies. Imports are confined to the theory that needs them, and the existing compiler calculus remains independent of Mathlib.
+
+A test's p-value is its null law's measure of the declared tail event. Measurability, normalization and binding to the null model are explicit obligations. Combination bounds require a coupling with exact marginals; union and intersection bounds do not require independence. The finite instance uses exact rational masses and inclusive tails, proves calibration and correspondence to the real interpretation, and makes no claim to evaluate arbitrary real or continuous models.
+
+The development separates corrected reference metatheory, finite-instance/checker correspondence and Lara-specific composition. Soundness is proved by induction on derivations over independent satisfaction and execution, then composed with checker correspondence and genuine application premises. Revision results use actual source/evidence semantics; negative boundaries use inhabited countermodels. A citation or foreign-prover result cannot discharge a Lean obligation, and no axiom asserting BHL soundness or completeness is permitted. Every frozen definition carries its available metatheory and explicit axiom audit; tests supply conformance evidence, not soundness or interpretation fidelity.
+
+After PR 05 soundness, PR 06 relative completeness was independent of the concrete PR 07–09 branch. Both remained mandatory. Final B8 acceptance joined them, reconciled the theorem inventory and ran integrated gates before completion; the dated stage records below preserve that evidence. The [assumption and novelty comparison](belief-hoare-logic-assessment.md#which-assumptions-change-and-what-novelty-is-established) distinguishes inherited corrected results, changed representation contracts, finite specialization and Lara composition. No novelty or expressivity separation claim is established, and calibration concerns the bound mathematical null law, not its adequacy for a physical population.
+
+## Which alternatives were rejected?
+
+| Alternative | Reason for rejection |
+| --- | --- |
+| Make BHL the semantics of all research | Claim interpretation, defeasible argumentation and incomplete records require additional semantics |
+| Keep BHL only as a literature comparison | Lara needs a checked statistical-method component |
+| Implement standalone BHL before deciding artifact meaning | Binding and assumption contracts constrain the implementation |
+| Treat supported assumptions as true preconditions | Defeasible support cannot discharge mathematical satisfaction |
+| Drop relative completeness to reach the bridge sooner | Completeness remained an independent required branch |
+
+Specifying artifact contracts before formalization exposed integration obligations early. Keeping physical sampling, interpretation and record completeness external limits what the checker establishes, but prevents a successful check from being reported as empirical truth. The bounded revision and record witnesses do not complete the wider process calculus.
 
 ## Which definitions are frozen?
 
 `Lara.BHL.Types` defines separate `VarId`, `TestId`, `DatasetId`, `HypothesisId`, `GhostId` and `PopulationId` types. `Variable sort visibility` binds a variable's sort and visibility in its type. `ValueSort` has Boolean, integer, real, product, list and sample-indexed population constructors; fixed visibility, test-tail and comparison vocabularies are closed sum types. A dataset identifier does not stand for its mathematical value, so these types do not prohibit aliases.
 
-The corrected artifact and numeric contracts are in [the architectural decision](theory-bhl-decision.md). A modeled application requires a genuine satisfied precondition and an actual terminating execution bound to the exact model and program. Artifact support supplies neither premise. Residual interpretation, physical sampling and submitted-history completeness assumptions remain external.
+The [artifact judgment](#what-exactly-does-the-independent-artifact-judgment-require) and [numeric contract](#which-numeric-dependency-and-proof-discipline-apply) govern these definitions. A modeled application requires a genuine satisfied precondition and an actual terminating execution bound to the exact model and program. Artifact support supplies neither premise. Residual interpretation, physical sampling and submitted-history completeness assumptions remain external.
 
 ## Which symbolic identity results are available?
 
@@ -70,7 +146,7 @@ The Dirac witness proves nonemptiness, not calibration of the final binary test.
 
 ## Which model and history laws are checked?
 
-The source mapping is [§4.1 values, Definitions 1-4, §5.2.2 history and Definitions 6-7](belief-hoare-logic-assessment.md#which-model-and-numerical-statements-must-be-reconstructed). The corrected local model and assertion-view boundary follow [the architectural decision](theory-bhl-decision.md). All declarations below are in `Lara.BHL`; nested names are written explicitly. Each has its own `#print axioms` row in `lean/AxCheck.lean`.
+The source mapping is [§4.1 values, Definitions 1-4, §5.2.2 history and Definitions 6-7](belief-hoare-logic-assessment.md#which-model-and-numerical-statements-must-be-reconstructed). The corrected local model and assertion-view boundary follow the [reference corrections](#which-reference-corrections-define-the-local-contract). All declarations below are in `Lara.BHL`; nested names are written explicitly. Each has its own `#print axioms` row in `lean/AxCheck.lean`.
 
 ### What do the typed carriers preserve?
 
