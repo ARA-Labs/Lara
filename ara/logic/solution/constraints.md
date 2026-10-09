@@ -2,7 +2,7 @@
 
 _Source: `docs/spec.md` §1, §11; `docs/strict-certificates.md#1-one-seam-for-opaque-strict-certificates`
 §7. What LARA does and does not guarantee, stated plainly (the "state the trusted boundary bluntly"
-lesson from EG-VAR, `docs/prior-art-lessons.md`)._
+lesson from EG-VAR, `docs/novelty-and-related-work.md#31-eg-var`)._
 
 ## Boundary conditions
 
@@ -152,7 +152,7 @@ disagreement; dependent claims surface as `gap`).
   The harness labels the columns separately for exactly this reason, and an unforced lazy
   `runCheck` would instead read ~0 ns (D8/5A), so the forcing discipline is part of the protocol.
 
-## Naturalness boundary (user, 2026-08-25 — grounds: N215, `docs/naturalness-boundary.md`)
+## Naturalness boundary (user, 2026-08-25 — grounds: N215, `docs/spec.md#natural-language-and-the-trusted-boundary`)
 
 Where natural language may and may not enter the system, split by **trust direction** rather
 than by convenience. Fixed policy so that ease-of-use work cites it instead of re-deciding
@@ -212,7 +212,8 @@ deferred.
   `StructuredAFIso` under the same fixed canon, signature, policy, and registry as
   the paper claim. The implemented fixed context, family-wide checker equation,
   and realizable witnesses are documented in `docs/theory-core.md#restricted-class-complexity`;
-  `docs/theory-core.md#frozen-decisions` preserves both gate decisions.
+  `docs/theory-core.md#frozen-constraints` states the frozen constraints; the gate
+  decisions are preserved at `git 7abcf62:docs/theory-m2b-complexity-spike.md`.
 - **Oracle cost and classical input size use separate frozen representations.**
   Grounded evaluation counts calls to the attack oracle on the frozen carrier.
   Classical hardness uses `CarrierCode`: finite node labels, a square adjacency
@@ -309,9 +310,9 @@ deferred.
 - **Constraint:** A certified leaf must be reproduced by a policy-approved checker from manifest-listed, hash-pinned source files included in its ARA package. A URL or prose assertion alone does not satisfy package membership. Missing or mismatching evidence prevents certification without silently relabeling the leaf, and a captured object is usable only under the manifest entry it was captured for.
 - **Boundary:** Enforce this at source admission, outside the symbolic argumentation core; every source door without an evidence context rejects a certified declaration at R8. Assumptions and attestations remain declared evidence; certification does not establish empirical truth, scientific validity, or immunity from attacks.
 - **Trusted base:** the concrete CSV/JSON byte parsers, SHA-256, the POSIX capture shim and the Haskell/Lean compilers. The finite model's 50-case typed differential is conformance evidence, not a parser proof.
-- **Evidence:** `ara/evidence/results/certified_evidence_landing_2026-10-06.md`; `docs/evidence-admission-design.md#how-can-the-implementation-and-proofs-be-checked`; `docs/evidence-admission-inventory.md`; package acceptance and `make local-gates` pass on the real binary.
+- **Evidence:** `ara/evidence/results/certified_evidence_landing_2026-10-06.md`; `docs/evidence-admission-design.md#how-can-the-implementation-and-proofs-be-checked`; `examples/certified-evidence/package-{a,b}/ORIGIN.md`; package acceptance and `make local-gates` pass on the real binary.
 - **Provenance:** ai-executed
-- **Sources:** `docs/evidence-admission-design.md#how-can-the-implementation-and-proofs-be-checked` (settled `lara-evidence@0.1` contract); `ara/evidence/results/certified_evidence_landing_2026-10-06.md` (verbatim gate output); `docs/evidence-admission-inventory.md` (ten-leaf original-byte portfolio)
+- **Sources:** `docs/evidence-admission-design.md#how-can-the-implementation-and-proofs-be-checked` (settled `lara-evidence@0.1` contract); `ara/evidence/results/certified_evidence_landing_2026-10-06.md` (verbatim gate output); `examples/certified-evidence/package-{a,b}/ORIGIN.md` (ten-leaf original-byte portfolio)
 - **Open:** human payload-to-proposition faithfulness review and the additive measured-input / report freeze — [issue 20](https://github.com/ARA-Labs/Lara/issues/20)
 - **Last revised:** 2026-10-06 (2026-10-06_001#5)
 

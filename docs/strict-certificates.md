@@ -1,6 +1,6 @@
 # Strict certificate backends
 
-Lara arguments carry two strengths of step. A *defeasible* step holds by default and can be attacked. A *strict* step has its conclusion re-verified mechanically. This document is the reference for how strict steps are verified: one small seam where an opaque certificate is handed to a registered, versioned external checker (a *backend*); the obligations every backend must meet; the adapters that ship; the theorems about mixing several backends in one program; and the two optional domain adapters, ordered comparison and static code inspection, that arrived after the seam was fixed.
+Lara arguments carry two strengths of step. A *defeasible* step holds by default and can be attacked. A *strict* step has its conclusion re-verified mechanically. This document is the reference for how strict steps are verified: one small seam where an opaque certificate is handed to a registered, versioned external checker (a *backend*); the obligations every backend must meet; the adapters that ship; the theorems about mixing several backends in one program; and the two optional domain adapters, ordered comparison and static code inspection.
 
 Nothing here makes the source language a proof system. The one claim-support calculus knows neither a backend's proof-term grammar nor its axioms, and a successful check buys deductive validity relative to the cited premises and the declared theory, not the truth of any premise and not the empirical truth of any measurement.
 
@@ -8,13 +8,7 @@ Nothing here makes the source language a proof system. The one claim-support cal
 
 The source language has one claim-support calculus and one small seam for strict certificates. A strict rule instance may carry an opaque certificate checked by a registered backend. The claim-support calculus knows neither the backend's proof-term grammar nor its axioms.
 
-This replaces
-
-```text
-Sigma_LP ; { x_i : P_i theta } |- d => t : C theta
-```
-
-with
+A strict instance is accepted iff
 
 ```text
 strictCheck(beta, T, [P_1 theta, ..., P_n theta], C theta, kappa) = accept
@@ -73,7 +67,7 @@ Every registered backend must establish these obligations:
 4. **Dependency accountability.** On acceptance, every free premise or theory entry consulted by `kappa` is returned by `uses_beta(kappa)`, and every returned dependency names a declared premise slot or an entry in the digest-addressed `T`. Adapters should prove exactness where their certificate syntax permits it.
 5. **Closed registration.** The backend implementation, decoder, source encoding, and admissible theory format are fixed by `(beta, version)`. An artifact cannot upload code, axioms, or a new encoding.
 
-Whole-tree semantic consequence needs additional laws: reflexivity, cut/transitivity and weakening over premises and theory entries. These were previously listed as a sixth registration obligation, but the mechanized `Strict.Backend` record does not require them. Its guaranteed results are occurrence-local soundness and dependency accounting. Shipped domain relations restrict which goals they interpret: `ordModels`, for example, rejects an arbitrary non-comparison atom even when it appears as a premise, so it is not reflexive over all encoded source atoms. The homogeneous-tree corollary below explicitly assumes the extra laws; the Boolean ND interpretation is the reference example that satisfies them.
+Whole-tree semantic consequence needs additional laws: reflexivity, cut/transitivity and weakening over premises and theory entries. Registration does not require them: the mechanized `Strict.Backend` record has no such fields, and its guaranteed results are occurrence-local soundness and dependency accounting. Shipped domain relations restrict which goals they interpret: `ordModels`, for example, rejects an arbitrary non-comparison atom even when it appears as a premise, so it is not reflexive over all encoded source atoms. The homogeneous-tree corollary below explicitly assumes the extra laws; the Boolean ND interpretation is the reference example that satisfies them.
 
 The trusted implementation for a run is the source checker plus the selected backend adapters. A backend theorem is evidence about its mathematical checker; conformance of an executable adapter is still a separate obligation.
 
@@ -181,9 +175,7 @@ F ::= p | false | F -> F | t:F
 
 Its registered theory fixes the admissible constant specification and standard LP axiom schemas. The adapter must prove its `check_LP` sound for the chosen LP semantics. LP reflection, sum, positive introspection, and realization remain internal to this adapter. They are not source-language constructs and do not constrain other backends.
 
-The Haskell `ConstantSpec` is not a conforming adapter because callers can register arbitrary `(constant, formula)` pairs. It becomes eligible only after fixed schema recognition and a conformance argument.
-
-LP is an experimental adapter seed, not a shipped conforming backend. Theorem 2 makes the interface independent of LP syntax; shipping an LP adapter would still require the fixed-schema and conformance obligations above.
+No conforming LP adapter ships. The Haskell `ConstantSpec` code is not conforming, because callers can register arbitrary `(constant, formula)` pairs; a conforming LP adapter needs fixed schema recognition and a conformance argument. Theorem 2 makes the interface independent of LP syntax.
 
 ### 4.3 Ordered comparison: `ord@1`
 
@@ -193,7 +185,7 @@ LP is an experimental adapter seed, not a shipped conforming backend. Theorem 2 
 
 An accepted certificate discharges the comparison relative to the premise conclusions, never the truth of any cell. The measurement leaves stay defeasible: attackable, quarantinable, admission-governed. You cannot argue with the arithmetic; you argue with the measurements.
 
-Stated exactly: both numerals appear in the goal, so the relation is decidable from the goal alone. What the premises add is provenance anchoring. An accepted step certifies that each cited premise's unique numeric literal equals the corresponding goal numeral, and that the goal's relation holds of those numerals. Neither the plan nor the paper should let "certifies the comparison" suggest more.
+Stated exactly: both numerals appear in the goal, so the relation is decidable from the goal alone. What the premises add is provenance anchoring. An accepted step certifies that each cited premise's unique numeric literal equals the corresponding goal numeral, and that the goal's relation holds of those numerals. "Certifies the comparison" means exactly this and nothing more.
 
 The dependency set is a metatheory-level obligation: the runtime seam (`buildCertOk`) collapses acceptance to a `Bool`, so `deps` feeds the soundness statement and audit reports, not the checked graph.
 
@@ -212,7 +204,7 @@ The adapter portfolio ships `insp@1` beside `ra@1` and `ord@1`, in `Lara.Strict.
 | `code_unique(Src, Feat)` | 1 | `Src`'s inspection found something, and everything it found is `Feat` |
 | `code_planned_not_shipped(Plan, Src, Feat)` | 2 | `Feat` is in `Plan`'s inspection and absent from `Src`'s |
 
-The last member is the corpus's own scheme name. The M0 C13/C14 study counted `code_inspection` (merging `plan_vs_shipped_diff`) as 3 of 60 sampled claims, small but real, and the only measured strict shape the portfolio had left unshipped. Certificates are
+The last member is the corpus's own scheme name. Certificates are
 
 ```text
 cert ::= (inspect (prem N))                 -- the one-inventory members
@@ -237,11 +229,13 @@ read as "an exhaustive inspection of `Src` found exactly `f1` and `f2`." The emp
 
 `Σ` fixes each constructor's arity (spec §2), so `inv(U, f1, …, fn)` is not declarable at all: a unit's signature would have to name one `inv` per length, and the R2 sort checker could not check it. The convention is therefore three fixed-arity reserved symbols, `inv`/2, `finding`/2, and `no_findings`/0, and the enumeration is an ordinary source-level list. This is the same one-table discipline the wire keywords follow: the concrete spellings live in `Lara.Strict.Insp`'s `Con` table (Lean: `Lara.Insp.Con`) and nowhere else.
 
+The whole enumeration is one premise because it is one observation, and because a certificate's slot count must not depend on the size of the enumeration. One premise per finding plus a separate exhaustiveness premise would make that count vary, which no flat `SlotSchema` can express, so the symbolic-slot pass (`Lara.Elaborate.CertSlots`) could not lower `(prem name)` references and the wire form would stop being a fixed-arity keyword application.
+
 A consulted premise must contain exactly one `inv(…)` node anywhere in its argument terms. This is `Lara.Strict.Cell.premiseCell`'s "exactly one numeric literal" discipline, for the same reason: a premise carrying two inventories does not say which one the certificate meant, and guessing is how a checker becomes unsound quietly. The scan does not stop at the first match, so a nested `inv` inside a finding is a second node and rejects too.
 
-An accepted certificate does not assert that an inventory faithfully describes source bytes, covers the whole module, or names the version relevant to the claim. Those are evidence-admission and human-review obligations, outside this strict adapter. An inventory remains a defeasible evidence leaf: attackable, quarantinable and admission-governed.
+An accepted certificate does not assert that an inventory faithfully describes source bytes, covers the whole module, or names the version relevant to the claim. Those are evidence-admission and human-review obligations, outside this strict adapter. An inventory remains a defeasible evidence leaf: attackable, quarantinable and admission-governed. Binding an inventory to source bytes is the job of the separate `lara-evidence@0.1` layer ([design](evidence-admission-design.md)); building that observation into the backend would make a defeasible measurement a trusted premise of the adapter, whereas byte-level admission strengthens the leaf without changing this adapter's inference.
 
-The corpus makes this concrete rather than hypothetical. `corpus-units/rebench-rust_codecontests/C09` is exactly a `plan_vs_shipped_diff` where the coverage half is met and the version half is not: `notes.md`, the sole documentary basis for the "planned" half, ships nowhere in the artifact tree. Its honest verdict is a `gap`, and no certificate changes that. The worked example `examples/S9` supplies the version attestation C09 could not, so the same shape reaches `justified`; the two read together are the demonstration that the certificate settles the inference and not the evidence. What the adapter does remove from the trusted base is narrower and real: the step from an enumeration to a structural conclusion no longer rests on a trusted policy rule.
+The certificate settles the inference, not the evidence: when evidence the policy requires about an inventory (for example, which version it describes) is missing, the claim stays at `gap` whatever the certificate. What the adapter removes from the trusted base is narrower: the step from an enumeration to a structural conclusion does not rest on a trusted policy rule.
 
 #### Premise-only slots
 
@@ -260,19 +254,9 @@ Inspection goals are not like that. They are decided against a declared inventor
 - `Lara.Insp.inspModels_excl_of_same_entry`, two arguments reading the same inspection leaf cannot both be backed for opposite polarities;
 - `Lara.Insp.inspModels_absent_present_sat`, two arguments reading different leaves can.
 
-`InspSpec.prop_inspContraryCoAcceptable` is the executable mirror of the second.
+`InspSpec.prop_inspContraryCoAcceptable` is the executable mirror of the second. `code_present` carries no closed-world content on its own, being plain membership; it is in the family because it is the positive half that makes this contrary question statable and testable, and because the diff member decomposes into it (`Lara.Insp.inspModels_diff_halves`).
 
 This has a direct consequence for policy authors, and it is a Path B consequence, not an `insp@1` one. Spec §8.1 forbids a strict-reachable conclusion pattern from overlapping either side of a `contrary` declaration (R12). So a policy may not both make `code_absent` and `code_present` strict conclusions and declare them contrary; that is an R12 rejection at compile time. The conflict therefore belongs on the defeasible bridge's conclusions, one layer up, which is exactly the layering `examples/S9/insp-v1.policy.lara` uses and the same shape `ord@1`'s S2 uses for a different reason. Under that restriction every conflict is rebuttable at a defeasible step, which is what Path B buys.
-
-#### Rejected designs
-
-One premise per finding plus a separate exhaustiveness premise was rejected: a negative existential would cite the exhaustiveness premise together with all occurrence premises, so the certificate's slot count would vary with the size of the enumeration. That is not a flat `SlotSchema`, so the symbolic-slot elaboration pass (`Lara.Elaborate.CertSlots`) could not lower `(prem name)` references for it, and the wire grammar would stop being a fixed-arity keyword application. The enumeration belongs in one premise because it is one observation.
-
-The separately implemented `lara-evidence@0.1` layer checks bindings to source bytes ([design](evidence-admission-design.md)). Building those observations into a strict backend would instead make a defeasible measurement a trusted premise of the adapter. Byte-level admission strengthens the evidence leaf without changing this adapter's inference.
-
-A `code_diff` spelling for the diff member was rejected on the §4.5 naming taste already settled for the scheme vocabulary: the target reader is a Python-literate domain researcher reading the formalization of their own artifact, so long-and-obvious wins over short-and-precise-to-insiders.
-
-Making `code_present` a separate backend, or dropping it, was rejected. It carries no closed-world content on its own, being plain membership, but it stays because it is the positive half that makes the contrary question above statable and testable, and because the diff member decomposes into it (`Lara.Insp.inspModels_diff_halves`).
 
 #### What the adapter does not settle
 
@@ -343,7 +327,7 @@ For a well-typed certificate `e`, the free de Bruijn indices in `e` are exactly 
 
 A program may mix certificates from several registered backends. What the theory has to guarantee is that no backend's acceptance can leak influence into another's mathematics. The composition results are mechanized in `lean/Lara/BackendComposition.lean` (abstract) and `lean/Lara/Examples/BackendComposition.lean` (worked witness), with a cross-language half in `src/Lara/Strict/Deps.hs` and `test/StrictSpec.hs`. Every theorem named in this section is covered by `lean/AxCheck.lean`, sorry-free, on the standard axiom trio `propext`, `Classical.choice`, and `Quot.sound`.
 
-Several of these properties were already true and unstated. `certOkOf` (`Lara/Support.lean`) resolves each `BackendId` to its own `RegisteredBackend`, each carrying its own `core : Strict.Backend canon` with its own private `core.Form`, so heterogeneity was already structural; nothing forced two occurrences to share a formula type. `cert_node_accounted` and `cert_steps_accounted` already lifted per-instance strict soundness through `HasSupport` with the backend record bound in a per-node existential, and `mem_certDeps_step` and `cert_step_deps_subset` were already the two directions of the dependency union. What was missing is that no theorem *stated* heterogeneity: every existing result quantified one occurrence at a time. An unstated property is one a later refactor can silently break, so the work here is consolidation, one genuinely new theorem (the firewall), and the repair of a live gap on the Haskell side.
+Heterogeneity is structural. `certOkOf` (`Lara/Support.lean`) resolves each `BackendId` to its own `RegisteredBackend`, each carrying its own `core : Strict.Backend canon` with its own private `core.Form`, so nothing forces two occurrences to share a formula type. `cert_node_accounted` and `cert_steps_accounted` lift per-instance strict soundness through `HasSupport` with the backend record bound in a per-node existential, and `mem_certDeps_step` and `cert_step_deps_subset` are the two directions of the dependency union. The results below state heterogeneity across occurrences explicitly, so it cannot be lost silently; the composition laws repackage those `Support.lean` results, and the firewall is the one theorem with new content.
 
 ### Frozen definitions
 
@@ -353,7 +337,7 @@ Several of these properties were already true and unstated. `certOkOf` (`Lara/Su
 | Named identities | `usedBackends`, `usedBackendsList`, `usedBackendsDis` | Which backends a term *names*, source-visibly |
 | Occurrence-local consequence | `OccurrenceConsequence` | What one occurrence's backend establishes, with its formula type bound inside |
 
-`CertOccurrence` derives rather than stores. The paper plan's field list included the instantiated premise conclusions and the source conclusion, and the mechanization does not store them. They are not part of the node's syntax; they are recovered from the rule and the substitution (`instAPats θ r.premises`, `instAPat θ r.concl`) and exist only relative to a typing derivation. Storing them would let a caller forge an occurrence whose recorded premises disagree with the ones its rule actually instantiates. The derived-fields phrasing is the authoritative one.
+`CertOccurrence` derives rather than stores. The instantiated premise conclusions and the source conclusion are not part of the node's syntax; they are recovered from the rule and the substitution (`instAPats θ r.premises`, `instAPat θ r.concl`) and exist only relative to a typing derivation. Storing them would let a caller forge an occurrence whose recorded premises disagree with the ones its rule actually instantiates.
 
 ### How an occurrence is stated
 
@@ -374,7 +358,7 @@ Two binders *are* shared across the conjuncts, and saying so keeps the sentence 
 
 ### The firewall
 
-The one new theorem, in two halves:
+The firewall has two halves:
 
 - `prem_subterm_swap`, replacing a premise subterm with any term of the same conclusion and obligations preserves the parent's typing.
 - `dis_subterm_swap`, the same at a discharge slot, with the question key carried across by `map_fst_set_of_getElem?`.
@@ -383,42 +367,40 @@ Neither statement mentions a backend, and that is the content: the replacement m
 
 The theorem is cheap, and how it is cheap is verified mechanically. `InstSide` reaches `ws` only through three length fields, `lenAs`, `lenCs`, and `lenOs`, and `List.set` preserves length. The check is not a reading of the structure: the premise half's proof is `refine .inst { hside with lenAs := …, lenCs := …, lenOs := … }`, and *that elaborating* is Lean confirming those three fields are the only place `InstSide` mentions `ws`. The discharge half touches more, lengths, `ans`, and the four fields reading `D.map Prod.fst`, so its surviving side conditions are written out one by one rather than inherited, because which fields survive is the point of the theorem.
 
-Backend leakage is inexpressible in Lean. A parent cannot attempt to inspect a child's formula: `Assurance` carries only `(β, hd, κ)`, and there is no syntax anywhere in the AST naming another backend's `Form`. The attempt is not ill-typed; it is inexpressible, so there is no Lean term to reject. The honest Lean deliverable is the positive opacity theorem above plus this non-expressibility note. At the Haskell wire level the attempt is expressible, because the wire form is untyped: an `nd@1` certificate whose payload embeds an `ord@1` sub-payload is a real `SExpr` that `nd@1`'s decoder rejects. That vector (`prop_crossBackendPayloadRejected`) runs through `buildCertOk`, not `strictCheck`, because a firewall vector that never runs on the shipped path checks the wrong checker. An `Assurance`-extension alternative was rejected: it would put a non-source construct in the frozen core to serve a test.
+Backend leakage is inexpressible in Lean. A parent cannot attempt to inspect a child's formula: `Assurance` carries only `(β, hd, κ)`, and there is no syntax anywhere in the AST naming another backend's `Form`. The attempt is not ill-typed; it is inexpressible, so there is no Lean term to reject. The Lean content is the positive opacity theorem above plus this non-expressibility note. At the Haskell wire level the attempt is expressible, because the wire form is untyped: an `nd@1` certificate whose payload embeds an `ord@1` sub-payload is a real `SExpr` that `nd@1`'s decoder rejects. That vector (`prop_crossBackendPayloadRejected`) runs through `buildCertOk`, not `strictCheck`, because a firewall vector that never runs on the shipped path checks the wrong checker.
 
 ### The accounting laws
 
 - `certDeps_eq_union`, certificate dependencies are exactly the union of the occurrence-local backend reports. Each `stepDeps o.node` is computed by `o.β`'s own core, so this is a union over heterogeneous reporters, not a report from a shared one. The collection law survives heterogeneity because it never had to look inside a backend to hold.
-- `hetero_occurrences_accounted`, the headline result. Every certified occurrence of a typed term is accounted by *its own* registered core. It carries the acceptance conjunct the paper's target theorem states ("its local checker accepts its certificate") as a conjunct separate from the consequence: acceptance is the checkable fact a verifier re-runs, consequence is the semantic fact it buys.
+- `hetero_occurrences_accounted`, the headline result. Every certified occurrence of a typed term is accounted by *its own* registered core. It states acceptance ("its local checker accepts its certificate") as a conjunct separate from the consequence: acceptance is the checkable fact a verifier re-runs, consequence is the semantic fact it buys.
 - `usedBackends_accounted`, the syntactic identity list is exactly the set of logics the term's correctness rests on. Read as an audit: for each `β` a reviewer scans out of a term, it names the occurrence to inspect, the certificate to re-check, and the digest fixing which axioms that check may consult.
 
-All three are derivations from the pre-existing `Lara/Support.lean` results (repackage, do not re-prove; design decision D4). No new induction was needed anywhere, which was the intended signal that the repackaging was the right shape.
+All three are derived from `Lara/Support.lean` results without a new induction.
 
 ### Dependency accounting in the shipped checker
 
-The shipped checker retains and surfaces certificate dependencies. `CertOutcome.CertAccepted` carries the `Set Dependency` the adapter already returns; the acceptance projection `certAccepted` stays a `Bool`, which is the invariant that makes the widening safe, since no checked-graph decision, and therefore no soundness statement, can start depending on dependency data. `Lara.Strict.Deps.certDeps` collects the term-level report, tagging each step with its own backend as it walks; identity is tagged with `St.BackendId` (name and version), not the AST's name-only id, so two same-name different-version backends cannot collide into one indistinguishable report.
+The shipped checker retains and surfaces certificate dependencies. `CertOutcome.CertAccepted` carries the `Set Dependency` the adapter returns; the acceptance projection `certAccepted` is a `Bool`, which is the invariant that makes carrying the report safe, since no checked-graph decision, and therefore no soundness statement, can start depending on dependency data. `Lara.Strict.Deps.certDeps` collects the term-level report, tagging each step with its own backend as it walks; identity is tagged with `St.BackendId` (name and version), not the AST's name-only id, so two same-name different-version backends cannot collide into one indistinguishable report.
 
-The reports are surfaced to shipped consumers on the current path. `Lara.Driver.runCheckDeps` produces rejection diagnostics, certificate dependencies, claim reports, and AF-node names from one pass; `unitCertDeps` reads `certDeps` per argument; and the `lara deps` subcommand renders them. Arguments with no certificate dependencies are still listed, with a header and no lines under it, because a strict-mode argument that consulted nothing and an argument that is not in the report at all are different facts and a reader auditing what evidence a verdict rests on needs to tell them apart. On checked terms the Haskell collector agrees with Lean's `certDeps`; the two differ only in totality, since Lean's `stepDeps` reports a resolvable certificate's uses even when acceptance fails while the Haskell collector sees a report only through `CertAccepted`, and on typed terms acceptance holds at every certificate node anyway.
-
-**Labeled history.** Before the accounting was wired through, `strictCheck`, the only constructor of the sealed `StrictJudgment` and the only thing retaining `sjDependencies`, was called from `test/` and from nowhere in `src/`, and the production checker reached backends through `buildCertOk`, which called `runBackend` and **discarded the dependency report**. Lean proved `certDeps` accounted for every certified occurrence while the shipped checker accounted for none of them, which is why `CertOutcome.CertAccepted` was widened to carry the report.
+The reports are surfaced to shipped consumers. `Lara.Driver.runCheckDeps` produces rejection diagnostics, certificate dependencies, claim reports, and AF-node names from one pass; `unitCertDeps` reads `certDeps` per argument; and the `lara deps` subcommand renders them. Arguments with no certificate dependencies are still listed, with a header and no lines under it, because a strict-mode argument that consulted nothing and an argument that is not in the report at all are different facts and a reader auditing what evidence a verdict rests on needs to tell them apart. On checked terms the Haskell collector agrees with Lean's `certDeps`; the two differ only in totality, since Lean's `stepDeps` reports a resolvable certificate's uses even when acceptance fails while the Haskell collector sees a report only through `CertAccepted`, and on typed terms acceptance holds at every certificate node anyway.
 
 ### The worked witnesses
 
 The typed firewall results use a fixture core. `mixed_swap` and `mixed_dis_swap` need a genuinely typed child, and typing a certificate node requires its acceptance to hold in-kernel. The child is `fixCore`, a minimal `Strict.Backend` whose every field is genuinely proved and whose `uses` reports a real slot rather than nothing; an empty report would discharge `uses_covers`, `uses_valid`, and `uses_account` vacuously, and the fixture would prove nothing about the accounting laws it exists to exercise. What sits above that child differs between the two halves, and only the premise half witnesses a swap under a shipped parent:
 
-- For `mixed_swap` the parent is the real `nd@1`, via the already-worked `registry_success_bridge`, and the swapped term names both identities (`usedBackends mixedSwapTerm = [ndId, fixId]`).
+- For `mixed_swap` the parent is the real `nd@1`, via `registry_success_bridge`, and the swapped term names both identities (`usedBackends mixedSwapTerm = [ndId, fixId]`).
 - For `mixed_dis_swap` the parent is an unassured defeasible `ruleMix` node, not `nd@1`: `strictNoQ` forces `D = []` on strict nodes, so a certified node in a discharge position needs a defeasible ancestor. `nd@1` is the replaced child here, so `usedBackends disParent = [ndId]` and `usedBackends disSwapTerm = [fixId]`: the swap crosses a backend boundary, but the post-swap term is homogeneous. The discharge-side firewall is therefore witnessed against a shipped backend only as the term being swapped out, not as the parent that survives the swap.
 
 `mixed_registrations_distinct` is proved through a non-dependent projection, the resolved theory's *length*, because the theory data itself has type `List r.core.Form` and cannot be compared across records.
 
-The shipped `nd@1` and `ord@1` carry the syntactic and resolution facts. `mixed_usedBackends` and `mixed_registrations_distinct` need no acceptance: which identities a term names is readable from the term alone, and registration is a registry lookup. The required per-literal string lemmas that would have let a real `ord@1` numeric certificate be accepted inside the Lean kernel are infeasible: `ord@1` acceptance routes through `Cell.parseDecimal` → `parseUnsigned` → `String.splitOn`, and through `parseCanonInt` → `String.startsWith`. Under the current Slice-based `String` API those functions are kernel-opaque, so `rfl`, `decide`, `simp`, `exact?`, and `grind` all fail on literal goals and unfolding the recursion diverges. `native_decide` would close the gap and is forbidden: the axiom gate admits only the standard trio, and `native_decide` would add `Lean.ofReduceBool`. What does reduce per-literal is `String.toNat?` (via `String.toNat?_eq_some_ofDigitChars`), string-literal equality, `String.toList`, and `String.length`; `Lara.NDNamed.parseCanonNat_repr` proves `parseCanonNat (Nat.repr n) = some n` generically and is the place to start if this is revisited. A later reader should not "fix" the split back without first checking whether the core `String` API has gained the reduction lemmas.
+The shipped `nd@1` and `ord@1` carry the syntactic and resolution facts. `mixed_usedBackends` and `mixed_registrations_distinct` need no acceptance: which identities a term names is readable from the term alone, and registration is a registry lookup. A real `ord@1` numeric certificate cannot be accepted inside the Lean kernel, because the per-literal string lemmas it needs are unavailable: `ord@1` acceptance routes through `Cell.parseDecimal` → `parseUnsigned` → `String.splitOn`, and through `parseCanonInt` → `String.startsWith`. Under the current Slice-based `String` API those functions are kernel-opaque, so `rfl`, `decide`, `simp`, `exact?`, and `grind` all fail on literal goals and unfolding the recursion diverges. `native_decide` would close the gap and is forbidden: the axiom gate admits only the standard trio, and `native_decide` would add `Lean.ofReduceBool`. What does reduce per-literal is `String.toNat?` (via `String.toNat?_eq_some_ofDigitChars`), string-literal equality, `String.toList`, and `String.length`; `Lara.NDNamed.parseCanonNat_repr` proves `parseCanonNat (Nat.repr n) = some n` generically. The split between typed Lean witnesses and Haskell acceptance vectors follows from this kernel opacity of the core `String` API.
 
-Cross-language conformance for the mixed case uses a golden file only. Lean emits the mixed term's `certDeps`, a committed golden pins it, and a Haskell test asserts the same list. The cross-language golden uses shipped backends on both sides; `certDeps` needs only resolution and `Backend.uses`, and `ord@1`'s `ordUses` routes through `decodeCert` → `decodeSlot` → `parseCanonNat` → `String.toNat?`, which is per-literal provable. So the one artifact where both languages compute the same thing over the same two shipped backends, `nd@1` and `ord@1`, is unaffected by the in-kernel acceptance limit. The worked mixed `nd@1`/`ord@1` acceptance vector lives in Haskell (`test/StrictSpec.hs`), running on the shipped `inferSupport` and `buildCertOk` path. Lean's `ord@1` and `ra@1` results have stopped at the resolution layer for exactly this reason since before this work.
+Cross-language conformance for the mixed case uses a golden file only. Lean emits the mixed term's `certDeps`, a committed golden pins it, and a Haskell test asserts the same list. The cross-language golden uses shipped backends on both sides; `certDeps` needs only resolution and `Backend.uses`, and `ord@1`'s `ordUses` routes through `decodeCert` → `decodeSlot` → `parseCanonNat` → `String.toNat?`, which is per-literal provable. So the one artifact where both languages compute the same thing over the same two shipped backends, `nd@1` and `ord@1`, is unaffected by the in-kernel acceptance limit. The worked mixed `nd@1`/`ord@1` acceptance vector lives in Haskell (`test/StrictSpec.hs`), running on the shipped `inferSupport` and `buildCertOk` path. Lean's `ord@1` and `ra@1` results stop at the resolution layer for the same reason.
 
 ### The claims boundary
 
 The following may be claimed: one checked support term may carry certified strict instances from different registered backends, each accounted in its own logic, with no shared backend logic introduced (`hetero_occurrences_accounted`); certificate dependencies are exactly the union of the occurrence-local backend reports (`certDeps_eq_union`); a premise or discharge subterm may be replaced by any term of the same conclusion and obligations without disturbing the parent's typing, and the replacement may be certified by a different identity (`prem_subterm_swap`, `dis_subterm_swap`, instantiated at `mixed_swap` and `mixed_dis_swap`); the set of backend identities a term names is source-visible, and every name in it is registered and discharges an occurrence (`usedBackends_accounted`); and backend identity is quantified independently at each occurrence, since the existential in `OccurrenceConsequence` binds `core.Form`.
 
-The following must not be claimed. Lean does not reject a backend-leakage program; it cannot be written, so there is nothing to reject, and the Lean content is the positive firewall theorem plus the non-expressibility note while the rejection artifact is the Haskell wire vector. Different registered identities do not have different formula types; that is not provable, not stated, and not true in general, since a registry may map two identities to one core, and what is claimed is the absence of a binder relating them. This is not parametricity: it quantifies over registered identities, not relationally over related backends, the same distinction the theory-pw spine draws. The Lean mixed witness does not use two shipped backends in its typed results: `mixed_swap` and `mixed_dis_swap` use `nd@1` plus the fixture core, and only the syntactic, resolution, and `certDeps` results use `nd@1` plus `ord@1`. And a backend certificate never establishes the empirical truth of a measurement or a claim: acceptance is a fact a verifier re-runs, and the leaves it depends on stay defeasible.
+The following must not be claimed. Lean does not reject a backend-leakage program; it cannot be written, so there is nothing to reject, and the Lean content is the positive firewall theorem plus the non-expressibility note while the rejection artifact is the Haskell wire vector. Different registered identities do not have different formula types; that is not provable, not stated, and not true in general, since a registry may map two identities to one core, and what is claimed is the absence of a binder relating them. This is not parametricity: it quantifies over registered identities, not relationally over related backends, the same distinction the [possible-world outer model](theory-pw.md) draws. The Lean mixed witness does not use two shipped backends in its typed results: `mixed_swap` and `mixed_dis_swap` use `nd@1` plus the fixture core, and only the syntactic, resolution, and `certDeps` results use `nd@1` plus `ord@1`. And a backend certificate never establishes the empirical truth of a measurement or a claim: acceptance is a fact a verifier re-runs, and the leaves it depends on stay defeasible.
 
 ## 7. Why modal, evidence, or justification logic is not the source semantics
 
@@ -450,7 +432,7 @@ Ordinary S4, LP, J, and J4 are monotonic and therefore cannot be the whole statu
 
 Evidence logic is not excluded. Neighborhood and dynamic evidence logics can model evidence-sensitive belief and, in some variants, update, and no theorem above rules one out. The current design does not make one the source calculus because it still needs certificate syntax, policy obligations, provenance, and positional attack diagnostics. Use it as policy or admission semantics when a corpus requirement for evidence aggregation appears; only a monotonic evidence-entailment fragment may satisfy the strict-backend contract.
 
-Default justification logic is not excluded either. Pandzic-style systems already combine justification terms and defeasibility, and they are a genuine alternative that Proposition 8 does not rule out. Lara chooses the ASPIC+/Dung route because it directly supplies the required rebut, undercut, and undermine structure, skeptical grounded status, and a small executable compilation target. The paper must defend this choice through the certificate-language delta and corpus fit, not by claiming default justification logic is incapable.
+Default justification logic is not excluded either. Pandzic-style systems already combine justification terms and defeasibility, and they are a genuine alternative that Proposition 8 does not rule out. Lara uses the ASPIC+/Dung route because it directly supplies the required rebut, undercut, and undermine structure, skeptical grounded status, and a small executable compilation target. The choice rests on the certificate-language delta and corpus fit, not on any claim that default justification logic is incapable.
 
 ## 8. What proof cannot decide
 
@@ -465,24 +447,15 @@ These are evaluation obligations. Presenting them as missing proofs would confus
 
 ## 9. Corpus and conformance evidence for the optional backends
 
-The frozen `corpus-v1` reports one claim-support strict row, `1/1` (`adaptive-pruning/C04`, `ra@1`). No corpus unit exercises `ord@1` or `insp@1`; extending the corpus with units for them is deferred to a `corpus-v2` cycle. So the evidence for the two optional backends is of a different kind from corpus coverage, and the paper must say so.
+The frozen `corpus-v1` reports one claim-support strict row, `1/1` (`adaptive-pruning/C04`, `ra@1`). No corpus unit exercises `ord@1` or `insp@1`, so the evidence for the two optional backends is worked examples plus conformance and mutation tests, a different kind of evidence from corpus coverage.
 
-For `ord@1`, the motivation is that the comparison shape is pervasive in the literature, and that is currently a design argument rather than a measurement: no real paper's beats-claim has gone through the backend. The demonstration lands in `examples/` instead. `examples/S3` is the `num_le` tie, sitting exactly on the boundary where the two family members separate. `examples/S4` has an audit undermining the binding leaf, so the bridge is defeated while the certified comparison stays justified. Together with `examples/S2` these are three artifacts sharing one shape and varying one thing each, which is what makes them readable as a set.
+For `ord@1`, the claim that the comparison shape is pervasive in the literature is a design argument rather than a measurement: no real paper's beats-claim has gone through the backend. The worked examples demonstrate the shape. `examples/S3` is the `num_le` tie, sitting exactly on the boundary where the two family members separate. `examples/S4` has an audit undermining the binding leaf, so the bridge is defeated while the certified comparison stays justified. Together with `examples/S2` these are three artifacts sharing one shape and varying one thing each.
 
-For `insp@1`, the corpus evidence is the M0 C13/C14 count of 3 of 60 sampled claims for the `code_inspection` shape. The worked example `examples/S9` carries the demonstration against C09's shape.
+For `insp@1`, the worked example `examples/S9` carries the demonstration, with a version attestation for the planned half so the plan-versus-shipped shape reaches `justified`.
 
-Conformance and mutation evidence covers both shipped backends. `test/StrictSpec.hs` and `test/InspSpec.hs` (23 property groups) exercise the adapters against the seam obligations as conformance evidence, not soundness proofs. Golden anchors are byte-compared across both drivers by `scripts/differential.sh`: the four hand-authored wire anchors under `fixtures/corpus/insp-*.sexp` plus `examples/S9`. The mutation refresh added `S9` (`insp@1`) and `S2` (`ord@1`) together, 27 verified mutants each, growing the seeded suite from 541 to 595 and the measured input set from 601 to 655; all previous mutant bytes were unchanged. `S9`'s `cert-payload-tamper` replaces an `inspect` payload with `mut_corrupt` (R13), and `cert-theory-swap` changes an `inspectdiff` theory digest (R7 allowlist rejection, before backend replay), covering decoder and allowlist rejection rather than every semantic recheck branch. `MutationSpec.prop_backendCertificateCoverage` pins both backends' measured certificate cases. These counts are historical measurements, recorded with their sources; the clean measurement snapshot and publication procedure are in `evaluation.md#frozen-provenance-current-evaluation-freeze-v8`.
+Conformance and mutation evidence covers both shipped backends. `test/StrictSpec.hs` and `test/InspSpec.hs` exercise the adapters against the seam obligations as conformance evidence, not soundness proofs. Golden anchors are byte-compared across both drivers by `scripts/differential.sh`: the four hand-authored wire anchors under `fixtures/corpus/insp-*.sexp` plus `examples/S9`. The seeded mutant suite includes `S9` (`insp@1`) and `S2` (`ord@1`). `S9`'s `cert-payload-tamper` replaces an `inspect` payload with `mut_corrupt` (R13), and `cert-theory-swap` changes an `inspectdiff` theory digest (R7 allowlist rejection, before backend replay), covering decoder and allowlist rejection rather than every semantic recheck branch. `MutationSpec.prop_backendCertificateCoverage` pins both backends' measured certificate cases. Suite sizes and the measurement snapshot are in `evaluation.md#frozen-provenance-current-evaluation-freeze-v8`.
 
-Because `corpus-units/` is a frozen input row, adding a corpus unit for a new backend regenerates the seeded mutant suite, invalidates `measurements/frozen/`, and forces a fresh freeze tag. That is a `corpus-v2` scale task, and it is worth doing properly rather than by appending a single unit to an otherwise frozen sample: a corpus unit would answer "do real beats-claims fit this shape without distortion?", which is an empirical question about the modeling and wants the same sampling protocol the original 60 used.
-
-### What a corpus unit would need
-
-Recorded so the deferral does not lose the design. `examples/S2` is the template; a corpus unit instantiates it with a real paper's numbers.
-
-- Two reported cells as observed leaves, each carrying exactly one numeric literal (the premise-cell convention) and its own `refs` into the artifact's evidence.
-- A binding leaf, `S2`'s `comparison_setup`, naming which systems and measurand the two numbers belong to. This is the piece a real paper usually leaves implicit in a table caption, and eliciting it is the part of the lowering that will take judgment.
-- A strict re-check rule with `certifiers = [(ord@1, <digest>)]` and an empty theory, plus a defeasible bridge rule consuming the comparison and the binding. Both already exist verbatim in `examples/S2/ord-v1.policy.lara`; a corpus policy would adopt them rather than reinvent them.
-- A decision about `corpus-v1`'s rule vocabulary. The existing corpus policy has no comparison family, and adding one is a policy change affecting every unit's `unit.core.sexp` through the shared policy, which is why this is a `corpus-v2` question and not a unit-level edit.
+Because `corpus-units/` is a frozen input row, adding a corpus unit for a new backend regenerates the seeded mutant suite, invalidates `measurements/frozen/`, and requires a fresh freeze tag.
 
 ## 10. Scope and claims boundary
 
@@ -494,8 +467,7 @@ Consequences for how the system is described:
 - `spec.md` defines one backend-parametric strict rule and one reference natural-deduction adapter.
 - LP realization belongs to optional-adapter metatheory and related work.
 - The trusted-base report lists the selected adapters and theory digests for each run.
-- The evaluation reports certified versus trusted strict steps per backend. The previous single "LP witness fraction" is a backend-neutral strict-certification rate.
-- Existing LP code is retained as an experimental adapter seed, not the trusted core of Lara.
+- The evaluation reports certified versus trusted strict steps per backend, and a backend-neutral strict-certification rate.
 
 ## 11. Sources and audit mapping
 

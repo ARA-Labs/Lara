@@ -17,9 +17,9 @@ Every argument is a support term. Strict and defeasible are rule modes, strict c
 | Concrete syntax | Separately versioned `.lara` forms in the [surface grammar](lara-surface-grammar.md) |
 | Artifact maps | `lara-map@1` manifests and `map-verdict@2` composite verdicts, separately versioned above the core (§12) |
 
-The semantic corpus study fixes the per-result-cell leaf grain, duplicate-report-group quarantine, nine-family scheme vocabulary, adapter portfolio and defeat conventions. Changes to those choices require evidence against their recorded criteria; see [the corpus study](../m0/annotation-summary.md) and [corpus lowering](corpus-map.md). [Evaluation](evaluation.md) retains frozen inputs, hashes and historical measurement provenance.
+The semantic corpus study grounds the per-result-cell leaf grain (§3), duplicate-report-group quarantine (§4.3), nine-family scheme vocabulary (§4.5), adapter portfolio (§5.2) and defeat conventions (§7); see [the corpus study](../m0/annotation-summary.md) and [corpus lowering](corpus-map.md). [Evaluation](evaluation.md) holds the frozen inputs and hashes.
 
-The `lara-core@0.3` cutover retires `incomplete-argument` rejection while retaining R5 question accounting. A claim with only incomplete support remains `gap`. Conservative evidence-blocking compares complete declared arguments, never holes; a quarantined hole cannot cause blocking through an outgoing attack. Units with no declared hole retain their labels, edges and statuses across that cutover, apart from the replay-version bytes.
+A well-typed argument with open mandatory obligations is a reported hole, while R5 still rejects question-accounting failures. A claim with only incomplete support is `gap`. Conservative evidence-blocking compares complete declared arguments, never holes; a quarantined hole cannot cause blocking through an outgoing attack.
 
 ## 0. How to read this specification (non-normative)
 
@@ -64,9 +64,8 @@ diagnostic drawn from the fixed rejection classes (§10.1).
   (compilation and grounded semantics, including the §8.1 policy
   restriction), and §9 (the mechanized results and their Lean pointers).
 
-The subject design documents collect rationale, theorem assumptions and rejected
-alternatives. This specification defines the language contract; the evaluation
-record carries historical freeze and measurement provenance.
+The subject design documents collect rationale and theorem assumptions. This
+specification defines the language contract.
 
 ## 1. Scope and guarantee
 
@@ -92,22 +91,20 @@ search exhaustively for every possible argument. Acceptance means:
 questions required by an instantiated scheme are discharged or reported as holes.
 
 The producer/checker wire encoding is the canonical S-expression codec of `Lara.Wire` (§1.1 TCB
-row 1, §10.1 R14) — there is deliberately no JSON checker-input codec in the TCB. The syntax below
-is the canonical presentation syntax for the paper, examples, debugging, and reports. Both map to
-one abstract syntax. A JSON surface (`Lara.Json`) is planned only as an untrusted LLM-producer front
-end, never as a trusted codec. Lara does not need
-a tactic DSL, IDE, package manager, or standard library for the initial contribution.
+row 1, §10.1 R14); there is no JSON checker-input codec in the TCB. The syntax below is the
+canonical presentation syntax for examples, debugging, and reports. Both map to one abstract
+syntax. Lara has no tactic DSL and no standard library.
 
 ### 1.1 Trusted computing base and mechanization host
 
 The guarantee above holds only relative to a **trusted computing base (TCB)** — the code whose
 correctness the acceptance verdict depends on. A defect inside the TCB can make the checker accept an
 invalid certificate; a defect outside it cannot, because every untrusted output is re-checked by
-trusted code before it is believed. The M1 freeze fixes this boundary (open question §8 #8).
+trusted code before it is believed.
 
 **Inside the TCB (trusted code).**
 
-| # | Component | Module (M3 target) | Discharges |
+| # | Component | Module | Discharges |
 | --- | --- | --- | --- |
 | 1 | Decode boundary: presentation parser + wire decoder into the abstract syntax | `Lara.Syntax`, `Lara.Wire` | §9 result 12 (codec round-trip) |
 | 2 | Proposition normalizer `nf` and identity `≡` | `Lara.Prop` | §9 result 11 (frozen carve-out 1) |
@@ -118,7 +115,7 @@ trusted code before it is believed. The M1 freeze fixes this boundary (open ques
 | 7 | Compiler `compile(P) = AF` with subargument closure | `Lara.Compile` | §9 result 4 |
 | 8 | Status engine: grounded labelling + four-state aggregation | `Lara.Grounded` | §9 results 5, 6, 7 |
 | 9 | Diagnostics / located rejection | `Lara.Diagnostics` | §1; §10 |
-| 10 | Signature well-formedness and well-sortedness (R2, since `lara-core@0.2`), and the seven-stage `checkUnit` orchestrator that sequences rows 3–9 | `Lara.Sigma`, `Lara.Sigma.WellSorted`, `Lara.Check` | §9 result 13 |
+| 10 | Signature well-formedness and well-sortedness (R2), and the seven-stage `checkUnit` orchestrator that sequences rows 3–9 | `Lara.Sigma`, `Lara.Sigma.WellSorted`, `Lara.Check` | §9 result 13 |
 
 Trusted **inputs** (versioned data, not executable TCB, but part of the trust base and replay
 identity): the proposition signature `Sigma`, the claim-support policy `Pi`, the backend registry
@@ -130,16 +127,32 @@ certificates `kappa` and backend proof terms (untrusted payloads that a trusted 
 any producer of the wire program. Checker acceptance establishes structural validity only; lowering
 faithfulness is an evaluation axis (§11), never a checker guarantee.
 
-**Mechanization host: Lean 4** (open question §8 #8, resolved 2026-07-22). Lean 4 is the default
-absent stronger Rocq expertise and is already the working choice — the carve-outs are mechanized
-under `lean/`. The mechanized development is a separate Lean model sharing one serialized first-order
-core AST with the Haskell checker; that shared serialized core is the differential-testing anchor.
-Discipline: (a) core results §9 1–9 and reference-adapter result 10 are mechanized in Lean 4; (b) each
-definition is ported to Lean the moment it is frozen and corpus-independent, not deferred to a later
-milestone; (c) the spec records, per definition, whether it is executable in Lean, which theorem
-covers it, and how the Haskell function corresponds; (d) property, golden, mutation, and differential
-tests are conformance evidence for the Haskell checker, never a substitute for the Lean theorems
-(§9 closing note).
+**Mechanization host: Lean 4.** The metatheory is mechanized under `lean/` as a separate Lean model
+sharing one serialized first-order core AST with the Haskell checker; that shared serialized core is
+the differential-testing anchor. The Lean development targets core results §9 1–9 and
+reference-adapter result 10; §9 gives each result's theorem pointers and any part that remains
+open. The spec records, per definition, whether it is executable in Lean, which theorem covers it,
+and how the Haskell function corresponds. Property, golden, mutation, and differential tests are
+conformance evidence for the Haskell checker, never a substitute for the Lean theorems (§9 closing
+note).
+
+#### Natural language and the trusted boundary
+
+Natural language meets Lara at three layers, and the rule at each layer follows the direction of trust.
+
+| Layer | Direction | Rule |
+| --- | --- | --- |
+| `.lara` surface | input, trusted | More readable, never natural |
+| Producer (elaborator) | input, untrusted | The only place natural language is an input |
+| Verdicts, rejection reasons and reports | output | Free prose within pinned templates |
+
+The surface is a small, rigid keyword grammar that reads aloud as prose without parsing prose, following Isar rather than controlled natural languages such as Attempto ACE or Naproche. A surface that accepts a fragment of English has an invisible parse boundary, so its rejections cannot be localized by the author or a reviewer, and a readable artifact is useful only if a reader can see exactly what the checker saw. Readability is measured against code that Python-literate researchers can read, not against English. The verified parser never accepts natural-language input.
+
+Every surface convenience removes transcription, never checking. Its executable form is byte identity: each readable spelling lowers to the terse spelling's exact bytes, so the checker's input is unchanged. Value bindings, inferred theta, symbolic and labelled premise slots, named `nd@1` proof terms and source-authored `nd@1` formula annotations all satisfy this rule ([surface grammar](lara-surface-grammar.md)). A convenience that would let the checker see something the author did not legibly write is a language change, not a presentation change.
+
+Natural-language input belongs to the untrusted producer. A claim's `nl` field is presentation, `formal` is the checked target, and the `binding` between them is an audited annotation that the checker does not interpret (§3.1). Checker acceptance therefore establishes structural validity, not that the prose matches the formal claim; that agreement is confirmed by audit (`scripts/binding-audit.hs`), and a better producer does not make it checked.
+
+Output prose is derived from checked artifacts and feeds nothing back, so improving it cannot change what is accepted. It must stay a rendering: output that becomes input, such as a suggested fix the tool applies or generated text an author pastes back, is a surface or producer change. Rejection templates are normative and pinned ([rejection reference](rejection-surface.md)), and `scripts/differential.sh` byte-compares both drivers' output. A rendering must also stay faithful: where a name can be recovered only by reimplementing the checker's scoping outside it, such as `nd@1` binder names, the diagnostic prints the index rather than a reconstructed name that might be wrong.
 
 ## 2. Names and program environment
 
@@ -177,31 +190,23 @@ and policy-allowlisted theory digests are part of replay identity.
 ### 2.1 Versioning and replay identity (v0.1-frozen)
 
 The language surface is itself versioned: **`lara-core@0.3`** names the abstract syntax, the
-static judgments (§6.1, §7.1, §8, §8.1), and the wire schema — the S-expression codec of
-`Lara.Wire` (§1) — as frozen by M1, amended by the many-sorted signature at `@0.2` and by located
-gaps at `@0.3` (`theory-core.md#holes-located-gaps-and-term-level-critical-questions`). Each core bump is a hard cutover: the decoder accepts
-exactly the current core version and refuses an input naming an earlier one as an R14 codec error.
-The
-presentation syntax is versioned separately (**`lara-syntax@0.10`**) because it may evolve against
-a fixed core (the §4.5 aliasing path); both front ends decode to the one abstract syntax.
-Presentation syntax versions live in `docs/lara-surface-grammar.md`; this specification pins the
-core. The codec round-trip obligation (§9 result 12) is stated against the current core version. Lean
-mechanizes `parse ∘ print = id` for the complete live structured `Program`/`Policy` AST at
-`lara-syntax@0.10`, including value bindings, inferred argument instantiations, `policySigma`,
-and optional measurand polarity (`lean/Lara/Presentation.lean`) — `lara-syntax@0.7` restricts the
-concrete `.lara` surface, `@0.8` widens a certificate premise-reference namespace, and `@0.9`/`@0.10`
-lower named `nd@1` payload atoms without changing the presentation AST, so the theorem proved
-for `@0.6` still holds verbatim. The separate `Lara.NDNamed` development proves the `@0.9`/`@0.10`
-lowering mathematics. The Haskell `parse ∘ print = id` property separately covers the concrete `.lara`
-parser/printer. The Lean theorem is an AST-shape
-anchor, not a correctness proof for the Haskell concrete parser.
-`scripts/check-presentation-parity.sh` keeps the two models from drifting by comparing their
-normalized shape inventories. Exact compiler witnesses pin record fields, sum payloads, aliases,
-and anonymous entry types per language; the tripwires also compare named record selectors in order.
-Positional constructors have no source selector names: exact signatures pin their arity and
-positional type sequence, but semantic labels and swaps among same-typed positions remain
-assertions. Two representation exemptions are documented in the guard (`SortName` erasure;
-`Cert`'s native payload).
+static judgments (§6.1, §7.1, §8, §8.1), and the wire schema, the S-expression codec of
+`Lara.Wire` (§1). The core includes the many-sorted signature (§3.4) and located gaps
+(`theory-core.md#holes-located-gaps-and-term-level-critical-questions`). Each core bump is a hard
+cutover: the decoder accepts exactly the current core version and refuses an input naming any other
+as an R14 codec error. The presentation syntax is versioned separately (**`lara-syntax@0.10`**)
+because it may evolve against a fixed core (the §4.5 aliasing path); both front ends decode to the
+one abstract syntax. Presentation syntax versions live in `docs/lara-surface-grammar.md`; this
+specification pins the core. The codec round-trip obligation (§9 result 12) is stated against the
+current core version. Lean mechanizes `parse ∘ print = id` for the complete structured
+`Program`/`Policy` presentation AST at `lara-syntax@0.10`, including value bindings, inferred
+argument instantiations, `policySigma`, and optional measurand polarity
+(`lean/Lara/Presentation.lean`). Named `nd@1` payload atoms are lowered before they reach that AST,
+and the separate `Lara.NDNamed` development proves that lowering. The Haskell `parse ∘ print = id`
+property separately covers the concrete `.lara` parser/printer. The Lean theorem is an AST-shape
+anchor, not a correctness proof for the Haskell concrete parser;
+`scripts/check-presentation-parity.sh` keeps the two models from drifting, as described in the
+surface grammar.
 
 **Replay identity.** A checker verdict is reproducible only relative to the full trusted-input
 tuple; v0.1 freezes it as
@@ -225,13 +230,12 @@ by `coreVersionText` in `lean/Lara/Driver.lean`, and both print `lara-core@0.3` 
 ## 3. Propositions and leaves
 
 Propositions are built from a fixed first-order vocabulary in `Sigma`: predicate symbols and term
-constructors with declared arities. Programs may not extend `Sigma`. Phase 0's opaque, stable
-proposition identifiers (display text retained for audit) are the nullary case; richer domain
-vocabularies may be added to `Sigma` after the corpus study.
+constructors with declared arities. Programs may not extend `Sigma`. Nullary predicates give
+opaque, stable proposition identifiers (display text retained for audit).
 
 ```text
 g    ::= k | k(g1, ..., gn)        -- ground terms over constructors in Sigma
-atom ::= pred(g1, ..., gn)         -- pred in Sigma; n = 0 gives the Phase-0 opaque identifiers
+atom ::= pred(g1, ..., gn)         -- pred in Sigma; n = 0 gives opaque identifiers
 
 prop ::= atom                      -- support-level propositions are atomic
 
@@ -245,26 +249,22 @@ leaf l : prop
   metadata   = {...}
 ```
 
-**Default leaf granularity (M0, C15).** The default evidence-leaf grain is the individual
-reported **result cell** — one number in a table or figure — which the corpus study found to be the
-natural decomposition for three quarters of sampled claims (per-result-cell 45/60; mixed 7,
-per-experiment-claim 6, per-run 2). Coarser or mixed grains remain fully expressible as explicit,
-minority exceptions; the elaborator states the chosen grain per leaf and it is audited, not checked.
-A leaf whose value is a *distribution* rather than a single number (stochastic measurand dispersion,
-triton_cumsum C09) is a documented v0.1 residual-wishlist item (`constraints.md`), not yet a core
-construct.
+**Default leaf granularity.** The default evidence-leaf grain is the individual reported **result
+cell**, one number in a table or figure, which is the natural decomposition for most corpus claims.
+Coarser or mixed grains remain expressible as explicit exceptions; the elaborator states the chosen
+grain per leaf and it is audited, not checked. Distribution-valued leaves (a measurand reported as a
+dispersion rather than a single number) are not a core construct.
 
 Support-level propositions are atomic. At this level, conflict comes from the declared `contrary`
 relation rather than negation-to-falsum, and an implication `E -> C` is reified as a named rule
 rather than asserted as a proposition. Strict backends may have richer private formula languages
 (Section 5), but their formulas and proof terms are not source constructs. There is likewise no
-support-level justification operator in v0.1 (`justified(term, prop)` is removed).
+support-level justification operator, so claims about other arguments are not expressible as
+propositions.
 
 The support judgment is non-factive by construction: a backend receives encoded premise
 conclusions as assumptions and returns only certificate acceptance, dependencies, and diagnostics.
-No backend formula or proof term can be eliminated into a source truth judgment. This source/backend
-interface replaces the former LP-specific syntactic firewall. Reintroduce an internalized operator
-only if the corpus study shows meta-level claims (claims about other arguments) matter.
+No backend formula or proof term can be eliminated into a source truth judgment.
 
 ### 3.1 Claims and the `supports` relation
 
@@ -284,10 +284,10 @@ identity, as in AIF inference nodes and the theorem-is-the-object convention of 
 
 `c.binding` — the correspondence between `c.nl` and `c.formal` — is never a checker obligation. It is
 the single most load-bearing unchecked step (Section 11), so it is a first-class, versioned,
-human-signed field evaluated on the semantic-faithfulness axis, never proven. Policy-declared
-entailment (`concl(w)` entails `c.formal`) is deferred: when wanted it enters as an explicit support
-step whose own conclusion is discharged against `c.formal` by identity, so the trusted core does not
-grow.
+human-signed field evaluated on the semantic-faithfulness axis, never proven. There is no
+policy-declared entailment between `concl(w)` and `c.formal`; an entailment step is written as an
+explicit support step whose own conclusion is discharged against `c.formal` by identity, so the
+trusted core does not grow.
 
 ### 3.2 Proposition normalization and the identity relation `≡`
 
@@ -319,20 +319,14 @@ p ≡ q   iff   nf(p) = nf(q)     (= is syntactic equality on the AST)
 addition to the TCB. The `contrary` matching of Section 4.1 and the `supports` check of Section 3.1
 both use `≡`.
 
-**Flip criterion.** If the corpus needs symmetric or AC predicates (e.g. an unordered `distinct{a,b}`)
-or binders (quantified propositions), extend `nf` with argument sorting for the declared AC symbols
-and de Bruijn indexing for binders, and re-establish the same properties. This is a normalization
-extension, not a change to the `p ≡ q iff nf(p) = nf(q)` shape.
-
 Confidence values and thresholds are metadata unless the selected policy gives them formal
 admission semantics. Provenance can admit, quarantine, or reject a leaf before argument evaluation;
 it does not itself create an attack.
 
-### 3.4 The proposition signature `Sigma` and well-sortedness (`lara-core@0.2`)
+### 3.4 The proposition signature `Sigma` and well-sortedness
 
-`Sigma` is a **declared, many-sorted, first-order signature**. Until `lara-core@0.2` it was an
-arity table the implementation carried and never read; it is now a field of the checker unit and a
-checked precondition of reading the policy as patterns.
+`Sigma` is a **declared, many-sorted, first-order signature**. It is a field of the checker unit
+and a checked precondition of reading the policy as patterns.
 
 ```text
 sort S1, ..., Sk                       -- declared, opaque sort names
@@ -348,9 +342,8 @@ non-total on ground data the frontend never declared.
 **Sort equality is name equality.** There is no subtyping, no sort variables, and no sort
 constructors. This is a first-order signature and nothing more.
 
-**Arity is subsumed, not replaced.** An arity is the length of an argument-sort vector, so the
-older `pred -> arity` table is `map (\s -> (sym s, length (args s)))` of the new one, and the new
-object is strictly stronger on every axis.
+**Arity is derived.** A symbol's arity is the length of its argument-sort vector, so the arity
+table is `map (\s -> (sym s, length (args s)))` of the signature.
 
 **`sortOf` is a simple recursion**, total except on undeclared symbols:
 
@@ -374,9 +367,8 @@ no sort annotations and the wire `rules` section gains no field.
 
 **What this deliberately does not give.** `num_lt(0.71, 0.74)` is well-sorted whether those numbers
 are accuracies, BLEU scores, or learning rates. Measurand identity stays in the binding leaf and
-stays *attackable*; making it a sort error would convert something the calculus currently lets an
-author dispute into something the checker silently refuses, which is a change to what the calculus
-claims rather than an enforcement improvement.
+stays *attackable*; making it a sort error would turn something an author can dispute into
+something the checker silently refuses, which would change what the calculus claims.
 
 **Where it is checked.** `checkUnit` stage 2 (§10.1 R2), in two halves. The *static* half checks
 `Sigma` itself (no duplicate declaration, no base-sort shadowing, no signature naming an undeclared
@@ -503,7 +495,7 @@ admitted only if it carries a checker witness `(name, version)` listed in `Pi` a
 reference. *(Enforced by the `lara-evidence@0.1` package door, which requires an inspection
 manifest, pins the referenced bytes by length and SHA-256, and replays the approved checker against
 them — [the evidence-admission design](evidence-admission-design.md#concrete-package-contract). It is not enforced by a policy witness list inside
-`lara-core@0.3`, whose `Policy` still carries no checker stage, so a source door with no evidence
+`lara-core@0.3`, whose `Policy` carries no checker stage, so a source door with no evidence
 context rejects a `certified` declaration at R8 rather than checking the witness; R8 is otherwise
 raised only by a `reject` admission row.)* The outcomes:
 
@@ -519,9 +511,8 @@ raised only by a `reject` admission row.)* The outcomes:
 Admission is per-leaf, happens before argument evaluation, and never creates an attack
 (Section 3).
 
-**Conflicting duplicate reports of one result cell (M0, C16).** When the trace reports the same
-measurand cell more than once — a figure restating a table, text restating a figure
-(bridging-data-gaps C05) — the elaborator emits each report as a **distinct leaf** and declares them a
+**Conflicting duplicate reports of one result cell.** When the trace reports the same
+measurand cell more than once — a figure restating a table, text restating a figure — the elaborator emits each report as a **distinct leaf** and declares them a
 **duplicate-report group** (Section 11, task 2). The group declaration is untrusted elaborator output,
 audited on the faithfulness axis; measurand identity never enters the trusted kernel. Admission then
 enforces agreement *within* each declared group by the existing `≡` relation (Section 3.2):
@@ -534,7 +525,7 @@ enforces agreement *within* each declared group by the existing `≡` relation (
 
 A data conflict is thus *absence of reliable evidence*, not a counter-argument: no attack is
 created, so a conflict never *directly* makes a claim `contested` or `defeated` — the same
-gap-not-defeat routing the corpus fixed for unmet mandatory critical questions (Section 7). It is
+gap-not-defeat routing as unmet mandatory critical questions (Section 7). It is
 neither a typed attack nor a provenance grade, and declaring the conflicting atoms `contrary` is not
 the intended encoding. The check is decidable and local (group membership plus `≡`). A policy may
 escalate the outcome from `quarantine` (the default) to `reject`, making any detected conflict a
@@ -545,9 +536,7 @@ the artifact uncheckable.
 not a weakening operation: grounded status is non-monotonic across graph changes, so if the
 quarantined leaf backed an *attacker*, its target loses a defeater and its label can move
 `contested`/`defeated` → `justified`. Checking the pruned program and reporting its labels as claim
-statuses would therefore let missing evidence make a claim look **stronger**. (An earlier version of
-the paragraph above asserted the opposite — that a conflict "can never make a claim `justified`" —
-which holds only for the claim whose *own* support was quarantined.)
+statuses would therefore let missing evidence make a claim look **stronger**.
 
 The checker therefore reports conservatively. Both frameworks live in original (pre-admission)
 argument declaration index space:
@@ -585,13 +574,13 @@ of `D` — including when it has a raw outgoing attack onto complete support —
 a typed hole. Holes are excluded from `D` because no accepted framework contains them: were a hole a
 reference node, an unattacked hole with a typed attack onto a claim's only support would defeat that
 support in `G` while the attack is inert in `F`, and a unit with nothing quarantined would violate
-non-promotion (`theory-core.md#rejected-alternatives`).
+non-promotion.
 
 The rule is directed, not "block the whole component": grounded labelling reads only a node's
-transitive attackers, so forward reachability is both sound and tight. The core's labelling
-function, its input wire schema, and its rejection classes are unchanged by this rule — it is an
-outer reporting layer over the same core verdict. The *verdict* grammar does gain the
-`evidence-blocked` status and the optional `conditional` section (the verdict grammar below), so a
+transitive attackers, so forward reachability is both sound and tight. The rule does not touch the
+core's labelling function, its input wire schema, or its rejection classes; it is an outer
+reporting layer over the same core verdict. The *verdict* grammar carries the `evidence-blocked`
+status and the optional `conditional` section (the verdict grammar below), so a
 consumer that has never heard of `evidence-blocked` fails to decode rather than misreading an
 inflated status; a program with nothing quarantined — holes included — reports no
 `evidence-blocked` query and produces no `conditional` section.
@@ -635,7 +624,7 @@ there is none:
   the root obligation set (§6.1). Sites follow the same traversal as the obligations (premise
   subterms in index order, then discharge subterms in discharge-map order, then the instance itself)
   and are distinct. They are read from the checked term, never by re-running inference
-  (`lean/Lara/Check/HoleSites.lean`; `theory-core.md#holes-located-gaps-and-term-level-critical-questions` D12). The multi-artifact map verdict
+  (`lean/Lara/Check/HoleSites.lean`; `theory-core.md#holes-located-gaps-and-term-level-critical-questions`). The multi-artifact map verdict
   (§12) does not carry sites;
 - `attacks` lists, by original attack declaration index and in that order, the surviving
   successfully typed raw attacks whose source is this hole, under raw endpoint alignment and before
@@ -685,13 +674,11 @@ projections of that same prune. Production never sends a dependent term with a m
 entry to the core, so R1 remains an undeclared-core-reference error rather than quarantine routing.
 
 A policy `reject` is source R8; an inconsistent group escalated by group policy is R9; neither is
-core R1. The fixed boundary precedence is source invalidity, then policy R8, replay R13, group R9,
-and finally core rejection. Source invalidity (including duplicate admission keys or duplicate
-`LeafId`s) is CLI exit 2 with empty stdout. R8 is the deliberate source-judgment exception: exit 1,
-empty stdout, and exactly one deterministic stderr line. It selects the first leaf in source
-declaration order whose exact `(LeafKind, Provenance)` key matches a `reject` row, and the line
-identifies its leaf id, kind, provenance, and matched admission row. Replay, group, accepted, and
-core rejection paths retain the core-verdict stdout contract.
+core R1. The fixed boundary precedence is source invalidity (including duplicate admission keys or
+duplicate `LeafId`s), then policy R8, replay R13, group R9, and finally core rejection. R8 selects
+the first leaf in source declaration order whose exact `(LeafKind, Provenance)` key matches a
+`reject` row. The evidence-admission design and `docs/rejection-surface.md` specify the exit code
+and output of each outcome.
 
 The hidden source carrier binds the unchanged replay identity, the full declared unit, the ordered
 policy seed, the one combined prune, and its canonical audit. Audit leaf rows follow leaf declaration
@@ -706,8 +693,9 @@ conservative rule above — quarantine-affected claims report `evidence-blocked`
 pruned graph's label.
 
 Byte-level evidence admission — checking that a certified leaf is the exact output of a registered
-checker over pinned artifact bytes — is **not** part of v0.1; leaves on every v0.1 path are
-*evidence declared*. The separate implemented extension has its own [evidence-admission design](evidence-admission-design.md).
+checker over pinned artifact bytes — is **not** part of the core language; core leaves are
+*evidence declared*. The `lara-evidence@0.1` package door implements it as a separate extension with
+its own [evidence-admission design](evidence-admission-design.md).
 
 ### 4.4 Instantiation in programs
 
@@ -746,7 +734,7 @@ support. Every declared attack is still type-checked under §7.1 whatever its en
   hole's root reaches no complete argument, because every term containing the root inherits its
   obligations.
 
-What still rejects the unit is unchanged: an ill-typed argument or attack, a duplicate argument, an
+The unit is still rejected for an ill-typed argument or attack, a duplicate argument, an
 R5 question-accounting failure, or a licensed conflict between complete arguments that no attack
 from a complete source covers (`missing-conflict`).
 
@@ -767,55 +755,38 @@ checked like any other, including attack completeness, so an update sequence tha
 is not guaranteed to be accepted step by step; the guarantee is about the complete program checked
 directly. Discharging a hole in place is not part of `lara-core@0.3`.
 
-### 4.5 Reference policy scheme vocabulary (M0-frozen)
+### 4.5 Reference policy scheme vocabulary
 
-Nothing in the calculus fixes *which* schemes a policy names — that is policy content. The corpus
-study (M0, C13, `m0/annotation-summary.md`) found that the argument shapes across the sampled ARA
-corpus collapse into a **small closed family set**, so the v0.1 reference policy (`empirical-v1`)
-ships a **fixed scheme vocabulary of nine families** rather than an open-ended scheme language:
+Nothing in the calculus fixes *which* schemes a policy names; that is policy content. The argument
+shapes across the ARA corpus collapse into a **small closed family set**
+([corpus study](../m0/annotation-summary.md)), so the reference policy `empirical-v1` ships a
+**fixed scheme vocabulary of nine families** rather than an open-ended scheme language:
 
-| Family | Merged raw schemes | Sample |
-| --- | --- | --- |
-| `controlled_comparison` | cost-accounting, resource, noninferiority, compute-matched, cross-model-transfer, spectral variants | 25 |
-| `intervention_ablation` | component_ablation, component_substitution, dose_response | 14 |
-| `observation_measurement` | cross_run_observation, exhaustive_pairwise, case_demonstration | 7 |
-| `analytic` | analytic_proof, analytic_bound_with_consequence_check | 4 |
-| `benchmark_stress_evaluation` | — | 3 |
-| `code_inspection` | plan_vs_shipped_diff | 3 |
-| `statistical_correlation` | — | 2 |
-| `inductive_generalization` | — | 1 |
-| `blind_paired_human_evaluation` | — | 1 |
+| Family | Merged raw schemes |
+| --- | --- |
+| `controlled_comparison` | cost-accounting, resource, noninferiority, compute-matched, cross-model-transfer, spectral variants |
+| `intervention_ablation` | component_ablation, component_substitution, dose_response |
+| `observation_measurement` | cross_run_observation, exhaustive_pairwise, case_demonstration |
+| `analytic` | analytic_proof, analytic_bound_with_consequence_check |
+| `benchmark_stress_evaluation` | — |
+| `code_inspection` | plan_vs_shipped_diff |
+| `statistical_correlation` | — |
+| `inductive_generalization` | — |
+| `blind_paired_human_evaluation` | — |
 
-The identifier spellings above are **settled for v0.1** (decided 2026-07-22): descriptive
-snake_case, chosen for the target reader — a Python-literate domain researcher reading the
-formalization of their own artifact, not a PL expert — so long-and-obvious wins over
-short-and-precise-to-insiders. What M0 freezes is the family *partition* (nine families and the
-merge assignments); the spellings are surface-layer and may be revisited during frontend
-concrete-syntax design, but only until `empirical-v1` ships — after that, a rename is a policy
-version bump, since the spelling is baked into checked artifacts.
+The identifiers are descriptive snake_case, written for a Python-literate domain researcher reading
+the formalization of their own artifact rather than for a PL expert. The spelling is baked into
+checked artifacts, so a rename is a policy version bump.
 
-The considered-and-deferred alternative is a short single-word vocabulary — `comparison`,
-`ablation`, `observation`, `analytic`, `stress_eval`, `inspection`, `correlation`,
-`generalization`, `human_eval` (in table order) — better program ergonomics, deferred for v0.1
-because it under-specifies for the domain-researcher reader (bare `comparison` hides *controlled*,
-which is what licenses the scheme's critical questions). These nine short identifiers are
-**reserved**: no other scheme, keyword, or construct may claim these spellings, so the aliasing
-path (short surface names decoding to the canonical identifiers via the single decode table)
-stays open without collision. The frontend concrete-syntax naming decision — canonical-only,
-alias, or switch — is made in collaboration with the ARA maintainer at frontend design time.
+The nine short identifiers `comparison`, `ablation`, `observation`, `analytic`, `stress_eval`,
+`inspection`, `correlation`, `generalization` and `human_eval` (in table order) are **reserved**: no
+other scheme, keyword, or construct may claim these spellings, so short surface names can decode to
+the canonical identifiers through the single decode table without collision.
 
-All 60 sampled claims are assignable to these nine families with no whole-reasoning-step opaque-leaf
-encoding; `controlled_comparison` and `intervention_ablation` alone carry two-thirds of the corpus.
 Each family is a named defeasible scheme (Section 4) with its own premises and critical questions;
 authors instantiate but do not define schemes (a policy is a versioned trusted input). This closed
 vocabulary is a property of the *shipped policy*, not of the calculus, so extending it never touches
-the trusted core.
-
-**Flip criterion.** If reserve annotation (the 171 unsampled claims) or a new corpus shows the family
-count growing open-endedly rather than converging, extend the shipped policy's scheme set — the
-calculus and its metatheory are unaffected. A single corpus claim whose supporting argument fits none
-of the nine families without opaque-leaf encoding falsifies the "nine families suffice" claim (C13)
-and triggers this extension.
+the trusted core or its metatheory.
 
 ## 5. Strict-certificate backends
 
@@ -897,38 +868,25 @@ propositional consequences made visible by its encoding and declared theory. A n
 must remain a reported theory dependency or a trusted policy rule; the checker does not relabel it a
 tautology.
 
-### 5.2 Optional domain adapters (M0-sized portfolio)
+### 5.2 Optional domain adapters
 
-The corpus study (M0, C14, `m0/annotation-summary.md`) measured which strict steps corpus arguments
-actually demand: of 60 sampled claims, 35 identified a domain-checker call, 21 none, 3 LP, 1
-reference-nd. The 35 domain-checker calls are **overwhelmingly arithmetic re-checks of reported
-tables** — deltas, ratios, aggregations, inequalities — plus a few code inspectors. The v0.1 optional
-adapter portfolio is therefore sized to that demand, and as of 2026-09-07 it ships **all three**
-members: the rational-arithmetic half — the table-recheck checker and, added beside it, the
-ordered-comparison checker `ord@1` whose beats-claim shape is the most common in the
-ML-methodology literature — and the static code-inspection checker `insp@1` the study also counted
-(shipped 2026-09-07; header note. It was portfolio-designed but unshipped between the portfolio
-amendment and its completion):
+Most strict steps that corpus arguments demand are arithmetic re-checks of reported tables (deltas,
+ratios, aggregations, inequalities), plus a few code inspections. The optional adapter portfolio
+matches that demand with three shipped members:
 
 1. a **rational-arithmetic / table-recheck checker** — certifies that a reported cell stands in a
-   declared arithmetic relation to other cells (delta, ratio, aggregation, inequality). This
-   answers the dominant observed demand, including the *instance identities* of the single
-   reference-nd call (nanogpt_chat_rl C04: single-elim on 8 plays 4+2+1 = 7 = N−1 matches;
-   round-robin 28; depth ⌈log₂ 8⌉ = 3). That call's *optimality lower bound* — any reliable
-   pairwise-selection rule needs ≥ N−1 judge calls — is the corpus's one ND-shaped derivation: a
-   quantified deductive step no table re-check expresses, carried by the Section 5.1 reference
-   backend with the combinatorial content ("every non-winner must lose at least once") as a
-   declared theory dependency, since source propositions are ground atoms. The corpus brackets the
-   reference backend from both sides: below it, arithmetic re-checks; above it, derivations beyond
-   its strength correctly left attested (stochastic-interpolants' measure-theoretic step).
+   declared arithmetic relation to other cells (delta, ratio, aggregation, inequality). A deductive
+   step that no table re-check expresses, such as a quantified lower bound, is carried by the
+   Section 5.1 reference backend with its combinatorial content as a declared theory dependency,
+   since source propositions are ground atoms. Derivations beyond the reference backend's strength
+   (for example a measure-theoretic step) stay attested leaves.
    Shipped as **`ra@1`** (`Lara.Strict.RA`; §9 result 10 discharged in `lean/Lara/RA.lean`).
 2. an **ordered-comparison checker** — certifies `num_lt(A, B)` / `num_le(A, B)` between two
    numeric literals by exact rational arithmetic. Its slots are premise-only: each cited numeral
    must trace to a consulted premise slot, so a certificate can never cite a self-supplied theory
    entry as measured evidence (`docs/strict-certificates.md#43-ordered-comparison-ord1`). Shipped as **`ord@1`**
-   (`Lara.Strict.Ord`; §9 result 10 discharged in `lean/Lara/Ord.lean`). No corpus unit
-   exercises it — a corpus extension is deferred to `corpus-v2`; the worked examples S2–S7 carry
-   the demonstration.
+   (`Lara.Strict.Ord`; §9 result 10 discharged in `lean/Lara/Ord.lean`). The worked examples S2–S7
+   demonstrate it.
 3. a **static code-inspection checker** — certifies structural facts about referenced source
    (plan-vs-shipped diffs, negative existentials over code) as a closed four-predicate family —
    `code_absent`, `code_present`, `code_unique`, `code_planned_not_shipped` — over **declared
@@ -936,7 +894,7 @@ amendment and its completion):
    **closed-world step**: a negative existential over code is not an observation but an inference
    from an exhaustive enumeration, and that inference is what the replay discharges. It does not
    assert that any inventory is faithful to the bytes — byte-level evidence admission is not part
-   of v0.1 (§4.3), so an inventory is an *evidence declared* leaf and stays defeasible, which is
+   of the core (§4.3), so an inventory is an *evidence declared* leaf and stays defeasible, which is
    why `rebench-rust_codecontests` C09 remains a `gap`. Slots are premise-only, and here that guard
    protects the closed-world premise itself: a self-supplied theory entry could otherwise assert
    "I inspected everything and found nothing". Unlike the `ord@1` family this one *does* need a
@@ -945,18 +903,13 @@ amendment and its completion):
    (`inspModels_absent_present_sat`); by §8.1 Path B that conflict must be carried on a defeasible
    bridge's conclusions, since a strict-reachable pattern may not overlap a `contrary` side.
    Shipped as **`insp@1`** (`Lara.Strict.Insp`; §9 result 10 discharged in
-   `lean/Lara/Insp.lean`; `docs/strict-certificates.md#44-static-code-inspection-insp1`). No corpus unit exercises it —
-   a corpus extension is deferred to `corpus-v2` with the `ord@1` units; the worked example S9
-   carries the demonstration against C09's shape.
+   `lean/Lara/Insp.lean`; `docs/strict-certificates.md#44-static-code-inspection-insp1`). The worked
+   example S9 demonstrates it against C09's shape.
 
-**LP answers no observed corpus demand** (3 calls, all speculative) and is not part of the shipping
-portfolio. It may still be *registered* as an optional backend — its `t:F`, application, sum, positive
-introspection, reflection, constant specification, and S4 realization remain internal to that adapter
-— but v0.1 does not ship it. The current Haskell `ConstantSpec` accepts arbitrary `(constant,
-formula)` pairs, so it is not yet even a conforming adapter; eligibility would require fixed LP schema
-recognition and a soundness/conformance argument. **Flip criterion:** ship LP only if corpus or
-reserve strict steps at meaningful frequency need nested justification-term structure that arithmetic
-and code inspection cannot express (C14 falsification).
+No LP adapter ships. LP's `t:F`, application, sum, positive introspection, reflection, constant
+specification, and S4 realization would stay internal to such an adapter. The Haskell
+`ConstantSpec` code accepts arbitrary `(constant, formula)` pairs and is not a conforming adapter;
+`strict-certificates.md` §4.2 states what an LP adapter must discharge.
 
 Further adapters may certify classical propositional reasoning, temporal properties, or other domains.
 Each adds only its selected checker and theory to the run's trusted base and must discharge the same
@@ -1029,28 +982,24 @@ subterm propagates). A complete graph node requires `O = empty`; a well-typed de
 `Lara.Strict.Deps`. The shipped checker hands it to a consumer: the driver runs the
 collector over each argument of the *accepted, checked* unit (`Lara.Driver.unitCertDeps`, reached
 through `runCheckDeps` and `Lara.Elaborate.sourceResultCertDeps`), and the `lara deps <file>`
-subcommand prints it. Three decisions are frozen with it, and the reasons are on the definitions
-themselves:
+subcommand prints it. Three contracts govern the report:
 
-- **The report is not in the verdict.** `lara check`'s stdout is the frozen wire verdict and the N11
-  differential anchor against `lean/Lara/Driver.lean` (`scripts/differential.sh`, 620 anchors);
-  widening it would move that anchor and every corpus golden, and would oblige the Lean driver to
-  render a report it has no encoder for. The report rides on its own subcommand instead.
-- **One collector, not two.** The driver calls `Lara.Strict.Deps.certDeps` rather than fusing
-  collection into `inferSupport`'s traversal. A fused collector would be a second implementation of
-  the same accounting, owing its own agreement argument against Lean; calling the mirror means the
-  shipped text is produced by the artifact `scripts/check-backend-deps-golden.sh` already pins
-  against the Lean witness. The cost is one extra replay per accepted certificate node, and only
-  when a caller demands the report — the oracle is a pure function, so the second application cannot
-  disagree with the first.
+- **The report is not in the verdict.** `lara check`'s stdout is the wire verdict that
+  `scripts/differential.sh` compares byte-for-byte against `lean/Lara/Driver.lean`, which has no
+  encoder for the report. The report has its own subcommand.
+- **One collector.** The driver calls `Lara.Strict.Deps.certDeps` rather than fusing collection into
+  `inferSupport`'s traversal, so the shipped text comes from the same function that
+  `scripts/check-backend-deps-golden.sh` pins against the Lean witness. The cost is one extra replay
+  per accepted certificate node, paid only when a caller asks for the report; replay is a pure
+  function, so the second application agrees with the first.
 - **Only an accepted unit has a report.** The accounting ranges over checked terms; on a rejected
-  one the collector would emit whatever the accepted steps beneath the refused node cited, which
-  reads as an audit of evidence the verdict does not rest on. `lara deps` therefore prints nothing
-  on stdout and exits 1 for a rejection, and the report is taken over the *checked* (§4.3-pruned)
-  unit, not the declared one.
+  unit the collector would cite the accepted steps beneath the refused node, which reads as an audit
+  of evidence the verdict does not rest on. `lara deps` therefore prints nothing on stdout and exits
+  1 for a rejection, and the report is taken over the *checked* (§4.3-pruned) unit, not the declared
+  one.
 
-Design note D9 in `Lara.SupportTerm` is unchanged by this: the acceptance projection stays a `Bool`
-and no checked-graph decision may consult dependency data.
+The acceptance projection is a `Bool`, and no checked-graph decision may consult dependency data
+(design note D9 in `Lara.SupportTerm`).
 
 ### 6.1 Support-term typing rules (v0.1-frozen)
 
@@ -1108,9 +1057,8 @@ obligation set unions every subterm's open obligations with this instance's own
     (Section 5). Its strict dependencies are `uses_beta(kappa)`, folded into `certDeps(w)` (Section 6).
 
 This figure is the executable core the Haskell checker and the Lean model share (Section 1.1). It is
-**frozen for v0.1**: the freeze proves nothing by itself but triggers the Section 9 obligations to be
-mechanized against this exact definition — result 1 (decidability), result 3 (dependency
-accountability via the `leaves`/`certDeps` inversion), and result 11 (support adequacy).
+**frozen for v0.1**, and Section 9 results 1 (decidability), 3 (dependency accountability via the
+`leaves`/`certDeps` inversion), and 11 (support adequacy) are proved against this exact definition.
 *(Mechanized against this figure, `lean/Lara/Support.lean`: `leaves_declared` — every leaf of a
 typed term is declared in `Gamma`, the result-3 leaf half, with "report = `leaves(w)`" definitional;
 `hasSupport_unique` — one conclusion and obligation set per term, the result-1 uniqueness half;
@@ -1125,7 +1073,7 @@ carries the frozen `(beta, theory-digest, kappa)` triple and `dom(theta) = {X1..
 Concrete obligation-accounting cases (mixed mandatory/optional holes, nested propagation,
 duplicate elimination, missing- and overlapping-accounting rejection) are pinned in
 `lean/Lara/Examples.lean`.
-`lean/Lara/Check/Support.lean` and `SupportProof.lean` now provide the
+`lean/Lara/Check/Support.lean` and `SupportProof.lean` provide the
 executable support checker and exact soundness/completeness bridge; the finite
 backend registry exposes Boolean replay with proved adequacy. The result-3
 `certDeps` certificate half is also mechanized: `Backend.uses` carries
@@ -1182,7 +1130,7 @@ Sigma; Pi; Gamma; R |- k : attacks(w, u@π)
 
 Attack checking is subterm-occurrence checking plus a contrary-relation lookup: decidable and
 local, and the position doubles as the source location in diagnostics. The presentation syntax
-writes root positions with the previous sugar (`undercut d1 a1.rule` means `a1@ε`) and inner
+writes root positions with the `.rule` sugar (`undercut d1 a1.rule` means `a1@ε`) and inner
 positions with paths (`undermine d2 a1/2.leaf`).
 
 ### 7.1 Attack typing rules (v0.1-frozen)
@@ -1239,13 +1187,12 @@ Three deliberate design points:
   partition the attackable positions — the "three kinds of attacks are the three kinds of
   positions" statement holds by construction.
 
-These rules are **frozen for v0.1** and trigger the Section 9 obligations against this exact
-definition — result 1 (attack-checking decidability) and result 4 (only typed attacks enter the
-compiled AF). *(Mechanized against this figure, `lean/Lara/Attack.lean`: `attack_source_checked`;
+These rules are **frozen for v0.1**, and Section 9 results 1 (attack-checking decidability) and 4
+(only typed attacks enter the compiled AF) are stated against this exact definition. *(Mechanized against this figure, `lean/Lara/Attack.lean`: `attack_source_checked`;
 `rebut_top_defeasible` and `undercut_pos_defeasible` — strict occurrences are unattackable;
 `undercut_target_rule` / `undermine_target_leaf` — the position-kind partition;
 `rebut_concl_coherent` — the local conclusion read-off agrees with the target's typed conclusion.
-`lean/Lara/Check/Attack.lean` now supplies exact executable positional-attack
+`lean/Lara/Check/Attack.lean` supplies exact executable positional-attack
 checking (`checkAttack_sound`/`complete`), and `lean/Lara/Compile.lean`
 discharges relational compile-facing edge soundness. Presentation premise
 indices are 1-based; the mechanized model is 0-based.)*
@@ -1253,32 +1200,27 @@ indices are 1-based; the mechanized model is 0-based.)*
 An ARA dead end creates an attack only if it can construct one of these typed forms. A dead-end tag,
 confidence score, or provenance downgrade alone is insufficient.
 
-**Defeat-layer provenance (M0, C16).** The corpus study fixes three conventions for how the elaborator
-draws attacks from a trace:
+**Defeat-layer provenance.** Three elaborator conventions govern how attacks are drawn from a trace:
 
 - **Attack candidates come from the whole trace, not only `dead_end` nodes.** Counter-evidence
-  sometimes lives outside dead ends — in experiment nodes (fix_embedding C12) or score-filtered runs
-  (triton_cumsum C09) — so the attack-candidate walk covers the entire exploration trace.
+  sometimes lives outside dead ends, in experiment nodes or score-filtered runs, so the
+  attack-candidate walk covers the entire exploration trace.
 - **A `dead_end` node may lower to support instead of attack.** A failed line of attempts can be a
-  negative-result claim's *primary evidence* (restricted_mlm C14). Whether a node lowers to a support
-  leaf/argument or a typed attack is the elaborator's per-node judgment (Section 11), untrusted and
-  audited on the faithfulness axis; the kernel treats a dead-end-derived leaf as an ordinary
-  `observed`/`attested` leaf and introduces no new construct. Its `refs` binding records the source
-  `dead_end` node, so the lowering choice stays audit-distinguishable even though it is
-  kernel-invisible (provenance never carries logical force, Section 3).
-- **Unmet mandatory critical questions route to holes, never attacks.** In the corpus 39% of mandatory
-  CQs (seeds/variance, significance, baseline completeness) are simply unstated; typing them as attacks
-  would spuriously defeat nearly every claim, so they surface as gaps (Sections 4.2, 4.3), not defeat
-  edges.
+  negative-result claim's *primary evidence*. Whether a node lowers to a support leaf/argument or a
+  typed attack is the elaborator's per-node judgment (Section 11), untrusted and audited on the
+  faithfulness axis; the kernel treats a dead-end-derived leaf as an ordinary `observed`/`attested`
+  leaf and introduces no new construct. Its `refs` binding records the source `dead_end` node, so
+  the lowering choice stays audit-distinguishable even though it is kernel-invisible (provenance
+  never carries logical force, Section 3).
+- **Unmet mandatory critical questions route to holes, never attacks.** Mandatory questions such as
+  seeds/variance, significance, and baseline completeness are often simply unstated; typing them as
+  attacks would spuriously defeat nearly every claim, so they surface as gaps (Sections 4.2, 4.3),
+  not defeat edges.
 
-Empirically genuine defeat edges are rare and undercut-dominant (M0: 4 undercut / 0 rebut / 0
-undermine over 194 dead-end classifications — the systematically typed region; the whole-trace
-counter-evidence finds of the first bullet add candidates without changing the rarity profile), so
-most trace nodes lower to support or to nothing rather than to attacks, while missing justification
-surfaces as holes (previous bullet), not defeat edges. Rebut and undermine are unexercised in the polished top-venue corpus by construction; they are
-exercised through *self-authored adversarial reports/mutations* against corpus claims at
-language-testing time (decision N29), extending the rejection-class negative-suite discipline to the
-defeat layer, not through corpus mining.
+Genuine defeat edges are rare in the corpus and mostly undercuts, so most trace nodes lower to
+support or to nothing rather than to attacks. Rebut and undermine are exercised through
+self-authored adversarial reports and mutations against corpus claims, which extend the
+rejection-class negative suite to the defeat layer.
 
 ## 8. Compilation and claim-support semantics
 
@@ -1314,8 +1256,7 @@ Holes(P)  = { a | arg a declared in P,  Sigma; Pi; Gamma; R |- a : supports(p_a)
 
 - `Args` admits only complete declared arguments (`O = ∅`); an incomplete argument neither enters
   the AF nor emits an edge — this is where Section 7.1's checked-not-complete source rule lands.
-  Since `lara-core@0.3` an accepted unit may contain such arguments: they form `Holes(P)`, the
-  located gaps of §4.4. Acceptance requires every declared argument to be in `Args(P) ∪ Holes(P)`
+  An accepted unit may contain such arguments: they form `Holes(P)`, the located gaps of §4.4. Acceptance requires every declared argument to be in `Args(P) ∪ Holes(P)`
   and every declared attack to type, whatever its endpoints; the AF is built from `Args(P)` alone.
 - The target `u` of a typed attack may be a hole. Occurrence containment `∃π'. v@π' = occ(k)` is
   structural: any complete argument sharing the attacked subterm is defeated with it, even when the
@@ -1334,11 +1275,10 @@ Holes(P)  = { a | arg a declared in P,  Sigma; Pi; Gamma; R |- a : supports(p_a)
 judgment over closure edges agrees with the abstract grounded semantics of
 `lean/Lara/Grounded.lean` over the compiled AF at the argument level; and `srcStatus_iff` —
 the exact iff/equality characterization at four-state claim status (`SrcStatus`, read from the
-source judgment alone). The edge oracle these levels take (`Faithful`) is no longer a
-gap: the checker-built closure decider `edgeB` (built from `containsB` and
-`attackClosureB`) constructively supplies it via `Compile.edgeB_faithful`, so §9 result
-6's source-vs-compiled half now holds with no oracle hypothesis (specialized as
-`checkedAF` / `srcIn_iff_checkedGrounded` / `srcStatus_iff_checked`).
+source judgment alone). The checker-built closure decider `edgeB` (built from `containsB` and
+`attackClosureB`) supplies the edge oracle these levels take (`Faithful`) via
+`Compile.edgeB_faithful`, so §9 result 6's source-vs-compiled half holds with no oracle hypothesis
+(specialized as `checkedAF` / `srcIn_iff_checkedGrounded` / `srcStatus_iff_checked`).
 Executable support, positional-attack, and proof-bearing raw-program checking
 are complete. The closure's strict-superset behavior — one attack edging both the
 declared target and a distinct wrapper argument containing the occurrence, with the grounded
@@ -1375,17 +1315,16 @@ contested if none is in and some a in support(P,p) is labelled undec
 defeated  if support(P,p) is nonempty and every such a is labelled out
 ```
 
-**Hole-vs-complete-alternative (resolved, N17 point 1).** A hole forces `gap` only when
+**Hole-vs-complete-alternative.** A hole forces `gap` only when
 `support(P,p)` — the *complete* checked support arguments — is empty. When a complete argument
 exists, the priority above decides status from labels alone; an open hole on some *other* alternative
 never downgrades a claim with a complete `in` argument. Instead it surfaces through a separate
 `incompleteAlternative` diagnostic (status never hides holes, but a winning complete argument is not
-suppressed by them). This makes the status function total. Up to `lara-core@0.2` the checker
-rejected any unit with a hole, so `holes(P, p)` was empty on every accepted unit; since `@0.3` it is
-populated from the accepted unit's located holes (§4.4), the status function itself is unchanged, and
-a claim whose candidate supports are all holes reports `gap`.
+suppressed by them). This makes the status function total. `holes(P, p)` is populated from the
+accepted unit's located holes (§4.4), and a claim whose candidate supports are all holes reports
+`gap`.
 
-**`contested` provenance (resolved, N17 point 2).** `contested` is defined as grounded `undec` (the
+**`contested` provenance.** `contested` is defined as grounded `undec` (the
 broad reading above), which is wider than mutual defeat: even/odd cycles and `undec`-propagation all
 collapse to `contested`. The finer SCC / cycle structure is a *reporting* obligation
 (`contestedProvenance`), not part of the four-state status, so the status function stays total and
@@ -1393,9 +1332,9 @@ deterministic. Determinism follows because status is a function of the determini
 labelling (§9 result 5).
 
 In `lean/Lara/Grounded.lean`, `statusC` is the total aggregation and `statusC_gap_iff` mechanizes the
-"gap only on empty complete support" half of point 1; `incompleteAlternative` is a *defined*
-diagnostic (a modeling convention, not tied to `statusC` by a theorem), and the `contested`-provenance
-report of point 2 is likewise a definition. The status is total and deterministic by construction (a
+"gap only on empty complete support" half of the hole-vs-complete-alternative rule;
+`incompleteAlternative` is a *defined* diagnostic (a modeling convention, not tied to `statusC` by a
+theorem), and the `contested`-provenance report is likewise a definition. The status is total and deterministic by construction (a
 function of the deterministic `labelC`).
 
 ### 8.1 Consistency and the strict-rule well-formedness restriction
@@ -1428,7 +1367,7 @@ introduces no new conflict and direct = indirect consistency hold by constructio
 claims are never jointly `justified`. The cost is an expressiveness limit: strict chains may only
 target uncontested claims.
 
-_The restriction is **v0.1-frozen** as part of the language definition (M1), not an advisory:
+_The restriction is **v0.1-frozen** as part of the language definition, not an advisory:
 `wf(Pi)` — no strict-reachable pattern may overlap either side of a `contrary` declaration — is a
 compile-time judgment, and its violation is rejection class R12 (§10.1), located at the offending
 rule and contrary pair. `lean/Lara/Policy.lean` mechanizes the finite strict-reachable set,
@@ -1439,12 +1378,10 @@ public Lean reference-PL boundary `Lara.Check.Unit.checkUnit` rejects duplicate 
 and then R12 violations before beginning program checking. It canonically constructs
 `Unit.CheckedUnit`, which carries both policy invariants and exact attack completeness. Manual
 proof-level construction of that structure remains possible only by supplying every invariant.
-The reference-PL implementation closes this accepted-unit premise and the §9 result-7/C09 consistency theorem._
+This accepted-unit premise is what the §9 result-7 consistency theorem consumes._
 
-**Flip criterion.** If the corpus shows strict rules genuinely feeding contested claims, switch to
-Path A — require the contrary relation to be a total, involutive contradictory map (`−φ`, `−−φ = φ`)
-and close strict rules under transposition, which buys all four rationality postulates under grounded
-with negation living in the contrary relation rather than the proposition language. See
+Lara does not use Path A, which would require the contrary relation to be a total, involutive
+contradictory map (`−φ`, `−−φ = φ`) and close strict rules under transposition. See
 `theory-core.md#support-calculus-and-obligations`.
 
 ### 8.2 Direct claim-status semantics and status preservation
@@ -1452,8 +1389,8 @@ with negation living in the contrary relation rather than the proposition langua
 The status of §8 is defined through the *compiled* route: `compile` the program to a Dung framework,
 compute the grounded labelling, then aggregate. That route cannot, on its own, discharge §9 **result
 6** ("status preservation between a direct source semantics and the compiled-AF semantics"): with
-only the compiled definition there is no independent semantics to preserve, so result 6 was
-previously unprovable (exploration tree **N16**). This section supplies the missing half.
+only the compiled definition there is no independent semantics to preserve. This section supplies
+the direct half.
 
 **Direct big-step judgment.** Define claim status *directly* on the well-formed program, without the
 Dung translation, as the least fixed point of the defense operator. Writing `att` for the
@@ -1475,28 +1412,24 @@ materializes the grounded iteration.
 status `W ⊢ p ⇓ status` equals `status(grounded(compile(W)), p)`. Equivalently, argument by argument,
 `W ⊢ a ⇓ in ⟺ a ∈ grounded(compile(W))`, and likewise for `out`/`undec`.
 
-**Mechanization status — source-to-compiled bridge, oracle eliminated (source-vs-compiled half
-complete).** `lean/Lara/Grounded.lean` proves declarative grounded semantics equal to executable
-bounded iteration over an arbitrary finite framework (`directIn_iff`, `labelC_inn/out/undec_iff`,
-`status_preservation`), including termination within `|Args|` steps (`grounded_stable`).
-`lean/Lara/Compile.lean` now instantiates that layer at checked source programs: `SrcIn`/`SrcOut`
-read the Prop-level subargument-closed source relation directly — the shadow of the *same* compiled
-closure `Edge`, not an independent declarative calculus — while `srcIn_iff_grounded` and
-`srcStatus_iff` prove argument membership and four-state source status equal the executable
-verdict over `toAF`. The `Faithful` obligation those carried — that a Boolean edge decider agrees
-with the frozen closure `Edge` relation exactly — is no longer an assumption: `containsB`
-(subterm-occurrence) and `attackClosureB` (attack-on-any-contained-occurrence) build the checker's
-closure decider `edgeB`, and `edgeB_faithful` proves it decides `Edge` exactly, discharging
-`Faithful` constructively (`containsB_iff`/`attackClosureB_iff`/`edgeB_iff`, with the `DisNodup`
-side condition supplied by the checker's `hasSupport_disNodup`). The specialized wrappers
-`checkedAF`, `srcIn_iff_checkedGrounded`, `srcStatus_checked`, and `srcStatus_iff_checked` therefore
-state result 6's source-vs-compiled half over an accepted program with **no oracle hypothesis**;
-`lean/Lara/Examples.lean` pins the checker-built decider and its grounded verdict on concrete
-fixtures. This closes the result-6 oracle. It does **not** relate an independent source calculus to the AF —
-`SrcIn`/`SrcOut` are the Prop-level shadow of the compiled edge closure that `edgeB` executes — and
-it does not by itself establish grounded consistency. That downstream theorem now lives in
-`Lara.Consistency`: attack completeness is supplied at the accepted-unit boundary, closing
-result 7/C09 for the Lean reference PL.
+**Mechanization status.** `lean/Lara/Grounded.lean` proves declarative grounded semantics equal to
+executable bounded iteration over an arbitrary finite framework (`directIn_iff`,
+`labelC_inn/out/undec_iff`, `status_preservation`), including termination within `|Args|` steps
+(`grounded_stable`). `lean/Lara/Compile.lean` instantiates that layer at checked source programs:
+`SrcIn`/`SrcOut` read the Prop-level subargument-closed source relation directly, and
+`srcIn_iff_grounded` and `srcStatus_iff` prove argument membership and four-state source status
+equal the executable verdict over `toAF`. The checker's closure decider `edgeB`, built from
+`containsB` (subterm occurrence) and `attackClosureB` (attack on any contained occurrence), decides
+the frozen closure `Edge` relation exactly (`edgeB_faithful`, from
+`containsB_iff`/`attackClosureB_iff`/`edgeB_iff`, with the `DisNodup` side condition supplied by
+the checker's `hasSupport_disNodup`). It therefore discharges the `Faithful` obligation
+constructively, and the specialized wrappers `checkedAF`, `srcIn_iff_checkedGrounded`,
+`srcStatus_checked`, and `srcStatus_iff_checked` state result 6's source-vs-compiled half over an
+accepted program with **no oracle hypothesis**; `lean/Lara/Examples.lean` pins the checker-built
+decider and its grounded verdict on concrete fixtures. Two limits apply. `SrcIn`/`SrcOut` are the
+Prop-level shadow of the same compiled edge closure that `edgeB` executes, not an independent source
+calculus. The bridge does not by itself establish grounded consistency; that theorem lives in
+`Lara.Consistency`, where attack completeness is supplied at the accepted-unit boundary (result 7).
 The development is `sorry`-free within the standard axiom trio.
 
 **Accepted-unit flow (Lean reference PL).** `checkUnit` has the fixed diagnostic order
@@ -1509,13 +1442,12 @@ duplicate rule IDs → R2 signature → R12 policy violation
 
 The first three checks precede program checking. Within program checking, duplicate detection precedes
 cache construction; the support stage then builds one retained checked-argument cache. It rejects
-only on a support-inference failure; since `lara-core@0.3` an open mandatory obligation is not a
-rejection, and the cache is partitioned once into complete nodes and located holes (§4.4). Typed
+only on a support-inference failure; an open mandatory obligation is not a rejection, and the cache is partitioned once into complete nodes and located holes (§4.4). Typed
 attacks are checked against every declared argument; the AF and the deterministic
 source-major/target-major completeness scan use the complete nodes and the attacks whose source is
 complete. Typed-attack sources, the completeness scan, compilation, hole reporting and downstream
-claim aggregation reuse that cache and do not re-infer support. Legacy
-`checkProgram`/`CheckedProgram` remains the generic attack-soundness boundary; detailed
+claim aggregation reuse that cache and do not re-infer support.
+`checkProgram`/`CheckedProgram` is the generic attack-soundness boundary; detailed
 `ProgramAcceptance` and `CheckedUnit` carry attack completeness and the located holes.
 
 `Lara.Consistency.claimSupportFor` aggregates exactly all retained complete checked nodes whose
@@ -1527,26 +1459,23 @@ is a complete-only projection with definitionally empty holes. That is sound for
 only complete support (`Semantics.observe_holes_independent`); the incomplete alternatives of a
 claim are read from the accepted unit's located holes, not from this projection.
 
-This mechanized result does not claim Path A, a production Haskell checker, or NL-to-structure
-validation, and its consistency statement is about complete claims only. `Lara.Grounded` is the
-proof-oriented executable reference evaluator; its transparent repeated scans are not the deferred
-optimized production evaluator.
+This mechanized result does not claim Path A or NL-to-structure validation, and its consistency
+statement is about complete claims only. `Lara.Grounded` is the proof-oriented executable reference
+evaluator, with transparent repeated scans.
 
-_M3 status (2026-07-27):_ the deferred Haskell pieces named here have since landed as the executable
-mirror of this frozen semantics, with no change to the definitions above: the production checker is
-`Lara.Check.checkUnit`, the optimized production evaluator is `Lara.Runtime` (cached adjacency,
-verdict byte-identical to the reference path), and the `holes(P,p)` / `incompleteAlternative`
-diagnostics of §8 are computed by `Lara.Reporting`, which since `lara-core@0.3` reads the accepted
-unit's located holes rather than rescanning arguments. Soundness remains carried by the Lean proofs;
+The Haskell production checker is `Lara.Check.checkUnit`, an executable mirror of this semantics.
+Its optimized evaluator is `Lara.Runtime` (cached adjacency, verdict byte-identical to the reference
+path), and the `holes(P,p)` / `incompleteAlternative` diagnostics of §8 are computed by
+`Lara.Reporting` from the accepted unit's located holes. Soundness is carried by the Lean proofs;
 the two implementations are cross-checked byte-for-byte through the `Lara.Wire` differential anchor.
 
-## 9. Static and semantic results required before freeze
+## 9. Static and semantic results
 
 1. Decidability of program and attack checking (including positional attack checking).
    *(Checker portion mechanized: `Lara.Check.inferSupport`,
    `checkAttack`, and `checkProgram` execute and have exact relational
-   soundness/completeness theorems. Legacy `checkProgram`/`CheckedProgram` remains generic and
-   unchanged. The canonical `checkUnit` flow adds the accepted-unit policy and completeness
+   soundness/completeness theorems. `checkProgram`/`CheckedProgram` is the generic
+   attack-soundness boundary. The canonical `checkUnit` flow adds the accepted-unit policy and completeness
    invariants in the fixed seven-stage order stated in §8.2.)*
 2. Strict-backend isolation: programs cannot extend `R`, backend theories are digest-addressed, and
    no support term, attack, or backend proof term crosses the strict-certificate interface.
@@ -1571,12 +1500,12 @@ the two implementations are cross-checked byte-for-byte through the `Lara.Wire` 
    `lean/Lara/Grounded.lean` `grounded_stable`/`grounded_fixpoint` — bounded iteration reaches the
    least fixed point within `|Args|` steps; aggregation is a total function of the labelling.)*
 6. Status preservation between a direct source semantics (§8.2) and compiled AF semantics.
-   *(Source-vs-compiled half complete — oracle eliminated: `lean/Lara/Compile.lean`
+   *(Source-vs-compiled half mechanized with no oracle hypothesis: `lean/Lara/Compile.lean`
    `srcIn_iff_checkedGrounded`, `srcStatus_checked`, and `srcStatus_iff_checked` connect source
    judgments over the subargument-closed `Edge` closure to executable grounded status over an
    accepted program with **no `Faithful` hypothesis** — the checker-built `edgeB`/`edgeB_faithful`
    discharge it constructively; `lean/Lara/Examples.lean` pins the decider on fixtures. The
-   accepted-unit attack-completeness premise for result 7 is separately closed; see §8.2.)*
+   accepted-unit attack-completeness premise for result 7 is supplied by `checkUnit`; see §8.2.)*
 7. Rationality postulates: sub-argument closure holds unconditionally; under the Section 8.1
    restriction, closure under strict rules and direct/indirect consistency hold under grounded
    semantics, so two contrary claims are never jointly `justified`. *(Partially mechanized for the
@@ -1611,13 +1540,6 @@ Additional adapter soundness may be imported from a separately verified checker 
 explicit theorem and encoding correspondence. Tests of executable checkers are conformance evidence,
 not substitutes for these theorems.
 
-For the Lean reference-PL implementation, the evidence at that milestone was 70 traceability IDs and six author flows,
-`lake build` (25 jobs), and 430 AxCheck reports with no `sorryAx` and only
-`propext`, `Classical.choice`, and `Quot.sound`; the multiline CI axiom parser is
-also repaired and negative-tested. Passing `cabal build`/`cabal test` (one
-suite, 30 QuickCheck groups, 100 cases each) is regression-compatibility
-evidence only, not evidence for the new Lean-only acceptance flow.
-
 ## 10. Presentation example
 
 ```lara
@@ -1647,66 +1569,29 @@ status c1
 ```
 
 This example is intentionally incomplete: `a1` leaves the mandatory question `external_validity`
-open, so `a1` is a hole (§4.4). Under `lara-core@0.3` the unit is accepted rather than rejected:
+open, so `a1` is a hole (§4.4). The unit is accepted:
 `a1` is not an AF node, `c1` has no complete support and reports `gap`, and the verdict's `holes`
 section reports `a1` at its declaration index with the one obligation `external_validity`, located
 at `a1`'s root: `(obligation external_validity (pos))`. The undercut
 `d1 a1.rule` is a typed attack from a complete source onto the root of a hole; it is kept, but no
-complete argument contains `a1`'s root, so it produces no edge. Before `@0.3` the checker rejected
-this unit with `incomplete-argument`, and the only accepted way to express the gap was to omit `a1`,
-which loses the information about which question is missing. `examples/running-example/run1/`
-carries the `@0.3` shape of the same situation: it declares run 2's support argument `a1`
+complete argument contains `a1`'s root, so it produces no edge. Reporting the hole keeps the
+information about which question is missing. `examples/running-example/run1/`
+carries the same situation: it declares run 2's support argument `a1`
 (`controlled_experiment` from `e1`, discharging `randomization` with `e2` and `adequate_power` with
 `e3`) without the leaf `e6`, so the mandatory question `external_validity` stays open, and its
 verdict reports `a1` in the `holes` section with the obligation `external_validity` at its root
 beside `c1`'s
 `gap` status. The worked examples under `examples/` (each with a
-derived `example.core.sexp` wire anchor and `expected.json` golden) are the M3/M5 golden-test
+derived `example.core.sexp` wire anchor and `expected.json` golden) are the golden-test
 artifacts built against this frozen spec (`implementation.md#test-discipline`).
 
 ### 10.1 Rejection classes (v0.1-frozen)
-
-**AMENDMENT (`lara-core@0.2`): R2 is widened, not replaced.** The class is frozen, and
-this is the one change to it. Three things moved:
-
-1. **Sorts entered the class.** `Sigma` is now a declared, many-sorted signature (§3.4) carried by
-   `Unit` and enforced by `checkUnit` stage 2, so a sort mismatch is an R2 trigger alongside the
-   arity and symbol mismatches the row already listed. Widening R2 is preferred to adding an R15
-   or splitting the class because **no implementation had ever enforced R2**: the class was
-   documented, reserved, and dead, so widening it changes no existing behavior and moves no other
-   class.
-2. **The groundness clause is dropped as vacuous, not as unimplemented.** "Non-ground term where
-   ground required" has never been violable: `Term ::= num | str | con(...)` has no variable
-   constructor, so every `Prop` is ground *structurally*, and pattern variables exist only in
-   `Pat`. It is removed rather than left looking unenforced — a reader who found it in the table
-   with no implementation behind it would reasonably conclude a check went missing.
-3. **What R2 still does not answer.** It answers exactly one question — is this term well-sorted
-   under `Sigma` — and never "does this identifier resolve" (R1), "is this substitution total"
-   (R3), or "does this conclusion match that pattern" (R4). In particular an undeclared *symbol*
-   (predicate head or constructor) is R2 and not R1, because R1 is about declaration identifiers
-   (leaf, argument, rule, question, backend, policy) and symbols have never been in its list; and
-   a substitution whose *domain* is wrong stays R3, because stage 2 checks the sorts of θ's range
-   terms at keys that *are* declared parameters and says nothing about coverage.
-
-Spec §4.1 rule well-formedness — every pattern variable among `ruleParams` — is now *enforced*,
-as a second arm of **R12** rather than as part of R2. An out-of-scope pattern variable is perfectly
-well-sorted; it is simply not in scope, which is policy well-formedness. One class per stage, and
-R2 stays purely about sorts.
-
-
-**AMENDMENT (`lara-core@0.3`): `incomplete-argument` is retired.** An argument that type-checks
-with an open mandatory obligation is no longer ill-formed: it is accepted as a located hole (§4.4)
-and reported in the verdict's `holes` section. The named kind, its wire tag and its error
-constructors are removed from both runtimes. No R-class moves: R5 still rejects a question that is
-in neither the discharge map nor the open set `H`, or a discharge or an `open` that names an
-undeclared question; and a hole's supports and attacks are still type-checked, so a later R-class defect is no longer
-masked by an earlier incomplete argument.
 
 Every ill-formed construct fails in exactly one located class. Besides R1–R14, the checker emits
 three named kinds from its fixed stage order: `duplicate-rule`, `duplicate-argument`, and
 `missing-conflict` (a licensed conflict between complete arguments with no covering attack from a
 complete source); `docs/rejection-surface.md` §2 anchors each. The enumeration is frozen so the
-diagnostics surface (`Lara.Diagnostics`), the golden negative examples, and the M5 mutation suite
+diagnostics surface (`Lara.Diagnostics`), the golden negative examples, and the mutation suite
 share one spine: every class must be exercised by at least one rejected example and one mutation.
 
 | Class | Trigger | Located at | Spec |
@@ -1726,6 +1611,20 @@ share one spine: every class must be exercised by at least one rejected example 
 | **R13** backend | certificate replay rejects; unknown backend or version; theory digest not allowlisted | the certified instance | §5 |
 | **R14** codec | wire program fails to decode to the abstract syntax: malformed S-expression, S-expression nesting deeper than the reader's bound (see below), unknown fields per the current core version, an input naming any other core version (§2.1), presentation parse error | the wire location | §1, §2.1 |
 
+R2 answers exactly one question — is this term well-sorted under `Sigma`
+(§3.4) — and never "does this identifier resolve" (R1), "is this substitution total" (R3), or "does
+this conclusion match that pattern" (R4). In particular an undeclared *symbol* (predicate head or
+constructor) is R2 and not R1, because R1 is about declaration identifiers (leaf, argument, rule,
+question, backend, policy) and symbols are not among them; and a substitution whose *domain* is
+wrong is R3, because stage 2 checks the sorts of θ's range terms at keys that *are* declared
+parameters and says nothing about coverage. R2 has no groundness clause: `Term ::= num | str |
+con(...)` has no variable constructor, so every `Prop` is ground structurally, and pattern variables
+exist only in `Pat`.
+
+Spec §4.1 rule well-formedness — every pattern variable among `ruleParams` — is the second arm of
+**R12**, not part of R2. An out-of-scope pattern variable is well-sorted; it is simply not in scope,
+which is policy well-formedness. One class per stage keeps R2 purely about sorts.
+
 **The reader's nesting bound is part of R14, and part of the shared contract.**
 Both readers — `Lara.Wire.parseSExprBS` and `Lara.Driver.parseWire` — refuse an
 S-expression nested deeper than `maxDepth = 10000` with a located R14 error. The
@@ -1740,32 +1639,25 @@ sits far above the deepest committed artifact: no
 `.sexp`, `.laramap` or `.lara` tree in the repository nests more than 135 levels.
 The evidence-model JSON depth-boundary fixtures reach that ceiling;
 `scripts/differential.sh` measures it on every run rather than assuming. The
-reader's 10000-level limit is unchanged, so
-it bounds no expressible program: it is a refusal boundary, not a grammar
+10000-level limit therefore bounds no expressible program: it is a refusal boundary, not a grammar
 restriction, and raising it is a reader change on both sides at once rather than
 a wire-version change.
 
-**On the Lean side the bound is proved, not only differentialled.**
-`Lara.Driver`'s reader was a `partial def` mutual block, and Lean's kernel has no
-reduction behaviour for a `partial def`, so nothing about its results was
-provable — the enforcement was real but the only evidence was the gates above. It
-is now a total definition, well-founded on the remaining input, with the
-consumption fact `parseList`'s element loop needs carried in the result
-(`Lara.Driver.Parsed`) rather than assumed. That buys three theorems, all
-trio-clean and pinned in `AxCheck.lean`: `parseForm_of_maxDepth_lt` (past the
-bound the reader refuses on depth alone, before it looks at the input),
-`parseList_of_maxDepth_lt` (the refusal is located at the post-`skipSpace`
-state, which is why the two runtimes' columns agree), and
-`parseWire_nested_error` (an input opening more than `maxDepth` lists before its
-first form is refused with the depth message at line 1, column `maxDepth + 2`).
-The refusal behaviour is unchanged — no corpus, wire, mutant or replay-identity
-byte moves, and the three gates above still pass unmodified.
+**On the Lean side the bound is proved, not only differentialled.** `Lara.Driver`'s reader is a
+total definition, well-founded on the remaining input, with the consumption fact `parseList`'s
+element loop needs carried in the result (`Lara.Driver.Parsed`) rather than assumed. Three
+theorems, all trio-clean and pinned in `AxCheck.lean`, state the refusal:
+`parseForm_of_maxDepth_lt` (past the bound the reader refuses on depth alone, before it looks at
+the input), `parseList_of_maxDepth_lt` (the refusal is located at the post-`skipSpace` state, which
+is why the two runtimes' columns agree), and `parseWire_nested_error` (an input opening more than
+`maxDepth` lists before its first form is refused with the depth message at line 1, column
+`maxDepth + 2`).
 
 Three non-classes, deliberately: **quarantine** (§4.3) is not rejection — the source boundary prunes
 the leaf, every dependent argument, and raw-endpoint attacks before core checking; **attack
-cycles** are not rejection — they evaluate to `undec`/`contested` (§8); and since `lara-core@0.3` a
-**well-typed incomplete argument** is not rejection — it is a located hole (§4.4). The engineering-plan
-mutation list maps onto this spine: wrong formulas → R2/R4, undeclared leaves → R1, hidden policy
+cycles** are not rejection — they evaluate to `undec`/`contested` (§8); and a
+**well-typed incomplete argument** is not rejection — it is a located hole (§4.4). The mutation
+suite maps onto this spine: wrong formulas → R2/R4, undeclared leaves → R1, hidden policy
 extension → R1/R12, bad attack targets → R10/R11, mis-declared obligations → R5, codec
 corruption → R14.
 
@@ -1779,18 +1671,17 @@ The untrusted elaborator performs six logged tasks:
 
 1. natural-language proposition formalization;
 2. evidence-leaf extraction and source binding — including declaring duplicate-report groups when
-   one measurand cell is reported more than once (Section 4.3, M0 C16);
+   one measurand cell is reported more than once (Section 4.3);
 3. inference-scheme selection and instantiation;
-4. critical-question discharge or explicit hole creation; and
+4. critical-question discharge or explicit hole creation;
 5. strict-backend, theory, and certificate selection where a strict instance is certified; and
 6. typed attack extraction — drawing candidates from the whole exploration trace (experiment and run
    nodes, not only dead ends), and lowering each `dead_end` node to either a support leaf/argument or a
-   typed attack per its evidential role (Section 7, M0 C16).
+   typed attack per its evidential role (Section 7).
 
 Checker acceptance establishes structural validity only. Faithfulness of all six tasks is evaluated
-against human annotations. If the optional LP adapter is selected, Artemov realization applies only
-when an already-formal strict S4 theorem is translated into that adapter; it is not a guarantee for
-this lowering process.
+against human annotations. Artemov realization would apply only when an already-formal strict S4
+theorem is translated into an LP adapter (§5.2); it is not a guarantee for this lowering process.
 
 ## 12. Multi-artifact composition (versioned extension)
 
@@ -1803,7 +1694,7 @@ to the calculus — members are merged into one unit, cross-member attacks are c
 contraries, and that unit goes through the ordinary §8 pipeline, so a map can accept nothing a
 hand-written equivalent unit would not.
 
-**Two versioned schemas**, versioned independently of the core (now `lara-core@0.3`): `lara-map@1`,
+**Two versioned schemas**, versioned independently of the core (`lara-core@0.3`): `lara-map@1`,
 the declarative manifest; and `map-verdict@2`, the composite verdict, whose leading `(scope map)`
 marker keeps it distinguishable from a §10 `(verdict …)`, and whose statuses are the plain §8
 four-state ones — a map refuses any member carrying a nonempty §4.3 admission or group-pruning
@@ -1835,22 +1726,14 @@ when the linked unit has no hole and is never present but empty. No handle appea
 Holes are reported by member handle only: a hole has no AF index, and its linked declaration
 position is an artifact of the merge. The map's own cross-member saturation never generates an
 attack sourced at or aimed at a hole; a member's declared attacks touching one are carried into the
-linked unit and treated by §7.1 and §8 like any other (`docs/theory-core.md#holes-located-gaps-and-term-level-critical-questions` D4, D6).
-`map-verdict@1`, whose `nodes` used linked declaration positions, is refused.
+linked unit and treated by §7.1 and §8 like any other
+(`docs/theory-core.md#holes-located-gaps-and-term-level-critical-questions`). `map-verdict@1` input
+is refused.
 
 **Errors.** Map failures use their own versioned error sum with its own two-exit-code split
 (ill-formed map vs. checked-and-rejected map). No map fault is classified as a §10.1 R-code; where a
 map verdict or diagnostic names one, it is quoting a member's or the linked unit's own core
 rejection unchanged.
-
-**Cost.** No corpus regeneration and no freeze-tag bump is owed. The layer is strictly additive above
-`lara-core@0.2`: it introduces two new schemas of its own and changes no corpus unit, mutant, wire,
-replay-identity, or golden byte, and no `Lara.Wire` encoder. The only core-side edit is two additive
-exports of an existing `Lara.Wire` production (§5's `<atom>` form), so `fixtures/`, `corpus/`,
-`corpus-units/`, and the differential goldens are bit-identical across this change.
-The move to `map-verdict@2` rides on the `lara-core@0.3` cutover and changes only the map's own
-goldens (`examples/agreement-map-multi/map.verdict.sexp` and `test/fixtures/map/**/map.verdict.sexp`);
-the manifest grammar and the parity envelope are unchanged.
 
 `docs/artifact-composition.md#maps-of-independently-checked-artifacts` is authoritative for this section and carries the
 detail that would rot if duplicated here: the two grammars, the shared-contract equality rules,

@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-`lara-evidence@0.1` checks that every declared certified leaf is the exact output of an approved, versioned checker over captured, hash-pinned package bytes and a pinned extraction request, and preserves `lara-core@0.3`, policy/group quarantine, located holes and conditional argumentation semantics. The same `.lara` source boundary applies the policy's `admission` table, deciding which declared leaves reach the core checker; quarantine means unavailable evidence, not false evidence, and never assigns a core status. The finite Lean model proves that a snapshot-and-typed-selection admission is equivalent to the executable runner and that a successful gate preserves ordinary source checking; concrete byte parsers, SHA-256, operating-system capture and compilers remain trusted. External registration receipts annotate provenance only and stay outside the calculus. Astra independently judged all ten original-output mappings faithful, the maintainer accepted that review and applied it to their audit metadata, and the additive `evidence-measured-inputs@2` freeze with its matching `evidence-measured-inputs-v2` tag records the checked packages; the first snapshot remains unchanged. These checks and the accepted review do not establish scientific validity or satisfy the separate archival paper-promotion protocol.
+`lara-evidence@0.1` checks that every declared certified leaf is the exact output of an approved, versioned checker over captured, hash-pinned package bytes and a pinned extraction request, and preserves `lara-core@0.3`, policy/group quarantine, located holes and conditional argumentation semantics. The same `.lara` source boundary applies the policy's `admission` table, deciding which declared leaves reach the core checker; quarantine means unavailable evidence, not false evidence, and never assigns a core status. The finite Lean model proves that a snapshot-and-typed-selection admission is equivalent to the executable runner and that a successful gate preserves ordinary source checking; concrete byte parsers, SHA-256, operating-system capture and compilers remain trusted. External registration receipts annotate provenance only and stay outside the calculus. None of these checks establishes scientific validity.
 
 ## Problem
 
@@ -14,13 +14,13 @@ Evidence admission checks that earlier boundary. It captures the package bytes, 
 
 The source language is `lara-syntax@0.11`, the evidence layer is independently versioned as `lara-evidence@0.1`, and the core wire remains `lara-core@0.3`. Evidence checking does not change the core codec, strict backends, four argument statuses, located holes or defeat rules. Trust tiers and manifest roles never become attacks. Quarantine means unavailable evidence, not false evidence, and cannot directly assign a core status.
 
-Three limits apply to every assurance label: admission does not prove a proposition true in the world; admission does not prove that the proposition supports a downstream claim; and a justified grounded status does not strengthen extractor soundness or policy adequacy. A justified status remains relative to the supplied evidence context and trusted registry. Neither byte replay nor the accepted mapping review validates the producers' experiments or establishes scientific truth.
+Three limits apply to every assurance label: admission does not prove a proposition true in the world; admission does not prove that the proposition supports a downstream claim; and a justified grounded status does not strengthen extractor soundness or policy adequacy. A justified status remains relative to the supplied evidence context and trusted registry. Byte replay does not validate the producers' experiments or establish scientific truth.
 
-This layer does not reproduce RIT's full Claim Flow Graph, replace schemes and attacks with Lean arithmetic, add dynamic checker plugins or arbitrary shell extractors, or infer scientific meaning from column names. Goal/attempt history and registration receipts stay outside the calculus and this versioned layer, as specified in [External registration receipts](#external-registration-receipts). Git order and local timestamps do not establish preregistration. A bespoke registration service would require a demonstrated gap in existing systems.
+This layer does not reproduce RIT's full Claim Flow Graph, replace schemes and attacks with Lean arithmetic, add dynamic checker plugins or arbitrary shell extractors, or infer scientific meaning from column names. Goal/attempt history and registration receipts stay outside the calculus and this versioned layer, as specified in [External registration receipts](#external-registration-receipts). Git order and local timestamps do not establish preregistration.
 
-## Proposed approach
+## Design
 
-The shipped design uses immutable capture, typed request binding and a rejecting evidence check before the existing source continuation. Each request declares its complete dependencies before replay. The runner constructs dependency metadata from that list; extractors receive only the captured objects and cannot perform IO. Existing policy and group quarantine still use their single combined prune and directed public `evidence-blocked` overlay.
+The design uses immutable capture, typed request binding and a rejecting evidence check before the existing source continuation. Each request declares its complete dependencies before replay. The runner constructs dependency metadata from that list; extractors receive only the captured objects and cannot perform IO. Existing policy and group quarantine still use their single combined prune and directed public `evidence-blocked` overlay.
 
 ### Concrete package contract
 
@@ -106,15 +106,11 @@ The command emits an accepted report only after the complete source/core check. 
 
 Source JSON retains ordinary claim support counts, hole counts, incomplete-alternative flags and argument names on grounded labels. These come from the accepted checker cache behind `SourceResult` projections, so rendering does not replay raw core. Replay-preflight rejection resolves argument indices against declarations; checker-stage rejection resolves them against the retained post-prune argument list.
 
-### Additive measurement and accepted independent review
+### Mapping review metadata
 
-The current additive freeze is [`evidence-measured-inputs@2`](../measurements/frozen/evidence-measured-inputs-v2.md), recorded on 2026-10-07 and tagged `evidence-measured-inputs-v2`. It records the reviewed source bindings and updated source pins. The [first content freeze](../measurements/frozen/evidence-measured-inputs-v1.md), recorded on 2026-10-06 without a Git tag, remains unchanged. Neither freeze amends `m5-freeze-*` snapshots, whose core results retain their declared-evidence interpretation. The freeze records, [corpus manifest](../fixtures/evidence/measured/MANIFEST.tsv) and frozen JSON/TSV reports hold the input and identity tables; they are not duplicated here.
+A certified leaf's `binding` annotation records who authored the mapping (`author`) and whether an independent reviewer has judged it faithful (`audit-status`), with the reviewer named in its rationale. The checker never interprets these fields. Byte replay establishes that the declared request reproduces the declared proposition from the pinned bytes; it cannot establish that the selected cell is the quantity the predicate and prose name. Review records that judgment and keeps reviewer identity separate from authorship. Because the annotation is part of the source, changing it changes the source pin and the evidence identity, but not the core replay identity or verdict. A `reviewed` mapping strengthens neither `evidence-checked` nor scientific validity.
 
-`scripts/gen-evidence-measured.py` materializes six one-edit rejection packages from the committed quarantine fixture without changing original packages. `scripts/evidence-measure.py` runs the real package door over ten declared inputs: the two original packages, the quarantine fixture, an identical-verifier-policy run and those six rejections. It records observed classes, located leaf/reason, exits and stdout/stderr digests, and independently recomputes accepted report identities, dependencies, requests, partitions and assurance labels from package bytes. Both reported core replay IDs must equal the tuple derived from the source artifact digest and ordered backends, the effective policy ID and sorted theory digests, with `lara-core@0.3` enforced. Its `--check` compares deterministic report blocks and matching TSV, ignoring only the environment block. Generator `--check` checks regeneration of committed bytes. These are `evidence-measured` and `evidence-measured-test` cross-check members. This measures package capture, binding, extraction, identity and the core replay verdict, without rerunning an experiment or supplying a semantic verdict.
-
-On 2026-10-07 the maintainer removed issue #20's human-only review requirement and accepted `openai-codex/gpt-6-astra`'s independent review: ten faithful verdicts, zero unfaithful and zero unclear. The [accepted review record](certified-evidence-human-review-worklist.md#accepted-independent-review) preserves reviewer identity, date, inspected source hashes and per-leaf rationale separately from the [maintainer's agreement](https://github.com/ARA-Labs/Lara/issues/20#issuecomment-6027990904). Independent agents or humans may perform this review under the [review instructions](certified-evidence-review-instructions.md). Agent verdicts are not human-authored verdicts, and the maintainer's acceptance is not a separate ten-leaf human audit.
-
-All ten bindings now carry `author = ai_inventory`, `audit-status = reviewed`, and a rationale naming the independent reviewer, review date and accepted review record. Both package manifests pin the changed source bytes. Their formal mappings, original producer/data bytes, core replay identities, verdicts and dependency digests remain unchanged. The [publication record](certified-evidence-human-review-worklist.md#published-reviewed-bindings) identifies the new source hashes separately from the inspected hashes. This completes the implementation and freeze work tracked by [issue #20](https://github.com/ARA-Labs/Lara/issues/20); closure follows merge. The accepted review does not strengthen `evidence-checked`, prove scientific truth or satisfy the archival paper-promotion gate below. The first freeze's human-only wording describes the policy at its recording date.
+The package evaluation is the separately versioned [`evidence-measured-inputs@2`](../measurements/frozen/evidence-measured-inputs-v2.md) freeze over [the measured corpus](../fixtures/evidence/measured/MANIFEST.tsv); [Evaluation](evaluation.md) describes its harness.
 
 ## What successful admission proves
 
@@ -170,7 +166,7 @@ These theorems identify the failing declaration or object and the valid prefix b
 
 `concrete_admission_refinement` explicitly assumes equality between a concrete implementation's result and the finite model's result. It transfers a successful result through that premise; it does not prove the premise. `TypedParserRefinement` similarly states a decoder-to-typed-payload relation rather than verifying the CSV or JSON byte parser. Hash collision resistance, descriptor-relative capture and compiler/runtime correctness remain outside the finite model. The proofs live in `lean/Lara/Evidence/` and are audited by `lean/AxCheck.lean`; they are `sorry`-free and restricted to `propext`, `Classical.choice` and `Quot.sound`.
 
-The implementation checks pinned bytes and a selected mapping. It does not rerun an experiment, authenticate its author, prove that a column expresses the intended scientific quantity, or establish that prose matches formal claims. The original-output examples declare `audit-status = reviewed` after the separately [accepted independent mapping review](certified-evidence-human-review-worklist.md#accepted-independent-review). The [second additive freeze](../measurements/frozen/evidence-measured-inputs-v2.md) records the re-pinned packages; historical raw-core measurements retain their declared-evidence meaning.
+The implementation checks pinned bytes and a selected mapping. It does not rerun an experiment, authenticate its author, prove that a column expresses the intended scientific quantity, or establish that prose matches formal claims. Raw-core measurements retain their declared-evidence meaning.
 
 ## How can the implementation and proofs be checked?
 
@@ -184,11 +180,11 @@ cabal run lara -- check-ara examples/certified-evidence/package-a
 cabal run lara -- check-ara examples/certified-evidence/package-b
 ```
 
-The package acceptance gate runs the real binary over copied original packages and mutation cases, including missing or changed evidence, policy precedence, mixed assurance, no-context source paths and transactional publication. `test/evidence-cli.sh` is that runtime gate; `scripts/evidence-differential.sh` compares the typed Haskell/Lean model corpus. They are `evidence-cli` and `evidence-differential` members of `make cross-check` and `make local-gates`. The [CI scope decision](implementation.md#ci-and-local-gates) distinguishes the Haskell workflow from the Lean build and cross-language gates.
+The package acceptance gate runs the real binary over copied original packages and mutation cases, including missing or changed evidence, policy precedence, mixed assurance, no-context source paths and transactional publication. `test/evidence-cli.sh` is that runtime gate; `scripts/evidence-differential.sh` compares the typed Haskell/Lean model corpus. They are `evidence-cli` and `evidence-differential` members of `make cross-check` and `make local-gates`. [CI and local gates](implementation.md#ci-and-local-gates) distinguishes the Haskell workflow from the Lean build and cross-language gates.
 
 ## Policy admission at the source boundary
 
-Policy admission is a deterministic judgment at the `.lara` source boundary (frozen runtime-source contract, recorded 2026-08-05). Background for cold readers: a *leaf* is a declared piece of evidence, and the policy's admission rows say which kinds of leaf (by kind and provenance) an artifact may rely on. This contract fixes the filtering layer that applies those rows at the `.lara` source boundary: it decides, deterministically, which declared leaves reach the core checker and which are *quarantined* (set aside as inadmissible, which is not the same as declared false). It filters inputs; it changes nothing about the calculus or the four statuses behind it, and it adds no construct to the core calculus.
+The policy's admission rows say which kinds of leaf, by kind and provenance, an artifact may rely on. A *quarantined* leaf is set aside as inadmissible, which is not the same as declared false.
 
 ### Boundary and non-goals
 
@@ -283,11 +279,11 @@ This contract changes only the `.lara` runtime source boundary and its mechanize
 - replay identity or the frozen corpus; or
 - byte-level evidence verification, which is the separately versioned layer described above.
 
-This contract has landed. The runtime lives in `src/Lara/Admission.hs` and `src/Lara/Admission/`, threaded through `src/Lara/Driver.hs`; the mechanized side is `lean/Lara/Admission.lean` with the executable reference driver `lean/Lara/AdmissionDriver.lean`, and the two are compared byte-for-byte by `scripts/admission-differential.sh` (20 files: 15 semantic, 5 codec rejects). The implementation plans that specified this work were retired once it landed; their content is this contract section plus the code.
+The runtime lives in `src/Lara/Admission.hs` and `src/Lara/Admission/`, threaded through `src/Lara/Driver.hs`; the mechanized side is `lean/Lara/Admission.lean` with the executable reference driver `lean/Lara/AdmissionDriver.lean`, and `scripts/admission-differential.sh` compares the two byte for byte.
 
 ## External registration receipts
 
-The registration-receipt contract is a backend-neutral seam for citing externally witnessed registrations (frozen documentation contract, recorded 2026-08-06). It adds no schema, no validator, no Git backend, no network dependency, and no Haskell or Lean code. Registration receipts are process metadata: they never enter `Gamma`, never create an attack, and never change a grounded status or claim status.
+The registration-receipt contract is a backend-neutral seam for citing externally witnessed registrations. It adds no schema, no validator, no Git backend, no network dependency, and no Haskell or Lean code. Registration receipts are process metadata: they never enter `Gamma`, never create an attack, and never change a grounded status or claim status.
 
 Why anyone wants this: a registration receipt proves that specific content existed, unchanged, at a specific time; for example, that a preregistered analysis plan predates the results it governs. The disclaimers above mark where receipts may *not* reach: `Gamma` is the evidence context the checker reasons from, so a receipt can annotate provenance but can never itself become evidence, mount an attack, or move a claim's status.
 
@@ -316,9 +312,9 @@ Exactly three labels, in decreasing strength:
 
 Git ancestry may establish the second label only. Git author or committer timestamps alone must never establish the first: a local Git log proves checkpoint-relative order, not wall-clock priority, and rewriting local history is cheap. OSF-style time-stamped, read-only registrations (a plan posted before data collection or analysis) are the reference model for the first label.
 
-### Build/no-build gate
+### Scope
 
-No Lara event-log schema, receipt validator, or Git backend is built in this paper cycle. A Lara-specific protocol package is reconsidered only if evaluation identifies a workflow that existing registration services plus a content-digest receipt cannot express, and such a package would require its own threat model covering witness authenticity, key rotation, clock semantics, history rewrite, and availability before any code is written.
+Lara has no event-log schema, receipt validator or Git backend; receipts are verified against their external provider. A Lara-specific registration protocol would need its own threat model covering witness authenticity, key rotation, clock semantics, history rewrite and availability.
 
 ### Invariants
 
@@ -327,49 +323,12 @@ No Lara event-log schema, receipt validator, or Git backend is built in this pap
 3. No goal or attempt event automatically changes a Lara claim status.
 4. This contract adds no module, schema, or runtime dependency.
 
-## Alternatives considered
-
-The shipped families declare their dependencies statically and reject certified-evidence failures, so they add no byte-level quarantine outcome; the earlier design's read-program sketch of dynamic access-logged checker reads and an `admit < quarantine < reject` outcome join is not implemented. Runner-owned dependency metadata remains required. The original sketch also used independent quarantine/retained-structure arguments and undirected blocking; the opaque source result, existing combined prune and directed public overlay supersede those choices.
-
-Incomplete arguments were a separate core decision. Through `lara-core@0.2`, open mandatory obligations rejected with `PEIncompleteArgument`, and a gap meant no submitted argument. `lara-core@0.3` instead accepts such an argument as a located hole outside the argumentation framework, with a full core refreeze documented in the [located-gap decision](theory-core.md#holes-located-gaps-and-term-level-critical-questions). This was a core scope change, not an evidence-admission soundness requirement. The evidence layer neither restores the former rejection rule nor turns a pruned argument into a reported hole.
-
-### Original-output inventory and portfolio revision
-
-The historical implementation gate required at least two independently produced packages, ten certified leaves across at least two claim families, and two closed, deterministic, byte-addressed checker families. Failure would have left the layer unbuilt. The earlier roadmap closed the extension as not planned on 2026-08-26; issue #8 later authorized an inventory-backed portfolio revision and delivered the feature. That implementation prerequisite is satisfied, not pending work.
-
-The `tsv-row@1` portfolio failed because available measured row outputs were original CSV rather than TSV. Reconstructed Markdown tables, question JSON with expected-result prose and hand-authored assertion files were insufficient witnesses. The revised [original-output inventory](evidence-admission-inventory.md) retains complete pinned CompoNet and Simformer files, original licenses and producer provenance. It supplies ten exact leaf assertions across two independently authored packages, three narrow claim families and the independently specified `csv-row@1` and `json-pointer@1` families. CSV was not converted to TSV, and the explicit `decimal-line` encoding accounts for original notebook output strings rather than an invented fixture. Saved positions from one notebook run are not independent experiments; runtime and loss records do not assert comparative superiority.
-
-The inventory records original revisions, byte counts, hashes, license details and selectors. Each package has a 5 MiB budget and uses ordinary Git blobs, not Git LFS pointers; no original byte was trimmed to fit. Test-only synthetic packages exercise error paths and never count toward this gate. Independent capture/security and semantic/composition contract reviews required NUL rejection and atomic no-replace publication. A later security review closed the borrowed-capture gap with `Admission.captureRejection`, its runtime regression and the corresponding finite-model obligation.
-
-### Archival paper-promotion gate
-
-The historical gate below is preserved as an archival research constraint, not a current implementation plan or issue #20 acceptance policy. It restricted paper-level promotion beyond describing a bounded tooling extension. Astra's accepted mapping review and the additive package-door freeze do not satisfy or retire it. No paper-level promotion is claimed here.
-
-The historical protocol required all of the following:
-
-- Original outputs from at least two independently produced packages, ten certified leaves, two claim families and two closed checker families.
-- Every declared tamper and incomplete-dependency mutant rejected or recorded before core checking.
-- No quarantine-affected root receiving an unqualified public core status.
-- Dependency reports sufficient to reproduce every admitted proposition exactly.
-- Payload-to-result and proposition-to-result mappings passing a frozen two-annotator semantic-faithfulness protocol with no LLM judging.
-- Byte-exact Haskell/Lean core behavior after admission.
-- Honest reporting of the added trusted computing base and separate guarantees.
-- At least one non-definitional composition/safety theorem used by implementation and evaluation.
-
-It also required three measured treatments: the declared-leaf baseline with policy-admitted leaves trusted at the world boundary, a naïve-pruned diagnostic measuring label changes after deletion, and the conservative checked treatment blocking every quarantine-affected public root. A favorable label transition caused by naïve pruning was a hazard to detect, not a success. Failure left the contribution classified as bounded tooling or future work. These archival requirements do not imply that such measurements or the two-annotator review have been completed, and even semantic faithfulness would not prove scientific truth.
-
 ## Tradeoffs
 
 Closed checkers and explicit dependencies keep replay deterministic and restrict what artifact input can execute. They cover exact CSV row selection and JSON pointer traversal without general aggregation, conversions or experiment reruns. Format strictness and resource limits reject inputs outside that scope. Adding a checker or changing its contract requires an independently versioned evidence-layer decision rather than a silent core-semantics change.
 
 Immutable snapshots and exact metadata binding keep later path changes or borrowed captures from authorizing the wrong bytes. Atomic no-replace publication prevents accepted partial bundles. These guarantees still depend on OS capture, cryptography and runtime behavior. Typed proofs and byte-level runtime tests address different boundaries; neither can stand in for the other. Separate identities and audit records let readers distinguish package-byte checking, conditional argument status and review of a mapping's meaning.
 
-## Migration
+## Related documents
 
-Evidence admission, its finite-model theory, policy source admission and external receipt boundaries share this reference. [Artifact composition](artifact-composition.md) defines the separate map contract. The evidence inventory, independent review procedure and record, and frozen measurement protocol remain separate audit records. Historical research records and frozen artifacts retain their original citations and are read at their recorded revision.
-
-Raw `.sexp` examples and admission/mutant fixtures are unaffected. Six certified declarations remain in surface fixtures whose subjects are rejections: `ambiguous-premise-reject.lara`, `attack-path-reject.lara` and `capture-reject.lara` retain structural failures before R8. The policy-quarantined certified fixture `admission-prune-open.lara` is recorded as `admission-prune-no-context`; its package replay coverage is supplied by `fixtures/evidence/quarantined`. Previously accepting fixtures `all-forms.lara`, `nd-alpha-left.lara` and `nd-alpha-right.lara` now use noncertified kinds (`observed`, `attested`, `assumed`) rather than depending on a missing evidence context. Each decision is recorded in `fixtures/surface/MANIFEST.tsv`, and `make surface-conformance` compares both runtimes with the golden over the whole manifest.
-
-Core checker bytes, wire grammar, fixtures and proof claims retain their versioned meaning. New replay/report evaluations require an explicit additive refreeze instead of borrowing old measured assurance. Audit-label changes must preserve original producer bytes and the first measured snapshot, update the affected source pins and produce a new reproducible report before the next freeze or release tag.
-
-Independently review any changed mapping before applying its verdict, and preserve original authorship while recording reviewer identity separately. Re-pin changed package bytes and record a new additive report/freeze with a matching tag when the measured inputs change, preserving prior snapshots. Keep runtime contract checks, typed-model conformance and the axiom audit aligned when the layer evolves, and do not describe those gates or mapping reviews as parser soundness, empirical truth or completed paper-level promotion.
+[Artifact composition](artifact-composition.md) defines the separate map contract. The package examples in `examples/certified-evidence/` record the origins and licenses of their original files in each package's `ORIGIN.md`. Which surface fixtures carry certified declarations, and why, is recorded in `fixtures/surface/MANIFEST.tsv`.

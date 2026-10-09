@@ -22,7 +22,7 @@ These layers do not establish empirical truth. A grounded support status, an acc
 | [Language specification](spec.md) | Frozen v0.1 language, current `lara-core@0.3`, typing, compilation, verdicts and rejection classes |
 | [Surface grammar](lara-surface-grammar.md) | Concrete `.lara` syntax and versioned appendices |
 | [Rejection reference](rejection-surface.md) | Refused inputs, located diagnostics and runnable examples |
-| [Natural-language boundary](naturalness-boundary.md) | Which prose is presentation and which declarations the checker interprets |
+| [Natural language and the trusted boundary](spec.md#natural-language-and-the-trusted-boundary) | Which prose is presentation and which declarations the checker interprets |
 | [BHL theorem inventory](bhl-theorem-inventory.jsonl) | Exact kernel types, basis citations and axiom-audit locations |
 
 ## Where are examples and evidence?
@@ -32,11 +32,8 @@ The [worked-example catalogue](../examples/README.md) lists executable artifacts
 | Reference | Contents |
 | --- | --- |
 | [Corpus lowering map](corpus-map.md) | How research-artifact content becomes Lara declarations |
-| [Evidence inventory](evidence-admission-inventory.md) | Original-output inventory and evidence admission coverage |
-| [Evidence review instructions](certified-evidence-review-instructions.md) | Independent review procedure and acceptance rules |
-| [Evidence review record](certified-evidence-human-review-worklist.md) | Accepted independent review and published reviewed bindings |
-| [Evaluation](evaluation.md) | Performance, mutation and localization contracts, frozen inputs and historical measurement records |
-| [Measured-input freeze](../measurements/frozen/evidence-measured-inputs-v2.md) | Separate certified-evidence evaluation inputs |
+| [Evaluation](evaluation.md) | Performance, mutation and localization contracts and frozen inputs |
+| [Measured-input freeze](../measurements/frozen/evidence-measured-inputs-v2.md) | Certified-evidence evaluation inputs |
 
 ## How is the implementation maintained?
 
@@ -46,10 +43,10 @@ Per-module API documentation is generated from source comments with `make docs`:
 
 ## What prior work does Lara build on?
 
-Read [foundations](foundations.md) for the main sources, [novelty and related work](novelty-and-related-work.md) for the claimed differences, and [prior-art lessons](prior-art-lessons.md) for implementation lessons. The [argumentation-scheme reading note](references/yu-zenker-2020-schemes-cqs-completeness.md) and [bibliography](lara-related-work.bib) retain detailed references.
+Read [foundations](foundations.md) for the main sources and [novelty and related work](novelty-and-related-work.md) for the claimed differences. The [bibliography](lara-related-work.bib) holds the full references.
 
 ## How should these documents change?
 
-Update the relevant subject document when a design or theorem contract changes. Keep its assumptions, counterexamples, trust boundaries and source mappings together. Do not create implementation-stage documents, completed plans or standalone decision records. Open work belongs in [GitHub issues](https://github.com/ARA-Labs/Lara/issues); unlanded implementation plans belong in `plans/` and are removed when executed.
+These documents describe the current design. When a design or theorem contract changes, update its subject document in place, keeping assumptions, counterexamples, trust boundaries and source mappings together. [Contributing](../CONTRIBUTING.md#how-work-is-tracked) says where decision history, open work and plans live instead.
 
-Historical verification snapshots are evidence from their recorded revision, not fresh test results. The repository's `main` starts at the v0.1.0 release; older development commits and freeze tags may not resolve in this history. [Evaluation](evaluation.md) retains the frozen content and recorded hashes. Historical research traces in `ara/` and serialized corpus, example and fixture bytes remain unchanged when active documentation is reorganized. Old document paths inside those preserved artifacts refer to their recorded revision; current documentation and source-code comments use the subject references above.
+Frozen measurement records, `ara/` research traces and serialized corpus, example and fixture bytes are never rewritten when these documents change. Document paths cited inside them refer to the revision at which they were recorded.

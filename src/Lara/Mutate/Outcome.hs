@@ -6,7 +6,8 @@
 -- @Lara.Mutate@ namespace, which lets the root import it: 'Lara.Mutate.Mutant'
 -- carries an 'Expected' field, so the dependency runs one way. The root
 -- re-exports every name here, so importers say @Lara.Mutate@ as before; this
--- is the one sanctioned re-export in the namespace (ownership record D1).
+-- is the one sanctioned re-export in the namespace (see the re-export rule in
+-- @docs\/evaluation.md#mutation-generation-and-module-ownership@).
 --
 -- The split exists because the root's growth had concentrated in one place
 -- (@docs\/evaluation.md#mutation-generation-and-module-ownership@, module size). The seam is

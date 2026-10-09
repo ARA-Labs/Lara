@@ -46,8 +46,8 @@ verified to exist as of 2026-07-21. Run records (test output) live in `evidence/
 - **File(s) in repo**: `docs/spec.md` (the calculus), `docs/strict-certificates.md#1-one-seam-for-opaque-strict-certificates`,
   `docs/theory-core.md#support-calculus-and-obligations`, `docs/implementation.md#the-trust-boundary-haskell-core-python-front-end`, `docs/theory-core.md#support-calculus-and-obligations`,
   `docs/implementation.md#module-dependency-order`, `docs/implementation.md#mechanization-one-core-two-implementations`, `docs/implementation.md#worked-examples`,
-  `docs/corpus-map.md`, `docs/novelty-and-related-work.md`, `docs/prior-art-lessons.md`,
-  `plans/lara-related-work.bib`.
+  `docs/corpus-map.md`, `docs/novelty-and-related-work.md`,
+  `docs/lara-related-work.bib`.
 - **Nature**: the design/theory content — the source of every claim, concept, and proof in this ARA.
 - **What it does / contains**: the frozen v0.1 calculus (spec), the settled decisions, the milestone
   spine (M0–M7), the 12 required metatheory results, and the trajectory the trace reconstructs.

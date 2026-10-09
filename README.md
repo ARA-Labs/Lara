@@ -247,9 +247,8 @@ prints the accepted report to stdout.
 The report separates checked leaves from declared leaves and preserves the
 ordinary claim verdict. Certification checks the bytes and extraction, not
 the experiment's validity or whether the chosen mapping expresses the intended
-scientific claim. The ten example bindings declare `audit-status = reviewed`
-after the [accepted independent mapping review](docs/certified-evidence-human-review-worklist.md#accepted-independent-review);
-their original `author = ai_inventory` remains unchanged.
+scientific claim. A binding's `author` and `audit-status` record who wrote
+and who reviewed the mapping; the checker does not interpret them.
 Missing or mismatching certified evidence rejects; ordinary source commands
 without a package context reject certified declarations at R8. See
 [the package contract](docs/evidence-admission-design.md#concrete-package-contract)
@@ -405,7 +404,7 @@ Start with the [documentation index](docs/README.md) for reading paths and theor
 | [`docs/evidence-admission-design.md`](docs/evidence-admission-design.md) | Policy and certified-evidence admission, source composition and trust boundaries |
 | [`docs/artifact-composition.md`](docs/artifact-composition.md) | `.laramap` manifests, member qualification and linking, cross-member attacks and composite verdicts |
 | [`docs/implementation.md`](docs/implementation.md), [`lean/README.md`](lean/README.md) | Implementation architecture, mechanization discipline, proof catalogue and verification gates |
-| [`docs/theory-bhl.md`](docs/theory-bhl.md) | Belief Hoare Logic: architectural rationale, method and artifact-binding contracts, reference audit, mechanized results and acceptance evidence ([exact theorem inventory](docs/bhl-theorem-inventory.jsonl)) |
+| [`docs/theory-bhl.md`](docs/theory-bhl.md) | Belief Hoare Logic: architectural rationale, method and artifact-binding contracts, reference audit and mechanized results ([exact theorem inventory](docs/bhl-theorem-inventory.jsonl)) |
 | [`docs/evaluation.md`](docs/evaluation.md) | Performance, mutation and localization contracts, frozen inputs and historical measurement evidence |
 | [`m0/annotation-summary.md`](m0/annotation-summary.md) | The semantic corpus study that froze the scheme vocabulary, leaf grain, adapter portfolio, and defeat conventions |
 | [`examples/README.md`](examples/README.md) | Index of the worked examples (A/B, E-series, R-series, S-series, running example, and the D3 agreement map in both its single-file and four-artifact forms) |

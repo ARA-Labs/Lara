@@ -1,17 +1,15 @@
 # D2 — mechanical reviewer
 
-*Demo for the M7 paper package (T1); part of the demos series.*
-
-_A demo write-up (2026-08-02). The "frozen 60-unit corpus" it renders from is
-the evaluation corpus of `../evaluation.md#frozen-provenance-current-evaluation-freeze-v8`: 60 checked programs
-lowered from real research artifacts, whose per-claim verdicts the checker
-already computes; this demo only re-phrases those verdicts._
+The "frozen 60-unit corpus" this demo renders from is the evaluation corpus of
+`../evaluation.md#frozen-provenance-current-evaluation-freeze-v8`: 60 checked
+programs lowered from real research artifacts, whose per-claim verdicts the
+checker already computes. This demo only re-phrases those verdicts.
 
 ## What it demonstrates
 
 The claim-support checker already computes a four-state status for every claim in
 the frozen 60-unit corpus (`justified` / `gap` / `defeated` / `contested`, spec
-§8). This demo makes the paper's point that **those statuses *are* review
+§8). This demo shows that **those statuses *are* review
 content**: a `gap` verdict with its unmet obligation reads as the reviewer
 complaint it corresponds to, and a `defeated` verdict names the attacking
 argument that sinks the claim.
@@ -135,8 +133,7 @@ implemented and fires whenever a unit ships an incomplete candidate alternative
 
 ## Demo figure — a `defeated` review
 
-The richest shape is `defeated`, which names the attacking argument exactly as
-the demo's specification requires. Reproduced verbatim from the golden
+The richest shape is `defeated`, which names the attacking argument. Reproduced verbatim from the golden
 (`measurements/frozen/mechanical-reviews.md`), unit `fre/C04`:
 
 > ## fre.C04 — defeated
@@ -170,7 +167,6 @@ cabal test                                        # includes the freshness test
 
 ## Scope
 
-This demo shows that Lara verdicts *are expressible as* review comments. Whether
-they *predict* human reviewer complaints (a correlation study against real
-OpenReview reviews) is an axis-(d) study deferred to future work
-(out of scope for this demo).
+This demo shows that Lara verdicts *are expressible as* review comments. It
+does not measure whether they *predict* human reviewer complaints; that would
+be a correlation study against real OpenReview reviews (evaluation axis (d)).

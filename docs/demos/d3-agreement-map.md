@@ -1,11 +1,12 @@
 # D3 — cross-paper agreement map
 
-Draftable into the M7 paper package, sections T1/T3. The demo ships **twice**,
+The question this demo answers: when several papers on one topic appear to
+disagree, which disagreements are real? The demo ships **twice**,
 and the pair is the point of the second half of this write-up:
 
 | Artifact | What it is |
 | --- | --- |
-| `examples/agreement-map/` | The original: all four papers in **one** `.lara` file, which therefore declares its own cross-paper attacks. Kept byte-unchanged as the oracle. |
+| `examples/agreement-map/` | The original: all four papers in **one** `.lara` file, which therefore declares its own cross-paper attacks. It is the oracle the map is compared against. |
 | `examples/agreement-map-multi/` | The same demonstration as **four independently authored, independently checkable artifacts** under one `map.laramap`. No member declares a cross-paper attack; the map generates them. |
 
 The single-file artifact (`example.lara`, `agreement-v1.policy.lara`, derived
@@ -15,11 +16,6 @@ coverage, and the byte-differential through both drivers). The four-member map i
 covered by `test/MapExampleSpec.hs` and by `scripts/check-map-conformance.sh`;
 [§ The same map as four artifacts](#the-same-map-as-four-artifacts) below is its
 section.
-
-_A demo write-up (2026-08-02). The question it answers: when several papers
-on one topic appear to disagree, which disagreements are real? The paragraph
-above locates the checked artifact and its pinned tests; the demo itself
-starts below._
 
 ## What this demo shows
 
@@ -33,7 +29,7 @@ outcomes by **atom identity** (spec §3.2), not by prose:
 2. **Setting-mismatch non-attack** — two conclusions that read as a flat
    contradiction in prose but differ in their *setting index*, so they are not a
    `contrary` instance and **no attack forms**. Both claims stand `justified`.
-   v0.1 deliberately has no cross-setting contrary, so Lara refuses to
+   The calculus has no cross-setting contrary, so Lara refuses to
    manufacture the disagreement; the open comparability critical question
    (below) names exactly what evidence would connect them.
 
@@ -131,7 +127,7 @@ both `justified`.
 
 ## Per-proposition A3 (atom-matching) alignment rationale
 
-Assumption A3 (README.md design constraint #1) makes atom identity load-bearing:
+Assumption A3, binding faithfulness, makes atom identity (spec §3.2) load-bearing:
 the alignment decision is asserted per proposition, so the attack / non-attack is
 an audited decision, not an accident of spelling. In the single-file artifact
 that assertion lives in each claim's `binding` rationale, which is what the two
@@ -198,34 +194,30 @@ it. The open comparability CQ for P2:
 
 This is the artifact the map contributes to a literature review: not a verdict of
 agreement or disagreement, but a precise statement of the missing measurement.
-v0.1 has no vocabulary to encode a cross-setting contrary (that would be
-eval-settings-as-worlds, the possible-worlds follow-up — out of scope for this demo),
-so the comparability CQ lives here in the write-up and in the artifact's
-golden-oracle comment, not as a checker edge. That boundary is deliberate: adding
-a cross-setting contrary would be exactly the kind of manufactured disagreement
-the demo argues against.
+The local calculus has no vocabulary for a cross-setting contrary, and the
+[possible-world outer model](../theory-pw.md) compares contexts only along
+declared, checked bridges. The comparability CQ therefore lives in this
+write-up, in the single-file artifact's golden-oracle comment and in the map
+manifest's `questions`, not as a checker edge. The boundary is deliberate: a
+cross-setting contrary would manufacture exactly the disagreement the demo
+argues against.
 
-## §8.1 Path A/B note (recorded, not routed around)
+## Strict well-formedness (spec §8.1, Path B)
 
-README.md flags a specific pressure point: *"the strict well-formedness
-restriction (spec §8.1, Path B) bites harder across a contested field ... whose
-headline claims are themselves the contested ones."* This demo sits exactly in
-that condition — P1's contested propositions (`better` / `not_better` on
-`roberta_mnli_s60`) are the **headline claims**.
+P1's contested propositions (`better` / `not_better` on `roberta_mnli_s60`) are
+the **headline claims** of a contested field, the condition under which the
+strict well-formedness restriction of spec §8.1 is most likely to bite.
 
 **No collision occurs.** Both are conclusions of *defeasible* schemes only
 (`controlled_comparison`, `null_comparison`); no strict rule and no strict chain
-in `agreement-v1` touches them. The §8.1 Path B check (spec §8.1: no
-strict-reachable pattern may overlap either side of a `contrary` declaration;
-violation = rejection class R12) is therefore satisfied, and the policy is
-accepted. Had either headline been the consequent of a strict rule — or reachable
-on a strict chain — the policy would be **rejected at compile time (R12)**, and
-resolving it would require the §8.1 **flip to Path A** (an involutive
-contradictory map with transposition-closed strict rules). This demo does not
-force that flip; it stays on Path B by keeping every contested proposition on a
-defeasible step, which is the discipline §8.1 requires and the reason the flip
-criterion is not triggered here. Recorded as a decision, per the load-bearing
-constraint.
+in `agreement-v1` touches them. The Path B check (no strict-reachable pattern
+may overlap either side of a `contrary` declaration; violation is rejection
+class R12) is therefore satisfied, and the policy is accepted. Had either
+headline been the consequent of a strict rule, or reachable on a strict chain,
+the policy would be **rejected at compile time (R12)**; accepting it would
+require §8.1's Path A (an involutive contradictory map with
+transposition-closed strict rules). Keeping every contested proposition on a
+defeasible step is the discipline Path B requires.
 
 ## The same map as four artifacts
 
@@ -340,92 +332,47 @@ reconstructions, as everywhere in `examples/`; a digest is author-declared
 metadata carried into the composite unchanged, never a checksum of the member's
 bytes.
 
-## Validation
+## Reproduce
 
-### The single-file artifact
+```sh
+cabal build exe:lara
+cabal run exe:lara -- check examples/agreement-map/example.lara
+cabal run exe:lara -- check examples/agreement-map-multi/paper-a/example.lara   # likewise paper-b, -c, -d
+cabal run exe:lara -- check examples/agreement-map-multi/map.laramap
+make map-check OUT=/tmp/map.verdict.sexp
+cabal exec -- runghc scripts/gen-worked-examples.hs
+cabal test all --test-show-details=direct
+cd lean && lake build && cd ..
+bash scripts/differential.sh
+bash scripts/check-map-conformance.sh
+```
 
-All commands run from a clean tree in the worktree.
+The single-file check accepts with labels `pa/pb undec, pc/pd in` and statuses
+`contested, contested, justified, justified`. Each paper member accepts alone
+with one unattacked argument and one `justified` claim. The map check, and
+`make map-check` with or without `OUT`, print the composite verdict above with
+the same bytes. The tests include `prop_agreementMap`, the `MapExampleSpec`
+properties and the corresponding `DifferentialSpec` verdict goldens.
 
-| Command | Result |
-| --- | --- |
-| `cabal build exe:lara` | success |
-| `cabal run exe:lara -- check examples/agreement-map/example.lara` | accept, exit 0; labels `pa/pb undec, pc/pd in`; statuses `contested, contested, justified, justified` |
-| `cabal exec -- runghc scripts/gen-worked-examples.hs` | regenerated all anchors; only `examples/agreement-map/` new, no drift elsewhere |
-| `cabal test` | PASS (adds `prop_agreementMap`; freshness, expected-json, coverage, DifferentialSpec all green) |
-| `cd lean && lake build` | success (52 jobs) |
-| `bash scripts/differential.sh` | `pass=419 fail=0`, `negative pass=54 fail=0` — Haskell and Lean drivers agree byte-exactly on the agreement-map verdict |
+`scripts/check-map-conformance.sh` is the cross-driver check for the map: the
+Haskell driver reads the manifest, rereads the four members and links them; the
+Lean `lara-map-driver` is handed only the `map-check-input@1` envelope — four
+unqualified units — and performs the qualification, the merge, the saturation,
+`checkUnit` and the grounded read itself. Neither reads the other's verdict, so
+byte-equal verdicts are two independent computations agreeing.
 
-### The four-artifact map
+## Cost
 
-All commands run from the worktree root.
-
-| Command | Result |
-| --- | --- |
-| `cabal run exe:lara -- check examples/agreement-map-multi/paper-{a,b,c,d}/example.lara` | each accepts, exit 0; one unattacked argument, one `justified` claim |
-| `cabal run exe:lara -- check examples/agreement-map-multi/map.laramap` | accept, exit 0; `(labels (0 undec) (1 undec) (2 in) (3 in))`, `(edges (0 1) (1 0))`, statuses `contested, contested, justified, justified` — 1032 bytes |
-| `make map-check` | same bytes |
-| `make map-check OUT=/tmp/map.verdict.sexp` | same bytes, written atomically to the file; stdout empty |
-| `cabal exec -- runghc scripts/gen-worked-examples.hs` | wrote the four members' `example.core.sexp` + `expected.json`; **no other anchor changed** |
-| `cabal test all --test-show-details=direct` | PASS (adds `MapExampleSpec`'s twelve properties and four `DifferentialSpec` verdict goldens) |
-| `cd lean && lake build` | success (179 jobs) |
-| `bash scripts/differential.sh` | `pass=673 fail=0`, `negative pass=66 fail=0` — the four new solo anchors included |
-| `bash scripts/check-map-conformance.sh` | `map anchors pass=6 fail=0`, `negative pass=16 fail=0`; the new anchor reports `verdicts agree (1032 bytes)` |
-
-The last row is the cross-driver claim in full: the Haskell driver reads the
-manifest, rereads the four members and links them; the Lean `lara-map-driver`
-is handed only the `map-check-input@1` envelope — four unqualified units — and
-performs the qualification, the merge, the saturation, `checkUnit` and the
-grounded read itself. Neither reads the other's verdict, and the 1032 bytes are
-two computations meeting.
-
-### End-to-end cost
-
-Measured by `make bench-map`, the map mode of the committed bench harness.
-Its protocol, and the dated table for every accepted map anchor,
-are in [`../evaluation.md#checker-performance`](../evaluation.md#the-multi-artifact-map-a-separate-protocol).
-A map is a different shape of work from the kernel bench's: it reads and parses
-several `.lara` sources, checks each, then links and checks again. So it has its
-own protocol and its own table, and none of its numbers may be set beside the
-kernel rows. There is no cache across invocations, so a full pass is the cost of
-*every* `lara check <map.laramap>`, including one whose members have not
-changed.
-
-For this map at commit `ad513b5`, on an AMD EPYC 9354 with GHC 9.10.3, with
-every file pre-read and then medians over 5 sections of 100 batched passes:
-
-| Work | Median | Worst |
-| --- | --- | --- |
-| the map: four members loaded, rechecked, linked, checked again, evaluated, rendered | **2.78 ms** | 2.81 ms |
-| the same over pre-loaded members: link, linked check, evaluate, render | 0.27 ms | 0.28 ms |
-
-About nine tenths of a pass is the four members' own load and recheck.
-Qualification, the merge, cross-member saturation, the linked `checkUnit`, the
-grounded evaluation and the composite encoding together cost about 0.27 ms.
-
-An earlier version of this section quoted a hand-taken table instead: 4.02 ms
-per pass, timed around `Lara.Map.Driver.runMap` with file reads included, on GHC
-9.6.6 `-O1`, beside per-member and single-file rows. It was retired because no
-committed harness could regenerate it; the table above comes from one command.
-The two protocols differ (the harness pre-reads the files, the old timing did
-not), so the old and new figures should not be compared.
-
-**Why there is no per-command wall-clock row.** Timing the CLI was tried and the
-result is not reportable as a property of Lara. In a shell loop of 300 execs on
-the machine above, `lara check <map>` measured ≈12.4 ms per invocation and the
-same binary *with no arguments at all* measured ≈11.7 ms — a difference of
-≈0.7 ms, where the pipeline it added measured about 4 ms in-process at the time.
-The two cannot both be serial, so the ≈11.7 ms floor is not startup being paid
-before the work begins.
-It is per-exec overhead of the measuring environment that overlaps the child's
-execution: in the same loop `/usr/bin/true` measured ≈1.0 ms per exec, which is
-one to two orders of magnitude above a bare `fork`+`exec` and is a fact about
-the harness, not about any program run under it.
-
-So a number from that loop is a property of the sandbox it was measured in and
-would mislead anyone who read it as the cost of `make map-check` on their own
-machine. The in-process table above is the figure this document stands behind;
-whoever wants a per-command number should measure it in the environment they
-care about.
-
-No caching was added, and none is planned: see D1 of
-[`../artifact-composition.md#maps-of-independently-checked-artifacts`](../artifact-composition.md#maps-of-independently-checked-artifacts).
+`make bench-map` measures the map mode of the committed bench harness; its
+protocol and figures are in
+[`../evaluation.md`](../evaluation.md#the-multi-artifact-map-a-separate-protocol).
+A map reads and parses several `.lara` sources, checks each, then links and
+checks again, so its numbers are never set beside the kernel rows. Most of a
+pass is the members' own load and recheck; qualification, merge, saturation,
+the linked check, evaluation and encoding are a small fraction. Maps are
+uncached by design
+([`../artifact-composition.md`](../artifact-composition.md#a-map-is-a-recheck-not-a-build)),
+so a full pass is the cost of every `lara check <map.laramap>`, including one
+whose members have not changed. No per-command wall-clock figure is reported:
+in shell-loop timing, per-exec overhead of the measuring environment dominates
+the work being measured.

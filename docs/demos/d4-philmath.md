@@ -104,8 +104,7 @@ reinstatement contrast. `DifferentialSpec` pins the wire verdict, and
 both Haskell and Lean. These are instances of the existing calculus; they
 introduce no new inference rule in the kernel or metatheorem.
 
-The proposed axiom-relative worlds example has a separate
-[decision record](../theory-pw.md#nonempirical-worlds-and-the-checked-bridge-boundary). No paper text is changed
-here. Paper-side scope wording may cite this committed example once it lands;
-the separate [D5 Lean witness](d5-axiom-withdrawal.md) now checks axiom withdrawal
-under the structural contract, without extending the CLI worlds loader.
+Axiom withdrawal across worlds is shown separately by the
+[D5 Lean witness](d5-axiom-withdrawal.md), which checks it under the structural
+bridge contract without extending the CLI worlds loader; the boundary is
+described in [the possible-world model](../theory-pw.md#nonempirical-worlds-and-the-checked-bridge-boundary).

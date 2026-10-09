@@ -42,9 +42,13 @@ On macOS this needs GNU sed and coreutils
 
 - Open work lives in [GitHub issues](https://github.com/ARA-Labs/Lara/issues).
   There is no in-repo backlog file; do not create one.
-- [`docs/`](docs/README.md) records current designs, contracts and mechanized
-  results by subject. Fold settled decisions into the relevant subject document;
-  do not add milestone journals or standalone decision records.
+- [`docs/`](docs/README.md) describes the current design of Lara by subject:
+  contracts, semantics, mechanized results, assumptions and limits. Fold a
+  settled decision into its subject document as a present-tense statement,
+  keeping at most the rationale or counterexample that explains it. Decision
+  history, rejected alternatives, review records and dated status notes belong
+  in `ara/` and Git history, not in `docs/`. Unlanded implementation plans live
+  in `plans/` and are deleted once executed.
 - [`ara/`](ara/) is this project's own research artifact. A session that
   introduces or materially changes a feature, design, or theory — or runs or
   interprets an experiment — updates it; routine fixes, guidance, and review

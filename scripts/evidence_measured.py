@@ -20,8 +20,8 @@ byte equality instead of trusting a hand-rolled formatter.
 Scope: this measures package capture, request binding, extraction, the core
 replay verdict, and the evidence-report identities.  It does not measure
 scientific interpretation, semantic faithfulness, or reviewer judgment. The
-certified leaves' reviewed audit metadata records the separately accepted
-independent review (see ``docs/certified-evidence-human-review-worklist.md``).
+certified leaves' audit metadata records a separate mapping review that this
+harness does not check.
 """
 
 from __future__ import annotations

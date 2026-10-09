@@ -34,8 +34,8 @@
 --
 -- The ownership contract behind this layout — which module owns which names,
 -- why "Lara.Mutate.Outcome" is the only module this one re-exports, why the
--- names that moved /upward/ are deliberately not re-exported, and the re-export
--- façade alternative that was rejected as cycle-forming — is recorded in
+-- names that moved /upward/ are deliberately not re-exported, and why a
+-- re-export façade would form an import cycle — is recorded in
 -- @docs\/evaluation.md#mutation-generation-and-module-ownership@.
 --
 -- == Namespace invariants
