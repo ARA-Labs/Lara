@@ -1,6 +1,6 @@
 # Corpus unit what-will-my-model-forget/C03 — gap (mandatory power CQ unmet; graded predicate dropped)
 #
-# Source: m0/annotations/what-will-my-model-forget.yaml C03 (negative-result,
+# Source: what-will-my-model-forget C03 annotation (negative-result,
 # controlled_comparison; corpus pin 62e9b54). Headline: logit-change-transfer forecasting is
 # partially interpretable and beats the tuned threshold on BART0 but FAILS on FLAN-T5 — trainable
 # logit F1 57.15 vs threshold 55.75 on BART0Large/Full FT, but 36.54 vs 43.93 on FLAN-T5Large/LoRA

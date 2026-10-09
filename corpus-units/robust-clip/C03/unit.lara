@@ -1,6 +1,6 @@
 # Corpus unit robust-clip/C03 — gap (unmet-mandatory-CQ path: benchmark validity)
 #
-# Source: m0/annotations/robust-clip.yaml C03 (descriptive, adversarial_stress_test;
+# Source: robust-clip C03 annotation (descriptive, adversarial_stress_test;
 # corpus pin 62e9b54). Headline: FARE makes LVLMs "fully robust" against stealthy targeted
 # linf attacks — FARE4 0/150 successes at both eps 2/255 and 4/255 (0%); FARE2 0% at 2/255
 # and 3/150 (2.0%) at 4/255, each cell a mean over 6 target captions x 25 images (Table 3, E02);

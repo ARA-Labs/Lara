@@ -1,6 +1,6 @@
 # Corpus unit what-will-my-model-forget/C01 — gap (mandatory variance CQ unmet)
 #
-# Source: m0/annotations/what-will-my-model-forget.yaml C01 (comparative, controlled_comparison;
+# Source: what-will-my-model-forget C01 annotation (comparative, controlled_comparison;
 # corpus pin 62e9b54). Headline: representation-based forecasting achieves the best overall
 # forecasting performance — representation-with-prior attains the highest binary F1 in 7 of 8
 # Table 1 (model, dataset, tuning) configurations, the lone exception being fixed-logit 68.37 vs

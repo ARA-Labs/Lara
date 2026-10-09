@@ -1,6 +1,6 @@
 # Corpus unit ftrl/C01 — gap (negative-result through the null_comparison dual)
 #
-# Source: m0/annotations/ftrl.yaml C01 (negative-result, controlled_comparison; corpus pin
+# Source: ftrl C01 annotation (negative-result, controlled_comparison; corpus pin
 # 62e9b54). Headline: vanilla RL fine-tuning fails to leverage pre-trained capabilities and
 # ends up comparable to or worse than training from scratch, because of forgetting of pre-
 # trained capabilities (FPC) — NetHack vanilla FT collapses to ~1K return (frozen model ~5K);

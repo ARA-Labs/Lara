@@ -1,6 +1,6 @@
 # Corpus unit test-time-model-adaptation/C07 — gap (mandatory baseline_parity + variance CQs unmet)
 #
-# Source: m0/annotations/test-time-model-adaptation.yaml C07 (comparative, controlled_comparison;
+# Source: test-time-model-adaptation C07 annotation (comparative, controlled_comparison;
 # corpus pin 62e9b54; double-annotated -> reviewed). Headline: FOA outperforms TENT and SAR under
 # non-i.i.d. test scenarios — online imbalanced label shift FOA 62.1% vs SAR 60.8% / TENT 60.2%,
 # mixed domain shift FOA 62.0% vs SAR 61.4% / TENT 56.9%, with lower ECE (E08, scenarios 1-2).

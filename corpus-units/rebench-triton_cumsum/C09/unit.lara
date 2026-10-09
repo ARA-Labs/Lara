@@ -1,6 +1,6 @@
 # Corpus unit rebench-triton_cumsum/C09 — defeated (unmet-defeater undercut path; batch: rebench)
 #
-# Source: m0/annotations/rebench-triton_cumsum.yaml C09 (negative-result, cross_run_observation;
+# Source: rebench-triton_cumsum C09 annotation (negative-result, cross_run_observation;
 # corpus pin 62e9b54; claim_type adjudicated via double-annotation 2026-07-22). Headline: the
 # pure-PyTorch two-cumsum pipeline is memory-bandwidth-bound and cannot beat the reference —
 # eager variants cluster at 2.2-5.0 ms and torch.compile plateaus at 1.5-1.8 ms on H100 at N=1e8,

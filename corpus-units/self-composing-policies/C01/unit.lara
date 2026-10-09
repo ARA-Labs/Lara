@@ -1,6 +1,6 @@
 # Corpus unit self-composing-policies/C01 — justified (all mandatory CQs met)
 #
-# Source: m0/annotations/self-composing-policies.yaml C01 (descriptive, analytic_proof/strict;
+# Source: self-composing-policies C01 annotation (descriptive, analytic_proof/strict;
 # corpus pin 62e9b54). Headline: CompoNet's parameter count grows linearly in the number of tasks
 # n -- each self-composing module has a fixed set of six linear maps + one feed-forward block whose
 # sizes depend only on d_enc, d_model, |A| (constants w.r.t. n), so total(n) = c0 + c1*n = O(n),
@@ -12,7 +12,7 @@
 #     (LOWERING "6 strict-flavored annotations" note); migration to a strict rule + certificate is
 #     future work. Q content (the c0 + c1*n formula, k=1..300 sweep) lives in nl and refs.
 #   * Parametric growth-rate claims are a kind-(b) construct on the v0.1 wishlist
-#     (m0/annotation-summary.md S3: "parametric growth-rate claims (nanogpt_chat_rl C04)"): corpus-v1
+#     (corpus study: "parametric growth-rate claims (nanogpt_chat_rl C04)"): corpus-v1
 #     has no first-class growth-order predicate, so the linear-growth content is carried by the
 #     single conclusion constant `linear_param_growth_componet` plus nl, not a rate atom.
 #   * Both mandatory corpus-v1 CQs are annotated met: assumptions_hold <- CQ1 (d_enc/d_model/|A|

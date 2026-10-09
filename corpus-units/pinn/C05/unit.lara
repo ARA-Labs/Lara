@@ -1,6 +1,6 @@
 # Corpus unit pinn/C05 — gap (an unmatched tuning budget breaks baseline parity)
 #
-# Source: m0/annotations/pinn.yaml C05 (comparative, controlled_comparison; corpus pin 62e9b54).
+# Source: pinn C05 annotation (comparative, controlled_comparison; corpus pin 62e9b54).
 # Headline: Adam+L-BFGS consistently outperforms Adam or L-BFGS alone — min L2RE 14.2x smaller
 # than Adam on convection and 6.07x smaller than L-BFGS on wave, and per (PDE, width) cell it
 # attains the lowest min loss and L2RE, with reaction at width 100 the acknowledged exception

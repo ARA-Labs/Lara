@@ -1,6 +1,6 @@
 # Corpus unit pinn/C01 — justified (a measurement whose mandatory CQs are all met)
 #
-# Source: m0/annotations/pinn.yaml C01 (descriptive, cross_run_observation; corpus pin 62e9b54).
+# Source: pinn C01 annotation (descriptive, cross_run_observation; corpus pin 62e9b54).
 # Headline: near-zero training loss is necessary for accurate PINN solutions — pooled over the
 # (PDE, optimizer, width, seed) sweep the final-loss-to-L2RE scatter is monotone, reaching
 # L2RE ~ 1e-2 requires final loss ~ 1e-5 (order of magnitude, per PDE), and the loss~0/L2RE~1

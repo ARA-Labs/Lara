@@ -1,10 +1,10 @@
 # Corpus unit all-in-one/C03 — gap (unmet mandatory sample-representativeness CQ)
 #
-# Source: m0/annotations/all-in-one.yaml C03 (generalization, inductive_generalization; corpus
+# Source: all-in-one C03 annotation (generalization, inductive_generalization; corpus
 # pin 62e9b54). Headline: Simformer accurately estimates all arbitrary conditionals of the joint
 # distribution — mean C2ST over 100 randomly sampled conditionals stays below 0.7 on Tree, HMM,
 # Two Moons, SLCP at 1e5 sims (E02, Fig 4b). The single inductive_generalization claim in the
-# M0 sample.
+# corpus sample.
 #
 # Lowering notes (conventions: corpus-units/LOWERING.md):
 #   * inductive_generalization family; conclusion generalizes_to(accurate_conditional_estimation,

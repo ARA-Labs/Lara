@@ -1,6 +1,6 @@
 # Corpus unit bam/C06 — gap (unmet mandatory single-variable CQ; batch-size / lambda_t confound)
 #
-# Source: m0/annotations/bam.yaml C06 (causal, dose_response; corpus pin 62e9b54). Headline: BaM
+# Source: bam C06 annotation (causal, dose_response; corpus pin 62e9b54). Headline: BaM
 # converges faster at larger batch sizes (dose levels up to B ~= D) measured in gradient
 # evaluations, while ADVI and GSM show marginal or no improvement from larger batches (E01-E04,
 # Fig 5.1).

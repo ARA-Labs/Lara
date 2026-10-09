@@ -1,6 +1,6 @@
 # Corpus unit rebench-restricted_mlm/C14 — justified (dead-end-as-SUPPORT, kind-c; batch: rebench)
 #
-# Source: m0/annotations/rebench-restricted_mlm.yaml C14 (implementation-behavioral,
+# Source: rebench-restricted_mlm C14 annotation (implementation-behavioral,
 # cross_run_observation; corpus pin 62e9b54). Headline: hand-rolled 1/x reciprocal normalisations
 # NaN at init under the restricted primitive set — 7 of 22 MALT runs (01,06,09,11,16,19,20) hit
 # NaN when normalisation used a hand-rolled reciprocal, and substituting a fixed scalar residual
@@ -11,7 +11,7 @@
 #   * cross_run_observation -> corpus-v1 `measurement(P, S, Exp)`; conclusion
 #     holds(hand_rolled_reciprocal_nan, restricted_primitive_mlm). The 7/22 rate and per-run ids
 #     stay in nl and refs.
-#   * kind-(c) dead-end-as-SUPPORT (M0 summary flag): M05 is a dead_end trace node but it IS the
+#   * kind-(c) dead-end-as-SUPPORT (corpus-study flag): M05 is a dead_end trace node but it IS the
 #     claim's primary evidence, so it is cited in the premise leaf e1 refs, NOT modelled as an
 #     attack. The typed-attack vocabulary (rebut/undercut/undermine/none) has no support edge from
 #     a dead end; recording M05 as the premise is the faithful lowering of that relation.

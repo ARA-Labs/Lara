@@ -1,6 +1,6 @@
 # Corpus unit fre/C03 — gap (generalization; benchmark_evaluation)
 #
-# Source: m0/annotations/fre.yaml C03 (generalization; corpus pin 62e9b54). Headline: a single
+# Source: fre C03 annotation (generalization; corpus pin 62e9b54). Headline: a single
 # frozen FRE-all agent beats GC-IQL/GC-BC on non-goal-reaching families (ant-directional 55.2 vs
 # 4.8/6.5; kitchen 66 vs 3/1) while staying competitive on goal-reaching (ant-goal 48.8 vs 0.0).
 #

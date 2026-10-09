@@ -1,6 +1,6 @@
 # Corpus unit bam/C05 — justified (all mandatory CQs met; the one gap maps to optional scope)
 #
-# Source: m0/annotations/bam.yaml C05 (comparative, controlled_comparison; corpus pin 62e9b54).
+# Source: bam C05 annotation (comparative, controlled_comparison; corpus pin 62e9b54).
 # Headline: BaM converges faster than ADVI in gradient evaluations across four benchmark families
 # (Gaussian, sinh-arcsinh, PosteriorDB, CIFAR-10 VAE) — lower KL or relative mean error at equal
 # gradient evaluations, with ADVI's learning rate grid-tuned so the baseline is not handicapped

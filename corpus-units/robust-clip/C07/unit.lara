@@ -1,6 +1,6 @@
 # Corpus unit robust-clip/C07 — gap (unmet-mandatory-CQ path: missing control arm)
 #
-# Source: m0/annotations/robust-clip.yaml C07 (negative-result, controlled_comparison;
+# Source: robust-clip C07 annotation (negative-result, controlled_comparison;
 # corpus pin 62e9b54; claim_type adjudicated via double-annotation 2026-07-22). Headline:
 # transfer attacks between LVLMs sharing a non-robust CLIP are effective but fail with robust
 # encoders — OF-CLIP adversarial COCO on LLaVA-CLIP CIDEr 25.5 vs clean 115.5; LLaVA-CLIP

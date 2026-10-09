@@ -1,6 +1,6 @@
 # Corpus unit rebench-rust_codecontests/C02 — justified (all-CQs-met path; batch: rebench)
 #
-# Source: m0/annotations/rebench-rust_codecontests.yaml C02 (implementation-behavioral,
+# Source: rebench-rust_codecontests C02 annotation (implementation-behavioral,
 # code_inspection; corpus pin 62e9b54). Headline: N=18 parallel generations per batch is the
 # shipped scaffold's configured operating point — solve_code_contests_rust.py binds tries=18 and
 # num_global_loops=3 at module level, passes n=tries into chat.completions.create, and returns

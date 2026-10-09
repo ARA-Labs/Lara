@@ -1,6 +1,6 @@
 # Corpus unit sapg/C01 — gap (unmet-mandatory-CQ path: single-variable + protocol parity)
 #
-# Source: m0/annotations/sapg.yaml C01 (negative-result, dose_response; corpus pin 62e9b54).
+# Source: sapg C01 annotation (negative-result, dose_response; corpus pin 62e9b54).
 # Headline: PPO asymptotic performance saturates as parallel environments increase (plateau
 # around 25k envs), attributed to redundant IID samples from a shared Gaussian policy; the E01
 # sweep spans ~1500 to 100,000 environments (4x beyond the threshold) on Shadow Hand and

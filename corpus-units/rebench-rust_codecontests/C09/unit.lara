@@ -1,6 +1,6 @@
 # Corpus unit rebench-rust_codecontests/C09 — gap (mandatory-CQ-unmet path; batch: rebench)
 #
-# Source: m0/annotations/rebench-rust_codecontests.yaml C09 (implementation-behavioral,
+# Source: rebench-rust_codecontests C09 annotation (implementation-behavioral,
 # plan_vs_shipped_diff; corpus pin 62e9b54). Headline: candidate-repair was planned but not
 # implemented — notes.md:22 lists 'Try doing repair on attempts that compiled' under 'Things to
 # try now', but the shipped solve_code_contests_rust.py has no path feeding evaluator failure

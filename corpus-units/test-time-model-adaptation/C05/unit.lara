@@ -1,6 +1,6 @@
 # Corpus unit test-time-model-adaptation/C05 — gap (policy-mandatory variance CQ unmet; annotator optional)
 #
-# Source: m0/annotations/test-time-model-adaptation.yaml C05 (causal, component_ablation;
+# Source: test-time-model-adaptation C05 annotation (causal, component_ablation;
 # corpus pin 62e9b54). Headline: activation-discrepancy fitness enables stable CMA-ES learning
 # for online unsupervised TTA — on ImageNet-C severity 5 it lifts CMA prompt adaptation from
 # 55.5% NoAdapt to 63.4% alone and 66.3% with activation shifting (best of all FOA variants),

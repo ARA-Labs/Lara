@@ -1,6 +1,6 @@
 # Corpus unit self-expansion/C04 — gap (policy-mandatory variance + scope CQs unmet)
 #
-# Source: m0/annotations/self-expansion.yaml C04 (generalization, component_substitution;
+# Source: self-expansion C04 annotation (generalization, component_substitution;
 # corpus pin 62e9b54). Headline: SEMA generalises across functional adapter types -- swapping the
 # default Adapter for LoRA or Convpass inside the unchanged SEMA framework keeps A_N within ~2% on
 # both ImageNet-A and VTAB (gaps 1.03, 1.05 on ImageNet-A; LoRA +0.59, Convpass -0.58 on VTAB),
@@ -11,7 +11,7 @@
 #     substitution/invariance reading is imperfect against the rule's positive-contribution
 #     conclusion contributes(C, S, Q): here C = functional_adapter names the substituted component
 #     slot whose contribution persists across types. The class-level generalisation ("functional
-#     adapter types") is a kind-(a) absorbed scope (m0/annotation-summary.md S3): the atom
+#     adapter types") is a kind-(a) absorbed scope (corpus study): the atom
 #     instantiates per tested type, the claimed-class-vs-tested-set lives in nl/binding, and the
 #     annotation's own coverage flag (no inductive-step construct) is recorded here, not forced
 #     into vocabulary. POLICY VOCABULARY NOTE: corpus-v1 has no invariance/equivalence scheme, so

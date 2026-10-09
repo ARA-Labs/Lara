@@ -11,7 +11,7 @@
 # occurrence KIND, not on the contrary relation. The typed-attack stage runs before the
 # missing-conflict scan, so R10 fires first.
 #
-# This is R3 of the M4a coverage matrix (docs/worked-examples-plan.md §3): spec class R10 (NOT the
+# This is R3 of the coverage matrix (examples/README.md): spec class R10 (NOT the
 # spec's assurance class R7 — the earlier "R7" citation is superseded; see m4a-checklist §3).
 #
 # Expected verdict is at the bottom of this file (golden oracle).

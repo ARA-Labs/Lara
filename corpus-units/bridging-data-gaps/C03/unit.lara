@@ -1,6 +1,6 @@
 # Corpus unit bridging-data-gaps/C03 — gap (comparative; resource_benchmarking_comparison -> controlled_comparison)
 #
-# Source: m0/annotations/bridging-data-gaps.yaml C03 (comparative; corpus pin 62e9b54). Headline:
+# Source: bridging-data-gaps C03 annotation (comparative; corpus pin 62e9b54). Headline:
 # DDPM-TAN dominates full fine-tuning on FFHQ -> 10-shot Sunglasses across trainable params
 # (1.3% vs 100%), iterations (300 vs ~5000), GPU-hours (3 vs 7.5), and peak memory (9 vs 20 GB),
 # at equal-or-better FID.

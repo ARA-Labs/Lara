@@ -10,7 +10,7 @@
 #     (lean/Lara/Insp.lean, relHolds_absent_of_nil).
 #
 #   * plan_vs_shipped_recheck — STRICT. The corpus's own code-inspection
-#     scheme (M0 C13: `plan_vs_shipped_diff`, 3 of 60 sampled claims): the
+#     scheme (corpus study: `plan_vs_shipped_diff`, 3 of 60 sampled claims): the
 #     feature is enumerated in the plan's inspection and absent from the
 #     shipped module's. Two inventories, one certificate.
 #

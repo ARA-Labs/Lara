@@ -1,6 +1,6 @@
 # Corpus unit sapg/C02 — gap (unmet-mandatory-CQ path: baseline parity)
 #
-# Source: m0/annotations/sapg.yaml C02 (comparative, controlled_comparison; corpus pin 62e9b54).
+# Source: sapg C02 annotation (comparative, controlled_comparison; corpus pin 62e9b54).
 # Headline: SAPG achieves significantly higher asymptotic performance than PPO, DexPBT, and PQL
 # on hard dexterous manipulation tasks — up to 12-66% over DexPBT on the AllegroKuka hard suite
 # at 2e10 steps, with PPO and PQL near-zero; all methods run at N=24,576 envs, 16-step horizon,

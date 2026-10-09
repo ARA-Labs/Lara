@@ -1,6 +1,6 @@
 # Corpus unit lbcs/C03 — gap (an analytic theorem the artifact never discharges)
 #
-# Source: m0/annotations/lbcs.yaml C03 (descriptive, scheme dose_response; corpus pin 62e9b54).
+# Source: lbcs C03 annotation (descriptive, scheme dose_response; corpus pin 62e9b54).
 # Headline: Theorem 2 — under Conditions 1 (Progressable) and 2 (Stable Moving), LBCS converges
 # eps-optimally (almost surely, P_{t->inf}[f2(mt) <= f2*] = 1). The artifact's cited support is
 # an empirical search-time sweep (E03: accuracy plateaus at T>=500, coreset size keeps

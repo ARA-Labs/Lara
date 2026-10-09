@@ -1,6 +1,6 @@
 # Corpus unit rebench-fix_embedding/C12 — gap (mandatory-CQ-unmet path; batch: rebench)
 #
-# Source: m0/annotations/rebench-fix_embedding.yaml C12 (implementation-behavioral,
+# Source: rebench-fix_embedding C12 annotation (implementation-behavioral,
 # cross_run_observation; corpus pin 62e9b54). Headline: the official scorer's 180 s hard
 # timeout interacts pathologically with large checkpoints — a 1.56B-param 3.1 GB fp16 .pth
 # spends about 60 s just deserialising, timeouts cascade within a run (run 11: six in a row),

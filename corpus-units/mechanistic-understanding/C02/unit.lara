@@ -1,7 +1,7 @@
 # Corpus unit mechanistic-understanding/C02 — gap (variance mandatory in policy, optional in
 # the annotation)
 #
-# Source: m0/annotations/mechanistic-understanding.yaml C02 (causal, controlled_comparison;
+# Source: mechanistic-understanding C02 annotation (causal, controlled_comparison;
 # corpus pin 62e9b54). Headline: subtracting a toxic vector (wtoxic, mlp_v19, or svd_utoxic0)
 # from the last-layer residual stream drops Perspective toxicity below the No Op baseline
 # (0.453 -> 0.245/0.305/0.268) while preserving language quality — perplexity 23.30-23.56

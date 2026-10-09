@@ -1,6 +1,6 @@
 # Corpus unit rebench-triton_cumsum/C05 — gap (mandatory-CQ-unmet path; batch: rebench)
 #
-# Source: m0/annotations/rebench-triton_cumsum.yaml C05 (implementation-behavioral,
+# Source: rebench-triton_cumsum C05 annotation (implementation-behavioral,
 # benchmark_evaluation; corpus pin 62e9b54). Headline: the superblock + atomic-suffix 3-kernel
 # Triton pipeline achieves the reference score 0.47 (1.6 ms) on N=1e8 int32 on H100.
 #

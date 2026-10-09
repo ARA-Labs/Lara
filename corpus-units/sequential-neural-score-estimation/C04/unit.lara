@@ -1,6 +1,6 @@
 # Corpus unit sequential-neural-score-estimation/C04 — gap (variance + measurement-validity CQs unmet)
 #
-# Source: m0/annotations/sequential-neural-score-estimation.yaml C04 (comparative,
+# Source: sequential-neural-score-estimation C04 annotation (comparative,
 # controlled_comparison; corpus pin 62e9b54). Headline: TSNPSE-VP achieves a superior percentage
 # of valid (non-NaN) summary statistics on the real-world Pyloric problem, reaching 81% in the
 # final (9th) round and exceeding both TSNPE and SNVI at every matched simulation budget below 200k

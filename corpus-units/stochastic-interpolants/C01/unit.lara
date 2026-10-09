@@ -1,6 +1,6 @@
 # Corpus unit stochastic-interpolants/C01 — gap (mandatory assumptions CQ unmet)
 #
-# Source: m0/annotations/stochastic-interpolants.yaml C01 (descriptive, analytic_proof;
+# Source: stochastic-interpolants C01 annotation (descriptive, analytic_proof;
 # corpus pin 62e9b54). Headline: quadratic regression remains valid for dependent couplings —
 # Theorem 3.1 states b_t(x) = E(I'_t | I_t=x) uniquely minimizes the quadratic objective L_b for
 # ANY coupling with the correct marginals (including dependent ones) and yields the transport

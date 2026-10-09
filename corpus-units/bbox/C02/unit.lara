@@ -1,6 +1,6 @@
 # Corpus unit bbox/C02 — gap (comparative; cost_accounting_comparison -> controlled_comparison)
 #
-# Source: m0/annotations/bbox.yaml C02 (comparative; corpus pin 62e9b54). Headline: BBOX-ADAPTER
+# Source: bbox C02 annotation (comparative; corpus pin 62e9b54). Headline: BBOX-ADAPTER
 # full-step training costs $3.48 (StrategyQA) / $11.58 (GSM8K) vs Azure SFT $153.00 / $216.50, an
 # ~31.30x mean cost reduction under one gpt-3.5-turbo-1106 pricing snapshot.
 #

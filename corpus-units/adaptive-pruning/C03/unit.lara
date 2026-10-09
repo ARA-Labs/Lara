@@ -1,6 +1,6 @@
 # Corpus unit adaptive-pruning/C03 — gap (T2 exemplar: the unmet-mandatory-CQ path)
 #
-# Source: m0/annotations/adaptive-pruning.yaml C03 (comparative, controlled_comparison;
+# Source: adaptive-pruning C03 annotation (comparative, controlled_comparison;
 # corpus pin 62e9b54). Headline: APT matches Prune+Distill (CoFi) accuracy on MNLI/SST2 at 60%
 # sparsity on RoBERTa-base within 0.9 points, with 41.6% of its peak training memory and 2.5x
 # faster 97% time-to-accuracy (E01 Table 2, steps 4/7; E04 Table 10).
@@ -9,10 +9,10 @@
 #   * E01/E04 specify no seeds or repeated runs, so corpus-v1's mandatory variance_reported CQ
 #     has no discharging leaf. The incomplete controlled_comparison(apt, prune_distill_cofi, ...)
 #     argument is declared as a located hole with `open variance_reported` (lowering re-done for
-#     issue #15 under `lara-core@0.3`; docs/located-gap-decision.md): it is not an AF node, so
+#     issue #15 under `lara-core@0.3`; docs/theory-core.md): it is not an AF node, so
 #     the claim lands `gap` on empty complete support, and the verdict's `holes` section names
 #     a1 with its open obligation.
-#   * Policy-vs-annotation divergence, recorded per the uniform-standard rule: the M0 annotator
+#   * Policy-vs-annotation divergence, recorded per the uniform-standard rule: the annotator
 #     rated the variance CQ OPTIONAL for this claim ("leaves the tightness of 'within 0.9
 #     points' unestablished but does not defeat it"); corpus-v1 makes variance mandatory
 #     family-wide (27 mandatory vs 16 optional annotations corpus-wide), and the policy call

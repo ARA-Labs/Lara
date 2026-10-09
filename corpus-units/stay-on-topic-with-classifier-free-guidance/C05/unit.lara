@@ -1,6 +1,6 @@
 # Corpus unit stay-on-topic-with-classifier-free-guidance/C05 — gap (mandatory rater-power CQ unmet)
 #
-# Source: m0/annotations/stay-on-topic-with-classifier-free-guidance.yaml C05 (causal,
+# Source: stay-on-topic-with-classifier-free-guidance C05 annotation (causal,
 # blind_paired_human_evaluation; corpus pin 62e9b54). Headline: CFG with negative prompting
 # improves assistant system-prompt following — at gamma=3 blind paired human evaluators prefer
 # CFG completions 75% of the time over vanilla, while user-prompt relevance preference stays near

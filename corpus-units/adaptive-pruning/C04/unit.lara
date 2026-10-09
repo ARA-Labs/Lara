@@ -1,7 +1,7 @@
 # Corpus unit adaptive-pruning/C04 — gap (unmet mandatory variance CQ, annotator-optional),
 # with the derived-arithmetic leg certificate-checked (issue #57)
 #
-# Source: m0/annotations/adaptive-pruning.yaml C04 (causal, component_ablation; corpus pin
+# Source: adaptive-pruning C04 annotation (causal, component_ablation; corpus pin
 # 62e9b54). Headline: removing the kurtosis (outlier-aware) salience term from APT drops the
 # LLaMA2-7B four-task OpenLLM average from 50.0 to 38.1 at 30% sparsity — a 23.8% relative drop
 # ((50.0 - 38.1) / 50.0) — so the kurtosis term is critical for large-LM pruning (E03, Table 5).
@@ -29,7 +29,7 @@
 #     >= 0.05 in exact rational arithmetic. Numerals use CANONICAL spellings (`50`, not `50.0`)
 #     per the Family-10 exception to the constants-only presentation convention.
 #   * c04a is intentionally NOT statused: the unit's queried claim stays the headline c04 (one
-#     claim-support instance per unit, m0/sample.tsv grain). The strict step is measured through
+#     claim-support instance per unit, MANIFEST.tsv grain). The strict step is measured through
 #     the compiled AF (a1 in) and the #56 aggregator's load-bearing scan, not through a second
 #     status row. The certificate discharges ONLY the arithmetic identity relative to the cited
 #     cells — the truth of the cells stays with the defeasible observed leaves (factivity

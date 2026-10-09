@@ -1,6 +1,6 @@
 # Corpus unit bridging-data-gaps/C05 — gap (causal; component_ablation)
 #
-# Source: m0/annotations/bridging-data-gaps.yaml C05 (causal; corpus pin 62e9b54). Headline: along
+# Source: bridging-data-gaps C05 annotation (causal; corpus pin 62e9b54). Headline: along
 # the TAN ablation chain (adaptor-only 41.88 -> +similarity guidance 26.41 -> +adversarial noise
 # 20.06 FID on FFHQ -> 10-shot Sunglasses at 300 iters), each component contributes incrementally.
 #

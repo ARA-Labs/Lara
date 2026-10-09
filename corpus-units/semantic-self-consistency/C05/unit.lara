@@ -1,6 +1,6 @@
 # Corpus unit semantic-self-consistency/C05 — gap (both policy-mandatory correlation CQs unmet)
 #
-# Source: m0/annotations/semantic-self-consistency.yaml C05 (descriptive, statistical_correlation;
+# Source: semantic-self-consistency C05 annotation (descriptive, statistical_correlation;
 # corpus pin 62e9b54). Headline: average reasoning-chain sequence length positively correlates with
 # the average accuracy increase from the semantic methods, over the 15 model-dataset pairs of
 # Table 3.

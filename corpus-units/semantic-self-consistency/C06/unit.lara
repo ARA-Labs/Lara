@@ -1,6 +1,6 @@
 # Corpus unit semantic-self-consistency/C06 — gap (both policy-mandatory null-correlation CQs unmet)
 #
-# Source: m0/annotations/semantic-self-consistency.yaml C06 (negative-result,
+# Source: semantic-self-consistency C06 annotation (negative-result,
 # statistical_correlation; corpus pin 62e9b54). Headline: average BLEU score does NOT correlate
 # with the average accuracy increase from the semantic methods, over the 15 model-dataset pairs of
 # Table 3 (low-BLEU / highest-gain cells among them).

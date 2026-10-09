@@ -1,6 +1,6 @@
 # Corpus unit semantic-self-consistency/C03 — gap (policy-mandatory measurement-validity CQ unmet)
 #
-# Source: m0/annotations/semantic-self-consistency.yaml C03 (comparative, controlled_comparison;
+# Source: semantic-self-consistency C03 annotation (comparative, controlled_comparison;
 # corpus pin 62e9b54). Headline: embedding-based outlier removal (Isolation Forest / kNN / OCSVM)
 # before the self-consistency vote improves or matches the SC baseline in the majority of the 45
 # method-model-dataset cells of Table 2, with gains persisting at reduced sample sizes.

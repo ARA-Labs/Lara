@@ -1,6 +1,6 @@
 # Corpus unit self-composing-policies/C04 — gap (policy-mandatory variance CQ unmet)
 #
-# Source: m0/annotations/self-composing-policies.yaml C04 (comparative, controlled_comparison;
+# Source: self-composing-policies C04 annotation (comparative, controlled_comparison;
 # corpus pin 62e9b54). Headline: CompoNet's empirical inference time grows substantially slower
 # than ProgressiveNet as tasks increase from 1 to 300 (CompoNet gradual, ProgressiveNet clearly
 # quadratic), measured on identical hardware (AMD EPYC 7252 CPU + NVIDIA A5000 GPU), 1-minute /
@@ -13,7 +13,7 @@
 #     located hole with `open variance_reported` (lowering re-done for issue #15 under
 #     lara-core@0.3). The complete-support set is empty and the claim lands `gap`, like
 #     adaptive-pruning/C03. The optional scope_match has no annotated basis and is opened too.
-#   * Policy-vs-annotation divergence (uniform-standard rule): the M0 annotator rated the timing-
+#   * Policy-vs-annotation divergence (uniform-standard rule): the annotator rated the timing-
 #     variance CQ OPTIONAL ("no stated margin ... does not defeat"); corpus-v1's family-wide call
 #     wins and it is mandatory. The other CQs are annotated met -- baseline_parity <- CQ2/CQ3
 #     (ProgressiveNet over the full k=1..300 sweep, same batch size / synthetic instantiation);

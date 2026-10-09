@@ -1,6 +1,6 @@
 # Corpus unit all-in-one/C06 — gap (unmet mandatory equivalence-margin CQ; null_comparison dual)
 #
-# Source: m0/annotations/all-in-one.yaml C06 (negative-result, component_ablation; corpus pin
+# Source: all-in-one C06 annotation (negative-result, component_ablation; corpus pin
 # 62e9b54). Headline: the all-in-one (all-conditionals) training objective does not hurt
 # posterior-only accuracy — all-conditionals Simformer posterior C2ST is comparable to the
 # posterior-only variant (which itself matches the NPSE baseline) across benchmark tasks, and
