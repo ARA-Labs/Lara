@@ -1,6 +1,6 @@
 # Corpus unit bbox/C06 — gap (negative-result; noninferiority_comparison -> null_comparison dual)
 #
-# Source: m0/annotations/bbox.yaml C06 (negative-result; corpus pin 62e9b54). Headline: selecting
+# Source: bbox C06 annotation (negative-result; corpus pin 62e9b54). Headline: selecting
 # positive samples via a GPT-4 judge (no ground-truth labels) is competitive with ground-truth
 # selection — max accuracy gap 1.77 points over 4 datasets, well under the 5-point falsification
 # margin.

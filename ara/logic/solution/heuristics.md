@@ -60,7 +60,7 @@
   the suite honest without trusting the generation event. Reused for the T2
   corpus units: the generator fails loudly on parse/elaborate/replay errors and
   the spec cross-checks manifest expected_status against computed verdicts.
-- **Sources**: ["148 → 295 seeded mutants over 8 accept bases (A, B, E1–E5, S1), then the frozen 358→360 suite ← docs/m5-freeze-checklist.md", "zero specification mismatches on the first full sweep ← test/MutationSpec.hs"]
+- **Sources**: ["148 → 295 seeded mutants over 8 accept bases (A, B, E1–E5, S1), then the frozen 358→360 suite ← docs/evaluation.md#frozen-provenance-current-evaluation-freeze-v8", "zero specification mismatches on the first full sweep ← test/MutationSpec.hs"]
 - **Status**: active
 - **Provenance**: ai-suggested
 - **Sensitivity**: medium
@@ -202,7 +202,7 @@
 - **Status**: active
 - **Provenance**: ai-suggested
 - **Sensitivity**: medium
-- **Code ref**: ["CLAUDE.md", "docs/theory-pw-t9-path-composition.md"]
+- **Code ref**: ["CLAUDE.md", "docs/theory-pw.md#path-composition"]
 
 ## H18: Decide which contract clauses to check by the representation of what each reads, not by its logical shape
 - **Rationale**: Clauses of one contract can share a universally quantified

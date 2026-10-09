@@ -267,7 +267,7 @@ computeUnit ruleModeOf flavored name ci surfaceDerivedArgs (Verdict _ outcome) p
         afIndexById =
           zip [aid | (aid, _) <- unitArgs unit, aid `notElem` holeIds] [0 :: Int ..]
         -- An @in@ challenge whose every typed attack is inert (aimed at a
-        -- located hole, D4/D6 of docs/located-gap-decision.md) bears on no
+        -- located hole, D4/D6 of docs/theory-core.md#holes-located-gaps-and-term-level-critical-questions) bears on no
         -- claim status, so neither it nor its leaves are load-bearing.
         loadBearingArgs =
           [ pair

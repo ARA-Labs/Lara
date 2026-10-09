@@ -6,7 +6,7 @@
 # robustness appendix, and its ablations are attacks the same paper mounts on its own headline
 # claim. All three attack kinds below originate inside `paper_17`.
 #
-# Expected verdict is at the bottom of this file (golden oracle, per worked-examples-plan §0).
+# Expected verdict is at the bottom of this file (golden oracle).
 
 artifact paper_17 at sha256:aaaa...
 policy empirical-v1

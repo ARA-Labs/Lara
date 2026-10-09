@@ -6,7 +6,7 @@
 replaces the function with a **relation** `R : Assurance → Assurance → Prop`,
 lifted structurally through support terms, attacks and fragments, and relates
 any two `R`-related fragments. That is the form M4's acceptance criterion
-reserves the word *parametricity* for (`docs/theory-m4-contextual-adequacy.md`
+reserves the word *parametricity* for (`docs/theory-core.md#contexts-contextual-adequacy-and-backend-replacement`
 §6, "Must not claim").
 
 **The relation is not arbitrary, and cannot be.** `RelInj` below requires `R` to
@@ -28,7 +28,7 @@ is the gain; it is not "arbitrary relations".
 **This is not Part B.** `RelTerm` lifts a relation on *certificates*
 structurally. It is not a logical relation over the contrary-visible occurrence
 profile, and nothing here reopens the full-abstraction gate descoped in
-`docs/theory-m4-contextual-adequacy.md` §7.
+`docs/theory-core.md#full-abstraction-descoped`.
 
 **The chain, and where the relation dies.**
 
@@ -249,7 +249,7 @@ def RelPreserving (R : Assurance → Assurance → Prop)
 fragment is not licensed to move the context's own certificates, so `R` must
 relate the context's material to itself.
 
-Note the consequence, recorded in `docs/theory-m4-relational-parametricity.md`:
+Note the consequence, recorded in `docs/theory-core.md#generic-semantics-and-relational-parametricity`:
 combined with `RelInj`, this makes `R` the *identity* on the context's
 occurrences. An assurance appearing in both `C` and `F` therefore cannot move.
 That is inherited from `FixesContext` and is correct, but it bounds how local
@@ -288,7 +288,7 @@ theorem relTerms_length {ws₁ ws₂ : List SupportTerm} (h : RelTerms R ws₁ w
 `RelInj R` says exactly that `R` is the graph of a **partial injection**: taking
 `α₁ = α₂` forces `β₁ = β₂` (single-valued), and taking `β₁ = β₂` forces
 `α₁ = α₂` (injective). Both halves are cited by
-`docs/theory-m4-relational-parametricity.md`; neither should be left to prose.
+`docs/theory-core.md#generic-semantics-and-relational-parametricity`; neither should be left to prose.
 
 The single-valued half is the surprising one — a predicate named `Inj` is also
 secretly a function — and it is what the strength argument starts from.
@@ -298,7 +298,7 @@ secretly a function — and it is what the strength argument starts from.
 realizing the fragment and fixing the context. It extends only the finite
 occurrence restriction of `R`, not all of `R`: the unrestricted assertion is
 false (`not_every_relInj_has_total_extension`). Global `AssurPreserving` remains
-a separate obligation; see `docs/theory-m4-relational-parametricity.md` §4. -/
+a separate obligation; see `docs/theory-core.md#what-the-relational-form-buys-and-localization`. -/
 
 theorem relInj_functional (hR : RelInj R)
     {α β₁ β₂ : Assurance} (h₁ : R α β₁) (h₂ : R α β₂) : β₁ = β₂ :=
@@ -1048,7 +1048,7 @@ occurrence for free, because the image is a computed function value.
 **No call site, deliberately.** Every consumer in this module goes through
 `attackOcc_rel_exists`, which produces the occurrence rather than requiring the
 caller to have it. This form is kept because it is the statement
-`docs/theory-m4-relational-parametricity.md` §2's mirror table names against
+`docs/theory-core.md#relational-parametricity`'s mirror table names against
 `attackOcc_mapAssurAtt`, and dropping it would leave that row unbacked. -/
 theorem attackOcc_rel (hR : RelInj R)
     {k₁ k₂ : Attack.Attack} {t₁ t₂ : SupportTerm} (hk : RelAtt R k₁ k₂)
@@ -1555,7 +1555,7 @@ it does not by itself witness failure of all globally preserving realizations.
 **Not full abstraction.** `RelTerm` lifts a relation on certificates
 structurally; it is not a logical relation over the contrary-visible occurrence
 profile, and Part B stays descoped
-(`docs/theory-m4-contextual-adequacy.md` §7). -/
+(`docs/theory-core.md#full-abstraction-descoped`). -/
 theorem obsGen_parametricity {α : Type} (g : Invariants.StructuredAF → Atom → α)
     (hR : RelInj R)
     (hpres : RelPreserving R (certOkOf reg₁) (certOkOf reg₂))

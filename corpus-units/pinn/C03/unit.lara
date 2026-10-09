@@ -1,6 +1,6 @@
 # Corpus unit pinn/C03 — gap (a spectral comparison whose estimator error is unquantified)
 #
-# Source: m0/annotations/pinn.yaml C03 (causal, component_spectral_comparison; corpus pin
+# Source: pinn C03 annotation (causal, component_spectral_comparison; corpus pin
 # 62e9b54). Headline: the residual loss component (the differential-operator term) is the
 # dominant source of ill-conditioning — for each PDE in {convection, reaction, wave} the
 # residual-component Hessian's max eigenvalue exceeds the IC and BC components', which are

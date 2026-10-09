@@ -1,6 +1,6 @@
 # Corpus unit sample-specific-masks/C05 — justified (all mandatory CQs met)
 #
-# Source: m0/annotations/sample-specific-masks.yaml C05 (causal, component_ablation;
+# Source: sample-specific-masks C05 annotation (causal, component_ablation;
 # corpus pin 62e9b54). Headline: three-channel masks outperform single-channel masks, and both
 # the shared delta and the fmask are necessary — single-channel variant averages 49.70% vs full
 # SMM 52.53% across 11 datasets (GTSRB 70.7% vs 80.4%, Flowers102 30.2% vs 38.7%), only-fmask
@@ -11,7 +11,7 @@
 #     large-data datasets; fmask necessary on feature-rich datasets). Binding conjunct is the
 #     three-channel > single-channel arm — the claim's headline and the arm with observed
 #     per-cell data (49.70 vs 52.53; GTSRB, Flowers102). The delta- and fmask-necessity arms
-#     stay in nl and refs (claim-splitting convention, M0 summary section 3(a)).
+#     stay in nl and refs (claim-splitting convention of the corpus study).
 #   * All three mandatory corpus-v1 CQs are annotated met, so this is the justified path:
 #       - single_variable: annotation CQ1 (four variants are single-component edits of the full
 #         SMM under identical hyperparameters) and CQ3 (variants cover delta / fmask / channel

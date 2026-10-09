@@ -1,36 +1,18 @@
 # The rejection surface: what Lara refuses, what it accepts-but-does-not-support
 
-_Status: reference note, written 2026-08-06. Answers "what does an invalid argument look like, and
-how does the checker detect it?" — a question spread across `docs/spec.md` §10, `examples/README.md`,
-and the mutant manifest but not previously answered in one place. Every anchor below was re-verified
-live against the `lara` binary while writing this note (`cabal build exe:lara`); rerun the commands to
-recheck them after a change. Updated 2026-08-08 for `lara-syntax@0.3`'s surface-context line (§1.1);
-every anchor below was re-run against the binary at that point and reproduced unchanged. Updated
-2026-08-19: mutation-suite counts refreshed to the `m5-freeze-v4` suite (504 mutants) and the R14
-row gained the codec-boundary note (code-point columns, invalid UTF-8). Updated
-2026-08-22 for `lara-syntax@0.9` named-`nd@1` lowering and the exact
-partial-label repair condition. Updated 2026-08-23 for `lara-syntax@0.10`
-source-authored formula annotations (§1.4 row `CertNdFormulaMalformed`; the D7
-marker vocabulary gains `(prop _)`). Updated 2026-08-25: mutation-suite counts
-refreshed to the `m5-freeze-v5` suite (541 mutants); the accept half is
-unchanged at 58, since all 37 added mutants are rejects. Updated 2026-10-04
-for `lara-core@0.3` located gaps: the `incomplete-argument` kind is retired
-and its anchor becomes an accepted unit with a `holes` section (§2); the §3
-mutation counts are those of the last freeze before that change._
+This note answers "what does an invalid argument look like, and how does the checker detect it?",
+gathering in one place what `docs/spec.md` §10, `examples/README.md` and the mutant manifest each
+state in part. Every anchor below is reproducible with `cabal build exe:lara` and the commands shown.
 
-The dated updates above are maintenance history; skip them on a first read.
-The content starts here, with the distinction the whole note turns on: a
-malformed program is *rejected* outright, while a well-formed program whose
-claim merely lacks standing support is *accepted* and reported as
-unsupported. Those are different doors, and conflating them is the most
-common misreading of the checker.
+The distinction the whole note turns on: a malformed program is *rejected* outright, while a
+well-formed program whose claim merely lacks standing support is *accepted* and reported as
+unsupported. Those are different doors, and conflating them is the most common misreading of the
+checker.
 
 ## 1. Two doors, two failure modes
 
 Lara has two entry points, and the same kind of defect surfaces differently depending on which one a
-program goes through. This is the least obvious part of the contract and was rediscovered
-empirically rather than read off a spec section (`app/Main.hs`, module header, is the authoritative
-statement).
+program goes through. `app/Main.hs` (module header) is the authoritative statement of this contract.
 
 - **Source boundary (`.lara`)** — the untrusted elaborator parses the program and its co-located
   policy and builds a checker `Unit`. If it cannot — a parse error, a missing/unreadable policy file,
@@ -63,11 +45,11 @@ on stderr (`app/Main.hs`, the `SourceRejected` branch). It is exit-1-like in cod
 like an exit-2 failure; treat "exit 1 with an S-expression verdict on stdout" as the actual signature
 of a checker-stage rejection, not the bare exit code.
 
-### 1.1 One line the `.lara` door adds (`lara-syntax@0.3`)
+### 1.1 One line the `.lara` door adds
 
 The two doors also differ in one place *after* a rejection is decided. A `comparison` block (grammar
-App. B.3) generates the strict re-check argument and the defeasible bridge the author no longer
-writes by hand — including the certificate's premise slot indices. So when `ord@1` refuses a
+App. B.3) generates the strict re-check argument and the defeasible bridge the author does not
+write by hand — including the certificate's premise slot indices. So when `ord@1` refuses a
 *generated* certificate, the R13 line below is worded in a vocabulary the author never wrote. On the
 `.lara` door only, that kernel line is therefore preceded by one surface-context line naming the
 block and the three fields the author *did* write:
@@ -91,100 +73,76 @@ slots by construction, so the value-mismatch wording above is the one a `compari
 (`Lara.Elaborate.sourceResultAuthorDiagnostics`; pinned by `test/CliSpec.hs`
 `prop_cliLaraComparisonRejectionContext`, which pins both doors in one test.)
 
-### 1.2 The certificate premise-slot rejections (`lara-syntax@0.6`, `@0.8`)
+### 1.2 The certificate premise-slot rejections
 
-Since `lara-syntax@0.6` (grammar Appendix E), the declared premise-reference
-positions of an `ord@1`/`ra@1`/`insp@1` certificate payload are lowered at
-elaboration.
-A spelling-level slot mistake there, such as a malformed numeral `(prem 007)`
-or `(prem -1)`, or a symbolic name that fails to resolve, rejects at the source
-boundary (`ElabError`, exit 2, the `CertSlot*` family of grammar Appendix E.5,
-superseded by G.5) rather than reaching certificate replay as an R13. Nodes
-outside the schema's declared reference positions remain backend-owned. This applies only on the
-`.lara` door: a raw `.sexp` carries no presentation layer, and a symbolic slot
-arriving there is still the backend's to refuse at replay.
-Acceptance is unchanged — every payload the frozen corpus can contain lowers to
-itself byte-identically.
+On the `.lara` door, the declared premise-reference positions of an
+`ord@1`/`ra@1`/`insp@1` certificate payload are lowered at elaboration (grammar
+Appendix E). A reference there resolves against three name classes: the citing
+rule's declared premise labels, the declared leaves, and the prior arguments
+(grammar Appendix G). A spelling-level slot mistake, such as a malformed numeral
+`(prem 007)` or `(prem -1)`, or a symbolic name that fails to resolve, rejects
+at the source boundary (`ElabError`, exit 2, the `CertSlot*` family) rather than
+reaching certificate replay as an R13. Nodes outside the schema's declared
+reference positions remain backend-owned. A raw `.sexp` carries no presentation
+layer, so a symbolic slot arriving there is the backend's to refuse at replay.
 
-Since `lara-syntax@0.8` (grammar Appendix G) the same lowering resolves a
-reference in a third name class — the citing rule's declared premise labels —
-so this section's rejection surface gains **one** family and rewords
-two messages. `lara-syntax@0.9` rewords `CertSlotMultiSlot` as described
-below. The normative template list is grammar Appendix G.5.
+The normative template list is grammar Appendix G.5. Three of its families
+carry the name-class logic:
 
-- **New:** `CertSlotLabelAmbiguous` — a reference that names both a premise
-  label of the citing rule and a declared leaf or prior argument:
-  `arg 'A': certificate 'B' premise reference 'N' is ambiguous between rule 'R' premise label and a declared leaf or prior argument`.
-  Rejected even when both classes would resolve to the same slot; that is the
-  one collision policy of Appendix E.2 and F.4, with no carve-out (Appendix
-  G.3).
-- **Reworded:** `CertSlotUnresolved` now names the citing rule and all three
-  classes —
+- `CertSlotUnresolved` names the citing rule and all three classes:
   `arg 'A': certificate 'B' premise reference 'N' names neither a premise label of rule 'R', a declared leaf, nor a prior argument`.
-  Same rejection, same class, same exit code; only the wording moved.
-- **Reworded:** `CertSlotMultiSlot` names the rule-premise-label repair only
-  when every slot matched by the ambiguous source name has a label whose
-  spelling does not collide with a declared leaf or prior argument:
+- `CertSlotLabelAmbiguous` is a reference that names both a premise label of
+  the citing rule and a declared leaf or prior argument:
+  `arg 'A': certificate 'B' premise reference 'N' is ambiguous between rule 'R' premise label and a declared leaf or prior argument`.
+  It rejects even when both classes would resolve to the same slot, under the
+  single collision policy of Appendix E.2 and F.4 (Appendix G.3).
+- `CertSlotMultiSlot` names the rule-premise-label repair only when every slot
+  matched by the ambiguous source name has a label whose spelling does not
+  collide with a declared leaf or prior argument:
   `arg 'A': certificate 'B' premise reference 'N' occupies premise slots I and J; cite a numeric slot or the rule's premise label for the slot you mean`.
-  A wholly, partially, or unusably labelled matching-slot set retains the
+  A wholly, partially, or unusably labelled matching-slot set gets the
   numeric-only ending `; cite a numeric slot`; labels on unrelated slots do not
-  enable the advice. Same rejection, same class, same exit code; only the repair
-  text is conditional.
+  enable the advice. Only the repair text is conditional; the class and exit
+  code are the same either way.
 
-Neither can fire on any **pre-existing** source, which is the scoping grammar
-Appendix G.7 states: no tracked policy other than S7's `ord-labeled-v1` — added
-by `@0.8` itself — labels a premise of a rule whose certificates cite names, and
-S7 declares no name that collides with one of its own labels. The label class is
-therefore empty across every policy frozen before `@0.8`, and acceptance is
-unchanged. As above, this applies only on the `.lara` door.
+### 1.3 Three source-boundary refusals of meaningless or ambiguous spellings
 
-### 1.3 Three rejections the `.lara` door gains (`lara-syntax@0.7`)
+The `.lara` door refuses three spellings that would otherwise drop a token or
+resolve a collision silently (grammar Appendix F). None of them is a checker
+verdict class: two are located parse errors (R14) and one is an `ElabError`,
+all exit 2.
 
-`lara-syntax@0.7` (grammar Appendix F) is a surface-strictness release: it
-removes three spellings the surface used to accept and then not mean. Each
-removal is a rejection the **`.lara` door gains** — a source that used to be
-accepted (with a token silently dropped, or a collision silently resolved) is
-now refused at the boundary. None of them is a new checker verdict class: two
-are located parse errors (R14) and one is an `ElabError`, all exit 2.
-
-Two additions at the **parse** door (`Lara.Syntax`, spec §10.1 R14, exit 2):
+Two are refused by the parser (`Lara.Syntax`, spec §10.1 R14, exit 2):
 
 - **`discharge`/`open` on a bare `leaf(…)` support term** (grammar
-  Appendix F.2) — previously accepted and dropped entirely, id and all. Now
-  `discharge requires a rule application, not a bare leaf` and
+  Appendix F.2) is
+  `discharge requires a rule application, not a bare leaf` or
   `open requires a rule application, not a bare leaf`, located at the keyword.
-  This extends to both siblings the ruling Appendix A.1 already made for
-  `assurance` in the same position.
-- **The retired two-identifier hole spelling `open q as o`** (grammar
-  Appendix F.3) — a hole is now spelled `open q`. Both legacy shapes, equal
-  (`open q as q`) and divergent (`open q as o`), are the same located error:
+  Appendix A.1 makes the same ruling for `assurance` in that position.
+- **A two-identifier hole spelling** (grammar Appendix F.3). A hole is spelled
+  `open q`. Both `open q as q` and `open q as o` are the same located error:
   `lara-syntax@0.7 uses 'open q'; remove 'as …'`.
 
-One addition at the **elaborator** door (`ElabError`, exit 2):
+One is refused by the elaborator (`ElabError`, exit 2):
 
-- **A shadowed discharge target** (grammar Appendix F.4) — when
+- **An ambiguous discharge target** (grammar Appendix F.4). When
   `discharge q with x` names both a declared leaf and a prior argument, the
-  resolver used to silently prefer the leaf. It is now `AmbiguousDischarge`:
+  result is `AmbiguousDischarge`:
   `arg 'A': discharge of 'q' names 'x', which is ambiguous between a declared leaf and a prior argument`.
-  This is the same collision policy the `@0.5` inferred-θ references and the
-  `@0.6` certificate premise slots already enforced (§1.2; grammar Appendix
-  E.2), so all three argument-body reference positions now agree.
+  This is the collision policy that inferred-θ references and certificate
+  premise slots also enforce (§1.2; grammar Appendix E.2), so all three
+  argument-body reference positions agree.
 
 All three apply **only on the `.lara` door**: a raw `.sexp` carries no
-presentation layer — it has no `open` line, no `discharge` line, and no source
-namespace to collide in — so the `.sexp` door's rejection surface is untouched,
-and so is the wire codec. Acceptance is unchanged on the frozen corpus: the ten
-migrated hole spellings were textual only (grammar Appendix F.5), no committed
-source attaches a body line to a bare leaf, and no tracked `.lara` file has a
-name that is both a declared leaf id and an argument id, so the ambiguity error
-cannot fire on any committed source.
+presentation layer (no `open` line, no `discharge` line, and no source
+namespace to collide in), so neither the `.sexp` door's rejection surface nor
+the wire codec has these cases.
 
-### 1.4 Named `nd@1` source-boundary rejections (`lara-syntax@0.9`/`@0.10`)
+### 1.4 Named `nd@1` source-boundary rejections
 
-`lara-syntax@0.9` (grammar Appendix H) adds a named presentation for the
-otherwise unchanged de Bruijn `nd@1` certificate grammar, and `@0.10`
-(grammar Appendix I) adds the source-authored `(prop TEXT)` formula
-annotation. A `.lara` payload containing a named marker is lowered during
+The de Bruijn `nd@1` certificate grammar has a named presentation (grammar
+Appendix H) and a source-authored `(prop TEXT)` formula annotation (grammar
+Appendix I). A `.lara` payload containing a named marker is lowered during
 elaboration, before replay. These nine failures are therefore `ElabError`s:
 exit 2, empty stdout, and one located source-invalid diagnostic. The templates
 below are exact; `A` is the argument, `B` the backend spelling, `N` the
@@ -212,46 +170,43 @@ mismatch belongs only to flat schema lowering and is not produced by this
 direct `nd@1` resolver path.
 
 The D7 boundary is exact. The named-mode markers are a `(prem _)` node, a
-`(thy _)` node, a two-field `(prop _)` node with an atom payload
-(`lara-syntax@0.10`), a four-element `lam`, and `(hyp a)` whose decoded atom
-begins with a character satisfying `isIdentStart`. The elaborator lowers known
-constructors — including `(prop TEXT)` and `imp`-nested formula positions —
-and rejects surviving named markers in a payload containing any
-marker. Residual named syntax therefore migrates from
-R13 to `CertNdResidualNamed`; in particular a `(prop _)` node in a
+`(thy _)` node, a two-field `(prop _)` node with an atom payload, a
+four-element `lam`, and `(hyp a)` whose decoded atom begins with a character
+satisfying `isIdentStart`. The elaborator lowers known constructors, including
+`(prop TEXT)` and `imp`-nested formula positions, and rejects surviving named
+markers in a payload containing any marker. A surviving named marker is
+therefore `CertNdResidualNamed`, not R13; in particular a `(prop _)` node in a
 certificate position, or any other marker in an opaque formula subtree, is
-residual. A payload
-containing none is passed structure-identically to the backend—marker-free junk
-such as `(foo bar)`, `(hyp 007)`, and a `prop` head of any other arity or with
-a non-atom payload included—and retains its existing R13
-behavior. A raw `.sexp` never runs the presentation lowering, so even named-looking
-atoms there remain backend decode/replay input rather than `CertNd*` source
-errors. If a successfully lowered term later fails replay, the R13 diagnostic is
-phrased over its numeric de Bruijn image; no source map restores the authored
-binder names (§1.6 restores proposition spellings). §1.5's slot mapping is
-the premise-list half of that attribution, which has closed.
+residual. A payload containing none is passed structure-identically to the
+backend, marker-free junk such as `(foo bar)`, `(hyp 007)`, and a `prop` head
+of any other arity or with a non-atom payload included, and is the backend's to
+refuse at R13. A raw `.sexp` never runs the presentation lowering, so even
+named-looking atoms there remain backend decode/replay input rather than
+`CertNd*` source errors. If a successfully lowered term later fails replay, the
+R13 diagnostic is phrased over its numeric de Bruijn image. §1.5's slot mapping
+restores the premise list and §1.6 restores proposition spellings; no source map
+restores the authored binder names.
 
 ### 1.5 The premise-slot mapping under an R13
 
 A backend rejection is phrased over premise *slots* — `(prem 0)`, `(prem 1)` —
 because that is the only vocabulary the seam has: `strictCheck` hands the
 backend a positional list of premise conclusions and nothing else
-(`docs/strict-backend-decision.md` §2). Nothing else in the rejection said what
-slot *i* was, so the reader decoded it by hand against the policy declarations.
+(`docs/strict-certificates.md#2-the-abstract-strict-certificate-system`). The slot lines name what
+fills each positional slot.
 
-The reason line is followed by one line per slot. **Both doors carry
-it**, which is the point: `lara-syntax@0.6`'s named slots fix slot mistakes for
-`ord@1`/`ra@1`/`insp@1` authors at authoring time on the `.lara` door, and do
-nothing for
-numeric certificates, `nd@1` proof terms, or third-party `.sexp` artifacts —
-all of which still die as positional rejections. Two readings exist:
+The reason line is followed by one line per slot, and **both doors carry
+it**. Named slots (§1.2) catch slot mistakes for `ord@1`/`ra@1`/`insp@1`
+authors at authoring time on the `.lara` door, but numeric certificates,
+`nd@1` proof terms and third-party `.sexp` artifacts still fail as positional
+rejections. Two readings exist:
 
 - **Structural** (`Lara.Driver.slotMappingLines`), what the checked `Unit` says
   fills the slot: `leaf e0`, or `derived by <rule>` for an inline
   sub-derivation. This is what a raw `.sexp` gets, since a wire program has no
   authored names to recover.
 - **Authored** (`Lara.Elaborate.SlotNames`), what the source wrote: `leaf e1`,
-  `arg a1`, plus the `lara-syntax@0.8` premise label when the citing rule
+  `arg a1`, plus the premise label when the citing rule
   declares one. This is what the `.lara` door prints.
 
 ```
@@ -286,8 +241,8 @@ structurally identical argument terms outright (`duplicate-argument`), and it
 scans exactly the checked argument list the authored map is keyed over, so a
 unit that survives to a backend rejection has pairwise distinct argument terms.
 The lookup still matches on a *unique* hit rather than taking the first one:
-that keeps the invariant load-bearing in the code, and if the dedupe is ever
-relaxed the slot degrades to the structural reading instead of printing a
+that keeps the invariant load-bearing in the code, and if the dedupe were
+relaxed the slot would degrade to the structural reading instead of printing a
 confident and possibly wrong id. Losing specificity is recoverable; a
 misleading diagnosis is the failure this block exists to prevent.
 
@@ -303,9 +258,10 @@ no slot sources.)
 
 ### 1.6 The formula mapping under an `nd@1` R13
 
-§1.5 makes the *premise list* of a refused certificate readable. The formulas in
-the same reason were still opaque. When an `nd@1` proof term lowers cleanly and
-is then refused, the backend names atoms by the `encodeAtomKey` framing:
+§1.5 makes the *premise list* of a refused certificate readable; this mapping
+does the same for the formulas in the reason. When an `nd@1` proof term lowers
+cleanly and is then refused, the backend names atoms by the `encodeAtomKey`
+framing:
 
 ```
 certificate replay: nd@1 (theory sha256:strict-v1-theory-0) rejected the certificate:
@@ -314,10 +270,10 @@ certificate replay: nd@1 (theory sha256:strict-v1-theory-0) rejected the certifi
   slot 0 = leaf e1
 ```
 
-`lara-syntax@0.10` removed the last out-of-band key from *authoring* — the author
-wrote `(prop "holds(other_invariant, D)")` — and a rejection put it straight
-back, at the moment it is hardest to read. The `.lara` door adds one
-line per atom the reason names, in the order it names them:
+On the `.lara` door, the formula lines spell each atom named in an `nd@1`
+reason in source vocabulary (here the author wrote
+`(prop "holds(other_invariant, D)")`). The door adds one line per atom the
+reason names, in the order it names them:
 
 ```
   formula 0 = holds(other_invariant, D)  (authored annotation)
@@ -326,9 +282,7 @@ line per atom the reason names, in the order it names them:
 
 **The map draws on two sources, because a mismatch names one of each.** The
 `expected` side is the author's `(prop TEXT)` annotation. The `got` side is the
-conclusion of the leaf a `(prem s)` cited — never spelled as a `prop` at all. A
-map built from annotations alone would have spelled back exactly the first line
-of every mismatch, which is the half that happens to be listed first;
+conclusion of the leaf a `(prem s)` cited, never spelled as a `prop` at all.
 `Lara.Elaborate.FormulaNames` therefore collects both, tagging each entry with
 its origin. A proposition spelled *both* ways shares one key and reports the
 annotation, the author's own words for the position under diagnosis.
@@ -342,7 +296,7 @@ theory formula, contributes no line, which is honest: nothing authored
 corresponds to it.
 
 **Recovered, not threaded**, the same way §1.5's authored reading is. Elaboration
-lowers certificate payloads in place, so the checked `Unit` no longer holds the
+lowers certificate payloads in place, so the checked `Unit` does not hold the
 authored spellings — but the parsed source `Program` is retained beside it and
 still does. Nothing is carried out of the elaborator, nothing new reaches `Unit`,
 nothing reaches the wire, and `sourceResultDiagnostics` — whose `messages` field
@@ -355,9 +309,8 @@ the same reason back to binder names. That index is relative to the local binder
 context *at the failure site inside the adapter*, which reports through a flat
 `String`, so no sound recovery exists from outside it — and a best-effort
 reconstruction could print a confidently wrong name, the failure §1.5 also
-exists to prevent. Closing it means giving the registered-backend seam a
-structured rejection, left as
-separate follow-up work.
+exists to prevent. Recovering binder names would need a structured rejection at
+the registered-backend seam.
 
 (Pinned by `test/FormulaNamesSpec.hs`: both sources of a mismatch, the
 reason-driven ordering, the shared-key precedence, the unmentioned-key and empty
@@ -366,8 +319,7 @@ cases, and the collector's nested and unparsable arms.)
 ## 2. The class table, with a runnable anchor per class
 
 `docs/spec.md` §10.1 freezes fourteen rejection classes (R1–R14); the table below adds one runnable
-anchor per class, verified against `lara check` at the time of writing. Re-running any command should
-reproduce the class shown.
+anchor per class. Running the command under `lara check` reproduces the class shown.
 
 | Class | Trigger | Anchor | Verified output |
 | --- | --- | --- | --- |
@@ -382,7 +334,7 @@ reproduce the class shown.
 | R10 attack-position | attack position undefined, or wrong occurrence kind for the attack kind | `examples/R3` | `lara check examples/R3/example.lara` → `reject R10` |
 | R11 attack-relation | no declared contrary pair licenses the rebut/undermine; no declared exception licenses the undercut; rebut or undercut targets a strict rule | `fixtures/mutants/A--unlicensed-attack-0.sexp` (unlicensed); `examples/R4` (strict target) | both reject `R11`; `lara check examples/R4/example.lara` → `reject R11` |
 | R12 policy-wf | a rule pattern variable falls outside its declared parameters (spec §4.1), or a `contrary` side may overlap a strict-reachable pattern (spec §8.1 Path B) | `fixtures/mutants/self-expansion.C04--out-of-scope-var-0.sexp` (scope); `examples/R2` (Path B) | both reject `R12` |
-| R13 backend | certificate replay rejects; unknown backend/version; theory digest not allowlisted. Since `lara-syntax@0.6`, a malformed premise-slot spelling under a matching `ord@1`/`ra@1`/`insp@1` schema on the `.lara` door rejects at elaboration instead of here (§1.2; grammar Appendix E). At `@0.9`/`@0.10` the same source-boundary migration applies only to `nd@1` payloads containing one of D7's five named markers (§1.4; grammar Appendices H and I); marker-free and raw `.sexp` payloads remain backend-owned — acceptance unchanged. The reason is followed by the slot → source mapping on both doors (§1.5) | `fixtures/corpus/ord-lt-boundary-reject.sexp` | `reject R13`, stderr: `certificate replay: ord@1 (theory t0) rejected the certificate: the claimed comparison does not hold: 5 < 5 is false` then `  slot 0 = leaf e0` |
+| R13 backend | certificate replay rejects; unknown backend/version; theory digest not allowlisted. On the `.lara` door, a malformed premise-slot spelling under a matching `ord@1`/`ra@1`/`insp@1` schema (§1.2; grammar Appendix E) and an `nd@1` payload error involving one of D7's five named markers (§1.4; grammar Appendices H and I) are `ElabError`s at elaboration instead; marker-free and raw `.sexp` payloads remain backend-owned. The reason is followed by the slot → source mapping on both doors (§1.5) | `fixtures/corpus/ord-lt-boundary-reject.sexp` | `reject R13`, stderr: `certificate replay: ord@1 (theory t0) rejected the certificate: the claimed comparison does not hold: 5 < 5 is false` then `  slot 0 = leaf e0` |
 | R14 codec | wire program fails to decode: malformed S-expression, S-expression nesting deeper than the readers' shared `maxDepth` (see the bound note below), unknown fields, presentation parse error | `fixtures/mutants/malformed/A--codec-core-version-0.sexp` | exit 2, stderr: `lara: codec error at replay-id: unsupported core version: "lara-core@0.1"`, **nothing on stdout** |
 
 The checker also emits three named rejection kinds outside R1–R14. They are part of the wire
@@ -394,12 +346,10 @@ The checker also emits three named rejection kinds outside R1–R14. They are pa
 | `duplicate-argument` | two arguments share an id (stage 4) | `fixtures/corpus/reject-duplicate-argument.sexp` | `reject duplicate-argument` |
 | `missing-conflict` | a conflict the policy's contraries license between two complete arguments has no covering attack from a complete source (stage 7) | `fixtures/corpus/reject-missing-conflict.sexp`; `fixtures/mutants/A--drop-covering-attack-0.sexp` | `reject missing-conflict` |
 
-**`incomplete-argument` is retired at `lara-core@0.3`.** Through `lara-core@0.2` a fourth kind
-rejected any unit containing an argument that type-checks with an open mandatory obligation. Such an
-argument is now accepted as a *located hole* (spec §4.4): it stays out of the argumentation
-framework, the claim it alone supports reports `gap`, and the verdict's `holes` section names it.
-Its former anchor, `fixtures/corpus/reject-incomplete-argument.sexp`, is renamed
-`fixtures/corpus/accept-located-hole.sexp` — one argument `a` whose rule leaves the mandatory
+An argument that type-checks with an open mandatory obligation is not a rejection. It is accepted as
+a *located hole* (spec §4.4): it stays out of the argumentation framework, the claim it alone
+supports reports `gap`, and the verdict's `holes` section names it. The anchor is
+`fixtures/corpus/accept-located-hole.sexp`: one argument `a` whose rule leaves the mandatory
 question `q1` open, and one query `c`. Both drivers print (wrapped here)
 
 ```
@@ -412,11 +362,11 @@ with exit **0**, pinned byte for byte by `test/DifferentialSpec.hs` and `scripts
 `fixtures/corpus/hole-attack-inert.sexp` pins a hole's typed outgoing attack, listed on its row and
 contributing no edge, and `fixtures/corpus/accept-nested-hole-sites.sexp` pins obligations located at
 nested rule occurrences — inherited through a premise, through a discharge, and one question open at
-three sites (`located-gap-decision.md` D12). What did not
-move: R5 still rejects a question in neither the discharge map nor the open set `H`, and a hole's premises, discharges and outgoing attacks are still type-checked, so an
-ill-typed attack *from* a hole rejects with its R-class. Because the checker no longer stops at the
-first incomplete argument, a later support or attack defect in the same unit is reported instead of
-being masked.
+three sites (`theory-core.md#holes-located-gaps-and-term-level-critical-questions` D12). R5 rejects
+a question in neither the discharge map nor the open set `H`, and a hole's premises, discharges and
+outgoing attacks are type-checked, so an ill-typed attack *from* a hole rejects with its R-class.
+Because the checker does not stop at an incomplete argument, a later support or attack defect in the
+same unit is reported rather than masked.
 
 One class is not individually anchored above, because it is a source-boundary rejection rather
 than a checker verdict:
@@ -425,30 +375,23 @@ than a checker verdict:
   §1's third case above; it is distinct from both the R1–R14 checker classes above it in the table
   and from quarantine below it.
 
-**R2 was unexercised, not under-anchored — corrected at `lara-core@0.2`.** Until then this section
-said R2 and R8 were both "exercised only inside larger worked cases". For R8 that is true. For R2
-it was not: `fixtures/mutants/MANIFEST.tsv` carried **zero** `reject-R2` rows across all 369
-mutants and no `examples/` directory produced one, because R2 was outside the executable core —
-documented, reserved, and dead. It is now a real stage (`checkUnit` stage 2), with:
+R2 is `checkUnit` stage 2. Its anchors are:
 
 - a dedicated negative, `examples/R2-sort/`, whose leaf is the motivating example itself,
   `num_lt(sys_new, accuracy)`, under the **shipped** `ord-v1` signature rather than a bespoke one;
-- five mutation operators, one per clause of the amended class — `undeclared-pred`,
-  `wrong-pred-arity`, `wrong-arg-sort`, `undeclared-con`, `wrong-theta-sort` — swept over both the
-  worked examples and the corpus, so `wrong-arg-sort` in particular has to find real sites in
-  `corpus-v1`'s own vocabulary;
-- a sixth operator, `out-of-scope-var`, witnessing R12's new spec-§4.1 arm, which must not land
-  witness-free the way R2 once did.
+- five mutation operators, one per clause of the class (`undeclared-pred`, `wrong-pred-arity`,
+  `wrong-arg-sort`, `undeclared-con`, `wrong-theta-sort`), swept over both the worked examples and
+  the corpus, so `wrong-arg-sort` in particular has to find real sites in `corpus-v1`'s own
+  vocabulary;
+- a sixth operator, `out-of-scope-var`, witnessing R12's spec-§4.1 arm.
 
-**The dropped groundness clause.** The old R2 row also read "non-ground term where ground
-required". That clause was never violable — `Term ::= num | str | con(…)` has no variable
-constructor, so every `Prop` is ground *structurally* and pattern variables exist only in `Pat` —
-and spec §10.1 now records it as vacuous rather than leaving it looking unenforced.
+R2 has no groundness clause: `Term ::= num | str | con(…)` has no variable constructor, so every
+`Prop` is ground structurally and pattern variables exist only in `Pat` (spec §10.1).
 
 **Where a codec error is located.** R14 positions are part of the differential contract, so
 the Haskell wire reader and the Lean reference driver must agree on them character-for-character.
-Both count **code points**, not bytes: Lean's `PState` advances per `Char`, and the Haskell reader —
-now over strict `ByteString` — advances by UTF-8 non-continuation bytes, so an error located after a
+Both count **code points**, not bytes: Lean's `PState` advances per `Char`, and the Haskell reader,
+over strict `ByteString`, advances by UTF-8 non-continuation bytes, so an error located after a
 multi-byte character on the same line reports the same column in both drivers
 (`fixtures/corpus/strict-cert-unicode-theory.sexp` is the live anchor). A file that is not
 valid UTF-8 also fails *inside* the codec as a located R14 rather than as an IO-level read error;
@@ -459,30 +402,24 @@ substituted content.
 *depth*. Both readers — `Lara.Wire.parseSExprBS` and `Lara.Driver.parseWire` — refuse an
 S-expression nested deeper than the `maxDepth = 10000` they share, as a located R14 codec error at
 exit 2 with the same wording and the same column, rather than exhausting the stack on either side.
-Originally only the Haskell reader carried the bound: the Lean driver read the over-deep form and
-refused it one layer later as a malformed envelope — the same exit code, a different refusal
-*category*, which is exactly the divergence class this document's positional contract exists to
-exclude. The bound is generated into the gates rather than committed as a fixture: an anchor at that
+The same exit code with a different refusal category would be exactly the divergence class this
+document's positional contract exists to exclude. The bound is generated into the gates rather than committed as a fixture: an anchor at that
 depth would be ten kilobytes of parentheses, and no committed `.sexp`, `.laramap` or `.lara` tree
 nests anywhere near it, so the bound restricts no expressible program. `scripts/differential.sh`,
 `scripts/check-map-conformance.sh` and `scripts/check-pw-conformance.py` each carry a case over the
 bound and one at the deepest form it admits, and each reads the constant out of both sources so a
 one-sided edit fails by name.
 
-**And on the Lean side it is now proved.** Until then the bound was enforced but unprovable:
-`Lara.Driver`'s `parseForm`/`parseList`/`parseQuoted` were a `partial def` mutual block, which the
-kernel cannot reduce, so the gates above were the *only* evidence. The reader is now total —
-well-founded on the remaining input, with the consumption fact `parseList`'s element loop needs
-carried in the result rather than assumed — and `AxCheck.lean` pins `parseForm_of_maxDepth_lt`
+On the Lean side the bound is proved. `Lara.Driver`'s `parseForm`/`parseList`/`parseQuoted` reader
+is total, well-founded on the remaining input, with the consumption fact `parseList`'s element loop
+needs carried in the result rather than assumed. `AxCheck.lean` pins `parseForm_of_maxDepth_lt`
 (refusal is a function of depth alone, decided before the reader dispatches on the input),
 `parseList_of_maxDepth_lt` (the refusal is located at the post-`skipSpace` position, which is what
 makes the two runtimes' columns agree rather than merely happen to agree on the cases the gates
 try) and `parseWire_nested_error` (an input opening more than `maxDepth` lists before its first form
-is refused with the depth message at line 1, column `maxDepth + 2`). No refusal behaviour changed;
-the three gates above pass unmodified.
+is refused with the depth message at line 1, column `maxDepth + 2`).
 
-The full mutation manifest (`fixtures/mutants/MANIFEST.tsv`, 600 mutants) exercises every class at
-scale and is the authoritative cross-check if an anchor above ever drifts; each row names its
+The full mutation manifest (`fixtures/mutants/MANIFEST.tsv`) exercises every class at scale and is the authoritative cross-check if an anchor above ever drifts; each row names its
 `expected` outcome (`reject-R1`, …, `codec-reject`) and `expected-location`.
 
 Two constructs are **deliberately not rejection classes**, per spec §10.1:
@@ -499,7 +436,7 @@ The natural reading of a paper's *evidence* not supporting its *claim* is "the c
 it." That is wrong, and it is the headline of this document.
 
 - **invalid** — malformed, or a certificate that does not replay: an `R1`–`R14` rejection, or one
-  of the four named checker kinds (§2).
+  of the three named checker kinds (§2).
 - **valid but unsupported** — accepted, with status `gap` / `defeated` / `contested`.
 
 ```
@@ -517,28 +454,17 @@ built, which is different from `examples/R1`'s argument that cites a leaf which 
 calculus keeps them apart (see `examples/R1/example.lara`'s own closing "teaching point" comment,
 which states this contrast directly).
 
-Most *scientific* problems — weak evidence, a claim whose argument could not be completed (since
-`lara-core@0.3` reported as a located hole beside the `gap` status, §2), a contested field — land in
-the "valid but unsupported" bucket by design: a rejected extractor should not
-automatically become a counter-argument. The natural assumption is the opposite of how the calculus is built, so this is
-worth stating plainly rather than leaving a reader to infer it.
+Most *scientific* problems, such as weak evidence, a claim whose argument could not be completed
+(reported as a located hole beside the `gap` status, §2), or a contested field, land in the "valid
+but unsupported" bucket by design: a rejected extractor should not automatically become a
+counter-argument.
 
-The seeded mutation suite quantifies the split. At evaluation freeze v6 (`docs/m5-freeze-checklist.md`), the last before
-`lara-core@0.3`, 537 of 595 mutants reject (across the R-classes, the then-current
-`incomplete-argument` and `missing-conflict` kinds, and codec) and 58 are *accept* mutants; of those, 49 have a ground-truth **status change**
-(`accept-defeated` 18, `accept-contested` 9, `accept-gap` 9, `accept-evidence-blocked` 9,
-`accept-all-contested` 4) and the remaining 9 (`accept-justified`) exercise mutations the checker
-correctly absorbs without a status change. Both halves are byte-identical across the Haskell and Lean
-drivers (`scripts/differential.sh`). The 18 `hole-obligation` mutants, which rejected as
-`incomplete-argument` in that snapshot, keep their mutation unchanged under `lara-core@0.3`. At
-freeze v7 all 18 accept with exactly one located hole at the seeded argument (none is masked by a
-later defect), so the split is 519 rejecting and 76 accepting mutants
-(`measurements/frozen/lara-core-0.3-regeneration-diffs.md`). Freeze v8 re-lowered the corpus
-units, which are mutation bases, to declare their located holes; that adds 5 rejecting mutants
-(2 `R10`, 3 `R4`), for 524 rejecting and 76 accepting out of 600
-(`measurements/frozen/corpus-relowering-v8-diffs.md`).
+The seeded mutation suite exercises both halves: of its 600 mutants, 524 reject (codec included) and 76 are *accept*
+mutants whose ground truth is a status or a located hole, and both halves are byte-identical across
+the Haskell and Lean drivers (`scripts/differential.sh`). The per-class breakdown is in
+`docs/evaluation.md#frozen-provenance-current-evaluation-freeze-v8`.
 
-## 4. Relationship to `rit` (the question that prompted this)
+## 4. Relationship to `rit`
 
 - **Genuine overlap.** `rit`'s refusal rule — "if a value cannot be re-derived, refuse rather than
   guess" — corresponds to Lara's R13: a certificate whose cited cells do not support the claimed
@@ -565,31 +491,29 @@ units, which are mutation bases, to declare their located holes; that adds 5 rej
   contradict Lara's own spec — the contradiction is a defeat-calculus outcome (`contested`), not an
   R-class rejection.
 
-## 5. One counterintuitive finding worth recording
+## 5. Renaming a leaf does not produce R1 on the `.lara` door
 
 Renaming a leaf id does **not** produce R1 in the surface language.
 
-This holds for the explicit-θ `rule(…)` form. With the `@0.5` `from [e1]` form, premises are cited
+This holds for the explicit-θ `rule(…)` form. With the `from [e1]` form, premises are cited
 by name, so a stale id is an elaboration error (exit 2, "reference 'e1' names neither a declared
 leaf nor prior argument") rather than R1.
 
 In the explicit-θ form, `.lara` rule premises resolve by *matching the leaf's proposition* against the instantiated premise
 pattern, not by citing leaf ids directly — so a renamed leaf whose proposition is unchanged still
 resolves, and the unit accepts. Producing R1 needs a support term that names a missing id explicitly
-(`by leaf(e_missing)` as in `examples/R1`, or a discharge referencing a missing id). This is easy to
-get backwards while constructing negative examples: the intuitive way to build an R1 case — rename a
-leaf and leave a stale reference — does not work, because the surface elaborator is matching on
-content, not on the name.
+(`by leaf(e_missing)` as in `examples/R1`, or a discharge referencing a missing id), because the
+surface elaborator matches on content, not on the name.
 
 (At the core wire layer this looks different: the `leaf l` support-term rule *does* look `l` up in
 `Gamma` by id, per spec §6.1, and a raw core caller that submits a `leaf l` term with no matching `Γ`
-entry gets R1 directly. The surprise is specific to the `.lara` presentation boundary's premise
+entry gets R1 directly. The behavior is specific to the `.lara` presentation boundary's premise
 resolution, not the core judgment.)
 
 ## Out of scope
 
 **Raw-core byte-level evidence verification** ([evidence-admission design](evidence-admission-design.md)).
-Raw `.sexp` leaves remain declared evidence checked relative to the caller's `Gamma`;
+Raw `.sexp` leaves are declared evidence checked relative to the caller's `Gamma`;
 the core rejection classes do not inspect artifact bytes. Byte checking belongs to
 the separate `check-ara` package command described below, not the raw core.
 
@@ -606,9 +530,9 @@ the separate `check-ara` package command described below, not the raw core.
 
 `lara check-ara ROOT [--policy FILE] [--out DIR]` captures package files before checking source. Invalid or noncanonical manifests and capture/integrity failures of the paper, source or policy are package-global errors (exit 2). Evidence binding, requested-object capture/integrity, and extraction/proposition mismatches are located R8 rejections (exit 1). Both classes leave stdout empty and publish no accepted output bundle.
 
-After global capture and source validation, existing policy R8 precedes evidence binding, requested-object capture and extraction. Evidence failure precedes strict replay R13, group R9 and core outcomes. Binding and extraction select errors in leaf order; requested objects use manifest order and name the earliest referencing leaf. The exact contract is in [the evidence-admission design](evidence-admission-design.md#concrete-package-contract).
+An evidence failure precedes strict replay R13, group R9 and core outcomes. The exact contract and error precedence are in [the evidence-admission design](evidence-admission-design.md#concrete-package-contract).
 
-Ordinary `.lara` commands without a package context refuse certified declarations at R8, including `check`, `deps`, map member loading and possible-world source loading. PW retains its existing stdout-only `pw-error` world-input envelope rather than the package command's empty-stdout convention. Raw core `.sexp` checking remains conditional declared-evidence checking.
+Ordinary `.lara` commands without a package context refuse certified declarations at R8, including `check`, `deps`, map member loading and possible-world source loading. PW keeps its stdout-only `pw-error` world-input envelope rather than the package command's empty-stdout convention. Raw core `.sexp` checking is conditional declared-evidence checking.
 
 ```sh
 make evidence-cli evidence-differential

@@ -1,17 +1,14 @@
 -- | Golden discipline for the T2 corpus units (M5).
 --
--- The corpus-unit suite lowers the frozen 60-claim M0 sample
--- (@m0\/sample.tsv@, seed-42 stratified draw) into @.lara@ units under
--- @corpus-units\/@, one per claim, all checked against the shared
--- @corpus-v1.policy.lara@ (conventions: @corpus-units\/LOWERING.md@). These
--- properties pin the suite the same way 'WorkedExamplesSpec' pins the worked
--- examples, plus the manifest discipline the mutant suite established:
--- discovery is manifest-driven and the manifest, the sample, and
--- the filesystem must agree exactly.
+-- The corpus-unit suite lowers a frozen 60-claim stratified sample of the
+-- ARA corpus into @.lara@ units under @corpus-units\/@, one per claim, all
+-- checked against the shared @corpus-v1.policy.lara@ (conventions:
+-- @corpus-units\/LOWERING.md@). @corpus-units\/MANIFEST.tsv@ is the record
+-- of that sample. These properties pin the suite the same way
+-- 'WorkedExamplesSpec' pins the worked examples, plus the manifest
+-- discipline the mutant suite established: discovery is manifest-driven and
+-- the manifest and the filesystem must agree exactly.
 --
---   * __manifest ↔ sample__: the manifest's @(group, artifact, claim_id,
---     claim_type, double_annotate)@ rows are exactly the 60 sample rows —
---     the corpus cannot silently shrink, grow, or drift from the frozen draw.
 --   * __manifest ↔ filesystem__: every listed unit directory exists with a
 --     @unit.lara@, and no unlisted unit directory is committed.
 --   * __freshness__: re-deriving every @unit.core.sexp@ and @expected.json@
@@ -26,8 +23,9 @@
 --     the legal status value set are pinned as data, so a lowering rewrite
 --     that regenerates anchors and the manifest column together cannot
 --     silently shift the mix.
---   * __stratum coverage__: the by-type counts equal the adjudicated M0
---     stratum quotas (the T5 freeze anchor for the sample composition).
+--   * __stratum coverage__: the by-type counts equal the adjudicated
+--     stratum quotas, so the corpus cannot silently shrink, grow, or drift
+--     from the frozen sample composition.
 module CorpusUnitsSpec (corpusUnitsSpecProps) where
 
 import Test.QuickCheck
@@ -50,14 +48,11 @@ import Lara.Syntax (parsePolicy, parseProgram)
 import Lara.Wire (encodeCheckInput, printSExpr)
 
 -- ---------------------------------------------------------------------------
--- Manifest and sample loading
+-- Manifest loading
 -- ---------------------------------------------------------------------------
 
 manifestPath :: FilePath
 manifestPath = "corpus-units/MANIFEST.tsv"
-
-samplePath :: FilePath
-samplePath = "m0/sample.tsv"
 
 policyPath :: FilePath
 policyPath = "corpus-units/corpus-v1.policy.lara"
@@ -79,18 +74,6 @@ readManifest = do
     toRow ln = case splitTabs ln of
       [g, a, c, t, d, s, h] -> pure (g, a, c, t, d, s, h)
       _ -> fail (manifestPath ++ ": malformed row: " ++ ln)
-
--- | The sample's @(group, artifact, claim_id, claim_type, double_annotate)@
--- columns (the trailing @title@ column is display-only).
-readSampleKeys :: IO [(String, String, String, String, String)]
-readSampleKeys = do
-  raw <- readFile samplePath
-  pure
-    [ (g, a, c, t, d)
-    | ln <- drop 1 (lines raw)
-    , not (null ln)
-    , (g : a : c : t : d : _) <- [splitTabs ln]
-    ]
 
 unitDir :: ManifestRow -> FilePath
 unitDir (_, artifact, claimId, _, _, _, _) = "corpus-units/" ++ artifact ++ "/" ++ claimId
@@ -127,19 +110,6 @@ deriveInput dir = do
 -- ---------------------------------------------------------------------------
 -- Properties
 -- ---------------------------------------------------------------------------
-
--- | The manifest rows are exactly the frozen sample rows (set equality on the
--- five shared columns; the manifest adds only @expected_status@ and
--- @located_holes@).
-prop_corpusManifestMatchesSample :: Property
-prop_corpusManifestMatchesSample = once $ ioProperty $ do
-  manifest <- readManifest
-  sample <- readSampleKeys
-  let manifestKeys = sort [(g, a, c, t, d) | (g, a, c, t, d, _, _) <- manifest]
-  pure $
-    counterexample
-      "corpus-units/MANIFEST.tsv rows must be exactly the m0/sample.tsv rows"
-      (manifestKeys === sort sample)
 
 -- | Every listed unit exists on disk, and no unlisted unit directory is
 -- committed (the mutant-suite manifest discipline).
@@ -250,15 +220,14 @@ prop_corpusStatusDistribution = once $ ioProperty $ do
   where
     expected = [("defeated", 3), ("gap", 48), ("justified", 9)]
 
--- | The by-type counts equal the adjudicated M0 stratum quotas
--- (m0/README.md §"Annotation pass": post-adjudication counts, sample not
--- redrawn) — the frozen composition the T5 freeze will seal.
+-- | The by-type counts equal the adjudicated stratum quotas
+-- (post-adjudication counts; the sample was not redrawn).
 prop_corpusStratumCoverage :: Property
 prop_corpusStratumCoverage = once $ ioProperty $ do
   manifest <- readManifest
   let count ty = length [() | (_, _, _, t, _, _, _) <- manifest, t == ty]
       got = map (\ty -> (ty, count ty)) (map fst quotas)
-  pure $ counterexample "corpus stratum counts drifted from the frozen M0 sample" (got === quotas)
+  pure $ counterexample "corpus stratum counts drifted from the frozen sample" (got === quotas)
   where
     quotas =
       [ ("comparative", 17)
@@ -275,10 +244,9 @@ prop_corpusStratumCoverage = once $ ioProperty $ do
 
 corpusUnitsSpecProps :: [(String, IO Result)]
 corpusUnitsSpecProps =
-  [ ("corpus-unit manifest rows are exactly the frozen m0/sample.tsv rows", quickCheckResult prop_corpusManifestMatchesSample)
-  , ("corpus-unit manifest and committed unit directories agree exactly", quickCheckResult prop_corpusManifestMatchesFilesystem)
+  [ ("corpus-unit manifest and committed unit directories agree exactly", quickCheckResult prop_corpusManifestMatchesFilesystem)
   , ("corpus-unit anchors and goldens are fresh (re-derive == committed)", quickCheckResult prop_corpusUnitsFresh)
   , ("corpus-unit manifest expected_status equals the computed claim status", quickCheckResult prop_corpusExpectedStatus)
   , ("corpus-unit status distribution is exactly 9 justified / 48 gap / 3 defeated", quickCheckResult prop_corpusStatusDistribution)
-  , ("corpus-unit stratum counts equal the adjudicated M0 quotas", quickCheckResult prop_corpusStratumCoverage)
+  , ("corpus-unit stratum counts equal the adjudicated quotas", quickCheckResult prop_corpusStratumCoverage)
   ]

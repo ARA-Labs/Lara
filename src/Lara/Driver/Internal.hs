@@ -502,7 +502,7 @@ declaredTypedHole declared w =
     gamma = buildGamma (unitLeaves declared)
     certOk = buildCertOk (unitTheories declared)
 
--- | The verdict's @holes@ rows (spec §4.4, @docs\/located-gap-decision.md@
+-- | The verdict's @holes@ rows (spec §4.4, @docs\/theory-core.md#holes-located-gaps-and-term-level-critical-questions@
 -- D5): each located hole of the checked unit, reported at its __original__
 -- declaration index and id, with its exact root obligations — each located at
 -- its sites (D12), read from the cached term by 'obligationSites', never by

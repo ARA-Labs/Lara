@@ -107,7 +107,7 @@ siteOps =
   , SiteOp OpUnlicensedAttack 1 False (single unlicensedAttackSites)
   , SiteOp OpDropCoveringAttack 1 False (single dropCoveringAttackSites)
   , SiteOp OpGroupConflict 1 False (single groupConflictSites)
-  , -- The localization family (@docs\/localization-metric-decision.md@):
+  , -- The localization family (@docs\/evaluation.md#metric-contracts-class-match-location-and-coverage@):
     -- the only enumerators publishing composite ground-truth lists — off-site
     -- manifestation and multi-defect ordering ("Lara.Mutate.Sites.Localize").
     SiteOp OpRetractRule 1 False Localize.retractRuleSites

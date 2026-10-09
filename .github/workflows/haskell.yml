@@ -4,7 +4,7 @@ name: Haskell
 # Lean build — the proofs, the axiom audit, and every Haskell-Lean cross-check —
 # runs outside it: `make lean-gate` / `make cross-check` locally, and the
 # optional Lean workflow (.github/workflows/lean.yml) on a PR when a reviewer
-# asks for it. See docs/ci-scope-decision.md.
+# asks for it. See docs/implementation.md#ci-and-local-gates.
 
 on:
   push:

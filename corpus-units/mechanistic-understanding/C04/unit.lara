@@ -1,6 +1,6 @@
 # Corpus unit mechanistic-understanding/C04 — gap (an undefined instrument blocks the measurement)
 #
-# Source: m0/annotations/mechanistic-understanding.yaml C04 (descriptive,
+# Source: mechanistic-understanding C04 annotation (descriptive,
 # exhaustive_pairwise_measurement; corpus pin 62e9b54). Headline: every matched GPT2-medium vs
 # GPT2DPO parameter tensor changes minimally — cosine similarity > 0.99 and average norm
 # difference < 1e-5, with the unembedding the sole exception (< 1e-3) (E03, paper §5.1).

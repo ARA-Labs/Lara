@@ -1,8 +1,7 @@
 # Certified-evidence independent review record (`evidence-measured-inputs@1`)
 
-Review status: accepted and applied on 2026-10-07. `openai-codex/gpt-6-astra` independently reviewed all ten mappings and returned ten faithful verdicts; the maintainer looked at the review and agreed. The package bindings retain `author = ai_inventory` and now carry `audit-status = reviewed` with the reviewer and accepted review link in their rationales. The [publication record](#published-reviewed-bindings) identifies the re-pinned sources and [second freeze](../measurements/frozen/evidence-measured-inputs-v2.md). The [first measured report](../measurements/frozen/evidence-measured-inputs-v1.md) remains unchanged and is not semantic-review evidence.
+Review status: accepted and applied on 2026-10-07. `openai-codex/gpt-6-astra` independently reviewed all ten mappings and returned ten faithful verdicts; the maintainer looked at the review and agreed. The package bindings retain `author = ai_inventory` and now carry `audit-status = reviewed` with the reviewer and accepted review link in their rationales. The [publication record](#published-reviewed-bindings) identifies the re-pinned sources and [second freeze](../../../measurements/frozen/evidence-measured-inputs-v2.md). The [first measured report](../../../measurements/frozen/evidence-measured-inputs-v1.md) remains unchanged and is not semantic-review evidence.
 
-Follow the [step-by-step review instructions](certified-evidence-review-instructions.md) to inspect the originals and record your verdicts.
 
 ## What a reviewer decides
 
@@ -137,7 +136,7 @@ The published source and manifest SHA-256 values are:
 2674c18e630642912b75792b2d41e942cf66cdc056ab035029a678c8a448effe  package-b/lara-evidence.sexp
 ```
 
-[`evidence-measured-inputs@2`](../measurements/frozen/evidence-measured-inputs-v2.md)
+[`evidence-measured-inputs@2`](../../../measurements/frozen/evidence-measured-inputs-v2.md)
 records the ten-case rerun and matching `evidence-measured-inputs-v2` Git tag.
 Issue #20 closes when the publishing PR merges. This publication does not
 relabel the agent review as a human audit or establish scientific validity.

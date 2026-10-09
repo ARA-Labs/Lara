@@ -1,6 +1,6 @@
 # Corpus unit fre/C01 — justified (generalization; controlled_comparison)
 #
-# Source: m0/annotations/fre.yaml C01 (generalization, double-annotated; corpus pin 62e9b54).
+# Source: fre C01 annotation (generalization, double-annotated; corpus pin 62e9b54).
 # Headline: using only K=32 (state, reward) pairs per task, FRE-all reaches an overall normalized
 # score of 57 +- 9 vs SF 33 +- 12, GC-IQL 24 +- 12, GC-BC 18 +- 5 (FB/SF use K=5120), competitive
 # or better across AntMaze/ExORL/Kitchen over 5 seeds.

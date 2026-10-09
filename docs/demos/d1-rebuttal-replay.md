@@ -1,19 +1,17 @@
 # D1 — Rebuttal replay: a paper + reviews + rebuttal as a sequence of checked programs
 
-Case-study material for the M7 paper package (T3). This is the **paper + reviews** population size that `examples/README.md` names but no prior example exhibits.
+This demo exhibits the **paper + reviews** population size that `examples/README.md` names.
 
-_A demo write-up (2026-08-02) for the paper package: prose around a set of
-checked, committed examples. For readers without argumentation background:
-"grounded semantics re-adjudicates the graph" means the checker re-runs its
-one deterministic settle-who-wins rule over the whole argument graph each
-time the graph changes, with no judgment call and no memory of the previous
-round's verdict._
+For readers without argumentation background: "grounded semantics
+re-adjudicates the graph" means the checker re-runs its one deterministic
+settle-who-wins rule over the whole argument graph each time the graph
+changes, with no judgment call and no memory of the previous round's verdict.
 
 ## What the demo shows
 
 A peer-review exchange — the submitted paper, the review round, and the author's rebuttal — is **not a new calculus**. It is the *same* Dung framework at a larger population size (`examples/README.md`; spec §8, cross-framework non-monotonicity). Reviews are typed attacks on the paper's arguments; a rebuttal is new evidence leaves and counter-attacks. Grounded semantics re-adjudicates the whole graph each round, so a claim's status moves **non-monotonically** across rounds — `justified → defeated → justified` — with **no change to the trusted policy**.
 
-The demo is three checked programs, one per round, in `examples/rebuttal-replay/{round0,round1,round2}/`. All three share **one artifact identity** and **one policy** (`rebuttal-v1`): the reviews and the rebuttal are *about* the paper, not a new artifact, and the reviewing standard is fixed. Only the argument population grows. The status trajectory is therefore a property of the growing graph under a constant replay identity — the demonstration the paper needs.
+The demo is three checked programs, one per round, in `examples/rebuttal-replay/{round0,round1,round2}/`. All three share **one artifact identity** and **one policy** (`rebuttal-v1`): the reviews and the rebuttal are *about* the paper, not a new artifact, and the reviewing standard is fixed. Only the argument population grows. The status trajectory is therefore a property of the growing graph under a constant replay identity.
 
 ## Read it first as a paper exchange
 
@@ -102,7 +100,7 @@ formalization of the paper sentences.
 
 ## Candidate: `adaptive-pruning` (APT)
 
-Chosen from the ara-paperbench corpus as the corpus annotation flags: APT's kurtosis-salience ablation is **single-run**, so `corpus-v1`'s mandatory `variance_reported` critical question has no discharging leaf and the ablation claim lands `gap` (corpus unit `corpus-units/adaptive-pruning/C04`). That annotated gap is exactly what a rebuttal round can discharge when the author supplies variance runs — a real `gap → justified` transition, not a synthetic one. The demo carries the **defeasible ablation leg only**; C04's separate `ra@1` arithmetic certificate is orthogonal to the review exchange and is omitted here.
+APT is from the ara-paperbench corpus. Its kurtosis-salience ablation is **single-run**, so `corpus-v1`'s mandatory `variance_reported` critical question has no discharging leaf and the ablation claim lands `gap` (corpus unit `corpus-units/adaptive-pruning/C04`). That annotated gap is exactly what a rebuttal round can discharge when the author supplies variance runs — a real `gap → justified` transition, not a synthetic one. The demo carries the **defeasible ablation leg only**; C04's separate `ra@1` arithmetic certificate is orthogonal to the review exchange and is omitted here.
 
 The demo constructs three claims from the paper so the review round has arguments to attack and the rebuttal round has a gap to discharge. Two use scheme families with **no** variance CQ (`benchmark_evaluation`, `measurement`), so they are honestly `justified` at submission without seeds; the third is the single-run ablation (`component_ablation`), `gap` at submission.
 
@@ -125,7 +123,7 @@ Every other attack reuses existing `corpus-v1` vocabulary: the rebut fires throu
 
 ### Round 0 — submission (the paper alone)
 
-The paper states three claims and supplies its evidence. `c_bench` and `c_measure` assemble complete arguments (their mandatory CQs are met; the optional `environment_match` / `confound_control` are left `open` with no status effect). `c_kurt` supplies the ablation premise and both met CQs (`single_variable`, `protocol_parity`) but **no** `variance_reported` leaf — the ablation is single-run. The argument `a_kurt` therefore declares that **mandatory** CQ `open`: it is a located hole (spec §4.4), not an AF node, so `c_kurt`'s complete-support set is empty and it is `gap`, and the verdict's `holes` section names `a_kurt` with its obligation `variance_reported`. (Through `lara-core@0.2` such an argument was an `IncompleteArgument` rejection, so the round-0 artifact had to omit it.)
+The paper states three claims and supplies its evidence. `c_bench` and `c_measure` assemble complete arguments (their mandatory CQs are met; the optional `environment_match` / `confound_control` are left `open` with no status effect). `c_kurt` supplies the ablation premise and both met CQs (`single_variable`, `protocol_parity`) but **no** `variance_reported` leaf — the ablation is single-run. The argument `a_kurt` therefore declares that **mandatory** CQ `open`: it is a located hole (spec §4.4), not an AF node, so `c_kurt`'s complete-support set is empty and it is `gap`, and the verdict's `holes` section names `a_kurt` with its obligation `variance_reported`.
 
 ### Round 1 — reviews (three reviewer comments as typed attacks)
 
@@ -147,7 +145,7 @@ Grounded result: the undermine and the rebut each drive `a_bench` out; the under
 - **Counter-attack to reinstate** (`c_bench` defeated → justified): the author defeats **both** reviewer attacks (E4-style reinstatement). Against R1's undermine, an author leaf concluding `protocol_confirmed` undermines the reviewer's `not_fixed_protocol` leaf (one-directional contrary → the defender is unattacked). Against R2's rebut, the author shows the cited replication ran on a mismatched eval harness, **undercutting** the reviewer's `null_benchmark` at its rule via `null_benchmark : environment_mismatch`. With both attackers out, `a_bench` is reinstated.
 - **Concede** (`c_measure` defeated → defeated): the author accepts R3's point and adds **no** counter-argument. `a_meas` stays out, so `c_measure` stays `defeated`. Concession is the *absence* of a defense — no special construct.
 
-The "at least one gap→justified discharge and at least one counter-attack on a reviewer leaf" requirement is met by the variance discharge (`c_kurt`) and the counter-undermine of the reviewer's leaf (`r_um`). "Some statuses recover, some don't" is met by `c_bench` (recovers) versus `c_measure` (does not).
+Round 2 therefore contains both a gap discharge (`c_kurt`) and a counter-attack on a reviewer leaf (the counter-undermine of `r_um`), and some statuses recover (`c_bench`) while others do not (`c_measure`).
 
 ## Per-claim status trajectory
 
@@ -159,15 +157,21 @@ The "at least one gap→justified discharge and at least one counter-attack on a
 
 `c_bench` is the non-monotonic reinstatement (justified → defeated → justified) across an undermine and a rebut; `c_kurt` is the gap discharge; `c_measure` is the conceded non-recovery. The reviewer's counter-claim `not_performs(...)` (supported by `d_rebut`) is present but not queried; it is `justified` in R1 and `defeated` in R2 once its argument is undercut.
 
-## Verification
+## Reproduce
 
-Every command was run from a clean tree on branch `demo/d1-rebuttal-replay`.
+```sh
+cabal build exe:lara
+cabal run exe:lara -- check examples/rebuttal-replay/round0/example.lara   # likewise round1, round2
+cabal exec -- runghc scripts/gen-worked-examples.hs                       # regenerates core.sexp + expected.json
+cabal test
+cd lean && lake build && cd .. && bash scripts/differential.sh
+```
 
-- `cabal build exe:lara` — OK.
-- `cabal run exe:lara -- check examples/rebuttal-replay/round0/example.lara` (and `round1`, `round2`) — all exit 0; printed statuses match the trajectory table above.
-- `cabal exec -- runghc scripts/gen-worked-examples.hs` — regenerates each round's `example.core.sexp` + `expected.json`; no churn in other examples.
-- `cabal test` — PASS. `WorkedExamplesSpec` adds three explicit verdict assertions (`prop_D1Round0/1/2`) and covers all three rounds in the freshness, `expected.json`, and coverage-matrix properties.
-- `cd lean && lake build` then `bash scripts/differential.sh` — both drivers agree byte-exactly on all three anchors: positive `pass=421 fail=0`, negative `pass=54 fail=0`, exit 0.
+Each `check` exits 0 and prints the statuses in the trajectory table above.
+`WorkedExamplesSpec` asserts the three verdicts (`prop_D1Round0/1/2`) and
+covers all three rounds in its freshness, `expected.json` and coverage-matrix
+properties; the differential gate checks that the Haskell and Lean drivers
+agree byte-exactly on all three anchors.
 
 ## Layout
 
@@ -182,4 +186,4 @@ Each `example.lara` carries a bottom-of-file golden-oracle comment (the expected
 
 ## Scaled version (out of scope)
 
-LLM elaboration of real OpenReview threads at scale, and correlation studies of Lara verdicts vs. human reviewer complaints, are deferred future work. Here the reviews are **hand-lowered** per the corpus-unit discipline, grounded in the gaps the C04 annotation already documents.
+LLM elaboration of real OpenReview threads at scale, and correlation of Lara verdicts with human reviewer complaints, are out of scope. Here the reviews are **hand-lowered** per the corpus-unit discipline, grounded in the gaps the C04 annotation documents.

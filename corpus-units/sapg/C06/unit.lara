@@ -1,6 +1,6 @@
 # Corpus unit sapg/C06 — gap (unmet-mandatory-CQ path: variance reporting)
 #
-# Source: m0/annotations/sapg.yaml C06 (causal, dose_response; corpus pin 62e9b54). Headline:
+# Source: sapg C06 annotation (causal, dose_response; corpus pin 62e9b54). Headline:
 # entropy regularization of the follower policies improves performance on harder exploration
 # tasks — sigma=0.005 improves Reorientation by up to 16.5% over sigma=0, while sigma=0 is
 # optimal on the easier AllegroHand, Regrasping, and Throw; a three-level sweep
@@ -16,7 +16,7 @@
 #     for issue #15 under lara-core@0.3). Annotation CQ "is seed-level variance reported so the
 #     16.5% effect is distinguishable from noise?" is mandatory unmet-gap — E06 specifies 5 seeds
 #     but Procedure step 2 asks only to "report final performance and learning curves", with no
-#     stderr (unlike E02). This is the corpus's most systematic gap (M0 summary section 2).
+#     stderr (unlike E02). This is the corpus's most systematic gap (corpus study).
 #   * single_variable and protocol_parity ARE met: annotation CQ (only sigma varies, all other
 #     SAPG settings held fixed) and CQ (sigma=0 baseline present on every task). The optional
 #     mechanism CQ (entropy -> exploration tested beyond correlation with task difficulty) is

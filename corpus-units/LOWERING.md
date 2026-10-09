@@ -1,9 +1,9 @@
 # Corpus-unit lowering conventions (M5 tracker #48, T2)
 
-How the 60 claims of `m0/sample.tsv` lower into `.lara` units under
+How the 60 claims of `corpus-units/MANIFEST.tsv` lower into `.lara` units under
 `corpus-units/corpus-v1.policy.lara`. Every unit's header comment cites this
 file; per-claim judgment calls are recorded in that header, never silently.
-Plan: M5 T2 corpus units (tracker #48; freeze `docs/m5-freeze-checklist.md`).
+Plan: M5 T2 corpus units (tracker #48; freeze `docs/evaluation.md#freeze-protocol`).
 Exemplars:
 
 - `sample-specific-masks/C06` — justified (all mandatory CQs met).
@@ -14,7 +14,7 @@ Exemplars:
 ## Unit shape
 
 - One unit per sampled claim: `corpus-units/<artifact>/<claim_id>/unit.lara`,
-  where `<artifact>`/`<claim_id>` match `m0/sample.tsv` exactly.
+  where `<artifact>`/`<claim_id>` match the manifest row exactly.
 - Header: `artifact <artifact> at sha256:<digest>` / `policy corpus-v1` /
   `use backends [nd@1]` (a unit carrying an `ra@1` certificate additionally
   selects `ra@1`: `adaptive-pruning/C04`). The digest is the first 12 hex
@@ -98,7 +98,7 @@ Map each annotated CQ onto the nearest policy CQ of the chosen rule; then:
   annotation's basis).
 - annotated **unmet-gap** on a policy-MANDATORY question → **declare the arg
   with `open <question>`** (a *located hole*, `lara-core@0.3`,
-  `docs/located-gap-decision.md`). The checker accepts it, keeps it out of the
+  `docs/theory-core.md#holes-located-gaps-and-term-level-critical-questions`). The checker accepts it, keeps it out of the
   graph, and names it in the verdict's `holes` section with its open
   obligations; the claim reports `gap`, because `gap` is still produced
   exactly one way — empty complete support. This applies even when the
@@ -152,7 +152,7 @@ no complete argument contains the attacked occurrence, so it adds no edge.
 
 Add its row to `corpus-units/MANIFEST.tsv`
 (`group  artifact  claim_id  claim_type  double_annotate  expected_status
-located_holes`, tab-separated, claim_type from `m0/sample.tsv`;
+located_holes`, tab-separated, claim_type from the sampled claim's annotation;
 `located_holes` is the number of located holes the unit declares, `0` for a
 hole-free unit — the measurement then expects `accept-located-hole` for a
 unit with holes), then regenerate:

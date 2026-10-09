@@ -78,13 +78,13 @@
 ## Backend-parametric strict-certificate interface
 - **Notation**: `check_β : Theory_β → List Form_β → Form_β → Cert_β → accept | reject(error)`
 - **Definition**: The one seam for strict deductive steps. A registered backend supplies `encode`,
-  `check`, `uses`, and a semantics `models`, and must discharge six obligations (decidable replay,
-  normalization fidelity, certificate soundness, dependency accountability, closed registration,
-  structural consequence laws). The source calculus knows none of a backend's formulas, proof terms,
-  axioms, or model theory.
+  `check`, `uses`, and a semantics `models`, with decidable replay, normalization fidelity,
+  certificate soundness, dependency accountability and closed registration. Whole-tree consequence
+  additionally requires structural laws not supplied by registration. The source calculus knows none
+  of a backend's formulas, proof terms, axioms or model theory.
 - **Boundary conditions**: The backend receives only normalized proposition encodings and returns only
-  accept/reject + dependencies + diagnostics (the factivity firewall). A non-monotonic reasoner is not
-  a strict backend.
+  accept/reject + dependencies + diagnostics (the factivity firewall). Its guaranteed soundness is
+  local to a certified occurrence; domain-specific consequence need not be reflexive on every atom.
 - **Related concepts**: Natural-deduction reference adapter, Backend replacement, Assurance, Non-factivity
 
 ## Natural-deduction reference adapter

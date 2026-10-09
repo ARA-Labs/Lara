@@ -220,7 +220,7 @@
 --     wrapper redefines nothing local: the PW modules only import, and no
 --     existing semantics module changed. Deliberately absent: structural
 --     bridges/T6, T8-T10, approximation, epistemic/dynamic/hybrid operators,
---     global scenarios, surface syntax — see docs/theory-pw0-outer-model.md
+--     global scenarios, surface syntax — see docs/theory-pw.md#the-outer-frame-and-satisfaction
 --   * the PW-T6 exact checked-support transport:
 --     the bridge-global partial symbol translation lifted structurally over
 --     terms, atoms, patterns, substitutions, rules, and support terms, with
@@ -245,7 +245,7 @@
 --     claim reported as exactly translationUndefined —
 --     Lara.Examples.PWStructural. The theorem neither assumes nor concludes
 --     grounded status preservation (that boundary is T8); the modules
---     only import — see docs/theory-pw-t6-structural-transport.md
+--     only import — see docs/theory-pw.md#structural-bridges-and-exact-support-transport
 --   * PW-T9 structural-path composition:
 --     arbitrary typed `BridgePath`s retain the chosen sequence of structural
 --     bridges and fold it to a named first-leg-first composite. Exact checked
@@ -281,8 +281,8 @@
 --     Neither T6 nor T9 is strengthened: every bridge-level result takes
 --     `StatusBridge` (or an explicit `SupportCorr`) as an extra hypothesis.
 --   * sorted queries and the outer language's surface (scheduled
---     once M5 landed out of the docs/theory-pw0-outer-model.md §5 non-goal
---     rows and the docs/theory-pw-closeout.md §3 surface-syntax row):
+--     once M5 landed out of the docs/theory-pw.md#the-outer-models-limitations non-goal
+--     rows and the docs/theory-pw.md#the-outer-models-limitations surface-syntax row):
 --     `Query_κ` refines from all of `Atom` to well-sorted claims over `Σ_κ`,
 --     reusing the existing `Sigma` judgment rather than a second one, so an
 --     out-of-vocabulary or ill-sorted claim is not a query and `pose` names
@@ -343,7 +343,7 @@
 --     where `preferredSem` and `groundedSem` disagree —
 --     Lara.Invariants.Observation, Lara.Context.Observation,
 --     Lara.Examples.ContextSemantics.
--- See docs/mechanization-plan.md for the result-by-result map.
+-- See docs/implementation.md#mechanization-one-core-two-implementations for the result-by-result map.
 import Lara.Prop
 import Lara.Presentation
 import Lara.ND

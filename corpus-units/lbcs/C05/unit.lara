@@ -1,6 +1,6 @@
 # Corpus unit lbcs/C05 — gap (comparative claim short of the variance bar)
 #
-# Source: m0/annotations/lbcs.yaml C05 (comparative, controlled_comparison; corpus pin 62e9b54;
+# Source: lbcs C05 annotation (comparative, controlled_comparison; corpus pin 62e9b54;
 # claim_type adjudicated via double annotation 2026-07-22). Headline: at ImageNet-1k, LBCS has
 # the highest Top-5 accuracy among {Uniform, EL2N, GraNd, Moderate, CCS, Probabilistic, LBCS}
 # at each predefined ratio, and its optimized ratio falls below the predefined ratio

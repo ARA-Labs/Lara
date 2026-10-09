@@ -1,5 +1,5 @@
 -- | Conformance tests for the seven-stage checker ("Lara.Check") and the whole
--- pipeline ("Lara.Driver"), per @docs/engineering-plan.md@ §5.
+-- pipeline ("Lara.Driver"), per @docs/implementation.md#module-dependency-order@ §5.
 --
 -- Three kinds of test:
 --
@@ -1080,7 +1080,7 @@ prop_groupQuarantineLostEdge =
       ]
 
 -- ---------------------------------------------------------------------------
--- Located holes (spec §4.4, docs/located-gap-decision.md)
+-- Located holes (spec §4.4, docs/theory-core.md#holes-located-gaps-and-term-level-critical-questions)
 -- ---------------------------------------------------------------------------
 
 -- | An open mandatory question no longer rejects: the unit is accepted, the

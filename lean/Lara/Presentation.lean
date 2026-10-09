@@ -15,7 +15,7 @@ by structural induction, `sorry`-free within the standard axiom trio.
 
 ## What this is, and what it is NOT
 
-`docs/mechanization-plan.md` records spec §9 **result 12** as a partially
+`docs/implementation.md#mechanization-one-core-two-implementations` records spec §9 **result 12** as a partially
 mechanized presentation-codec round trip with current Haskell conformance
 evidence. Its proof strength remains *test-only* — it is not a soundness theorem.
 The real conformance evidence for the concrete `.lara` surface syntax is the

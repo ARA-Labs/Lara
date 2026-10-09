@@ -1,6 +1,6 @@
 -- | The ordered-comparison domain-checker backend: @ord\@1@
 -- (@plans\/2026-08-06-ord1-comparison-backend.md@;
--- @docs\/strict-backend-decision.md@ §2 obligations).
+-- @docs\/strict-certificates.md#1-one-seam-for-opaque-strict-certificates@ §2 obligations).
 --
 -- This adapter certifies the most common claim shape in ML methodology papers
 -- — "this number beats that number" — as a closed two-predicate family over

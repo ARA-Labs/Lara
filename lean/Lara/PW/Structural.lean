@@ -25,7 +25,7 @@ judgment `HasSupport canon Pi Gamma CertOk` reads:
 
 The shared `canon` is deliberate: the source canonicalizer is the one thing
 two bridged environments must agree on for their conclusions to be comparable
-as claims (see `docs/theory-b0-backend-compositionality.md`, "two binders ARE
+as claims (see `docs/strict-certificates.md#6-heterogeneous-composition-the-firewall-and-the-accounting-laws`, "two binders ARE
 shared").
 
 **What the theorem says** (`support_transport`): under the contract, if
@@ -450,7 +450,7 @@ theorem transport_occurrences_accounted
 /-! ### The induced applicability judgment
 
 PW0 froze `accept` as an arbitrary `Prop` and recorded supplying its
-connection to the checker as T6's work (`docs/theory-pw0-outer-model.md`,
+connection to the checker as T6's work (`docs/theory-pw.md#the-outer-frame-and-satisfaction`,
 limitation 1). At a structural bridge the connection is `Admits`: the target
 world's accepted program carries the transport of every argument of the
 source world's accepted program. Together with `support_transport` this

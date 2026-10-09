@@ -6,7 +6,7 @@
 # to a scientific claim.
 #
 # The subject is the corpus unit rebench-rust_codecontests/C09
-# (m0/annotations/rebench-rust_codecontests.yaml, scheme `plan_vs_shipped_diff`):
+# (annotated scheme `plan_vs_shipped_diff`):
 # a repair pass was planned but not shipped. C09 itself is a `gap` unit — its
 # version_match critical question has no honest discharging leaf, because
 # notes.md, the sole documentary basis for the "planned" half, ships nowhere in

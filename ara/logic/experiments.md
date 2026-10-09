@@ -3,7 +3,7 @@
 _For a calculus-contribution paper the "experiments" are metatheory proof obligations and checker
 conformance tests, not benchmark runs. Each experiment is directional; exact status (proved / passing
 / open) lives in `evidence/status/`. The 12 required results are spec §9; the mechanization plan is
-`docs/mechanization-plan.md`._
+`docs/implementation.md#mechanization-one-core-two-implementations`._
 
 ## E01: Normalizer / identity conformance (the implemented carve-out)
 - **Verifies**: C01
@@ -28,7 +28,7 @@ conformance tests, not benchmark runs. Each experiment is directional; exact sta
 
 ## E02: POPL evaluation-methodology synthesis (deep-research, adversarially verified)
 - **Verifies**: C10, C11, C12
-- **Evidence**: evidence/status/mechanization_status.md (methodology section); docs/mechanization-plan.md §0/§3; docs/worked-examples-plan.md §6
+- **Evidence**: evidence/status/mechanization_status.md (methodology section); docs/implementation.md#mechanization-one-core-two-implementations/§3; docs/implementation.md#worked-examples
 - **Run**: deep-research workflow (fan-out web search → fetch → 3-vote adversarial verification → synthesis), 104 agents
 - **Setup**:
   - Model: LLM research agents (workflow harness)
@@ -51,10 +51,10 @@ conformance tests, not benchmark runs. Each experiment is directional; exact sta
 ## E03: Strict-certificate soundness + reference-adapter soundness (paper proofs)
 - **Verifies**: C03, C05
 - **Evidence**: evidence/proofs/nd_adapter_soundness.md, evidence/proofs/nonfactivity_and_defeat.md
-- **Run**: docs/strict-backend-decision.md §5 (Theorems 1, 3, 4; Lemma 5); target Lean 4 mechanization (results 8, 10)
+- **Run**: docs/strict-certificates.md#5-results-and-proofs (Theorems 1, 3, 4; Lemma 5); target Lean 4 mechanization (results 8, 10)
 - **Setup**:
   - Model: n/a (metatheory)
-  - System: the backend interface (six obligations) + the natural-deduction reference adapter
+  - System: the original paper backend interface (six obligations) + the natural-deduction reference adapter; the current registered interface separates whole-tree structural laws from its local guarantees.
 - **Procedure**:
   1. State certificate soundness as backend obligation 3; derive Theorem 1 (strict-step soundness) as a one-line application.
   2. Prove source non-factivity (Theorem 3) by inversion on the source rules.
@@ -69,7 +69,7 @@ conformance tests, not benchmark runs. Each experiment is directional; exact sta
 ## E04: Backend replacement preserves claim status (paper proof → mechanization)
 - **Verifies**: C04
 - **Evidence**: evidence/proofs/backend_replacement.md
-- **Run**: docs/strict-backend-decision.md §5 (Theorem 2); target Lean 4 mechanization (result 9)
+- **Run**: docs/strict-certificates.md#5-results-and-proofs (Theorem 2); target Lean 4 mechanization (result 9)
 - **Setup**:
   - Model: n/a (metatheory)
   - System: two backends with identical strict-acceptance profiles; `eraseCert`; grounded labelling
@@ -105,8 +105,8 @@ conformance tests, not benchmark runs. Each experiment is directional; exact sta
 
 ## E06: Non-monotonic defeat — the differentiator (dead-end flips claim to defeated)
 - **Verifies**: C06
-- **Evidence**: evidence/proofs/nonfactivity_and_defeat.md; worked example E3 (docs/worked-examples-plan.md §3)
-- **Run**: docs/strict-backend-decision.md §6 (Proposition 8); the `defeat-suite` worked example (ResNet-anchored)
+- **Evidence**: evidence/proofs/nonfactivity_and_defeat.md; worked example E3 (docs/implementation.md#worked-examples)
+- **Run**: docs/strict-certificates.md#7-why-modal-evidence-or-justification-logic-is-not-the-source-semantics (Proposition 8); the `defeat-suite` worked example (ResNet-anchored)
 - **Setup**:
   - Model: n/a
   - Dataset: the ResNet ARA (C01/C02) with the real N04 vanishing-gradient dead-end (a NON-attack) plus a constructed conflicting-measurement dead-end (a rebut)
@@ -122,7 +122,7 @@ conformance tests, not benchmark runs. Each experiment is directional; exact sta
 ## E07: Grounded evaluation determinism + termination (fixed-point construction)
 - **Verifies**: C07
 - **Evidence**: **core mechanized** — `lean/Lara/Grounded.lean`: `grounded` = bounded characteristic-operator iteration from ∅; `grounded_stable` proves the ascending chain reaches the least fixed point within `|args|` steps (deficit measure + strict-filter-length, done by hand in core Lean 4 — no `Finset`/Mathlib needed); `grounded_fixpoint` gives the fixed point. Total, deterministic function. Full instance over concrete compiled support terms is M1-gated. (canonical status: `evidence/status/mechanization_status.md` result 5)
-- **Run**: docs/spec.md §8; Lean 4 mechanization by bounded iteration (result 5; docs/mechanization-plan.md §4)
+- **Run**: docs/spec.md §8; Lean 4 mechanization by bounded iteration (result 5; docs/implementation.md#what-the-lean-development-mechanizes)
 - **Setup**:
   - Model: n/a
   - System: Dung characteristic function `D_AF` on the finite argument set
@@ -156,7 +156,7 @@ conformance tests, not benchmark runs. Each experiment is directional; exact sta
   is mechanized, per spec §8.2 and the ledger. (canonical status:
   `evidence/status/mechanization_status.md` result 3 = "mechanized", result 6 = "source-vs-compiled
   half mechanized (oracle eliminated)")
-- **Run**: docs/spec.md §6 (`leaves`/`certDeps`), §8.2 (direct semantics), §9 results 3 & 6; docs/mechanization-plan.md §5
+- **Run**: docs/spec.md §6 (`leaves`/`certDeps`), §8.2 (direct semantics), §9 results 3 & 6; docs/implementation.md#what-the-lean-development-mechanizes
 - **Setup**:
   - Model: n/a
   - System: support-term checker + compilation + direct source semantics, all in `lean/`
@@ -179,7 +179,7 @@ conformance tests, not benchmark runs. Each experiment is directional; exact sta
   annotators (one per artifact, shared codebook, no cross-talk); aggregation and
   coverage-flag adjudication in `m0/annotation-summary.md`.
 - **Status**: done (2026-07-22); human affirmation of the summary on 2026-07-22.
-- **Artifacts**: `m0/` (claims-index.tsv, claim-types.tsv, sample.tsv, annotations/,
+- **Artifacts**: `m0/` at `git 1118109` (removed in `386ede6`; claims-index.tsv, claim-types.tsv, sample.tsv, annotations/,
   double-annotation.tsv, annotation-summary.md), commits `75e2a65`…`6524e8c`.
 - **Grounds**: C13, C14, C15, C16, C17.
 

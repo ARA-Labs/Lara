@@ -333,7 +333,7 @@ argIndexInt (ArgIndex n) = n
 -- label, or edge endpoint refers to.
 --
 -- Since @map-verdict\@2@ this is the __AF__ index (spec §4.4,
--- @docs\/located-gap-decision.md@ §3), not the linked declaration position:
+-- @docs\/theory-core.md#holes-located-gaps-and-term-level-critical-questions@ §3), not the linked declaration position:
 -- a located hole is declared but is never an AF node, so as soon as a hole
 -- precedes a complete argument the two numberings diverge. The @nodes@,
 -- @labels@ and @edges@ sections share this one index space.

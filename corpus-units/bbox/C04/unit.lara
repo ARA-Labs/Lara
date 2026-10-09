@@ -1,6 +1,6 @@
 # Corpus unit bbox/C04 — gap (causal; component_ablation)
 #
-# Source: m0/annotations/bbox.yaml C04 (causal; corpus pin 62e9b54). Headline: ranking-based NCE
+# Source: bbox C04 annotation (causal; corpus pin 62e9b54). Headline: ranking-based NCE
 # loss beats MLM loss for BBOX-ADAPTER by up to +10.10 points (StrategyQA 0.1B: 71.62 vs 61.52)
 # and +3.05 (GSM8K 0.3B: 73.86 vs 70.81), same datasets and adapter sizes.
 #

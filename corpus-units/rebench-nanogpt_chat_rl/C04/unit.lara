@@ -1,6 +1,6 @@
 # Corpus unit rebench-nanogpt_chat_rl/C04 — gap (mandatory-CQ-unmet path; batch: rebench)
 #
-# Source: m0/annotations/rebench-nanogpt_chat_rl.yaml C04 (implementation-behavioral,
+# Source: rebench-nanogpt_chat_rl C04 annotation (implementation-behavioral,
 # analytic_proof; corpus pin 62e9b54). Headline: pairwise single-elimination tournament
 # selection is judge-call-optimal for best-of-N — at N=8 it uses N-1 = 7 judge calls per prompt
 # vs 28 for round-robin, with ceil(log2 N) = 3 dependent latency rounds under parallel dispatch.

@@ -671,7 +671,7 @@ theorem SideOk.mono_gamma {canon : String → String} {reg : BackendRegistry can
 /-- **A side with located holes is linkable** (issue #13): `SideOk` with the
 hole-free `support` field weakened to typing. Every declared argument type-checks
 under the linked Γ, complete or a located hole (a typed term with a nonempty
-mandatory obligation set, `docs/located-gap-decision.md` §1); the other four
+mandatory obligation set, `docs/theory-core.md#the-judgment-and-the-declaration-partition`); the other four
 fields are `SideOk`'s verbatim. Attack completeness already quantifies over
 complete endpoints only, so a hole never owes coverage and is never owed it.
 This is the per-side bundle `Check.Unit.checkUnit_complete_holes` consumes, and

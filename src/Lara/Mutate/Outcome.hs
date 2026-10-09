@@ -6,10 +6,11 @@
 -- @Lara.Mutate@ namespace, which lets the root import it: 'Lara.Mutate.Mutant'
 -- carries an 'Expected' field, so the dependency runs one way. The root
 -- re-exports every name here, so importers say @Lara.Mutate@ as before; this
--- is the one sanctioned re-export in the namespace (ownership record D1).
+-- is the one sanctioned re-export in the namespace (see the re-export rule in
+-- @docs\/evaluation.md#mutation-generation-and-module-ownership@).
 --
 -- The split exists because the root's growth had concentrated in one place
--- (@docs\/mutate-module-ownership-decision.md@, module size). The seam is
+-- (@docs\/evaluation.md#mutation-generation-and-module-ownership@, module size). The seam is
 -- *specified outcome* versus *operator vocabulary*: adding an 'Expected'
 -- constructor now costs this module rather than the root, which is the growth
 -- that was pushing it.
@@ -37,7 +38,7 @@ data Expected
   -- open mandatory root obligation, so the full system accepts and reports
   -- that argument in the verdict's @holes@ section instead of making it an AF
   -- node. Up to @lara-core\@0.2@ this was the @incomplete-argument@
-  -- rejection (retired, @docs\/located-gap-decision.md@ D3).
+  -- rejection (retired, @docs\/theory-core.md#holes-located-gaps-and-term-level-critical-questions@ D3).
   | ExpectMissingConflict
   -- ^ the structural completeness reject ('Lara.AST.MissingConflict', a
   -- 'Rejection' with no R-class by design): the mutant declares an attackable

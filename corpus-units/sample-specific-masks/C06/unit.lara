@@ -1,6 +1,6 @@
 # Corpus unit sample-specific-masks/C06 — justified (T2 exemplar: the all-CQs-met path)
 #
-# Source: m0/annotations/sample-specific-masks.yaml C06 (comparative, controlled_comparison;
+# Source: sample-specific-masks C06 annotation (comparative, controlled_comparison;
 # corpus pin 62e9b54). Headline: patch-wise interpolation upsamples CNN mask outputs at lower
 # cost than bilinear/bicubic — pixel accesses 0.151e6 vs 0.602e6 vs 2.408e6, batch time
 # 0.026+-0.004 s vs 0.062+-0.001 s vs 0.195+-0.013 s (ResNet-18/50, batch 256, A100), and no

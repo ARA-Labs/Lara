@@ -1,8 +1,8 @@
 # Constraints, assumptions, limitations
 
-_Source: `docs/spec.md` §1, §11; `docs/strict-backend-decision.md`
+_Source: `docs/spec.md` §1, §11; `docs/strict-certificates.md#1-one-seam-for-opaque-strict-certificates`
 §7. What LARA does and does not guarantee, stated plainly (the "state the trusted boundary bluntly"
-lesson from EG-VAR, `docs/prior-art-lessons.md`)._
+lesson from EG-VAR, `docs/novelty-and-related-work.md#31-eg-var`)._
 
 ## Boundary conditions
 
@@ -152,7 +152,7 @@ disagreement; dependent claims surface as `gap`).
   The harness labels the columns separately for exactly this reason, and an unforced lazy
   `runCheck` would instead read ~0 ns (D8/5A), so the forcing discipline is part of the protocol.
 
-## Naturalness boundary (user, 2026-08-25 — grounds: N215, `docs/naturalness-boundary.md`)
+## Naturalness boundary (user, 2026-08-25 — grounds: N215, `docs/spec.md#natural-language-and-the-trusted-boundary`)
 
 Where natural language may and may not enter the system, split by **trust direction** rather
 than by convenience. Fixed policy so that ease-of-use work cites it instead of re-deciding
@@ -211,8 +211,9 @@ deferred.
   carriers. The witness must provide an executable checker equation and
   `StructuredAFIso` under the same fixed canon, signature, policy, and registry as
   the paper claim. The implemented fixed context, family-wide checker equation,
-  and realizable witnesses are documented in `docs/theory-m2b-complexity.md`;
-  `docs/theory-m2b-complexity-spike.md` preserves both gate decisions.
+  and realizable witnesses are documented in `docs/theory-core.md#restricted-class-complexity`;
+  `docs/theory-core.md#frozen-constraints` states the frozen constraints; the gate
+  decisions are preserved at `git 7abcf62:docs/theory-m2b-complexity-spike.md`.
 - **Oracle cost and classical input size use separate frozen representations.**
   Grounded evaluation counts calls to the attack oracle on the frozen carrier.
   Classical hardness uses `CarrierCode`: finite node labels, a square adjacency
@@ -236,7 +237,7 @@ deferred.
   extrapolate acceptance from closed instances. This constraint is discharged
   through the compositional-lemma architecture in
   `lean/Lara/Complexity/Gadget.lean`; the durable account is
-  `docs/theory-m2b-complexity.md`, and the retired execution plan is preserved
+  `docs/theory-core.md#restricted-class-complexity`, and the retired execution plan is preserved
   at git object `8155ec7:plans/2026-08-30-m2b-realization-followup.md`.
 
 ## PW-T6 translation-form constraint (2026-09-02 — grounds: O113, N271, N276)
@@ -254,8 +255,8 @@ deferred.
   stated against the `Option` form, so adopting it re-opens the adequacy layer
   and must be budgeted as such. T6 deliberately stayed on the
   bridge-global form — `Lara.PW.SymMap` is functional, and the frozen
-  limitation is recorded in `docs/theory-pw-t6-structural-transport.md` §8.1
-  with the sizing note at `docs/theory-pw0-outer-model.md` §6. T8/T9 designs
+  limitation is recorded in `docs/theory-pw.md#structural-bridges-and-exact-support-transport` §8.1
+  with the sizing note at `docs/theory-pw.md#structural-bridges-and-exact-support-transport`. T8/T9 designs
   choose the translation form *first*; a design assuming per-world resolution
   on the `Option` interface is wrong before it starts.
 
@@ -309,9 +310,9 @@ deferred.
 - **Constraint:** A certified leaf must be reproduced by a policy-approved checker from manifest-listed, hash-pinned source files included in its ARA package. A URL or prose assertion alone does not satisfy package membership. Missing or mismatching evidence prevents certification without silently relabeling the leaf, and a captured object is usable only under the manifest entry it was captured for.
 - **Boundary:** Enforce this at source admission, outside the symbolic argumentation core; every source door without an evidence context rejects a certified declaration at R8. Assumptions and attestations remain declared evidence; certification does not establish empirical truth, scientific validity, or immunity from attacks.
 - **Trusted base:** the concrete CSV/JSON byte parsers, SHA-256, the POSIX capture shim and the Haskell/Lean compilers. The finite model's 50-case typed differential is conformance evidence, not a parser proof.
-- **Evidence:** `ara/evidence/results/certified_evidence_landing_2026-10-06.md`; `docs/evidence-admission-decision.md` §9; `docs/evidence-admission-inventory.md`; package acceptance and `make local-gates` pass on the real binary.
+- **Evidence:** `ara/evidence/results/certified_evidence_landing_2026-10-06.md`; `docs/evidence-admission-design.md#how-can-the-implementation-and-proofs-be-checked`; `examples/certified-evidence/package-{a,b}/ORIGIN.md`; package acceptance and `make local-gates` pass on the real binary.
 - **Provenance:** ai-executed
-- **Sources:** `docs/evidence-admission-decision.md` §9 (settled `lara-evidence@0.1` contract); `ara/evidence/results/certified_evidence_landing_2026-10-06.md` (verbatim gate output); `docs/evidence-admission-inventory.md` (ten-leaf original-byte portfolio)
+- **Sources:** `docs/evidence-admission-design.md#how-can-the-implementation-and-proofs-be-checked` (settled `lara-evidence@0.1` contract); `ara/evidence/results/certified_evidence_landing_2026-10-06.md` (verbatim gate output); `examples/certified-evidence/package-{a,b}/ORIGIN.md` (ten-leaf original-byte portfolio)
 - **Open:** human payload-to-proposition faithfulness review and the additive measured-input / report freeze — [issue 20](https://github.com/ARA-Labs/Lara/issues/20)
 - **Last revised:** 2026-10-06 (2026-10-06_001#5)
 
@@ -322,7 +323,7 @@ deferred.
 - **Assumption boundary:** Conditional method validity, modeled application and defeasible artifact warrant are separate judgments. Actual modeled precondition satisfaction and a bound run are required to derive the modeled postcondition. Supported applicability establishes neither the assumption nor BHL knowledge of it; residual assumptions stay visible. Statistical belief does not imply empirical truth.
 - **Composition boundary:** Bind the full source, authored/declared claim origin, actual declared-claim association, interpretation, model, method, execution and evidence material. Actual quarantine derives named-dependency warrant loss while preserving conditional validity and any independent alternative. Explicit rebinding derives fresh warrant under injective raw/checked maps, preserved support material, whole-carrier sink embedding, clean target admission and fresh evidence; target warrant is not a premise. Ordinary public statuses, located holes/sites and raw coordinates remain the production observations.
 - **History and context boundary:** BHL observation equivalence and Lara accepted-context modalities remain distinct. The baseline models complete histories. The inhabited partial-record countermodel retains the same latest emitted test while full compatible executions have opposite method conclusions; it is not a general compatible-completion calculus or physical capture assurance. Canonical control-log replay proves full semantic-view and unchanged-environment correspondence for the legal representation, without an assumed WLP family.
-- **Evidence:** `docs/theory-bhl-decision.md`; `docs/belief-hoare-logic-assessment.md`; `docs/theory-bhl.md`; `docs/bhl-theorem-inventory.jsonl`; `ara/evidence/results/bhl-integrated-acceptance-2026-10-09.log`; `ara/trace/exploration_tree.yaml:N376_bhl_integrated_acceptance`. PRs 25–32 retain earlier stage verification; the exact kernel inventory and joined audit cover the complete corrected candidate.
+- **Evidence:** `docs/theory-bhl.md`; `docs/theory-bhl.md#how-does-the-theory-map-to-the-reference`; `docs/bhl-theorem-inventory.jsonl`; `ara/evidence/results/bhl-integrated-acceptance-2026-10-09.log`; `ara/trace/exploration_tree.yaml:N376_bhl_integrated_acceptance`. PRs 25–32 retain earlier stage verification; the exact kernel inventory and joined audit cover the complete corrected candidate.
 - **Provenance:** user-revised approved contract; ai-suggested implementation/scope reconciliation grounded by actual proofs and runtime.
 - **Open:** [Issue #24](https://github.com/ARA-Labs/Lara/issues/24) records operational integration and release verification separately from this formal baseline. [Issue #23](https://github.com/ARA-Labs/Lara/issues/23) retains general incomplete-history reasoning, broad revision, representation adequacy and inquiry/impact; [issue #22](https://github.com/ARA-Labs/Lara/issues/22) remains downstream. No empirical protocol or outcome improvement is released.
 - **Last revised:** 2026-10-09 (2026-10-09_001#1)

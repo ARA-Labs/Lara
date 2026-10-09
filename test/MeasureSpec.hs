@@ -272,7 +272,7 @@ prop_reportRoundTrips = once $ ioProperty $ do
 -- count, which is invariant under reordering 'tsvHeader' or
 -- 'Lara.Measure.recordTsv' independently: such a swap keeps the arity
 -- identical while silently mislabelling every @cut -f@ consumer downstream
--- (@docs\/m5-freeze-checklist.md@'s @cut -f1-15@ deterministic projection among
+-- (@docs\/evaluation.md#frozen-provenance-current-evaluation-freeze-v8@'s @cut -f1-15@ deterministic projection among
 -- them) and changing the bytes the freeze hashes. Pinning the header verbatim
 -- also makes the checklist's field numbers executable rather than prose.
 --
@@ -419,7 +419,7 @@ prop_constituentRoundTrip =
       ]
 
 -- | The ordered-list spelling of the @expected-location@ column
--- (docs\/localization-metric-decision.md): @-@ ↔ the empty list, singletons
+-- (docs\/evaluation.md#metric-contracts-class-match-location-and-coverage): @-@ ↔ the empty list, singletons
 -- spell as the bare constituent, multi-element lists round-trip in order, and
 -- malformed spellings (empty segment, unknown segment) parse to 'Nothing'.
 prop_constituentListRoundTrip :: Property

@@ -1,6 +1,6 @@
 # Corpus unit stay-on-topic-with-classifier-free-guidance/C06 — gap (mandatory coverage CQ unmet)
 #
-# Source: m0/annotations/stay-on-topic-with-classifier-free-guidance.yaml C06 (descriptive,
+# Source: stay-on-topic-with-classifier-free-guidance C06 annotation (descriptive,
 # cross_run_observation; corpus pin 62e9b54). Headline: CFG reduces sampling entropy but differs
 # from instruction tuning — Falcon-7b-Base + CFG at gamma=1.5 has mean logit entropy 4.7 vs 5.4
 # for vanilla on P3 samples, yet its top-p=0.9 vocabulary overlap with Falcon-7b-Instruct is

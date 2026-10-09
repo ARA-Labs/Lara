@@ -5,7 +5,7 @@ The original staging records remain authoritative. Duplicate historical IDs are
 not lookup keys: each occurrence needs a fresh canonical alias with an exact
 (timestamp, bound_to) selector and a fingerprint of its immutable identity fields.
 Qualified historical references are forward records, never edits to the trace.
-See docs/ara-observation-identity-decision.md for the consumer contract.
+See CONTRIBUTING.md#observation-identity-and-historical-lookup for the consumer contract.
 """
 
 from __future__ import annotations

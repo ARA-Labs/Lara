@@ -15,8 +15,8 @@
 -- Discovery is manifest-driven, never by globbing (the mutant-suite rule):
 -- the manifest and the committed unit directories must agree exactly.
 -- @test/CorpusUnitsSpec.hs@ pins freshness (re-deriving each committed
--- @unit.core.sexp@\/@expected.json@ reproduces the bytes), manifest ↔
--- @m0/sample.tsv@ agreement, and expected-status agreement; the differential
+-- @unit.core.sexp@\/@expected.json@ reproduces the bytes), stratum
+-- coverage, and expected-status agreement; the differential
 -- harness runs every anchor through both drivers.
 --
 -- Run with the built library on the path:

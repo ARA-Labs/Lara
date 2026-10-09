@@ -4,7 +4,7 @@
 Before this module the outer language was Lean-side only: a bridge was a record
 with three `Prop` fields, and a modal query was an intrinsically typed
 `PW.Form`, which nothing outside Lean could author.
-`docs/theory-pw-closeout.md` §3 recorded that as a boundary with no scheduling
+`docs/theory-pw.md#the-outer-models-limitations` recorded that as a boundary with no scheduling
 condition; the condition it was really waiting on — M5's sorting machinery
 — has since landed, so the `Query_κ` refinement (`Lara.PW.Sorted`) makes
 a surface possible and this module supplies one.
@@ -331,7 +331,7 @@ structure BridgeEnv where
   target : Instance.Context
   /-- `PW.StructuralBridge` is stated over a *shared* source canonicalizer —
   the one thing two bridged environments must agree on for their conclusions to
-  be comparable as claims (`docs/theory-pw-t6-structural-transport.md`). This
+  be comparable as claims (`docs/theory-pw.md#structural-bridges-and-exact-support-transport`). This
   is not a checkable condition: `canon` is a function, and function equality is
   undecidable. So it is a field of the declared environment rather than a
   clause the elaborator pretends to verify, and

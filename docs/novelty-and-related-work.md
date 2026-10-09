@@ -1,15 +1,7 @@
-# Novelty and related work: the delta Lara must defend
+# Novelty and related work
 
-_The novelty-defense artifact. Consolidates the deltas scattered across `gap-resolution.md` into one place, so the paper's related-work section and the "why is this
-new?" rebuttal are on record before M0. Written 2026-07-21._
-
-## 0. The framing rule (read first)
-
-**Do not claim "no prior work formalizes research claims."** It is false and it is the fastest path
-to desk rejection: Micropublications, AIF, nanopublications, and — most sharply — EG-VAR all
-formalize scientific claims and their evidence. A reviewer who knows any of these stops reading at
-that sentence. The space is *populated*; the contribution is a precise **delta within it**, not the
-discovery of an empty field — composition alone is a weak novelty claim.
+This document states how Lara differs from its nearest neighbors. The lines of
+work Lara builds on are described in [`foundations.md`](foundations.md).
 
 ## 1. The one-sentence novelty claim
 
@@ -20,8 +12,9 @@ discovery of an empty field — composition alone is a weak novelty claim.
 > status-preservation theorems** stated over an explicit leaf interface and a
 > **backend-parametric strict-certificate seam**.
 
-The novelty is the **object and its guarantee** — a checked, defeasible, replayable claim-support
-certificate with located failure — not the act of formalizing a claim. Three parts, none of which
+Formalizing scientific claims and their evidence is not new: Micropublications, AIF,
+nanopublications and EG-VAR all do it. The novelty is the **object and its guarantee** — a checked,
+defeasible, replayable claim-support certificate with located failure. Three parts, none of which
 any prior system combines:
 
 1. a typed claim-support **calculus** with policy-generated obligations and typed attacks;
@@ -34,27 +27,36 @@ any prior system combines:
 | Prior art (in bib) | What it does | What it lacks that Lara has |
 | --- | --- | --- |
 | **Micropublications** (Clark et al. 2014) | RDF model of claims, evidence, support, challenge, attribution | A **representation model, not a checker.** Support is a *declared* relation, never checked; no status computation, no located defeat, no typed attacks, no soundness theorem. |
-| **AIF** (arg-tech) | Typed interchange vocabulary for inference, conflict, preference | An **interchange format, not a language with checking semantics.** No proof-carrying discipline, no compilation theorem, no replay. Lara reuses its "support = positional identity" idea (spec §3.1) and cites it as related, not as the mechanism. |
-| **EG-VAR** (Ren 2026; ICML TAIGR **workshop**) | Tool-attested empirical claims verified via Lean 4 kernel proofs; `mkVerified` requires an `Attested_T` runtime token, so a verified output structurally descends from a tool call (Thm 3.1) and type-checks (Thm 3.2) | **Monotonic**: attest a leaf, prove a Σ-goal, done — **no defeasible reasoning, no defeat, no argumentation layer, no critical-question completeness**; a recorded dead end cannot retract anything. By its own admission (M.1(ii)) the tools and per-source *lifts* are **trusted, not checked** ("a semantically wrong audited lift can certify a wrong formalized claim") — so despite the title's "eliminating hallucination," it relocates trust to the lift rather than removing it. Lara's non-monotonic defeat, policy-relative completeness, and four-state located status are exactly what it lacks. Its self-claim — "the **first** proof-assistant-verified architecture in Lean 4 for this setting" — bounds *our* claim: Lara must not claim first-to-formalize, only first-to-make-defeasible-and-checkable. |
+| **AIF** (arg-tech) | Typed interchange vocabulary for inference, conflict, preference | An **interchange format, not a language with checking semantics.** No proof-carrying discipline, no compilation theorem, no replay. Lara adopts its "support = positional identity" idea (spec §3.1): support is an edge landing on the claim node, not an entailment query, which keeps entailment out of the trusted base. |
+| **EG-VAR** (Ren 2026; ICML TAIGR workshop) | Tool-attested empirical claims verified via Lean 4 kernel proofs; `mkVerified` requires an `Attested_T` runtime token, so a verified output structurally descends from a tool call (Thm 3.1) and type-checks (Thm 3.2) | **Monotonic**: attest a leaf, prove a Σ-goal, done — **no defeasible reasoning, no defeat, no argumentation layer, no critical-question completeness**; a recorded dead end cannot retract anything. By its own statement (App. M.1(ii)) the tools and per-source *lifts* are **trusted, not checked** ("a semantically wrong audited lift can certify a wrong formalized claim"), so trust is relocated to the lift rather than removed. Lara's non-monotonic defeat, policy-relative completeness, and four-state located status are exactly what it lacks. |
 | **Pandžić** (2022, two papers) | Defeasible arguments as justification-logic terms with rebut/undercut/undermine | Pure logic, **no artifact application**; **factive** (keeps A1 globally — Lara has no support-level modality and confines factive logics behind the strict-backend interface); no policy / critical-question layer; no compilation-to-AF theorem; no evaluation. |
 | **ASPIC+** (Modgil–Prakken 2014) | Structured-argumentation framework: rules, attacks, rationality postulates | A **framework, not a language or artifact.** Lara is a concrete typed calculus that compiles to it, with a proof-carrying checker and mechanized metatheory, applied to research claim support. |
 | **Dung** (1995) | Abstract argumentation, grounded semantics | Abstract nodes/edges only; **no structure inside arguments**, no leaves, no obligations, no provenance, no source language. Lara supplies all of these and compiles down to Dung. |
 | **PCC / FPC** (Necula 1997; Miller 2015) | Untrusted-producer / checked-certificate architecture | The **architecture ancestor**, applied to machine proofs. Lara is that discipline applied to *defeasible empirical claim support* with a non-monotonic layer PCC never has. |
-| **`rit`** (sibling project) | Lean kernel + sha256-pinned facts + AND/OR claim DAG. Formal vocabulary (verified 2026-07-25 against its source): six relations over log-extracted numbers — ≤, beats-baseline, interval bounds, arithmetic entail/contradict — proved `by decide` | Monotonic proof-or-evidence attestation; **no defeasible defeat, no `gap`/`contested`/`defeated` distinction, no policy of inference schemes.** Every paper claim reaches its kernel through a **silent, unverified narrowing** ("faster" ⇒ `2875 < 3225`); Lara types and adjudicates that narrowing. Its non-kernel disagreement machinery (collisions, tiers, weakest-link roll-up) is an unproven shadow argumentation framework whose aggregation Lara's grounded semantics answers. |
+| **`rit`** (sibling project) | Lean kernel + sha256-pinned facts + AND/OR claim DAG. Formal vocabulary: six relations over log-extracted numbers — ≤, beats-baseline, interval bounds, arithmetic entail/contradict — proved `by decide` | Monotonic proof-or-evidence attestation; **no defeasible defeat, no `gap`/`contested`/`defeated` distinction, no policy of inference schemes.** Every paper claim reaches its kernel through a **silent, unverified narrowing** ("faster" ⇒ `2875 < 3225`); Lara types and adjudicates that narrowing. Its non-kernel disagreement machinery (collisions, tiers, weakest-link roll-up) is an unproven shadow argumentation framework whose aggregation Lara's grounded semantics answers. |
 
-## 3. The two real novelty risks (and the defense for each)
+## 3. The closest neighbors
 
-Novelty is a concern — but the concern is precision, not emptiness. Two threats are sharp enough to
-name and pre-empt:
+### 3.1 EG-VAR
 
-### 3.1 EG-VAR proximity (the sharpest)
+EG-VAR is a four-layer stack for verified empirical claims: deterministic tool queries, audited
+per-source lifts from storage to world facts, a Lean 4 kernel that mints `Verified` claims, and a
+solver LLM that proposes proofs the kernel checks. `mkVerified`, the sole constructor of
+`Evidence Verified w`, requires an `Attested_T` token emitted by the runtime; the answer is the
+witness of a Σ-type goal. Cases it cannot verify return an abstention with a replayable audit
+trail. Its fully passing tier uses committed gold typed goals that bypass the NL→Lean formalizer;
+only its second tier runs the formalizer end to end.
 
-EG-VAR (2026) is "very close": tool-attested empirical claims,
-kernel-checked. It can genuinely narrow the contribution — but note the venue is the **ICML 2026
-TAIGR workshop** (single-author, n=120 single-substrate eval), not a peer-reviewed conference paper,
-and its own limitations (App. M.1) concede the trust boundary its title overclaims. See
-`prior-art-lessons.md` for the full firsthand read and what to borrow. **Defense — three concrete
-differentiators it does not have:**
+Lara shares two design choices with it. Certified evidence enters Lara only through sealed
+admission judgments whose constructors are hidden
+([`evidence-admission-design.md`](evidence-admission-design.md), "Sealed types and source-door
+guarantees"), the same sole-witness-constructor shape as `mkVerified`. Lara's evaluation likewise
+separates the LLM-independent checker measurements (axis (a)) from the faithfulness of the
+untrusted lowering (axis (b)) ([`evaluation.md`](evaluation.md)), as EG-VAR separates its kernel
+tier from its formalizer tier. Both systems trust their leaf boundary; Lara states it as a
+hypothesis of its theorems (spec §1, §11).
+
+Three differences carry the delta:
 
 - **Non-monotonic defeat.** A recorded dead end can flip a claim to `defeated`. EG-VAR has no
   retraction mechanism; adding an attested fact never overturns a prior conclusion.
@@ -63,51 +65,30 @@ differentiators it does not have:**
 - **Four-state located status.** `justified / gap / defeated / contested` with a source-located
   reason, vs. per-leaf pass/fail attestation.
 
-State this delta **early and explicitly** in related work; it is a strength, not something to hide.
+### 3.2 Composition of existing parts
 
-### 3.2 "Composition of mature parts"
+Dung, ASPIC+, proof-certificate backends and PCC all exist separately. The property specific to
+their combination is a typed compilation from claim-support programs to structured argumentation
+that **preserves dependency provenance, attack targets, open obligations, and claim status** — a
+property none of the parts provides individually. The evaluation measures whether the abstraction
+catches and *localizes* real claim-support failures that a holistic reviewer score does not.
 
-Dung + ASPIC+ + proof-certificate backends + PCC all exist; "we glued them" is the weak-novelty
-objection. **Defense — a theorem specific to the combination:** a typed compilation from
-claim-support programs to structured argumentation that **preserves dependency provenance, attack
-targets, open obligations, and claim status** — a property none of the parts provides individually.
-The evaluation then shows the abstraction catches and *localizes* real claim-support failures a
-holistic reviewer cannot. Composition is the method; the theorem + localization is the contribution.
+## 4. Related areas and the role of strict logic
 
-## 4. Positioning (where to anchor the paper)
-
-Anchor in this order:
-
-1. **Structured argumentation** (Dung, ASPIC+, schemes/CQs) — the semantic center.
-2. **Proof certificates / PCC** (Necula, Miller; natural deduction and optional LP adapters) — the
-   trust architecture.
-3. **Semantic publishing / provenance** (Micropublications, AIF, RO-Crate) — the application domain
-   and the closest claim-formalization prior art.
-4. **Autoformalization faithfulness** (Beyond Compilation, EG-VAR, DSP/LeanDojo/Baldur) — the
-   measured-residual-risk framing for the untrusted lowering.
+Lara's related work falls into four areas: structured argumentation (Dung, ASPIC+, schemes and
+critical questions) as the semantic center; proof certificates and PCC (Necula, Miller; natural
+deduction and optional adapters) as the trust architecture; semantic publishing and provenance
+(Micropublications, AIF, RO-Crate) as the application domain and the closest claim-formalization
+prior art; and autoformalization faithfulness (Beyond Compilation, EG-VAR, DSP, LeanDojo, Baldur)
+as the measure of residual risk in the untrusted lowering.
 
 Backend replacement and strict-certificate soundness are the core strict metatheory. LP realization
-is **supporting metatheory for an optional adapter**, never the novelty and never the guarantee behind
-NL lowering. Leading with modal/JL depth moves Lara onto ground Pandžić already occupies — the
-opposite of a novelty argument; the design keeps modal logic off the critical path deliberately
-(structured argumentation is the outer frame; the strict-certificate interface is isolated behind it).
-
-## 5. Sentences to use, and to avoid
-
-**Use:**
-- "the first checkable, defeasible claim-support language for research claims, with mechanized
-  accountability and located four-state status."
-- "prior systems represent or attest claims; Lara compiles them to a replayable status object and
-  proves the compilation sound."
-
-**Avoid:**
-- "no prior work formalizes research claims" (false — Micropublications, AIF, EG-VAR).
-- "Lara is Lean for science" / "modal logic for research" (invites Pandžić and EG-VAR objections;
-  obscures the defeasible + graph-semantics contribution).
-- any novelty claim resting on composition alone.
+is supporting metatheory for an optional adapter, never the guarantee behind NL lowering. Modal and
+justification logic stay off the critical path: structured argumentation is the outer frame, and the
+strict-certificate interface is isolated behind it.
 
 ## Sources
 
-All in `lara-related-work.bib`. The must-explain-the-delta set: Micropublications
+All in `lara-related-work.bib`. The neighbors whose delta this document states: Micropublications
 (doi:10.1186/2041-1480-5-28), AIF (arg-tech spec), EG-VAR (arXiv:2607.12650), Pandžić
 (doi:10.3233/AAC-200536, doi:10.1007/s10472-021-09765-z), ASPIC+ (doi:10.1080/19462166.2013.869766).

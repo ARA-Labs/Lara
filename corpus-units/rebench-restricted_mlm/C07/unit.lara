@@ -1,6 +1,6 @@
 # Corpus unit rebench-restricted_mlm/C07 — gap (mandatory-CQ-unmet path; batch: rebench)
 #
-# Source: m0/annotations/rebench-restricted_mlm.yaml C07 (implementation-behavioral,
+# Source: rebench-restricted_mlm C07 annotation (implementation-behavioral,
 # code_inspection; corpus pin 62e9b54). Headline: the single use of division lives outside the
 # forward pass — forward() of ConvMLMWithBiBigrams normalises only by multiplying with the
 # inverse_stds buffer, and the EMA division 1/std sits in update_inverse_stds, called only from

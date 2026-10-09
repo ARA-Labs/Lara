@@ -1,6 +1,6 @@
 # Corpus unit stay-on-topic-with-classifier-free-guidance/C02 — gap (mandatory power CQ unmet)
 #
-# Source: m0/annotations/stay-on-topic-with-classifier-free-guidance.yaml C02 (comparative,
+# Source: stay-on-topic-with-classifier-free-guidance C02 annotation (comparative,
 # compute_matched_equivalence; corpus pin 62e9b54). Headline: at equal inference FLOPs, CFG
 # models (which double FLOPs/token via two forward passes) match a roughly 2x-FLOP vanilla
 # model on zero-shot accuracy — ANCOVA at p=0.01 finds no significant gap on 5 of 9 benchmarks;

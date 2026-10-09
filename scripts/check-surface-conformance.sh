@@ -12,7 +12,7 @@ set -euo pipefail
 # `authored_open` lists every question an author left open anywhere in a
 # retained argument, optional ones included (syntax data); `located_holes` lists
 # the core's located holes, one `arg:question` atom per exact mandatory
-# obligation (docs/located-gap-decision.md D8).
+# obligation (docs/theory-core.md#holes-located-gaps-and-term-level-critical-questions D8).
 #
 # Fingerprints are 16 lowercase hexadecimal digits: FNV-1a-64 over the UTF-8
 # bytes of a length-framed structured encoding.  List cells are `-` when empty;

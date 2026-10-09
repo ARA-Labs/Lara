@@ -10,7 +10,7 @@
 # is an elaborator error (exit 2), whereas an undeclared *root leaf* passes through the elaborator
 # untouched (Elaborate.hs: `SLeaf l -> pure (SLeaf l)`) and is rejected by the checker as R1.
 #
-# This is R1 of the M4a coverage matrix (docs/worked-examples-plan.md §3): spec class R1.
+# This is R1 of the coverage matrix (examples/README.md): spec class R1.
 #
 # Expected verdict is at the bottom of this file (golden oracle).
 

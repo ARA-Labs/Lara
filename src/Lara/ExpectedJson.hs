@@ -539,7 +539,7 @@ publicStatusString ps
   | isPublished ps = statusString (conditionalStatus ps)
   | otherwise = tagToString TEvidenceBlocked
 
--- | The four-state claim status, spelled as in @docs\/m4a-checklist.md@.
+-- | The four-state claim status, spelled as in @docs\/implementation.md#worked-examples@.
 statusString :: Status -> String
 statusString s = case s of
   Gap -> "gap"

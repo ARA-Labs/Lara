@@ -1,7 +1,7 @@
 /-
 The many-sorted proposition signature `Σ` and well-sortedness — the Lean port of
 `src/Lara/Sigma.hs` and `src/Lara/Sigma/WellSorted.hs`, and the mechanization of
-`docs/mechanization-plan.md` **result 13**.
+`docs/implementation.md#mechanization-one-core-two-implementations` **result 13**.
 
 v0.1 carried Σ as an elaborator-private arity table nothing read. `lara-core@0.2`
 makes it a declared, wire-carried field of `Lara.Unit` and a checked precondition

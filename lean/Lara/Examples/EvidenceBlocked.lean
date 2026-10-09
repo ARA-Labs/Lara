@@ -1,6 +1,6 @@
 /-
 Conservative reporting with located holes (spec §4.3,
-`docs/located-gap-decision.md` §5): kernel-checked witnesses for the reference
+`docs/theory-core.md#conservative-reporting-with-holes`): kernel-checked witnesses for the reference
 carrier `D`, the checked carrier `K` and the seed
 `(D \ K) ∪ {j ∈ K | ∃ i ∈ K, G.attack i j ∧ ¬ F.attack i j}`.
 

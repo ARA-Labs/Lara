@@ -522,7 +522,7 @@ prop_resolutionIsManifestRelative = once $ ioProperty $ do
 -- @justified@. Nothing else moves: the manifest is not touched, paper B still
 -- declares @sha256:bbbb...@, and its mtime is restored after the write.
 --
--- That is D1 of @docs\/multi-artifact-composition-decision.md@ made
+-- That is D1 of @docs\/artifact-composition.md#maps-of-independently-checked-artifacts@ made
 -- observable. A build system keyed on timestamps would have reported the stale
 -- answer here; a manifest carrying a checksum would have had to be updated
 -- first. This one rereads the member's current bytes because that is the only

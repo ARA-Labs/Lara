@@ -8,7 +8,7 @@ tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT HUP INT TERM
 
 golden="$repo_root/test/update-matrices.golden"
-doc="$repo_root/docs/theory-m3-source-updates.md"
+doc="$repo_root/docs/theory-core.md"
 doc_matrix="$tmp_dir/doc-matrix.txt"
 mode="${1:-check}"
 case "$mode" in
@@ -206,10 +206,9 @@ def expected_summary(emitted: bytes) -> bytes:
         f"`tighten` product has {public['tighten'][0]} reachable cells, including "
         f"{evidence_blocked} `evidenceBlocked`\n"
         "targets.\n\n"
-        "The mechanization refuted the predicted `addInstance` count of 13. The "
-        "actual\n"
-        f"count is {add_instance}. A fresh instance is a sink in the old framework: "
-        "freshness prevents\n"
+        f"`addInstance` reaches {add_instance} cells because a fresh instance is a "
+        "sink in the old\n"
+        "framework: freshness prevents\n"
         "old raw attacks from naming it, while old-to-old edges and labels are "
         "preserved.\n"
         "`Grounded.SinkExtension`, `SinkExtension.label_old`,\n"
@@ -357,7 +356,7 @@ if ! diff -u --label lean-emitted.txt --label test/update-matrices.golden \
 fi
 
 if ! diff -u --label test/update-matrices.golden \
-    --label docs/theory-m3-source-updates.md:update-matrices \
+    --label docs/theory-core.md:update-matrices \
     "$golden" "$doc_matrix"; then
   echo "update goldens: FAIL: the generated documentation matrix block is stale." >&2
   echo "  Synchronize both files with: scripts/check-update-goldens.sh --update" >&2

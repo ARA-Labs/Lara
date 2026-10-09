@@ -45,7 +45,7 @@ Subargument closure, positional attack coherence, and strict-chain
 well-formedness are invariants of the source judgment, not of the carrier: each
 quantifies over term structure that erasure discards. They keep their existing
 Lean homes (`Compile.Covered`, `Compile.AttackOcc`, `Support.cert_steps_accounted`)
-and are classified as source-level in `docs/theory-m0-compilation-invariants.md`
+and are classified as source-level in `docs/theory-core.md#compilation-carrier-and-image`
 rather than restated here as carrier predicates they cannot be.
 -/
 

@@ -1,79 +1,38 @@
-# Lara surface grammar — frozen (`lara-syntax@0.11`)
+# Lara surface grammar (`lara-syntax@0.11`)
 
-_Task **A0.5** of M4a (tracker `docs/m4a-checklist.md`).
-This document **freezes** the concrete `.lara` grammar so that Task A1's parser +
-printer (`Lara.Syntax`) and the `Program → Unit` elaborator (`Lara.Elaborate`)
-implement a fixed contract instead of inventing language semantics. It is grounded
-in what `examples/A/example.lara`, `examples/B/example.lara`,
-and `examples/A/empirical-v1.policy.lara` actually write, and in the abstract syntax
-of `src/Lara/AST.hs`._
+This document defines the concrete `.lara` grammar implemented by the parser
+and printer (`Lara.Syntax`) and the `Program → Unit` elaborator
+(`Lara.Elaborate`). The abstract checker contract is [the language
+specification](spec.md); [the base-language design](theory-core.md) covers the
+surface calculus and its preservation results.
+The grammar is grounded in the committed examples and the abstract syntax
+of `src/Lara/AST.hs`.
 
 **How to read this document (non-normative).** This is the contract for the
 concrete `.lara` syntax: what the parser accepts, what the printer emits, and
 how each surface form lowers to the abstract syntax the checker consumes. Its
 audience is implementers of the parser/printer/elaborator and readers writing
-or reviewing `.lara` files by hand. The main body defines the grammar; the
-appendices (A–J) each specify one later surface version (`@0.2` through `@0.11`; most are
-additive, and F, `@0.7`, only removes syntax), and the
-version paragraphs below record what changed when. If you are new to Lara,
+or reviewing `.lara` files by hand. The main body defines the base grammar;
+each appendix (A–J) specifies one group of constructs of the current surface.
+An appendix's title carries the `lara-syntax` version label that code and tests
+use to cite it, and appendix letters and subsection numbers are stable
+references. If you are new to Lara,
 read the [README](../README.md) and a worked example
 ([`examples/README.md`](../examples/README.md)) first; this document assumes
 you already know what a claim, leaf, argument, and policy are (spec §0 has
 the one-paragraph vocabulary).
 
-Historical A0.5 baseline (the status below predates later additive surface
-versions):
-
-- **AST** — `src/Lara/AST.hs` gained two presentation-only types
-  (`ChallengeTarget`, `ArgConcl`) and `Arg.argClaim :: PropId` became
-  `Arg.argConcl :: ArgConcl`. No frozen (Unit-reachable) type changed. See §7
-  and §9.1.
-- **A / B** — at the original A0.5 baseline, both already conformed to the
-  grammar below; **no reconciliation edits were required at that stage** (see
-  §10). The later `lara-syntax@0.5` implementation intentionally migrates the
-  A and S1 witness spellings to inferred arguments as a separate additive
-  surface change; that migration does not revise this historical baseline.
-  The gap that A0.5 existed to close was in the *AST*, not the example text:
-  the surface forms `challenges(…)` and `supports(c1_neg)` (undeclared) had no
-  representable conclusion until `ArgConcl` landed.
-
-The `@0.6` additions are specified in Appendix E: an `ord@1` or `ra@1`
-certificate payload may cite a premise slot by source name (`(prem e4)`
-instead of `(prem 0)`), and elaboration lowers the name to the canonical
-numeric slot after premise resolution, so the wire `Unit` and `lara-core@0.2`
-remain unchanged. The `@0.5` inferred-theta form (`Arg` carrying
-`ArgInstantiation` with `ArgRef` references, exercised by the migrated A/S1
-witnesses) remains specified in Appendix D. `@0.7`'s three *restrictions* —
-`discharge`/`open` on a bare leaf are parse errors, a hole is spelled `open q`,
-and a shadowed discharge target is a hard error — are specified in Appendix F;
-they remove surface and add none, so the AST, the wire, and `lara-core@0.2` are
-again unchanged. `@0.8` lets a certificate premise reference cite the citing
-rule's declared premise **label** beside the `@0.6` leaf and prior-argument
-names (Appendix G). `@0.9` gives `nd@1` a named proof-term presentation over
-its unchanged de Bruijn kernel (Appendix H). `@0.10` lets those proof terms
-author their formula annotations as source propositions instead of opaque
-encoded atom keys (Appendix I). The current surface, `@0.11`, adds typed
-evidence extraction requests and a checker allowlist (Appendix J).
-Named certificate forms still lower to the numeric spelling's exact bytes.
-
-That byte-identity is the executable form of a standing policy: this surface
-gets *more readable*, never *natural*, and every convenience must remove
-transcription rather than checking. The boundary — including where natural
-language **is** admitted (the untrusted producer) and where it is free
-(rejection prose and reports) — is recorded in `docs/naturalness-boundary.md`;
-read it before proposing a surface addition.
+Every presentation convenience lowers to the exact bytes of the terse spelling
+it abbreviates; named certificate forms, for example, lower to the numeric
+spelling's exact bytes. This surface gets *more readable*, never *natural*: a
+convenience removes transcription, not checking. [The specification](spec.md#natural-language-and-the-trusted-boundary)
+states where natural language is admitted and where the trusted boundary lies.
 
 Versioning: the presentation surface is versioned **separately** from the core
 (`docs/spec.md` §2.1). This document defines `lara-syntax@0.11`; the current
-core is `lara-core@0.3`. Signature declarations lower to `unitSigma`; the additive
-`@0.3` forms, `@0.4` value bindings, `@0.5` inferred-theta form, and the `@0.6`
-symbolic, `@0.8` premise-label, and `@0.9`/`@0.10` named-`nd@1` certificate
-spellings
-remain presentation-layer data until elaboration, and `@0.7`'s restrictions
-(bare-leaf body lines, the sole `open q` hole spelling, and the unified
-discharge collision policy) remove
-presentation-layer forms without adding any, so the decoded `lara-core@0.2`
-object is unchanged. The Haskell `parse ∘ print == id` property covers this current
+core is `lara-core@0.3`. Signature declarations lower to `unitSigma`. Every
+other presentation form is resolved during elaboration, so the decoded core
+object does not depend on the surface version. The Haskell `parse ∘ print == id` property covers this current
 concrete surface. The structured Lean round-trip in
 `lean/Lara/Presentation.lean` covers the complete live `Program`/`Policy` AST
 for this surface, including value bindings, inferred argument instantiations,
@@ -88,7 +47,7 @@ positions remain assertions. The guard documents two representation exemptions
 (`SortName` erasure; `Cert`'s native payload).
 
 The runtime semantics of the existing `admission` and `duplicate-reports`
-constructs are frozen separately in `docs/policy-admission-calculus-decision.md`.
+constructs are frozen separately in `docs/evidence-admission-design.md#policy-admission-at-the-source-boundary`.
 Byte-level `lara-evidence@0.1` is implemented through `lara check-ara`; Appendix J defines its source fields and the [evidence-admission design](evidence-admission-design.md#concrete-package-contract) defines the package contract.
 
 ---
@@ -104,7 +63,7 @@ disambiguator is the **first significant token**:
 | `policy`   | policy            | `.policy.lara` | `Policy` |
 
 The extension is a **convention** (and what `lara check`'s co-located policy
-resolution keys on, plan A1 / D-Arch-2); the **keyword is normative**. A `.lara`
+resolution keys on); the **keyword is normative**. A `.lara`
 file that begins `policy …` is a policy, and vice versa. The two grammars share the
 lexical layer (§1) and the proposition/term/pattern sub-grammars (§2), and are
 otherwise disjoint.
@@ -189,7 +148,7 @@ Reserved words are the keyword/tag vocabulary of §1.4. An `ident` equal to a
 reserved word is that keyword in the positions where a keyword is expected; the
 grammar is not otherwise keyword-quarantined (a `pred`/`funsym`/`id` occurrence is
 positionally determined). Two idents are reserved from the **question-id**
-namespace because they are terminal markers in attack position suffixes (§8):
+namespace because they are terminal markers in attack position suffixes (§7):
 `rule` and `leaf`.
 
 ### 1.4 Keyword & tag vocabulary (single `toString`/`parse` table)
@@ -211,29 +170,31 @@ by  supports  challenges  discharge  with  open
 rebut  undercut  undermine
 allow-trusted  certifiers  cert  trusted  none
 
--- lara-syntax@0.2 (Appendix A)
+-- signature declarations (§4)
+sort  con  pred  Num  Str
+
+-- Appendix A
 assurance  theory
 
--- lara-syntax@0.3 (Appendix B)
+-- Appendix B
 measurand  comparison  comparison-scheme  recheck  bridge  result  baseline
 relation  claims  on  where  cell
 higher-is-better  lower-is-better  strictly-better  at-least-as-good
 
--- lara-syntax@0.4 (Appendix C)
+-- Appendix C
 let
 
--- lara-syntax@0.5 (Appendix D)
+-- Appendix D
 from
 
--- lara-syntax@0.7 (Appendix F)
--- removed: `as`. A hole is spelled `open q`, so the keyword has no remaining
--- syntactic role and `as` is once again an ordinary identifier.
+-- Appendix J
+extract  evidence-checkers
 ```
-The @0.5 entry `from` is contextual after a rule identifier; it is listed
-under the version delta without becoming a lexer-reserved identifier.
-`@0.6` adds no keywords and no lexer or parser change at all: the symbolic
-`(prem name)` spelling lives inside the opaque `sexp` payload of `cert(…)`,
-whose atom grammar already admits identifiers (Appendix E).
+`as` is an ordinary identifier: a hole is spelled `open q` (Appendix F.3).
+`from` is contextual after a rule identifier and is not a lexer-reserved
+identifier. The symbolic `(prem name)` spelling of Appendix E adds no keyword:
+it lives inside the opaque `sexp` payload of `cert(…)`, whose atom grammar
+already admits identifiers.
 
 Closed tag enumerations (surface ↔ `Lara.AST` constructor):
 
@@ -348,12 +309,11 @@ statusDecl ::= "status" ident
 
 Notes:
 
-- `use backends [ … ]` may be empty (`[]`); `nd@1` was the only registry entry when
-  the base grammar was frozen (the registry now also holds `ra@1`, `ord@1`,
-  and `insp@1`), and is **inert** for the defeasible-only worked-examples suite
-  (plan A2 honesty note).
-- Field order inside `claim`/`leaf` is the canonical printer order shown; the
-  parser accepts that order for v0.1.
+- `use backends [ … ]` may be empty (`[]`). The backend registry holds `nd@1`,
+  `ra@1`, `ord@1`, and `insp@1`; a backend listed by a defeasible-only artifact
+  is **inert**.
+- Field order inside `claim`/`leaf` is fixed: the parser accepts only the
+  canonical printer order shown.
 - Every `decl` is order-free at the top level except that a name must be in scope
   by elaboration time (forward references across the file are allowed; scoping is
   the elaborator's job, not the grammar's).
@@ -407,8 +367,7 @@ Notes:
 - The signature blocks are printed immediately after the `policy` header, in the
   canonical order `sort` (one line carrying every declared sort), then one `con`
   line per constructor, then one `pred` line per predicate. Each block is elided
-  when empty, so a signature-free policy prints byte-identically to the pre-`@0.2`
-  grammar. A nullary symbol is spelled **without** parentheses (`con alice : Sys`,
+  when empty, so a signature-free policy prints no signature lines. A nullary symbol is spelled **without** parentheses (`con alice : Sys`,
   `pred blinded`); `()` parses but never prints, the usual permissive-parser /
   canonical-printer split.
 - `Num` and `Str` are reserved: they are the sorts of the two term literal forms
@@ -441,29 +400,26 @@ Notes:
 
 ---
 
-## 5. Support terms: premises implicit, discharges explicit (versioned contract)
+## 5. Support terms: premises implicit, discharges explicit
 
-For the legacy explicit form, `by r(g1, …, gn)` supplies the **full ground
+The explicit form `by r(g1, …, gn)` supplies the **full ground
 substitution `θ`** over `r`'s declared parameters, positionally (`r`'s i-th
 parameter ↦ `gi`). The parenthesized terms are θ bindings, not premise
 sub-argument references. The elaborator reconstructs each implicit premise by
 computing `Apᵢ · θ` and resolving the unique declared leaf or prior `arg` whose
-conclusion is `≡ Apᵢ · θ` (spec §3.2 `nf`-equality).
+conclusion is `≡ Apᵢ · θ` (spec §3.2 `nf`-equality). This positional reading
+differs from `docs/spec.md` §4.4's `by r(a1,…,an)` premise-reference notation.
 
-This explicit positional reading is the historical v0.1 contract reflected by
-the original A/B sources. It explains the older notation's divergence from
-`docs/spec.md` §4.4's `by r(a1,…,an)` premise-reference notation. The additive
-`lara-syntax@0.5` form may instead write `by r from [ref1,…,refn]`; Appendix D
-defines that form. Inferred references select the support terms directly in
-policy-premise order, including the principal leaf such as `e1` or `e7`, and
-the elaborator derives θ by ordered matching.
+The inferred form `by r from [ref1,…,refn]` (Appendix D) instead selects the
+support terms directly in policy-premise order, including the principal leaf
+such as `e1` or `e7`, and the elaborator derives θ by ordered matching.
 
 Both forms reach the checker as a fully explicit support term. Explicit
 premise reconstruction is untrusted elaborator work, as stated in spec §4.1;
 inferred reconstruction is deterministic and source-selected, as specified in
 Appendix D. Discharges and open holes remain explicit in both forms.
 
-**Explicit-form determinism (plan D3).** For positional θ, premise resolution is
+**Explicit-form determinism.** For positional θ, premise resolution is
 a total function on well-formed input:
 
 - `nf`/`≡` is decidable and the declared leaf+arg set is finite, so the set of
@@ -477,12 +433,10 @@ deterministic and total on well-formed input. Inferred matching has its separate
 left-to-right scope and precedence contract in Appendix D.
 
 **Discharges stay EXPLICIT.** Each critical question is discharged by name:
-`discharge q with <argRef>` (A/B use bare leaf ids: `discharge randomization with
-e2`). Open holes are explicit too: `open q` (`@0.7`, Appendix F.3). The `D ⊎ H = questions(r)`
-accounting invariant (spec §4.2) is checked by the elaborator against the resolved
-discharge/open sets. No premise edits are needed for the historical explicit
-A/B sources under this positional rule; current inferred sources are specified
-in Appendix D.
+`discharge q with <argRef>` (examples A and B use bare leaf ids: `discharge
+randomization with e2`). Open holes are explicit too: `open q` (Appendix F.3).
+The `D ⊎ H = questions(r)` accounting invariant (spec §4.2) is checked by the
+elaborator against the resolved discharge/open sets.
 
 ---
 
@@ -495,7 +449,7 @@ records the author's stated role, which the elaborator resolves/validates.
 | Surface | `ArgConcl` | Meaning | A/B site |
 | --- | --- | --- | --- |
 | `supports(c)`, `c` a declared `claim` | `SupportsClaim (PropId c)` | elaborator checks `concl(w) ≡ c.claimFormal` (spec §3.1) | `a1`, `pa`, `pb` |
-| `supports(c)`, `c` **not** declared | `SupportsDerived (PropId c)` | `c`'s formal prop is **derived** from `concl(w)`; A0.5 records only the label. No status is computed for `c` unless a separate `status c` names it. | `d3` (`supports(c1_neg)`) |
+| `supports(c)`, `c` **not** declared | `SupportsDerived (PropId c)` | `c`'s formal prop is **derived** from `concl(w)`; the elaborator records only the label. No status is computed for `c` unless a separate `status c` names it. | `d3` (`supports(c1_neg)`) |
 | `challenges(q(u))` | `Challenges (ChallengesQuestion (QuestionId q) (ArgId u))` | attack-only arg; real edge is the paired `undercut`/`undermine` line. Target = the CQ `q` of arg `u`. | `d1` (`challenges(external_validity(a1))`) |
 | `challenges(l)` | `Challenges (ChallengesLeaf (LeafId l))` | attack-only arg; target = frontier leaf `l`; real edge is the paired `undermine` line. | `d2` (`challenges(e6)`) |
 
@@ -504,15 +458,15 @@ The `challenges(…)` target is **presentation intent only**: `d1`'s real conclu
 `undercut d1 a1.rule` — the challenge label and the attack line are independent, and
 the elaborator uses the label solely for diagnostics. The two `ChallengeTarget`
 forms mirror the two attackable non-root positions (a CQ discharge occurrence, a
-frontier leaf), matching the shape of the attack targets in §8.
+frontier leaf), matching the shape of the attack targets in §7.
 
 ---
 
 ## 7. Attacks and the position-suffix ↔ `[Step]` mapping (FROZEN)
 
 Attacks **reuse the frozen checker types** `Attack` / `Position` / `Step`
-(`src/Lara/AST.hs`; Unit-reachable, off-limits) — A0.5 adds **no** presentation
-attack type. The surface suffix has **one canonical spelling per (attack-kind,
+(`src/Lara/AST.hs`; Unit-reachable). The only presentation-side step type is
+the shallow `SurfaceStep` described under named step segments below. The surface suffix has **one canonical spelling per (attack-kind,
 position)**, so `parse ∘ print == id` holds.
 
 A `Position = [Step]` and `Step = StepPremise Int | StepQuestion QuestionId`. The
@@ -533,7 +487,9 @@ the parser **requires** it.
 | (deeper) | `… u.<s1>.<s2>.….marker` | steps left→right | `[s1, s2, …]` |
 
 **Step disambiguation.** A dotted segment that is a decimal integer is a
-`StepPremise`; otherwise it is a `StepQuestion` (the question id). The **final**
+`StepPremise`; otherwise it is a name, which resolves to a `StepQuestion` (the
+question id) or, when it is a premise label, to a `StepPremise` (named step
+segments, below). The **final**
 segment is the terminal marker and must equal `rule` (for `undercut`) or `leaf` (for
 `undermine`); a mismatch is a located parse error. To keep this unambiguous, `rule`
 and `leaf` are **reserved from the question-id namespace** (a policy must not name a
@@ -551,79 +507,31 @@ Worked from Example A:
   ⇒ `Undermine (ArgId "d2") (ArgId "a1") [StepQuestion (QuestionId "external_validity")]`.
 - `rebut d3 a1` ⇒ `Rebut (ArgId "d3") (ArgId "a1")`.
 
-> **AMENDMENT (`lara-syntax@0.3`, 2026-08-08).** §7's claim that A0.5 adds **no**
-> presentation attack type no longer holds as of `@0.3`. Appendix B.5 admits a
-> dotted segment that names a rule's premise *label* (`a2.binding.leaf`) beside the
-> existing integer spelling (`a2.1.leaf`), and the printer cannot choose between
-> them: `printProgram :: Program -> String` never receives the `Policy`, and
-> `Source` keeps the program and its policy as separate files, so the labels the
-> choice would depend on are not in scope where printing happens. If the authored
-> spelling is not recorded in the presentation AST, `parse ∘ print = id` fails for
-> whichever spelling the printer does not pick — and making a *program* file's
-> canonical form depend on a *different* file would be worse than the problem it
-> solves.
->
-> **Resolution.** The presentation `Program` carries a shallow step,
-> `SurfaceStep = StepIndex Int | StepName String`, and `Lara.Elaborate` resolves
-> `StepName` against the target rule, where the policy *is* in hand
-> (`elaborate sigma registry program policy`). This is the same A1a → A1b contract
-> `Lara.Syntax`'s header already describes for support terms: the parser records
-> what the surface states and leaves the rest for the elaborator.
->
-> **Scope.** The amendment is **strictly additive**. The integer spelling keeps
-> working, keeps its meaning, and stays canonical for any premise without a label;
-> the §7 table, the terminal-marker rule, and the printer clauses above are
-> unchanged for it. **No Unit-reachable type moves** — `Attack`, `Position`, and
-> `Step` are untouched. `SurfaceStep` is presentation-only and is resolved away
-> before the checker anchor exists, so the compiled AF is byte-identical either
-> way.
->
-> **Sign-off.** Signed off 2026-08-08; this was the sole open item of the
-> `lara-syntax@0.3` design pass, now resolved. The surface rules are
-> Appendix B.4 and B.5 below.
+**Named step segments.** A dotted segment may name a rule's premise *label*
+(`a2.binding.leaf`; Appendix B.4 and B.5) beside the integer spelling
+(`a2.1.leaf`). The printer cannot choose between the two spellings:
+`printProgram :: Program -> String` never receives the `Policy`, and `Source`
+keeps the program and its policy as separate files, so the labels the choice
+would depend on are not in scope where printing happens, and a program file's
+canonical form must not depend on a different file. The presentation `Program` therefore records the authored spelling in a shallow
+step, `SurfaceStep = StepIndex Int | StepName String`, and `Lara.Elaborate`
+resolves `StepName` against the target rule, where the policy *is* in hand
+(`elaborate sigma registry program policy`). This is the contract
+`Lara.Syntax`'s header describes for support terms: the parser records what the
+surface states and leaves the rest to the elaborator.
+
+The integer spelling keeps its meaning and is canonical for any premise without
+a label; the table, the terminal-marker rule, and the printer clauses above
+apply to it as written. `SurfaceStep` is presentation-only and is resolved
+before the checker anchor exists, so `Attack`, `Position`, and `Step` carry no
+trace of it and the compiled AF is byte-identical for either spelling.
 
 ---
 
-## 8. Decisions & rationale (the five A0.5 items)
+## 8. Presentation AST types
 
-1. **Attack-arguments without a declared claim → `ArgConcl` sum (§6).** `Arg`'s
-   conclusion went from `argClaim :: PropId` to `argConcl :: ArgConcl` with three
-   arms: `SupportsClaim` (declared), `SupportsDerived` (undeclared — `d3`'s
-   `supports(c1_neg)`), and `Challenges` carrying a `ChallengeTarget` (the two
-   surface forms `challenges(q(u))` and `challenges(l)` — `d1`, `d2`). This is the
-   only field change; `ArgConcl`/`ChallengeTarget` are presentation-only and never
-   reach `Unit`. **Deviation from the "e.g." in the plan:** the plan floated "an
-   attack-argument node, or a claim-inference desugaring" — a single sum on the
-   existing `Arg` is smaller (one field, no new `Decl` arm) and keeps every `arg`
-   uniform, so I took the orchestrator's recommended `ArgConcl` instead. `d_comp`
-   in `Lara.Examples` (concludes `forward_path_rewrite(rmsnorm)`, id
-   `c05_compliance` not declared) is likewise `SupportsDerived`.
-
-2. **`challenges(…)` target syntax + position suffixes (§6, §7).** `challenges(q(u))`
-   and `challenges(l)` map to `ChallengesQuestion`/`ChallengesLeaf`. Dotted position
-   suffixes lower to `[Step]` by the §7 table with a terminal `rule`/`leaf` marker
-   whose value is fixed by the attack constructor — one canonical spelling per
-   (kind, position) for the round-trip.
-
-3. **Premises implicit, discharges explicit (§5).** Legacy positional `by r(…)`
-   supplies full ground `θ`; premise sub-terms are reconstructed by unique
-   `≡`-match (0 ⇒ error, 1 ⇒ resolved, ≥2 ⇒ error). Current sources may use the
-   `@0.5` form `by r from […]`, whose ordered source references and matching
-   contract are defined in Appendix D. Discharges and holes remain explicit.
-
-4. **`#` lexing (§1.2).** `#` is a to-EOL comment everywhere **except** inside a
-   `refs = […]` list, where it is a literal source-ref character. Two lexer modes,
-   one trigger (the `refs` bracket).
-
-5. **Two top-levels, one extension, keyword-disambiguated (§0).** `artifact …` ⇒
-   `Program` (`.lara`); `policy …` ⇒ `Policy` (`.policy.lara`). The extension is
-   convention; the leading keyword is authoritative.
-
----
-
-## 9. AST delta (what A0.5 landed)
-
-### 9.1 `src/Lara/AST.hs`
+`src/Lara/AST.hs` defines the presentation-only types for argument conclusions
+(§6) and inferred support terms (Appendix D):
 
 ```haskell
 -- NEW
@@ -658,52 +566,31 @@ data Arg = Arg
   deriving (Eq, Show)
 ```
 
-Exports gained `ChallengeTarget (..)`, `ArgConcl (..)`, `ArgRef (..)`,
-`ArgDischarge`, and `ArgInstantiation (..)`. No Unit-reachable type
-(`Unit`, `SupportTerm`, `Attack`, `Step`, `Position`, `Rule`, `Contrary`,
-`Exception`, `Prop`, `Term`, the `*Id` newtypes, …) was touched.
-
-### 9.2 Construction-site updates (kept green, no new warnings)
-
-- `src/Lara/Examples.hs` — 5 sites: `a02`, `a_rec`, `a08`, `a09` → `SupportsClaim`;
-  `d_comp` → `SupportsDerived` (its id is undeclared).
-- `src/Lara/Negatives.hs` — 8 sites: all declared claims → `SupportsClaim`.
-
-No test constructs the presentation `Arg` (the `Unit`-level `unitArgs` in
-`WireSpec`/`CheckSpec` is a different, frozen type), so no test needed editing.
+A single `ArgConcl` sum on `Arg` covers every conclusion role, so an
+attack-only argument needs no separate declaration form. None of these types
+reaches `Unit`; the Unit-reachable types (`Unit`, `SupportTerm`, `Attack`,
+`Step`, `Position`, `Rule`, `Contrary`, `Exception`, `Prop`, `Term`, the `*Id`
+newtypes, …) are separate.
 
 ---
 
-## 10. Conformance of the committed examples
+## 9. Conformance of the committed examples
 
-Verified construct-by-construct against the grammar above (A1 confirms by parsing to
-the committed `.core.sexp`):
-
-- **`examples/A/example.lara`** — conforms. `challenges(external_validity(a1))`,
-  `challenges(e6)`, `supports(c1_neg)` (undeclared), the `#`-in-refs tokens, the
-  `a1.rule` / `a1.external_validity.leaf` suffixes, and the implicit-premise `by`
-  applications are all representable. **No edits.**
-- **`examples/B/example.lara`** — conforms. `supports(c_pos)`/`supports(c_neg)`
-  over declared claims, multi-line `binding` with `rationale`, mutual `rebut`, and
-  implicit premises. **No edits.**
-- **`examples/A/empirical-v1.policy.lara`** — conforms to §4. Defeasible `rule`s with
-  `question … (mandatory)`, `contrary A B`, `exception r : E`, no `admission` block
-  (elaborator default, A1). **No edits.**
-
-The inline `EXPECTED VERDICT (golden oracle)` blocks in A and B are **untouched**;
-they remain the A0 goldens frozen in `docs/m4a-checklist.md` §1.
-
-_Frozen 2026-07-27 as Task A0.5. Gates A1 (`Lara.Syntax` + `Lara.Elaborate`)._
+The committed examples conform to this grammar. `test/WorkedExamplesSpec.hs`'s
+freshness property re-derives every `example.core.sexp` anchor from its `.lara`
+source and policy, and the inline `EXPECTED VERDICT (golden oracle)` blocks in
+examples A and B are the goldens described in
+`docs/implementation.md#worked-examples`. The parser, printer and elaborator
+share this grammar contract.
 
 ---
 
-## Appendix A — `lara-syntax@0.2` (additive, 2026-07-29)
+## Appendix A — Support-term assurance and theory tables (`lara-syntax@0.2`)
 
-Two additive constructs over `lara-syntax@0.1`, both decoding to the same
-`lara-core@0.1` abstract syntax (spec result 12 unaffected; no Unit-reachable
-type changes). Motivation: the strict-certificate worked example
-(`examples/S1/`; `docs/worked-examples-plan.md`); the Unit-level cert path
-(`Lara.Strict.ND`, `Driver.buildCertOk`) predates this surface.
+Two constructs, both decoding to the core abstract syntax with no new
+Unit-reachable type (spec result 12 is unaffected). The strict-certificate
+worked example is `examples/S1/` (`docs/implementation.md#worked-examples`);
+the Unit-level certificate path is `Lara.Strict.ND` and `Driver.buildCertOk`.
 
 ### A.1 Support-term assurance (arg blocks)
 
@@ -740,22 +627,15 @@ theoryLine ::= "theory" digest "=" "[" [ prop { "," prop } ] "]"
 
 ---
 
-## Appendix B — `lara-syntax@0.3` (one source-level migration, 2026-08-08)
-
-Additive over `lara-syntax@0.2` except for §3's ordinary `claim nl`: every
-claim-form `nl` now adopts B.6's brace contract. Existing `@0.2` prose with a
-literal `{` or `}` must spell it `{{` or `}}` under `@0.3`; the committed
-`corpus-units/lbcs/C05` and `corpus-units/sapg/C06` sources make exactly this
-spelling migration. `nl` does not enter `Unit`, so the migration changes no
-`.core.sexp` byte.
+## Appendix B — Comparisons, labelled premises and `nl` interpolation (`lara-syntax@0.3`)
 
 Every form below is parsed into the **presentation AST** and **expanded in
 `Lara.Elaborate` before the checker anchor exists**; every form elaborates to a
-byte-identical `Unit`. Nothing here changes `Unit`, the `.core.sexp` door, the
-wire codec, `checkUnit`, or the strict backends. Motivation: the comparison
-worked examples (`examples/S2`, `S3`, `S4`) make the author write `num_lt`
-argument orders, premise slot indices, and two θ vectors by hand — none of
-which is the research claim being made. The direction-of-goodness contract
+byte-identical `Unit`. None of them affects `Unit`, the `.core.sexp` door, the
+wire codec, `checkUnit`, or the strict backends. Without them, the comparison
+worked examples (`examples/S2`, `S3`, `S4`) would make the author write
+`num_lt` argument orders, premise slot indices, and two θ vectors by hand —
+none of which is the research claim being made. The direction-of-goodness contract
 behind the form is written up in `lean/Lara/Comparison.lean`; the surface rules
 are Appendix B.1–B.3 below.
 
@@ -763,15 +643,6 @@ Expansion happens in the elaborator and not in `Lara.Syntax` on purpose: spec
 result 12 (`parse ∘ print == id`) is stated on the presentation AST, and
 macro-expanding at parse time would lose round-tripping for exactly these forms.
 A `comparison` round-trips as a `comparison`, never as its expansion.
-
-**`@0.3` is where the split lands.** The `nl`-interpolation half — B.6's `nl`
-interpolation — lands here. The `let`-bindings/named-premise-slot half — `let`
-value bindings and named premise-slot references `(prem e1)` — waits on the
-many-sorted Σ and is **not** part of `@0.3`: a mistyped bare
-binding name is indistinguishable from a nullary constant until a declared
-signature can reject it, and App. A declares the `cert(…)` payload opaque, so a
-surface `(prem e1)` needs its own layering decision (made at `lara-syntax@0.6`;
-Appendix E).
 
 Identifier aliases used below are all `ident` (§1.3), spelled distinctly for
 readability: `propId` (a `claim` id), `leafId`, `argId`, `ruleId`. `binding` is
@@ -803,11 +674,9 @@ measurand perplexity : Num  where lower-is-better
 - Declaring the same measurand twice in one policy is a **parse error** (the same
   rule, and the same reason, as A.2's duplicate digest: a silent first-wins lookup
   would pick a polarity the author did not intend).
-- **The many-sorted Σ landed here, as designed.** The `: Num` slot was always a **sort
-  position**, not decoration, so `lara-core@0.2`'s many-sorted Σ extends *this*
-  declaration rather than introducing a parallel one: the slot now admits any
-  sort §4 declares, over the same vocabulary the `sort` block names. The two
-  tracks never forked the spelling.
+- **The `: Num` slot is a sort position**, not decoration. It admits `Num`,
+  `Str`, or any sort §4 declares, over the same vocabulary the `sort` block
+  names, so the many-sorted Σ and the measurand table share one spelling.
 - **The `where` clause is optional and `Num`-gated.** A polarity presupposes an
   *ordered* domain and only `Num` is ordered, so a polarity clause on a
   non-`Num` measurand is a parse error. A `Num` measurand with no clause is
@@ -870,8 +739,8 @@ comparison-scheme at-least-as-good higher-is-better
   - `bridge`'s conclusion pattern is **4-ary over S, B, Q, D with the favored
     system first**. This positional convention is what
     `better(sys_new, sys_base) on accuracy @ imagenet_val` elaborates against.
-    Richer bridge conclusions — e.g. one carrying an evaluation-setting
-    parameter — are an explicit **non-goal** for `@0.3`.
+    Bridge conclusions are exactly 4-ary; a bridge conclusion carrying a
+    further parameter, such as an evaluation setting, is not supported.
   - **direction of goodness**: `recheck`'s conclusion, with each operand
     attributed to `result` or `baseline` by *which match introduced it*, is
     written in the order the measurand's `polarity` declares — `rel(base, ours)`
@@ -956,7 +825,7 @@ comparison : better(sys_new, sys_base) on accuracy @ imagenet_val
   one its `polarity` names. The table is therefore a specification of the
   elaborator, not a parallel description of it: it is the same table
   `Lara.Comparison.goalOf` computes in the Lean development (`lean/`), and the
-  Haskell now checks against it rather than merely being expected to agree.
+  Haskell elaborator checks against it.
 - **`relation` is required and closed**, and both members are needed.
   Non-inferiority — "matches the baseline at a third the cost" — is a distinct and
   common research argument, and `examples/S3` is exactly that case; without
@@ -1008,8 +877,8 @@ premiseList     ::= "[" [ labelledPremise { "," labelledPremise } ] "]"
 labelledPremise ::= [ ident ":" ] apat
 ```
 
-This supersedes the `"premises" "=" "[" [ apat { "," apat } ] "]"` fragment of §4's
-`ruleDecl`; everything else about `ruleDecl` is unchanged.
+This refines the `"premises" "=" "[" [ apat { "," apat } ] "]"` fragment of §4's
+`ruleDecl`; the rest of `ruleDecl` is as §4 states.
 
 ```
 rule beats_baseline(S, B, Q, D, Sv, Bv)
@@ -1019,8 +888,8 @@ rule beats_baseline(S, B, Q, D, Sv, Bv)
   …
 ```
 
-- Labels are **optional**, per premise. An unlabelled premise behaves exactly as
-  it does today.
+- Labels are **optional**, per premise. An unlabelled premise is cited by index
+  only.
 - **Policy well-formedness**, checked at declaration time: a rule's premise labels
   must be **disjoint from that rule's question ids**, and `rule` and `leaf` are
   **reserved from the premise-label namespace** (§1.3 already reserves them from
@@ -1029,20 +898,20 @@ rule beats_baseline(S, B, Q, D, Sv, Bv)
   **rejected at declaration time**, not discovered at an attack site.
 - Duplicate labels within one rule are an error, for the same reason.
 - Labels **never enter `Unit`**: `cmp` and `0` resolve to the same
-  `StepPremise 0`, and the rule's compiled form is unchanged.
+  `StepPremise 0`, and the rule's compiled form is the same with or without
+  labels.
 
 ### B.5 Attack-path name segments
 
-See the **AMENDMENT** note appended to §7, which this subsection is the surface
-half of.
+§7 (named step segments) describes the presentation AST this subsection relies
+on.
 
 - A dotted segment of a position suffix (§7) that is a **decimal integer** is a
   `StepIndex`; **otherwise** it is a `StepName`, which the elaborator resolves
   against the target rule to **either** a premise label (B.4) **or** a question id
   — at most one of the two, guaranteed by B.4's disjointness requirement.
-- Integers keep resolving directly to `StepPremise`, unchanged; question ids keep
-  resolving to `StepQuestion`, unchanged. The terminal `rule`/`leaf` marker rule
-  of §7 is untouched.
+- Integers resolve directly to `StepPremise` and question ids to `StepQuestion`.
+  §7's terminal `rule`/`leaf` marker rule applies to every spelling.
 - Both spellings elaborate to the **same `Position`**, and each **round-trips in
   the spelling it was written in** — which is why the presentation AST carries
   `SurfaceStep` rather than reconstructing a spelling at print time.
@@ -1051,7 +920,7 @@ half of.
   against the post-expansion argument set.
 - **Index basis.** Attack-path integers, `(prem i)` certificate slots, and
   premise-label resolution are all **0-based**. 1-based indices appear only in
-  human-facing error text (`resolvePremises` zips `[1..]` today) and are converted
+  human-facing error text (`resolvePremises` zips `[1..]`) and are converted
   at the message boundary — never in a generated certificate or a resolved `Step`.
 
 ### B.6 `nl` interpolation
@@ -1062,11 +931,10 @@ nlChar    ::= any-char-except '"', newline, "{", "}"
 directive ::= "{" "cell" leafId "}"
 ```
 
-This block records the historical `@0.3` spelling. The active `@0.7` surface
-retains the historical `@0.4` value-binding grammar introduced in Appendix
-C.5: it permits inline spaces or tabs around directive tokens and retains those
-authored gaps for round-tripping; the cell lookup and `renderDecimal` semantics
-below are unchanged.
+This production covers the `{cell …}` directive. Appendix C.5 gives the
+complete directive grammar, which adds one-token value references and permits
+inline spaces or tabs around directive tokens, retained for round-tripping. The
+cell lookup and `renderDecimal` semantics below apply to both.
 
 ```
 claim c1
@@ -1077,7 +945,8 @@ claim c1
   both §3's ordinary `claim` and B.3's nested `claims` block. Inside `nl`, `{{`
   and `}}` denote literal braces — the f-string / `format!` convention this
   surface's Python-literate audience already knows — and **any other `{` must
-  open a recognized directive**, which in `@0.3` means `{cell <leafId>}`.
+  open a recognized directive**: `{cell <leafId>}` or a one-token value
+  reference (C.5).
   Anything else is a **located error naming the claim**.
   This is strict rather than lenient on purpose: if `{cel e2}` (a typo) silently
   stayed literal text, a number the author believed was auto-synced would be
@@ -1085,13 +954,13 @@ claim c1
   kill.
 - `{cell e2}` resolves via `premiseCell` on leaf `e2` — the same helper `ord@1`
   and the `comparison` form use — and is rendered back through `renderDecimal`.
-  **No binding is required, so the `nl`-interpolation half stands alone** and does not wait on the `let`-bindings/named-premise-slot half.
+  No value binding is required.
 - Interpolating a **cell** is the *stronger* form for the prose↔formal binding
   audit: a number quoted in prose is then guaranteed to equal the number the cited
   evidence leaf actually carries, sourced from the leaf itself. Interpolating a
   `let` would only guarantee agreement with a parallel declaration, which could
-  itself be wrong. When the `let`-bindings/named-premise-slot half lands, `{acc_new}` becomes an **additional**
-  interpolation source; it does not replace `{cell e2}`.
+  itself be wrong. A value reference such as `{acc_new}` (C.5) is an
+  **additional** interpolation source; it does not replace `{cell e2}`.
 - **Preconditions and errors:** the named leaf must exist and must satisfy the
   premise-cell obligation (exactly one numeric literal); failure is a **located
   source error naming the leaf**.
@@ -1100,10 +969,10 @@ claim c1
   elaborator, so the resulting `nl` is a plain `String` before anything downstream
   sees it.
 
-### B.7 Keyword vocabulary delta
+### B.7 Comparison vocabulary
 
-`@0.3` adds these reserved words to §1.4's vocabulary block, which stays the
-single `toString`/`parse` table:
+The comparison forms use these reserved words from §1.4's vocabulary block,
+which is the single `toString`/`parse` table:
 
 ```
 measurand  comparison  comparison-scheme  recheck  bridge  result  baseline
@@ -1111,7 +980,7 @@ relation  claims  on  where  cell
 higher-is-better  lower-is-better  strictly-better  at-least-as-good
 ```
 
-Closed tag enumerations added by `@0.3` (surface ↔ presentation AST):
+Closed tag enumerations of the comparison forms (surface ↔ presentation AST):
 
 | Field | Surface spelling | Presentation AST |
 | --- | --- | --- |
@@ -1120,25 +989,20 @@ Closed tag enumerations added by `@0.3` (surface ↔ presentation AST):
 
 Neither reaches `Unit`; both are resolved away during expansion.
 
-Two housekeeping notes:
-
-- **Appendix A's omission is corrected here.** `@0.2` added `assurance` (A.1) and
-  `theory` (A.2) without updating §1.4, leaving the vocabulary block stale. Both
-  are now listed there under a `lara-syntax@0.2` sub-block.
-- `test/SyntaxSpec.hs`'s `reservedWords` list **mirrors §1.4** and must be kept in
-  sync with it. If it is not, the round-trip generator will emit identifiers that
-  collide with the new keywords and the property will fail for a reason that has
-  nothing to do with the grammar.
+`test/SyntaxSpec.hs`'s `reservedWords` list mirrors §1.4 and must be kept in
+sync with it. If it is not, the round-trip generator will emit identifiers that
+collide with keywords and the property will fail for a reason that has nothing
+to do with the grammar.
 
 
 ---
 
-## Appendix C — `lara-syntax@0.4` (value bindings, 2026-08-11)
+## Appendix C — Value bindings (`lara-syntax@0.4`)
 
-Additive over `lara-syntax@0.3`. This appendix adds a presentation-only table of
-named ground terms and a one-token `nl` interpolation form. It does not change
-`lara-core@0.2`, `Unit`, the `.core.sexp` door, the JSON/wire codecs, checker
-judgments, strict backends, scientific claims, or verdicts.
+This appendix specifies a presentation-only table of named ground terms and a
+one-token `nl` interpolation form. Neither affects the core, `Unit`, the
+`.core.sexp` door, the JSON/wire codecs, checker judgments, strict backends,
+scientific claims, or verdicts.
 
 ### C.1 Grammar position and canonical form (D1)
 
@@ -1156,9 +1020,8 @@ the existing `ident` lexical class. The parser rejects a duplicate at its second
 `let`.
 
 The canonical printer preserves source order, prints one binding per line, and
-prints one blank line before declarations when the table is non-empty. A legacy
-program has an empty table and retains its previous canonical bytes. `@0.4`
-adds the single keyword `let` to §1.4.
+prints one blank line before declarations when the table is non-empty; a
+program with an empty table prints neither. `let` is listed in §1.4.
 
 For example:
 
@@ -1327,8 +1190,8 @@ directive form are ignored during resolution but retained in the raw
 presentation AST for `parse ∘ print = id`.
 
 The same one-pass grammar applies to `Claim.claimNl` and
-`ComparisonClaim.ccNlRaw`. Thus the C.1 example expands to the exact previous
-prose:
+`ComparisonClaim.ccNlRaw`. Thus the C.1 example expands to the prose a
+hand-written literal would give:
 
 ```text
 sys_new outperforms sys_base on ImageNet-val accuracy (0.74 vs 0.71)
@@ -1359,21 +1222,18 @@ claim '<claim>': nl directive '{cell <leaf>}' names '<leaf>', which is not a dec
 claim '<claim>': nl directive '{cell <leaf>}' names a leaf that does not carry exactly one numeric literal (the premise-cell obligation)
 ```
 
-### C.6 Opaque certificate boundary and explicit deferrals
+### C.6 Opaque certificate boundary
 
 Value substitution operates on `Term` fields in the presentation AST. It never
 enters `Cert`: the certificate payload remains the native opaque S-expression
-owned and decoded only by its named backend (Appendix A.1). Consequently,
-`@0.4` does not add symbolic certificate slots such as `(prem e1)`; authored
-certificates keep numeric premise slots. A future named-slot design must define
-an explicit layer above the opaque payload rather than making the general value
-pass inspect backend syntax. Appendix E (`lara-syntax@0.6`) defines exactly
-that layer; value substitution still never enters `Cert`.
+owned and decoded only by its named backend (Appendix A.1). Symbolic
+certificate slots such as `(prem e1)` are a separate layer above the opaque
+payload (Appendix E), so the value pass never inspects backend syntax.
 
-Likewise, value bindings do not rename named premise references. The plain-argument
-theta-matching form is defined in Appendix D (`lara-syntax@0.5`).
+Value bindings also do not rename the named premise references of the inferred
+form (Appendix D); `InferTheta` keeps its `ArgRef` values (C.4).
 
-## Appendix D — `lara-syntax@0.5` (plain-argument theta inference, 2026-08-12)
+## Appendix D — Plain-argument theta inference (`lara-syntax@0.5`)
 
 ### D.1 Syntax and presentation scope
 
@@ -1399,31 +1259,19 @@ in positions where a rule, predicate, leaf, or argument name is expected.
 `InferTheta` carries these fields as one presentation payload; the parser folds
 `discharge`, `open`, and `assurance` lines into that payload. For either rule
 instantiation — explicit `r(g1,…,gn)` or inferred `r from [...]` — a hole is
-authored and printed as `open q`, stored as `ObligationId q`. (At `@0.5` and
-`@0.6` the production was `open q as o`: the parser read `q`, discarded it, and
-retained only the `ObligationId o`, and the canonical printer re-emitted
-`open o as o`. `@0.7` retired that two-identifier form — a hole has one identity
-— and both legacy shapes are now located parse errors carrying the repair; see
-Appendix F.3.) §3 leaves `dischargeLine`/`openLine` order free
+authored and printed as `open q`, stored as `ObligationId q` (Appendix F.3).
+§3 leaves `dischargeLine`/`openLine` order free
 and A.1 lets `assurance` fold in anywhere; the canonical printer picks one order
 — discharges, then opens, then assurance. For inferred arguments it prints the
 rule, named references, discharges, opens, and assurance.
 
-On a bare `leaf(…)` support term there is nothing to retain. At `@0.5` and
-`@0.6` the parser accepted `discharge` and `open` lines there and then dropped
-them entirely, id and all — the opposite of A.1's ruling for
-`assurance`, which is a parse error in the same position precisely so the author
-is not misled. `@0.7` extends A.1's ruling to both siblings: all three lines are
-located parse errors on a bare leaf (Appendix F.2).
+A bare `leaf(…)` support term instantiates no rule, so `discharge`, `open`, and
+`assurance` lines are located parse errors there (Appendix F.2).
 
-That the discarded token was never consulted is exactly why one name suffices:
-§6.1 reads a hole's `ObligationId` *as* the question it leaves open
-(`holeNames` in `Lara.SupportTerm`, Lean `H : List QuestionId`), so the stored
-id names the question actually in force. Under the retired `@0.5`/`@0.6`
-spelling every committed `open` line already spelled the two identically, which
-is why `@0.7`'s migration is textual only (Appendix F.5).
-An earlier revision of this paragraph said the printer "intentionally omits
-`open` lines"; that omission broke result 12
+One identifier per hole suffices because §6.1 reads a hole's `ObligationId`
+*as* the question it leaves open (`holeNames` in `Lara.SupportTerm`, Lean
+`H : List QuestionId`), so the stored id names the question actually in force.
+The printer emits every `open` line; omitting them would break result 12
 (`parse ∘ print = id`) on any term with a non-empty hole set.
 
 At argument `a`, each reference is resolved in this fixed scope. A name that
@@ -1477,14 +1325,13 @@ such as `0.710` and `0.71`, the semantic units can differ in bytes while their
 verdict JSON and exit classifications remain equal. This spelling condition is
 part of the contract; byte identity is not unconditional.
 
-## Appendix E — `lara-syntax@0.6` (named certificate premise slots, 2026-08-12)
+## Appendix E — Named certificate premise slots (`lara-syntax@0.6`)
 
-Additive over `lara-syntax@0.5`. This appendix adds a symbolic spelling for the
-premise-slot references inside `ord@1` and `ra@1` certificate payloads, lowered
-to the canonical numeric slots at elaboration. It does not change
-`lara-core@0.2`, `Unit`, the `.core.sexp` door, the JSON/wire codecs, checker
-judgments, strict backends, or replay identity — and, uniquely among the
-additive versions, it changes no lexer or parser rule either.
+This appendix specifies a symbolic spelling for the premise-slot references
+inside schema'd certificate payloads (E.1), lowered to the canonical numeric
+slots at elaboration. It needs no lexer or parser rule and does not affect the
+core, `Unit`, the `.core.sexp` door, the JSON/wire codecs, checker judgments,
+strict backends, or replay identity.
 
 ### E.1 Symbolic form, supported backends, and grammar position (D2, D7)
 
@@ -1515,10 +1362,9 @@ apart by head and arity — and the closed aggregate table lives in
 | `insp@1` | `inspect` | 1 | 0 | — |
 | `insp@1` | `inspectdiff` | 2 | 0, 1 | — |
 
-There is zero concrete-syntax change: the wire S-expression sub-grammar already
+The concrete syntax needs no new rule: the wire S-expression sub-grammar
 admits an identifier atom, and the printer prints the stored payload verbatim,
-so the surface AST keeps the authored spelling and `parse ∘ print = id` holds
-unchanged. Lowering happens only at elaboration, *after* premise resolution, at
+so the surface AST keeps the authored spelling and `parse ∘ print = id` holds. Lowering happens only at elaboration, *after* premise resolution, at
 both instantiation sites: the explicit rule application and the inferred
 `by r from […]` form (Appendix D). Every declared premise-reference position in
 the wire `Unit` therefore carries a numeric slot.
@@ -1533,20 +1379,15 @@ every resolved name first).
 
 ### E.2 Name resolution: namespace and collision policy (D3)
 
-*Extended at `@0.8`:* Appendix G.2 adds the citing rule's declared premise
-labels as a third name class, under the same collision policy (G.3). The
-two classes below and their collision rule are unchanged.
-
-A symbolic name resolves in the `lara-syntax@0.5` reference namespace —
+A symbolic name resolves in the Appendix D reference namespace —
 declared leaves ∪ prior arguments, exactly the scope an inferred θ reference
 sees (Appendix D.1): "prior" means already elaborated earlier in declaration
-order, and a later argument is never a valid reference. A name that matches both namespaces is a **hard error**,
-never silently one of them — deliberately aligned with the inferred-reference
-resolver, not with the discharge resolver's silent leaf preference (that
-inconsistency is tracked separately, untouched here).
-*Resolved at `@0.7`:* Appendix F.4 gives the discharge resolver this same
-collision policy, so the carve-out named in this paragraph no longer exists —
-all three argument-body reference positions now agree.
+order, and a later argument is never a valid reference. Appendix G.2 adds the
+citing rule's declared premise labels as a third class. A name that matches
+both a declared leaf and a prior argument is a **hard error**, never silently
+one of them. The inferred-θ resolver (D.3) and the discharge resolver (F.4)
+apply the same collision policy, so all three argument-body reference
+positions agree.
 
 ### E.3 Slot mapping and mixed forms (D4, D5)
 
@@ -1560,9 +1401,8 @@ against", never a positional convention of the surface text.
 - Zero slots → error: the referent is real but is not among this argument's
   premises.
 - Two or more slots (the same leaf feeding two premises) → error; the author
-  must cite numeric slots there. *Superseded at `@0.8`:* a numeric slot is no
-  longer the only exit — the rule's premise label for the intended slot is the
-  other, and the better one (Appendix G.4).
+  cites a numeric slot or, when the rule labels the intended slot, that
+  premise label (Appendix G.4).
 
 *Representation rule:* locating matches whatever representation the author's
 spelling actually put in the resolved premise sequence. A prior-argument
@@ -1575,12 +1415,12 @@ Mixed symbolic and numeric references are legal: each reference position
 lowers independently, so `(radrop (prem e4) (prem 1) (frac 119 500))` is
 well-formed if `e4` resolves to slot 0's premise.
 
-### E.4 Pass-through, the dead-wire rule, and the moved rejection site (D6)
+### E.4 Pass-through, the dead-wire rule, and the rejection site (D6)
 
 Payloads stay backend-owned. Unknown backend/version payloads, non-`(prem …)`
 nodes at reference positions, canonical numeric slots, and every
-non-reference position are left untouched and reach the backend exactly as
-today. This includes symbolic-looking `(prem s)` nodes at a matched schema's
+non-reference position are left untouched and reach the backend as
+authored. This includes symbolic-looking `(prem s)` nodes at a matched schema's
 non-reference positions, whether direct or nested: the schema does not declare
 them as premise references, so the backend owns their meaning and rejection.
 A backend with no declared schema (`nd@1`, E.7) always passes through
@@ -1590,39 +1430,21 @@ anywhere. No declared positions exist under a mismatch, so such a spelling
 cannot be lowered; it fails at elaboration as a schema mismatch. Detection is
 a generic sub-tree scan, and the elaborator still learns no backend grammar.
 
-Consequences: every existing accepted artifact lowers to itself — frozen
-payloads contain no symbolic names, and byte preservation is the E.1 Lean
-theorem — and every existing rejection path is preserved. The intended
-exception: spelling-level mistakes at a matched schema's reference positions
-now die **earlier**, at elaboration instead of at certificate replay (R13):
+Consequences: a payload with no symbolic names lowers to itself (byte
+preservation is the E.1 Lean theorem), and every backend rejection path is
+preserved. The one exception is deliberate: spelling-level mistakes at a
+matched schema's reference positions fail **earlier**, at elaboration rather
+than at certificate replay (R13):
 malformed numerals (`(prem 007)`, `(prem -1)`), name typos (`(prem e44)`), and
 symbolic names inside schema-mismatched payloads (`(ordcmp (prem e4))`, one
 argument short) fail before the checker (`docs/rejection-surface.md` §1.2 and
-the R13 row). Acceptance is unchanged.
+the R13 row). Acceptance is the same as for the numeric spelling.
 
 ### E.5 Stable error messages
 
-*Superseded by Appendix G.5:* `@0.8` adds a seventh family
-(`CertSlotLabelAmbiguous`) and rewords two of the six below, so **G.5 is the
-normative template list**. The list here is kept as the `@0.6` record.
-
-The six diagnostic families are `CertSlotUnresolved`, `CertSlotAmbiguous`,
-`CertSlotNotAPremise`, `CertSlotMultiSlot`, `CertSlotNonCanonicalNumeral`, and
-`CertSlotSchemaMismatch` — located `ElabError`s in the `ThetaReference*` style
-(D.3), attributed to the enclosing `arg` block. This *was* their normative
-home at `@0.6`; the renderer *used* these exact templates, where `A` is the
-enclosing argument, `B` is the backend spelling `name@version` from the
-`assurance` line, `N` is the authored reference spelling, and `I`/`J` are
-0-based slots:
-
-```text
-arg 'A': certificate 'B' premise reference 'N' names neither a declared leaf nor prior argument
-arg 'A': certificate 'B' premise reference 'N' is ambiguous between a declared leaf and a prior argument
-arg 'A': certificate 'B' premise reference 'N' does not resolve to any of this argument's premise slots
-arg 'A': certificate 'B' premise reference 'N' occupies premise slots I and J; cite a numeric slot
-arg 'A': certificate 'B' premise reference 'N' is not a canonical slot numeral (use unsigned decimal with no leading zeros); write the canonical numeral or a source name
-arg 'A': certificate 'B' payload does not match the backend's premise-reference schema but contains symbolic premise reference 'N'
-```
+The `CertSlot*` diagnostic families and their exact templates are listed in
+Appendix G.5, which covers the leaf and prior-argument names of this appendix
+together with the premise labels of Appendix G.
 
 ### E.6 Recursion semantics (D8)
 
@@ -1633,68 +1455,28 @@ on a premise instance therefore lowers against the nested instance's premises,
 not the enclosing argument's. Symbolic-looking nodes outside a matched
 schema's declared reference positions remain backend-owned as specified in
 E.4.
-The `@0.6` surface grammar
-cannot yet author a nested assurance — a parsed rule application carries no
-authored premise list, and `assurance` attaches only to the `arg` block's own
-rule application — so the recursive case is reachable only from a hand-built
-AST today, but it is on the path the moment premises become authorable.
-`test/CertSlotsSpec.hs` records the reachability note and pins the recursive
+The surface grammar cannot author a nested assurance — a parsed rule
+application carries no authored premise list, and `assurance` attaches only to
+the `arg` block's own rule application — so the recursive case is reachable
+only from a hand-built AST. `test/CertSlotsSpec.hs` pins the recursive
 behavior at the AST level through the real elaborator entry point.
 
-### E.7 The nd@1 exclusion and future work (D1, D3)
+### E.7 `nd@1` has no slot schema (D1, D3)
 
-> **Resolved at `lara-syntax@0.9`:** Appendix H lands the first bullet's named
-> kernel/surface split. This section remains as the historical record of
-> why `nd@1` was excluded at `@0.6`; Appendix H is normative for current
-> `nd@1` authoring.
+`nd@1` declares no slot schema, so its kernel payloads pass through this pass
+byte-identical and keep numeric `hyp` indices. `ord@1`, `ra@1` and `insp@1`
+payloads are single flat head applications with premise references at fixed
+argument positions, where a name is a stable notion. `nd@1` payloads are
+recursive de Bruijn proof terms: `hyp i` shifts under `lam` binders and covers
+premise slots and theory entries by offset, so "the premise named `e4`" is not
+a fixed payload position. Named `nd@1` authoring is a separate presentation
+form with its own binder discipline and lowering arithmetic (Appendix H).
 
-`nd@1` admitted no named slots and was deliberately schema-less: its payloads
-passed through byte-identical and kept numeric `hyp` indices. `ord@1` and
-`ra@1` payloads were single flat head applications with premise references at
-fixed argument positions — a name was a stable notion there. `nd@1` payloads
-were recursive de Bruijn proof terms: `hyp i` shifted under `lam` binders and
-conflated premise slots with theory entries by offset, so "the premise named
-`e4`" was not well-defined at a fixed payload position without teaching the
-presentation layer the full ND grammar and binder discipline.
-
-Two future-work notes were recorded here so the next design could start from them:
-
-- *A named `nd@1` form* was expected to start from Lean 4's kernel/surface
-  split rather than inventing new machinery. The kernel term would stay de
-  Bruijn (`hyp i`). The presentation would write named binders
-  (`(lam h FORMULA CERT)` with `h` bound in `CERT`) and cite premise/theory
-  slots by source name. The elaborator would own the index shifting, exactly
-  as Lean's elaborator lowered
-  `fun h => … h …` to bound-variable indices. The locally-nameless literature
-  covered the metatheory of that lowering.
-  *Resolved at `@0.9`:* Appendix H defines this form, including the exact
-  binder discipline, mode boundary, lowering arithmetic, and rejection
-  surface. Formula annotation authoring was the one deliberately separate
-  follow-up, resolved at
-  `@0.10` by Appendix I.
-- *Rule premise labels as a second symbolic class (considered and deferred).*
-  `premiseLabelIndex` already mapped a rule's declared premise labels to slot
-  indices, and a label named the backend slot directly — it would even have
-  covered the E.3 multi-slot case, where this design fell back to numerals.
-  It was deferred at `@0.6` because labels were optional
-  (`rulePremiseLabels :: [Maybe PremiseLabel]`) and could not be the universal
-  namespace. A second symbolic class would have needed its own collision
-  policy against leaves and priors, growing the resolution surface that this
-  feature was supposed to keep predictable. Premise-label citation remained a
-  natural future `lara-syntax@0.x` extension.
-  *Resolved at `@0.8`:* Appendix G lands premise-label citation. The
-  collision policy this bullet asks for is G.3 — cross-class collision is a
-  hard error, with no carve-out for agreeing referents — and the optionality
-  concern is answered by keeping labels a *third* class beside the other two
-  rather than a replacement (G.2): a rule that labels nothing is cited exactly
-  as at `@0.6`. The multi-slot case this bullet anticipated is G.4, worked in
-  `examples/S7/`.
-
-## Appendix F — `lara-syntax@0.7` (surface strictness, 2026-08-20)
+## Appendix F — Surface strictness (`lara-syntax@0.7`)
 
 ### F.1 Scope
 
-Three restrictions over `lara-syntax@0.6`, all enforcing one invariant: **every
+Three restrictions, all enforcing one invariant: **every
 authored surface token must affect the semantic object or trigger an explicit
 error.** A token the parser reads and then discards is a lie to the author, who
 reasonably concludes the checker saw what they wrote.
@@ -1703,54 +1485,35 @@ reasonably concludes the checker saw what they wrote.
   are parse errors, not silently dropped lines.
 - **F.3** — a hole is spelled `open q`. The two-identifier
   `open q as o` form is a located parse error carrying its repair, and `as`
-  leaves the §1.4 vocabulary.
+  is not a keyword.
 - **F.4** — a `discharge q with x` whose `x` names both a declared leaf
   and a prior argument is a hard elaboration error, not a silent preference for
   the leaf.
 
-This appendix adds **no productions**. `@0.7` is the first surface version that
-only *removes* surface: `@0.2`–`@0.6` were additive (`@0.3` carried one source
-migration; `@0.6` changed no lexer or parser rule at all), while every clause
-below narrows what the parser or elaborator accepts.
+This appendix adds **no productions**; every clause narrows what the parser or
+elaborator accepts. None of the restrictions reaches the kernel: the AST, the
+wire, `.core.sexp`, checker judgments, strict backends and replay are
+unaffected. F.4's check sits in the validated-not-verified elaborator
+(`ara/logic/solution/constraints.md`), outside the mechanized checker boundary
+described in [implementation](implementation.md).
 
-Nothing here reaches the kernel. There is no `lara-core@0.2` change, no
-`Lara.AST` change, no wire or `.core.sexp` change, no checker-judgment change,
-and no strict-backend or replay change. The surface version never reaches the
-wire, so every derived `.core.sexp`, `expected.json`, verdict, mutant fixture,
-and frozen measurement byte is unchanged (F.5). Because the AST is unchanged,
-`lean/Lara/Presentation.lean`'s structured model still holds at `@0.7` and
-`scripts/check-presentation-parity.sh` stayed green throughout; no Lean work was
-owed. The `@0.7` elaborator addition (F.4) sits in the validated-not-verified
-elaborator (`ara/logic/solution/constraints.md`), which the mechanization plan
-does not cover.
-
-**Why removal is the right instrument here, and why no compatibility alias.**
-Every one of these three warts has the same shape — the surface accepts an
-author's token and then does not mean it — and an alias that keeps accepting the
-old spelling would preserve exactly the misreading each fix exists to remove.
-The usual argument against a breaking surface change is the installed base;
-Lara has none. There is no public release of `lara-syntax`, and every `.lara`
-source that exists is in this repository, so the migration cost is bounded,
-mechanical, and paid in the same commit as the restriction (F.5: ten spellings
-in seven of 109 tracked files). Under those conditions a compatibility alias
-buys nothing and permanently doubles the spellings a reader must know. The
-window for this trade closes when the surface is published; that is an argument
-for making the surface strict *now*, not for deferring.
+No compatibility alias exists. Each of the three cases has the same shape — the
+surface would accept an author's token and then not mean it — and an alias that
+kept accepting the rejected spelling would preserve exactly that misreading
+while doubling the spellings a reader must know.
 
 ### F.2 `discharge`/`open` on a bare leaf are parse errors
 
-Appendix A.1 already rules that `assurance` on a bare `leaf(…)` support term is
+Appendix A.1 rules that `assurance` on a bare `leaf(…)` support term is
 a parse error, "the checker has no rule to check it against, and silently
 dropping it would mislead the author". That reasoning is not specific to
 `assurance`. A `discharge` or an `open` line answers or defers a *critical
 question of a rule*; a bare leaf instantiates no rule, so it declares no
-questions, and there is nothing for either line to attach to. Before `@0.7` the
-parser accepted both there and dropped them entirely, id and all — a strictly
-worse outcome than the sibling it sat next to, since the author who writes
-`discharge q with e2` under `leaf(e1)` is told nothing and believes `q` was
-answered.
+questions, and there is nothing for either line to attach to. Dropping the
+line silently would let an author who writes `discharge q with e2` under
+`leaf(e1)` believe `q` was answered.
 
-`@0.7` extends A.1's ruling to both siblings, with the same wording shape:
+A.1's ruling therefore covers both siblings, with the same wording shape:
 
 ```text
 discharge requires a rule application, not a bare leaf
@@ -1765,22 +1528,15 @@ keyword, so the diagnostic points at the line the author must delete or move.
 `addArgHole` and `setArgAssurance` in `Lara.Syntax` each return
 `Either String ArgInstantiation`, with **one equation per `ArgInstantiation`
 shape and no catch-all**; `argBody` turns a `Left` into the located error above.
-Previously the bare-leaf case was a silent identity fall-through —
-`addArgDischarge inst _ _ = inst`, `addArgHole inst _ = inst`,
-`setArgAssurance inst _ = inst` — which meant the rejection lived only in the
-parser's decision to check first, and a future caller reaching the helper by another path (a bundle
-lowerer, a test builder, a refactor that reorders `argBody`) would silently
-resurrect the drop. Making the helpers total-with-error moves the guarantee
-into the type: the impossible case has no equation that can quietly succeed.
-`setArgAssurance` was brought to the same shape in a follow-up commit for
-exactly this reason, even though A.1's diagnostic and its position were already
-correct — the consistency is structural, not cosmetic.
+The guarantee therefore lives in the type: a caller that reaches a helper by
+another path (a bundle lowerer, a test builder, a reordered `argBody`) still
+cannot drop the line, because the impossible case has no equation that can
+quietly succeed.
 
-*Rejected alternative:* keep accepting the lines and make the elaborator reject
-them. That would move an unambiguously syntactic error (a line in a position
-the grammar gives no meaning) past the decode boundary, contradicting §1's
-placement of surface well-formedness in `Lara.Syntax`, and would leave the
-presentation AST able to represent a state the surface cannot mean.
+The error is a parse error rather than an elaboration error because the line
+sits in a position the grammar gives no meaning, and §1 places surface
+well-formedness in `Lara.Syntax`; the presentation AST therefore cannot
+represent a state the surface cannot mean.
 
 ### F.3 The sole hole spelling is `open q`
 
@@ -1788,28 +1544,19 @@ presentation AST able to represent a state the surface cannot mean.
 openLine ::= "open" ident                 -- open q   (explicit hole)
 ```
 
-Before `@0.7` the production was `open ident "as" ident`. The parser read the
-first identifier, **discarded it**, and stored the second as the hole's
-`ObligationId`; the canonical printer then re-emitted `open o as o`, normalizing
-away any divergence the author had written. So `open external_validity as o1`
-was checked as a hole on the *question* `o1` — a question that in general does
-not exist — and printed back as `open o1 as o1`.
-
 **A hole has one identity.** Spec §6.1 question-accounting reads a hole *as the
 question it leaves open*: `holeNames` in `Lara.SupportTerm` maps each stored
 `ObligationId` to the `QuestionId` of the same text (Lean `H : List QuestionId`;
 the Lean driver decodes `holes` straight to `QuestionId`), and `D ⊎ H =
 questions(r)` is then checked against the rule's declared questions. No
 reporting path — verdict JSON, `Lara.Reporting`, the located-obligation output
-of an E2-style gap — ever consumed an obligation name independent of that
-question name. The second identifier was therefore never *read* as a separate
-thing; it could only be redundant (when equal) or actively misleading (when
-divergent). `@0.7` stores `ObligationId q` from the single authored identifier,
-which is exactly the name §6.1 goes on to use.
+of an E2-style gap — consumes an obligation name independent of that question
+name, so a second identifier could only be redundant (when equal) or
+misleading (when divergent). The parser stores `ObligationId q` from the single
+authored identifier, which is exactly the name §6.1 uses.
 
-Both legacy shapes are rejected identically — there is no "equal spelling is
-harmless" carve-out, because a spelling that is currently harmless is still a
-second way to say one thing:
+`open q as q` and `open q as o` are rejected identically. There is no carve-out
+for the equal spelling, because it is still a second way to say one thing:
 
 ```text
 lara-syntax@0.7 uses 'open q'; remove 'as …'
@@ -1818,60 +1565,43 @@ lara-syntax@0.7 uses 'open q'; remove 'as …'
 located at the `as` token, on `open q as q` and `open q as o` alike, and the
 message carries the repair rather than only the complaint.
 
-**`as` leaves the grammar.** It had no other syntactic role, so §1.4 records it
-as *removed* at `@0.7` and it is once again an ordinary identifier: a leaf,
-argument, rule, question, or predicate may be named `as`, and
-`test/SyntaxSpec.hs` (`unit_asIsAnOrdinaryIdentifier`) pins that. This is the
-narrow reason the §1.4 table is a single `toString`/`parse` vocabulary — the
-keyword's disappearance from the surface is one table edit, and the reserved-word
-list the round-trip generator consults (`test/SyntaxSpec.hs`) mirrors it.
+**`as` is an ordinary identifier.** It has no syntactic role, so it is not in
+§1.4: a leaf, argument, rule, question, or predicate may be named `as`, and
+`test/SyntaxSpec.hs` (`unit_asIsAnOrdinaryIdentifier`) pins that. The
+reserved-word list the round-trip generator consults (`test/SyntaxSpec.hs`)
+mirrors §1.4.
 
 The retained `ObligationId` newtype is **not** collapsed into `QuestionId`. It
 is the spec §2 obligation name class, and the symbolic-core discipline keeps
-distinct namespaces in distinct types (CLAUDE.md); what `@0.7` removes is the
-claim that the *surface* can name the two independently. The single sanctioned
-bridge is now exactly `open q → ObligationId q → QuestionId q`, confined to
+distinct namespaces in distinct types (CLAUDE.md); only the *surface* cannot
+name the two independently. The single sanctioned bridge is exactly
+`open q → ObligationId q → QuestionId q`, confined to
 `holeNames`, and `src/Lara/SupportTerm.hs` documents it there.
 
-*Rejected alternative:* keep `open q as o` and make the elaborator check that
-`q` is a declared question of the rule (using both names for real). That adds a
-second name class to the surface and a new diagnostic family in exchange for an
-identifier no downstream consumer reads. Appendix D's inferred-θ payload,
-Appendix E's premise-slot names, and F.4's discharge targets all shrink the
-number of independently-authorable names in an argument body; this moves the
-same way.
+### F.4 Discharge collision policy
 
-### F.4 Discharge collision policy unified with D and E.2
-
-`discharge q with x` resolves `x` in the `lara-syntax@0.5` reference namespace:
-declared leaves ∪ prior arguments (Appendix D.1). Before `@0.7`, when `x` named
-**both**, the resolver silently preferred the declared leaf. The identical
-collision was already a hard error in the two neighbouring positions — Appendix
-D's inferred-θ references (`ThetaReferenceAmbiguous`) and Appendix E.2's
-certificate premise slots (`CertSlotAmbiguous`) — so one argument body carried
-two opposite answers to the same question, and which one an author got depended
-on which line they were writing.
-
-`@0.7` gives all three positions one policy. One `refMatches`-based
-`resolveDischargeRef` serves **both** discharge payload forms — the explicit one
-(where the parser spells the target `SLeaf (LeafId ref)`) and the inferred one
-(where it arrives as `ArgRef ref`) — so the two surfaces cannot drift apart:
+`discharge q with x` resolves `x` in the Appendix D reference namespace:
+declared leaves ∪ prior arguments (Appendix D.1). It applies the same collision
+policy as Appendix D's inferred-θ references (`ThetaReferenceAmbiguous`) and
+Appendix E.2's certificate premise slots (`CertSlotAmbiguous`), so one argument
+body gives one answer whichever line the author is writing. One
+`refMatches`-based `resolveDischargeRef` serves **both** discharge payload
+forms — the explicit one (where the parser spells the target
+`SLeaf (LeafId ref)`) and the inferred one (where it arrives as `ArgRef ref`) —
+so the two surfaces cannot drift apart:
 
 | declared leaf named `x` | prior argument named `x` | result |
 | --- | --- | --- |
 | yes | no | the leaf's `SLeaf` |
 | no | yes | that argument's elaborated support term |
-| yes | yes | **`AmbiguousDischarge`** (new at `@0.7`) |
+| yes | yes | **`AmbiguousDischarge`** |
 | no | no | `UnresolvedDischarge` |
 
 "Prior" keeps D.1's meaning: strictly earlier in declaration order, i.e.
 whatever `elabOne` has accumulated when this argument is elaborated. A discharge
 naming a *later* argument is therefore `UnresolvedDischarge`, not a forward
 reference — the same scope rule the θ references and the E.2 premise-slot names
-already obey. The two non-error rows are unchanged behavior: the previous
-implementation tested `elem` against `envLeafIds env = map fst envGamma`, which
-is exactly the leaf half of `refMatches`, so the **only** new rejection is the
-ambiguity itself.
+already obey.
 
 Diagnostics (`Lara.Elaborate.Error`, the D.3 `ThetaReference*` style, attributed
 to the enclosing `arg`):
@@ -1881,91 +1611,43 @@ arg 'A': discharge of 'q' names 'x', which is neither a declared leaf nor a prio
 arg 'A': discharge of 'q' names 'x', which is ambiguous between a declared leaf and a prior argument
 ```
 
-`AmbiguousDischarge ArgId QuestionId ArgRef` is the new family.
-`UnresolvedDischarge`'s final field is retyped `String → ArgRef` in the same
-change, so the source identifier is carried in the type the namespace is defined
-over and is unwrapped in exactly one place — the renderer — matching how every
-other reference diagnostic in this family already works.
+The families are `AmbiguousDischarge ArgId QuestionId ArgRef` and
+`UnresolvedDischarge ArgId QuestionId ArgRef`. The source identifier is carried
+in the type the namespace is defined over and is unwrapped in exactly one
+place, the renderer, as in every other reference diagnostic of this family.
 
-**This closes E.2's carve-out.** Appendix E.2 records the `@0.6` decision to
-align the certificate premise-slot resolver "with the inferred-reference
-resolver, not with the discharge resolver's silent leaf preference (that
-inconsistency is tracked separately, untouched here)". At `@0.7`
-there is no discharge exception left to name: all three argument-body reference
-positions resolve in one namespace under one collision policy, each keeping only
-its own error *family* because each names a different surface position.
+A collision is an error rather than a documented leaf preference because a
+program whose meaning turns on a shadowing rule is not readable at the
+Python-literate baseline this surface targets; the author renames in one edit.
 
-*Rejected alternative:* make the leaf preference explicit and documented instead
-of an error. Shadowing rules are exactly the kind of surface knowledge a reader
-must hold in their head to read a program correctly, and a program whose meaning
-turns on one is not readable at the Python-literate baseline this surface
-targets. The author who hit the collision can rename in one edit; the reader who
-does not know the rule silently misreads the argument.
+### F.5 Effect on accepted sources
 
-### F.5 Migration
+The three restrictions only reject. They change the meaning of no accepted
+source, so no derived `.core.sexp`, `expected.json`, verdict, or measurement
+byte depends on them.
 
-Every `.lara` source in the repository was migrated in the same commit as the
-restriction that required it, so the suite never went red.
-
-- **10 spellings across 7 of 109 tracked `.lara` files** — all of them F.3's
-  hole spelling, and all of them the *equal* form `open X as X`:
-  `corpus-units/bam/C05`, `corpus-units/fre/C01`,
-  `corpus-units/rebench-restricted_mlm/C14`,
-  `corpus-units/rebench-triton_cumsum/C09` (one line each), and the three
-  rebuttal-replay examples `examples/rebuttal-replay/round0`, `round1`,
-  `round2` (two lines each).
-- **F.2 required no source migration**: no committed source attaches a
-  `discharge` or `open` line to a bare `leaf(…)` support term.
-- **F.4 required no source migration and cannot fire on the corpus**: no
-  tracked `.lara` file has a name that is both a declared leaf id and an
-  argument id. Acceptance is unchanged corpus-wide.
-
-**Zero derived semantic artifacts changed.** Verified by explicit pathspec diff
-over `corpus-units/**/*.core.sexp`, `corpus-units/**/expected.json`,
-`examples/**/*.core.sexp`, `examples/**/expected.json`, `fixtures/mutants` and
-`measurements/frozen` — empty. The authored `.lara` sources moved, so their
-containing trees re-pin (intentional, and recorded in
-`docs/m5-freeze-checklist.md` as provenance):
-
-| tree | `@0.6` | `@0.7` |
-| --- | --- | --- |
-| `corpus-units/` | `1dc20ea9d79adb2690731a66216dae828a100cf3` | `cadb5fa62b9f7f6ace14129f1435e3c32b2dff7b` |
-| `examples/` | `4ab6b5f480d9e3bddd94b17908d1c6a910b7944f` | `9e6291fbf1a53703092123a4550ab2099cbed52c` |
-
-The two frozen trees that hold no `.lara` source are byte-identical and did not
-move: `fixtures/mutants/` = `fd7142072d58da4d35642cbad6f144c970627afa`,
-`measurements/frozen/` = `a067c921e0142eae69b34ed500ff18c7efea1bed`.
-
-**No measurement re-run is owed.** The measurement harness consumes
-`.core.sexp` bytes, every one of which is unchanged, so the headline numbers of
-record stand as measured: **564/564** class match, **564/564** `lean_agree`,
-**60/60** replay.
-
-## Appendix G — `lara-syntax@0.8` (premise-label certificate citation, 2026-08-21)
+## Appendix G — Premise-label certificate citation (`lara-syntax@0.8`)
 
 ### G.1 Scope
 
-Additive over `lara-syntax@0.7`. A certificate premise reference may now cite
-the **premise label** the citing rule declares for that slot (Appendix B.4),
-alongside the `@0.6` leaf and prior-argument names. Like `@0.6`, this changes
-no lexer or parser rule: the spelling `(prem s)` is unchanged, and only the set
-of names `s` may carry grows.
+A certificate premise reference may cite the **premise label** the citing rule
+declares for that slot (Appendix B.4), alongside the leaf and prior-argument
+names of Appendix E. Like Appendix E, this needs no lexer or parser rule: the
+spelling `(prem s)` is the same, and only the set of names `s` may carry is
+larger.
 
-Nothing here reaches the kernel. No `lara-core@0.2` change, no `Lara.AST`
-change, no wire or `.core.sexp` change, no checker-judgment change, and no
-strict-backend or replay change. A label citation and its numeric twin produce
-byte-identical `Cert` payloads, byte-identical encoded `Unit`s, and
-byte-identical verdicts; `examples/S7/` authors the label spelling and its
-committed `.core.sexp` golden is the standing byte-identity witness (G.7).
+Nothing here reaches the kernel: the core, `Lara.AST`, the wire, `.core.sexp`,
+checker judgments, strict backends and replay are unaffected. A label citation
+and its numeric twin produce byte-identical `Cert` payloads, byte-identical
+encoded `Unit`s, and byte-identical verdicts; `examples/S7/` authors the label
+spelling and its committed `.core.sexp` golden is the standing byte-identity
+witness (G.7).
 
-**Why labels earned their own name class.** `@0.6` resolves a name by locating
-the *referent's term* in the resolved premise sequence, which has one case it
-structurally cannot express: when one leaf feeds two premises, the leaf name
-occupies both slots and the author is pushed back to numerals (E.3's third
-bullet). A label does not name the term — it names the **slot**, in the rule
-that declares it — so it stays unambiguous however the instance is filled.
-That is the gap Appendix G closes, and it is closed with an existing, tested
-mechanism (`premiseLabelIndex`) rather than new machinery.
+**Why labels are their own name class.** Appendix E resolves a name by locating
+the *referent's term* in the resolved premise sequence, so when one leaf feeds
+two premises the leaf name occupies both slots (E.3's third bullet). A label
+names the **slot** in the rule that declares it, not the term, so it stays
+unambiguous however the instance is filled.
 
 ### G.2 The three-class namespace and resolution rule
 
@@ -1977,7 +1659,7 @@ A symbolic `(prem s)` resolves in **three** classes:
 3. the **prior arguments** (already elaborated, in declaration order).
 
 Class 1 is answered by `premiseLabelIndex`, which maps a label to its 0-based
-slot directly and needs no locating step. Classes 2 and 3 are `@0.6`'s
+slot directly and needs no locating step. Classes 2 and 3 are Appendix E's
 namespace (`refMatches`) and keep E.3's locating rule verbatim: the referent's
 term is located in the resolved premise sequence by term equality, with the
 representation rule of E.3 intact.
@@ -1990,13 +1672,12 @@ Resolution reads as one case split, in this order:
   vector, which is a not-a-premise error.
 - label hit, and the name is **also** a declared leaf or prior argument →
   hard error (G.3), whatever the other class would have resolved to.
-- no label hit → exactly `@0.6`, with all of E.2's and E.3's verdicts.
+- no label hit → Appendix E's resolution, with all of E.2's and E.3's verdicts.
 
 Labels are optional (`rulePremiseLabels :: [Maybe PremiseLabel]`, `[]` when the
-rule labels nothing), so class 1 is empty for every rule written before `@0.8`
-— which is every rule in the frozen corpus. For those rules the resolver is
-bitwise the `@0.6` one, and `test/CertSlotsSpec.hs` carries an unlabelled
-control rule pinning both its resolving and its failing path.
+rule labels nothing). For a rule that labels nothing, class 1 is empty and the
+resolver behaves exactly as Appendix E's; `test/CertSlotsSpec.hs` carries an
+unlabelled control rule pinning both its resolving and its failing path.
 
 The class is **per rule, not per policy**: a label of rule `r` is not a name
 that rule `r'` knows, and a nested instance's certificate resolves against its
@@ -2009,26 +1690,16 @@ never silently either class. This is E.2's and F.4's one collision policy
 applied to the new class, and it holds **even when the two classes would
 resolve to the same slot**.
 
-That last clause is the deliberate part. A carve-out for agreeing referents is
-tempting — nothing is lost by picking either — but it would be the first
-conditional case in a policy that is otherwise a single uniform sentence, and
-its condition is not visible in the citing line: whether `base` is ambiguous
+A carve-out for agreeing referents would make the policy conditional on
+something not visible in the citing line: whether `(prem base)` is ambiguous
 would depend on which slot a leaf elsewhere in the artifact happens to fill.
-An author reading `(prem base)` could not tell. Predictability beats
-convenience here, and relaxing the rule later is additive while tightening it
-later would be breaking.
-
-The rejected alternatives, for the record: *label wins* and *leaf wins* both
-reintroduce the silent preference removed from the discharge resolver;
-*agreeing referents are fine* is the conditional rule above.
 
 ### G.4 What labels resolve that names could not
 
-E.3's third bullet — two or more occupied slots — said the author "must cite
-numeric slots there". That is no longer the only exit. **Superseded by this
-section:** the multi-slot case now has two exits, a numeric slot or the
-label of the intended slot, and the label is the better one, because it says
-which slot was meant in the rule's own vocabulary rather than by position.
+E.3's multi-slot case — the source name occupies two or more slots — has two
+exits: a numeric slot or the label of the intended slot. The label is the
+better one, because it says which slot was meant in the rule's own vocabulary
+rather than by position.
 
 When every slot occupied by the ambiguous source name has its own usable
 premise label, the `CertSlotMultiSlot` message names both repairs: cite a
@@ -2039,17 +1710,19 @@ slots of a two-premise rule, and only `(prem left)`/`(prem right)` resolve
 there. An unrelated, partially declared, or colliding label does not advertise
 a nonexistent repair.
 
-Note that this does not make labels a *universal* namespace. Labels are
-optional, so a rule that declares none is cited exactly as at `@0.6`, and the
-multi-slot dead end survives for such a rule. What `@0.8` gives is an exit the
-policy author can open.
+Labels are not a *universal* namespace. They are optional, so a rule that
+declares none is cited exactly as in Appendix E, and the multi-slot case then
+has only the numeric exit. A policy author opens the label exit by labelling
+the rule's premises.
 
 ### G.5 Stable error messages
 
-Seven diagnostic families: E.5's six, of which **two are reworded here** and
-the multi-slot template is reworded at `@0.9`, plus `CertSlotLabelAmbiguous`.
-This list supersedes E.5's as the normative home;
-E.5 carries a banner pointing here. `A` is the enclosing argument, `B` the
+Seven diagnostic families — `CertSlotUnresolved`, `CertSlotAmbiguous`,
+`CertSlotLabelAmbiguous`, `CertSlotNotAPremise`, `CertSlotMultiSlot`,
+`CertSlotNonCanonicalNumeral`, and `CertSlotSchemaMismatch` — are located
+`ElabError`s in the `ThetaReference*` style (D.3), attributed to the enclosing
+`arg` block. This is the normative template list for Appendix E and this
+appendix. `A` is the enclosing argument, `B` the
 backend spelling `name@version`, `N` the authored reference spelling, `R` the
 citing rule's id, and `I`/`J` are 0-based slots:
 
@@ -2064,8 +1737,7 @@ arg 'A': certificate 'B' premise reference 'N' is not a canonical slot numeral (
 arg 'A': certificate 'B' payload does not match the backend's premise-reference schema but contains symbolic premise reference 'N'
 ```
 
-The first and third templates changed at `@0.8`; the labelled multi-slot
-template changes at `@0.9`. The first and third name the citing rule,
+The first and third templates name the citing rule,
 because "a premise label" is only actionable once the author knows whose labels
 were consulted — the same reason `ThetaReference*` messages name their rule.
 The labelled multi-slot template applies exactly when every slot in the
@@ -2077,9 +1749,9 @@ intended. `test/CertSlotsSpec.hs` pins all seven families, both multi-slot
 branches, the partial-label case, a three-match case, and a shadowed-label case;
 the production CLI preserves the rendered diagnostic on stderr.
 
-### G.6 Recursion, and why no Lean change is owed
+### G.6 Recursion and mechanization
 
-E.6's recursion semantics hold verbatim, with the citing rule's labels now part
+E.6's recursion semantics hold verbatim, with the citing rule's labels part
 of what "that node's own scope" means: a nested certificate resolves against
 the nested instance's premise list *and* the nested rule's labels. A label of
 the enclosing rule is unresolved inside a nested certificate, and vice versa.
@@ -2087,51 +1759,35 @@ the enclosing rule is unresolved inside a nested certificate, and vice versa.
 label would be the worst kind of silent success — it names a slot index both
 instances have.
 
-**No Lean change is owed.** `lean/Lara/CertSlots.lean` parameterizes the
+`lean/Lara/CertSlots.lean` parameterizes the
 mechanized pass over an *abstract* resolver `ρ : String → Option Nat` and an
 abstract classifier `startsSourceIdentifier : String → Bool`, and both
 theorems — `lower_id_of_no_symbolic` (byte preservation on every payload the
 frozen corpus can contain) and `lower_eq_numeric_subst` (a successful lowering
 is exactly the declarative substitution) — are universally quantified over `ρ`.
-The label-extended resolver is one more instance of `ρ`, so both theorems hold
-over it without re-proof. This is the F.1 precedent restated: a surface change
-that does not alter the modeled shape owes no Lean work, and saying so
-explicitly is part of the record. `scripts/check-axioms.sh` and
-`scripts/check-presentation-parity.sh` stayed green with no Lean edit.
+The label-extended resolver is one more instance of `ρ`, so both theorems cover
+it.
 
 The resolver itself lives in the validated-not-verified elaborator
-(`ara/logic/solution/constraints.md`), which the mechanization plan does not
-cover; the Lean mirror carries the lowering math, and the Haskell property
-tests carry conformance.
+(`ara/logic/solution/constraints.md`), outside the mechanized checker boundary
+described in [implementation](implementation.md). The Lean mirror carries the
+lowering math, and the Haskell property tests carry conformance.
 
-### G.7 Migration and derived artifacts
+### G.7 Worked example
 
-**No source migration.** `@0.8` adds names to a namespace and removes nothing,
-so every `.lara` source in the repository is unchanged and every existing
-spelling keeps its meaning. `@0.8` cannot fire on any pre-existing artifact:
-no tracked policy labels a premise of a rule whose certificates cite names, so
-class 1 is empty throughout the frozen corpus and the resolver's behavior there
-is bitwise `@0.6`'s.
+`examples/S7/` (`example.lara`, `ord-labeled-v1.policy.lara`, and the two
+generated files) is the worked label citation. Both of its certificates lower
+to `(ordcmp (prem 0) (prem 1))`, the bytes its numeric twin produces;
+`test/WorkedExamplesSpec.hs`'s freshness property re-proves that on every run,
+and `scripts/differential.sh` confirms both drivers agree on the anchor.
 
-**One new worked example, no changed derived artifact.** `examples/S7/`
-(`example.lara`, `ord-labeled-v1.policy.lara`, and the two generated files) is
-added; no other `example.core.sexp`, `expected.json`, mutant fixture, or frozen
-measurement byte changes. S7's own golden was verified byte-equal to the one
-its numeric twin produces — both certificates lower to
-`(ordcmp (prem 0) (prem 1))` — and `test/WorkedExamplesSpec.hs`'s freshness
-property re-proves that on every run, while `scripts/differential.sh` confirms
-both drivers agree on the new anchor.
-
-**No measurement re-run is owed**, for F.5's reason: the measurement harness
-consumes `.core.sexp` bytes and none of the measured ones moved.
-
-## Appendix H — `lara-syntax@0.9` (named `nd@1` proof terms, 2026-08-22)
+## Appendix H — Named `nd@1` proof terms (`lara-syntax@0.9`)
 
 ### H.1 Scope and the two modes
 
-Additive over `lara-syntax@0.8`. The registered `nd@1` backend keeps its
-closed, numeric de Bruijn grammar; `@0.9` adds a presentation form that the
-untrusted elaborator lowers before replay. The grammars are deliberately
+The registered `nd@1` backend keeps its closed, numeric de Bruijn grammar;
+this appendix specifies a presentation form that the untrusted elaborator
+lowers before replay. The grammars are deliberately
 separate:
 
 ```text
@@ -2159,10 +1815,9 @@ canonicalNat  ::= "0" | nonZeroDigit { digit }
 ```
 
 `formula` is the frozen backend annotation grammar. In particular an atom is
-still `(atom KEY)`, never a bare key. Producing `KEY` from a source proposition
-is an encoding feature, not reference lowering; it was deferred to
-a follow-up and landed at `@0.10` as
-Appendix I's `(prop TEXT)` presentation formula.
+`(atom KEY)`, never a bare key. Producing `KEY` from a source proposition
+is an encoding feature, not reference lowering; Appendix I's `(prop TEXT)`
+presentation formula provides it.
 
 `sourceName` deliberately uses the shipped source-name classifier, not the
 complete concrete-syntax `ident` production. The first decoded character must
@@ -2176,30 +1831,26 @@ the D7 marker scan in H.4 finds no marker,
 the payload is **kernel mode** and passes through structure-identically for the
 backend to decode and replay. If it finds any marker, the whole payload is
 **named mode** and is subject to this appendix. A canonical numeric `(hyp N)`
-inside named mode is therefore `CertNdKernelIndex`, not a second spelling. The
-rejected gradual-conversion alternative would have retained raw `hyp` indices
-inside named terms; it was rejected because `(prem N)` shifts under binders
-while `(hyp N)` would not, giving one term two context-sensitive shift regimes.
-Relaxing this rule later would be additive; tightening it later would break
-authored artifacts.
+inside named mode is therefore `CertNdKernelIndex`, not a second spelling. Raw
+`hyp` indices are excluded from named terms because `(prem N)` shifts under
+binders while `(hyp N)` would not, which would give one term two
+context-sensitive shift regimes.
 
-Nothing in this appendix changes `lara-core@0.2`, `Lara.AST`, the wire,
-`.core.sexp`, the frozen corpus, a checker judgment, or replay. No corpus
-regeneration or freeze-tag bump is owed.
+Nothing in this appendix affects the core, `Lara.AST`, the wire,
+`.core.sexp`, a checker judgment, or replay.
 
-`@0.9` is the **substrate** for named formula authoring, not a complete
-deep-`nd@1` authoring solution. It closes silent index-misbinding by giving
-binders, premises, and theory offsets one explicit lowering discipline, while
-formula annotations remain opaque `(atom KEY)` values at this version; the
-source-authored spelling landed at `@0.10` (Appendix I).
+Named mode gives binders, premises, and theory offsets one explicit lowering
+discipline, which closes silent index misbinding. Formula annotations are
+written either as opaque `(atom KEY)` values or as source propositions
+(Appendix I).
 
 ### H.2 Namespaces and binder discipline
 
 The three reference namespaces are separated by their heads (D1): `(hyp x)`
 consults only enclosing named binders; `(prem s)` consults only premise slots;
 and `(thy N)` consults only theory entries. They never compete for one syntactic
-position. That head separation is why E.7's general collision concern dissolves
-for recursive proof terms instead of requiring a global shadowing preference.
+position, so recursive proof terms need no global shadowing preference between
+them.
 
 A named binder is spelled `(lam x FORMULA CERT)`. Its `x` must be a
 `sourceName`: an S-expression atom whose first decoded character satisfies
@@ -2210,9 +1861,9 @@ legal inside named mode as an anonymous binder and still contributes one level
 to de Bruijn depth.
 
 Local binder shadowing is forbidden (D3): a nested named `lam` may not reuse an
-enclosing binder's name. Lean-style shadowing was considered and rejected
-because the same `(hyp x)` would silently change its referent after crossing the
-inner binder. A named binder also may not use a name that the citing instance's
+enclosing binder's name, so a `(hyp x)` keeps one referent. With shadowing, the
+same `(hyp x)` would silently change its referent after crossing the inner
+binder. A named binder also may not use a name that the citing instance's
 shared resolver successfully resolves to a citable premise (D10). Only a
 successful resolution reserves the name: unresolved, ambiguous, and
 not-a-premise resolver failures leave it available, so an irrelevant
@@ -2249,7 +1900,7 @@ offset is applied: `N >= nPrem` is `CertNdPremOutOfRange`, never a silent slide
 into theory entry `N - nPrem`. Theory indices have no presentation-side upper
 bound; the backend checks them against the selected theory table during replay.
 
-### H.4 Exact D7 boundary and rejection-site migration
+### H.4 Exact D7 boundary and rejection site
 
 The same marker vocabulary drives two leftmost-outermost scans. The first
 selects named mode. Before lowering, a traversal-aware scan checks positions
@@ -2261,6 +1912,8 @@ that the lowering grammar treats as opaque. The markers are exactly:
 4. a two-field `(hyp a)` whose decoded atom `a` is nonempty and whose first
    character satisfies `isIdentStart`.
 
+Appendix I.2 adds a fifth marker, a two-field `(prop ATOM)` node.
+
 Everything with none of those markers is kernel mode and passes through
 unchanged—valid kernel certificates, marker-free junk such as `(foo bar)`, and
 even noncanonical `(hyp 007)` alike. The backend continues to own their decode
@@ -2268,9 +1921,8 @@ or replay result, including R13. Once any marker selects named mode, known proof
 constructors are recursively lowered. A named marker in an opaque formula
 position or an unknown subtree is `CertNdResidualNamed` at the source boundary,
 even when lowering a traversed node would fail for another reason. Consequently
-only payloads that actually contain one of the four markers migrate from
-backend R13 to a located elaboration error; marker-free payload behavior is
-unchanged. A raw `.sexp` has no presentation lowering and remains backend-owned.
+only payloads that contain a marker fail as a located elaboration error rather
+than at backend R13; marker-free payloads keep their backend behavior. A raw `.sexp` has no presentation lowering and remains backend-owned.
 
 ### H.5 Stable source-boundary diagnostics
 
@@ -2298,27 +1950,22 @@ parallel `CertNd` rendering: it reuses the applicable `CertSlot*` family and
 the Appendix G.5 template verbatim.
 
 Lowering is one-way. If lowering succeeds but `nd@1` later rejects at R13, its
-backend diagnostic describes the lowered de Bruijn term. Three parts of that
-term could in principle be mapped back to what the author wrote; two now are.
+backend diagnostic describes the lowered de Bruijn term. The `.lara` door maps
+two parts of that term back to the authored spelling:
 
-- **The premise list** — the `(prem s)` references a named term cites — is
-  closed: an R13 renders the
-  slot → source mapping of the refused instance, in the authored spelling on
-  the `.lara` door (`docs/rejection-surface.md` §1.5).
-- **The formula annotations** are also
-  closed: the same R13 renders the
-  authored spelling of every atom the reason names, drawn from the `(prop
-  TEXT)` annotations *and* the declared leaf propositions, because a mismatch
-  names one of each (`docs/rejection-surface.md` §1.6).
-- **The binder names** remain unmapped. A `hyp i` index is relative to the
-  local binder context at the failure site *inside* the adapter, which reports
-  through a flat string, so no sound recovery exists from outside it. Closing
-  it means giving the registered-backend seam a structured rejection — the one
-  boundary the `@0.6`–`@0.10` arc kept frozen — and is left as
-  separate follow-up work.
+- **The premise list.** An R13 renders the slot → source mapping of the
+  refused instance, in the authored spelling (`docs/rejection-surface.md`
+  §1.5).
+- **The formula annotations.** The same R13 renders the authored spelling of
+  every atom the reason names, drawn from the `(prop TEXT)` annotations *and*
+  the declared leaf propositions, because a mismatch names one of each
+  (`docs/rejection-surface.md` §1.6).
 
-This residual limitation does not weaken replay; it belongs to the honest
-user-facing boundary.
+Binder names are not mapped back. A `hyp i` index is relative to the local
+binder context at the failure site *inside* the adapter, which reports through
+a flat string, so no sound recovery exists from outside it; recovering binder
+names would require a structured rejection at the registered-backend seam.
+This limit affects only the user-facing message, not replay.
 
 ### H.6 Mechanization, witness, and trust boundary
 
@@ -2337,19 +1984,18 @@ validated-not-verified boundary code: its classifier, resolver, traversal, and
 execution are covered by properties and integration tests. The Lean mirror
 proves the lowering mathematics over abstract classifier and resolver
 parameters; it does **not** prove that the Haskell implementation executed that
-function, nor verify the Haskell classifier or resolver. `@0.9` removes silent
-index-misbinding from named premise/binder authoring; the remaining formula
-tooling gap was closed at `@0.10` (Appendix I).
+function, nor verify the Haskell classifier or resolver. Named mode removes
+silent index misbinding from premise and binder authoring; Appendix I covers
+source-authored formula annotations.
 
-## Appendix I — `lara-syntax@0.10` (source-authored `nd@1` formula annotations, 2026-08-23)
+## Appendix I — Source-authored `nd@1` formula annotations (`lara-syntax@0.10`)
 
 ### I.1 Scope
 
-Additive over `lara-syntax@0.9`.
-Appendix H left exactly one hand-hostile position in a named `nd@1` proof
-term: the formula annotation of a `lam` or `abort`, which had to be an opaque
-`(atom KEY)` whose `KEY` was produced by out-of-band tooling. `@0.10` adds a
-presentation formula grammar for named mode:
+In a named `nd@1` proof term (Appendix H), the formula annotation of a `lam` or
+`abort` may be a source proposition instead of an opaque `(atom KEY)` whose
+`KEY` comes from out-of-band tooling. The presentation formula grammar for
+named mode is:
 
 ```text
 namedFormula ::= "false"
@@ -2372,85 +2018,72 @@ declare.
 The untrusted elaborator lowers `(prop TEXT)` through the shared
 normalization/encoding path — `encodeAtomKey (nf p)`, precisely the backend's
 `encode_ND` — and re-emits the frozen `(atom KEY)` node. The authored and the
-hand-computed key spellings are therefore byte-equivalent by construction, and
-S8's key-generation command is retired. Nothing changes in `lara-core@0.2`,
-`Lara.AST`, the wire, `.core.sexp`, the frozen corpus, a checker judgment, or
-replay. No corpus regeneration or freeze-tag bump is owed.
+hand-computed key spellings are therefore byte-equivalent by construction.
+Nothing here affects the core, `Lara.AST`, the wire, `.core.sexp`, a checker
+judgment, or replay.
 
-### I.2 Boundary amendments to Appendix H
+### I.2 Extensions to Appendix H's boundary
 
 - **Marker vocabulary (H.4).** A two-field `(prop ATOM)` node is the fifth
   D7 marker; any payload containing one is named mode, subject to D9's whole-
   payload discipline (in particular, a numeric kernel `(hyp N)` beside a
   `(prop TEXT)` is `CertNdKernelIndex`). Like `prem` and `thy`, only the exact
   two-field atom shape is a marker: a `prop` head of any other arity, or with
-  a non-atom payload, is inert junk that the strict backend continues to own
-  (R13).
-- **Formula positions are no longer fully opaque.** The residual scan and the
-  lowering both now traverse `imp` nodes in formula positions to reach nested
+  a non-atom payload, is inert junk that the strict backend owns (R13).
+- **Formula positions are traversed through `imp`.** The residual scan and the
+  lowering both traverse `imp` nodes in formula positions to reach nested
   `prop` spellings, rebuilding byte-identically when none occur; `false`,
   `(atom KEY)`, and non-grammar formula subtrees still pass through unchanged.
   A *different* named marker in a formula position — for example `(prem s)`
   posing as a formula, or any marker inside an opaque formula subtree — stays
   `CertNdResidualNamed`, as does a `(prop _)` node sitting in a certificate
   position.
-- **Rejection surface (H.5).** The family grows to nine. The one new
-  template, `CertNdFormulaMalformed`, fires when the annotation text is not a
+- **Rejection surface (H.5).** A ninth template, `CertNdFormulaMalformed`,
+  fires when the annotation text is not a
   complete surface proposition (including trailing input):
 
   ```text
   arg 'A': certificate 'B' formula annotation 'N' is not a source proposition
   ```
 
-  `N` is the decoded annotation text. Rejection-site migration follows H.4
-  verbatim: only payloads carrying a marker move from backend R13 to a located
-  elaboration error.
+  `N` is the decoded annotation text. As in H.4, only payloads carrying a
+  marker fail at elaboration rather than at backend R13.
 - **Σ is not consulted.** A lowered annotation is an opaque atom key to the
-  checker, exactly as a hand-authored key was; it matters only up to equality
-  with the premise/goal encodings during replay. `@0.10` therefore adds no
-  signature obligation that the numeric spelling did not have.
+  checker, exactly as a hand-authored key is; it matters only up to equality
+  with the premise/goal encodings during replay. A source-authored annotation
+  therefore carries no signature obligation that the numeric spelling lacks.
 
 ### I.3 Mechanization and witness
 
 The Lean mirror (`lean/Lara/NDNamed.lean`) abstracts the proposition encoder
 as `encodeProp : String → Option String` — the composition of the surface
 proposition parser with `encodeAtomKey ∘ nf` stays validated-not-verified
-Haskell boundary code — and proves the new named result
+Haskell boundary code — and proves the named result
 `Lara.NDNamed.lowerFormula_eq_translation` (every well-formed named formula
 lowers to exactly the kernel wire image of its independent translation)
-alongside the two Appendix H theorems, whose statements gain the parameter
-unchanged. Nineteen executable `#guard` vectors pin the boundary, seven of
-them new for `prop`. On the Haskell side,
+alongside the two Appendix H theorems, which are stated over the same
+parameter. Nineteen executable `#guard` vectors pin the boundary, seven of
+them for `prop`. On the Haskell side,
 `prop_sourceFormulaMatchesEncoder` checks authored spellings against
 `encode_ND` itself, `prop_parsePropRoundTrip` pins `parseProp ∘ printProp`,
-and `examples/S8/` — rewritten to
-`(app (lam h (prop "holds(safety_invariant, D)") (prem e1)) (prem e1))` —
-remains the end-to-end byte-identity witness against its committed numeric
-`.core.sexp`, now with no out-of-band command anywhere in its provenance.
+and `examples/S8/`, which authors
+`(app (lam h (prop "holds(safety_invariant, D)") (prem e1)) (prem e1))`, is the
+end-to-end byte-identity witness against its committed numeric `.core.sexp`,
+with no out-of-band command in its provenance.
 
-The post-lowering error-attribution limitation recorded here at `@0.9` has since
-closed for formulas. If a
-lowered term fails replay at R13, the reason is still phrased over the numeric
-de Bruijn image with the encoded key — that much is inherent to a one-way
-lowering — but the `.lara` door now prints, beneath it, the authored spelling of
-every atom the reason names (`docs/rejection-surface.md` §1.6). The map is
-recovered from the retained source `Program`, not threaded out of the
-elaborator, so `@0.10`'s zero-cost property holds unchanged: no core, wire,
-`.core.sexp`, checker-judgment or replay change.
+R13 attribution for a lowered term follows H.5: the reason is phrased over the
+numeric de Bruijn image with the encoded key, and the `.lara` door prints,
+beneath it, the authored spelling of every atom the reason names
+(`docs/rejection-surface.md` §1.6). The map is recovered from the retained
+source `Program`, not threaded out of the elaborator, so it involves no core,
+wire, `.core.sexp`, checker-judgment or replay component. It draws on **two**
+sources, because a mismatch names one atom of each: the `(prop TEXT)`
+annotations of the proof term, and the propositions of the declared leaves a
+`(prem s)` cites. Binder names remain unmapped (H.5).
 
-The map draws on **two** sources, because a mismatch names one atom of each: the
-`(prop TEXT)` annotations of the proof term, and the propositions of the
-declared leaves a `(prem s)` cites. An annotation-only map would have spelled
-back exactly the `expected` side of every mismatch and left the `got` side
-opaque.
+## Appendix J — Certified-evidence requests (`lara-syntax@0.11`)
 
-What remains unmapped is the binder names — see H.5 for why that half is a seam
-change rather than a rendering one, left as
-separate follow-up work.
-
-## Appendix J — `lara-syntax@0.11` (certified-evidence requests, 2026-10-06)
-
-### J.1 Which source fields were added?
+### J.1 Which source fields does it define?
 
 A leaf may carry one `extract` field immediately after `refs`. A policy may carry one `evidence-checkers` field among its policy declarations. Both contain embedded S-expressions decoded by `Lara.Evidence.Syntax`; they are presentation data, not fields in the core wire.
 
@@ -2497,4 +2130,4 @@ Duplicate request fields, duplicate allowlist fields or entries, unknown checker
 
 ### J.4 Which checks cover this surface extension?
 
-The Haskell printer emits `extract` after `refs` and emits a policy allowlist only when nonempty. `Lara.Presentation` mirrors the request and allowlist types without adding fields to `Lara.Unit`. `make presentation-parity surface-conformance` checks the two representations; `make evidence-cli evidence-differential` exercises the real package command and the finite typed model separately. The model's proofs and its trusted byte-parser boundary are documented in [the evidence theory note](theory-evidence-admission.md).
+The Haskell printer emits `extract` after `refs` and emits a policy allowlist only when nonempty. `Lara.Presentation` mirrors the request and allowlist types without adding fields to `Lara.Unit`. `make presentation-parity surface-conformance` checks the two representations; `make evidence-cli evidence-differential` exercises the real package command and the finite typed model separately. The model's proofs and its trusted byte-parser boundary are documented in [the evidence theory note](evidence-admission-design.md#what-successful-admission-proves).

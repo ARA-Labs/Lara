@@ -1,6 +1,6 @@
 # Corpus unit self-expansion/C03 — gap (policy-mandatory variance CQ unmet)
 #
-# Source: m0/annotations/self-expansion.yaml C03 (causal, component_ablation; corpus pin 62e9b54).
+# Source: self-expansion C03 annotation (causal, component_ablation; corpus pin 62e9b54).
 # Headline: on-demand (z-score-triggered) self-expansion outperforms static and per-task expansion
 # -- full SEMA's cells strictly exceed all five ablation variants (No Exp., Avg. W., Rand. W.,
 # Top-1 Sel., Rand. Sel.) on both ImageNet-A and VTAB across A_N and A_bar (E03, Table 2).

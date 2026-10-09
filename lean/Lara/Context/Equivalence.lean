@@ -32,7 +32,7 @@ It lives here rather than beside the semantics that instantiate it because none
 of its *statements* mentions a semantics and none needs an import this module
 did not already have. `Lara.Context.obsSem`
 (`lean/Lara/Context/Observation.lean:119`) is the instantiation the milestone
-exists for; `docs/theory-m4-generic-observation.md` §2 records the choice.
+exists for; `docs/theory-core.md#generalizing-the-projection` records the choice.
 -/
 
 import Lara.Context.Compose
@@ -914,7 +914,7 @@ fragment to its relabeling inside every admissible context satisfying
 `FixesContext`. Neither implies the other — result 9 carries no admissibility
 hypothesis — which is why it is cited rather than re-derived
 (`whole_program_replacement`). It is the contextual-adequacy obligation
-`docs/theory-m3-source-updates.md` deferred to M4. It is **not** parametricity
+`docs/theory-core.md#source-updates-and-status-dynamics` deferred to M4. It is **not** parametricity
 (no relational quantification over related backends) and not full
 abstraction (no logical relation — Part B).
 

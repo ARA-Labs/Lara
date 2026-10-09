@@ -1,6 +1,6 @@
 # Corpus unit rice/C01 — justified (the analytic-bound / consequence-check two-strand path)
 #
-# Source: m0/annotations/rice.yaml C01 (comparative, analytic_bound_with_consequence_check;
+# Source: rice C01 annotation (comparative, analytic_bound_with_consequence_check;
 # corpus pin 62e9b54). Headline: RICE achieves a tighter sub-optimality bound via an
 # explanation-guided mixed initial distribution — MaskNet-identified critical states give a
 # smaller distribution-mismatch coefficient (linf norm) than the random-explanation baseline
@@ -8,7 +8,7 @@
 # consequence (final reward) across 8 environments.
 #
 # Lowering notes (conventions: corpus-units/LOWERING.md):
-#   * Two support strands (M0 summary section 3(a): rice C01 is a heterogeneous-support case).
+#   * Two support strands (corpus study: rice C01 is a heterogeneous-support case).
 #     Strand A is the analytic derivation (Lemma 3.5 / Theorem 3.6). Strand B is the E03
 #     controlled comparison of final reward. They conclude DIFFERENT predicates
 #     (holds_analytically vs better), so they cannot both conclude one claim formal; the

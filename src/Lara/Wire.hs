@@ -1399,7 +1399,7 @@ data Outcome
   deriving (Eq, Show)
 
 -- | One located hole of an accepted verdict (spec §4.4,
--- @docs\/located-gap-decision.md@ §4): an argument that type-checks with a
+-- @docs\/theory-core.md#holes-located-gaps-and-term-level-critical-questions@ §4): an argument that type-checks with a
 -- nonempty mandatory root obligation set, so it is not an AF node.
 --
 -- 'hrIndex' and 'hrAttacks' are __original__ declaration indices (the supplied
@@ -1417,7 +1417,7 @@ data HoleRow = HoleRow
   deriving (Eq, Show)
 
 -- | One root obligation of a hole and its __sites__ (spec §4.4,
--- @docs\/located-gap-decision.md@ D12): the positions, relative to the hole's
+-- @docs\/theory-core.md#holes-located-gaps-and-term-level-critical-questions@ D12): the positions, relative to the hole's
 -- term and in the attack position encoding (spec §7), of every rule occurrence
 -- that leaves the question open with the question mandatory for its rule. The
 -- list is nonempty and duplicate-free, in the traversal order of

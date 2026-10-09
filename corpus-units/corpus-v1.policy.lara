@@ -1,11 +1,11 @@
 # corpus-v1 — the shared claim-support policy for the T2 corpus units (tracker #48)
 #
-# One policy for all 60 units lowered from the M0 sample (`m0/sample.tsv`): a review policy is a
+# One policy for all 60 units lowered from the corpus sample (`MANIFEST.tsv`): a review policy is a
 # uniform standard, so per-claim disagreement with a policy call is recorded in the unit's header
-# comment, never by forking the policy (docs/m5-freeze-checklist.md).
+# comment, never by forking the policy (docs/evaluation.md).
 #
-# Vocabulary provenance: one defeasible rule per scheme family from the M0 aggregation
-# (`m0/annotation-summary.md` §2 — 22 raw annotator scheme names normalize to 9 families), plus
+# Vocabulary provenance: one defeasible rule per scheme family from the corpus study
+# (22 raw annotator scheme names normalize to 9 families), plus
 # null-conclusion duals only where the sample's negative-result claims support through them
 # (null_comparison, null_benchmark, null_correlation). Critical questions are the recurring
 # per-family themes of the 249 annotated CQs; a CQ is mandatory here iff the annotators
@@ -29,7 +29,7 @@
 #     that instantiate a dual must declare the forced edges or land R-missing-conflict.
 #   * Every rule carries at least one exception (component_ablation carries two:
 #     confounded_ablation and within_noise), so each family's undercut is licensed: the four dead-end
-#     undercuts (m0 annotations: nanogpt_chat_rl N604, fix_embedding N603/N759, ttma N03) and the
+#     undercuts (annotated dead ends: nanogpt_chat_rl N604, fix_embedding N603/N759, ttma N03) and the
 #     unmet-defeater CQs lower as leaf-rooted challenge args concluding these exception atoms.
 #
 # Scheme variable conventions: S = subject system/method, B = baseline/comparand, Q = metric,

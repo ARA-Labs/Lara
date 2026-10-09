@@ -95,7 +95,7 @@ data Stage
 -- constituents — 'SeededSites')
 -- and located diagnostics; in the measurement harness @location_match@ is
 -- membership in that list and @location_primary@ is '==' with its head
--- (@docs\/localization-metric-decision.md@).
+-- (@docs\/evaluation.md#metric-contracts-class-match-location-and-coverage@).
 data Constituent
   = CPolicy
   | CArgument Int

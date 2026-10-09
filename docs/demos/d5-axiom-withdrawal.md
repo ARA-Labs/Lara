@@ -99,14 +99,11 @@ The document supplies no bridge or candidate-edge flag. Its refusal therefore
 cannot be mistaken for detection of a failed structural contract by `lara pw`.
 The separate Lean witness supplies that proof.
 
-## Verification and interface decision
+## Verification
 
-The follow-up allowed either a new
-source-admission-aware world interface or a separate Lean structural witness.
-This demo selects the latter and uses the existing admission evaluator,
-production ND registry, unit checker, and `PW.StructuralBridge` contract.
-No runtime definition, frozen envelope, corpus anchor, or freeze tag changes.
-There is no new CLI bridge-verification claim.
+The witness reuses the admission evaluator, the production ND registry, the
+unit checker and the `PW.StructuralBridge` contract. It adds no CLI
+bridge-verification capability.
 
 `WorkedExamplesSpec.prop_axiomAdmissionBoundary` reads the committed source
 files and checks statuses, dependencies, the quarantine audit, source rejection,
@@ -121,14 +118,13 @@ retained programs. `units_accepted` applies the unit checker’s exact completen
 theorem to those same programs; the executable also runs the checker on them.
 Every new theorem is covered by `lean/AxCheck.lean`. The executable report is
 checked by `make axiom-withdrawal-example`, included in `make lean-gate`.
-Before review, run:
+To check:
 
 ```sh
 cabal test all --test-show-details=direct
 make local-gates
 ```
 
-The [earlier decision](../non-empirical-worlds-decision.md) records why the
-original CLI story was deferred. This witness resolves the demo using the
-separate Lean option. Paper text may describe that bounded result; it must
-not claim a checked geometric consequence or new `lara pw` capability.
+This is a Lean witness, not a `lara pw` capability, and it proves no geometric
+consequence. [The possible-world model](../theory-pw.md#nonempirical-worlds-and-the-checked-bridge-boundary)
+describes why `lara pw` does not check bridges out of a policy-pruned world.

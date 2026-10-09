@@ -8,7 +8,7 @@ carries definitions; every theorem about them lives in `Lara.Context.Link`,
 `Lara.Context.Compose`, and `Lara.Context.Equivalence`.**
 
 The design decisions frozen here are recorded in
-`docs/theory-m4-context-calculus-decision.md`; the short form:
+`docs/theory-core.md#contexts-contextual-adequacy-and-backend-replacement`; the short form:
 
 * **Contexts live at the core `Lara.Unit` level** (D1). The surface calculus
   (`Lara.Surface.*`) contributes a transport corollary, not the quantification
@@ -231,7 +231,7 @@ deriving DecidableEq
 locate the fault: R-L1/R-L2 identify the side and leaf, while R-L3 retains both
 disagreeing values in left-to-right order. The registry cannot appear: it is a
 parameter of the calculus, not fragment data, so a context cannot redefine it
-(see `docs/theory-m4-context-calculus-decision.md` §2). -/
+(see `docs/theory-core.md#fragments-contexts-and-linking`). -/
 inductive LinkFault where
   /-- R-L1: one side declares the same leaf identifier twice -/
   | duplicateOwnId : LinkSide → LeafId → LinkFault

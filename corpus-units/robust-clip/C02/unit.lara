@@ -1,6 +1,6 @@
 # Corpus unit robust-clip/C02 — gap (unmet-mandatory-CQ path: measurement + variance)
 #
-# Source: m0/annotations/robust-clip.yaml C02 (comparative, controlled_comparison;
+# Source: robust-clip C02 annotation (comparative, controlled_comparison;
 # corpus pin 62e9b54). Headline: FARE-CLIP preserves the original CLIP embedding structure
 # better than TeCoA at matched training radius — mean clean embedding loss FARE2 32.7 vs
 # TeCoA2 236.9 and FARE4 47.6 vs TeCoA4 292.7; mean adversarial loss (eps 4/255) FARE2 103.9

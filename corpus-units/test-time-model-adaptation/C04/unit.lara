@@ -1,6 +1,6 @@
 # Corpus unit test-time-model-adaptation/C04 — defeated (T2 exemplar: the undercut path)
 #
-# Source: m0/annotations/test-time-model-adaptation.yaml C04 (negative-result,
+# Source: test-time-model-adaptation C04 annotation (negative-result,
 # component_ablation; corpus pin 62e9b54). Headline: entropy-only fitness cannot provide stable
 # CMA-ES learning signals for test-time adaptation — norm-layer + entropy collapses to ~0.1%
 # average accuracy on ImageNet-C severity 5 (exp5) and prompts + entropy reaches only 44.9% vs

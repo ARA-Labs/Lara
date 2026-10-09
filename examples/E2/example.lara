@@ -10,7 +10,7 @@
 # mandatory question is an IncompleteArgument REJECTION (Check.hs), not a gap. So E2 witnesses the
 # gap the only way `runUnit` produces one — a claim whose complete-support set is empty.
 #
-# This is E2 of the M4a coverage matrix (docs/worked-examples-plan.md §3): status = gap, no attacks.
+# This is E2 of the coverage matrix (examples/README.md): status = gap, no attacks.
 #
 # Expected verdict is at the bottom of this file (golden oracle).
 

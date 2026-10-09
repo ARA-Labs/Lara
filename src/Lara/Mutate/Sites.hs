@@ -43,7 +43,7 @@
 -- re-exported here, so 'Lara.Mutate.Suite' keeps its single import of this
 -- module; the navigation helpers they share live in "Lara.Mutate.Sites.Nav"
 -- (splitting the certificate family off this module along the seam
--- @docs\/mutate-module-ownership-decision.md@ records).
+-- @docs\/evaluation.md#mutation-generation-and-module-ownership@ records).
 --
 -- Internal to the library: the navigation helpers were private before the
 -- split and stay library-internal, and the enumerators have exactly one

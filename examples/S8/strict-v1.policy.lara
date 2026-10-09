@@ -41,6 +41,5 @@ rule certified_citation(X, D)
   certifiers = [ (nd@1, sha256:strict-v1-theory-0) ]
 
 # The empty theory the certificate cites. The digest is a placeholder like the
-# artifact digests (no digest computation exists in the codebase — M4b B0
-# investigation, docs/m4b-b0-source-and-replay-bundle.md).
+# artifact digests (no digest computation exists in the codebase).
 theory sha256:strict-v1-theory-0 = []

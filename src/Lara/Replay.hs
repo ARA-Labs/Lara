@@ -34,7 +34,7 @@ import qualified Lara.Strict.RA as RA
 -- decoder would have had to answer what a @0.1@ unit's absent signature means
 -- under strict mode — "nothing legal", since the empty Σ accepts only
 -- symbol-free units. @lara-core\@0.2@ went at the located-gap bump
--- (@docs\/located-gap-decision.md@ D1): @0.3@ accepts units @0.2@ rejected
+-- (@docs\/theory-core.md#holes-located-gaps-and-term-level-critical-questions@ D1): @0.3@ accepts units @0.2@ rejected
 -- and adds the verdict's @holes@ section, so a @0.2@ identity would name a
 -- different acceptance contract. Nothing is released, so there is no external
 -- compatibility burden.

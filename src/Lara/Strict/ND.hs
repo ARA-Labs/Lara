@@ -1,5 +1,5 @@
 -- | The required v0.1 reference strict backend: intuitionistic natural
--- deduction for implication and falsum (@docs/strict-backend-decision.md@ §4.1;
+-- deduction for implication and falsum (@docs/strict-certificates.md#1-one-seam-for-opaque-strict-certificates@ §4.1;
 -- spec §5).
 --
 -- This adapter is deliberately __modest__: it certifies only the propositional

@@ -1,6 +1,6 @@
 # Corpus unit bbox/C05 — gap (generalization; cross_model_transfer_evaluation -> controlled_comparison)
 #
-# Source: m0/annotations/bbox.yaml C05 (generalization, double-annotated; corpus pin 62e9b54).
+# Source: bbox C05 annotation (generalization, double-annotated; corpus pin 62e9b54).
 # Headline: the frozen BBOX-ADAPTER (trained on gpt-3.5-turbo) plugs into davinci-002 (+6.85 avg
 # over 3 datasets) and Mixtral-8x7B (+4.50) with no retraining.
 #

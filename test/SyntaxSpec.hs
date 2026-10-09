@@ -75,6 +75,7 @@ reservedWords =
   , "result", "baseline", "relation", "claims", "on", "where", "cell"
   , "sort", "con", "pred", "Num", "Str"
   , "higher-is-better", "lower-is-better", "strictly-better", "at-least-as-good"
+  , "extract", "evidence-checkers" -- Appendix J
   ]
 
 -- | An @ident@ (grammar §1.3): letter start, then letters\/digits\/@_@; kept

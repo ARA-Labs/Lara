@@ -1,9 +1,8 @@
 # Theoretical foundations
 
-> Moved here from the README front page. This note records the four established
-> lines of work Lara builds on and how each one shapes the design. The precise
-> novelty delta against each neighbor is a separate document:
-> [`novelty-and-related-work.md`](novelty-and-related-work.md).
+This note records the four established lines of work Lara builds on and how
+each one shapes the design. How Lara differs from each neighbor is in
+[`novelty-and-related-work.md`](novelty-and-related-work.md).
 
 Three terms of art, for readers who have not met them: an *argumentation
 framework* (Dung) is a directed graph whose nodes are arguments and whose
@@ -25,22 +24,22 @@ Lara sits at the junction of four established lines of work:
   undermine — realized as the three kinds of *positions* in a support term
   ([spec §6–§7](spec.md)).
 - **Argumentation schemes with critical questions** are the policy layer: a
-  claim-support policy is a versioned vocabulary of inference schemes (the
-  nine-family vocabulary was frozen against the M0 corpus) whose critical
-  questions generate obligations that must be discharged or reported as
-  located holes ([spec §4](spec.md)).
+  claim-support policy is a versioned vocabulary of inference schemes (a
+  nine-family vocabulary covering the corpus) whose critical questions
+  generate obligations that must be discharged or reported as located holes
+  ([spec §4](spec.md)). Yu and Zenker (2020) note that evaluating a scheme
+  instance completely means asking every critical question relevant to it,
+  and propose a meta-level critical-question list for the general schema
+  "premises; if premises then conclusion; so conclusion". Lara does not
+  claim completeness in that general sense: the policy fixes which questions
+  are mandatory, and completeness is relative to the policy ([spec §4.2](spec.md)).
 - **Proof-carrying code and the LCF architecture** (Necula 1997; Milner) give
   the trust discipline: untrusted producers, opaque certificates, and a small
   checker whose sealed judgments are the only way to obtain acceptance —
   applied here to defeasible empirical claim support rather than machine
   proofs.
 
-Justification logic (Artemov's LP) informed the early design and survives as a
-non-shipping backend seed; factive logics in general are confined behind the
-strict-backend interface rather than admitted into the source calculus. The
-precise delta over each neighbor (Micropublications, AIF, EG-VAR, Pandžić,
-ASPIC+, PCC) is recorded in
-[`novelty-and-related-work.md`](novelty-and-related-work.md): Lara is
-a proof-carrying *language* whose programs are typed claim-support
-certificates, compiled into an argumentation framework with mechanized
-accountability and status-preservation theorems.
+Justification logic (Artemov's LP) is not part of the source calculus; LP
+could enter only as an optional strict backend adapter, which Lara does not
+ship ([spec §5.2](spec.md)). Factive logics in general are confined behind the
+strict-backend interface.

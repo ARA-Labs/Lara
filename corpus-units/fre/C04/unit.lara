@@ -1,6 +1,6 @@
 # Corpus unit fre/C04 — defeated (causal; component_ablation, unmet-defeater -> within_noise undercut)
 #
-# Source: m0/annotations/fre.yaml C04 (causal, uncertain=true; corpus pin 62e9b54). Headline:
+# Source: fre C04 annotation (causal, uncertain=true; corpus pin 62e9b54). Headline:
 # performance scales smoothly with reward diversity and FRE-all dominates all reward-subset
 # ablations — total AntMaze score FRE-all 47.3 +- 7, the argmax over 7 variants.
 #

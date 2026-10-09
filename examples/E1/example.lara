@@ -5,7 +5,7 @@
 # leaves, no attacks. The single support argument is `in` under grounded semantics, so the
 # headline claim aggregates to `justified` (spec §8 priority: some support `in`).
 #
-# This is E1 of the M4a coverage matrix (docs/worked-examples-plan.md §3): status = justified,
+# This is E1 of the coverage matrix (examples/README.md): status = justified,
 # attacks = none. It is the "leaf → scheme → support term → compile → grounded → aggregate"
 # walk with every corner clean, so a failure here localizes to the pipeline, not the calculus.
 #

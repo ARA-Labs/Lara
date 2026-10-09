@@ -26,7 +26,7 @@
 ; A map is a RECHECK, not a build: this file names where the members are and
 ; nothing about what they were. There is no checksum field and no lockfile, so
 ; editing a member changes the next verdict with no manifest update — see
-; `docs/multi-artifact-composition-decision.md` D1. The `(artifact DIGEST)`
+; `docs/artifact-composition.md` ("A map is a recheck, not a build"). The `(artifact DIGEST)`
 ; each member declares is carried into the composite verdict as author-declared
 ; metadata, exactly as in a solo verdict; it is not verified against the bytes.
 ;

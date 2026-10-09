@@ -1,7 +1,7 @@
 /-
 The ordered-comparison domain-checker backend `ord@1` (
-design records: `docs/strict-backend-decision.md` for the backend seam and
-`docs/ord1-corpus-extension-decision.md` for what an accepted step certifies).
+design records: `docs/strict-certificates.md#1-one-seam-for-opaque-strict-certificates` for the backend seam and
+`docs/strict-certificates.md#43-ordered-comparison-ord1` for what an accepted step certifies).
 
 The adapter certifies a closed two-predicate family — `num_lt(A, B)` and
 `num_le(A, B)` over two numeric literals — by exact rational arithmetic.  The
@@ -30,7 +30,7 @@ The `Backend` obligations are discharged the same way `Lara.RA` does it:
 
 The Haskell adapter rejects any certificate slot `>= nPrem`, so a certificate
 cannot cite a self-supplied theory entry as if it were measured evidence
-(the premise-only slot decision, `docs/ord1-corpus-extension-decision.md`).
+(the premise-only slot decision, `docs/strict-certificates.md#43-ordered-comparison-ord1`).
 The abstract `Backend` core, by contrast, is handed a single
 context `Γ = Δ ++ T` and never learns `Δ.length`, so that guard is not
 expressible at this layer.
@@ -45,7 +45,7 @@ the Haskell side rejects those slots outright.  The premise-only guard is
 therefore an *acceptance-preserving* refinement on the Haskell side, and the
 soundness statement below is about the premises it actually consulted.
 
-## Intra-family consistency (`docs/ord1-corpus-extension-decision.md`)
+## Intra-family consistency (`docs/strict-certificates.md#43-ordered-comparison-ord1`)
 
 `num_lt` / `num_le` head no declared contrary pair, and that is a theorem
 rather than a workaround: comparison goals are decidable against a shared
@@ -188,7 +188,7 @@ family member, some context entries carry the two cells, and the comparison
 holds in exact rational arithmetic (cross-multiplied form).
 
 Note what this does *and does not* say (the factivity firewall,
-`docs/ord1-corpus-extension-decision.md`).
+`docs/strict-certificates.md#43-ordered-comparison-ord1`).
 Since both numerals appear in the goal, the relation itself is decidable from
 the goal alone; what the context adds is **provenance anchoring** — each cited
 entry's unique numeric literal equals the corresponding goal numeral.  Nothing
@@ -298,7 +298,7 @@ theorem ordUses_account (κ : CertRef) (Γ : List Lara.Atom) (φ : Lara.Atom)
   · rw [hsel]; rfl
   · rw [hsel]; rfl
 
-/-! ### Intra-family exclusivity (`docs/ord1-corpus-extension-decision.md`)
+/-! ### Intra-family exclusivity (`docs/strict-certificates.md#43-ordered-comparison-ord1`)
 
 Why `num_lt` / `num_le` head no declared contrary pair: over the *same* two
 cells, a strict comparison in one direction rules out either comparison in the
@@ -357,7 +357,7 @@ theorem ordModels_excl_of_lt {Γ Γ' : List Lara.Atom} {φ ψ : Lara.Atom}
 /-- The one fixed `ord@1` backend core.  `Form` is the normalized source atom
 itself — the identity encoding — so `enc_iff` is `equiv_iff_nf_eq`.  A
 registered digest resolves to the empty theory (the premise-only slot decision,
-`docs/ord1-corpus-extension-decision.md`), so the consulted context is exactly
+`docs/strict-certificates.md#43-ordered-comparison-ord1`), so the consulted context is exactly
 the submitted premises. -/
 def ordBackend (canon : String → String) : Lara.Strict.Backend canon where
   Form := Lara.Atom

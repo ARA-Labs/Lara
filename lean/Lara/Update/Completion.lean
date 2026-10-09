@@ -1,7 +1,7 @@
 /-
 Completion updates beyond the additive sequence: atomic batches (D14, issue
 #11) and the pipeline-level metatheory of in-place discharge (D13, issue #14).
-`docs/located-gap-decision.md` §6a records the design.
+`docs/theory-core.md#core-contract-decisions` records the design.
 
 An atomic batch applies its raw edits in order, checking each edit's syntactic
 side condition against the state the earlier edits produced, and then runs

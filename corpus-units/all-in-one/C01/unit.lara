@@ -1,6 +1,6 @@
 # Corpus unit all-in-one/C01 — gap (unmet mandatory variance CQ, annotator-optional)
 #
-# Source: m0/annotations/all-in-one.yaml C01 (comparative, controlled_comparison; corpus pin
+# Source: all-in-one C01 annotation (comparative, controlled_comparison; corpus pin
 # 62e9b54). Headline: Simformer-dense reaches C2ST closer to 0.5 than NPE on 3 of 4 benchmark
 # tasks (Gaussian Mixture, Two Moons, SLCP) at all simulation budgets, tying on Gaussian Linear
 # except at 1e4 sims (E01, E06, Fig 4a).

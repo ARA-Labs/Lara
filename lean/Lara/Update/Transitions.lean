@@ -1,7 +1,7 @@
 /-
 Status transitions of the completion updates (issues #11 and #14).
-`docs/located-gap-decision.md` §6 and §6a record the design and
-`docs/theory-m3-source-updates.md` records the claim boundary.
+`docs/theory-core.md#holes-and-the-agm-probe` and §6a record the design and
+`docs/theory-core.md#source-updates-and-status-dynamics` records the claim boundary.
 
 Neither completion update has an unrestricted transition theorem.  An in-place
 discharge of an optional question of a complete argument with an incomplete

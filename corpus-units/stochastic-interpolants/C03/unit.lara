@@ -1,6 +1,6 @@
 # Corpus unit stochastic-interpolants/C03 — gap (mandatory variance CQ unmet)
 #
-# Source: m0/annotations/stochastic-interpolants.yaml C03 (causal, controlled_comparison;
+# Source: stochastic-interpolants C03 annotation (causal, controlled_comparison;
 # corpus pin 62e9b54). Headline: on ImageNet-256 inpainting the data-dependent coupling reaches
 # FID-50k = 1.13 vs 1.35 for the uncoupled interpolant baseline under a matched U-Net and
 # training budget, attributing the 0.22 FID gain to the coupling (E02, Table 2, section 4.1).
