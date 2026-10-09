@@ -4,7 +4,8 @@ name: Haskell
 # Lean build — the proofs, the axiom audit, and every Haskell-Lean cross-check —
 # runs outside it: `make lean-gate` / `make cross-check` locally, and the
 # optional Lean workflow (.github/workflows/lean.yml) on a PR when a reviewer
-# asks for it. See docs/implementation.md#ci-and-local-gates.
+# asks for it. The ARA artifact checks run in their own required workflow
+# (.github/workflows/ara.yml). See docs/implementation.md#ci-and-local-gates.
 
 on:
   push:
@@ -89,24 +90,6 @@ jobs:
 
       - name: Certified-evidence corpus and frozen reports reproduce
         run: make evidence-measured
-
-      - name: ARA source-span unit tests
-        run: python3 -m unittest scripts/test_check_ara_source_spans.py -v
-
-      - name: ARA source quotations match cited spans
-        run: make ara-source-spans
-
-      - name: ARA session-index unit tests
-        run: uv run --no-project --with pyyaml python -m unittest scripts/test_check_ara_session_index.py -v
-
-      - name: ARA session index is total, unique, and agrees with its files
-        run: uv run --no-project --with pyyaml python scripts/check_ara_session_index.py
-
-      - name: ARA observation lookup unit tests
-        run: uv run --no-project --with pyyaml python -m unittest scripts/test_check_ara_observations.py -v
-
-      - name: ARA observation identifiers and historical references are unambiguous
-        run: uv run --no-project --with pyyaml python scripts/check_ara_observations.py
 
       - name: Policy-copy authenticity (T7)
         run: |

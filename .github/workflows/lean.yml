@@ -1,8 +1,9 @@
 name: Lean
 
 # Optional, reviewer-triggered. The required Haskell workflow gates the Haskell
-# compiler only (docs/implementation.md#ci-and-local-gates). This one runs the Lean gate on a PR
-# when a reviewer adds the `lean` label — typically because the PR changes
+# compiler only, and the required ARA workflow the research artifact
+# (docs/implementation.md#ci-and-local-gates). This one runs the Lean gate on a
+# PR when a reviewer adds the `lean` label — typically because the PR changes
 # proofs, or review found something that should be mechanized — and re-runs on
 # every later push while the label stays. It can also be started by hand:
 #

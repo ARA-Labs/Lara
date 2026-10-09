@@ -364,7 +364,8 @@ Lean mechanization (elan / lean / lake on `PATH`; toolchain pinned in
 ```
 
 The required `Haskell` workflow builds and tests the checker on every push
-to `main` and every PR into it. The Lean side runs outside it: `make lean-gate`
+to `main` and every PR into it, and the required `ARA` workflow checks the
+research artifact under `ara/`. The Lean side runs outside it: `make lean-gate`
 (the build, the `AxCheck.lean` axiom audit, and the Lean examples) also runs on
 a PR in the optional Lean workflow when a reviewer adds the `lean` label, while
 `make cross-check` (the Haskell-Lean conformance gates) runs only locally
