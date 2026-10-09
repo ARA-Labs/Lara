@@ -221,8 +221,9 @@ reading, the demo write-ups reconstruct checked artifacts as a
 [paper/review/rebuttal exchange](docs/demos/d1-rebuttal-replay.md),
 [mechanical review comments](docs/demos/d2-mechanical-reviewer.md),
 [cross-paper abstract excerpts](docs/demos/d3-agreement-map.md), a
-[philosophy-of-mathematics debate](docs/demos/d4-philmath.md), and
-[withdrawing an assumed axiom](docs/demos/d5-axiom-withdrawal.md).
+[philosophy-of-mathematics debate](docs/demos/d4-philmath.md),
+[withdrawing an assumed axiom](docs/demos/d5-axiom-withdrawal.md), and
+[a checked statistical method and its limits](docs/demos/d6-bhl-method-support.md).
 
 ## Checking evidence files in a package
 
@@ -295,6 +296,41 @@ them). The worked demo is the
 [cross-paper agreement map](docs/demos/d3-agreement-map.md); for papers kept
 in separate files, a `.laramap` composes them (see [Example](#example)).
 
+## The statistical method behind a claim
+
+Argument checking settles whether a claim's declared support survives attack.
+Lara's mechanized Belief Hoare Logic (BHL) checks a different question:
+under explicit assumptions, does a modeled statistical procedure establish
+its specified postcondition? It does not establish that a physical experiment
+was sound or that the model describes the experiment.
+
+A method judgment has three parts, and the checker keeps them separate: a
+*conditional* method is valid under the exact model and program; a *modeled
+application* adds genuine precondition satisfaction and the actual execution;
+*artifact warrant* says the selected support and every named applicability
+dependency stay admitted, checked, justified and unblocked. Modeled application
+binds a particular initial world and execution; it does not certify that a
+physical run occurred. An argument can be **justified** while
+the precondition of the method it serves is false, and statistical belief can
+hold while the alternative is false. Support never discharges a mathematical
+premise.
+
+In the worked example, quarantining a named applicability dependency removes
+the warrant that uses it while the conditional method stays valid.
+Independent support for the same claim survives. A copied certificate cannot
+attest an edited source: a harmless addition still invalidates the old
+certificate and requires an explicitly rebound one. A second example gives
+two complete test histories with the same nonempty submitted record but
+different method conclusions. That record alone cannot determine the conclusion.
+
+For a prose-first walkthrough of those boundaries, see
+[the D6 demo](docs/demos/d6-bhl-method-support.md). The
+[BHL theory record](docs/theory-bhl.md) contains the durable contracts,
+mechanized results, acceptance evidence and
+[reference audit](docs/theory-bhl.md#how-does-the-theory-map-to-the-reference). BHL adds no
+`.lara` syntax: it lives in the Lean development under `lean/Lara/BHL/` with
+worked examples in `lean/Lara/Examples/`.
+
 ## Quick start
 
 To use the checker without building it, install the prebuilt `lara` binary
@@ -324,7 +360,8 @@ Lean mechanization (elan / lean / lake on `PATH`; toolchain pinned in
 [`lean/lean-toolchain`](lean/lean-toolchain)):
 
 ```sh
-cd lean && lake build
+(cd lean && lake build)
+(cd lean && lake exe bhl-examples)   # run the BHL method, revision and record witnesses
 ```
 
 The required `Haskell` workflow builds and tests the checker on every push
@@ -368,6 +405,7 @@ Start with the [documentation index](docs/README.md) for reading paths and theor
 | [`docs/multi-artifact-composition-decision.md`](docs/multi-artifact-composition-decision.md) | The `.laramap` **map**: what composing independently checkable artifacts means, the manifest and composite-verdict grammars, why a map is a recheck rather than a build, and what v1 refuses |
 | [`docs/substrate-decision.md`](docs/substrate-decision.md) | Why the core is Haskell and the front-end Python |
 | [`docs/mechanization-plan.md`](docs/mechanization-plan.md), [`lean/README.md`](lean/README.md) | The Lean 4 development: what is mechanized, per-result pointers |
+| [`docs/theory-bhl.md`](docs/theory-bhl.md) | Belief Hoare Logic: architectural rationale, method and artifact-binding contracts, reference audit, mechanized results and acceptance evidence ([exact theorem inventory](docs/bhl-theorem-inventory.jsonl)) |
 | [`docs/performance.md`](docs/performance.md) | What the checker-performance bench measures, how to run it, and dated snapshots from a retired harness, kept as upper bounds |
 | [`docs/engineering-plan.md`](docs/engineering-plan.md) | The engineering plan: build order and the module dependency graph |
 | [`m0/annotation-summary.md`](m0/annotation-summary.md) | The semantic corpus study that froze the scheme vocabulary, leaf grain, adapter portfolio, and defeat conventions |
@@ -418,6 +456,16 @@ example, corpus unit, and generated mutant. Property, golden, mutation, and
 differential tests are conformance evidence for the Haskell checker, never a
 substitute for the theorems (spec §9). So the tool that judges arguments has
 its own argument for correctness.
+
+The Belief Hoare Logic development follows the same proof discipline.
+Its soundness, relative completeness and artifact-composition results are
+proved in Lean without `sorry` or axioms beyond the standard trio. The
+[theorem inventory](docs/bhl-theorem-inventory.jsonl) records exact statements
+and explicit `AxCheck.lean` entries. The theory uses pinned Mathlib imports
+and their transitive dependencies; the compiler calculus remains independent
+of those imports. The native `bhl-examples` runner exercises concrete cases;
+the proofs establish the general results under the assumptions in the
+[theory record](docs/theory-bhl.md).
 
 ## Contributing
 

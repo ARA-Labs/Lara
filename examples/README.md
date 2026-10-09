@@ -97,6 +97,14 @@ Its structural-bridge proof runs separately in Lean. These sources are tested
 directly by `WorkedExamplesSpec`; policy-pruned sources cannot be exported to
 the ordinary frozen wire anchors.
 
+The statistical-method side has its own boundary demo:
+[D6](../docs/demos/d6-bhl-method-support.md) walks the three method judgments,
+evidence-sensitive warrant loss, and one reported result fitting two complete
+test histories. Its witnesses live in the Lean examples
+([`BHLBridge.lean`](../lean/Lara/Examples/BHLBridge.lean),
+[`BHLPartialRecord.lean`](../lean/Lara/Examples/BHLPartialRecord.lean)), not in
+`.lara` sources, because BHL adds no surface syntax.
+
 ## Relationship to the planned E-series (`docs/worked-examples-plan.md`)
 
 The plan's E1–E3 / R1–R3 are the paper's coverage-matrix set. These two are complementary teaching
