@@ -367,7 +367,7 @@ the result is stated but not yet proved or mechanized._
 - **Conditions**: Established on the 60-claim stratified M0 sample at corpus pin `62e9b54`
   (single-AI annotation; only the typing field double-annotated). Family count is ~9 after
   normalizing annotator-coined names; the unsampled reserve (171 claims) is unannotated.
-- **Sources**: ["9 families / all assignable ← m0/annotation-summary.md:44 «Top-3 families cover 46/60 (77%); all 60 are assignable to the 9 families» [result]", "two-thirds ← m0/annotation-summary.md:45–46 «comparison + ablation alone carry two-thirds of the corpus» [result]"]
+- **Sources**: ["9 families / all assignable ← `git 1118109:m0/annotation-summary.md:44` «Top-3 families cover 46/60 (77%); all 60 are assignable to the 9 families» [result]", "two-thirds ← `git 1118109:m0/annotation-summary.md:45–46` «comparison + ablation alone carry two-thirds of the corpus» [result]"]
 - **Status**: supported
 - **Provenance**: user-revised
 - **Falsification criteria**: A corpus or reserve claim whose supporting argument fits none of the
@@ -389,7 +389,7 @@ the result is stated but not yet proved or mechanized._
   identities are arithmetic, but its ≥ N−1 optimality lower bound is a genuine quantified
   derivation — the corpus's one ND-shaped demand, carried by the reference backend with the
   combinatorial content as a declared theory dependency (spec §5.2, N33).
-- **Sources**: ["certifier counts ← m0/annotation-summary.md:48 «domain-checker 35, none 21, lp 3, reference-nd 1» [result]", "arithmetic character ← m0/annotation-summary.md:49–50 «overwhelmingly *arithmetic re-checks of reported tables* (deltas, ratios, aggregations, inequalities) plus a few code inspectors» [result]"]
+- **Sources**: ["certifier counts ← `git 1118109:m0/annotation-summary.md:48` «domain-checker 35, none 21, lp 3, reference-nd 1» [result]", "arithmetic character ← `git 1118109:m0/annotation-summary.md:49–50` «overwhelmingly *arithmetic re-checks of reported tables* (deltas, ratios, aggregations, inequalities) plus a few code inspectors» [result]"]
 - **Status**: supported
 - **Provenance**: user-revised
 - **Falsification criteria**: Corpus/reserve strict steps at meaningful frequency that need nested
@@ -406,7 +406,7 @@ the result is stated but not yet proved or mechanized._
   should default to per-result-cell atoms with coarser grains as explicit, minority exceptions.
 - **Conditions**: 60-claim sample at pin `62e9b54`; coarser or mixed grains cover the remaining
   quarter of claims and must stay expressible.
-- **Sources**: ["grain distribution ← m0/annotation-summary.md:66–67 «per-result-cell 45, mixed 7, per-experiment-claim 6, per-run 2» [result]"]
+- **Sources**: ["grain distribution ← `git 1118109:m0/annotation-summary.md:66–67` «per-result-cell 45, mixed 7, per-experiment-claim 6, per-run 2» [result]"]
 - **Status**: supported
 - **Provenance**: user-revised
 - **Falsification criteria**: Further annotation showing cell-level atoms are systematically the
@@ -428,7 +428,7 @@ the result is stated but not yet proved or mechanized._
   expectedly so: the corpus is polished, peer-reviewed top-venue work. By decision N29 (user,
   2026-07-22), rebut/undermine are exercised via self-authored adversarial reports/mutations
   against corpus claims at language-testing time, not by corpus mining.
-- **Sources**: ["attack profile ← m0/annotation-summary.md:55–56 «4 undercut, 0 rebut, 0 undermine, 190 none (98%)» [result]", "CQ profile ← m0/annotation-summary.md:69–70 «Mandatory: 105 met, **68 unmet-gap (39%)**, 3 unmet-defeater» [result]"]
+- **Sources**: ["attack profile ← `git 1118109:m0/annotation-summary.md:55–56` «4 undercut, 0 rebut, 0 undermine, 190 none (98%)» [result]", "CQ profile ← `git 1118109:m0/annotation-summary.md:69–70` «Mandatory: 105 met, **68 unmet-gap (39%)**, 3 unmet-defeater» [result]"]
 - **Status**: supported
 - **Provenance**: user-revised
 - **Falsification criteria**: Authored-adversarial or reserve annotation showing that gap-treatment
@@ -452,7 +452,7 @@ the result is stated but not yet proved or mechanized._
   flagged at gate time (whole-trace attack walk, dead-end-as-support, result-cell conflict) were
   resolved into spec §7/§4.3/§11 on 2026-07-22 (N30, N31), leaving the six-item wishlist
   as the whole residue.
-- **Sources**: ["gate verdict ← m0/annotation-summary.md:101 «PASS — ~90% of sampled argument shapes are expressible» [result]", "flag partition ← m0/annotation-summary.md:77 «21/60 claims (35%) carry coverage flags» [result]"]
+- **Sources**: ["gate verdict ← `git 1118109:m0/annotation-summary.md:101` «PASS — ~90% of sampled argument shapes are expressible» [result]", "flag partition ← `git 1118109:m0/annotation-summary.md:77` «21/60 claims (35%) carry coverage flags» [result]"]
 - **Status**: supported
 - **Provenance**: user-revised
 - **Falsification criteria**: Full-schema double annotation or reserve annotation pushing

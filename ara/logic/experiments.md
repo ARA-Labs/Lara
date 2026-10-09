@@ -179,7 +179,7 @@ conformance tests, not benchmark runs. Each experiment is directional; exact sta
   annotators (one per artifact, shared codebook, no cross-talk); aggregation and
   coverage-flag adjudication in `m0/annotation-summary.md`.
 - **Status**: done (2026-07-22); human affirmation of the summary on 2026-07-22.
-- **Artifacts**: `m0/` (claims-index.tsv, claim-types.tsv, sample.tsv, annotations/,
+- **Artifacts**: `m0/` at `git 1118109` (removed in `386ede6`; claims-index.tsv, claim-types.tsv, sample.tsv, annotations/,
   double-annotation.tsv, annotation-summary.md), commits `75e2a65`…`6524e8c`.
 - **Grounds**: C13, C14, C15, C16, C17.
 
