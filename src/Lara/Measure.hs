@@ -105,7 +105,7 @@ data InputMeta = InputMeta
   , imExpectedLocation :: Maybe SeededSites
   -- ^ ordered seeded ground truth (manifest column 8): every element is an
   -- admissible located report, the head is the spec-order-first one
-  -- (@docs\/localization-metric-decision.md@); 'Nothing' when the row seeds no
+  -- (@docs\/evaluation.md#metric-contracts-class-match-location-and-coverage@); 'Nothing' when the row seeds no
   -- site (@-@). Non-empty by construction, so a row cannot be seeded at
   -- nothing and thereby drop out of the location metrics' denominator
   -- unnoticed
@@ -283,7 +283,7 @@ computeDeterministic im bytes = case rowOutcome fullConfig bytes of
           , detLocation = loc
           -- location metrics are defined on the seeded expectations only
           -- (the seeded rejects and the seeded located hole); both are
-          -- measured, never gated (docs/localization-metric-decision.md).
+          -- measured, never gated (docs/evaluation.md#metric-contracts-class-match-location-and-coverage).
           , detLocationMatch = onSeeded (\_ locs -> maybe False (`elem` locs) loc)
           , detLocationPrimary = onSeeded (\primary _ -> maybe False (== primary) loc)
           , detReplayOk = case imKind im of

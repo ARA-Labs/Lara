@@ -1543,7 +1543,7 @@ inductive PublicStatus where
   deriving Repr, DecidableEq
 
 /-- One row of the verdict's `holes` section (spec §4.4,
-`docs/located-gap-decision.md` D5, D12) — mirrors `Lara.Wire.HoleRow`. Every
+`docs/theory-core.md#holes-located-gaps-and-term-level-critical-questions` D5, D12) — mirrors `Lara.Wire.HoleRow`. Every
 index is in the *supplied* unit's declaration space: `index` is the hole's
 original argument declaration index, `argId` that declaration's id,
 `obligations` its exact root obligations in order, each with its sites (the
@@ -1640,7 +1640,7 @@ def blockedQueries (keep : (String × SupportTerm) → Bool)
   BlockedProgram.blockedQueries keep done live declared declAtts keptAtts
     support queries
 
-/-- The verdict's `holes` rows (spec §4.4, `docs/located-gap-decision.md` D5),
+/-- The verdict's `holes` rows (spec §4.4, `docs/theory-core.md#holes-located-gaps-and-term-level-critical-questions` D5),
 mirroring Haskell `Lara.Driver.Internal.holeRows`: each located hole of the
 checked unit, in checked declaration order, reported at its *original*
 declaration index and id. A hole's checked index `k` is carried back through

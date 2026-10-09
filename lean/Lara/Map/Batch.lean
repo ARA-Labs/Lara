@@ -113,7 +113,7 @@ theorem crossPairs_spec {k : Attack}
 every attack it emits are *complete* support — they type with an empty
 obligation set — because the cache it ranges over keeps complete terms only.
 So a map's generated cross-member attacks are never sourced at, nor aimed at,
-a hole (spec §4.4, `docs/located-gap-decision.md` D4/D6/D9): only the members'
+a hole (spec §4.4, `docs/theory-core.md#holes-located-gaps-and-term-level-critical-questions` D4/D6/D9): only the members'
 own declared attacks can touch one. -/
 theorem crossPairs_endpoints_complete {k : Attack}
     (hk : k ∈ crossPairs canon P.defeat P.ruleLookup cross

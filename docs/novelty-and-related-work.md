@@ -1,6 +1,6 @@
 # Novelty and related work: the delta Lara must defend
 
-_The novelty-defense artifact. Consolidates the deltas scattered across `gap-resolution.md` into one place, so the paper's related-work section and the "why is this
+_The novelty-defense artifact. Consolidates the deltas scattered across `theory-core.md#support-calculus-and-obligations` into one place, so the paper's related-work section and the "why is this
 new?" rebuttal are on record before M0. Written 2026-07-21._
 
 ## 0. The framing rule (read first)

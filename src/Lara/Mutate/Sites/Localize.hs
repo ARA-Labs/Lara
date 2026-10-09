@@ -1,5 +1,5 @@
 -- | The localization site enumerators: the discriminating families of
--- @docs\/localization-metric-decision.md@ — mutants whose ground truth is a
+-- @docs\/evaluation.md#metric-contracts-class-match-location-and-coverage@ — mutants whose ground truth is a
 -- genuine prediction rather than an echo of the edit site.
 --
 -- Every other rejection enumerator publishes the constituent it edits, so its

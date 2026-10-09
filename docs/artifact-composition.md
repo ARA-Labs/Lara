@@ -1,19 +1,6 @@
-# Decision: composing independently checkable artifacts into a map
+# Maps of independently checked artifacts
 
-_Status: the composition boundary is settled, and every stage behind it has
-landed. Recorded 2026-09-10, with the first increment
-(`Lara.Map.Types`, `Lara.Map.Wire`, `test/MapWireSpec.hs`), which shipped the
-vocabulary, the two grammars, and their codecs only. Loading, qualification,
-linking, the `.laramap` driver, `--out`, and the worked example landed behind
-this record, each amending it as it went; nothing may change them without
-amending this file again. **No corpus regeneration and no freeze-tag bump is owed:** the
-layer is strictly additive above `lara-core@0.2`, and no corpus unit, mutant, wire,
-replay-identity, or golden byte changes — the only core-side edit is two additive exports of an
-existing `Lara.Wire` production. Amended 2026-10-05: the composite verdict moved to
-`map-verdict@2` with the core's `lara-core@0.3` located-gap cutover (D14). Companion to `docs/spec.md` §12 and its dated
-amendment (the versioned extension marker), `strict-backend-decision.md` (the shared-contract
-fields a member is compared on), and `rejection-surface.md` (the two-exit-code
-door story a map inherits)._
+The composition boundary is settled and every stage behind it has landed: the vocabulary, the two grammars and their codecs, loading, qualification, linking, the `.laramap` driver, `--out`, and the worked example. The layer is strictly additive above the core, so no corpus regeneration or freeze-tag bump is owed: no corpus unit, mutant, wire, replay-identity or golden byte changes, and the only core-side edit is two additive exports of an existing `Lara.Wire` production. The composite verdict is `map-verdict@2`, which rides on the core's `lara-core@0.3` located-gap cutover. Older text keeps stable `D1` to `D14` identifiers; [Legacy section identifiers](#legacy-section-identifiers) maps each to the section that now carries it. This reference is the companion to [`docs/spec.md`](spec.md) §12 and its versioned extension marker, [`strict-certificates.md#1-one-seam-for-opaque-strict-certificates`](strict-certificates.md#1-one-seam-for-opaque-strict-certificates) for the shared-contract fields a member is compared on, and [`rejection-surface.md`](rejection-surface.md) for the two-exit-code door story a map inherits.
 
 ## What a map is
 
@@ -28,7 +15,7 @@ map-relative statuses.
 There is deliberately no build system in that sentence. No hashing, no
 lockfile, no cache, no scheduler, no snapshot pinning — see D1.
 
-## D1 — A map is a recheck, not a build
+## A map is a recheck, not a build
 
 The manifest declares *where the members are*, and nothing about *what they
 were*. A member entry is exactly an alias and a path:
@@ -49,7 +36,7 @@ verdict, not by refusing to run.
 The cost is real and accepted: a map is only as reproducible as the working
 tree it is run in. That is the same contract a single `.lara` file already has.
 
-## D2 — What v1 refuses
+## What v1 refuses
 
 Excluded from v1, each because it would make the map more than a recheck:
 
@@ -82,7 +69,7 @@ syntax to express them, the audit rule is a load-stage rejection, and the last
 two are enforced by absence — the loader has no access to the notions it would
 need.
 
-## D3 — Namespace encoding: length-framed qualification
+## Namespace encoding: length-framed qualification
 
 Two members may each declare a leaf `e1` and an argument `a1`. Linking them
 requires an injective map from `(alias, local name)` to a linked identity, and
@@ -127,7 +114,7 @@ membership. **Not qualified:** `Prop`/`Term` symbols, `Pred`, `FunSym`,
 `TheoryDigest`. The split is the whole design in one line: *handles* are
 member-local and get qualified, *meanings* are shared and must not be — see D6.
 
-## D4 — Manifest grammar `lara-map@1`
+## Manifest grammar `lara-map@1`
 
 Exactly one top-level form. All five sections are required, in this order. No
 unknown tag anywhere.
@@ -186,7 +173,7 @@ and its formal target. An alignment is that kind of object one level up: an
 untrusted, attributed link between two *formal* coordinates. Reusing the record
 means the audit vocabulary is spelled once.
 
-## D5 — Composite verdict grammar `map-verdict@2`
+## Composite verdict grammar `map-verdict@2`
 
 ```text
 (map-verdict@2
@@ -234,7 +221,7 @@ linked declaration position, and there was no `holes` section.
   can be blocked, and the composite verdict's status vocabulary is the plain
   four-state one.
 
-## D6 — Alignments are checked, never applied
+## Alignments are checked, never applied
 
 An alignment says two coordinates are `same` or `different`. It is a
 *claim about the members*, evaluated against them; it is never a rewrite that
@@ -252,7 +239,7 @@ A single alignment's two coordinates must select the same *kind* of target:
 mixing `whole` with `(arg n)` is not a comparison anyone can state, and is
 rejected rather than interpreted.
 
-## D7 — Shared-contract equality compares structures, not names
+## Shared-contract equality compares structures, not names
 
 Every member is compared against the manifest on five fields. Each failure is
 `MRContract alias field` (exit 1):
@@ -298,7 +285,7 @@ name, which comparing ids alone would wave through. That is the whole point of
 having a shared contract: a map whose members silently ran under different rules
 would produce a composite verdict that means nothing.
 
-## D8 — Linking pipeline
+## Linking pipeline
 
 ```text
 qualify each member's local identities
@@ -325,7 +312,7 @@ runs. **Nothing is asserted; everything is checked** — the linked unit is an
 ordinary unit and goes through the ordinary checker, so a map cannot accept
 anything a hand-written equivalent unit would not.
 
-## D9 — Deterministic output ordering
+## Deterministic output ordering
 
 The composite verdict's order is fixed, so two runs and two implementations
 produce the same bytes:
@@ -344,7 +331,7 @@ sorts: the driver decides the canonical order and the bytes reflect exactly that
 decision, so an ordering bug in the driver is visible in the output instead of
 being hidden by a tidy-up in the printer.
 
-## D10 — Where each rule is enforced: codec, loader, or checker
+## Where each rule is enforced: codec, loader, or checker
 
 The split is:
 
@@ -382,7 +369,7 @@ index is in range. This mirrors the two extra invariants `Lara.Wire` already
 checks at its own decode boundary (unique argument ids, declared attack
 endpoints): wire well-formedness, not a checker rejection.
 
-## D11 — Error classes, precedence, and exit codes
+## Error classes, precedence, and exit codes
 
 ```text
 data MapError = MapBoundary MapBoundaryError | MapReject MapRejectError
@@ -560,16 +547,16 @@ never sees exit 1 for a map that was also ill-formed. Inside the verdict codec,
 `labels` therefore reports as a labels error even when a node index is also out
 of range.
 
-## D14 — `map-verdict@2`: located holes in a linked unit (2026-10-05)
+## Located holes in a linked unit
 
-`lara-core@0.3` (`docs/located-gap-decision.md`) accepts a unit containing a
+`lara-core@0.3` (`docs/theory-core.md#holes-located-gaps-and-term-level-critical-questions`) accepts a unit containing a
 *located hole*: an argument that type-checks with a nonempty mandatory
 obligation set. A hole is declared but is never an AF node. A map member may
 now carry one, and so may the linked unit, which `checkUnit` accepts. Under
 `map-verdict@1` that broke the verdict silently: `nodes` carried each handle's
 linked *declaration position* while `labels` and `edges` carried *AF indices*,
 and the two diverge as soon as a hole precedes a complete argument. The user
-decided the bump on 2026-10-05; the decisions it carries are these.
+decided the bump on 2026-10-05; the rulings it carries are these.
 
 **Hard cutover.** The envelope tag is `map-verdict@2` and the schema
 `lara-map-verdict@2`. Both decoders accept exactly `@2`; an `@1` envelope or
@@ -605,7 +592,7 @@ whenever the merge does not fire.
 
 **Section placement and canonical form.** `holes` follows `statuses` and is
 omitted when the linked unit has no hole; a present-but-empty section is
-refused, as the solo verdict refuses one (`docs/located-gap-decision.md` §4).
+refused, as the solo verdict refuses one (`docs/theory-core.md#wire-the-holes-section`).
 The decoder also refuses a row of the wrong shape, an undeclared alias, an
 empty or duplicated obligation list entry, and a handle that appears twice
 across `nodes` and `holes` together (a handle is a node or a hole, once). It
@@ -660,7 +647,7 @@ the hole sources by original attack declaration index. A map has no
 reader-facing attack index — the linked attack list mixes transported and
 generated attacks and is never printed — and every such attack is inert, so the
 map row carries none. A reader who needs them reads the member's own solo
-verdict. The same holds for obligation sites (`located-gap-decision.md` D12):
+verdict. The same holds for obligation sites (`theory-core.md#holes-located-gaps-and-term-level-critical-questions` D12):
 the solo row locates each obligation at its rule occurrences, the map row
 names the obligations only.
 
@@ -742,7 +729,7 @@ separate `lara inputs` plus depfiles, which is what an incremental build needs
 and what `lara deps` deliberately is not; nothing here implements it, and
 nothing here should be read as promising it on a schedule.
 
-## D12 — What qualification renames, and what the merge is for
+## What qualification renames, and what the merge is for
 
 `Lara.Map.Qualify` renames `LeafId`, `ArgId` and `GroupId` and every reference
 to them; D3's second list is what it leaves alone. Two consequences of that
@@ -802,7 +789,7 @@ atom is `justified` and then `defeated`. That non-preservation is the reason a m
 is worth computing at all (D3's cross-framework reading), so it is exhibited
 rather than apologised for.
 
-## D13 — `--out` is a product file, not a stdout redirect
+## `--out` is a product file, not a stdout redirect
 
 `lara check <file> --out <path>` writes the verdict to `path` through
 `Lara.AtomicWrite.atomicWriteFile`, so a `Makefile` rule can name a verdict file
@@ -916,7 +903,7 @@ ties to the Lean driver byte for byte.
 them reference resolution (`MBUnknownAlias`, `MBUnknownClaim`,
 `MBCoordinateOutOfRange`, and a question's `MBMixedSelector`) and alignment
 evaluation (`MRAlignmentFalse`), which consume the same coordinates and did land
-together as this record said they would. `lara check <file.laramap>` is the
+together as the contract stated they would. `lara check <file.laramap>` is the
 third CLI door, printing composite verdict bytes (`map-verdict@2` since D14) on acceptance and one
 `renderMapError` line at `mapErrorExitCode`'s 2-or-1 on failure; the `.lara` and
 `.sexp` doors are untouched, and every extension neither arm names still reaches
@@ -935,7 +922,7 @@ and performs the qualification, the merge, the cross-member saturation,
 never reads a Haskell verdict. `lara map-input <file.laramap>` emits the
 envelope, `scripts/check-map-conformance.sh` byte-compares the two drivers'
 stdout and exit codes over `test/fixtures/map/`, and `make cross-check` runs it
-(no longer the required CI; see `docs/ci-scope-decision.md`).
+(no longer the required CI; see `docs/implementation.md#ci-and-local-gates`).
 
 Four rulings about it, each of which looks arbitrary without its reason:
 
@@ -1029,7 +1016,7 @@ are checked rather than assumed (see the modules' own notes), but no test drives
 them, because reaching one means constructing a `CheckedMembers` that
 `Lara.Map.Load` cannot produce.
 
-**One coverage gap at the map level remains.** Of the three this record listed
+**One coverage gap at the map level remains.** Of the three items listed
 before the driver landed, two are closed: `test/fixtures/map/agreement` is a
 three-member map, and the permutation property is `MapSpec`'s
 `prop_memberPermutationPermutesReport` — reordering the manifest permutes
@@ -1204,3 +1191,24 @@ The cost is a constraint on the comment's layout. The lines between the
 banner's closing rule and the first bare `;` line must parse as S-expressions,
 and every malformed shape fails the property by name. Explanatory prose belongs
 after that bare `;` line, which the parser does not read.
+
+## Legacy section identifiers
+
+Earlier revisions of this material were organized as numbered decisions. Inbound references, including code comments and other documents, still cite those labels, so the table maps each to the section that now carries it.
+
+| Label | Section |
+| --- | --- |
+| `D1` | [A map is a recheck, not a build](#a-map-is-a-recheck-not-a-build) |
+| `D2` | [What v1 refuses](#what-v1-refuses) |
+| `D3` | [Namespace encoding: length-framed qualification](#namespace-encoding-length-framed-qualification) |
+| `D4` | [Manifest grammar `lara-map@1`](#manifest-grammar-lara-map1) |
+| `D5` | [Composite verdict grammar `map-verdict@2`](#composite-verdict-grammar-map-verdict2) |
+| `D6` | [Alignments are checked, never applied](#alignments-are-checked-never-applied) |
+| `D7` | [Shared-contract equality compares structures, not names](#shared-contract-equality-compares-structures-not-names) |
+| `D8` | [Linking pipeline](#linking-pipeline) |
+| `D9` | [Deterministic output ordering](#deterministic-output-ordering) |
+| `D10` | [Where each rule is enforced: codec, loader, or checker](#where-each-rule-is-enforced-codec-loader-or-checker) |
+| `D11` | [Error classes, precedence, and exit codes](#error-classes-precedence-and-exit-codes) |
+| `D12` | [What qualification renames, and what the merge is for](#what-qualification-renames-and-what-the-merge-is-for) |
+| `D13` | [`--out` is a product file, not a stdout redirect](#--out-is-a-product-file-not-a-stdout-redirect) |
+| `D14` | [Located holes in a linked unit](#located-holes-in-a-linked-unit) |

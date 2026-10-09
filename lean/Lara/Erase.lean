@@ -1,7 +1,7 @@
 /-
 # Result 9 — backend replacement (Theorem 2), Model A
 
-Mechanizes spec §9 result 9 / `docs/strict-backend-decision.md` (Theorem 2:
+Mechanizes spec §9 result 9 / `docs/strict-certificates.md#1-one-seam-for-opaque-strict-certificates` (Theorem 2:
 "backend replacement preserves claim status") under the *uniform injective
 certificate relabel* model.
 

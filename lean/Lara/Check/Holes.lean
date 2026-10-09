@@ -1,6 +1,6 @@
 /-
 Located holes: the specification views of the support-stage partition
-(spec §4.4, §8; `docs/located-gap-decision.md`).
+(spec §4.4, §8; `docs/theory-core.md#holes-located-gaps-and-term-level-critical-questions`).
 
 `argComplete`/`argHole` classify one declared argument by running support
 inference; `completeArgs`/`holeArgs` are `Args(P)` and `Holes(P)` in

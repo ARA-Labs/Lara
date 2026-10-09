@@ -48,7 +48,7 @@ docs-lean:
 	@echo "doc-gen4: lean/docbuild/.lake/build/doc/index.html"
 
 # ---------------------------------------------------------------------------
-# Gates outside the required CI (docs/ci-scope-decision.md). The required
+# Gates outside the required CI (docs/implementation.md#ci-and-local-gates). The required
 # `Haskell` workflow gates the Haskell compiler only; everything below needs a Lean build. Run them locally
 # before asking for review on any change that touches lean/, a wire contract,
 # or a golden either side emits:
@@ -57,8 +57,8 @@ docs-lean:
 #   make cross-check    # every Haskell-Lean conformance and differential gate
 #   make local-gates    # both, in that order
 #
-# `lean-gate` is also what the optional Lean workflow (.github/workflows/lean.yml)
-# runs on a PR carrying the `lean` label.
+# The optional Lean workflow runs these checks on a PR with the `lean` label,
+# except `bhl-theory`, which is part of the local gate only.
 
 lean-gate: lean-build pw-example bhl-theory axiom-withdrawal-example axiom-audit semantics-registry semantics-registry-test
 

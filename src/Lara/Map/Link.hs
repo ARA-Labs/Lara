@@ -103,7 +103,7 @@
 -- == Located holes (@lara-core\@0.3@)
 --
 -- A member may declare a /hole/: an argument that type-checks with a nonempty
--- mandatory obligation set (spec §4.4, @docs\/located-gap-decision.md@). The
+-- mandatory obligation set (spec §4.4, @docs\/theory-core.md#holes-located-gaps-and-term-level-critical-questions@). The
 -- member is accepted, and so is a linked unit that carries the hole, because
 -- 'Lara.Check.checkUnit' accepts it. A hole is declared but is never an AF
 -- node, so the linked unit has two index spaces: the linked declaration

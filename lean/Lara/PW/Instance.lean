@@ -32,7 +32,7 @@ Queries are `Atom`s. The design refines `Query_κ` to well-sorted claims over
 matching retained node has empty complete support, hence status `gap`), so
 PW0 takes the total query set and leaves the well-sortedness refinement to
 the surface layer (M5-gated, out of PW0 scope). The cost is recorded as a
-limitation in `docs/theory-pw0-outer-model.md`: `gap` currently conflates
+limitation in `docs/theory-pw.md#the-outer-frame-and-satisfaction`: `gap` currently conflates
 "out of vocabulary", "ill-sorted", "not posed", and "posed but unsupported".
 The executable layer separates only the bridge-domain case, and reports it as
 `translationUndefined` rather than as any status.

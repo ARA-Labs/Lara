@@ -3,7 +3,7 @@
 
 `Lara.Context.Link` states acceptance of a link over `SideOkHoles`, the side
 condition that asks every declared argument only to type: complete, or a
-located hole (`docs/located-gap-decision.md` §1). This module says what the
+located hole (`docs/theory-core.md#the-judgment-and-the-declaration-partition`). This module says what the
 accepted link *is* when a side carries holes, in terms of the two sides alone.
 
 * `link_accepted_holes` — the AF arguments of the accepted link are the merged

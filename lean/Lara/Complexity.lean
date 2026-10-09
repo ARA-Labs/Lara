@@ -24,7 +24,7 @@ Four layers are mechanized here:
   lemmas for the mirrors, from which consumers (e.g. the quartic witness in
   `Lara.Examples.Complexity`) assemble exact per-round costs.
 * **Universal lower bounds** (`*_cost_ge*`): `n² ≤ (groundedC F).2`
-  for every framework (constraint D4, `docs/theory-m2b-complexity.md`).
+  for every framework (constraint D4, `docs/theory-core.md#restricted-class-complexity`).
   The two-node all-attacks evaluation
   `groundedC_twoNodeAllAttacks_cost` refutes the rejected exact pointwise
   cubic inequality at `n = 2`: its full run costs `4 = 2²`, strictly below
@@ -42,7 +42,7 @@ queries of `Grounded.labelC`'s `out` scan; `statusSharedC` preserves
 `groundedC` at most once, and only after the empty-support guard; and
 `carrierStatusC` is the exposed carrier query over `Invariants.eraseAF` and
 `Invariants.claim`.  **Citation discipline** (see the cost-results citation
-discipline in `docs/theory-m2b-complexity.md`, and constraint D4 there for
+discipline in `docs/theory-core.md#restricted-class-complexity`, and constraint D4 there for
 the quantifier rule):
 `carrierStatusC_cost_le` is the paper-citable GroundedStatus upper theorem
 for the carrier surface; the generic Claim bound `statusSharedC_cost_le` is
@@ -639,7 +639,7 @@ theorem statusSharedC_fst (F : AF) (c : Claim) :
 
 /-- **The generic Claim bound**: one grounded run plus two support passes.
 **INTERNAL** (the cost-results citation discipline in
-`docs/theory-m2b-complexity.md`): this bound
+`docs/theory-core.md#restricted-class-complexity`): this bound
 is generic-claim accounting; the paper must **not** cite it as the
 restricted-class headline — the paper-citable GroundedStatus upper theorem
 for the carrier surface is `carrierStatusC_cost_le`. -/
@@ -723,7 +723,7 @@ theorem carrierStatusC_fst (canon : String → String)
   statusSharedC_fst (eraseAF F) (claim canon F p)
 
 /-- **The paper-citable GroundedStatus upper theorem**
-(`docs/theory-m2b-complexity.md`): the carrier status query pays at most
+(`docs/theory-core.md#restricted-class-complexity`): the carrier status query pays at most
 `n³(1 + n) + 2n²` attack
 queries for `n = F.size`.  Cite this — not the generic Claim bound
 `statusSharedC_cost_le` — as the restricted-class headline. -/

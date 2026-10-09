@@ -1,92 +1,25 @@
-# Lara language specification (v0.1 — frozen at M1)
+# Lara language specification
 
-_This specification is **frozen at v0.1** (M1, 2026-07-22). The language definition — TCB and
-mechanization host (§1.1), names, environment, and versioning (§2, §2.1), propositions and
-`nf`/`≡` (§3), policy language, instantiation, and admission (§4), strict backends (§5),
-support-term typing (§6.1), typed positional attacks (§7.1), compilation and grounded semantics
-(§8, §8.1, §8.2), and rejection behavior (§10.1) — is fixed; changes require a `lara-core`
-version bump (§2.1). The Haskell in `src/Lara/` is the experimental LP seed plus the two
-carve-outs — M3 builds the checker against this spec; the Lean development in `lean/` mechanizes
-the frozen metatheory (per-result pointers in §9). Sections 3–7 reflect the unified support-term
-calculus recorded in `claim-support-calculus-decision.md` and the backend-parametric strict
-interface recorded in `strict-backend-decision.md`: every argument is a term, strict/defeasible
-is a rule mode, strict certificates are opaque backend payloads, and attacks are positional._
+This specification defines the frozen v0.1 language with current core version `lara-core@0.3`. Changes to its core semantics require a version bump under §2.1. The Haskell checker in `src/Lara/` implements the language; the Lean development in `lean/` mechanizes its metatheory, with per-result pointers in §9.
 
-> **M0-frozen (2026-07-22).** The following decisions are fixed by the semantic corpus
-> study (claims C13–C17, `m0/annotation-summary.md`) and are not to be re-litigated
-> without new corpus evidence triggering their recorded flip criteria: the §3 default leaf grain
-> (per-result-cell), the §4.3 duplicate-report-group quarantine rule, the §4.5 nine-family
-> scheme vocabulary (partition frozen; spellings settled, revisitable with the ARA maintainer
-> until `empirical-v1` ships), the §5.2 adapter portfolio (arithmetic + code-inspection, LP
-> non-shipping), and the §7 defeat-layer conventions (whole-trace attack walk, dead-end → support
-> or attack, unmet mandatory CQs → holes).
+Every argument is a support term. Strict and defeasible are rule modes, strict certificates are opaque backend payloads, and attacks name positions in support terms. The [base-language design](theory-core.md) explains this calculus and its compilation, observation, update and context theorems. The [strict-certificate design](strict-certificates.md) states backend obligations and the boundaries of each adapter.
 
-> **M1-frozen (2026-07-22, the lock pass).** The corpus-independent language surface is fixed:
-> the §1.1 TCB enumeration and Lean 4 host, the §2.1 version and replay-identity tuple, the §4.1
-> instantiation and §4.2 question-accounting semantics, the §4.3 admission-as-context
-> construction, the §6.1 support-term typing rules, the §7.1 attack typing rules, the §8
-> compilation rules, the §8.1 strict-reachable `contrary` restriction (Path B), and the §10.1
-> rejection classes. Frozen definitions carry mechanization pointers into `lean/`; see
-> `m1-freeze-checklist.md` for the row-by-row record and the M2 backlog.
+## Which contracts are current?
 
-> **Source-boundary lock (2026-08-05).** The `.lara` policy-admission runtime contract is frozen in
-> `policy-admission-calculus-decision.md`. It fixes total default-admit lookup, source invalidity,
-> R8/R13/R9/core precedence, one combined policy-plus-group prune, and its canonical audit without
-> changing `lara-core@0.2`, raw `.sexp` checking, replay identity, the frozen corpus, or four-state
-> semantics. Byte-level `lara-evidence@0.1` verification remains gated.
+| Contract | Current boundary |
+| --- | --- |
+| Core and replay identity | `lara-core@0.3`; §2.1 defines the version tuple |
+| Support and located holes | A typed argument with open mandatory obligations is a reported hole, not an argumentation-framework node or a whole-unit rejection (§4.4, §6.1, §8) |
+| Claim status | `justified`, `defeated`, `contested`, `gap`; hole reports do not add a fifth status |
+| Source admission | Total default-admit policy lookup, source invalidity, R8/R13/R9/core precedence, one combined policy-plus-group prune and a canonical audit; see [evidence admission](evidence-admission-design.md) |
+| Strict adapters | Reference `nd@1`, plus optional `ra@1`, `ord@1` and `insp@1`; LP is not shipped (§5) |
+| Checker input | S-expression codec `Lara.Wire`; JSON is outside the trusted checker-input boundary (§1.1, §10.1) |
+| Concrete syntax | Separately versioned `.lara` forms in the [surface grammar](lara-surface-grammar.md) |
+| Artifact maps | `lara-map@1` manifests and `map-verdict@2` composite verdicts, separately versioned above the core (§12) |
 
-> **Portfolio completion (2026-09-07).** The §5.2 portfolio is now shipped in full:
-> `insp@1` (static code inspection, `Lara.Strict.Insp`; §9 result 10 discharged in
-> `lean/Lara/Insp.lean`) joins `ra@1` and `ord@1` as the third optional adapter, closing the
-> designed-but-unshipped clause the portfolio amendment below recorded. LP remains non-shipping — the
-> C14 flip criterion is unchanged and unmet. What an accepted `insp@1` step certifies, and why its
-> family needs a declared contrary pair where `ord@1`'s does not, is recorded in
-> `insp1-code-inspection-decision.md`. No corpus regeneration or freeze-tag bump is owed: the
-> adapter is additive at the registry, no existing unit selects it, and no corpus, wire, or
-> replay-identity bytes change. A mutation base for `S9` was not included in this
-> amendment, because `fixtures/mutants/` is frozen input row 1 of `m5-freeze-checklist.md` and a
-> new base costs a re-cut plus a full axis-(c) re-run. The later v6 snapshot added it, with an S2
-> base (541 → 595 mutants).
+The semantic corpus study fixes the per-result-cell leaf grain, duplicate-report-group quarantine, nine-family scheme vocabulary, adapter portfolio and defeat conventions. Changes to those choices require evidence against their recorded criteria; see [the corpus study](../m0/annotation-summary.md) and [corpus lowering](corpus-map.md). [Evaluation](evaluation.md) retains frozen inputs, hashes and historical measurement provenance.
 
-> **Portfolio and wire amendment (2026-09-07).** Two stale claims are corrected. (1) The
-> §5.2 shipped-adapter clause of the M0-frozen blockquote above is amended: v0.1 ships `ra@1`
-> (rational-arithmetic/table-recheck) and `ord@1` (ordered comparison) as the optional
-> adapters beside the §5.1 reference backend `nd@1`; the static code-inspection checker stays in the
-> portfolio as designed-but-unshipped (since **shipped**, see the amendment above).
-> LP remains non-shipping. (2) The wire encoding is
-> the S-expression codec of `Lara.Wire` (§1.1 TCB row 1, §10.1 R14) — there is deliberately no JSON
-> checker-input codec in the TCB; `Lara.Json` is the future untrusted LLM-producer surface.
-> See §5.2 and `m1-freeze-checklist.md` for the row updates. No corpus regeneration or
-> freeze-tag bump is owed: prose-only, with no byte change to the corpus, the wire, or replay
-> identity.
-
-> **Multi-artifact composition (2026-09-10).** A new versioned layer sits *above* the
-> frozen core: `lara-map@1` declares a flat map of independently checkable `.lara` members under one
-> shared policy, and `map-verdict@1` reports the composite result (§12). It is **additive and
-> versioned separately**: it changes no §2.1 replay identity, no `lara-core@0.2` unit or verdict
-> byte, no `Lara.Wire` tag-table entry, no §8 four-state semantics, no §10.1 rejection class, and no
-> frozen corpus or mutant input. The only edit inside the core is two additive exports of an existing
-> `Lara.Wire` production — `encodeAtom`, plus a new `decodeAtomSExpr` wrapper over the existing
-> decoder — so that a composite verdict spells a proposition in the one `<atom>` syntax instead of
-> inventing a second; no existing byte moves. Map failures carry their own versioned error sum and
-> its own exit-code split, and never classify a map fault as an R-class. **No corpus regeneration and
-> no freeze-tag bump is owed:** no corpus, mutant, wire, or replay-identity byte changes.
-
-> **Located gaps (`lara-core@0.3`, 2026-10-04).** An argument that type-checks but leaves a mandatory
-> obligation open is no longer a whole-unit rejection. It is accepted as a **hole**: it stays out of
-> the argumentation framework and is reported, with its declaration position, its id and its exact
-> mandatory obligations, in a new optional `holes` section of the verdict (§4.3 verdict grammar,
-> §4.4, §8). The named rejection kind `incomplete-argument` is retired (§10.1); R5 question
-> accounting is unchanged. The §4.3 conservative-reporting rule compares against complete declared
-> arguments, never holes. The four-state status vocabulary, the grounded labelling, and the §6.1 and
-> §7.1 typing rules are unchanged: a claim with only incomplete support reports `gap`, as it always
-> did. This is a core version change with a hard cutover (§2.1), so every committed verdict and
-> check-input byte that carries the replay identity is regenerated and a new evaluation freeze is
-> cut. A unit with no hole among its declarations, retained or quarantined, keeps its labels, edges
-> and statuses; only the core version component of its verdict changes. A quarantined hole is no
-> longer a node of the §4.3 reference framework, so its outgoing attacks no longer cause
-> `evidence-blocked`. `located-gap-decision.md` records the decisions and the rejected
-> alternatives.
+The `lara-core@0.3` cutover retires `incomplete-argument` rejection while retaining R5 question accounting. A claim with only incomplete support remains `gap`. Conservative evidence-blocking compares complete declared arguments, never holes; a quarantined hole cannot cause blocking through an outgoing attack. Units with no declared hole retain their labels, edges and statuses across that cutover, apart from the replay-version bytes.
 
 ## 0. How to read this specification (non-normative)
 
@@ -131,9 +64,9 @@ diagnostic drawn from the fixed rejection classes (§10.1).
   (compilation and grounded semantics, including the §8.1 policy
   restriction), and §9 (the mechanized results and their Lean pointers).
 
-The freeze blockquotes above record *when* each part of the definition became
-fixed and under what evidence; they matter for provenance and for proposing
-changes, and can be skipped on a first reading.
+The subject design documents collect rationale, theorem assumptions and rejected
+alternatives. This specification defines the language contract; the evaluation
+record carries historical freeze and measurement provenance.
 
 ## 1. Scope and guarantee
 
@@ -246,7 +179,7 @@ and policy-allowlisted theory digests are part of replay identity.
 The language surface is itself versioned: **`lara-core@0.3`** names the abstract syntax, the
 static judgments (§6.1, §7.1, §8, §8.1), and the wire schema — the S-expression codec of
 `Lara.Wire` (§1) — as frozen by M1, amended by the many-sorted signature at `@0.2` and by located
-gaps at `@0.3` (`located-gap-decision.md`). Each core bump is a hard cutover: the decoder accepts
+gaps at `@0.3` (`theory-core.md#holes-located-gaps-and-term-level-critical-questions`). Each core bump is a hard cutover: the decoder accepts
 exactly the current core version and refuses an input naming an earlier one as an R14 codec error.
 The
 presentation syntax is versioned separately (**`lara-syntax@0.10`**) because it may evolve against
@@ -652,7 +585,7 @@ of `D` — including when it has a raw outgoing attack onto complete support —
 a typed hole. Holes are excluded from `D` because no accepted framework contains them: were a hole a
 reference node, an unattacked hole with a typed attack onto a claim's only support would defeat that
 support in `G` while the attack is inert in `F`, and a unit with nothing quarantined would violate
-non-promotion (`located-gap-decision.md` §7).
+non-promotion (`theory-core.md#rejected-alternatives`).
 
 The rule is directed, not "block the whole component": grounded labelling reads only a node's
 transitive attackers, so forward reachability is both sound and tight. The core's labelling
@@ -702,7 +635,7 @@ there is none:
   the root obligation set (§6.1). Sites follow the same traversal as the obligations (premise
   subterms in index order, then discharge subterms in discharge-map order, then the instance itself)
   and are distinct. They are read from the checked term, never by re-running inference
-  (`lean/Lara/Check/HoleSites.lean`; `located-gap-decision.md` D12). The multi-artifact map verdict
+  (`lean/Lara/Check/HoleSites.lean`; `theory-core.md#holes-located-gaps-and-term-level-critical-questions` D12). The multi-artifact map verdict
   (§12) does not carry sites;
 - `attacks` lists, by original attack declaration index and in that order, the surviving
   successfully typed raw attacks whose source is this hole, under raw endpoint alignment and before
@@ -765,7 +698,7 @@ policy seed, the one combined prune, and its canonical audit. Audit leaf rows fo
 order: `PolicyQuarantine` first, then every causing `GroupQuarantine` once in group declaration
 order. Removed arguments and attacks follow their declaration order, and there is exactly one leaf
 row with nonempty causes for each removed leaf. Blocked reporting is derived from that same prune.
-See `policy-admission-calculus-decision.md` for the complete source contract.
+See `evidence-admission-design.md#policy-admission-at-the-source-boundary` for the complete source contract.
 
 Removing the dependent support can leave the *conditional* core query at `gap`; the same prune can
 also remove an attacker and move another query's label. Public status is therefore computed by the
@@ -825,7 +758,7 @@ located at the rule occurrences inside the hole that leave it open (positions as
 the hole's root); labels, edges and
 complete support use AF indices. Positions the core computes are local to the post-admission unit
 it checked; the driver maps them back through admission's retained-argument and retained-attack
-maps and the complete-node-to-declaration map of the partition (`located-gap-decision.md` §3).
+maps and the complete-node-to-declaration map of the partition (`theory-core.md#index-convention`).
 Rejection constituents keep their local declaration ids.
 
 An author completes a gap additively: add fresh admitted leaves as needed, then a distinct
@@ -889,7 +822,7 @@ and triggers this extension.
 A strict-mode rule instance has an empty critical-question map and no local holes. It is either
 explicitly trusted by policy or carries an opaque certificate for a fixed, versioned backend. The
 source calculus is independent of every backend's formulas, proof terms, axioms, and model theory.
-The full interface and proof obligations are fixed in `strict-backend-decision.md`.
+The full interface and proof obligations are fixed in `strict-certificates.md#1-one-seam-for-opaque-strict-certificates`.
 
 A backend registry entry provides:
 
@@ -917,9 +850,9 @@ check_beta(T, Delta, phi, kappa) = accept
 and account for every free premise or theory dependency used by the certificate. Backend
 implementations, decoders, proposition encodings, and theory formats are fixed by backend id and
 version. Artifact programs may select registered entries but cannot upload a checker, encoding,
-theory language, or axiom schema. Backend consequence must satisfy reflexivity, cut/transitivity,
-and weakening under additional premises/theory entries; non-monotonic reasoning belongs in the
-support/attack layer.
+theory language, or axiom schema. A whole-tree consequence result additionally requires reflexivity,
+cut/transitivity and weakening over premises/theory entries; registration alone does not establish
+those laws. The backend guarantees local certified-step soundness and dependency accounting.
 
 For a strict rule `r : P1, ..., Pn => C` at substitution `theta`, a certified instance checks:
 
@@ -992,7 +925,7 @@ amendment and its completion):
 2. an **ordered-comparison checker** — certifies `num_lt(A, B)` / `num_le(A, B)` between two
    numeric literals by exact rational arithmetic. Its slots are premise-only: each cited numeral
    must trace to a consulted premise slot, so a certificate can never cite a self-supplied theory
-   entry as measured evidence (`docs/ord1-corpus-extension-decision.md`). Shipped as **`ord@1`**
+   entry as measured evidence (`docs/strict-certificates.md#43-ordered-comparison-ord1`). Shipped as **`ord@1`**
    (`Lara.Strict.Ord`; §9 result 10 discharged in `lean/Lara/Ord.lean`). No corpus unit
    exercises it — a corpus extension is deferred to `corpus-v2`; the worked examples S2–S7 carry
    the demonstration.
@@ -1012,7 +945,7 @@ amendment and its completion):
    (`inspModels_absent_present_sat`); by §8.1 Path B that conflict must be carried on a defeasible
    bridge's conclusions, since a strict-reachable pattern may not overlap a `contrary` side.
    Shipped as **`insp@1`** (`Lara.Strict.Insp`; §9 result 10 discharged in
-   `lean/Lara/Insp.lean`; `docs/insp1-code-inspection-decision.md`). No corpus unit exercises it —
+   `lean/Lara/Insp.lean`; `docs/strict-certificates.md#44-static-code-inspection-insp1`). No corpus unit exercises it —
    a corpus extension is deferred to `corpus-v2` with the `ord@1` units; the worked example S9
    carries the demonstration against C09's shape.
 
@@ -1512,7 +1445,7 @@ The reference-PL implementation closes this accepted-unit premise and the §9 re
 Path A — require the contrary relation to be a total, involutive contradictory map (`−φ`, `−−φ = φ`)
 and close strict rules under transposition, which buys all four rationality postulates under grounded
 with negation living in the contrary relation rather than the proposition language. See
-`gap-resolution.md`.
+`theory-core.md#support-calculus-and-obligations`.
 
 ### 8.2 Direct claim-status semantics and status preservation
 
@@ -1664,7 +1597,7 @@ the two implementations are cross-checked byte-for-byte through the `Lara.Wire` 
    *(Mechanized as Model A: `Erase.backend_replacement` proves status invariance under a uniform
    injective certificate relabel, and `EraseTransport.backend_replacement_transport` constructs the
    relabeled well-checked program. Erasing every certificate to one marker is not an isomorphism,
-   because it can merge distinct subterms; see `strict-backend-decision.md`, Theorem 2.)*
+   because it can merge distinct subterms; see `strict-certificates.md#1-one-seam-for-opaque-strict-certificates`, Theorem 2.)*
 10. Reference-backend soundness and dependency exactness for the natural-deduction adapter; each
     additional shipped adapter must discharge the same obligations.
 11. Support adequacy: `w supports c` is decidable, being normalized structural identity of `concl(w)`
@@ -1729,7 +1662,7 @@ verdict reports `a1` in the `holes` section with the obligation `external_validi
 beside `c1`'s
 `gap` status. The worked examples under `examples/` (each with a
 derived `example.core.sexp` wire anchor and `expected.json` golden) are the M3/M5 golden-test
-artifacts built against this frozen spec (`engineering-plan.md` §5).
+artifacts built against this frozen spec (`implementation.md#test-discipline`).
 
 ### 10.1 Rejection classes (v0.1-frozen)
 
@@ -1902,7 +1835,7 @@ when the linked unit has no hole and is never present but empty. No handle appea
 Holes are reported by member handle only: a hole has no AF index, and its linked declaration
 position is an artifact of the merge. The map's own cross-member saturation never generates an
 attack sourced at or aimed at a hole; a member's declared attacks touching one are carried into the
-linked unit and treated by §7.1 and §8 like any other (`docs/located-gap-decision.md` D4, D6).
+linked unit and treated by §7.1 and §8 like any other (`docs/theory-core.md#holes-located-gaps-and-term-level-critical-questions` D4, D6).
 `map-verdict@1`, whose `nodes` used linked declaration positions, is refused.
 
 **Errors.** Map failures use their own versioned error sum with its own two-exit-code split
@@ -1919,7 +1852,7 @@ The move to `map-verdict@2` rides on the `lara-core@0.3` cutover and changes onl
 goldens (`examples/agreement-map-multi/map.verdict.sexp` and `test/fixtures/map/**/map.verdict.sexp`);
 the manifest grammar and the parity envelope are unchanged.
 
-`docs/multi-artifact-composition-decision.md` is authoritative for this section and carries the
+`docs/artifact-composition.md#maps-of-independently-checked-artifacts` is authoritative for this section and carries the
 detail that would rot if duplicated here: the two grammars, the shared-contract equality rules,
 member-alias qualification, diagnostic precedence, deterministic output ordering, and the complete
 list of what v1 refuses.

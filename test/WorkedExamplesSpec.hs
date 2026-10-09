@@ -12,7 +12,7 @@
 -- goldens pin the same bytes the CLI prints. IO lives in the test, never in the
 -- elaborator (mirrors "ElaborateSpec").
 --
--- Coverage (docs/m4a-checklist.md §2–§3):
+-- Coverage (docs/implementation.md#worked-examples–§3):
 --
 --   * __E1__ @justified-clean@ — 'Accept'; the single support @in@; status justified.
 --   * __E2__ @open-gap@        — 'Accept'; status gap (empty complete support).
@@ -1064,7 +1064,7 @@ attackCells u outcome = case outcome of
 
 -- | The measured coverage of the whole suite: every accept status, every attack
 -- kind, and rejection classes R1/R12/R10/R11 are __read off the elaborated units
--- and their verdicts__ (docs/worked-examples-plan.md §1, docs/m4a-checklist.md §2).
+-- and their verdicts__ (docs/implementation.md#worked-examples, docs/implementation.md#worked-examples).
 -- This turns the coverage matrix into evidence, not a prose claim: if some cell
 -- stops being witnessed (a status vanishes, an attack kind is dropped, a reject
 -- reclassifies), this fails.

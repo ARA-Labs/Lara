@@ -236,7 +236,7 @@ the premise-list half of that attribution, which has closed.
 A backend rejection is phrased over premise *slots* — `(prem 0)`, `(prem 1)` —
 because that is the only vocabulary the seam has: `strictCheck` hands the
 backend a positional list of premise conclusions and nothing else
-(`docs/strict-backend-decision.md` §2). Nothing else in the rejection said what
+(`docs/strict-certificates.md#2-the-abstract-strict-certificate-system`). Nothing else in the rejection said what
 slot *i* was, so the reader decoded it by hand against the policy declarations.
 
 The reason line is followed by one line per slot. **Both doors carry
@@ -412,7 +412,7 @@ with exit **0**, pinned byte for byte by `test/DifferentialSpec.hs` and `scripts
 `fixtures/corpus/hole-attack-inert.sexp` pins a hole's typed outgoing attack, listed on its row and
 contributing no edge, and `fixtures/corpus/accept-nested-hole-sites.sexp` pins obligations located at
 nested rule occurrences — inherited through a premise, through a discharge, and one question open at
-three sites (`located-gap-decision.md` D12). What did not
+three sites (`theory-core.md#holes-located-gaps-and-term-level-critical-questions` D12). What did not
 move: R5 still rejects a question in neither the discharge map nor the open set `H`, and a hole's premises, discharges and outgoing attacks are still type-checked, so an
 ill-typed attack *from* a hole rejects with its R-class. Because the checker no longer stops at the
 first incomplete argument, a later support or attack defect in the same unit is reported instead of
@@ -523,7 +523,7 @@ the "valid but unsupported" bucket by design: a rejected extractor should not
 automatically become a counter-argument. The natural assumption is the opposite of how the calculus is built, so this is
 worth stating plainly rather than leaving a reader to infer it.
 
-The seeded mutation suite quantifies the split. At evaluation freeze v6 (`docs/m5-freeze-checklist.md`), the last before
+The seeded mutation suite quantifies the split. At evaluation freeze v6 (`docs/evaluation.md#frozen-provenance-current-evaluation-freeze-v8`), the last before
 `lara-core@0.3`, 537 of 595 mutants reject (across the R-classes, the then-current
 `incomplete-argument` and `missing-conflict` kinds, and codec) and 58 are *accept* mutants; of those, 49 have a ground-truth **status change**
 (`accept-defeated` 18, `accept-contested` 9, `accept-gap` 9, `accept-evidence-blocked` 9,

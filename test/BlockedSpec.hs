@@ -20,7 +20,7 @@
 --     reference node that is not a checked node (@D \\ K@) and every checked
 --     node that lost an incoming edge — Lean @blocking_of_seed@'s @hmissing@
 --     and @hedge@ hypotheses — and the reference carrier excludes exactly the
---     typed holes (@docs\/located-gap-decision.md@ §5).
+--     typed holes (@docs\/theory-core.md#holes-located-gaps-and-term-level-critical-questions@ §5).
 --   * __No quarantine, no cost.__ A unit with no @≢@ group blocks nothing, so
 --     every frozen artifact keeps its pre-conservative-reporting verdict bytes
 --     exactly.

@@ -7,7 +7,7 @@ per-context queries become **well-sorted claims over `Σ_κ`**, and the
 executable layer gains a posing stage that runs *before* any world is
 consulted.
 
-**What this narrows.** `docs/theory-pw0-outer-model.md` limitation 2 states in
+**What this narrows.** `docs/theory-pw.md#the-outer-frame-and-satisfaction` limitation 2 states in
 print that a `gap` conflates four conditions — *out of vocabulary*,
 *ill-sorted*, *not posed*, and *posed but unsupported* — so a reader must not
 read `⟨b⟩Gap(c)` as "the target field considered this and found it
@@ -36,7 +36,7 @@ carry and `queryFault` the target's offending head. `crossCompare`'s own
 The residue is honest and recorded: separating "posed but unsupported" from
 "not posed" would need `holes(P, p)` at the instance layer, which
 `Consistency.completeClaimFor` deliberately does not compute (N17 point (1),
-a modeling convention). `docs/theory-pw-sorted-queries.md` §4 carries it.
+a modeling convention). `docs/theory-pw.md#sorted-queries-and-the-outer-surface` carries it.
 
 **What this does not change.** PW0's frame, satisfaction, `crossCompare`,
 `CrossResult` and `IncomparabilityReason` are untouched: the refinement is a
@@ -304,12 +304,12 @@ theorem srcStatus_gap_iff_not_addresses {κ : Context} (w : World κ) (c : Atom)
   (srcStatus_iff_cmpStatus w c Status.gap).trans
     (cmpStatus_gap_iff_not_addresses w c)
 
-/-- **"Posed but unsupported" is not a `gap` cause in this model.** Every
-argument an accepted unit retains is *complete* — `Compile.CheckedNode.valid`
-carries the empty obligation list — so an addressed claim has nonempty complete
-support and `statusC` cannot gap on it. This is the residue of limitation 2
-made precise: the fourth condition collapses into the third by theorem, not by
-omission. -/
+/-- **Complete support excludes a `gap`.** `Addresses` means nonempty complete
+support, not merely a declared claim or an incomplete attempt. Every retained
+AF node is complete, while the accepted unit may also retain located holes
+outside that graph. An incomplete-only attempt therefore still reports `gap`.
+This observation does not expose the unit's separate located-hole report;
+it distinguishes complete support from its absence. -/
 theorem not_gap_of_addresses {κ : Context} (w : World κ) (c : Atom)
     (h : Addresses w c) : cmpStatus w c ≠ Status.gap :=
   fun hg => (cmpStatus_gap_iff_not_addresses w c).mp hg h
@@ -798,7 +798,7 @@ statements about the two signatures and the bridge alone: the same verdict for
 *any* candidate list, acceptance predicate and status function, including at a
 target context with no worlds at all. This is what stops a vocabulary or
 sorting mismatch from being read as "the target field considered this and found
-it unsupported" — the misreading `docs/theory-pw0-outer-model.md` limitation 2
+it unsupported" — the misreading `docs/theory-pw.md#the-outer-frame-and-satisfaction` limitation 2
 had to warn about in prose. -/
 theorem notPosable_world_independent {W W' : Type} (sgS sgT : Lara.Sigma.Sigma)
     (m : SymMap) (raw : Atom)

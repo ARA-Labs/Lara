@@ -18,7 +18,7 @@ agreement with each file on every counted field:
 The session file is authoritative and the row is its projection; the
 projection rules (which file spellings are accepted, how multi-turn
 continuation blocks count) are recorded in
-``docs/ara-session-record-decision.md``. In short: events and claims
+``CONTRIBUTING.md#session-records-and-their-index``. In short: events and claims
 accumulate across ``events_logged`` / ``claims_touched``, their
 ``*_<suffix>`` continuation blocks, and nested ``turn_<n>:`` mappings;
 ``open_threads`` is the size of the LAST such block, the threads open at

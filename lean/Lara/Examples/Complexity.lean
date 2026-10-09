@@ -34,7 +34,7 @@ Three results are mechanized:
   the `d` claim has nonempty complete support, so `carrierStatusC` takes
   the grounded branch and pays the complete `groundedC` count.
 
-**Quantifier discipline (constraint D4, `docs/theory-m2b-complexity.md`).**
+**Quantifier discipline (constraint D4, `docs/theory-core.md#restricted-class-complexity`).**
 Together with
 `quartic_size` and `groundedC_cost_le`, this is a *worst-case* `Θ(n⁴)`
 result over the fixed-context realizable class — an existential family on
@@ -133,7 +133,7 @@ def quarticAF : Nat → Invariants.StructuredAF
         attack := quarticAttack k }
 
 /-- **The frozen node count** (statement frozen by the decision
-record, `docs/theory-m2b-complexity.md`). -/
+record, `docs/theory-core.md#restricted-class-complexity`). -/
 theorem quartic_size (k : Nat) : (quarticAF k).size = 3 * k := by
   cases k with
   | zero => rfl
@@ -1393,7 +1393,7 @@ private theorem quartic_iterC_ge (k : Nat) :
 instrumented grounded run on the erased carrier pays at least `k⁴` attack
 queries: `3k` rounds, of which every round past the first pays ≥ `k³`.
 
-**Quantifier discipline** (constraint D4, `docs/theory-m2b-complexity.md`):
+**Quantifier discipline** (constraint D4, `docs/theory-core.md#restricted-class-complexity`):
 together with
 `quartic_size` and `groundedC_cost_le` this is a *worst-case* `Θ(n⁴)` result
 over the fixed-context realizable class — an existential statement about a
@@ -1467,7 +1467,7 @@ private theorem quartic_carrierStatus_ge_grounded (k : Nat) :
 For `2 ≤ k`, the shared carrier-status query on the
 realizable witness at the `d` claim pays at least `k⁴` attack queries.
 
-**Quantifier discipline** (constraint D4, `docs/theory-m2b-complexity.md`):
+**Quantifier discipline** (constraint D4, `docs/theory-core.md#restricted-class-complexity`):
 together with
 `quartic_size` and `carrierStatusC_cost_le`, this is the tight *worst-case*
 degree result for the actual carrier-status surface — an existential

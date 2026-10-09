@@ -1,7 +1,7 @@
 # The claim-support calculus
 
 _The frozen core of LARA v0.1 (source of truth: `docs/spec.md` §1–§8, settled by
-`docs/claim-support-calculus-decision.md`). One support-term language; strict/defeasible is a rule
+`docs/theory-core.md#support-calculus-and-obligations`). One support-term language; strict/defeasible is a rule
 mode; strict certificates are opaque backend payloads; attacks are positional._
 
 ## 1. Scope and guarantee
@@ -59,7 +59,7 @@ leaves; their quarantine seed is then unioned with the policy seed to construct 
 context. Admission creates neither attacks nor a fifth core status; conservative source reporting may
 publish `evidence-blocked` for affected roots while retaining any conditional core diagnostic. The
 runtime contract and compatibility boundary are fixed in
-`docs/policy-admission-calculus-decision.md`.
+`docs/evidence-admission-design.md#policy-admission-at-the-source-boundary`.
 
 ## 4. Support terms and dependencies
 
@@ -103,7 +103,7 @@ defeated  if supports exist and every one is out
 ```
 
 **Two definitional points remain open** (must close before M1 freeze; see
-`docs/mechanization-plan.md` §5): the hole-vs-complete-alternative case (spec §8, self-flagged), and
+`docs/implementation.md#what-the-lean-development-mechanizes`): the hole-vs-complete-alternative case (spec §8, self-flagged), and
 `contested`-SCC provenance reporting. LARA is non-monotonic at the consequence level across framework
 extensions (C06), while the internal transfer operator is monotone over a finite-height lattice (C07).
 

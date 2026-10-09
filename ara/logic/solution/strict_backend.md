@@ -1,6 +1,6 @@
 # The backend-parametric strict-certificate interface
 
-_Source of truth: `docs/spec.md` §5 and `docs/strict-backend-decision.md`. This is the one seam for
+_Source of truth: `docs/spec.md` §5 and `docs/strict-certificates.md#1-one-seam-for-opaque-strict-certificates`. This is the one seam for
 strict deductive steps. It replaces the earlier LP-specific strict fragment (the pivot recorded in
 trace N05); LP is now an optional adapter._
 
@@ -23,7 +23,7 @@ Two ways a rule is strict: **certified** (a registered backend discharges the in
 **trusted-policy** (an indefeasible domain law, `assurance = trusted`). Reports distinguish
 `certified(β, theory-digest)` from `trusted-policy`; only the first receives the soundness guarantee.
 
-## 2. The backend interface and six obligations
+## 2. The backend interface and obligations
 
 A registered backend supplies `encode_β : prop → Form_β`, `check_β : Theory_β → List Form_β → Form_β →
 Cert_β → accept | reject`, `uses_β : Cert_β → Set Dependency`, and a semantics `models_β` (written
@@ -37,8 +37,8 @@ Cert_β → accept | reject`, `uses_β : Cert_β → Set Dependency`, and a sema
    `uses_β(κ)`, and every returned dependency names a declared slot or a `T` entry.
 5. **Closed registration** — implementation, decoder, encoding, and admissible theory format are fixed
    by `(β, version)`; artifacts cannot upload code, axioms, or a new encoding.
-6. **Structural consequence laws** — `models_β` has reflexivity, cut/transitivity, and weakening. A
-   non-monotonic reasoner is not a strict backend; it belongs in the support/attack layer.
+
+Whole-tree consequence additionally requires reflexivity, cut/transitivity and weakening. These were listed as a sixth obligation in the original paper interface, but the mechanized `Strict.Backend` record does not require them. Registration guarantees local soundness and dependency accounting; the homogeneous-tree corollary separately assumes those extra laws.
 
 The backend receives only normalized proposition encodings; it never sees support terms, argument ids,
 attacks, provenance, or statuses. Its return is only accept/reject + dependencies + diagnostics. No

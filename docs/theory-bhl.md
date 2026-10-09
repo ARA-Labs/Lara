@@ -16,7 +16,7 @@ Lara uses BHL as its statistical-method component alongside argumentation and co
 
 Neither statistical belief nor Lara support implies empirical truth. Support for an assumption cannot establish that assumption or knowledge of it in BHL. Residual assumptions remain visible even when evidence supports their applicability. Interpretation fidelity, physical sampling, capture adequacy and runtime refinement remain external obligations.
 
-BHL's observation-equivalence relation differs from Lara's accepted-context bridge relation. The former supports its epistemic laws; the latter generally lacks the stronger frame laws, as recorded in the [PW0 theory](theory-pw0-outer-model.md). There is no modality coercion. Any future translation must state and prove its required conditions.
+BHL's observation-equivalence relation differs from Lara's accepted-context bridge relation. The former supports its epistemic laws; the latter generally lacks the stronger frame laws, as recorded in the [possible-world theory](theory-pw.md#the-outer-frame-and-satisfaction). There is no modality coercion. Any future translation must state and prove its required conditions.
 
 The baseline preserves existing core, admission, quarantine, evidence and public-status semantics. It introduces no `.lara` syntax, core/wire migration, corpus regeneration, mutation-base rewrite or freeze-tag bump. It does not add physical history capture or a receipt service. Those changes would require separate approval and explicit costs.
 
@@ -872,7 +872,7 @@ The reference contract distinguishes a procedure-wide conditional assertion from
 
 Selected-warrant loss does not imply loss of every warrant for a claim. Alternative support may survive, and a separately proved modeled application may remain mathematically valid after evidence quarantine. Safe rebinding must preserve indirect defenders as well as direct attacks; absence of a new direct attack is insufficient. The wider theory of all compatible partial histories, broader revision and representation adequacy remains in [issue #23](https://github.com/ARA-Labs/Lara/issues/23).
 
-BHL accessibility is observation equality and supports S5. Lara's [accepted-context possible-world bridges](theory-pw0-outer-model.md) need not be equivalence relations. Any theorem translating their modalities needs explicit frame/relation and interpretation-preservation hypotheses; this workstream cannot import BHL's reflexivity or introspection into those bridges for free. The bridge results are candidate Lara-specific composition results. History sensitivity, basic BHL soundness and relative completeness are inherited targets; neither namespace separation nor plan approval proves a new expressiveness or novelty claim.
+BHL accessibility is observation equality and supports S5. Lara's [accepted-context possible-world bridges](theory-pw.md#the-outer-frame-and-satisfaction) need not be equivalence relations. Any theorem translating their modalities needs explicit frame/relation and interpretation-preservation hypotheses; this workstream cannot import BHL's reflexivity or introspection into those bridges for free. The bridge results are candidate Lara-specific composition results. History sensitivity, basic BHL soundness and relative completeness are inherited targets; neither namespace separation nor plan approval proves a new expressiveness or novelty claim.
 
 ## Which assumptions change, and what novelty is established?
 

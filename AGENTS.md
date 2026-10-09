@@ -9,9 +9,9 @@ in-repo backlog file; do not create one.
 - An issue states the work, why it matters, and what it costs — especially when
   the cost is a corpus regeneration or a freeze-tag bump, which must be budgeted
   rather than discovered.
-- Issues track *work*; `docs/` records *decisions*. A frozen contract, a settled
-  design, or a rejected alternative belongs in a `docs/` record even when the
-  issue that produced it closes.
+- Issues track *work*; `docs/` records current designs and contracts by subject.
+  Fold frozen contracts, settled designs and rejected alternatives into the
+  relevant subject document; do not create milestone or standalone decision files.
 - `plans/` holds only living research documents and implementation plans whose
   work has **not** landed; a plan that is executed gets deleted, with anything
   durable moved into `docs/` first. A partially executed plan stays, carrying a
@@ -42,7 +42,7 @@ the Lean proofs carry soundness, so land them alongside the code that frozen
 definitions enable.
 
 The required GitHub workflow (`Haskell`) does not build Lean or run any Haskell-Lean cross-check
-(`docs/ci-scope-decision.md`). A change that touches `lean/`, a wire contract,
+(`docs/implementation.md#ci-and-local-gates`). A change that touches `lean/`, a wire contract,
 or a golden either side emits must pass `make local-gates` before review; say
 so in the PR.
 
@@ -78,7 +78,7 @@ read alone — and treat length as a hint that such a seam may have appeared, ne
 as the reason on its own. A module stays as it is when it is long because it is
 well documented, or because what it owns is genuinely one thing (`Lara.Syntax`,
 `Lara.Wire`, `Lara.BindingAudit` are all past the guideline by design). See
-`docs/mutate-module-ownership-decision.md` for the worked case, including why the
+`docs/evaluation.md#mutation-generation-and-module-ownership` for the worked case, including why the
 one namespace that had a hard bound no longer does.
 
 ## ARA: agent-native research artifacts

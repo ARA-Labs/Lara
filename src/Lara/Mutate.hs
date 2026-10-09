@@ -1,6 +1,6 @@
 -- | The shared core of the seeded mutation generators for the M5 evaluation
 -- corpus (T1; spec §10.1 mutation table; freeze
--- @docs/m5-freeze-checklist.md@): the closed operator vocabulary, the 'Mutant'
+-- @docs/evaluation.md#frozen-provenance-current-evaluation-freeze-v8@): the closed operator vocabulary, the 'Mutant'
 -- record every generator produces, and — re-exported from
 -- "Lara.Mutate.Outcome" — the specified-outcome type.
 --
@@ -36,7 +36,7 @@
 -- why "Lara.Mutate.Outcome" is the only module this one re-exports, why the
 -- names that moved /upward/ are deliberately not re-exported, and the re-export
 -- façade alternative that was rejected as cycle-forming — is recorded in
--- @docs\/mutate-module-ownership-decision.md@.
+-- @docs\/evaluation.md#mutation-generation-and-module-ownership@.
 --
 -- == Namespace invariants
 --
@@ -370,7 +370,7 @@ data Mutant = Mutant
   -- ^ the seeded ground-truth manifestation sites, ordered: the head is the
   -- constituent the checker's spec-fixed stage order designates first, and
   -- every element is an admissible located report
-  -- (@docs\/localization-metric-decision.md@). Rendered as the
+  -- (@docs\/evaluation.md#metric-contracts-class-match-location-and-coverage@). Rendered as the
   -- @expected-location@ manifest column; 'Nothing' for mutants with no seeded
   -- site (the codec family, the constructed rebut-cycle family, and the
   -- accept-verdict family), which render @-@.

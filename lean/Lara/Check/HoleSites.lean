@@ -1,6 +1,6 @@
 /-
 Located obligation sites: where inside a hole each open mandatory question is
-left open (spec §4.4, §6.1; `docs/located-gap-decision.md` D12).
+left open (spec §4.4, §6.1; `docs/theory-core.md#holes-located-gaps-and-term-level-critical-questions` D12).
 
 A hole's root obligation set `O` is transitive: spec §6.1 unions obligations
 upward from premise and discharge subterms. A **site** of a question `q` in a

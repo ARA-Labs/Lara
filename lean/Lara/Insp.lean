@@ -1,7 +1,7 @@
 /-
 The static code-inspection domain-checker backend `insp@1` (design
-records: `docs/strict-backend-decision.md` for the backend seam and
-`docs/insp1-code-inspection-decision.md` for what an accepted step certifies).
+records: `docs/strict-certificates.md#1-one-seam-for-opaque-strict-certificates` for the backend seam and
+`docs/strict-certificates.md#44-static-code-inspection-insp1` for what an accepted step certifies).
 
 The adapter certifies the corpus's third measured strict shape — structural
 facts about referenced source — as a closed four-predicate family over

@@ -4,7 +4,7 @@ import Lara.RawAttack
 
 /-
 The program-level instance of conservative reporting for quarantine-affected
-claims (spec §4.3, `docs/located-gap-decision.md` §5).
+claims (spec §4.3, `docs/theory-core.md#conservative-reporting-with-holes`).
 
 `Lara.Blocked` proves the metatheory over an arbitrary pair of frameworks. This
 module builds a declared-index pair matching the drivers' seed computation and

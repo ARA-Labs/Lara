@@ -105,7 +105,7 @@ both Haskell and Lean. These are instances of the existing calculus; they
 introduce no new inference rule in the kernel or metatheorem.
 
 The proposed axiom-relative worlds example has a separate
-[decision record](../non-empirical-worlds-decision.md). No paper text is changed
+[decision record](../theory-pw.md#nonempirical-worlds-and-the-checked-bridge-boundary). No paper text is changed
 here. Paper-side scope wording may cite this committed example once it lands;
 the separate [D5 Lean witness](d5-axiom-withdrawal.md) now checks axiom withdrawal
 under the structural contract, without extending the CLI worlds loader.

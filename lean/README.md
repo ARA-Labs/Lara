@@ -3,7 +3,7 @@
 The machine-checked companion to the Haskell checker (`../src/`) and the spec
 (`../docs/spec.md` §9). Prover: **Lean 4** (v4.32.0; toolchain pinned in
 `lean-toolchain`). Architecture, prover choice, and per-result plan:
-`../docs/mechanization-plan.md`.
+`../docs/implementation.md#mechanization-one-core-two-implementations`.
 
 What "mechanized" means here: each frozen definition of the spec is restated
 in Lean 4 and its metatheory proved, so the claims below are machine-checked
@@ -87,7 +87,7 @@ python3 ../scripts/check-pw-example.py
 ```
 
 Its fixed host, grammar, and proof boundary are documented in
-[the outer wire contract](../docs/theory-pw-declared-wire.md).
+[the outer wire contract](../docs/theory-pw.md#declared-bridges-and-the-wire-contract).
 
 The `pw-run` executable is the finite reference for `pw-run 1` documents,
 which also declare their worlds and candidate edges. `lara pw` is the Haskell
@@ -98,7 +98,7 @@ root) requires the two to print identical bytes:
 .lake/build/bin/pw-run ../fixtures/pw/run/fields.sexp
 ```
 
-See [the outer runtime contract](../docs/theory-pw-outer-runtime.md) for the
+See [the outer runtime contract](../docs/theory-pw.md#the-haskell-runtime-and-conformance) for the
 grammar, the finite model boundary, and what `Lara.PW.Run` proves.
 
 ## Check the proofs are real
@@ -181,27 +181,27 @@ conservative coverage — replay consults nothing outside the report;
 exactness of the report is proved for the ND adapter specifically
 (result 10, exactness half).
 
-The project-level next milestone is M5. Its immediate cross-layer prerequisites
-are verdict-carried replay identity and duplicate-report groups with R9
-checking; these are language/reporting additions, not missing pieces of
-the existing Lean checker proofs. The shared serialized first-order core AST
-remains the Haskell↔Lean differential-testing anchor.
+The serialized first-order core AST is the Haskell/Lean differential-testing
+boundary. Replay identity and duplicate-report admission are implemented;
+their current contracts are in [the specification](../docs/spec.md) and
+[evidence admission](../docs/evidence-admission-design.md). See
+[implementation](../docs/implementation.md) for verification responsibilities.
 
-### Theory spine
+### Base-language compilation
 
-`Lara/Invariants.lean` and `Lara/Examples/CompilerInvariants.lean` are the M0
-modules. They freeze the M1 carrier (`StructuredAF`, a
-conclusion-labelled finite framework), the erasure to a naked Dung framework,
+`Lara/Invariants.lean` and `Lara/Examples/CompilerInvariants.lean` define the
+compilation carrier (`StructuredAF`, a conclusion-labelled finite framework),
+the erasure to a naked Dung framework,
 the two-field `CompilerInvariant` record and its necessity proof over accepted
 units, rejecting counterexamples for the carrier invariants, and adequacy
 theorems showing that claim support and four-state status factor through the
 carrier. The carrier decision and source/carrier invariant classification are
-recorded in `docs/theory-m0-compilation-invariants.md`.
+recorded in `docs/theory-core.md#compilation-carrier-and-image`.
 
-`Lara/Realizability.lean` and `Lara/Examples/Realizability.lean` are the M1
-modules. They define structured-framework isomorphism and executable
-realizability, prove the invariant's only-if direction and coverage-qualified
+`Lara/Realizability.lean` and `Lara/Examples/Realizability.lean` define
+structured-framework isomorphism and executable realizability,
+prove the invariant's only-if direction and coverage-qualified
 conclusion sortedness, establish an accepted empty-policy anchor, and refute
 invariant sufficiency with a one-node self-edge under a fixed empty-defeat
 policy. The exact paper boundary and prohibited claims are recorded in
-`docs/theory-m1-compilation-image.md`.
+`docs/theory-core.md#the-compilation-image`.

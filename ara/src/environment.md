@@ -13,7 +13,7 @@
   `rigor-reviewer`, the named baseline). See `docs/corpus-map.md`.
 - **Key dependencies**: `base >=4 && <5`, `containers`, `QuickCheck` (test suite).
 - **Protocols**: `cabal build all` (library + demo); `cabal run lara` (LP-seed demo); `cabal test`
-  (property suite). Build discipline and module dependency order in `docs/engineering-plan.md`.
+  (property suite). Build discipline and module dependency order in `docs/implementation.md#module-dependency-order`.
 - **Random seeds**: QuickCheck default (100 cases per property); not pinned — properties are laws
   expected to hold for all inputs.
 

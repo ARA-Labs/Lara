@@ -1,5 +1,5 @@
 -- | The static code-inspection domain-checker backend: @insp\@1@
--- (@docs\/insp1-code-inspection-decision.md@; @docs\/strict-backend-decision.md@
+-- (@docs\/strict-certificates.md#44-static-code-inspection-insp1@; @docs\/strict-certificates.md#1-one-seam-for-opaque-strict-certificates@
 -- §2 obligations; spec §5.2 portfolio item 3).
 --
 -- This adapter certifies the corpus's third measured strict shape — structural

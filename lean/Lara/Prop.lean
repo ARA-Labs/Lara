@@ -4,7 +4,7 @@ trusted identity relation (`≡`). This is the Lean 4 port of the frozen `Lara.P
 Haskell carve-out (`src/Lara/Prop.hs`) and discharges spec §9 **result 11**
 (support adequacy at the identity level) and the algebraic laws behind claim C01.
 
-It is the low-risk mechanization warm-up sanctioned by `docs/mechanization-plan.md`
+It is the low-risk mechanization warm-up sanctioned by `docs/implementation.md#mechanization-one-core-two-implementations`
 §6: the `nf`/`≡` carve-out is corpus-independent and already frozen, so proving it
 now validates the toolchain and the shared-core AST *before* the corpus-gated
 definitions land at M1.

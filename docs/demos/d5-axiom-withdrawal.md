@@ -128,7 +128,7 @@ cabal test all --test-show-details=direct
 make local-gates
 ```
 
-The [earlier decision](../non-empirical-worlds-decision.md) records why the
+The [earlier decision](../theory-pw.md#nonempirical-worlds-and-the-checked-bridge-boundary) records why the
 original CLI story was deferred. This witness resolves the demo using the
 separate Lean option. Paper text may describe that bounded result; it must
 not claim a checked geometric consequence or new `lara pw` capability.

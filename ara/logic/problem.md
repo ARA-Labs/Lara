@@ -23,7 +23,7 @@
 - **Statement**: Recent autoformalization work reports compile success far above faithfulness — e.g.
   "Beyond Compilation" reports 89.5% compile vs 60.5% faithfulness, a ~29-point gap; over half of
   miniF2F v1 formal statements were misaligned with their informal text until manually re-aligned.
-- **Evidence**: `docs/gap-resolution.md` (Gap 2, autoformalization faithfulness); the LLM risk is not
+- **Evidence**: `docs/theory-core.md#support-calculus-and-obligations` (Gap 2, autoformalization faithfulness); the LLM risk is not
   confined to leaves — it also chooses the proposition, inference scheme, attack type/target, and
   what to omit, so every untrusted boundary must be measured separately.
 - **Implication**: An LLM that produces formalizations cannot be trusted as the source of validity;

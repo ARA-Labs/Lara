@@ -1,6 +1,6 @@
 # ARA → Lara corpus map and M0 annotation guide
 
-_The M0 kickoff artifact (`engineering-plan.md` §2). Fixes the
+_The M0 kickoff artifact (`implementation.md#module-dependency-order`). Fixes the
 source corpus, the field-level lowering map from an ARA to a Lara program, and the annotation schema
 for the semantic corpus study. Written 2026-07-21 after inspecting the two upstream repos._
 
@@ -111,7 +111,7 @@ Per sampled claim, annotate:
 
 ### What M0 unblocks
 
-The annotation directly answers the corpus-gated decision gates in `engineering-plan.md` §6:
+The annotation directly answers the corpus-gated decision gates in `implementation.md#what-the-v01-freeze-fixed`:
 §8 #1 (optional adapter portfolio), §8 #2 (rule schemes → `Lara.Policy`), §8 #3 (defeat typing →
 `Lara.Attack`), §8 #5 (leaf granularity → `Lara.SupportTerm`), and §8 #7
 (behavioral-vs-empirical routing → optional TL-1).

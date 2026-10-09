@@ -8,7 +8,7 @@ tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT HUP INT TERM
 
 golden="$repo_root/test/update-matrices.golden"
-doc="$repo_root/docs/theory-m3-source-updates.md"
+doc="$repo_root/docs/theory-core.md"
 doc_matrix="$tmp_dir/doc-matrix.txt"
 mode="${1:-check}"
 case "$mode" in
@@ -357,7 +357,7 @@ if ! diff -u --label lean-emitted.txt --label test/update-matrices.golden \
 fi
 
 if ! diff -u --label test/update-matrices.golden \
-    --label docs/theory-m3-source-updates.md:update-matrices \
+    --label docs/theory-core.md:update-matrices \
     "$golden" "$doc_matrix"; then
   echo "update goldens: FAIL: the generated documentation matrix block is stale." >&2
   echo "  Synchronize both files with: scripts/check-update-goldens.sh --update" >&2

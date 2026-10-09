@@ -3,7 +3,7 @@
 *Demo for the M7 paper package (T1); part of the demos series.*
 
 _A demo write-up (2026-08-02). The "frozen 60-unit corpus" it renders from is
-the evaluation corpus of `../m5-freeze-checklist.md`: 60 checked programs
+the evaluation corpus of `../evaluation.md#frozen-provenance-current-evaluation-freeze-v8`: 60 checked programs
 lowered from real research artifacts, whose per-claim verdicts the checker
 already computes; this demo only re-phrases those verdicts._
 

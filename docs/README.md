@@ -1,144 +1,55 @@
-# docs/ — what lives here and how to find it
+# Documentation
 
-`docs/` records *decisions and contracts*; open work is tracked as GitHub
-issues, never here. Most files are one of three kinds: a **spec/contract**
-(normative, frozen, versioned), a **decision record** (why something is the
-way it is, with its status and date in an italic header), or a **theory note**
-(the durable record of one mechanized result). New to the project? Read the
-top-level [`../README.md`](../README.md) first, then [spec §0](spec.md) for
-the vocabulary and reading paths.
+Lara's design documents are organized by subject. Start with the [project README](../README.md) for the language and CLI, then choose the semantic layer below. The [language specification](spec.md) and [surface grammar](lara-surface-grammar.md) define the concrete contracts; the subject documents explain their design, theorem assumptions and limits.
 
-Per-module API documentation is not in `docs/`: it is generated from the
-source comments by `make docs` (Haddock for `src/`, doc-gen4 for `lean/`), and
-the `>>>` examples inside Haddock comments are run by `make doctest`.
+## Which logic answers which question?
 
-**Commit and tag anchors.** This repository's `main` starts from a fresh root
-at the v0.1.0 release; the development history before it is not included.
-Records written before the release cite commits, git objects, and tags of that
-history (the evaluation-freeze tags `m5-freeze-v1` through `m5-freeze-v6`, and
-`spec-v0.1`). They are kept as the provenance of each record, but they do not
-resolve here. The release tag is `v0.1.0`; the separate evidence evaluation uses
-`evidence-measured-inputs-v2`. The historical frozen content is checked in, and
-its tree hashes are in [`m5-freeze-checklist.md`](m5-freeze-checklist.md).
+| Subject | Canonical design and theory | What it establishes |
+| --- | --- | --- |
+| Base language | [Claim support and argumentation](theory-core.md) | Whether declared support terms type-check, how complete arguments compile into an attack graph, and how grounded claim status behaves under observations, updates and contexts |
+| Possible worlds | [Checking contexts and transport](theory-pw.md) | When explicitly declared bridges transport support or preserve status between checking contexts; includes sorted queries, wire format and runtime limits |
+| Statistical methods | [Belief Hoare Logic](theory-bhl.md) | Conditional validity of statistical methods, modeled application and evidence-dependent artifact warrants under explicit assumptions |
+| Strict certificates | [Backend interface and adapters](strict-certificates.md) | What an accepted strict step certifies relative to its premises, backend replacement, and the limits of numerical and inspection adapters |
+| Evidence admission | [Evidence and source admission](evidence-admission-design.md) | Which leaves reach the source checker, how certified inputs bind to evidence files, and what remains outside the parser, cryptographic and operating-system models |
+| Artifact composition | [Maps of independently checked artifacts](artifact-composition.md) | How manifests qualify and link members, generate cross-member attacks and report composite verdicts |
 
-## Entry points
+These layers do not establish empirical truth. A grounded support status, an accepted evidence binding and a valid statistical-method judgment have different premises and conclusions. Possible-world bridges are not automatically BHL epistemic relations. The subject documents retain those boundaries rather than presenting the layers as interchangeable logics.
 
-| Doc | What it is |
+## Where are the language contracts?
+
+| Reference | Contents |
 | --- | --- |
-| [`spec.md`](spec.md) | The frozen v0.1 language specification; §0 is the reader's guide |
-| [`lara-surface-grammar.md`](lara-surface-grammar.md) | The concrete `.lara` syntax contract, with per-version appendices |
-| [`foundations.md`](foundations.md) | The four lines of prior work Lara builds on |
-| [`novelty-and-related-work.md`](novelty-and-related-work.md) | The novelty claim and the delta table against prior art |
-| [`demos/`](demos/) | Prose-first walkthroughs of checked artifacts: a rebuttal exchange (D1), mechanical review comments (D2), a cross-paper agreement map (D3), a philosophy debate (D4), [axiom withdrawal](demos/d5-axiom-withdrawal.md) (D5), and [a checked statistical method and its limits](demos/d6-bhl-method-support.md) (D6) |
+| [Language specification](spec.md) | Frozen v0.1 language, current `lara-core@0.3`, typing, compilation, verdicts and rejection classes |
+| [Surface grammar](lara-surface-grammar.md) | Concrete `.lara` syntax and versioned appendices |
+| [Rejection reference](rejection-surface.md) | Refused inputs, located diagnostics and runnable examples |
+| [Natural-language boundary](naturalness-boundary.md) | Which prose is presentation and which declarations the checker interprets |
+| [BHL theorem inventory](bhl-theorem-inventory.jsonl) | Exact kernel types, basis citations and axiom-audit locations |
 
-## Decision records
+## Where are examples and evidence?
 
-Design decisions with status headers, roughly in dependency order:
-[`claim-support-calculus-decision.md`](claim-support-calculus-decision.md)
-(one support-term language),
-[`strict-backend-decision.md`](strict-backend-decision.md) (the opaque
-strict-certificate seam),
-[`gap-resolution.md`](gap-resolution.md) (making `(Inst)` checkable),
-[`substrate-decision.md`](substrate-decision.md) (Haskell core / Python
-front-end),
-[`policy-admission-calculus-decision.md`](policy-admission-calculus-decision.md)
-(the source-boundary leaf filter),
-[`ord1-corpus-extension-decision.md`](ord1-corpus-extension-decision.md) and
-[`insp1-code-inspection-decision.md`](insp1-code-inspection-decision.md)
-(what the `ord@1` / `insp@1` backends certify),
-[`evidence-admission-design.md`](evidence-admission-design.md) (the canonical
-ARA-packaged evidence design, `lara-evidence@0.1`, implemented;
-[issue #8](https://github.com/ARA-Labs/Lara/issues/8);
-[original-output inventory](evidence-admission-inventory.md); the additive
-measured-input freeze [`evidence-measured-inputs@2`](../measurements/frozen/evidence-measured-inputs-v2.md);
-[accepted independent review](certified-evidence-human-review-worklist.md#accepted-independent-review)
-and [applied source metadata](certified-evidence-human-review-worklist.md#published-reviewed-bindings);
-[issue #20](https://github.com/ARA-Labs/Lara/issues/20))),
-[`located-gap-decision.md`](located-gap-decision.md) (`lara-core@0.3`:
-incomplete arguments accepted as located holes),
-[`registration-receipt-contract.md`](registration-receipt-contract.md)
-(documentation-only receipt seam),
-[`naturalness-boundary.md`](naturalness-boundary.md) (where natural language
-is allowed),
-[`mechanization-scope-decision.md`](mechanization-scope-decision.md) and
-[`examples-corpus-decision.md`](examples-corpus-decision.md) (what the Lean
-side does and does not carry),
-[`mutate-module-ownership-decision.md`](mutate-module-ownership-decision.md)
-and [`localization-metric-decision.md`](localization-metric-decision.md)
-(mutation-benchmark contracts),
-[`ara-session-record-decision.md`](ara-session-record-decision.md) (the
-session-file schema, what `session_index.yaml` rows project from it, and why
-`logic_revisions` entries are append-only history),
-[`ara-observation-identity-decision.md`](ara-observation-identity-decision.md)
-(unique observation lookup and append-only historical-reference repair),
-[`multi-artifact-composition-decision.md`](multi-artifact-composition-decision.md)
-(the `.laramap` contract: linking members and generating cross-paper attacks),
-[`non-empirical-worlds-decision.md`](non-empirical-worlds-decision.md)
-(non-empirical settings), and
-[`ci-scope-decision.md`](ci-scope-decision.md) (what the required CI gates).
+The [worked-example catalogue](../examples/README.md) lists executable artifacts. The prose walkthroughs cover [rebuttal replay](demos/d1-rebuttal-replay.md), [mechanical review](demos/d2-mechanical-reviewer.md), [cross-paper agreement](demos/d3-agreement-map.md), [philosophical argument](demos/d4-philmath.md), [axiom withdrawal](demos/d5-axiom-withdrawal.md), and [statistical-method support and its limits](demos/d6-bhl-method-support.md).
 
-## Plans, references, and operational notes
+| Reference | Contents |
+| --- | --- |
+| [Corpus lowering map](corpus-map.md) | How research-artifact content becomes Lara declarations |
+| [Evidence inventory](evidence-admission-inventory.md) | Original-output inventory and evidence admission coverage |
+| [Evidence review instructions](certified-evidence-review-instructions.md) | Independent review procedure and acceptance rules |
+| [Evidence review record](certified-evidence-human-review-worklist.md) | Accepted independent review and published reviewed bindings |
+| [Evaluation](evaluation.md) | Performance, mutation and localization contracts, frozen inputs and historical measurement records |
+| [Measured-input freeze](../measurements/frozen/evidence-measured-inputs-v2.md) | Separate certified-evidence evaluation inputs |
 
-[`engineering-plan.md`](engineering-plan.md) (build order and module graph; a
-living contributor log), [`mechanization-plan.md`](mechanization-plan.md)
-(the Lean track; status table in [`../lean/README.md`](../lean/README.md)),
-[`performance.md`](performance.md) (the checker bench),
-[`releasing.md`](releasing.md) (release binaries and the Homebrew formula),
-[`rejection-surface.md`](rejection-surface.md) (what the checker refuses,
-with runnable anchors), [`corpus-map.md`](corpus-map.md) (the ARA→Lara
-lowering map), [`prior-art-lessons.md`](prior-art-lessons.md)
-(firsthand reads of neighboring systems),
-[`worked-examples-plan.md`](worked-examples-plan.md)
-(historical; the live catalogue is
-[`../examples/README.md`](../examples/README.md)).
+## How is the implementation maintained?
 
-## Theory notes — two series, one prefix
+[Implementation and verification](implementation.md) owns the architecture, mechanization discipline and CI/local-gate boundary. [Contributing](../CONTRIBUTING.md) covers setup, work tracking and research-record maintenance. [Releasing](releasing.md) covers release binaries and packaging. The [Lean catalogue](../lean/README.md) maps the proof development to its modules.
 
-The `theory-*.md` files record mechanized results, and the prefix is
-load-bearing: **`theory-m0`…`theory-m5` are the theory spine.**
+Per-module API documentation is generated from source comments with `make docs`: Haddock for Haskell and doc-gen4 for Lean. `make doctest` runs the `>>>` examples in Haddock comments. Generated API output is not committed here.
 
-- **Theory spine**, in order:
-  [`theory-m0-compilation-invariants.md`](theory-m0-compilation-invariants.md)
-  (the carrier everything quantifies over),
-  [`theory-m1-compilation-image.md`](theory-m1-compilation-image.md),
-  [`theory-m2a-observation.md`](theory-m2a-observation.md),
-  [`theory-m2b-complexity.md`](theory-m2b-complexity.md) (gate history in
-  [`theory-m2b-complexity-spike.md`](theory-m2b-complexity-spike.md), which
-  is superseded reading),
-  [`theory-m3-source-updates.md`](theory-m3-source-updates.md),
-  [`theory-m4-context-calculus-decision.md`](theory-m4-context-calculus-decision.md)
-  and [`theory-m4-contextual-adequacy.md`](theory-m4-contextual-adequacy.md)
-  with follow-ons
-  [`theory-m4-generic-observation.md`](theory-m4-generic-observation.md),
-  [`theory-m4-relational-parametricity.md`](theory-m4-relational-parametricity.md),
-  [`theory-m4-g0-interface-spike.md`](theory-m4-g0-interface-spike.md)
-  (Part B gate: re-descoped),
-  and [`theory-term-level-holes.md`](theory-term-level-holes.md),
-[`theory-m5-surface-calculus.md`](theory-m5-surface-calculus.md), plus the
-side result
-[`theory-b0-backend-compositionality.md`](theory-b0-backend-compositionality.md).
-- **Possible-world spike**: start from
-  [`theory-pw-closeout.md`](theory-pw-closeout.md), the subseries index; the
-  contracts are [`theory-pw0-outer-model.md`](theory-pw0-outer-model.md),
-  [`theory-pw-t6-structural-transport.md`](theory-pw-t6-structural-transport.md),
-  [`theory-pw-t8-status-preservation.md`](theory-pw-t8-status-preservation.md),
-  and
-  [`theory-pw-t9-path-composition.md`](theory-pw-t9-path-composition.md).
+## What prior work does Lara build on?
 
-The certified-evidence admission and source-composition results are recorded in
-[`theory-evidence-admission.md`](theory-evidence-admission.md), with explicit
-limits for byte parsing, cryptography and operating-system capture.
+Read [foundations](foundations.md) for the main sources, [novelty and related work](novelty-and-related-work.md) for the claimed differences, and [prior-art lessons](prior-art-lessons.md) for implementation lessons. The [argumentation-scheme reading note](references/yu-zenker-2020-schemes-cqs-completeness.md) and [bibliography](lara-related-work.bib) retain detailed references.
 
-The [Belief Hoare Logic theory record](theory-bhl.md) combines its architectural
-rationale, frozen statistical-method and artifact-binding contracts, mechanized
-results, acceptance evidence and the [reference audit](theory-bhl.md#how-does-the-theory-map-to-the-reference).
-The [exact theorem inventory](bhl-theorem-inventory.jsonl) records kernel types
-and axiom-audit locations.
+## How should these documents change?
 
-## Subdirectories
+Update the relevant subject document when a design or theorem contract changes. Keep its assumptions, counterexamples, trust boundaries and source mappings together. Do not create implementation-stage documents, completed plans or standalone decision records. Open work belongs in [GitHub issues](https://github.com/ARA-Labs/Lara/issues); unlanded implementation plans belong in `plans/` and are removed when executed.
 
-- [`demos/`](demos/) — the prose-first demo write-ups (see entry
-  points above).
-- `references/` — long-form reading notes on external sources feeding the
-  related-work and annotation vocabulary.
-
+Historical verification snapshots are evidence from their recorded revision, not fresh test results. The repository's `main` starts at the v0.1.0 release; older development commits and freeze tags may not resolve in this history. [Evaluation](evaluation.md) retains the frozen content and recorded hashes. Historical research traces in `ara/` and serialized corpus, example and fixture bytes remain unchanged when active documentation is reorganized. Old document paths inside those preserved artifacts refer to their recorded revision; current documentation and source-code comments use the subject references above.

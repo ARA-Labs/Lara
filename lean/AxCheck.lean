@@ -1156,7 +1156,7 @@ open Lara
 #print axioms Lara.Examples.GroundedConsistency.computed_self_claim_not_justified
 #print axioms Lara.Examples.GroundedConsistency.computed_self_claim_result7
 
--- lara-core@0.3 located gaps (spec §4.4, §8; docs/located-gap-decision.md).
+-- lara-core@0.3 located gaps (spec §4.4, §8; docs/theory-core.md#holes-located-gaps-and-term-level-critical-questions).
 -- Accepted units may carry typed arguments with open mandatory obligations as
 -- located holes. The checker partitions its retained cache once into complete
 -- nodes and holes and proves agreement with the inference-based specification
@@ -1785,7 +1785,7 @@ outside the public audit surface. -/
 #print axioms Lara.Update.nonInstance_gap_fixed
 #print axioms Lara.Update.addInstance_sink_status_monotone
 
--- Obligations and holes across updates (docs/located-gap-decision.md §6).
+-- Obligations and holes across updates (docs/theory-core.md#holes-and-the-agm-probe).
 #print axioms Lara.Update.typed_obligations_preserved
 #print axioms Lara.Update.addLeaf_obligations_preserved
 #print axioms Lara.Update.addAttack_obligations_preserved
@@ -3186,7 +3186,7 @@ F3 adds the surface corollary. -/
 #print axioms Lara.Context.compileUnit_map
 -- The projection layer: `obsGen` is `obs` with the per-export reading
 -- left open, so `obs_eq_of_ok` and `backend_replacement_congruence` below are
--- one-line corollaries of it. Rationale in docs/theory-m4-generic-observation.md §2.
+-- one-line corollaries of it. Rationale in docs/theory-core.md#generalizing-the-projection.
 #print axioms Lara.Context.obsGen_incompatible
 #print axioms Lara.Context.obsGen_rejected
 #print axioms Lara.Context.obsGen_eq_of_ok
@@ -3526,7 +3526,7 @@ F3 adds the surface corollary. -/
 -- semantic change to the module interface, and would create a third,
 -- undocumented visibility category. Absence from this ledger is meaningful
 -- only for public declarations — `#print axioms` cannot reach a `private`
--- one from another module (`docs/examples-corpus-decision.md`).
+-- one from another module (`docs/implementation.md#the-lean-example-corpus`).
 -- ---------------------------------------------------------------------------
 
 -- Lara/ND.lean (9).
@@ -3927,7 +3927,7 @@ F3 adds the surface corollary. -/
 -- M1 counterexample corpus: the frozen two-field compiler invariant is
 -- necessary but not sufficient for realizability. A separation result, so it
 -- has no cross-language differential counterpart
--- (`docs/examples-corpus-decision.md`).
+-- (`docs/implementation.md#the-lean-example-corpus`).
 #print axioms Lara.Examples.Realizability.swapFirstTwo_involutive
 #print axioms Lara.Examples.Realizability.nonempty_ground_covers
 #print axioms Lara.Examples.Realizability.nonempty_accepted_nodes

@@ -1,14 +1,15 @@
 name: Lean
 
 # Optional, reviewer-triggered. The required Haskell workflow gates the Haskell
-# compiler only (docs/ci-scope-decision.md). This one runs the Lean gate on a PR
+# compiler only (docs/implementation.md#ci-and-local-gates). This one runs the Lean gate on a PR
 # when a reviewer adds the `lean` label — typically because the PR changes
 # proofs, or review found something that should be mechanized — and re-runs on
 # every later push while the label stays. It can also be started by hand:
 #
 #   gh workflow run lean.yml --ref <branch>
 #
-# Each step is a make target, so `make lean-gate` locally runs the same thing.
+# Each step is a make target. Local `make lean-gate` also runs `bhl-theory`,
+# which this optional workflow does not invoke.
 
 on:
   pull_request:

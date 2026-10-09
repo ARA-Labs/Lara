@@ -1,4 +1,4 @@
--- | The strict-certificate seam (spec §5; @docs/strict-backend-decision.md@ §2–§3).
+-- | The strict-certificate seam (spec §5; @docs/strict-certificates.md#1-one-seam-for-opaque-strict-certificates@ §2–§3).
 --
 -- LARA has __one__ claim-support calculus and __one__ small seam for strict
 -- certificates. A strict rule instance may carry an opaque certificate checked
@@ -23,14 +23,14 @@
 --     goal (it applies its own @encode_beta@ inside);
 --   * it receives the certificate as an opaque 'SExpr' wire value that it alone
 --     decodes (closed registration — an artifact cannot upload code, axioms, or
---     a new encoding, decision doc §2 obligation 5);
+--     a new encoding, strict-certificate reference §2 obligation 5);
 --   * on acceptance it returns exactly the 'Dependency' set it consulted
 --     (dependency accountability, obligation 4).
 --
--- The @models_beta@ semantics used to /state/ soundness (obligation 3) and the
--- structural consequence laws (obligation 6) are mathematics about a backend's
--- checker, not runtime code; they live in each adapter's soundness theorem and
--- its property suite, not in this module.
+-- The @models_beta@ semantics used to /state/ soundness (obligation 3) is
+-- mathematics about a backend's checker, not runtime code. Whole-tree
+-- consequence additionally needs reflexivity, cut and weakening; registration
+-- does not establish those laws for every backend.
 --
 -- == The LCF seal
 --

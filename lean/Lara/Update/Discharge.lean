@@ -1,6 +1,6 @@
 /-
 In-place discharge of an open question at a located rule occurrence
-(`docs/located-gap-decision.md` D13; issue #14).
+(`docs/theory-core.md#holes-located-gaps-and-term-level-critical-questions` D13; issue #14).
 
 This module is the term-level half of the `dischargeOpen` source update.  It
 owns one rewrite, `dischargeAt q v π w`: at the rule occurrence `w@π` (spec §7,

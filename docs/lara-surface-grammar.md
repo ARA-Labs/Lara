@@ -1,12 +1,12 @@
-# Lara surface grammar — frozen (`lara-syntax@0.11`)
+# Lara surface grammar (`lara-syntax@0.11`)
 
-_Task **A0.5** of M4a (tracker `docs/m4a-checklist.md`).
-This document **freezes** the concrete `.lara` grammar so that Task A1's parser +
-printer (`Lara.Syntax`) and the `Program → Unit` elaborator (`Lara.Elaborate`)
-implement a fixed contract instead of inventing language semantics. It is grounded
-in what `examples/A/example.lara`, `examples/B/example.lara`,
-and `examples/A/empirical-v1.policy.lara` actually write, and in the abstract syntax
-of `src/Lara/AST.hs`._
+This document defines the concrete `.lara` grammar implemented by the parser
+and printer (`Lara.Syntax`) and the `Program → Unit` elaborator
+(`Lara.Elaborate`). The abstract checker contract is [the language
+specification](spec.md); [the base-language design](theory-core.md) covers the
+surface calculus and its preservation results.
+The grammar is grounded in the committed examples and the abstract syntax
+of `src/Lara/AST.hs`.
 
 **How to read this document (non-normative).** This is the contract for the
 concrete `.lara` syntax: what the parser accepts, what the printer emits, and
@@ -21,7 +21,7 @@ read the [README](../README.md) and a worked example
 you already know what a claim, leaf, argument, and policy are (spec §0 has
 the one-paragraph vocabulary).
 
-Historical A0.5 baseline (the status below predates later additive surface
+Historical `lara-syntax@0.1` baseline (the status below predates later surface
 versions):
 
 - **AST** — `src/Lara/AST.hs` gained two presentation-only types
@@ -88,7 +88,7 @@ positions remain assertions. The guard documents two representation exemptions
 (`SortName` erasure; `Cert`'s native payload).
 
 The runtime semantics of the existing `admission` and `duplicate-reports`
-constructs are frozen separately in `docs/policy-admission-calculus-decision.md`.
+constructs are frozen separately in `docs/evidence-admission-design.md#policy-admission-at-the-source-boundary`.
 Byte-level `lara-evidence@0.1` is implemented through `lara check-ara`; Appendix J defines its source fields and the [evidence-admission design](evidence-admission-design.md#concrete-package-contract) defines the package contract.
 
 ---
@@ -691,9 +691,9 @@ the committed `.core.sexp`):
   (elaborator default, A1). **No edits.**
 
 The inline `EXPECTED VERDICT (golden oracle)` blocks in A and B are **untouched**;
-they remain the A0 goldens frozen in `docs/m4a-checklist.md` §1.
+they remain the A0 goldens frozen in `docs/implementation.md#worked-examples`.
 
-_Frozen 2026-07-27 as Task A0.5. Gates A1 (`Lara.Syntax` + `Lara.Elaborate`)._
+The parser, printer and elaborator share this versioned grammar contract.
 
 ---
 
@@ -702,7 +702,7 @@ _Frozen 2026-07-27 as Task A0.5. Gates A1 (`Lara.Syntax` + `Lara.Elaborate`)._
 Two additive constructs over `lara-syntax@0.1`, both decoding to the same
 `lara-core@0.1` abstract syntax (spec result 12 unaffected; no Unit-reachable
 type changes). Motivation: the strict-certificate worked example
-(`examples/S1/`; `docs/worked-examples-plan.md`); the Unit-level cert path
+(`examples/S1/`; `docs/implementation.md#worked-examples`); the Unit-level cert path
 (`Lara.Strict.ND`, `Driver.buildCertOk`) predates this surface.
 
 ### A.1 Support-term assurance (arg blocks)
@@ -1721,8 +1721,8 @@ and frozen measurement byte is unchanged (F.5). Because the AST is unchanged,
 `lean/Lara/Presentation.lean`'s structured model still holds at `@0.7` and
 `scripts/check-presentation-parity.sh` stayed green throughout; no Lean work was
 owed. The `@0.7` elaborator addition (F.4) sits in the validated-not-verified
-elaborator (`ara/logic/solution/constraints.md`), which the mechanization plan
-does not cover.
+elaborator (`ara/logic/solution/constraints.md`), outside the mechanized
+checker boundary described in [implementation](implementation.md).
 
 **Why removal is the right instrument here, and why no compatibility alias.**
 Every one of these three warts has the same shape — the surface accepts an
@@ -1925,7 +1925,7 @@ over `corpus-units/**/*.core.sexp`, `corpus-units/**/expected.json`,
 `examples/**/*.core.sexp`, `examples/**/expected.json`, `fixtures/mutants` and
 `measurements/frozen` — empty. The authored `.lara` sources moved, so their
 containing trees re-pin (intentional, and recorded in
-`docs/m5-freeze-checklist.md` as provenance):
+`docs/evaluation.md#frozen-provenance-current-evaluation-freeze-v8` as provenance):
 
 | tree | `@0.6` | `@0.7` |
 | --- | --- | --- |
@@ -2100,9 +2100,9 @@ explicitly is part of the record. `scripts/check-axioms.sh` and
 `scripts/check-presentation-parity.sh` stayed green with no Lean edit.
 
 The resolver itself lives in the validated-not-verified elaborator
-(`ara/logic/solution/constraints.md`), which the mechanization plan does not
-cover; the Lean mirror carries the lowering math, and the Haskell property
-tests carry conformance.
+(`ara/logic/solution/constraints.md`), outside the mechanized checker boundary
+described in [implementation](implementation.md). The Lean mirror carries the
+lowering math, and the Haskell property tests carry conformance.
 
 ### G.7 Migration and derived artifacts
 
@@ -2497,4 +2497,4 @@ Duplicate request fields, duplicate allowlist fields or entries, unknown checker
 
 ### J.4 Which checks cover this surface extension?
 
-The Haskell printer emits `extract` after `refs` and emits a policy allowlist only when nonempty. `Lara.Presentation` mirrors the request and allowlist types without adding fields to `Lara.Unit`. `make presentation-parity surface-conformance` checks the two representations; `make evidence-cli evidence-differential` exercises the real package command and the finite typed model separately. The model's proofs and its trusted byte-parser boundary are documented in [the evidence theory note](theory-evidence-admission.md).
+The Haskell printer emits `extract` after `refs` and emits a policy allowlist only when nonempty. `Lara.Presentation` mirrors the request and allowlist types without adding fields to `Lara.Unit`. `make presentation-parity surface-conformance` checks the two representations; `make evidence-cli evidence-differential` exercises the real package command and the finite typed model separately. The model's proofs and its trusted byte-parser boundary are documented in [the evidence theory note](evidence-admission-design.md#what-successful-admission-proves).

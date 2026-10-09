@@ -16,7 +16,7 @@ accounting measure, `Formula3.byteSize` the UTF-8 length of the canonical
 S-expression).
 
 This module owns the compile-image seam (see
-`docs/theory-m2b-complexity.md`): the gadget module proves what the checker accepts, this one
+`docs/theory-core.md#restricted-class-complexity`): the gadget module proves what the checker accepts, this one
 proves what compilation makes of it and how large the result is.
 
 Task 12 adds the reduction's *correctness*.  `Formula3.Satisfiable` defines

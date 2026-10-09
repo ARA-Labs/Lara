@@ -41,7 +41,7 @@
 -- hole-sourced one included — before the attacks sourced at holes are dropped
 -- from the compiled program. Up to @lara-core\@0.2@ the support stage rejected
 -- such a unit as @incomplete-argument@; that kind is retired
--- (@docs\/located-gap-decision.md@ D3).
+-- (@docs\/theory-core.md#holes-located-gaps-and-term-level-critical-questions@ D3).
 module Lara.Check
   ( -- * Located program-level diagnostics (Lean @Program.lean@)
     DeclLoc (..)
@@ -223,7 +223,7 @@ firstDuplicate = go 0
 --
 -- That scope rule, the six @AxCheck.lean@ entries that pin the conflict scan
 -- independently of this switch, and the rejected alternative are recorded in
--- @docs\/mechanization-scope-decision.md@.
+-- @docs\/implementation.md#what-the-lean-development-mechanizes@.
 data CheckConfig = CheckConfig
   { ccNodeCompleteness :: NodeCompleteness
     -- ^ Which successfully typed declarations become AF nodes. The frozen

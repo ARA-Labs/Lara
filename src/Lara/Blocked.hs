@@ -397,7 +397,7 @@ retainedEdge p = edgeWith (map snd (unitArgs (pruneDeclared p))) (retainedAttack
 -- ---------------------------------------------------------------------------
 
 -- | The two framework carriers of spec §4.3, in declared index space
--- (@docs\/located-gap-decision.md@ §5; Lean @BlockedProgram.referenceCarrier@
+-- (@docs\/theory-core.md#holes-located-gaps-and-term-level-critical-questions@ §5; Lean @BlockedProgram.referenceCarrier@
 -- \/ @checkedCarrier@). Built only by 'carriers', from one 'Prune' and the
 -- unit the checker accepted on its checked half.
 data Carriers = Carriers

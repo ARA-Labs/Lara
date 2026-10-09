@@ -1,7 +1,7 @@
 -- | Property tests for the strict-certificate seam ("Lara.Strict") and the
 -- reference natural-deduction adapter ("Lara.Strict.ND").
 --
--- These cover the backend obligations of @docs/strict-backend-decision.md@ §2
+-- These cover the backend obligations of @docs/strict-certificates.md#1-one-seam-for-opaque-strict-certificates@ §2
 -- and the reference-adapter results of §5 as /conformance evidence/ (not
 -- soundness proofs — those are the Lean mechanization, spec §9 closing note):
 --

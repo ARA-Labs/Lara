@@ -1,6 +1,6 @@
 # Mechanization architecture (the "experiment" design)
 
-_Source of truth: `docs/mechanization-plan.md`. Because LARA's contribution is a calculus, the
+_Source of truth: `docs/implementation.md#mechanization-one-core-two-implementations`. Because LARA's contribution is a calculus, the
 mechanization + test status IS the empirical signal that grounds design decisions — this file is the
 method by which that signal is produced. The 12 required results are spec §9; their live status is
 `evidence/status/mechanization_status.md`._
@@ -142,7 +142,7 @@ definitions. Shared axiom-audit and paper-name-map edits land in a final
 additive integration commit.
 
 _Committed by N269/N270; durable theorem contract:
-`docs/theory-m5-surface-calculus.md`. Reviewed implementation-plan history:
+`docs/theory-core.md#surface-calculus-and-verified-elaboration`. Reviewed implementation-plan history:
 `git show aec9facc1ba3890016401847e6ddca09c0715795:plans/2026-08-30-m5-surface-calculus.md`;
 promoted from O110._
 
@@ -188,7 +188,7 @@ deferred to the M5 surface layer, which is why `gap` currently conflates four
 distinct conditions.
 
 _Committed by N271/N272; durable theorem contract:
-`docs/theory-pw0-outer-model.md`; proof record:
+`docs/theory-pw.md#the-outer-frame-and-satisfaction`; proof record:
 `evidence/proofs/pw0_outer_model.md`. The T7 finding is C47._
 
 ## 10. T6 transports the typing judgment, not the checker
@@ -223,7 +223,7 @@ PW-T6 translation-form constraint in `constraints.md`), partial leaf maps,
 attack correspondence (T8), and bridge composition (T9).
 
 _Committed by N275/N276; durable theorem contract:
-`docs/theory-pw-t6-structural-transport.md`; proof record:
+`docs/theory-pw.md#structural-bridges-and-exact-support-transport`; proof record:
 `evidence/proofs/pw_t6_transport.md`. The headline finding is C48._
 
 ## 11. T9 composes exact structural bridges along explicit paths
@@ -268,5 +268,5 @@ never a local status. Approximation composition and status preservation remain
 separate work; the latter still requires T8 attack correspondence.
 
 _Committed by N293/N294; durable theorem contract:
-`docs/theory-pw-t9-path-composition.md`; proof record:
+`docs/theory-pw.md#path-composition`; proof record:
 `evidence/proofs/pw_t9_path_composition.md`. Promoted from O125/O126._

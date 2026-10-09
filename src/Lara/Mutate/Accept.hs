@@ -11,7 +11,7 @@
 -- operators run and in what order ('acceptMutants'), which bases they run on
 -- ('isJustified'), and whether the result is the mutant that was asked for
 -- ('acceptStructureOk'). The parts it composes were split out along
--- the seam @docs\/mutate-module-ownership-decision.md@ records:
+-- the seam @docs\/evaluation.md#mutation-generation-and-module-ownership@ records:
 --
 -- * "Lara.Mutate.Accept.Ops" — the six constructions, and the injected
 --   vocabulary each needs.

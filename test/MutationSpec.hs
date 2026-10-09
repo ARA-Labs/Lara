@@ -439,7 +439,7 @@ publishedSites op u = [(e, seededSitesList ss, m) | (e, ss, m) <- siteSites op u
 -- rejects with the site's specified outcome and 'runCheckLocated' reports
 -- exactly the /head/ of the site's ordered ground-truth list (the
 -- spec-order-first constituent; membership follows,
--- docs\/localization-metric-decision.md). A fail-fast checker witnesses only
+-- docs\/evaluation.md#metric-contracts-class-match-location-and-coverage). A fail-fast checker witnesses only
 -- the head in one run, so this property cannot gate the non-head elements of
 -- a composite site; any operator publishing them owes them a gate of its own.
 --

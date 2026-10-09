@@ -212,7 +212,7 @@ worked case — four "papers" that each stand alone as `justified`, two of which
 become `contested` the moment they are read together, and two of which do not
 because their experimental settings differ. No member declares an edge; none
 could. The contract is in
-[`docs/multi-artifact-composition-decision.md`](docs/multi-artifact-composition-decision.md).
+[`docs/artifact-composition.md#maps-of-independently-checked-artifacts`](docs/artifact-composition.md#maps-of-independently-checked-artifacts).
 
 More worked examples, each a self-contained directory with its surface
 artifact and co-located policy (and, for single-artifact examples, a derived
@@ -253,7 +253,7 @@ their original `author = ai_inventory` remains unchanged.
 Missing or mismatching certified evidence rejects; ordinary source commands
 without a package context reject certified declarations at R8. See
 [the package contract](docs/evidence-admission-design.md#concrete-package-contract)
-and [the proof boundaries](docs/theory-evidence-admission.md).
+and [the proof boundaries](docs/evidence-admission-design.md#what-successful-admission-proves).
 
 ## How checking works
 
@@ -369,7 +369,7 @@ to `main` and every PR into it. The Lean side runs outside it: `make lean-gate`
 (the build, the `AxCheck.lean` axiom audit, and the Lean examples) also runs on
 a PR in the optional Lean workflow when a reviewer adds the `lean` label, while
 `make cross-check` (the Haskell-Lean conformance gates) runs only locally
-([why](docs/ci-scope-decision.md)).
+([why](docs/implementation.md#ci-and-local-gates)).
 
 ## Syntax versions
 
@@ -399,15 +399,14 @@ Start with the [documentation index](docs/README.md) for reading paths and theor
 | [`docs/lara-surface-grammar.md`](docs/lara-surface-grammar.md) | The `.lara` presentation syntax (current: **`lara-syntax@0.11`**), with per-version appendices — comparison blocks, value bindings, inferred instantiation, named certificate premise slots, surface strictness, premise-label citation, named `nd@1` proof terms, source-authored `nd@1` formula annotations, and certified-evidence requests |
 | [`docs/foundations.md`](docs/foundations.md) | The four lines of work Lara builds on: abstract and structured argumentation, argumentation schemes, proof-carrying code / LCF |
 | [`docs/novelty-and-related-work.md`](docs/novelty-and-related-work.md) | The novelty claim and the delta table against prior art (Micropublications, AIF, EG-VAR, Pandžić, ASPIC+, Dung, PCC/FPC) |
-| [`docs/claim-support-calculus-decision.md`](docs/claim-support-calculus-decision.md) | Why one unified support-term calculus (strict/defeasible as a rule mode) |
-| [`docs/strict-backend-decision.md`](docs/strict-backend-decision.md) | The backend-parametric strict-certificate interface and its proof obligations |
-| [`docs/ord1-corpus-extension-decision.md`](docs/ord1-corpus-extension-decision.md), [`docs/insp1-code-inspection-decision.md`](docs/insp1-code-inspection-decision.md) | What an accepted `ord@1` / `insp@1` step certifies — and, for `insp@1`, why the closed-world step is the certified content and why its family needs a declared contrary pair |
-| [`docs/multi-artifact-composition-decision.md`](docs/multi-artifact-composition-decision.md) | The `.laramap` **map**: what composing independently checkable artifacts means, the manifest and composite-verdict grammars, why a map is a recheck rather than a build, and what v1 refuses |
-| [`docs/substrate-decision.md`](docs/substrate-decision.md) | Why the core is Haskell and the front-end Python |
-| [`docs/mechanization-plan.md`](docs/mechanization-plan.md), [`lean/README.md`](lean/README.md) | The Lean 4 development: what is mechanized, per-result pointers |
+| [`docs/theory-core.md`](docs/theory-core.md) | Base-language design and theory: claim support, compilation, observations, updates, context semantics and located holes |
+| [`docs/theory-pw.md`](docs/theory-pw.md) | Possible-world semantics: checking contexts, support and status transport, path composition, sorted queries and outer runtime |
+| [`docs/strict-certificates.md`](docs/strict-certificates.md) | The strict-certificate interface, proof obligations, adapters and backend compositionality |
+| [`docs/evidence-admission-design.md`](docs/evidence-admission-design.md) | Policy and certified-evidence admission, source composition and trust boundaries |
+| [`docs/artifact-composition.md`](docs/artifact-composition.md) | `.laramap` manifests, member qualification and linking, cross-member attacks and composite verdicts |
+| [`docs/implementation.md`](docs/implementation.md), [`lean/README.md`](lean/README.md) | Implementation architecture, mechanization discipline, proof catalogue and verification gates |
 | [`docs/theory-bhl.md`](docs/theory-bhl.md) | Belief Hoare Logic: architectural rationale, method and artifact-binding contracts, reference audit, mechanized results and acceptance evidence ([exact theorem inventory](docs/bhl-theorem-inventory.jsonl)) |
-| [`docs/performance.md`](docs/performance.md) | What the checker-performance bench measures, how to run it, and dated snapshots from a retired harness, kept as upper bounds |
-| [`docs/engineering-plan.md`](docs/engineering-plan.md) | The engineering plan: build order and the module dependency graph |
+| [`docs/evaluation.md`](docs/evaluation.md) | Performance, mutation and localization contracts, frozen inputs and historical measurement evidence |
 | [`m0/annotation-summary.md`](m0/annotation-summary.md) | The semantic corpus study that froze the scheme vocabulary, leaf grain, adapter portfolio, and defeat conventions |
 | [`examples/README.md`](examples/README.md) | Index of the worked examples (A/B, E-series, R-series, S-series, running example, and the D3 agreement map in both its single-file and four-artifact forms) |
 
@@ -440,7 +439,7 @@ corpus-units/, fixtures/, measurements/   the frozen evaluation corpus
 scripts/            conformance gates, corpus/mutant generators, bench, replay
 bundles/, elaborator/   replay bundles and the untrusted Python elaborator
 containers/         pinned container for the performance bench
-docs/               spec, surface grammar, design decisions, plans, demos
+docs/               subject designs and theory, language references, evaluation, demos
 m0/, corpus/        the semantic corpus study and its sampled ARA corpus
 ara/                this project's own Agent-Native Research Artifact
 ```

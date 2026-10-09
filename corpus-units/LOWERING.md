@@ -3,7 +3,7 @@
 How the 60 claims of `m0/sample.tsv` lower into `.lara` units under
 `corpus-units/corpus-v1.policy.lara`. Every unit's header comment cites this
 file; per-claim judgment calls are recorded in that header, never silently.
-Plan: M5 T2 corpus units (tracker #48; freeze `docs/m5-freeze-checklist.md`).
+Plan: M5 T2 corpus units (tracker #48; freeze `docs/evaluation.md#frozen-provenance-current-evaluation-freeze-v8`).
 Exemplars:
 
 - `sample-specific-masks/C06` — justified (all mandatory CQs met).
@@ -98,7 +98,7 @@ Map each annotated CQ onto the nearest policy CQ of the chosen rule; then:
   annotation's basis).
 - annotated **unmet-gap** on a policy-MANDATORY question → **declare the arg
   with `open <question>`** (a *located hole*, `lara-core@0.3`,
-  `docs/located-gap-decision.md`). The checker accepts it, keeps it out of the
+  `docs/theory-core.md#holes-located-gaps-and-term-level-critical-questions`). The checker accepts it, keeps it out of the
   graph, and names it in the verdict's `holes` section with its open
   obligations; the claim reports `gap`, because `gap` is still produced
   exactly one way — empty complete support. This applies even when the

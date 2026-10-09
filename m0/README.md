@@ -1,6 +1,6 @@
 # M0 — semantic corpus study workspace
 
-Working directory for the M0 annotation task (`docs/engineering-plan.md` §2,
+Working directory for the M0 annotation task (`docs/implementation.md#module-dependency-order`,
 `docs/corpus-map.md` §4). Source corpus: the `corpus/ara-paperbench` submodule,
 pinned at `62e9b54` — all row references below are valid only at that pin.
 

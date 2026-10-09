@@ -37,7 +37,7 @@ bundle today is `bundles/walking-skeleton/` (§2).
   (`PEIncompleteArgument`), so B1 lowered an explicit hole (§11 task 4) by
   *not emitting* the incomplete argument. Since `lara-core@0.3` such an
   argument is accepted as a located hole (spec §4.4,
-  `docs/located-gap-decision.md`). The elaborator now **emits** every
+  `docs/theory-core.md#holes-located-gaps-and-term-level-critical-questions`). The elaborator now **emits** every
   instantiated argument: an unanswered question becomes an `open <question>`
   line, the argument is reported in the verdict's `holes` section with its
   open obligations, and the claim's complete-support set stays empty, so

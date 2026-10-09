@@ -66,7 +66,7 @@ partial claim translation `translate`.
 `accept` is an arbitrary `Prop`: PW0 posits *no* connection between it and any
 checker, certificate, or soundness condition. Supplying that connection is the
 structural-bridge work of T6, deliberately out of scope here (see
-`docs/theory-pw0-outer-model.md`). -/
+`docs/theory-pw.md#the-outer-frame-and-satisfaction`). -/
 structure Frame where
   /-- scientific contexts -/
   K : Type

@@ -4,7 +4,7 @@
 -- The crux is the frozen end-to-end slice: parse a committed @.lara@ file with
 -- "Lara.Syntax", lower it against the shared policy with 'prepareSource', run
 -- the opaque carrier through 'runSourceCheck',
--- and assert the frozen A0 verdict (@docs/m4a-checklist.md@ §1). IO lives here,
+-- and assert the frozen A0 verdict (@docs/implementation.md#worked-examples@ §1). IO lives here,
 -- never in the elaborator.
 --
 --   * __Example B__ (`examples/B/example.lara`) reproduces its frozen golden

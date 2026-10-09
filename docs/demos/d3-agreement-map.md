@@ -382,7 +382,7 @@ two computations meeting.
 
 Measured by `make bench-map`, the map mode of the committed bench harness.
 Its protocol, and the dated table for every accepted map anchor,
-are in [`../performance.md`](../performance.md#the-multi-artifact-map-a-separate-protocol).
+are in [`../evaluation.md#checker-performance`](../evaluation.md#the-multi-artifact-map-a-separate-protocol).
 A map is a different shape of work from the kernel bench's: it reads and parses
 several `.lara` sources, checks each, then links and checks again. So it has its
 own protocol and its own table, and none of its numbers may be set beside the
@@ -428,4 +428,4 @@ whoever wants a per-command number should measure it in the environment they
 care about.
 
 No caching was added, and none is planned: see D1 of
-[`../multi-artifact-composition-decision.md`](../multi-artifact-composition-decision.md).
+[`../artifact-composition.md#maps-of-independently-checked-artifacts`](../artifact-composition.md#maps-of-independently-checked-artifacts).

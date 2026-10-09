@@ -25,7 +25,7 @@ Two structural facts carry the whole file, and both are proved here:
   the two commute and `nf`-equality is preserved.
 
 This module only imports; no local definition is touched (PW0's gate 1
-discipline, `docs/theory-pw0-outer-model.md` §3).
+discipline, `docs/theory-pw.md#verification-and-audit`).
 -/
 
 import Lara.Support
