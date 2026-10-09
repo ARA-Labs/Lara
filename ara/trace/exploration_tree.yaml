@@ -10630,3 +10630,123 @@ tree:
   - docs/theory-bhl.md
   also_depends_on:
   - N371_bhl_contract_verification
+
+- id: N373_bhl_server_continuation
+  type: pivot
+  title: Resume the preserved BHL stack in a resource-safe server worktree
+  provenance: ai-executed
+  timestamp: '2026-10-09T01:04:30Z'
+  from: Partial reference contract and unimplemented approved stages at server handoff
+  to: Implement and verify every approved stage on the feature integration branch
+  trigger: Continue the preserved planning commit and partial PR 25 without reducing soundness, completeness,
+    artifact composition or release scope. Each stage runs actual smoke and complete local gates before
+    one squash integration.
+  evidence:
+  - docs/theory-bhl.md
+  - https://github.com/ARA-Labs/Lara/issues/24#issuecomment-6052983323
+  parent: N372_bhl_server_handoff
+  also_depends_on:
+  - N370_bhl_corrected_contract
+- id: N374_bhl_stages_01_08
+  type: experiment
+  title: Verify and squash-integrate corrected BHL metatheory, completeness and exact finite execution
+  provenance: ai-executed
+  timestamp: '2026-10-09T01:04:30Z'
+  result: PRs 25–32 completed stages 01–08 with individual native/reference smoke and complete local gates.
+    Soundness is proved by derivation induction; relative completeness constructs a finite legal-view
+    WLP representative and decodes real control-log runs with full-view and unchanged-environment correspondence.
+    Exact finite null calibration, genuine population/statistic marginals and informative alternatives
+    support the five scientific method trees and countermodels. The executable checker validates every
+    recursive rule; finite execution includes nested choices/parallelism, loops and explicit fuel exhaustion.
+    No cited foreign proof, assumed representability family or soundness axiom is used.
+  evidence:
+  - docs/theory-bhl.md
+  - docs/bhl-theorem-inventory.jsonl
+  - https://github.com/ARA-Labs/Lara/pull/25
+  - https://github.com/ARA-Labs/Lara/pull/26
+  - https://github.com/ARA-Labs/Lara/pull/27
+  - https://github.com/ARA-Labs/Lara/pull/28
+  - https://github.com/ARA-Labs/Lara/pull/29
+  - https://github.com/ARA-Labs/Lara/pull/30
+  - https://github.com/ARA-Labs/Lara/pull/31
+  - https://github.com/ARA-Labs/Lara/pull/32
+  verification_kind: formal proofs and computed conformance, not empirical research outcomes
+  also_depends_on:
+  - N373_bhl_server_continuation
+  - N370_bhl_corrected_contract
+- id: N375_bhl_artifact_composition
+  type: decision
+  title: Bind independent artifact meaning to real source, declared claims and derived warrant revision
+  provenance: ai-executed
+  timestamp: '2026-10-09T01:04:30Z'
+  choice: Implement actual accepted-source and certified evidence/audit alignment; separate conditional
+    validity, genuine modeled application and defeasible warrant. Bind authored versus declared claim
+    origins to actual input/semantic lookup and unpruned audit alternatives. Derive named-dependency quarantine
+    loss from actual prune and missing checked support; derive explicit rebind transport from structural
+    sink embedding and clean target admission rather than target warrant. Preserve complete ordinary public
+    statuses and actual located-hole coordinates/sites. Keep physical sampling, interpretation fidelity,
+    capture adequacy and external runtime refinement residual.
+  alternatives:
+  - Combine independently accepted but unrelated source/evidence witnesses
+  - Treat supported applicability as mathematical truth or knowledge
+  - Take target warrant as a rebind premise
+  - Accept caller-provided public hole rows or a coarse blocked flag
+  evidence:
+  - lean/Lara/BHL/BridgeSource.lean
+  - lean/Lara/BHL/LaraBridge.lean
+  - lean/Lara/Examples/BHLBridge.lean
+  - lean/Lara/Examples/BHLPartialRecord.lean
+  - docs/theory-bhl-decision.md
+  also_depends_on:
+  - N374_bhl_stages_01_08
+  - N368_bhl_artifact_approval
+- id: N376_bhl_integrated_acceptance
+  type: experiment
+  title: Pass joined completeness and artifact-composition kernel and runtime acceptance
+  provenance: ai-executed
+  timestamp: '2026-10-09T01:04:30Z'
+  result: 'The actual extended bhl-examples passed conditional/applied, source quarantine/dependency loss,
+    surviving alternative, stale/fresh rebind, incompatible method/interpretation/dependency/claim/origin,
+    blocked/defeated/rejected, false-precondition, CSV certified-source and CSV/JSON extraction cases.
+    Equal latest-test records with full ledger counts one/two yield opposite independent finite conclusions.
+    Actual located-hole projection retains raw index one, identity hole, root obligation site and original
+    retention coordinates. Complete make local-gates passed in 1016.87 seconds: 6811 build jobs, 5332
+    audited declarations, standard axiom trio only, 233 registry modules and ten registry regressions
+    in 304.982 seconds. The explicit unelided kernel inventory maps 1750 BHL declarations plus four implementation
+    prerequisites. All existing conformance/frozen-input gates passed. Stage 09 review/integration and
+    release are not yet recorded as completed.'
+  evidence:
+  - ara/evidence/results/bhl-integrated-acceptance-2026-10-09.log
+  - docs/bhl-theorem-inventory.jsonl
+  - docs/theory-bhl.md
+  - lean/AxCheck.lean
+  verification_kind: formal/kernel and native conformance; no empirical protocol, novelty claim or general
+    incomplete-history calculus
+  also_depends_on:
+  - N374_bhl_stages_01_08
+  - N375_bhl_artifact_composition
+- id: N377_bhl_closed_source_reduction
+  type: dead_end
+  title: Abandon repeated closed-source unfolding in dependent concrete proofs
+  provenance: ai-executed
+  timestamp: '2026-10-09T01:04:30Z'
+  hypothesis: Default decide or rfl can efficiently normalize the entire proof-bearing certified source
+    through every concrete field and checker result.
+  failure_mode: Several completed elaboration jobs timed out. Prefix isolation proved the real source
+    and quarantine pipeline succeeds, then identified expensive concrete alignment, audit-pair and full-binding-copy
+    reductions. The first complete joined audit also exposed missing bridge imports despite complete printed-name
+    coverage.
+  lesson: Reuse symbolic source-alignment and audit-projection equations, instantiate dependent claim
+    parameters explicitly, use actual Option.some_get for non-decidable audit-pair equality and kernel-checked
+    closed finite decisions, and derive exact error results from symbolic branch equations. The full corrected
+    concrete proof batch elaborated in 17.116 seconds; native and full joined gates subsequently passed.
+    Explicit audit imports must accompany printed names. No native-decision trust extension, assumed result
+    or omitted acceptance case was introduced.
+  evidence:
+  - lean/Lara/Examples/BHLBridge.lean
+  - lean/Lara/Evidence/Admission.lean
+  - lean/AxCheck.lean
+  - ara/evidence/results/bhl-integrated-acceptance-2026-10-09.log
+  also_depends_on:
+  - N375_bhl_artifact_composition
+  - N376_bhl_integrated_acceptance

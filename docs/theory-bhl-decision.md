@@ -31,7 +31,7 @@ PR 01 must specify the abstract artifact fragment and its reference interpretati
 | --- | --- | --- |
 | Conditional method validity | A checked derivation with valid underlying premises and model side conditions | Every terminating modeled run from a precondition-satisfying world has the stated postcondition |
 | Modeled application | Conditional validity, actual initial-world precondition satisfaction and the bound execution | The modeled final world satisfies the postcondition |
-| Artifact warrant under residual assumptions | Exact bindings, conditional method evidence, justified unblocked claim support and the required applicability evidence | The artifact has that conditional warrant; residual assumptions are not proved true |
+| Artifact warrant under residual assumptions | Exact accepted run, raw/checked typing, retention, grounded in-label and unblocked status for selected support and every named dependency | Selected supports remain eligible; independent `ArtifactMeaning` also requires claim association, conditional validity and applied-mode application, without proving residual assumptions true |
 
 A claim identifier does not prove interpretation fidelity. A modeled execution does not prove that physical sampling occurred as modeled. BHL's complete modeled history does not prove completeness of a submitted log. Each remains an explicit external obligation where the application needs it.
 
@@ -64,7 +64,7 @@ Keep reference BHL metatheory, concrete-instance and checker correspondence, and
 
 ### How do the implementation dependencies change?
 
-The [living plans](../plans/belief-hoare-logic/README.md) retain their PR identifiers. After soundness in PR 05, relative completeness in PR 06 is independent of the concrete PR 07-09 branch. The latter needs soundness, not relative completeness. Both branches remain mandatory.
+The [durable stage record](theory-bhl.md#what-remains-required) retains the PR identifiers and earlier acceptance. After soundness in PR 05, relative completeness in PR 06 is independent of the concrete PR 07-09 branch. The latter needs soundness, not relative completeness. Both branches remain mandatory; PR 06 is already integrated and PR 09 owns final B8 acceptance.
 
 Final acceptance B8 belongs to the last-ready PR among PR 06 and PR 09. It must include the other's merged work, reconcile the full theorem inventory and run integrated gates on its candidate tree before review. Workstream completion is recorded only after both merge. This removes an unnecessary dependency without dropping a theorem or creating a separate acceptance-only PR.
 
@@ -96,6 +96,27 @@ Let `s` be the declared source snapshot, `r` its exact accepted admission/checke
 
 Certificate checking must establish this reference meaning. Quarantine removes eligibility by pruning the selected raw dependency, while leaving the conditional method theorem untouched. Rebinding across a source edit requires exact method/run/interpretation preservation, recomputed source and evidence admission, and proved preservation of the relevant support and complete attack/defense component. A fresh unrelated admitted leaf supplies the harmless-edit witness; the old snapshot-bound certificate still fails. A partial-record projection must exhibit compatible complete histories with different method conclusions before any complete-history inference is rejected.
 
+### Which concrete bridge contract replaces the proposed interface?
+
+The declarations are in `Lara.BHL.BridgeSource` and `Lara.BHL.LaraBridge`; [the theorem record](theory-bhl.md#which-pr-09-source-and-claim-contracts-are-implemented) retains their exact source-facing hypotheses and direct acceptance. The integrated root, extended native runner, complete joined local gates, standard-trio axiom audit and three ARA gates passed on 2026-10-09. [The exact inventory](bhl-theorem-inventory.jsonl) maps all 1,754 relevant declarations to source, fully explicit unelided kernel type, scientific basis/scope and audit entry. The prior-art comparison does not assert novelty.
+
+`ArtifactBinding` uses exact structural `Update.SourceState`, selected and dependent raw/checked occurrence references, closed method/interpretation/request codes, residual assumptions and complete-modeled-history coverage. `ClaimOrigin.authored` explicitly marks a bridge-authored association. A declared origin names a real `Presentation.ArgId`; independent `ClaimAssociation.declared` requires the actual certified source/material, formal claim lookup in input and semantic programs, matching selected audit pair/core/argument/supports-claim relation and membership in the unpruned alternatives ledger. Both certificate and meaning retain this association. Neither a stable claim spelling nor an independently accepted unrelated source can supply it.
+
+`ConditionalMethod` is independent `ValidTriple`; `ModeledApplication` is genuine initial satisfaction and actual reference execution, and `modeled_application_post` derives final satisfaction. `ArtifactWarrant` independently quantifies actual raw/checked typing, retention, node material, grounded in-label and production unblocked status over selected support and every named dependency. `checkBridge` compares every binding field and composes real PR 08 derivation/application checking with ordinary support checks. It cannot make supported applicability true. Conditional `.conditionalFalse` may succeed while the applied version fails `.falsePrecondition`; support-to-truth/knowledge and belief-to-truth countermodels remain separate.
+
+The ordinary projection retains complete public status, labels/edges, checked arguments/attacks/holes, raw masks and retained original occurrence coordinates. Actual `Driver.holeRows` derives located sites from the accepted run; `observeOrdinaryWire` uses production `Driver.buildAccept`, with no caller-supplied holes. The same-source CSV example composes actual `Surface.sourceWithEvidence` and `Evidence.extract`; JSON is a separate actual extraction witness. Evidence success does not admit a policy-quarantined leaf, and no metadata gate changes source/update rejection precedence.
+
+`tighten_dependency_loss` derives missing target support from an actual accepted tighten, source metadata/key membership, raw typing and use of the quarantined leaf. Independent alternative support and mathematical method validity may survive. `RebindConditions` requires injective raw/checked maps, actual target retention/node/material and admission facts, a whole-carrier `Grounded.SinkEmbedding`, target `CleanBase`, fresh source-evidence success, exact evidence transport and syntactic claim association. `rebind_warrant` derives target warrant from these facts and old warrant, rather than assuming it. Mathematical fields and actual run remain unchanged by construction. Fresh unrelated leaf addition satisfies the concrete conditions, but changes the snapshot: the old certificate is stale and the newly rebound one is checked again.
+
+`BHLPartialRecord.submittedRecord` reports only the latest actual emitted test, not a complete log or an ordered prefix. The nonempty record target 12/test 0/true/`1/4` fits both the single-test run and a run with earlier hidden test 4; their complete ledgers have cardinalities one and two and their finite method conclusions are true and false. Reference execution and finite satisfaction correspondence ground the record-specific non-determination theorem. A general compatible-completion calculus and physical capture completeness remain outside this decision.
+
+### What does this comparison establish scientifically?
+
+The [assumption and novelty comparison](belief-hoare-logic-assessment.md#which-assumptions-change-and-what-novelty-is-established) distinguishes inherited corrected BHL metatheory, changed typed history/representation contracts, exact finite rational calibration/checker specialization and Lara-specific binding/revision. No novelty or expressivity separation claim is established. B7's accepted calibration concerns the exact bound mathematical null law, not model adequacy for a physical population. Interpretation fidelity, physical sampling, capture adequacy and runtime refinement remain external assumptions, even for a fully checked artifact.
+
+Issues [#23](https://github.com/ARA-Labs/Lara/issues/23) and [#22](https://github.com/ARA-Labs/Lara/issues/22) retain their wider theory gates. B8 requires all earlier method/history/loop/parallel/checker cases plus conditional/applied, blocked/defeated/rejected, selected tighten loss with surviving alternative, stale/rebound/incompatible copies, supported false precondition, certified composition/quarantine and nonempty record separation on the joined candidate. Completion of this baseline does not release an empirical protocol or establish improved research outcomes.
+
+
 ## Alternatives considered
 
 | Alternative | Decision |
@@ -114,7 +135,7 @@ Keeping physical sampling, interpretation and record completeness as external ob
 
 ## Migration
 
-The reference audit, corrected contract and numeric dependency decision are recorded here and in the assessment. The remaining implementation stages retain their full proof and runtime obligations. Existing compiler, wire and frozen corpus contracts remain unchanged. Each stage adds proved results to `docs/theory-bhl.md`; its executed living plan is removed after durable decisions and theorem evidence have moved into documentation.
+The reference audit, corrected contract, numeric dependency decision, actual PR 09 interfaces and observed joined acceptance are durable here, in the assessment and in the theorem record. Earlier stage evidence remains intact. Existing compiler, wire and frozen corpus contracts remain unchanged. The executed stage 09 plan is retired; its sequence index remains only until both PR 06 and PR 09 are integrated. Issue #24 owns version/main/release delivery; issues #23 and #22 retain the wider theory and downstream inquiry/impact boundary.
 
 ## Recommendations
 

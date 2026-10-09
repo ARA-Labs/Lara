@@ -5,7 +5,7 @@
 
 Develop Belief Hoare Logic (BHL) as Lara's statistical-method semantics within its role as a lower-level language for Agent-Native Research Artifacts (ARA). Define the artifact-level meaning and assumption boundaries first, then mechanize the reference logic and its composition with checked arguments. Retain soundness, relative completeness, concrete statistical instances and executable checking. The Lara-specific work must explain how evidence changes affect methodological warrant; attaching two successful checks is insufficient.
 
-Plan status: approved by the researcher on 2026-10-07. Implementation status: PR 01–08 passed server acceptance on 2026-10-08, including relative completeness, calibrated binary procedures, independent executable rule decoding, declared finite satisfaction, complete bounded branching execution, genuine modeled applications, the registered native runner and complete local gates. PR 09 remains required. The inventory through PR 08 has 1,573 mapped BHL theorems. PR 01–02 also passed the three ARA gates; qualifying research capture occurs at the end of the implementation session. Every stage targets `feat/belief-hoare-logic`. [Issue #24](https://github.com/ARA-Labs/Lara/issues/24) tracks remaining work. The [architectural decision](../../docs/theory-bhl-decision.md) owns the contract; the [theorem record](../../docs/theory-bhl.md) owns exact assumptions and exercised acceptance evidence.
+Plan status: approved on 2026-10-07. All nine stages are implemented and the joined PR 06/09 candidate passed actual native execution, complete local gates, exact theorem/axiom inventory, independent source review and all three ARA gates on 2026-10-09. The durable [theorem record](../../docs/theory-bhl.md#what-evidence-must-finish-the-b8-join) retains direct evidence, 1,750 BHL declarations and four supporting prerequisites. Stages 01–08 are squash-integrated. Stage 09 integration is the only remaining stage operation; this index retires after that merge. [Issue #24](https://github.com/ARA-Labs/Lara/issues/24) owns the subsequent version/main/release delivery. Qualifying research capture is in `ara/trace/sessions/2026-10-09_001.yaml`.
 
 ## Problem
 
@@ -45,7 +45,7 @@ PR numbers identify plans; they do not impose a total merge order.
 | 06 | [Completed legal representation and relative completeness](../../docs/theory-bhl.md#what-completed-pr-06-on-the-server) | B4, completeness | PR 05 |
 | 07 | [Completed exact finite statistical instance](../../docs/theory-bhl.md#what-completed-pr-07-on-the-server) | B5 | PR 05 |
 | 08 | [Completed executable proof checking and finite semantics](../../docs/theory-bhl.md#what-completed-pr-08-on-the-server) | B6 | PR 07 |
-| 09 | [Lara composition and acceptance](09-lara-bridge-and-acceptance.md) | B7, evidence-sensitive warrant and revision witnesses | PR 08 |
+| 09 | [Completed Lara composition and joined acceptance](../../docs/theory-bhl.md#which-pr-09-source-and-claim-contracts-are-implemented) | B7, evidence-sensitive warrant and revision witnesses, joined B8 acceptance | PR 08 and integrated PR 06 |
 
 After PR 05, PR 06 and the PR 07-09 branch can proceed independently. Relative completeness remains mandatory, but concrete tests and the bridge use soundness rather than completeness. Base each implementation PR on `feat/belief-hoare-logic` after its listed dependencies land there. Keep the existing plan filenames and avoid importing unmerged definitions.
 

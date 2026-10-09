@@ -1,0 +1,233 @@
+session:
+  id: 2026-10-09_001
+  date: '2026-10-09'
+  started: '2026-10-09T01:04:30Z'
+  last_turn: '2026-10-09T01:04:30Z'
+  turn_count: 1
+  summary: Completed and verified the nine-stage corrected BHL/artifact candidate; eight stages are integrated,
+    joined completeness/bridge gates pass, exact kernel inventory is complete; stage09 integration and
+    release remain operational requirements.
+events_logged:
+- turn: 1
+  type: pivot
+  id: N373_bhl_server_continuation
+  routing: direct
+  provenance: ai-executed
+  summary: Resume the preserved BHL stack in a resource-safe server worktree
+- turn: 1
+  type: experiment
+  id: N374_bhl_stages_01_08
+  routing: direct
+  provenance: ai-executed
+  summary: Verify and squash-integrate corrected BHL metatheory, completeness and exact finite execution
+- turn: 1
+  type: decision
+  id: N375_bhl_artifact_composition
+  routing: direct
+  provenance: ai-executed
+  summary: Bind independent artifact meaning to real source, declared claims and derived warrant revision
+- turn: 1
+  type: experiment
+  id: N376_bhl_integrated_acceptance
+  routing: direct
+  provenance: ai-executed
+  summary: Pass joined completeness and artifact-composition kernel and runtime acceptance
+- turn: 1
+  type: dead_end
+  id: N377_bhl_closed_source_reduction
+  routing: direct
+  provenance: ai-executed
+  summary: Abandon repeated closed-source unfolding in dependent concrete proofs
+- turn: 1
+  type: observation
+  id: O206
+  routing: crystallized
+  provenance: ai-suggested
+  summary: Promote corrected legal-view/control-log architecture via the actual merged PR06 artifact commitment;
+    retain original staged wording.
+- turn: 1
+  type: observation
+  id: O207
+  routing: staged
+  provenance: ai-suggested
+  summary: Stage the narrow latest-test submitted-record inference boundary without novelty or empirical
+    confirmation.
+ai_actions:
+- turn: 1
+  action: Implemented all remaining approved model, assertion, execution, soundness, relative-completeness,
+    exact finite probability/checking and artifact-composition stages. Ran each real smoke and full local
+    gates, squash-integrated stages01–08, preserved exactly one stage commit, repaired concrete proof
+    reduction and full audit imports, and ran final joined acceptance.
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/BHL/
+  - lean/Lara/Examples/BHLBridge.lean
+  - lean/Lara/Examples/BHLPartialRecord.lean
+  - lean/Lara/BHL/ExampleMain.lean
+  - lean/Lara/Update.lean
+  - lean/Lara/Evidence/Admission.lean
+  - lean/Lara.lean
+  - lean/AxCheck.lean
+  - docs/theory-bhl.md
+  - docs/belief-hoare-logic-assessment.md
+  - docs/theory-bhl-decision.md
+  - docs/bhl-theorem-inventory.jsonl
+- turn: 1
+  action: Captured settled theory/design and direct verification; reconciled current BHL constraint with
+    before/after history, promoted only O206 on artifact commitment, staged O207 and preserved immutable
+    older trace and observations.
+  provenance: ai-executed
+  files_changed:
+  - ara/logic/solution/constraints.md
+  - ara/trace/exploration_tree.yaml
+  - ara/staging/observations.yaml
+  - ara/evidence/results/bhl-integrated-acceptance-2026-10-09.log
+  - ara/trace/sessions/2026-10-09_001.yaml
+  - ara/trace/sessions/session_index.yaml
+  - ara/trace/pm_reasoning_log.yaml
+claims_touched: []
+logic_revisions:
+- turn: 1
+  entry: logic/solution/constraints.md#bhl-artifact-semantics-implemented-corrected-baseline
+  field: Heading
+  before: BHL artifact semantics (approved, implementation pending)
+  after: BHL artifact semantics (implemented corrected baseline)
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: Reconcile current constraint with integrated relative-completeness commit and verified joined
+    candidate; preserve historical source, claim states and wider-theory boundaries.
+- turn: 1
+  entry: logic/solution/constraints.md#bhl-artifact-semantics-implemented-corrected-baseline
+  field: Status
+  before: Approved corrected contract and numeric dependency; reference audit and initial vocabulary/countermodel/real-probability
+    results are present in draft PR 25. PR 01 acceptance and all later stages remain incomplete.
+  after: All nine stages are implemented on the joined PR 06/09 candidate. Stages 01–08 are squash-integrated;
+    stage 09 passes native and complete local gates, including the transitive standard-trio audit. Stage
+    09 integration, version bump, main merge and release remain operational requirements, not completed
+    events.
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: Reconcile current constraint with integrated relative-completeness commit and verified joined
+    candidate; preserve historical source, claim states and wider-theory boundaries.
+- turn: 1
+  entry: logic/solution/constraints.md#bhl-artifact-semantics-implemented-corrected-baseline
+  field: Constraint
+  before: Lara expresses research-artifact semantics as a lower-level language of ARA. BHL supplies statistical-method
+    semantics alongside argumentation and context semantics. Preserve the faithful general reference logic,
+    soundness and relative completeness, exact finite instances and checked source/evidence composition.
+  after: Lara expresses research-artifact semantics as a lower-level language of ARA. BHL supplies a corrected
+    symbolic epistemic/assertion/program logic with derivation soundness, relative completeness over the
+    explicit legal finite-view representation, exact calibrated finite instances and independently checked
+    source/evidence/claim composition. These are not verbatim proofs of the defective printed source or
+    a general research-process theory.
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: Reconcile current constraint with integrated relative-completeness commit and verified joined
+    candidate; preserve historical source, claim states and wider-theory boundaries.
+- turn: 1
+  entry: logic/solution/constraints.md#bhl-artifact-semantics-implemented-corrected-baseline
+  field: Composition boundary
+  before: Require exact source, claim interpretation, model, method, execution and evidence bindings.
+    Prove selected-dependency warrant loss under quarantine without invalidating the conditional theorem,
+    and safe-update transport through explicit rebinding. Alternative support may survive. A conjunction
+    of two accepted certificates alone does not discharge these obligations.
+  after: Bind the full source, authored/declared claim origin, actual declared-claim association, interpretation,
+    model, method, execution and evidence material. Actual quarantine derives named-dependency warrant
+    loss while preserving conditional validity and any independent alternative. Explicit rebinding derives
+    fresh warrant under injective raw/checked maps, preserved support material, whole-carrier sink embedding,
+    clean target admission and fresh evidence; target warrant is not a premise. Ordinary public statuses,
+    located holes/sites and raw coordinates remain the production observations.
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: Reconcile current constraint with integrated relative-completeness commit and verified joined
+    candidate; preserve historical source, claim states and wider-theory boundaries.
+- turn: 1
+  entry: logic/solution/constraints.md#bhl-artifact-semantics-implemented-corrected-baseline
+  field: History and context boundary
+  before: BHL observation equivalence and Lara accepted-context bridges have distinct modalities. The
+    BHL baseline models complete histories; the artifact bridge must exhibit the limit of incomplete submitted
+    records without claiming physical completeness. The general partial-history calculus and broader revision
+    remain in the wider process-theory workstream.
+  after: BHL observation equivalence and Lara accepted-context modalities remain distinct. The baseline
+    models complete histories. The inhabited partial-record countermodel retains the same latest emitted
+    test while full compatible executions have opposite method conclusions; it is not a general compatible-completion
+    calculus or physical capture assurance. Canonical control-log replay proves full semantic-view and
+    unchanged-environment correspondence for the legal representation, without an assumed WLP family.
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: Reconcile current constraint with integrated relative-completeness commit and verified joined
+    candidate; preserve historical source, claim states and wider-theory boundaries.
+- turn: 1
+  entry: logic/solution/constraints.md#bhl-artifact-semantics-implemented-corrected-baseline
+  field: Evidence
+  before: '`docs/theory-bhl-decision.md`; `docs/belief-hoare-logic-assessment.md`; `docs/theory-bhl.md`;
+    `ara/trace/exploration_tree.yaml:N370_bhl_corrected_contract`; [draft PR 25](https://github.com/ARA-Labs/Lara/pull/25).
+    The theorem record separates checked initial results from unimplemented obligations; no full BHL soundness,
+    completeness or bridge theorem is claimed.'
+  after: '`docs/theory-bhl-decision.md`; `docs/belief-hoare-logic-assessment.md`; `docs/theory-bhl.md`;
+    `docs/bhl-theorem-inventory.jsonl`; `ara/evidence/results/bhl-integrated-acceptance-2026-10-09.log`;
+    `ara/trace/exploration_tree.yaml:N376_bhl_integrated_acceptance`. PRs 25–32 retain earlier stage verification;
+    the exact kernel inventory and joined audit cover the complete corrected candidate.'
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: Reconcile current constraint with integrated relative-completeness commit and verified joined
+    candidate; preserve historical source, claim states and wider-theory boundaries.
+- turn: 1
+  entry: logic/solution/constraints.md#bhl-artifact-semantics-implemented-corrected-baseline
+  field: Provenance
+  before: user-revised
+  after: user-revised approved contract; ai-suggested implementation/scope reconciliation grounded by
+    actual proofs and runtime.
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: Reconcile current constraint with integrated relative-completeness commit and verified joined
+    candidate; preserve historical source, claim states and wider-theory boundaries.
+- turn: 1
+  entry: logic/solution/constraints.md#bhl-artifact-semantics-implemented-corrected-baseline
+  field: Open
+  before: '[BHL implementation](https://github.com/ARA-Labs/Lara/issues/24) and [wider process theory](https://github.com/ARA-Labs/Lara/issues/23);
+    empirical experiment design remains behind the wider theory acceptance.'
+  after: '[Issue #24](https://github.com/ARA-Labs/Lara/issues/24) retains final integration and release
+    until observed. [Issue #23](https://github.com/ARA-Labs/Lara/issues/23) retains general incomplete-history
+    reasoning, broad revision, representation adequacy and inquiry/impact; [issue #22](https://github.com/ARA-Labs/Lara/issues/22)
+    remains downstream. No empirical protocol or outcome improvement is released.'
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: Reconcile current constraint with integrated relative-completeness commit and verified joined
+    candidate; preserve historical source, claim states and wider-theory boundaries.
+- turn: 1
+  entry: logic/solution/constraints.md#bhl-artifact-semantics-implemented-corrected-baseline
+  field: Last revised
+  before: 2026-10-07 (2026-10-07_002#5)
+  after: 2026-10-09 (2026-10-09_001#1)
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: Reconcile current constraint with integrated relative-completeness commit and verified joined
+    candidate; preserve historical source, claim states and wider-theory boundaries.
+key_context:
+- turn: 1
+  excerpt: All nine stages and every original acceptance obligation remain required. Every stage targets
+    feat/belief-hoare-logic; joined PR06/PR09 acceptance precedes the version bump, merge commit onto
+    main and verified release.
+- turn: 1
+  excerpt: Kernel proofs remain sorry-free under the standard trio. Actual native/source/update/extraction
+    checks establish exercised conformance, not physical sampling or capture assurance, general research-process
+    theory, outcome improvement or novelty.
+open_threads:
+- Finish stage09 review/squash integration and verify the nine-stage history; then version bump, main
+  merge commit and published-release/asset verification under issue24.
+- Issue23 retains the general compatible-history calculus, broad revision, representation adequacy and
+  wider theory gate before empirical design.
+- Issue22 inquiry/impact remains downstream of issue23; no experiment protocol is authorized here.
+ai_suggestions_pending:
+- O207 records the narrow submitted latest-test inference boundary without claiming general partial-history
+  completeness or novelty.
+verification:
+  command: make ara-source-spans ara-session-index ara-observations
+  result: PASS
+  source_quotations: 66
+  sessions: 84
+  effective_observations: 193
+  ambiguous_historical_ids: 2
+  audited_reference_lines: 14
+  evidence: ara/evidence/results/bhl-integrated-acceptance-2026-10-09.log

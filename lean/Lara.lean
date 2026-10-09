@@ -542,3 +542,7 @@ import Lara.BHL.Check
 import Lara.BHL.FiniteModel
 import Lara.BHL.FiniteExecution
 import Lara.BHL.CheckedMethods
+import Lara.BHL.BridgeSource
+import Lara.BHL.LaraBridge
+import Lara.Examples.BHLBridge
+import Lara.Examples.BHLPartialRecord

@@ -1,5 +1,8 @@
 import Lara.BHL.CheckedMethods
 import Lara.BHL.FiniteModel
+import Lara.Examples.BHLPartialRecord
+import Lara.Examples.BHLBridge
+import Lara.Examples.TermHoles
 
 namespace Lara.BHL.ExampleRuntime
 
@@ -11,19 +14,19 @@ export Lara.Examples.BHLExecution (report oldReport x y dataId aliasId)
 end E
 
 private def expect {α : Type} [DecidableEq α] [Repr α]
-    (label : String) (actual expected : α) : IO Unit := do
+    (label : String) (actual expected : α) : IO _root_.Unit := do
   if actual = expected then pure ()
   else throw (IO.userError s!"{label}: got {reprStr actual}, expected {reprStr expected}")
 
-private def require (label : String) (actual : Bool) : IO Unit := expect label actual true
+private def require (label : String) (actual : Bool) : IO _root_.Unit := expect label actual true
 
 private def expectError {ε α : Type} [DecidableEq ε] [Repr ε]
-    (label : String) (actual : Except ε α) (expected : ε) : IO Unit := do
+    (label : String) (actual : Except ε α) (expected : ε) : IO _root_.Unit := do
   match actual with
   | .error error => expect label error expected
   | .ok _ => throw (IO.userError s!"{label}: unexpectedly accepted")
 
-private def numericChecks : IO Unit := do
+private def numericChecks : IO _root_.Unit := do
   for sample in [false, true] do
     let p := Tests.Binary.pvalue sample
     let expected : ℚ := if sample then 1 / 4 else 1
@@ -52,7 +55,7 @@ private def numericChecks : IO Unit := do
       require "intersection bound" (decide (intersection ≤ min p q))
       IO.println s!"pair=({first},{second}): union={union}≤{p + q}, intersection={intersection}≤{min p q}"
 
-private def executionChecks : IO Unit := do
+private def executionChecks : IO _root_.Unit := do
   let aliases := FiniteExecution.Smoke.aliases
   expect "aliases complete" aliases.status .completed
   require "alias updates the actual dataset" (aliases.state.datasets E.aliasId)
@@ -97,7 +100,7 @@ private def executionChecks : IO Unit := do
   expect "terminal zero fuel" (FiniteExecution.replay [] none FiniteExecution.Smoke.initial).status .completed
   IO.println s!"loop: x={reprStr (loop.state.integers E.x.id)}, steps={loop.events.length}; bounded={reprStr (FiniteExecution.Smoke.boundedLoop.map FiniteExecution.Outcome.status)}; undefined={reprStr FiniteExecution.Smoke.undefined.status}"
 
-private def satisfactionChecks : IO Unit := do
+private def satisfactionChecks : IO _root_.Unit := do
   let run := Lara.Examples.BHLFiniteBelief.RunKind.single firstId
   let quantified := FiniteModel.evalFinite FiniteModel.Examples.rigidDatasetSupport GhostEnv.empty run 0 true true
   let allKnown := FiniteModel.evalFinite FiniteModel.Examples.allDatasetsKnownSupport GhostEnv.empty run 0 true true
@@ -128,7 +131,7 @@ private theorem truth_not_falsity : ¬ AssertionEntails (context .two) CheckedMe
   exact CheckedMethods.conditional_false_not_applicable (CheckedMethods.Method.two.request 0 true true)
     (implication GhostEnv.empty _ initial)
 
-private def checkerChecks : IO Unit := do
+private def checkerChecks : IO _root_.Unit := do
   let post := CheckedMethods.truth
   require "proof-backed consequence accepted" (checkDerivation (DerivationCheckExamples.reflexiveConsequence (context .two) post)).isAccepted
   require "assignment rule accepted" (checkDerivation (DerivationCheckExamples.assignment (context .two) E.x (.integer 1) post)).isAccepted
@@ -146,7 +149,7 @@ private def checkerChecks : IO Unit := do
   expectError "invalid parallel side condition" (checkDerivation (DerivationCheckExamples.noninterferingFailure (context .two) E.x (.integer 1) post)) .noninterferingFailure
   IO.println "checker: exact recursive rules accepted; missing/refuted implication, invalid recursive premise, assignment misuse and non-NI rejected"
 
-private def applicationChecks : IO Unit := do
+private def applicationChecks : IO _root_.Unit := do
   for method in ([.two, .low, .up, .disjunction, .conjunction] : List CheckedMethods.Method) do
     require "actual scientific test/consequence tree" (checkDerivation method.evidence).isAccepted
     let request := method.request 0 true true
@@ -177,13 +180,129 @@ private def applicationChecks : IO Unit := do
     (CheckedMethods.Method.two.request 2 true true)) .failedPrecondition
   IO.println "exact model/P/C/Q/run mismatches rejected; conditional validity with false P retained, modeled application rejected"
 
-def run : IO Unit := do
+private def recordChecks : IO _root_.Unit := do
+  let reported := Lara.Examples.BHLPartialRecord.outcome .reportedOnly
+  let omitted := Lara.Examples.BHLPartialRecord.outcome .unreportedEarlier
+  expect "reported-only complete history" reported.status .completed
+  expect "earlier omitted test complete history" omitted.status .completed
+  let firstRecord := Lara.Examples.BHLPartialRecord.submittedRecord reported
+  let secondRecord := Lara.Examples.BHLPartialRecord.submittedRecord omitted
+  expect "actual nonempty submitted test" firstRecord Lara.Examples.BHLPartialRecord.record
+  expect "identical submitted test despite omitted action" secondRecord firstRecord
+  expect "reported-only full ledger" reported.state.ledger.card 1
+  expect "omitted earlier test remains in full ledger" omitted.state.ledger.card 2
+  expect "reported-only actual finite belief" (Lara.Examples.BHLPartialRecord.checkConclusion .reportedOnly) true
+  expect "omitted test changes actual finite belief" (Lara.Examples.BHLPartialRecord.checkConclusion .unreportedEarlier) false
+  IO.println s!"partial record: {reprStr firstRecord}; complete H counts=1/2, finite method conclusions=true/false"
+
+open Lara.Examples.BHLBridge in
+private def bridgeChecks : IO _root_.Unit := do
+  expect "actual named-dependency source accepted" (checkBridgeNative dependencyBinding dependencyCertificate) (.ok ())
+  expect "actual tighten dependency loss" (checkBridgeNative dependencyTargetBinding dependencyTargetCertificate) (.error .missingSupport)
+  expect "independent surviving alternative" (checkBridgeNative alternativeBinding alternativeCertificate) (.ok ())
+  expect "ordinary conditional bridge" (checkBridgeNative harmlessBinding harmlessCertificate) (.ok ())
+  expect "actual modeled application bridge" (checkBridgeNative appliedBinding appliedCertificate) (.ok ())
+  expect "stale copied source binding" (checkBridgeNative harmlessTargetBinding harmlessCertificate) (.error .staleSnapshot)
+  expect "fresh structural rebind" (checkBridgeNative harmlessTargetBinding harmlessReboundCertificate) (.ok ())
+  expect "copied method binding" (checkBridgeNative { harmlessBinding with method := .low } harmlessCertificate) (.error .incompatibleMethod)
+  expect "copied interpretation binding" (checkBridgeNative { harmlessBinding with interpretation := .conditional .low } harmlessCertificate) (.error .incompatibleInterpretation)
+  expect "copied dependency binding" (checkBridgeNative { harmlessBinding with dependencies := [harmlessSelected] } harmlessCertificate) (.error .incompatibleDependencies)
+  expect "copied authored claim identity" (checkBridgeNative { harmlessBinding with claim := ⟨"copied"⟩ } harmlessCertificate) (.error .incompatibleClaim)
+  expect "copied authored/declaration origin" (checkBridgeNative { harmlessBinding with origin := .declared ⟨"selected"⟩ } harmlessCertificate) (.error .incompatibleClaim)
+  expect "unknown declared source claim copy" (checkBridgeNative { certifiedBinding with claim := ⟨"missing"⟩ } certifiedCertificate) (.error .incompatibleClaim)
+  expect "lost defender preserves blocked boundary" (checkBridgeNative defenseBinding defenseCertificate) (.error .blockedSupport)
+  expect "accepted source with defeated claim" (checkBridgeNative defeatedBinding defeatedCertificate) (.error .defeatedSupport)
+  expect "defender's loss retains conditional defeated core" (ordinaryStatus defenseTargetRun Lara.Examples.pA) (.evidenceBlocked .defeated)
+  expect "ordinary defeated claim remains public" (ordinaryStatus defeatedSourceRun Lara.Examples.pA) (.published .defeated)
+  expect "supported applicability remains ordinary justified" (ordinaryStatus harmlessSourceRun Lara.Examples.pA) (.published .justified)
+  expect "false precondition retains conditional theorem" (checkBridgeNative falsePreconditionBinding falsePreconditionCertificate) (.ok ())
+  expect "false precondition rejects modeled application" (checkBridgeNative falsePreconditionAppliedBinding falsePreconditionAppliedCertificate) (.error .falsePrecondition)
+  expect "actual CSV source/evidence integration" certifiedResult.isOk true
+  expect "certified source bridge" (checkBridgeNative certifiedBinding certifiedCertificate) (.ok ())
+  expect "ordinary quarantine retains successful evidence replay" quarantinedCertifiedResult.isOk true
+  require "replayed evidence does not restore ordinary admitted leaf"
+    (decide (quarantinedCertifiedPair.1.gamma ⟨"measured"⟩ = none))
+  let csv := Lara.Evidence.run csvSnapshot Lara.Evidence.extract csvRequest
+  let json := Lara.Evidence.run [(⟨"json"⟩, .ok jsonObject)] Lara.Evidence.extract jsonRequest
+  require "actual CSV proposition replay" (decide (csv.map (·.proposition) = .ok evidenceAtom))
+  expect "actual CSV manifest dependency" (csv.map (·.dependencies)) (.ok [csvMetadata])
+  require "actual JSON proposition replay" (decide (json.map (·.proposition) = .ok evidenceAtom))
+  expect "actual JSON manifest dependency" (json.map (·.dependencies)) (.ok [jsonMetadata])
+  require "actual tighten pipeline" (decide ((Lara.Update.applyUpdate Lara.Examples.registryEx dependencySource
+    (.tighten (.attested, .user))).map (fun state => decide (state = dependencyTarget)) = .ok true))
+  require "actual harmless addLeaf pipeline" (decide ((Lara.Update.applyUpdate Lara.Examples.registryEx harmlessSource
+    (.addLeaf Lara.Examples.l3 Lara.Examples.pC harmlessMeta)).map (fun state => decide (state = harmlessTarget)) = .ok true))
+  require "rejected duplicate leaf source edit" (decide ((Lara.Update.applyUpdate Lara.Examples.registryEx harmlessSource
+    (.addLeaf Lara.Examples.l1 Lara.Examples.pC harmlessMeta)).map (fun _ => ()) = .error (.leafNotFresh Lara.Examples.l1)))
+  IO.println "Lara bridge: actual source/tighten/addLeaf/evidence runs; dependency loss, surviving alternative, fresh rebind, stale/copy/blocked/defeated/false-precondition boundaries checked"
+
+namespace LocatedHoles
+
+open Lara Lara.Support Lara.Examples
+
+private def state : Lara.Update.SourceState :=
+  { sigma := sigmaEx
+    policy := TermHoles.holePolicy
+    table := [{ key := (.observed, .user), decision := .quarantine }]
+    metas := [{ id := l1, kind := .attested, provenance := .user },
+      { id := l2, kind := .observed, provenance := .user }]
+    leaves := [(l1, pA), (l2, pB)]
+    argsRaw := [("drop", .leaf l2), ("hole", TermHoles.innerOpen), ("kept", .leaf l1)]
+    rawAtts := [.rebut "drop" "kept"]
+    groups := []
+    ground := groundEx }
+
+private def registry : BackendRegistry Driver.dcanon := fun _ => none
+private def declared := Examples.Update.declaredOf state (by rfl) (by decide)
+
+private def runResult : Except String (Lara.Update.AcceptedRun registry state) :=
+  match hadmission : Admission.evaluateAdmission Driver.dcanon state.table state.metas
+      state.leaves state.argsRaw state.rawAtts state.groups declared with
+  | .accepted admission =>
+      match hchecked : Check.Unit.checkUnit (Admission.buildGamma admission.prune.checkedLeaves)
+          registry state.ground
+          { sigma := state.sigma
+            policy := state.policy
+            args := admission.prune.keptArgs.map (·.2)
+            atts := admission.prune.keptAttacks } with
+      | .error _ => .error "whole-unit checking rejected the hole source"
+      | .ok checked => .ok
+          { declared := declared
+            admission := admission
+            checked := checked
+            admission_ok := hadmission
+            check_ok := hchecked }
+  | _ => .error "admission rejected the hole source"
+
+private def checks : IO _root_.Unit := do
+  let run ← match runResult with
+    | .ok run => pure run
+    | .error message => throw (IO.userError message)
+  let observed := observeOrdinary run [pA]
+  let rows := (ordinaryHoleRows run).map fun row =>
+    (row.index, row.argId, row.obligations, row.attacks)
+  let expected : List (Nat × String × List (QuestionId × List Attack.Pos) × List Nat) :=
+    [(1, "hole", [(q1, [[]])], [])]
+  if rows != expected then
+    throw (IO.userError "actual located hole original-index/identity/obligation-site/attack-coordinate mismatch")
+  expect "actual raw argument retention" observed.rawArgumentMask [false, true, true]
+  expect "actual raw attack retention" observed.rawAttackMask [false]
+  expect "retained raw argument identities and coordinates"
+    (observed.retainedArguments.map (fun entry => (entry.1.1, entry.2))) [("hole", 1), ("kept", 2)]
+  IO.println s!"Actual bridge located-hole projection: {(ordinaryHoleRows run).map (fun row => (row.index, row.argId))}; raw masks={observed.rawArgumentMask}/{observed.rawAttackMask}; exact mandatory root-site and retained raw-coordinate checks passed"
+
+end LocatedHoles
+
+def run : IO _root_.Unit := do
   numericChecks
   executionChecks
   satisfactionChecks
   checkerChecks
   applicationChecks
-  IO.println "BHL examples: all computed checker, semantic, execution and application checks passed"
+  recordChecks
+  bridgeChecks
+  LocatedHoles.checks
+  IO.println "BHL examples: all computed checker, semantic, execution, application, partial-record and Lara-bridge checks passed"
 
 end Lara.BHL.ExampleRuntime
 

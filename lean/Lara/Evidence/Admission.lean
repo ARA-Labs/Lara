@@ -1,5 +1,6 @@
 import Lara.Evidence.Runner
 import Lara.Presentation
+import Init.Data.String.Lemmas.Pattern.TakeDrop.Pred
 
 namespace Lara.Evidence
 open Lara
@@ -9,7 +10,62 @@ abbrev EvidencePolicy := List (LeafCheckerId × CheckerVersion)
 
 def manifestObject (manifest : List ObjectMeta) (id : ObjectId) : Option ObjectMeta :=
   manifest.find? (fun m => m.id == id)
-def referencePath (ref : String) : String := (ref.splitOn "#").head!
+private def referencePathRuntime (ref : String) : String :=
+  (ref.takeWhile (fun c => c != '#')).copy
+
+/-- The path before the first fragment marker. The kernel specification is
+transparent; compiled code scans a slice and copies only the selected prefix. -/
+@[implemented_by referencePathRuntime]
+def referencePath (ref : String) : String :=
+  String.ofList (ref.toList.takeWhile (fun c => c != '#'))
+
+private theorem takeWhile_prefix (predicate : Char → Bool) (headChars tailChars : List Char)
+    (safe : headChars.all predicate = true) (stopped : tailChars.head?.any predicate = false) :
+    (headChars ++ tailChars).takeWhile predicate = headChars := by
+  induction headChars with
+  | nil =>
+      cases tailChars with
+      | nil => rfl
+      | cons first rest =>
+          change predicate first = false at stopped
+          simp [List.takeWhile, stopped]
+  | cons first rest ih =>
+      change (predicate first && rest.all predicate) = true at safe
+      have both : predicate first = true ∧ rest.all predicate = true := by simpa using safe
+      simp [List.takeWhile, both.1, ih both.2]
+
+/-- The allocation-efficient compiled implementation has the same prefix
+meaning as the transparent kernel definition for every Unicode string. -/
+theorem referencePath_eq_runtime (ref : String) :
+    referencePath ref = (ref.takeWhile (fun c => c != '#')).copy := by
+  let predicate : Char → Bool := fun c => c != '#'
+  have safe : (ref.takeWhile predicate).copy.toList.all predicate = true := by
+    simpa only [String.Slice.all_bool_eq] using
+      (String.all_takeWhile (s := ref) (pat := predicate))
+  have stopped : (ref.dropWhile predicate).copy.toList.head?.any predicate = false := by
+    simpa only [String.Slice.startsWith_bool_eq_head?] using
+      (String.startsWith_dropWhile (s := ref) (pat := predicate))
+  have partition : ref.toList =
+      (ref.takeWhile predicate).copy.toList ++ (ref.dropWhile predicate).copy.toList := by
+    simpa only [String.toList_append] using
+      congrArg String.toList (String.takeWhile_append_dropWhile (s := ref) (pat := predicate)).symm
+  unfold referencePath
+  change String.ofList (ref.toList.takeWhile predicate) = _
+  rw [partition, takeWhile_prefix predicate _ _ safe stopped]
+  simp [predicate]
+
+theorem referencePath_without_fragment (ref : String)
+    (safe : ref.toList.all (fun c => c != '#') = true) : referencePath ref = ref := by
+  unfold referencePath
+  have equal := takeWhile_prefix (fun c => c != '#') ref.toList [] safe (by rfl)
+  simpa using congrArg String.ofList equal
+
+theorem referencePath_before_fragment (headChars tailChars : List Char)
+    (safe : headChars.all (fun c => c != '#') = true) :
+    referencePath (String.ofList (headChars ++ '#' :: tailChars)) = String.ofList headChars := by
+  unfold referencePath
+  simp only [String.toList_ofList]
+  rw [takeWhile_prefix (fun c => c != '#') headChars ('#' :: tailChars) safe (by rfl)]
 
 def requestReferenceValid (manifest : List ObjectMeta) (leaf : Leaf) (id : ObjectId) : Prop :=
   match manifestObject manifest id with
