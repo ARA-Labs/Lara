@@ -208,7 +208,7 @@ logic_revisions:
   entry: logic/solution/constraints.md#bhl-artifact-semantics-implemented-corrected-baseline
   field: Status
   before: All nine stages are implemented on the joined PR 06/09 candidate. Stages 01–08 are squash-integrated; stage 09 passes native and complete local gates, including the transitive standard-trio audit. Stage 09 integration, version bump, main merge and release remain operational requirements, not completed events.
-  after: All nine stages are implemented and squash-integrated on `feat/belief-hoare-logic`; [PR #33](https://github.com/ARA-Labs/Lara/pull/33) completes the joined PR 06/09 acceptance. Native execution, complete local gates, the transitive standard-trio audit and three ARA gates pass. This formal baseline does not certify release assets; the version/main/publication verification trail is recorded separately in issue #24 and the release.
+  after: "All nine stages are implemented and squash-integrated on `feat/belief-hoare-logic`; [PR #33](https://github.com/ARA-Labs/Lara/pull/33) completes the joined PR 06/09 acceptance. Native execution, complete local gates, the transitive standard-trio audit and three ARA gates pass. This formal baseline does not certify release assets; the version/main/publication verification trail is recorded separately in issue #24 and the release."
   signal: artifact-commitment
   provenance: ai-executed
   note: Record the directly observed final-stage squash without conflating formal proof acceptance with published-release verification.
