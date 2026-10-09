@@ -135,7 +135,7 @@ Keeping physical sampling, interpretation and record completeness as external ob
 
 ## Migration
 
-The reference audit, corrected contract, numeric dependency decision, actual PR 09 interfaces and observed joined acceptance are durable here, in the assessment and in the theorem record. Earlier stage evidence remains intact. Existing compiler, wire and frozen corpus contracts remain unchanged. The executed stage 09 plan is retired; its sequence index remains only until both PR 06 and PR 09 are integrated. Issue #24 owns version/main/release delivery; issues #23 and #22 retain the wider theory and downstream inquiry/impact boundary.
+The reference audit, corrected contract, numeric dependency decision, actual PR 09 interfaces and observed joined acceptance are durable here, in the assessment and in the theorem record. Earlier stage evidence remains intact. Existing compiler, wire and frozen corpus contracts remain unchanged. Both PR 06 and PR 09 are squash-integrated with B8 evidence; all executed plans and the completed sequence index are retired. Issue #24 owns the version/main/release delivery trail; issues #23 and #22 retain the wider theory and downstream inquiry/impact boundary.
 
 ## Recommendations
 

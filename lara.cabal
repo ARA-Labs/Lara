@@ -1,6 +1,6 @@
 cabal-version:      3.0
 name:               lara
-version:            0.1.0.0
+version:            0.2.0.0
 synopsis:           A checker for the arguments behind research claims
 description:        LARA is a small language for writing down the argument
                     behind a research claim: the evidence, the reasoning

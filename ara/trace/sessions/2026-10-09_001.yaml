@@ -204,6 +204,22 @@ logic_revisions:
   provenance: ai-suggested
   note: Reconcile current constraint with integrated relative-completeness commit and verified joined
     candidate; preserve historical source, claim states and wider-theory boundaries.
+- turn: 1
+  entry: logic/solution/constraints.md#bhl-artifact-semantics-implemented-corrected-baseline
+  field: Status
+  before: All nine stages are implemented on the joined PR 06/09 candidate. Stages 01–08 are squash-integrated; stage 09 passes native and complete local gates, including the transitive standard-trio audit. Stage 09 integration, version bump, main merge and release remain operational requirements, not completed events.
+  after: All nine stages are implemented and squash-integrated on `feat/belief-hoare-logic`; [PR #33](https://github.com/ARA-Labs/Lara/pull/33) completes the joined PR 06/09 acceptance. Native execution, complete local gates, the transitive standard-trio audit and three ARA gates pass. This formal baseline does not certify release assets; the version/main/publication verification trail is recorded separately in issue #24 and the release.
+  signal: artifact-commitment
+  provenance: ai-executed
+  note: Record the directly observed final-stage squash without conflating formal proof acceptance with published-release verification.
+- turn: 1
+  entry: logic/solution/constraints.md#bhl-artifact-semantics-implemented-corrected-baseline
+  field: Open
+  before: "[Issue #24](https://github.com/ARA-Labs/Lara/issues/24) retains final integration and release until observed. [Issue #23](https://github.com/ARA-Labs/Lara/issues/23) retains general incomplete-history reasoning, broad revision, representation adequacy and inquiry/impact; [issue #22](https://github.com/ARA-Labs/Lara/issues/22) remains downstream. No empirical protocol or outcome improvement is released."
+  after: "[Issue #24](https://github.com/ARA-Labs/Lara/issues/24) records operational integration and release verification separately from this formal baseline. [Issue #23](https://github.com/ARA-Labs/Lara/issues/23) retains general incomplete-history reasoning, broad revision, representation adequacy and inquiry/impact; [issue #22](https://github.com/ARA-Labs/Lara/issues/22) remains downstream. No empirical protocol or outcome improvement is released."
+  signal: artifact-commitment
+  provenance: ai-executed
+  note: Retain the unchanged wider-theory/inquiry scope while moving delivery-state evidence to the issue and release trail.
 key_context:
 - turn: 1
   excerpt: All nine stages and every original acceptance obligation remain required. Every stage targets
