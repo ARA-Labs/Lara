@@ -299,30 +299,29 @@ in separate files, a `.laramap` composes them (see [Example](#example)).
 ## The statistical method behind a claim
 
 Argument checking settles whether a claim's declared support survives attack.
-It does not ask whether the experiment behind the claim was sound. Lara answers
-that second question with a mechanized Belief Hoare Logic (BHL), the
-statistical-method component of the semantics alongside argumentation and
-context.
+Lara's mechanized Belief Hoare Logic (BHL) checks a different question:
+under explicit assumptions, does a modeled statistical procedure establish
+its specified postcondition? It does not establish that a physical experiment
+was sound or that the model describes the experiment.
 
 A method judgment has three parts, and the checker keeps them separate: a
 *conditional* method is valid under the exact model and program; a *modeled
 application* adds genuine precondition satisfaction and the actual execution;
 *artifact warrant* says the selected support and every named applicability
-dependency stay admitted, checked, justified and unblocked. Only the middle
-judgment depends on the world the experiment actually ran in. The practical
-consequence, proved rather than asserted: an argument can be **justified** while
+dependency stay admitted, checked, justified and unblocked. Modeled application
+binds a particular initial world and execution; it does not certify that a
+physical run occurred. An argument can be **justified** while
 the precondition of the method it serves is false, and statistical belief can
 hold while the alternative is false. Support never discharges a mathematical
 premise.
 
-Withdrawing evidence moves warrant without moving the theorem. Quarantining the
-leaf an argument depends on costs that argument its support while the
-conditional method stays valid, and an independent argument on another leaf
-survives in the same artifact. A copied certificate cannot attest an edited
-source: a harmless addition still invalidates the old certificate and requires
-an explicitly rebound one. One reported result can also conceal different test
-histories, so a nonempty submitted record cannot pin down the method
-conclusion.
+In the worked example, quarantining a named applicability dependency removes
+the warrant that uses it while the conditional method stays valid.
+Independent support for the same claim survives. A copied certificate cannot
+attest an edited source: a harmless addition still invalidates the old
+certificate and requires an explicitly rebound one. A second example gives
+two complete test histories with the same nonempty submitted record but
+different method conclusions. That record alone cannot determine the conclusion.
 
 For a prose-first walkthrough of those boundaries, see
 [the D6 demo](docs/demos/d6-bhl-method-support.md). The
@@ -361,8 +360,8 @@ Lean mechanization (elan / lean / lake on `PATH`; toolchain pinned in
 [`lean/lean-toolchain`](lean/lean-toolchain)):
 
 ```sh
-cd lean && lake build
-cd lean && lake exe bhl-examples   # replay the BHL method, revision and record witnesses
+(cd lean && lake build)
+(cd lean && lake exe bhl-examples)   # run the BHL method, revision and record witnesses
 ```
 
 The required `Haskell` workflow builds and tests the checker on every push
@@ -458,14 +457,15 @@ differential tests are conformance evidence for the Haskell checker, never a
 substitute for the theorems (spec §9). So the tool that judges arguments has
 its own argument for correctness.
 
-The Belief Hoare Logic development follows the same discipline. Its
-definitions, soundness, relative completeness and artifact-composition results
-are proved in Lean with no `sorry` and no new axiom, every declaration has an
-entry in `AxCheck.lean`, and the only added dependency is Mathlib at a pinned
-revision, imported by the theory modules alone. The native `lake exe
-bhl-examples` runner rechecks the executable witnesses, and
-[the theory record](docs/theory-bhl.md) states each theorem's assumptions and
-audit location.
+The Belief Hoare Logic development follows the same proof discipline.
+Its soundness, relative completeness and artifact-composition results are
+proved in Lean without `sorry` or axioms beyond the standard trio. The
+[theorem inventory](docs/bhl-theorem-inventory.jsonl) records exact statements
+and explicit `AxCheck.lean` entries. The theory uses pinned Mathlib imports
+and their transitive dependencies; the compiler calculus remains independent
+of those imports. The native `bhl-examples` runner exercises concrete cases;
+the proofs establish the general results under the assumptions in the
+[theory record](docs/theory-bhl.md).
 
 ## Contributing
 

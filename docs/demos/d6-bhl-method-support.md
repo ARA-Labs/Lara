@@ -6,9 +6,15 @@ Hoare Logic (BHL) asks whether the statistical procedure behind the claim is
 valid under explicit assumptions. This demo separates those questions with
 three checked witnesses, all in [lean/Lara/Examples/](../../lean/Lara/Examples/).
 
-Every result quoted here is a named Lean declaration, and
-`cd lean && lake exe bhl-examples` replays them. The demo adds no `.lara`
-syntax and no CLI command.
+The named Lean declarations below prove the stated boundaries. From the
+repository root, run their executable examples with:
+
+```sh
+(cd lean && lake exe bhl-examples)
+```
+
+The runner exercises concrete outcomes; it does not numerically verify the
+universal theorems. The demo adds no `.lara` syntax or `lara` CLI command.
 
 ## What the three parts of a method judgment are
 
@@ -21,9 +27,10 @@ judgments with different evidence and different conclusions.
 | Modeled application | Conditional validity, actual precondition satisfaction in the initial world, and the exact execution | The final modeled world satisfies the postcondition |
 | Artifact warrant | Selected support and every named applicability dependency surviving admission, checking, grounded justification and blocking | Those supports stay eligible. It says nothing about the assumptions they carry |
 
-The distinction matters because only the middle judgment depends on the world
-the experiment actually ran in. The [theory record](../theory-bhl.md) states
-the contracts; the declarations below are their witnesses.
+Modeled application binds a particular mathematical initial world and
+execution. It does not certify that a physical experiment occurred as modeled.
+The [theory record](../theory-bhl.md) states the contracts; the declarations
+below are their witnesses.
 
 ## Episode 1: support for an assumption is not the assumption
 
