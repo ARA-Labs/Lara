@@ -1,0 +1,47 @@
+name: ARA
+
+# Required. Integrity checks over this project's own research artifact (ara/):
+# located quotations match the repository lines they cite, the session index
+# agrees with the session files, and observation IDs resolve uniquely. None of
+# them builds Haskell or Lean, so a docs- or ARA-only change gets its answer in
+# seconds rather than after a cabal build. See
+# docs/implementation.md#ci-and-local-gates.
+#
+# No path filter: a quotation can cite any file in the repository, so a change
+# outside ara/ can still break the source-span check.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ara:
+    name: ARA (artifact integrity)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: '0.11.2'
+
+      - name: ARA source-span unit tests
+        run: python3 -m unittest scripts/test_check_ara_source_spans.py -v
+
+      - name: ARA source quotations match cited spans
+        run: make ara-source-spans
+
+      - name: ARA session-index unit tests
+        run: uv run --no-project --with pyyaml python -m unittest scripts/test_check_ara_session_index.py -v
+
+      - name: ARA session index is total, unique, and agrees with its files
+        run: uv run --no-project --with pyyaml python scripts/check_ara_session_index.py
+
+      - name: ARA observation lookup unit tests
+        run: uv run --no-project --with pyyaml python -m unittest scripts/test_check_ara_observations.py -v
+
+      - name: ARA observation identifiers and historical references are unambiguous
+        run: uv run --no-project --with pyyaml python scripts/check_ara_observations.py

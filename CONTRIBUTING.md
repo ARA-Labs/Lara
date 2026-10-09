@@ -22,7 +22,8 @@ cd lean && lake build    # proofs
 ## Verification gates
 
 The required `Haskell` workflow builds and tests the checker on every push
-to `main` and every PR into it. Lean checks run separately. The optional
+to `main` and every PR into it, and the required `ARA` workflow checks the
+research artifact under `ara/`. Lean checks run separately. The optional
 `Lean` workflow runs the proof build, axiom audit, PW and axiom-withdrawal
 examples, and semantics-registry checks when a reviewer adds the `lean` label.
 Local `make lean-gate` also runs the BHL examples; `make cross-check` runs only

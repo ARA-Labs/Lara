@@ -44,7 +44,7 @@ milestone. Keep `AxCheck.lean` covering every new theorem; proofs must stay
 the Lean proofs carry soundness, so land them alongside the code that frozen
 definitions enable.
 
-The required GitHub workflow (`Haskell`) does not build Lean or run any Haskell-Lean cross-check
+The required GitHub workflows (`Haskell`, `ARA`) do not build Lean or run any Haskell-Lean cross-check
 (`docs/implementation.md#ci-and-local-gates`). A change that touches `lean/`, a wire contract,
 or a golden either side emits must pass `make local-gates` before review; say
 so in the PR.
