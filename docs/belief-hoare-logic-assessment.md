@@ -1,5 +1,4 @@
 # Belief Hoare Logic: reference and artifact assessment
-**Date:** 2026-10-07
 
 ## TL;DR
 
@@ -278,10 +277,3 @@ A Lean proof establishes a statement inside the bound mathematical model. It doe
 | History coverage | Every modeled test appears with correct multiplicity and alias-safe accounting in the reference ledger. | Physical logging completeness, authenticity and omitted external tests; absence of a submitted entry cannot certify absence of the action. |
 | Statistical interpretation | Knowledge of alternative/exception/model-failure disjunction under the stated world relation. | Truth of the alternative, posterior probability, or a procedure-wide frequentist error bound without its own strategy/distribution proof. |
 | Research outcomes | Formal procedure, support, binding and revision distinctions. | Improved scientific outcomes, empirical efficacy and general representation adequacy; no empirical protocol is released by this workstream. |
-
-## Recommendations
-
-1. Keep the corrected predicate, canonical-ledger, modal-closure and stored-result hypotheses visible in every affected statement. Reconstruct each rule proof against independent satisfaction/execution, and retain the separating countermodels beside the source map.
-2. Retain the approved pinned Mathlib carrier, proved finite binary calibration, rational-to-real event correspondence and explicit null bindings. Keep the full used Lean dependency audit within the allowed axiom trio; these finite results do not certify physical sampling or every real distribution.
-3. Retain the proved concrete representation and its full-view/unchanged-environment correspondence. Relative completeness for the richer corrected language neither validates the original integer-vector ELHT claim nor shows that Lara expresses every relevant research distinction.
-4. Retain the joined native, full local-gate, exact theorem/axiom inventory and ARA evidence when recording B8 integration and release. The passing corrected baseline does not discharge the wider issue #23 theory or authorize empirical experiment design.

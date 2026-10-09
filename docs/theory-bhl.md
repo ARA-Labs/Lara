@@ -1,5 +1,4 @@
 # Belief Hoare Logic: contracts and theorem record
-**Date:** 2026-10-09
 
 ## TL;DR
 
@@ -683,9 +682,3 @@ The actual native output reports `Lara bridge: actual source/tighten/addLeaf/evi
 PR 01–09 are complete and squash-integrated on `feat/belief-hoare-logic`, including mandatory relative completeness, statistical instances, executable correspondence, exact source/evidence/claim binding, dependency loss, safe rebinding, ordinary located-hole preservation and the nonempty submitted-record limitation. The complete unelided theorem inventory, transitive axiom audit, research capture and three ARA gates pass. All nine PR bases and merge commits were checked through the GitHub API; the integration history contains planning commit `46a97472d8478137fa2c2680df7a828ff8a05b17` and exactly one verified squash commit per stage. Version/main/release delivery is recorded separately in [issue #24](https://github.com/ARA-Labs/Lara/issues/24), the main integration PR and the [v0.2.0 release](https://github.com/ARA-Labs/Lara/releases/tag/v0.2.0); this theorem record does not infer published assets from a passing source build.
 
 All stage PRs target `feat/belief-hoare-logic`. The integration branch retains planning commit `46a9747` and one commit per completed stage. Integrated acceptance joins both completeness and source composition before the version bump, merge commit to `main` and release. This work does not discharge [issue #23](https://github.com/ARA-Labs/Lara/issues/23)'s wider research-process theory or authorize an empirical protocol.
-
-## Recommendations
-
-1. Use the corrected contracts and explicit source mapping when adding semantics; do not import the paper's conclusions as axioms.
-2. Update this record with exact theorem assumptions, audit entries and exercised commands in each completed stage.
-3. Require joined-tree proof, runtime, source/evidence and release evidence before closing the workstream.
