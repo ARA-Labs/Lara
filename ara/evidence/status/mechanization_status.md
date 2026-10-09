@@ -167,3 +167,11 @@ the neural component (failed 1-2) — so LARA need not over-invest in baseline-b
   the earlier statement-model blocker is closed.
 - Result 7's validator, attack-completeness checker invariant, and computed-claim status theorem are
   mechanized at `CheckedUnit` (**N60 executed; result 7 closed for the Lean reference PL**).
+
+### Verification run (2026-10-09, corrected BHL and exact Lara artifact composition)
+
+- The joined mandatory relative-completeness and source-composition candidate passes complete `make local-gates`: 6,811 build jobs, 5,332 explicitly audited declarations, 233 semantic registry modules and ten registry regressions in 304.982 seconds. Total wall time was 1,016.87 seconds; every theorem dependency stays within `propext`, `Classical.choice` and `Quot.sound`.
+- `docs/bhl-theorem-inventory.jsonl` maps all 1,750 public BHL theorems and four narrow implementation prerequisites to exact source/declaration, fully explicit unelided kernel type, scientific basis/scope and audit location. The inherited/corrected theory, finite/executable instance and Lara composition are classified separately; no novelty claim follows from the inventory.
+- The actual extended registered native runner exercises conditional/applied methods, exact source/evidence/declared-claim binding, accepted dependency quarantine with loss and surviving alternative, stale/fresh rebind, incompatible copies, full blocked/defeated statuses, rejected edits, false-precondition rejection, CSV/JSON replay, original located-hole identity/coordinates/sites and the equal-latest-record/opposite-conclusion witness.
+- Verbatim acceptance excerpts: `ara/evidence/results/bhl-integrated-acceptance-2026-10-09.log`. Durable contracts, exact hypotheses and prior stage evidence: `docs/theory-bhl.md`, `docs/belief-hoare-logic-assessment.md`, `docs/theory-bhl-decision.md`. Trace: N374–N377.
+- Scope: corrected formal BHL/artifact semantics and exercised conformance, not an empirical protocol, unrestricted missing-record calculus, physical capture guarantee or proof of outcome improvement. Stage09 integration and release remain operational requirements until directly observed; issues23/22 remain open.

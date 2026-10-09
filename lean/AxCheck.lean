@@ -77,6 +77,10 @@ import Lara.BHL.Check
 import Lara.BHL.FiniteModel
 import Lara.BHL.FiniteExecution
 import Lara.BHL.CheckedMethods
+import Lara.BHL.BridgeSource
+import Lara.BHL.LaraBridge
+import Lara.Examples.BHLBridge
+import Lara.Examples.BHLPartialRecord
 import Lara.ND
 import Lara.NDNamed
 import Lara.Strict
@@ -6488,3 +6492,193 @@ context's own arguments make unavailable. -/
 #print axioms Lara.BHL.CheckedMethods.method_execution
 #print axioms Lara.BHL.CheckedMethods.conditional_false_not_applicable
 #print axioms Lara.BHL.CheckedMethods.application_post
+
+-- PR 09: exact Lara composition, source/evidence alignment and record separation.
+-- lean/Lara/BHL/BridgeSource.lean: 10 public theorems.
+#print axioms Lara.BHL.CertifiedSource.exact_source
+#print axioms Lara.BHL.CertifiedSource.admitted
+#print axioms Lara.BHL.CertifiedSource.core
+#print axioms Lara.BHL.CertifiedSource.alignment_from_audit
+#print axioms Lara.BHL.CertifiedSource.certified_witness
+#print axioms Lara.BHL.CertifiedSource.certified_dependencies
+#print axioms Lara.BHL.auditCoreResult_accepted
+#print axioms Lara.BHL.except_toOption_get_exact
+#print axioms Lara.BHL.auditChecked_exact
+#print axioms Lara.BHL.acceptedRunOfSource_alignment
+-- lean/Lara/BHL/LaraBridge.lean: 47 public theorems.
+#print axioms Lara.BHL.modeled_application_post
+#print axioms Lara.BHL.checkBridge_sound
+#print axioms Lara.BHL.checkBridge_binding_integrity
+#print axioms Lara.BHL.checkBridge_evidence
+#print axioms Lara.BHL.checkBridge_exact_fields
+#print axioms Lara.BHL.checkBridge_stale
+#print axioms Lara.BHL.checkBridge_incompatible
+#print axioms Lara.BHL.forgetting_metadata_preserves
+#print axioms Lara.BHL.missing_metadata_preserves
+#print axioms Lara.BHL.ordinary_blocked_payload
+#print axioms Lara.BHL.SupportWarrant.published
+#print axioms Lara.BHL.artifact_warrant_selected_public
+#print axioms Lara.BHL.checkSupport_complete
+#print axioms Lara.BHL.checkSupports_complete
+#print axioms Lara.BHL.no_support_of_missing_leaf
+#print axioms Lara.BHL.tighten_dependency_loss
+#print axioms Lara.BHL.tighten_artifact_warrant_loss
+#print axioms Lara.BHL.RebindConditions.raw
+#print axioms Lara.BHL.rebind_labels
+#print axioms Lara.BHL.rebind_warrant
+#print axioms Lara.BHL.rebind_mathematical_contract
+#print axioms Lara.BHL.rebind_conditional
+#print axioms Lara.BHL.rebind_application
+#print axioms Lara.BHL.rebind_meaning
+#print axioms Lara.BHL.rebound_requires_fresh_certificate
+#print axioms Lara.BHL.conditional_false_no_application
+#print axioms Lara.BHL.applicability_support_not_precondition
+#print axioms Lara.BHL.wire_metadata_preserves
+#print axioms Lara.BHL.source_metadata_preserves
+#print axioms Lara.BHL.update_metadata_preserves
+#print axioms Lara.BHL.CheckedPayload.application_checked
+#print axioms Lara.BHL.checkBound_complete
+#print axioms Lara.BHL.checkBridge_complete
+#print axioms Lara.BHL.rebind_checker_success
+#print axioms Lara.BHL.rebind_run_exact
+#print axioms Lara.BHL.checked_payload_run
+#print axioms Lara.BHL.checkSupport_missing
+#print axioms Lara.BHL.sinkEmbedding_of_checked_agree
+#print axioms Lara.BHL.conditional_false_precondition
+#print axioms Lara.BHL.supported_applicability_without_truth
+#print axioms Lara.BHL.supported_applicability_without_knowledge
+#print axioms Lara.BHL.tighten_raw_support_preserved
+#print axioms Lara.BHL.tighten_support_rejected
+#print axioms Lara.BHL.checkBridge_no_warrant
+#print axioms Lara.BHL.EvidenceTransport.certified_exact
+#print axioms Lara.BHL.EvidenceTransport.request_preserved
+#print axioms Lara.BHL.quarantine_mathematical_contract
+-- lean/Lara/Examples/BHLBridge.lean: 87 public theorems.
+#print axioms Lara.Examples.BHLBridge.dependency_tighten
+#print axioms Lara.Examples.BHLBridge.dependency_prune_exact
+#print axioms Lara.Examples.BHLBridge.dependency_named_pruned
+#print axioms Lara.Examples.BHLBridge.dependency_source_support
+#print axioms Lara.Examples.BHLBridge.dependency_target_no_support
+#print axioms Lara.Examples.BHLBridge.dependency_alternative_support
+#print axioms Lara.Examples.BHLBridge.dependency_alternative_eligible
+#print axioms Lara.Examples.BHLBridge.dependency_source_published
+#print axioms Lara.Examples.BHLBridge.harmless_addLeaf
+#print axioms Lara.Examples.BHLBridge.harmless_source_distinct
+#print axioms Lara.Examples.BHLBridge.harmless_fresh_unrelated
+#print axioms Lara.Examples.BHLBridge.harmless_carriers
+#print axioms Lara.Examples.BHLBridge.harmless_context_transport
+#print axioms Lara.Examples.BHLBridge.harmless_statuses
+#print axioms Lara.Examples.BHLBridge.harmless_source_program_args
+#print axioms Lara.Examples.BHLBridge.harmless_target_program_args
+#print axioms Lara.Examples.BHLBridge.harmless_program_args
+#print axioms Lara.Examples.BHLBridge.harmless_source_program_atts
+#print axioms Lara.Examples.BHLBridge.harmless_target_program_atts
+#print axioms Lara.Examples.BHLBridge.harmless_program_atts
+#print axioms Lara.Examples.BHLBridge.harmless_sink_embedding
+#print axioms Lara.Examples.BHLBridge.harmless_all_labels_preserved
+#print axioms Lara.Examples.BHLBridge.defense_loss_update
+#print axioms Lara.Examples.BHLBridge.defense_loss_full_status
+#print axioms Lara.Examples.BHLBridge.defeated_source_status
+#print axioms Lara.Examples.BHLBridge.rejected_duplicate_leaf
+#print axioms Lara.Examples.BHLBridge.certified_result_success
+#print axioms Lara.Examples.BHLBridge.certified_source_success
+#print axioms Lara.Examples.BHLBridge.certified_extraction_exact
+#print axioms Lara.Examples.BHLBridge.certified_request_bound
+#print axioms Lara.Examples.BHLBridge.certified_semantic_admission
+#print axioms Lara.Examples.BHLBridge.certified_same_declared_leaf
+#print axioms Lara.Examples.BHLBridge.certified_same_source_witness
+#print axioms Lara.Examples.BHLBridge.json_extraction_exact
+#print axioms Lara.Examples.BHLBridge.quarantined_certified_success
+#print axioms Lara.Examples.BHLBridge.quarantined_certified_source_success
+#print axioms Lara.Examples.BHLBridge.quarantined_evidence_admitted
+#print axioms Lara.Examples.BHLBridge.evidence_cannot_admit_quarantined
+#print axioms Lara.Examples.BHLBridge.evidence_independent_of_ordinary_quarantine
+#print axioms Lara.Examples.BHLBridge.certified_audit_success
+#print axioms Lara.Examples.BHLBridge.certified_audit_output
+#print axioms Lara.Examples.BHLBridge.certified_run_alignment
+#print axioms Lara.Examples.BHLBridge.certified_raw_exact
+#print axioms Lara.Examples.BHLBridge.conditional_bridge_success
+#print axioms Lara.Examples.BHLBridge.applied_bridge_success
+#print axioms Lara.Examples.BHLBridge.harmless_stale_certificate
+#print axioms Lara.Examples.BHLBridge.harmless_fresh_certificate
+#print axioms Lara.Examples.BHLBridge.incompatible_method_copy
+#print axioms Lara.Examples.BHLBridge.incompatible_interpretation_copy
+#print axioms Lara.Examples.BHLBridge.incompatible_dependency_copy
+#print axioms Lara.Examples.BHLBridge.dependency_bridge_source_success
+#print axioms Lara.Examples.BHLBridge.dependency_bridge_target_failure
+#print axioms Lara.Examples.BHLBridge.dependency_conditional_unchanged
+#print axioms Lara.Examples.BHLBridge.dependency_target_no_warrant
+#print axioms Lara.Examples.BHLBridge.independent_alternative_bridge_success
+#print axioms Lara.Examples.BHLBridge.blocked_bridge_failure
+#print axioms Lara.Examples.BHLBridge.defeated_bridge_failure
+#print axioms Lara.Examples.BHLBridge.certified_bridge_success
+#print axioms Lara.Examples.BHLBridge.supported_applicability_false_precondition
+#print axioms Lara.Examples.BHLBridge.false_precondition_conditional_success
+#print axioms Lara.Examples.BHLBridge.false_precondition_applied_failure
+#print axioms Lara.Examples.BHLBridge.false_precondition_no_modeled_application
+#print axioms Lara.Examples.BHLBridge.complete_observation_projection
+#print axioms Lara.Examples.BHLBridge.harmless_reference_warrant
+#print axioms Lara.Examples.BHLBridge.harmless_rebound_binding
+#print axioms Lara.Examples.BHLBridge.harmless_rebound_warrant
+#print axioms Lara.Examples.BHLBridge.harmless_rebind_success
+#print axioms Lara.Examples.BHLBridge.dependency_structural_loss
+#print axioms Lara.Examples.BHLBridge.dependency_target_support_rejected
+#print axioms Lara.Examples.BHLBridge.dependency_no_warrant_checker_failure
+#print axioms Lara.Examples.BHLBridge.supported_applicability_no_knowledge
+#print axioms Lara.Examples.BHLBridge.belief_without_truth_boundary
+#print axioms Lara.Examples.BHLBridge.certified_leaf_prop_exact
+#print axioms Lara.Examples.BHLBridge.certified_registry_exact
+#print axioms Lara.Examples.BHLBridge.certified_source_equation
+#print axioms Lara.Examples.BHLBridge.certified_full_witness
+#print axioms Lara.Examples.BHLBridge.certified_declared_proposition_is_extraction
+#print axioms Lara.Examples.BHLBridge.certified_bridge_meaning
+#print axioms Lara.Examples.BHLBridge.certified_reference_warrant
+#print axioms Lara.Examples.BHLBridge.dependency_reference_warrant
+#print axioms Lara.Examples.BHLBridge.alternative_reference_warrant
+#print axioms Lara.Examples.BHLBridge.dependency_method_fields_preserved
+#print axioms Lara.Examples.BHLBridge.dependency_source_bridge_success_and_alternative
+#print axioms Lara.Examples.BHLBridge.conditional_bridge_native_success
+#print axioms Lara.Examples.BHLBridge.dependency_target_native_failure
+#print axioms Lara.Examples.BHLBridge.blocked_native_failure
+#print axioms Lara.Examples.BHLBridge.stale_native_failure
+-- lean/Lara/Examples/BHLPartialRecord.lean: 11 public theorems.
+#print axioms Lara.Examples.BHLPartialRecord.completed_runs
+#print axioms Lara.Examples.BHLPartialRecord.record_compatible
+#print axioms Lara.Examples.BHLPartialRecord.different_full_ledgers
+#print axioms Lara.Examples.BHLPartialRecord.reported_conclusion
+#print axioms Lara.Examples.BHLPartialRecord.omitted_test_conclusion
+#print axioms Lara.Examples.BHLPartialRecord.complete_reference_run
+#print axioms Lara.Examples.BHLPartialRecord.computed_endpoint
+#print axioms Lara.Examples.BHLPartialRecord.checkConclusion_correct
+#print axioms Lara.Examples.BHLPartialRecord.reported_satisfaction
+#print axioms Lara.Examples.BHLPartialRecord.omitted_test_not_satisfaction
+#print axioms Lara.Examples.BHLPartialRecord.record_does_not_determine_conclusion
+-- Successful actual tightening exposes preserved material and quarantine lookup.
+#print axioms Lara.Update.applyUpdate_tighten_material
+
+-- Final PR09 review repairs and transparent evidence-path correspondence.
+#print axioms Lara.BHL.ClaimAssociation.declared_input_claim
+#print axioms Lara.BHL.ClaimAssociation.declared_source_alternative
+#print axioms Lara.BHL.ClaimAssociation.no_declared_without_source
+#print axioms Lara.BHL.ClaimAssociation.query_exact
+#print axioms Lara.BHL.ClaimAssociation.raw_occurrence
+#print axioms Lara.BHL.checkBridge_claim_association
+#print axioms Lara.BHL.checkBridge_origin_copy_rejected
+#print axioms Lara.BHL.checkBridge_origin_integrity
+#print axioms Lara.BHL.ordinaryHoleRows_exact
+#print axioms Lara.BHL.ordinaryHoleRows_obligations
+#print axioms Lara.BHL.ordinaryWire_projection
+#print axioms Lara.BHL.ordinary_checked_holes_projection
+#print axioms Lara.BHL.ordinary_retention_projection
+#print axioms Lara.Evidence.referencePath_before_fragment
+#print axioms Lara.Evidence.referencePath_eq_runtime
+#print axioms Lara.Evidence.referencePath_without_fragment
+#print axioms Lara.Examples.BHLBridge.certified_claim_carriers
+#print axioms Lara.Examples.BHLBridge.certified_declared_association
+#print axioms Lara.Examples.BHLBridge.certified_declared_claim
+#print axioms Lara.Examples.BHLBridge.certified_unknown_claim_copy
+#print axioms Lara.Examples.BHLBridge.certified_unknown_claim_native_failure
+#print axioms Lara.Examples.BHLBridge.incompatible_claim_copy
+#print axioms Lara.Examples.BHLBridge.incompatible_claim_native_failure
+#print axioms Lara.Examples.BHLBridge.incompatible_origin_copy
+#print axioms Lara.Examples.BHLBridge.incompatible_origin_native_failure

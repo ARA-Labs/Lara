@@ -4145,7 +4145,7 @@ observations:
   bound_to:
   - N366_bhl_plan
   promoted: true
-  promoted_to: logic/solution/constraints.md#bhl-artifact-semantics-approved-implementation-pending
+  promoted_to: logic/solution/constraints.md#bhl-artifact-semantics-implemented-corrected-baseline
   crystallized_via: verbal-affirmation
   stale: false
 - id: O205
@@ -4193,6 +4193,25 @@ observations:
   bound_to:
   - N370_bhl_corrected_contract
   - N372_bhl_server_handoff
+  promoted: true
+  promoted_to: logic/solution/constraints.md#bhl-artifact-semantics-implemented-corrected-baseline
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O207
+  timestamp: '2026-10-09T01:04:30Z'
+  provenance: ai-suggested
+  content: The proved latest-test record witness separates compatible complete executions with opposite
+    equality-indexed method conclusions. This bounds inference from that submitted projection without
+    implying that every partial record is useless, or that the artifact now has a general compatible-completion
+    calculus.
+  context: The joined PR06/PR09 candidate has actual reference executions, computed finite endpoints and
+    independent satisfaction correspondence. Formal acceptance does not establish physical log capture,
+    empirical outcome improvement or novelty.
+  potential_type: claim
+  bound_to:
+  - N375_bhl_artifact_composition
+  - N376_bhl_integrated_acceptance
   promoted: false
   promoted_to: null
   crystallized_via: null
