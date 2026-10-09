@@ -100,7 +100,8 @@ calculus of compatible completions.
 Physical sampling as modeled, interpretation fidelity of the natural-language
 claim, completeness of an external log, and the adequacy of the null model for
 a real population all stay outside the checked model. Those are stated
-obligations, not hidden assumptions. The [reference assessment](../belief-hoare-logic-assessment.md)
-records where the published BHL statements were corrected, and the
-[theory record](../theory-bhl.md) records the taxonomy that separates
-inherited results from Lara-specific composition.
+obligations, not hidden assumptions. The
+[reference audit](../theory-bhl.md#which-discrepancies-require-corrections)
+records the corrections to published BHL statements. The same theory record's
+[comparison](../theory-bhl.md#which-assumptions-change-and-what-novelty-is-established)
+separates inherited results from Lara-specific composition.

@@ -325,10 +325,10 @@ histories, so a nonempty submitted record cannot pin down the method
 conclusion.
 
 For a prose-first walkthrough of those boundaries, see
-[the D6 demo](docs/demos/d6-bhl-method-support.md). The durable contracts,
-mechanized results and acceptance evidence are in the
-[BHL theory record](docs/theory-bhl.md); the source audit is the
-[reference assessment](docs/belief-hoare-logic-assessment.md). BHL adds no
+[the D6 demo](docs/demos/d6-bhl-method-support.md). The
+[BHL theory record](docs/theory-bhl.md) contains the durable contracts,
+mechanized results, acceptance evidence and
+[reference audit](docs/theory-bhl.md#how-does-the-theory-map-to-the-reference). BHL adds no
 `.lara` syntax: it lives in the Lean development under `lean/Lara/BHL/` with
 worked examples in `lean/Lara/Examples/`.
 
@@ -406,7 +406,7 @@ Start with the [documentation index](docs/README.md) for reading paths and theor
 | [`docs/multi-artifact-composition-decision.md`](docs/multi-artifact-composition-decision.md) | The `.laramap` **map**: what composing independently checkable artifacts means, the manifest and composite-verdict grammars, why a map is a recheck rather than a build, and what v1 refuses |
 | [`docs/substrate-decision.md`](docs/substrate-decision.md) | Why the core is Haskell and the front-end Python |
 | [`docs/mechanization-plan.md`](docs/mechanization-plan.md), [`lean/README.md`](lean/README.md) | The Lean 4 development: what is mechanized, per-result pointers |
-| [`docs/theory-bhl.md`](docs/theory-bhl.md) | Belief Hoare Logic: why Lara carries a statistical-method component, the frozen method and artifact-binding contracts, corrected reference contracts, and the mechanized results with their acceptance evidence ([source audit](docs/belief-hoare-logic-assessment.md), [exact theorem inventory](docs/bhl-theorem-inventory.jsonl)) |
+| [`docs/theory-bhl.md`](docs/theory-bhl.md) | Belief Hoare Logic: architectural rationale, method and artifact-binding contracts, reference audit, mechanized results and acceptance evidence ([exact theorem inventory](docs/bhl-theorem-inventory.jsonl)) |
 | [`docs/performance.md`](docs/performance.md) | What the checker-performance bench measures, how to run it, and dated snapshots from a retired harness, kept as upper bounds |
 | [`docs/engineering-plan.md`](docs/engineering-plan.md) | The engineering plan: build order and the module dependency graph |
 | [`m0/annotation-summary.md`](m0/annotation-summary.md) | The semantic corpus study that froze the scheme vocabulary, leaf grain, adapter portfolio, and defeat conventions |

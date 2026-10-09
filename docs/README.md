@@ -131,9 +131,9 @@ limits for byte parsing, cryptography and operating-system capture.
 
 The [Belief Hoare Logic theory record](theory-bhl.md) combines its architectural
 rationale, frozen statistical-method and artifact-binding contracts, mechanized
-results and acceptance evidence. The [reference assessment](belief-hoare-logic-assessment.md)
-audits the published source; the [exact theorem inventory](bhl-theorem-inventory.jsonl)
-records kernel types and axiom-audit locations.
+results, acceptance evidence and the [reference audit](theory-bhl.md#how-does-the-theory-map-to-the-reference).
+The [exact theorem inventory](bhl-theorem-inventory.jsonl) records kernel types
+and axiom-audit locations.
 
 ## Subdirectories
 
