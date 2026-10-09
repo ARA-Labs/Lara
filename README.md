@@ -406,7 +406,6 @@ Start with the [documentation index](docs/README.md) for reading paths and theor
 | [`docs/implementation.md`](docs/implementation.md), [`lean/README.md`](lean/README.md) | Implementation architecture, mechanization discipline, proof catalogue and verification gates |
 | [`docs/theory-bhl.md`](docs/theory-bhl.md) | Belief Hoare Logic: architectural rationale, method and artifact-binding contracts, reference audit and mechanized results ([exact theorem inventory](docs/bhl-theorem-inventory.jsonl)) |
 | [`docs/evaluation.md`](docs/evaluation.md) | Performance, mutation and localization contracts, frozen inputs and historical measurement evidence |
-| [`m0/annotation-summary.md`](m0/annotation-summary.md) | The semantic corpus study that froze the scheme vocabulary, leaf grain, adapter portfolio, and defeat conventions |
 | [`examples/README.md`](examples/README.md) | Index of the worked examples (A/B, E-series, R-series, S-series, running example, and the D3 agreement map in both its single-file and four-artifact forms) |
 
 ### Building the documentation
@@ -439,7 +438,7 @@ scripts/            conformance gates, corpus/mutant generators, bench, replay
 bundles/, elaborator/   replay bundles and the untrusted Python elaborator
 containers/         pinned container for the performance bench
 docs/               subject designs and theory, language references, evaluation, demos
-m0/, corpus/        the semantic corpus study and its sampled ARA corpus
+corpus/             the pinned ARA corpus the evaluation units are sampled from
 ara/                this project's own Agent-Native Research Artifact
 ```
 

@@ -17,7 +17,7 @@ Every argument is a support term. Strict and defeasible are rule modes, strict c
 | Concrete syntax | Separately versioned `.lara` forms in the [surface grammar](lara-surface-grammar.md) |
 | Artifact maps | `lara-map@1` manifests and `map-verdict@2` composite verdicts, separately versioned above the core (§12) |
 
-The semantic corpus study grounds the per-result-cell leaf grain (§3), duplicate-report-group quarantine (§4.3), nine-family scheme vocabulary (§4.5), adapter portfolio (§5.2) and defeat conventions (§7); see [the corpus study](../m0/annotation-summary.md) and [corpus lowering](corpus-map.md). [Evaluation](evaluation.md) holds the frozen inputs and hashes.
+The semantic corpus study grounds the per-result-cell leaf grain (§3), duplicate-report-group quarantine (§4.3), nine-family scheme vocabulary (§4.5), adapter portfolio (§5.2) and defeat conventions (§7); see [corpus lowering](corpus-map.md). [Evaluation](evaluation.md) holds the frozen inputs and hashes.
 
 A well-typed argument with open mandatory obligations is a reported hole, while R5 still rejects question-accounting failures. A claim with only incomplete support is `gap`. Conservative evidence-blocking compares complete declared arguments, never holes; a quarantined hole cannot cause blocking through an outgoing attack.
 
@@ -759,7 +759,7 @@ directly. Discharging a hole in place is not part of `lara-core@0.3`.
 
 Nothing in the calculus fixes *which* schemes a policy names; that is policy content. The argument
 shapes across the ARA corpus collapse into a **small closed family set**
-([corpus study](../m0/annotation-summary.md)), so the reference policy `empirical-v1` ships a
+(22 raw scheme names in the annotated sample normalize to these nine), so the reference policy `empirical-v1` ships a
 **fixed scheme vocabulary of nine families** rather than an open-ended scheme language:
 
 | Family | Merged raw schemes |

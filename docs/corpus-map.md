@@ -72,8 +72,8 @@ why defeat edges are typed rather than read as "dead end = defeater."
 
 ## 4. Annotation schema
 
-The semantic corpus study in `m0/` annotates each sampled claim with eight
-fields: claim type (descriptive, comparative, causal, generalization,
+The semantic corpus study annotated each claim of a 60-claim stratified sample
+with eight fields: claim type (descriptive, comparative, causal, generalization,
 negative-result, implementation/behavioral); proposition shape (the `formal`
 atom's predicate and arity in `Sigma`); inference scheme and premises, strict
 or defeasible; the smallest plausible strict certifier (reference natural
@@ -82,14 +82,14 @@ theory; critical questions, each marked mandatory or optional and as a gap
 (question) or defeater (exception) per spec §4.2; leaf granularity; attack
 candidates (rebut, undercut, undermine or none for each `dead_end`, with target
 position and `contrary` pair); and holes the artifact leaves open. The
-per-artifact format is `m0/annotations/SCHEMA.md`; the results are summarized
-in `m0/annotation-summary.md`.
+sampled claims are listed in `corpus-units/MANIFEST.tsv`, and each unit's
+header comment records the annotation it was lowered from.
 
 ## 5. Local corpus checkout
 
 The corpus is vendored as a git submodule at `corpus/ara-paperbench`, pinned to commit
-`62e9b54b2d4efe45b97f25676a16784530dd552a` (upstream `main`). The `m0/`
-annotations and the `corpus-units/` lowerings reference artifacts at this pin,
+`62e9b54b2d4efe45b97f25676a16784530dd552a` (upstream `main`). The
+`corpus-units/` lowerings reference artifacts at this pin,
 so changing the pin requires re-checking them. Fetch it with:
 
 ```
