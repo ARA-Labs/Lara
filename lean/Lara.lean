@@ -563,3 +563,6 @@ import Lara.Examples.ProcessOrder
 import Lara.Process.Statistics
 import Lara.Process.Ledger
 import Lara.Examples.ProcessStatistics
+import Lara.Process.Revision
+import Lara.Process.RevisionBridge
+import Lara.Examples.ProcessRevision

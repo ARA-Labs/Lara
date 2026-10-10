@@ -216,6 +216,9 @@ import Lara.Examples.ProcessOrder
 import Lara.Process.Statistics
 import Lara.Process.Ledger
 import Lara.Examples.ProcessStatistics
+import Lara.Process.Revision
+import Lara.Process.RevisionBridge
+import Lara.Examples.ProcessRevision
 
 open Lara
 
@@ -6875,3 +6878,35 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.Statistics.warrantedLevel_needs_fwer
 #print axioms Lara.Process.Statistics.warrantedLevel_eValue
 #print axioms Lara.Process.Statistics.warrantedLevel_pValue
+
+-- lean/Lara/Examples/ProcessRevision.lean: 10 public theorems.
+#print axioms Lara.Examples.ProcessRevision.quarantine_one_support
+#print axioms Lara.Examples.ProcessRevision.quarantine_all_supports
+#print axioms Lara.Examples.ProcessRevision.support_avoids_but_defeated
+#print axioms Lara.Examples.ProcessRevision.stable_not_directional
+#print axioms Lara.Examples.ProcessRevision.grounded_locality_instance
+#print axioms Lara.Examples.ProcessRevision.failed_sibling_changes_warrant
+#print axioms Lara.Examples.ProcessRevision.merge_breaks_corroboration
+#print axioms Lara.Examples.ProcessRevision.incomplete_reads_unsound
+#print axioms Lara.Examples.ProcessRevision.complete_reads
+#print axioms Lara.Examples.ProcessRevision.update_and_revision
+
+-- lean/Lara/Process/Revision.lean: 13 public theorems.
+#print axioms Lara.Process.Derives.mono
+#print axioms Lara.Process.not_derives_empty
+#print axioms Lara.Process.quarantine_iff_support
+#print axioms Lara.Process.grounded_directional_locality
+#print axioms Lara.Process.warranted_natural
+#print axioms Lara.Process.corroboration_injective
+#print axioms Lara.Process.verifying_trace_reuse
+#print axioms Lara.Process.version_update_keeps_old
+#print axioms Lara.Process.revision_withdraws_dependents
+#print axioms Lara.Process.warranted_locality
+#print axioms Lara.Process.derives_reencode
+#print axioms Lara.Process.derives_reencode_iff
+#print axioms Lara.Process.corroboration_preserved_iff
+
+-- lean/Lara/Process/RevisionBridge.lean: 3 public theorems.
+#print axioms Lara.Process.tighten_revision
+#print axioms Lara.Process.update_keeps_old
+#print axioms Lara.Process.update_reestablish

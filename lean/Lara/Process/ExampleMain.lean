@@ -3,6 +3,7 @@ import Lara.Examples.ProcessCore
 import Lara.Examples.ProcessEntitlement
 import Lara.Examples.ProcessOrder
 import Lara.Examples.ProcessStatistics
+import Lara.Examples.ProcessRevision
 
 /-!
 The `process-examples` runner: computes every research-process fixture through
@@ -154,12 +155,33 @@ def checks : IO _root_.Unit := do
 
 end Stats
 
+namespace Revision
+open Lara.Examples.ProcessRevision
+open Lara.Grounded
+
+def checks : IO _root_.Unit := do
+  expect "claim defeated although its support avoids the quarantine" (labelC attacked 0) .out
+  require "stable credulous before the unrelated edit" (decide (StableCredulous single 0))
+  require "no stable extension after the unrelated edit" (!decide (StableCredulous withSelfAttack 0))
+  expect "grounded label unchanged by the unrelated edit" (labelC withSelfAttack 0) (labelC single 0)
+  require "warrant without the failed sibling" (decide (bonferroniWarrant Lara.Examples.ProcessOrder.withoutSibling))
+  require "no warrant with it" (!decide (bonferroniWarrant Lara.Examples.ProcessOrder.withSibling))
+  expect "corroboration before merging" (corroboration twoSources .a) 2
+  expect "corroboration after merging" (corroboration (renameSupplies (fun _ : Nat => (0 : Nat)) twoSources) .a) 1
+  require "stale reuse" (check (fun k => k == 0) != check (fun _ => true))
+  require "new version keeps the old warrant" (decide (VersionWarranted [newV, oldV] [oldV] []))
+  require "defect withdraws it" (!decide (VersionWarranted [newV, oldV] [oldV] [oldV]))
+  IO.println "R5 revision: support-only quarantine, attacked support defeated, stable not directional, failed sibling flips warrant, merge halves corroboration, incomplete reads stale, update keeps and revision withdraws"
+
+end Revision
+
 def run : IO _root_.Unit := do
   FalseLaws.checks
   Core.checks
   Entitlement.checks
   Order.checks
   Stats.checks
+  Revision.checks
   IO.println "process examples: all research-process checks passed"
 
 end Lara.Process.ExampleRuntime

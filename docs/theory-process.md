@@ -143,6 +143,34 @@ A partial-order record (`OrderRecord`) lists reported events and explicit preced
 
 Infinite-horizon Ville and online FDR procedures over complete ledgers (LORD, e-LOND) are not part of this layer.
 
+## How does entitlement survive revision?
+
+`Lara.Process.Revision` sorts every edit into three classes.
+
+| Class | Criterion | Exactness |
+| --- | --- | --- |
+| Survives by structure | a minimal support avoids the quarantined sources, the edit is outside the claim's argument ancestry, or the recorded reads are unchanged | the quarantine criterion is an iff on the support-only fragment and only necessary with attacks; ancestry locality and trace reuse are sufficient |
+| Survives by transport | the edit is a renaming or re-encoding under which warrant is natural | every source renaming and every injective atom re-encoding for derivability; for a source count, exactly the renamings injective on the supplying sources |
+| Must be re-established | the edit changes something the derivation read | Lara recomputes the affected region; it never searches for a minimal repair |
+
+| Theorem | Statement |
+| --- | --- |
+| `Derives.mono`, `not_derives_empty` | support-only derivability (`SupportSystem`, Horn rules over source supplies) is monotone, and nothing is derivable from no supplies when every rule has a premise |
+| `quarantine_iff_support` | after quarantining sources `Q`, a claim stays derivable iff some minimal support (`MinimalSupport`, a set of source supplies: an ATMS label environment or why-provenance witness) inside the available supplies has no source in `Q`. On the support-only fragment this is the exact criterion of which `tighten_artifact_warrant_loss` states one direction (a used quarantined leaf loses the selected warrant) for the full bridge |
+| `grounded_directional_locality` | if two frameworks contain the same ancestors of `t` and give each the same attackers, `t` has the same grounded label in both |
+| `warranted_locality` | warrant is local in the same sense once every other input it reads (artifact check, conclusion, kind, probes, attained guarantee) is preserved too; graph agreement alone is not enough |
+| `warranted_natural` | derivability transports along every renaming of sources (`renameSupplies`, `SupportSystem.rename`), injective or not, because no rule compares source identities |
+| `derives_reencode`, `derives_reencode_iff` | re-encoding atoms preserves derivations, and for injective re-encodings derivability transports in both directions |
+| `corroboration_injective`, `corroboration_preserved_iff` | a renaming preserves the number of distinct sources supplying a claim iff it is injective on those sources |
+| `verifying_trace_reuse` | if a check's result depends only on its recorded reads (`RecordsReads`) and every recorded read is unchanged, the stored result is the recomputed one; the hypothesis is complete read recording |
+| `version_update_keeps_old`, `revision_withdraws_dependents` | publishing a new dataset version keeps every warrant indexed by the versions it read; declaring a version defective withdraws exactly the warrants that read it |
+| `tighten_revision` | over core source edits (`SourceUpdate`), `tighten` is the revision class (`editClass`), and an actual `tighten` of material a support uses leaves no `ArtifactWarrant` |
+| `update_keeps_old`, `update_reestablish` | an artifact warrant is indexed by its source snapshot, so applying any update leaves the old-snapshot warrant in place; at the new snapshot warrant must be re-established, and `RebindConditions` suffices (`rebind_warrant`) |
+
+`RebindConditions` requires injective raw and checked index maps. `warranted_natural` and `corroboration_preserved_iff` show that, on the support-only fragment, injectivity is needed exactly where a profile counts sources, which refines that sufficient contract toward a characterization there.
+
+`Lara.Examples.ProcessRevision` holds the witnesses. `quarantine_one_support` and `quarantine_all_supports` exercise the quarantine iff on two independent supports. `support_avoids_but_defeated` shows a support that avoids the quarantine is not enough once attacks exist. `stable_not_directional` adds a self-attacking argument outside the claim's ancestry: every stable extension disappears while the grounded label is unchanged, and `grounded_locality_instance` derives that grounded fact from the general theorem. `failed_sibling_changes_warrant` keeps the lowered arguments, and so every attack edge, unchanged while a failed sibling run flips the e-Bonferroni warrant through the family count. `merge_breaks_corroboration` merges two sources: derivability survives, corroboration halves. `incomplete_reads_unsound` and `complete_reads` separate incomplete from complete read recording. `update_and_revision` keeps an old-version warrant across a new version and withdraws it when the old version is declared defective.
+
 ## How is the development checked?
 
 - `cd lean && lake build`
