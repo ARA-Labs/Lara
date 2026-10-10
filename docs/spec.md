@@ -16,6 +16,7 @@ Every argument is a support term. Strict and defeasible are rule modes, strict c
 | Checker input | S-expression codec `Lara.Wire`; JSON is outside the trusted checker-input boundary (§1.1, §10.1) |
 | Concrete syntax | Separately versioned `.lara` forms in the [surface grammar](lara-surface-grammar.md) |
 | Artifact maps | `lara-map@1` manifests and `map-verdict@2` composite verdicts, separately versioned above the core (§12) |
+| Process records | `process-input 1` documents with `process-result 1` / `process-error 1` envelopes, separately versioned above the core; Lean reference runner only ([research-process semantics](theory-process.md#what-does-the-process-input-1-contract-fix)) |
 
 The semantic corpus study grounds the per-result-cell leaf grain (§3), duplicate-report-group quarantine (§4.3), nine-family scheme vocabulary (§4.5), adapter portfolio (§5.2) and defeat conventions (§7); see [corpus lowering](corpus-map.md). [Evaluation](evaluation.md) holds the frozen inputs and hashes.
 
