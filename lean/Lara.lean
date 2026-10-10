@@ -578,3 +578,4 @@ import Lara.Process.Universe
 import Lara.Process.Rename
 import Lara.Process.Wire
 import Lara.Process.Run
+import Lara.Examples.ProcessWire
