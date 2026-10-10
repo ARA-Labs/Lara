@@ -1,4 +1,5 @@
 import Lara.Examples.ProcessFalseLaws
+import Lara.Examples.ProcessCore
 
 /-!
 The `process-examples` runner: computes every research-process fixture through
@@ -40,8 +41,35 @@ def checks : IO _root_.Unit := do
 
 end FalseLaws
 
+namespace Core
+open Lara.Examples.ProcessCore
+
+def checks : IO _root_.Unit := do
+  expect "coarse record certain" (verdict (fun _ : Bool => True) (fun _ => True)) .certainTrue
+  expect "empty refinement inconsistent" (verdict (fun _ : Bool => False) (fun _ => True)) .inconsistent
+  expect "Kleene gives up on p ∨ ¬p"
+    (kleeneVerdictFinite (fun _ : Bool => True) (finiteAtoms (fun _ => True) pVal) excludedMiddle) .unknown
+  expect "supervaluation certifies p ∨ ¬p"
+    (verdict (fun _ : Bool => True) (excludedMiddle.holds pVal)) .certainTrue
+  require "complete coverage allows full reporting" (decide (completeRuns.Allowed .bothReported ()))
+  require "complete coverage forbids omission" (!decide (completeRuns.Allowed .oneOmitted ()))
+  require "count bound forbids two runs" (!decide (atMostOneRun.Allowed .bothReported ()))
+  require "count bound allows the omission" (decide (atMostOneRun.Allowed .oneOmitted ()))
+  expect "stronger assumptions empty the set"
+    (verdict (Compatible silentModel bothCoverages ()) (fun _ => True)) .inconsistent
+  -- The process model of `partialRecord_unknown`, with the finite evaluator that
+  -- `BHLPartialRecord.checkConclusion_correct` ties to `conclusionHolds`.
+  let partialVerdict := verdict (Compatible partialModel Assumptions.trivial
+    Lara.Examples.BHLPartialRecord.record)
+    (fun x => Lara.Examples.BHLPartialRecord.checkConclusion x.1 = true)
+  expect "BHL partial record leaves the conclusion unknown" partialVerdict .unknown
+  IO.println s!"R1 core: refinement needs nonempty, Kleene incomplete on p ∨ ¬p, coverage incomparable, BHL partial record verdict={reprStr partialVerdict}"
+
+end Core
+
 def run : IO _root_.Unit := do
   FalseLaws.checks
+  Core.checks
   IO.println "process examples: all research-process checks passed"
 
 end Lara.Process.ExampleRuntime

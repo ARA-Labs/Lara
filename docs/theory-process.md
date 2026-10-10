@@ -8,7 +8,7 @@ The research-process layer (`lean/Lara/Process/`, namespace `Lara.Process`) stat
 
 Entitlement is non-factive and separate from every existing judgment. It implies neither the claim's truth nor BHL knowledge of it, and an unchanged public status does not transport it. There is no coercion between this layer's verdicts and the core's statuses or BHL's modalities; every translation states its hypotheses and proves preservation.
 
-`Lara.BHL.HistoryCoverage` keeps its single constructor `completeModeled`. The omission models of this layer live in the separate type `RecordCoverage`. `Lara.BHL.History` stays a multiset; ordered process histories are a separate view.
+`Lara.BHL.HistoryCoverage` keeps its single constructor `completeModeled`. The omission models of this layer live in the separate type `RecordCoverage`, and `coverage_complete_conservative` relates the two. `Lara.BHL.History` stays a multiset; ordered process histories are a separate view.
 
 No theorem here establishes the honesty of an external log, the faithfulness of a natural-language interpretation or the adequacy of a model for the real world. A finite carrier and horizon are model assumptions with explicit parameters, not facts inferred from a short record.
 
@@ -40,6 +40,32 @@ The witness quantifiers are frozen as `EntitledBy compat warranted` (nonempty, a
 | An empty compatible set is harmless | `empty_compatible_vacuous`: naive supervaluation certifies a property and its negation; the verdict is `inconsistent` | Positive verdicts require a nonempty set |
 | Completing the past is continuing the future | `past_completion_not_future`: every past completion warrants a claim that a later retraction defeats | `compat` and `continues` stay separate |
 | Ordering predicates can be stated over the event multiset | `multiset_forgets_plan_order`: two histories with one event multiset differ on plan precommitment, so no multiset predicate decides it | Order predicates are stated over ordered histories |
+
+## What does the compatible-history core prove?
+
+`Lara.Process.Verdict`, `Kleene`, `Coverage` and `Conservative` hold the laws of the four-valued verdict. They are stated for the reference `verdictOf`; `verdict_eq_verdictOf` transfers them to the executable `verdict`, and `verdictOf_inconsistent_iff`, `verdictOf_certainTrue_iff`, `verdictOf_certainFalse_iff` and `verdictOf_unknown_iff` characterize each verdict exactly.
+
+| Theorem | Statement |
+| --- | --- |
+| `verdict_sound`, `verdict_sound_false` | `certainTrue` (`certainFalse`) implies the property (its negation) at every compatible history |
+| `positive_needs_nonempty` | a `certainTrue` or `certainFalse` verdict implies a compatible history exists |
+| `certain_refine` | if the refined compatible set is contained in the original and is nonempty, a determinate verdict transfers |
+| `certain_weaken_assumption` | stronger admitted assumptions preserve a determinate verdict when their compatible set is nonempty |
+| `certain_factor` | if a coarse observation is `g` of a finer one, a determinate coarse verdict transfers to every realized finer observation |
+| `determined_iff_no_witness` | a verdict is determinate iff the compatible set is nonempty and no two compatible histories disagree |
+| `verdict_of_generator` | a realized record whose compatible histories agree with its generating history on the property has that history's verdict |
+| `history_independent_verdict` | a property that reads no history gets its constant truth value on every consistent record |
+| `naive_sound_iff_factors`, `factors_iff_determinate` | an exact record-level evaluator exists iff the property factors through the observation on valid histories, iff every realizable record is determinate |
+| `kleene_sound` | whenever the compositional strong-Kleene verdict is not `unknown`, the reference verdict agrees; its empty-set check comes first |
+| `referenceAtoms_sound`, `finiteAtoms_eq`, `kleeneVerdictFinite_eq` | the atom valuation read off atom verdicts is sound, and the executable Kleene evaluator equals the reference one |
+| `RecordCoverage.stronger_openWorld`, `RecordCoverage.countBounded_mono` | every scoped assumption implies open-world coverage; a smaller count bound is stronger |
+| `complete_scope_events`, `complete_coverage_determines` | under `complete` coverage of a scope, with reports exposing only in-scope events, every compatible history has exactly the record's in-scope events, so every property reading only those events gets its generating history's verdict |
+| `coverage_complete_conservative` | admitting a binding's own `HistoryCoverage` through `RecordCoverage.ofHistoryCoverage`, if the artifact warrant reads only in-scope events, a realized record's verdict is exactly `ArtifactWarrant` at the generating bridge history |
+| `realized_conservative`, `completeObservation_conservative` | the same agreement for any realized record that determines the warrant; the complete observation always determines it |
+
+`RecordCoverage.ofHistoryCoverage` reads BHL's only constructor `completeModeled` as `complete` coverage of a stated scope. Conservativity needs more than a complete test ledger: the `reads` hypothesis requires every input the warrant reads, data accesses included, to lie in the covered scope. Profile checks beyond `ArtifactWarrant` are a separate obligation.
+
+`Lara.Examples.ProcessCore` supplies the witnesses: `refine_needs_nonempty` and `weaken_assumption_needs_nonempty` (refining a record or strengthening its assumptions until the set is empty yields `inconsistent`), `kleene_incomplete` (the compositional evaluator answers `unknown` on `p ∨ ¬p` where supervaluation answers `certainTrue`), `coverage_incomparable` (complete and count-bounded coverage of one scope allow incomparable sets), `partialRecord_unknown` (the existing `record_does_not_determine_conclusion`, restated as the verdict `unknown` of a process model built from the same two BHL histories) and `partialRecord_not_factors` (naive evaluation of the method conclusion on the submitted record is unsound).
 
 ## How is the development checked?
 

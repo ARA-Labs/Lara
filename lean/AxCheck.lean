@@ -202,6 +202,11 @@ import Lara.Examples.PWRun
 import Lara.Process.Vocabulary
 import Lara.Process.Contract
 import Lara.Examples.ProcessFalseLaws
+import Lara.Process.Verdict
+import Lara.Process.Kleene
+import Lara.Process.Coverage
+import Lara.Process.Conservative
+import Lara.Examples.ProcessCore
 
 open Lara
 
@@ -6697,3 +6702,55 @@ context's own arguments make unavailable. -/
 -- lean/Lara/Process/Vocabulary.lean: 2 public theorems.
 #print axioms Lara.Process.EvidenceKind.rank_injective
 #print axioms Lara.Process.EvidenceKind.le_iff_rank
+
+-- lean/Lara/Examples/ProcessCore.lean: 7 public theorems.
+#print axioms Lara.Examples.ProcessCore.refine_needs_nonempty
+#print axioms Lara.Examples.ProcessCore.kleene_incomplete
+#print axioms Lara.Examples.ProcessCore.coverage_incomparable
+#print axioms Lara.Examples.ProcessCore.partial_compatible
+#print axioms Lara.Examples.ProcessCore.partialRecord_unknown
+#print axioms Lara.Examples.ProcessCore.partialRecord_not_factors
+#print axioms Lara.Examples.ProcessCore.weaken_assumption_needs_nonempty
+
+-- lean/Lara/Process/Coverage.lean: 8 public theorems.
+#print axioms Lara.Process.RecordCoverage.stronger_openWorld
+#print axioms Lara.Process.RecordCoverage.countBounded_mono
+#print axioms Lara.Process.Assumptions.stronger_refl
+#print axioms Lara.Process.Assumptions.stronger_trans
+#print axioms Lara.Process.Assumptions.and_stronger_left
+#print axioms Lara.Process.Assumptions.and_stronger_right
+#print axioms Lara.Process.complete_scope_events
+#print axioms Lara.Process.complete_coverage_determines
+
+-- lean/Lara/Process/Conservative.lean: 4 public theorems.
+#print axioms Lara.Process.RecordCoverage.ofHistoryCoverage_complete
+#print axioms Lara.Process.coverage_complete_conservative
+#print axioms Lara.Process.completeObservation_conservative
+#print axioms Lara.Process.realized_conservative
+
+-- lean/Lara/Process/Verdict.lean: 18 public theorems.
+#print axioms Lara.Process.verdictOf_cases
+#print axioms Lara.Process.verdictOf_inconsistent_iff
+#print axioms Lara.Process.verdictOf_certainTrue_iff
+#print axioms Lara.Process.verdictOf_certainFalse_iff
+#print axioms Lara.Process.verdictOf_unknown_iff
+#print axioms Lara.Process.verdict_eq_verdictOf
+#print axioms Lara.Process.verdict_sound
+#print axioms Lara.Process.verdict_sound_false
+#print axioms Lara.Process.positive_needs_nonempty
+#print axioms Lara.Process.certain_refine
+#print axioms Lara.Process.determined_iff_no_witness
+#print axioms Lara.Process.verdict_of_generator
+#print axioms Lara.Process.history_independent_verdict
+#print axioms Lara.Process.certain_weaken_assumption
+#print axioms Lara.Process.certain_factor
+#print axioms Lara.Process.naive_sound_iff_factors
+#print axioms Lara.Process.factors_iff_determinate
+#print axioms Lara.Process.RecordSemantics.verdict_eq_verdictOf
+
+-- lean/Lara/Process/Kleene.lean: 5 public theorems.
+#print axioms Lara.Process.kleene_value_sound
+#print axioms Lara.Process.kleene_sound
+#print axioms Lara.Process.referenceAtoms_sound
+#print axioms Lara.Process.finiteAtoms_eq
+#print axioms Lara.Process.kleeneVerdictFinite_eq

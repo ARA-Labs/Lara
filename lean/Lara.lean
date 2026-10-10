@@ -549,3 +549,8 @@ import Lara.Examples.BHLPartialRecord
 import Lara.Process.Vocabulary
 import Lara.Process.Contract
 import Lara.Examples.ProcessFalseLaws
+import Lara.Process.Verdict
+import Lara.Process.Kleene
+import Lara.Process.Coverage
+import Lara.Process.Conservative
+import Lara.Examples.ProcessCore
