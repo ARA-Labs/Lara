@@ -630,7 +630,8 @@ the result is stated but not yet proved or mechanized._
 - **Statement**: A specification class with no executable enforcement accumulates falsehoods that survive review, because nothing can contradict them. The failure is not the absence of coverage; it is that the *description* of the class becomes unfalsifiable and then wrong — including triggers that are unsatisfiable by construction, and coverage prose that asserts exercise where there is none.
 - **Conditions**: Holds for a frozen, enumerated rejection surface whose classes are documented ahead of implementation and whose test suite is generated from the implemented classes. Observed on one class (R2) in one system; the untested boundary is whether a class enforced *partially* drifts the same way, and whether a hand-written (rather than generated) suite would have caught it.
 - **Sources**: [
-  `R2 documented trigger, unsatisfiable` ← `git dfa9811~1:docs/spec.md:1340` «| **R2** signature | arity or symbol mismatch against `Sigma`; non-ground term where ground required | the offending term | §3, §4.1 |» [input];
+  `R2 documented trigger, unsatisfiable` ← `ara/staging/observations.yaml:1222-1223` «("non-ground term where ground required") was unsatisfiable by construction, because Term has no variable constructor.» [input];
+  `why the trigger cannot fire` ← `docs/spec.md:1621-1622` «R2 has no groundness clause: `Term ::= num | str | con(...)` has no variable constructor, so every `Prop` is ground structurally» [input];
   `coverage prose asserting exercise` ← `git dfa9811~1:docs/rejection-surface.md:93` «Two classes are not individually anchored above because they are exercised only inside larger» [input];
   `0` ← `git dfa9811~1:fixtures/mutants/MANIFEST.tsv` «`cut -f5 | grep -c '^reject-R2$'` → 0 over 369 rows» [result];
   `107` ← `fixtures/mutants/MANIFEST.tsv` «`cut -f5 | grep -c '^reject-R2$'` → 107 over 496 rows, after enforcement landed» [result]
