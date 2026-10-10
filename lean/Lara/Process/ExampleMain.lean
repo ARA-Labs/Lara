@@ -4,6 +4,8 @@ import Lara.Examples.ProcessEntitlement
 import Lara.Examples.ProcessOrder
 import Lara.Examples.ProcessStatistics
 import Lara.Examples.ProcessRevision
+import Lara.Examples.ProcessARA
+import Lara.Examples.ProcessAdequacy
 
 /-!
 The `process-examples` runner: computes every research-process fixture through
@@ -67,7 +69,7 @@ def checks : IO _root_.Unit := do
     Lara.Examples.BHLPartialRecord.record)
     (fun x => Lara.Examples.BHLPartialRecord.checkConclusion x.1 = true)
   expect "BHL partial record leaves the conclusion unknown" partialVerdict .unknown
-  IO.println s!"R1 core: refinement needs nonempty, Kleene incomplete on p ∨ ¬p, coverage incomparable, BHL partial record verdict={reprStr partialVerdict}"
+  IO.println s!"R1 core: refinement needs nonempty, Kleene incomplete on p ∨ ¬p, coverage incomparable, BHL partial record verdict={partialVerdict.label}"
 
 end Core
 
@@ -175,6 +177,93 @@ def checks : IO _root_.Unit := do
 
 end Revision
 
+namespace Ara
+open Lara.Examples.ProcessARA
+open Lara.Examples.ProcessOrder (Candidate precommitted siblingRun failure noPolicy)
+
+/-- Report a decoded-record verdict with everything it depends on: model,
+query, coverage scope and admitted assumptions, profile, submitted claims and
+witnesses, and the ARA source reference of every decoded fact. -/
+def report (label : String) (src : AraSource Empty) (v : Verdict) : IO _root_.Unit := do
+  let d := extract admits src
+  let cite (r : SourceRef) : String :=
+    let span := match r.span with
+      | some (a, b) => s!":{a}-{b}"
+      | none => ""
+    s!"{r.file}#{r.entry}{span}"
+  let bases := [AdmissionBasis.instrumentedLog, .signedAttestation, .authorDeclaration]
+  let attestations := src.entries.filterMap AraEntry.coverage?
+  IO.println s!"  {label}: {v.label}"
+  IO.println s!"    model: ProcessOrder.Candidate, 3 complete histories, cutoff {d.cutoff}"
+  IO.println "    query: RunPrecommitted run0 (an order query; no profile applies)"
+  IO.println s!"    admitted bases: {(bases.filter admits).map AdmissionBasis.label}"
+  let kind : RecordCoverage Empty → String
+    | .complete _ => "complete"
+    | .countBounded _ k => s!"at most {k}"
+    | .declaredPolicy _ p => p.elim
+    | .openWorld _ => "open world"
+  IO.println s!"    admitted coverage: {d.coverage.map fun c => s!"{kind c.coverage} from {cite c.evidence}"}"
+  IO.println s!"    unadmitted attestations: {(attestations.filter fun c => !admits c.basis).map fun c => s!"{cite c.evidence} ({c.basis.label})"}"
+  IO.println s!"    submitted: {d.submitted.map fun (c, w) => s!"claim {c.index} by witness {w.index}"}"
+  IO.println s!"    events: {d.events.map fun e => cite e.source}"
+  IO.println s!"    ordering: {d.order.map fun o => cite o.source}"
+
+def checks : IO _root_.Unit := do
+  let omitted := verdict (decodedCompat withoutCoverage) precommitted
+  let logged := verdict (decodedCompat withLogCoverage) precommitted
+  let declared := verdict (decodedCompat withDeclaredCoverage) precommitted
+  let contradictory := verdict (decodedCompat contradictorySource) precommitted
+  expect "ordering evidence alone" omitted .unknown
+  expect "admitted access coverage" logged .certainTrue
+  expect "author declaration not admitted" declared .unknown
+  expect "contradictory ordering entries" contradictory .inconsistent
+  require "generating history compatible"
+    (decide ((extract admits withLogCoverage).Compatible noPolicy Candidate.committedFirst.trace))
+  require "failed trial preserved"
+    (decide (siblingRun ∈ (extract admits withSiblingSource).toOrderRecord.events))
+  expect "reordered source, same verdict"
+    (verdict (fun x : Candidate => (extract admits reorderedSource).Compatible noPolicy x.trace) precommitted)
+    logged
+  IO.println "R6 ARA bridge:"
+  report "ordering evidence only" withoutCoverage omitted
+  report "instrumented-log access coverage" withLogCoverage logged
+  report "author-declared access coverage" withDeclaredCoverage declared
+  report "contradictory ordering" contradictorySource contradictory
+
+end Ara
+
+namespace Adequacy
+open Lara.Examples.ProcessAdequacy
+open Lara.Examples.ProcessOrder
+
+def checks : IO _root_.Unit := do
+  require "dropping failed analyses collapses the pair" (decide (dropFailed withoutSibling = dropFailed withSibling))
+  require "dropping selection provenance collapses the pair"
+    (decide (dropSelectionProvenance [selectRead, commit, read, run] =
+      dropSelectionProvenance [selectOnTest, commit, read, run]))
+  require "collapsing sources collapses the pair"
+    (decide (renameSupplies (fun _ : Nat => (0 : Nat)) Lara.Examples.ProcessRevision.twoSources =
+      renameSupplies (fun _ : Nat => (0 : Nat)) ({(1, .a)} : Finset (Nat × Lara.Examples.ProcessRevision.Atom))))
+  require "dropping retractions collapses the pair"
+    (decide (dropRetractions Lara.Examples.ProcessFalseLaws.asserted =
+      dropRetractions Lara.Examples.ProcessFalseLaws.retracted))
+  require "the multiset collapses the pair"
+    (decide ((Candidate.committedFirst.trace : Multiset Stamped) = Candidate.readFirst.trace))
+  require "the pairs disagree on their warrants"
+    (decide (Lara.Examples.ProcessRevision.bonferroniWarrant withoutSibling) &&
+      !decide (Lara.Examples.ProcessRevision.bonferroniWarrant withSibling) &&
+      decide (SplitSelection [selectRead, commit, read, run] [selectData] [testData]) &&
+      !decide (SplitSelection [selectOnTest, commit, read, run] [selectData] [testData]) &&
+      decide (corroborated Lara.Examples.ProcessRevision.twoSources) &&
+      !decide (corroborated {(1, .a)}) &&
+      decide (Lara.Examples.ProcessFalseLaws.warranted Lara.Examples.ProcessFalseLaws.asserted) &&
+      !decide (Lara.Examples.ProcessFalseLaws.warranted Lara.Examples.ProcessFalseLaws.retracted) &&
+      decide (RunPrecommitted Candidate.committedFirst.trace run0) &&
+      !decide (RunPrecommitted Candidate.readFirst.trace run0))
+  IO.println "R6 adequacy: multiset, failed-analysis, selection-provenance, source-identity and retraction pairs computed here; the latest-test and PROV separations are proved in Lean (latestTest_separates, prov_separates)"
+
+end Adequacy
+
 def run : IO _root_.Unit := do
   FalseLaws.checks
   Core.checks
@@ -182,6 +271,8 @@ def run : IO _root_.Unit := do
   Order.checks
   Stats.checks
   Revision.checks
+  Ara.checks
+  Adequacy.checks
   IO.println "process examples: all research-process checks passed"
 
 end Lara.Process.ExampleRuntime

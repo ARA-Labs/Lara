@@ -70,6 +70,27 @@ The lowering makes this call per dead-end node, which a holistic score cannot
 express. Most dead ends are rejected alternatives and lower to no edge, which is
 why defeat edges are typed rather than read as "dead end = defeater."
 
+### The process boundary
+
+The lowering above produces argumentation structure only. It establishes no
+event order and no omission guarantee, and a branch that lowers to no attack
+edge can still be a trial in a statistical family. The research-process layer
+([theory-process.md](theory-process.md#what-crosses-the-ara-boundary)) reads a
+separate decoded process record from the same ARA:
+
+| ARA source material | Decoded process information | When it is missing |
+| --- | --- | --- |
+| Claims and their proof references | Claim identity and the exact submitted witness | The witness is not audited; no substitute argument is chosen |
+| Experiment setup, run references and evidence | Run identity, plan and input versions, result, statistical family | Fields stay unknown; family size is never inferred from reported successes |
+| Exploration branches, failed trials included | Candidate events throughout the declared scope | Relevant trials are kept even when they lower to no attack edge |
+| Explicit access, commit and ordering records | Data reads, plan commitments, precedence constraints | Every valid ordering not ruled out stays possible |
+| Coverage attestations and reporting declarations | Scoped coverage assertions with evidence and admission basis | Absence of entries is never read as completeness |
+| Corrections, withdrawals and dataset updates | Versioned changes and the warrants that depend on them | A new dataset version is distinguished from a defect in an old one |
+
+Every decoded fact keeps its ARA file and entry reference. Decoding arbitrary
+ARA prose into this record, and capturing processes as they happen, are outside
+the theory: its fixtures are hand-decoded finite records.
+
 ## 4. Annotation schema
 
 The semantic corpus study annotated each claim of a 60-claim stratified sample

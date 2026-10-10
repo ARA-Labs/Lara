@@ -189,6 +189,13 @@ inductive Verdict where
   | unknown
   deriving DecidableEq, Repr
 
+/-- The one spelling table for verdicts. -/
+def Verdict.label : Verdict → String
+  | .inconsistent => "inconsistent"
+  | .certainTrue => "certainTrue"
+  | .certainFalse => "certainFalse"
+  | .unknown => "unknown"
+
 /-! ### Evidence kinds and profiles -/
 
 /-- The evidence-kind lattice `hypothetical < conditional < supported <

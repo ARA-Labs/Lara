@@ -219,6 +219,10 @@ import Lara.Examples.ProcessStatistics
 import Lara.Process.Revision
 import Lara.Process.RevisionBridge
 import Lara.Examples.ProcessRevision
+import Lara.Process.Bridge
+import Lara.Process.Prov
+import Lara.Examples.ProcessAdequacy
+import Lara.Examples.ProcessARA
 
 open Lara
 
@@ -6910,3 +6914,39 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.tighten_revision
 #print axioms Lara.Process.update_keeps_old
 #print axioms Lara.Process.update_reestablish
+
+-- lean/Lara/Examples/ProcessARA.lean: 9 public theorems.
+#print axioms Lara.Examples.ProcessARA.omitted_read_ara
+#print axioms Lara.Examples.ProcessARA.admitted_coverage_ara
+#print axioms Lara.Examples.ProcessARA.declared_coverage_not_admitted
+#print axioms Lara.Examples.ProcessARA.generating_history_compatible
+#print axioms Lara.Examples.ProcessARA.failed_trial_preserved
+#print axioms Lara.Examples.ProcessARA.contradictory_ara_inconsistent
+#print axioms Lara.Examples.ProcessARA.submission_extracted
+#print axioms Lara.Examples.ProcessARA.reordered_equivalent
+#print axioms Lara.Examples.ProcessARA.omitted_read_compatible
+
+-- lean/Lara/Examples/ProcessAdequacy.lean: 8 public theorems.
+#print axioms Lara.Examples.ProcessAdequacy.latestTest_separates
+#print axioms Lara.Examples.ProcessAdequacy.multiset_separates
+#print axioms Lara.Examples.ProcessAdequacy.dropFailed_separates
+#print axioms Lara.Examples.ProcessAdequacy.selectionProvenance_separates
+#print axioms Lara.Examples.ProcessAdequacy.collapse_separates
+#print axioms Lara.Examples.ProcessAdequacy.dropRetractions_separates
+#print axioms Lara.Examples.ProcessAdequacy.prov_separates
+#print axioms Lara.Examples.ProcessAdequacy.multiset_record_unknown
+
+-- lean/Lara/Process/Bridge.lean: 10 public theorems.
+#print axioms Lara.Process.extraction_preserves_compatibility
+#print axioms Lara.Process.extraction_verdict_sound
+#print axioms Lara.Process.extraction_overapprox_safe
+#print axioms Lara.Process.encode_extract
+#print axioms Lara.Process.verdict_invariant
+#print axioms Lara.Process.RecordCoverage.allowed_perm
+#print axioms Lara.Process.perm_equivalent
+#print axioms Lara.Process.separation_unknown
+#print axioms Lara.Process.separates_not_factors
+#print axioms Lara.Process.extraction_safe_for_source
+
+-- lean/Lara/Process/Prov.lean: 1 public theorem.
+#print axioms Lara.Process.provGraph_perm

@@ -171,6 +171,37 @@ Infinite-horizon Ville and online FDR procedures over complete ledgers (LORD, e-
 
 `Lara.Examples.ProcessRevision` holds the witnesses. `quarantine_one_support` and `quarantine_all_supports` exercise the quarantine iff on two independent supports. `support_avoids_but_defeated` shows a support that avoids the quarantine is not enough once attacks exist. `stable_not_directional` adds a self-attacking argument outside the claim's ancestry: every stable extension disappears while the grounded label is unchanged, and `grounded_locality_instance` derives that grounded fact from the general theorem. `failed_sibling_changes_warrant` keeps the lowered arguments, and so every attack edge, unchanged while a failed sibling run flips the e-Bonferroni warrant through the family count. `merge_breaks_corroboration` merges two sources: derivability survives, corroboration halves. `incomplete_reads_unsound` and `complete_reads` separate incomplete from complete read recording. `update_and_revision` keeps an old-version warrant across a new version and withdraws it when the old version is declared defective.
 
+## What crosses the ARA boundary?
+
+`Lara.Process.Bridge` decodes an ARA record, at the boundary, into a symbolic `DecodedRecord`: identified events, precedence constraints and scoped coverage assertions, each carrying the ARA file and entry reference (`SourceRef`) it came from, plus the submitted claims and witnesses. Source references are decode-boundary evidence; the theory only reports them. A coverage assertion carries its evidence and an `AdmissionBasis` (instrumented log, signed attestation or author declaration); a reader states which bases it admits, and an attestation labeled complete does not prove its own reliability.
+
+The ARA side is an `AraSource`: a list of entries in file order, which carries no meaning. `extract` keeps every event entry (failed and sibling trials included) and every ordering entry, admits exactly the coverage attestations with an admitted basis, and never infers order from file position or completeness from absence. `SourceRel` states what it means for a modeled history to be faithfully described by the source; it is the trust boundary, an assumption about the source rather than something the theory checks.
+
+| Part | Theorem |
+| --- | --- |
+| A1 encoding | `encode_extract`: encoding a decoded record as ARA entries and extracting it is the identity. This is representation consistency only; no round trip reconstructs a unique history from an incomplete record. `extraction_preserves_compatibility`: every history the source faithfully describes stays compatible with the extracted record, so with `extraction_verdict_sound` a certain verdict holds at the generating history, conditional on source fidelity and the admitted bases. `extraction_overapprox_safe`: an extraction admitting a superset of the source-compatible histories can lose certainty but never invents it for a nonempty source-compatible set; `extraction_safe_for_source` is its instance for `extract` and `SourceRel`. |
+| A2 conservativity | `coverage_complete_conservative` and `history_independent_verdict` (see the compatible-history core) |
+| A3 invariance | `verdict_invariant` and `verdictQ`: verdicts respect equivalence of decoded records (equal compatible sets) and lift to the quotient; `perm_equivalent` and `RecordCoverage.allowed_perm` show reordered events, constraints and attestations give an equivalent record |
+| A4 separation | `Separates`, `separation_unknown`, `separates_not_factors`: when a coarsening identifies two histories that disagree on a warrant, the shared coarse record's verdict is `unknown` and no exact evaluator reads the coarse record |
+
+`Lara.Process.Prov` defines one explicit W3C PROV projection, `provGraph`: `used`, `wasAssociatedWith`, plan, `wasGeneratedBy` and invalidation relations, with event order and access purpose omitted. `provGraph_perm` shows it forgets order. It is one specified projection, not a claim that every PROV encoding must erase these distinctions: qualified PROV with timestamps and roles can keep them.
+
+`Lara.Examples.ProcessAdequacy` separates every specified coarsening:
+
+| Coarsening | Witness |
+| --- | --- |
+| latest-test projection | `latestTest_separates` (the BHL partial record) |
+| event multiset, the shape of `History` | `multiset_separates`, `multiset_record_unknown` |
+| dropping failed or unreported analyses | `dropFailed_separates` |
+| dropping selection-read provenance | `selectionProvenance_separates` |
+| collapsing source identities | `collapse_separates`, over source supplies and the two-source corroboration check rather than whole histories |
+| dropping retractions | `dropRetractions_separates` |
+| the PROV graph | `prov_separates`, with PROV graphs compared as relation sets (`ProvGraph.Equiv`) |
+
+A Hennessy–Milner-style characterization (histories are entitlement-equivalent iff no profile formula separates them) is not proved; the separation table is the adequacy result.
+
+`Lara.Examples.ProcessARA` runs the contract on hand-decoded records with source references and spans. `omitted_read_compatible` and `omitted_read_ara`: the same recorded plan and evaluation are compatible with and without an unrecorded earlier read, so ordering evidence alone leaves precommitment `unknown`. `admitted_coverage_ara`: an admitted instrumented-log attestation of complete evaluation-read coverage makes it `certainTrue`. `declared_coverage_not_admitted`: the same attestation as an author declaration is not admitted. `generating_history_compatible` instantiates preservation, `failed_trial_preserved` keeps a failed sibling through extraction, `contradictory_ara_inconsistent` reports contradictory ordering entries as `inconsistent`, `submission_extracted` keeps every submitted witness, and `reordered_equivalent` shows file order changes no verdict.
+
 ## How is the development checked?
 
 - `cd lean && lake build`

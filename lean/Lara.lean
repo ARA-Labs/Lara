@@ -566,3 +566,7 @@ import Lara.Examples.ProcessStatistics
 import Lara.Process.Revision
 import Lara.Process.RevisionBridge
 import Lara.Examples.ProcessRevision
+import Lara.Process.Bridge
+import Lara.Process.Prov
+import Lara.Examples.ProcessAdequacy
+import Lara.Examples.ProcessARA
