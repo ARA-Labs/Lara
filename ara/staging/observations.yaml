@@ -4264,6 +4264,37 @@ observations:
   potential_type: architecture
   bound_to:
   - N379_compatible_history_plan
+  promoted: true
+  promoted_to: logic/solution/constraints.md#research-process-semantics
+  crystallized_via: artifact-commitment
+  stale: false
+
+- id: O211
+  timestamp: '2026-10-10T07:18:46+00:00'
+  provenance: ai-executed
+  content: Every calibration or validity predicate used as a theorem hypothesis needs a concrete
+    inhabiting witness in Lean; IsPValue over all thresholds was unsatisfiable and made the Bonferroni
+    theorem vacuous until a reviewer found it.
+  context: R4 spec review of the research-process statistics layer; fixed by restricting to nonnegative
+    thresholds and adding fair_pvalue.
+  potential_type: heuristic
+  bound_to:
+  - N384_unsatisfiable_pvalue_definition
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O212
+  timestamp: '2026-10-10T07:18:46+00:00'
+  provenance: ai-executed
+  content: Small conditionally valid alpha-investing runs (non-null rejection then wealth-funded nulls,
+    alpha 1/2) keep FDR below alpha; an mFDR-but-not-FDR run likely needs dependence or a non-monotone
+    level rule.
+  context: Attempted while landing the R4 counterexample twins; deferred to issue 38.
+  potential_type: claim
+  bound_to:
+  - N383_alpha_investing_counterexample_probe
   promoted: false
   promoted_to: null
   crystallized_via: null

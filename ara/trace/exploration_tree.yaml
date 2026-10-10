@@ -10867,3 +10867,87 @@ tree:
   also_depends_on:
   - N379_compatible_history_plan
   - N380_lara_paper_not_prior_art
+- id: N382_process_semantics_implemented
+  type: experiment
+  title: Implement and mechanize the research-process layer (issue 23, R0-R7)
+  provenance: ai-executed
+  timestamp: '2026-10-10T07:18:46+00:00'
+  description: >-
+    Executed the approved plan as one PR on theory/research-process-semantics, as the
+    researcher requested ("implement plans/research-process-semantics, one pr"). Each
+    stage passed an independent spec-compliance and code-quality review before its commit.
+  result: >-
+    Commits b0af183 (R0) through b176d00 (R7) add lean/Lara/Process (contract, verdicts,
+    Kleene evaluator, scoped coverage, BHL conservativity, profile entitlement and
+    no-promotion, ordered process histories, finite statistics, revision and transport,
+    decoded ARA bridge, PROV projection, inquiry interface) with fixtures under
+    lean/Lara/Examples/Process*. Every public theorem has an AxCheck row within the
+    standard axiom trio; no sorry or native_decide. make process-theory recomputes every
+    ARA-contract fixture with its model, assumptions, profile, witness and source
+    references. make local-gates passed on the tree before the final R7 review fixes.
+    docs/theory-process.md and the docs/corpus-map.md process boundary hold the contracts;
+    the plan directory was deleted and its 59 verified references moved to
+    docs/lara-related-work.bib.
+  evidence:
+  - docs/theory-process.md
+  - docs/corpus-map.md
+  - lean/Lara/Process/ExampleMain.lean
+  - lean/AxCheck.lean
+  status: resolved
+  also_depends_on:
+  - N381_process_semantics_approved
+- id: N383_alpha_investing_counterexample_probe
+  type: dead_end
+  title: Small alpha-investing runs do not exhibit FDR above alpha
+  provenance: ai-executed
+  timestamp: '2026-10-10T07:18:46+00:00'
+  hypothesis: >-
+    A short Foster-Stine alpha-investing run (one surely rejected non-null followed by
+    nulls whose levels are paid from earned wealth, alpha = 1/2) would show mFDR within
+    alpha but FDR above it, giving the R4 counterexample twin directly.
+  failure_mode: >-
+    In the conditionally valid instances worked by hand, FDR stayed below alpha (about
+    3/14 and 0.27 at alpha = 1/2). A violating run appears to need dependence between
+    p-values or a non-monotone level rule while still meeting the mFDR theorem's
+    conditional-validity hypothesis.
+  lesson: >-
+    The landed witness mfdr_not_fdr separates the guarantee classes with an outcome law
+    only; a genuine alpha-investing run is research work, tracked as issue 38.
+  status: resolved
+  also_depends_on:
+  - N382_process_semantics_implemented
+- id: N384_unsatisfiable_pvalue_definition
+  type: dead_end
+  title: A calibration definition quantified over negative thresholds was vacuous
+  provenance: ai-executed
+  timestamp: '2026-10-10T07:18:46+00:00'
+  hypothesis: >-
+    IsPValue law p := for all t, Pr(p <= t) <= t, as a hypothesis of bonferroni_bounded.
+  failure_mode: >-
+    At t = -1 it demands a probability of at most -1, so no p-value satisfies it and the
+    Bonferroni theorem held vacuously. A spec reviewer proved the negation in a scratch file.
+  lesson: >-
+    Restricted to nonnegative thresholds and added fair_pvalue, a concrete inhabitant.
+    Every calibration-style hypothesis now needs an inhabiting witness alongside the theorem.
+  status: resolved
+  also_depends_on:
+  - N382_process_semantics_implemented
+- id: N385_process_deferrals
+  type: decision
+  title: Track the three unproved plan items as issues
+  provenance: ai-suggested
+  timestamp: '2026-10-10T07:18:46+00:00'
+  choice: >-
+    Open issue 38 (a concrete alpha-investing run with mFDR within alpha and FDR above
+    it), issue 39 (infinite-horizon Ville and online FDR over complete ledgers) and issue
+    40 (Hennessy-Milner characterization of entitlement equivalence). The separation
+    table is the delivered adequacy result; docs/theory-process.md states the gap.
+  alternatives:
+  - Record the gaps only in docs or commit messages
+  evidence:
+  - https://github.com/ARA-Labs/Lara/issues/38
+  - https://github.com/ARA-Labs/Lara/issues/39
+  - https://github.com/ARA-Labs/Lara/issues/40
+  status: resolved
+  also_depends_on:
+  - N382_process_semantics_implemented

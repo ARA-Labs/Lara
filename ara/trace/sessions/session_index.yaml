@@ -741,8 +741,8 @@ sessions:
 
 - id: 2026-10-10_001
   date: '2026-10-10'
-  summary: 'Approved the revised issue 23 plan with scoped ARA extraction and fixed-witness audits; all process-theory implementation and proofs remain pending.'
-  turn_count: 5
-  events_count: 8
+  summary: 'Approved the revised issue 23 plan, then implemented and mechanized R0-R7 of the research-process layer as one PR; deferrals tracked as issues 38-40.'
+  turn_count: 6
+  events_count: 15
   claims_touched: []
-  open_threads: 3
+  open_threads: 2
