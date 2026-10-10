@@ -299,7 +299,9 @@ def Acceptance.label : Acceptance → String
 
 /-- An explicit inductive-risk profile. The coverage policy is a decidable
 predicate over scoped assumptions, never an order on `RecordCoverage`
-constructors. -/
+constructors. `acceptance` has the single standard `groundedJustified`, which
+`Lara.Process.ProfileChecks` checks as the grounded `in` label; a second
+standard would need `ProfileChecks` to dispatch on this field. -/
 structure Profile (Policy : Type) where
   admissible : Finset EvidenceKind
   acceptsCoverage : RecordCoverage Policy → Bool
