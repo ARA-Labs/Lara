@@ -572,3 +572,5 @@ import Lara.Examples.ProcessAdequacy
 import Lara.Examples.ProcessARA
 import Lara.Process.Inquiry
 import Lara.Examples.ProcessInquiry
+import Lara.Process.Characterization
+import Lara.Examples.ProcessCharacterization

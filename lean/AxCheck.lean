@@ -225,6 +225,8 @@ import Lara.Examples.ProcessAdequacy
 import Lara.Examples.ProcessARA
 import Lara.Process.Inquiry
 import Lara.Examples.ProcessInquiry
+import Lara.Process.Characterization
+import Lara.Examples.ProcessCharacterization
 
 open Lara
 
@@ -6969,3 +6971,18 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.Inquiry.mem_sensitivity
 #print axioms Lara.Process.Inquiry.mem_ofRecord
 #print axioms Lara.Process.Inquiry.ofRecord_stable_iff
+
+-- lean/Lara/Examples/ProcessCharacterization.lean: 3 public theorems.
+#print axioms Lara.Examples.ProcessCharacterization.formula_separates
+#print axioms Lara.Examples.ProcessCharacterization.atoms_agree_before_run
+#print axioms Lara.Examples.ProcessCharacterization.not_bisimilar
+
+-- lean/Lara/Process/Characterization.lean: 8 public theorems.
+#print axioms Lara.Process.bisimilar_refl
+#print axioms Lara.Process.bisimilar_sat
+#print axioms Lara.Process.bisimilar_formulaEquivalent
+#print axioms Lara.Process.separating_conjunction
+#print axioms Lara.Process.formulaEquivalent_forth
+#print axioms Lara.Process.formulaEquivalent_isBisimulation
+#print axioms Lara.Process.formulaEquivalent_iff_bisimilar
+#print axioms Lara.Process.process_characterization

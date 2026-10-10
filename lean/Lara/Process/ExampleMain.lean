@@ -7,6 +7,7 @@ import Lara.Examples.ProcessRevision
 import Lara.Examples.ProcessARA
 import Lara.Examples.ProcessAdequacy
 import Lara.Examples.ProcessInquiry
+import Lara.Examples.ProcessCharacterization
 
 /-!
 The `process-examples` runner: computes every research-process fixture through

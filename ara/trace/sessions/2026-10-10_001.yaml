@@ -2,8 +2,8 @@ session:
   id: 2026-10-10_001
   date: '2026-10-10'
   started: '2026-10-09T18:00:00-07:00'
-  last_turn: '2026-10-10T08:12:08+00:00'
-  turn_count: 7
+  last_turn: '2026-10-10T08:37:46+00:00'
+  turn_count: 8
   summary: Re-planned issue 23, approved the revised process-semantics design, then implemented
     and mechanized R0-R7 as one PR with per-stage reviews and passing local gates.
 events_logged:
@@ -263,3 +263,22 @@ logic_revisions_turn7:
 open_threads_turn7:
 - Merge the single PR closing issues 23 and 38; the empirical-design gate opens only by researcher decision.
 - Issues 39 and 40 hold the remaining items outside the delivered scope.
+events_logged_turn8:
+- turn: 8
+  type: experiment
+  id: N387_hennessy_milner_characterization
+  routing: direct
+  provenance: ai-executed
+  summary: Hennessy-Milner characterization proved for image-finite systems and process histories
+logic_revisions_turn8:
+- turn: 8
+  entry: logic/solution/constraints.md#research-process-semantics
+  field: Open
+  before: 'Issue #39 (infinite-horizon Ville and online FDR) and issue #40 (a Hennessy–Milner characterization).'
+  after: 'Issue #39 (infinite-horizon Ville and online FDR, outside the plan''s scope).'
+  signal: empirical-resolution
+  provenance: ai-suggested
+open_threads_turn8:
+- Merge the single PR closing issues 23, 38 and 40; the empirical-design gate opens only by researcher
+  decision.
+- Issue 39 holds the work the plan placed outside its scope.

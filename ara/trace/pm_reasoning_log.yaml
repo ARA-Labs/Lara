@@ -1827,3 +1827,8 @@ entries:
   - "Recorded N386: the exact DP search resolved the N383 dead end; the counterexample needs a non-monotone policy, not dependence."
   - "O212 left staged: it is resolved in the trace (non-monotone rule suffices under independence), but no researcher comment yet; not crystallized."
   - "Dropped issue 38 from the constraint's Open line (empirical resolution of that open item)."
+
+- turn: 2026-10-10_001#8
+  notes:
+  - "Recorded N387: the plan-required Hennessy-Milner attempt succeeded for image-finite systems; dropped issue 40 from the constraint's Open line."
+  - "No logic claim added: the characterization is a theorem recorded in docs/theory-process.md and the trace, consistent with how earlier stages were recorded."

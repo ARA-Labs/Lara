@@ -10973,3 +10973,27 @@ tree:
   status: resolved
   also_depends_on:
   - N383_alpha_investing_counterexample_probe
+- id: N387_hennessy_milner_characterization
+  type: experiment
+  title: Prove the Hennessy-Milner characterization for image-finite process systems
+  provenance: ai-executed
+  timestamp: '2026-10-10T08:37:46+00:00'
+  description: >-
+    The plan asked for a Hennessy-Milner-style characterization attempted for
+    image-finite instances. Defined transition systems with atoms, profile formulas
+    (truth, atoms, negation, conjunction, one-step possibility), entitlement
+    equivalence and bisimulation.
+  result: >-
+    Proved that bisimilar states are entitlement-equivalent and, for image-finite
+    systems, that entitlement equivalence is a bisimulation, so the two coincide
+    (entitlementEquivalent_iff_bisimilar). Process histories over a finite event
+    alphabet form an image-finite system (processSystem_imageFinite), giving
+    process_characterization. A fixture separates commit-first from read-first
+    histories by a formula although no atom distinguishes them before the run.
+    Closes the issue 40 deferral inside the same PR.
+  evidence:
+  - lean/Lara/Process/Characterization.lean
+  - lean/Lara/Examples/ProcessCharacterization.lean
+  status: resolved
+  also_depends_on:
+  - N385_process_deferrals
