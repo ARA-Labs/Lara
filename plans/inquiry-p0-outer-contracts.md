@@ -98,11 +98,13 @@ The enumerator P0 ships is the plain reference one: subsets of the universe, int
 - `fixtures/process/run/*.sexp` with `*.expected` goldens. The fixture set re-expresses every ARA fixture in `Lara.Examples.ProcessARA` as a wire document (omitted read, admitted log coverage, declared coverage not admitted, failed sibling preserved, contradictory ordering, reordered entries), plus refused documents covering each refusal tag. A Lean exe `process-run` emits the goldens. Until the Haskell door exists in P6, `make process-theory` checks only that `process-run` reproduces them.
 - `AxCheck.lean` rows for every new theorem.
 
-### Which choices need the reviewer?
+### Which contract choices are settled?
 
-1. **Freeze `audit` now or later.** Freezing it now avoids a hard version bump when P1 lands, but the frozen syntax will exist before any runtime outside the warrant fixtures can execute it. I recommend freezing it now: the Lean meaning is already fixed by `ArgumentEntitled`.
-2. **Report the Kleene verdict as well.** I recommend no. Two verdicts invite readers to cite the weaker one.
-3. **Reporting choices.** `DecodedRecord.Compatible` reads the record's events as the reported ones, so the universe carrier has no separate reporting choice `rho`. Version 1 keeps that. A record whose reporting protocol matters (for example, selective reporting of runs) then needs a coverage assertion to say so. Adding `rho` to the wire later is a version bump.
+Settled with the user on 2026-10-10:
+
+1. **`audit` is frozen in version 1.** Its Lean meaning is fixed by `ArgumentEntitled`, and freezing it now avoids a version bump when P1 lands. Until P1, only the hand-modeled warrant fixtures can execute it, and any other audit is refused with `unsupported`.
+2. **Results report only the exact verdict.** The Kleene evaluator is not reported, so readers cannot cite the weaker answer.
+3. **Version 1 has no separate reporting choice.** The universe carrier follows `DecodedRecord.Compatible` and reads the record's events as the reported ones. Selective reporting must be stated as a coverage assertion, and adding a reporting choice later is a version bump.
 
 ## Stage map for #22 after this plan
 
