@@ -199,6 +199,9 @@ import Lara.Examples.PWFinite
 import Lara.Examples.PWFileHost
 import Lara.PW.Run
 import Lara.Examples.PWRun
+import Lara.Process.Vocabulary
+import Lara.Process.Contract
+import Lara.Examples.ProcessFalseLaws
 
 open Lara
 
@@ -6682,3 +6685,15 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.BHLBridge.incompatible_claim_native_failure
 #print axioms Lara.Examples.BHLBridge.incompatible_origin_copy
 #print axioms Lara.Examples.BHLBridge.incompatible_origin_native_failure
+
+-- lean/Lara/Examples/ProcessFalseLaws.lean: 6 public theorems.
+#print axioms Lara.Examples.ProcessFalseLaws.stricter_profile_reinstates
+#print axioms Lara.Examples.ProcessFalseLaws.quarantine_reinstates
+#print axioms Lara.Examples.ProcessFalseLaws.unchanged_status_different_basis
+#print axioms Lara.Examples.ProcessFalseLaws.empty_compatible_vacuous
+#print axioms Lara.Examples.ProcessFalseLaws.past_completion_not_future
+#print axioms Lara.Examples.ProcessFalseLaws.multiset_forgets_plan_order
+
+-- lean/Lara/Process/Vocabulary.lean: 2 public theorems.
+#print axioms Lara.Process.EvidenceKind.rank_injective
+#print axioms Lara.Process.EvidenceKind.le_iff_rank

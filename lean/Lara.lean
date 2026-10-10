@@ -546,3 +546,6 @@ import Lara.BHL.BridgeSource
 import Lara.BHL.LaraBridge
 import Lara.Examples.BHLBridge
 import Lara.Examples.BHLPartialRecord
+import Lara.Process.Vocabulary
+import Lara.Process.Contract
+import Lara.Examples.ProcessFalseLaws

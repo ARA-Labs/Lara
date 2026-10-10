@@ -9,8 +9,8 @@ name: Lean
 #
 #   gh workflow run lean.yml --ref <branch>
 #
-# Each step is a make target. Local `make lean-gate` also runs `bhl-theory`,
-# which this optional workflow does not invoke.
+# Each step is a make target. Local `make lean-gate` also runs `bhl-theory` and
+# `process-theory`, which this optional workflow does not invoke.
 
 on:
   pull_request:
