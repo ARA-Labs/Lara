@@ -1,7 +1,7 @@
 import Lara.Process.Entitlement
 
 /-!
-R2 witnesses for entitlement.
+Witnesses for entitlement.
 
 One two-history model carries every witness. In history `left` the claim's
 witness `w1` is unattacked and `w2` is defeated; in `right` the roles swap. A

@@ -2,7 +2,7 @@ import Lara.Process.Revision
 import Lara.BHL.LaraBridge
 
 /-!
-R5: the update/revision distinction over core source edits.
+The update/revision distinction over core source edits.
 
 Katsuno–Mendelzon's distinction is drawn on `Lara.Update.SourceUpdate`. A
 `tighten` quarantines a leaf kind/provenance: it is a *revision*, and

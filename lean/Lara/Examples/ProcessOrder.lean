@@ -2,7 +2,7 @@ import Lara.Process.WorldView
 import Lara.Process.Coverage
 
 /-!
-R3 fixtures for ordered process histories.
+Fixtures for ordered process histories.
 
 A plan version `v0` of `plan` is committed (`commit`), the evaluation dataset is
 read (`read`), and run `run0` uses that plan version on that dataset (`run`).

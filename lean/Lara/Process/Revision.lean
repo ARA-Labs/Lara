@@ -4,7 +4,7 @@ import Mathlib.Order.Minimal
 import Mathlib.Data.Finset.Max
 
 /-!
-R5: revision and transport of entitlement.
+Revision and transport of entitlement.
 
 Every edit puts a claim's entitlement into one of three classes:
 

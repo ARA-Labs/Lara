@@ -1,7 +1,7 @@
 import Lara.Process.Order
 
 /-!
-R6: an explicit W3C PROV projection of a process history.
+An explicit W3C PROV projection of a process history.
 
 `provGraph` keeps the PROV core relations a process history determines:
 `used` (an activity used an entity), `wasAssociatedWith` (an activity and its

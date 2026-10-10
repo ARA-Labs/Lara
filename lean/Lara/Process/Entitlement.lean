@@ -3,7 +3,7 @@ import Lara.Blocked
 import Mathlib.Algebra.Order.Ring.Rat
 
 /-!
-R2: profiles, entitlement and no-promotion.
+Profiles, entitlement and no-promotion.
 
 Entitlement follows a justification norm, not a truth or knowledge norm: only a
 non-factive norm can be decided from a record. Pollock's warrant gives it its
@@ -15,7 +15,7 @@ the error kinds the method must have probed.
 Warrant is keyed by the justification witness, not by public status: two
 histories can give a claim the same status through different arguments
 (`Lara.Examples.ProcessFalseLaws.unchanged_status_different_basis`). The two
-record-level judgments keep the R0 quantifier order: `Entitled` asks for some
+record-level judgments keep the frozen quantifier order: `Entitled` asks for some
 warranting witness in each compatible history, `ArgumentEntitled` for one fixed
 submitted witness in all of them.
 -/

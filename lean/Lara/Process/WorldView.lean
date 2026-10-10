@@ -2,7 +2,7 @@ import Lara.Process.Order
 import Lara.BHL.Trace
 
 /-!
-R3: the process view of a BHL world and its test-event projection.
+The process view of a BHL world and its test-event projection.
 
 A BHL `World` keeps its ordered state trace; its ledger `History` is a multiset.
 `testProjection` reads the test events off the trace as the consecutive ledger

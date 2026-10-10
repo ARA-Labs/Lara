@@ -2,7 +2,7 @@ import Lara.Process.Coverage
 import Lara.BHL.LaraBridge
 
 /-!
-R1: conservativity over the BHL baseline.
+Conservativity over the BHL baseline.
 
 The new omission models extend `Lara.BHL.HistoryCoverage` without changing it.
 `RecordCoverage.ofHistoryCoverage` reads its only constructor `completeModeled`

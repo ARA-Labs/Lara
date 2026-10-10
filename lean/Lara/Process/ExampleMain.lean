@@ -6,6 +6,7 @@ import Lara.Examples.ProcessStatistics
 import Lara.Examples.ProcessRevision
 import Lara.Examples.ProcessARA
 import Lara.Examples.ProcessAdequacy
+import Lara.Examples.ProcessInquiry
 
 /-!
 The `process-examples` runner: computes every research-process fixture through
@@ -25,6 +26,35 @@ private def expect {α : Type} [DecidableEq α] [Repr α]
 
 private def require (label : String) (actual : Bool) : IO _root_.Unit := expect label actual true
 
+/-- The fields of a profile, read from the profile itself. -/
+def profileLines (P : Profile Empty) : List String :=
+  let scope : CoverageScope := ⟨[], none, none, none, 0⟩
+  let samples : List (RecordCoverage Empty) := [.complete scope, .countBounded scope 0, .openWorld scope]
+  let accepts := (samples.filter P.acceptsCoverage).map (·.label Empty.elim)
+  [s!"admissible evidence: {(EvidenceKind.all.filter (· ∈ P.admissible)).map EvidenceKind.label}",
+   s!"accepted coverage kinds: {accepts}",
+   s!"guarantee: {P.guarantee.1.label} at {P.guarantee.2}",
+   s!"required probes: {(ErrorKind.all.filter (· ∈ P.requiredProbes)).map ErrorKind.label}",
+   s!"acceptance: {P.acceptance.label}"]
+
+/-- Report one contract fixture: its verdict or computed value and everything it
+depends on. -/
+def fixture (label value model query assumptions : String) (profile : List String)
+    (claim sources : String) : IO _root_.Unit := do
+  IO.println s!"  {label}: {value}"
+  IO.println s!"    model: {model}"
+  IO.println s!"    query: {query}"
+  IO.println s!"    assumptions: {assumptions}"
+  match profile with
+  | [] => IO.println "    profile: none (not an entitlement query)"
+  | lines => do
+      IO.println "    profile:"
+      for line in lines do IO.println s!"      {line}"
+  IO.println s!"    claim and witness: {claim}"
+  IO.println s!"    sources: {sources}"
+
+private def handModeled : String := "hand-modeled finite fixture, no ARA source"
+
 namespace FalseLaws
 open Lara.Examples.ProcessFalseLaws
 open Lara.Grounded
@@ -43,7 +73,7 @@ def checks : IO _root_.Unit := do
   require "future retraction defeats" (!decide (warranted Candidate.later.history))
   require "commit-first order" (decide (commitPrecedesRead committedFirst))
   require "read-first order" (!decide (commitPrecedesRead readFirst))
-  IO.println "R0 false laws: stricter profile reinstates, quarantine reinstates, equal status with different basis, empty set inconsistent, past vs future, multiset forgets order"
+  IO.println "False laws: stricter profile reinstates, quarantine reinstates, equal status with different basis, empty set inconsistent, past vs future, multiset forgets order"
 
 end FalseLaws
 
@@ -69,7 +99,7 @@ def checks : IO _root_.Unit := do
     Lara.Examples.BHLPartialRecord.record)
     (fun x => Lara.Examples.BHLPartialRecord.checkConclusion x.1 = true)
   expect "BHL partial record leaves the conclusion unknown" partialVerdict .unknown
-  IO.println s!"R1 core: refinement needs nonempty, Kleene incomplete on p ∨ ¬p, coverage incomparable, BHL partial record verdict={partialVerdict.label}"
+  IO.println s!"Compatible-history core: refinement needs nonempty, Kleene incomplete on p ∨ ¬p, coverage incomparable, BHL partial record verdict={partialVerdict.label}"
 
 end Core
 
@@ -90,7 +120,7 @@ def checks : IO _root_.Unit := do
   require "entitled claim not known at left" (!decide (Known model sameReport .left claimC))
   require "promoting rule is not well-kinded"
     (!decide (KindDerivation.unary .observed (.leaf .hypothetical)).WellKinded)
-  IO.println "R2 entitlement: entitled without a single submitted argument; defeated, conditional, warranted-but-false and entitled-but-not-known separations"
+  IO.println "Entitlement: entitled without a single submitted argument; defeated, conditional, warranted-but-false and entitled-but-not-known separations"
 
 end Entitlement
 
@@ -119,7 +149,7 @@ def checks : IO _root_.Unit := do
   require "split selection" (decide (SplitSelection [selectRead, commit, read, run] [selectData] [testData]))
   require "same-data selection is not split"
     (!decide (SplitSelection [selectOnTest, commit, read, run] [selectData] [testData]))
-  IO.println "R3 order: omitted read unknown, access coverage certain, record order irrelevant, contradictory constraints inconsistent, failed sibling counted, multiset forgets precommitment"
+  IO.println "Order: omitted read unknown, access coverage certain, record order irrelevant, contradictory constraints inconsistent, failed sibling counted, multiset forgets precommitment"
 
 end Order
 
@@ -153,7 +183,7 @@ def checks : IO _root_.Unit := do
   expect "zero bound fails closed for a p-value"
     (warrantedLevel ⟨some .pValue, some (1 / 40), some 0, some .fwer⟩) ⊤
   expect "missing bound fails closed" (warrantedLevel ⟨some .eValue, some 60, none, some .fwer⟩) ⊤
-  IO.println s!"R4 statistics: Ville crossing {ville} ≤ 1/4; e-value 60 certain under bound 2 and unknown under bound 4; optional stopping 3/4, same-data selection 3/4, dependent split 1, replay 1/40 > 1/80, FDR 1/2 under mFDR, e-BH at reported count 3/4"
+  IO.println s!"Statistics: Ville crossing {ville} ≤ 1/4; e-value 60 certain under bound 2 and unknown under bound 4; optional stopping 3/4, same-data selection 3/4, dependent split 1, replay 1/40 > 1/80, FDR 1/2 under mFDR, e-BH at reported count 3/4"
 
 end Stats
 
@@ -173,7 +203,7 @@ def checks : IO _root_.Unit := do
   require "stale reuse" (check (fun k => k == 0) != check (fun _ => true))
   require "new version keeps the old warrant" (decide (VersionWarranted [newV, oldV] [oldV] []))
   require "defect withdraws it" (!decide (VersionWarranted [newV, oldV] [oldV] [oldV]))
-  IO.println "R5 revision: support-only quarantine, attacked support defeated, stable not directional, failed sibling flips warrant, merge halves corroboration, incomplete reads stale, update keeps and revision withdraws"
+  IO.println "Revision: support-only quarantine, attacked support defeated, stable not directional, failed sibling flips warrant, merge halves corroboration, incomplete reads stale, update keeps and revision withdraws"
 
 end Revision
 
@@ -197,12 +227,7 @@ def report (label : String) (src : AraSource Empty) (v : Verdict) : IO _root_.Un
   IO.println s!"    model: ProcessOrder.Candidate, 3 complete histories, cutoff {d.cutoff}"
   IO.println "    query: RunPrecommitted run0 (an order query; no profile applies)"
   IO.println s!"    admitted bases: {(bases.filter admits).map AdmissionBasis.label}"
-  let kind : RecordCoverage Empty → String
-    | .complete _ => "complete"
-    | .countBounded _ k => s!"at most {k}"
-    | .declaredPolicy _ p => p.elim
-    | .openWorld _ => "open world"
-  IO.println s!"    admitted coverage: {d.coverage.map fun c => s!"{kind c.coverage} from {cite c.evidence}"}"
+  IO.println s!"    admitted coverage: {d.coverage.map fun c => s!"{c.coverage.label Empty.elim} from {cite c.evidence}"}"
   IO.println s!"    unadmitted attestations: {(attestations.filter fun c => !admits c.basis).map fun c => s!"{cite c.evidence} ({c.basis.label})"}"
   IO.println s!"    submitted: {d.submitted.map fun (c, w) => s!"claim {c.index} by witness {w.index}"}"
   IO.println s!"    events: {d.events.map fun e => cite e.source}"
@@ -224,7 +249,7 @@ def checks : IO _root_.Unit := do
   expect "reordered source, same verdict"
     (verdict (fun x : Candidate => (extract admits reorderedSource).Compatible noPolicy x.trace) precommitted)
     logged
-  IO.println "R6 ARA bridge:"
+  IO.println "ARA bridge:"
   report "ordering evidence only" withoutCoverage omitted
   report "instrumented-log access coverage" withLogCoverage logged
   report "author-declared access coverage" withDeclaredCoverage declared
@@ -260,9 +285,105 @@ def checks : IO _root_.Unit := do
       !decide (Lara.Examples.ProcessFalseLaws.warranted Lara.Examples.ProcessFalseLaws.retracted) &&
       decide (RunPrecommitted Candidate.committedFirst.trace run0) &&
       !decide (RunPrecommitted Candidate.readFirst.trace run0))
-  IO.println "R6 adequacy: multiset, failed-analysis, selection-provenance, source-identity and retraction pairs computed here; the latest-test and PROV separations are proved in Lean (latestTest_separates, prov_separates)"
+  IO.println "Adequacy: multiset, failed-analysis, selection-provenance, source-identity and retraction pairs computed here; the latest-test and PROV separations are proved in Lean (latestTest_separates, prov_separates)"
 
 end Adequacy
+
+namespace Inquiry
+open Lara.Examples.ProcessInquiry
+open Lara.Examples.ProcessEntitlement
+
+/-- Report the entitlement verdict of the contract's different-witness fixture,
+reading the profile and coverage from the fixture's values. -/
+def entitlementReport : IO _root_.Unit := do
+  let entitled := decide (Entitled model strict reporting admitted () claimC)
+  let audits := [(Wit.w1, "w1"), (Wit.w2, "w2"), (Wit.w3, "w3")].map fun (w, name) =>
+    s!"{name}={decide (ArgumentEntitled model strict reporting admitted () claimC w)}"
+  let coverage := s!"{admitted.coverage.label Empty.elim} coverage, cutoff {admitted.coverage.scope.cutoff}"
+  fixture "claim supported by a different witness in each history"
+    s!"Entitled={entitled}, ArgumentEntitled {audits}"
+    "ProcessEntitlement.Hist, 2 complete histories reporting the same record"
+    s!"Entitled and ArgumentEntitled of claim {claimC.index}"
+    s!"{coverage}; accepted by the profile: {strict.acceptsCoverage admitted.coverage}"
+    (profileLines strict) s!"claim {claimC.index}; witnesses w1, w2, w3" handModeled
+
+def checks : IO _root_.Unit := do
+  require "w1 audit unstable over both histories"
+    (!decide (both.Stable (fun h => Warranted model strict h claimC .w1)))
+  require "right flips the w1 audit"
+    (decide (both.sensitivity (fun h => Warranted model strict h claimC .w1) .left = {.right}))
+  require "stable truth" (decide (leftOnly.Stable (fun x => model.truth x.1 unargued)))
+  require "stable claim not entitled" (!decide (Entitled model strict exact admitted .left unargued))
+  expect "status justified at left" (claimStatus .left) .justified
+  expect "status justified at right" (claimStatus .right) .justified
+  require "w1 audit on the left record" (decide (ArgumentEntitled model strict exact admitted .left claimC .w1))
+  require "no w1 audit on the right record" (!decide (ArgumentEntitled model strict exact admitted .right claimC .w1))
+  IO.println "Inquiry: sensitivity, stable-but-not-entitled, equal status without transported entitlement"
+
+end Inquiry
+
+namespace Contract
+open Lara.Examples.ProcessStatistics (boundedCompat warrantsRejection correlated matchTest ledgerBoundTwo)
+open Lara.Examples.ProcessOrder (withSibling withoutSibling family)
+open Lara.Examples.ProcessRevision (bonferroniWarrant newV oldV)
+open Lara.Examples.ProcessFalseLaws (pastCompat warranted)
+
+def checks : IO _root_.Unit := do
+  IO.println "ARA-contract fixtures:"
+  let partialBound := verdict (Compatible Lara.Examples.ProcessCore.partialModel ledgerBoundTwo
+    Lara.Examples.BHLPartialRecord.record)
+    (fun x => Lara.Examples.BHLPartialRecord.checkConclusion x.1 = true)
+  expect "BHL conclusion under a count bound of two" partialBound .unknown
+  fixture "one-test and two-test BHL histories" partialBound.label
+    "BHLPartialRecord: the single and hidden-earlier complete binary runs"
+    "the 1/4 single-test statistical belief (checkConclusion, equal to its satisfaction)"
+    "latest-test report; complete ledger has at most two tests" [] "no submitted argument"
+    handModeled
+  let bound2 := verdict (boundedCompat 2) warrantsRejection
+  let bound4 := verdict (boundedCompat 4) warrantsRejection
+  expect "count bound two" bound2 .certainTrue
+  expect "count bound four" bound4 .unknown
+  fixture "calibrated e-value 60, count bound two" bound2.label
+    "4 completions with 1 to 4 family runs, one run reported"
+    "e-Bonferroni rejection at the admitted bound 2 (threshold 2/α = 40)"
+    "count bound 2 on the family; e-value null mass 1/60; α = 1/20" [] "the reported run" handModeled
+  fixture "calibrated e-value 60, count bound four" bound4.label
+    "4 completions with 1 to 4 family runs, one run reported"
+    "e-Bonferroni rejection at bound 2; the four-test threshold 4/α = 80 exceeds 60"
+    "count bound 4 on the family" [] "the reported run" handModeled
+  Inquiry.entitlementReport
+  let dependent := Lara.BHL.FiniteProbability.eventMass correlated fun ω => matchTest ω.1 ω.2
+  expect "dependent samples" dependent 1
+  fixture "distinct dataset identities with dependent samples" s!"selected test level {dependent} > 1/2"
+    "selection sample and test sample, fair marginals, perfectly dependent"
+    "probability the selected calibrated test rejects"
+    "structural split selection holds; the product-law premise fails" [] "none" handModeled
+  let countWith := familyCount withSibling family
+  let countWithout := familyCount withoutSibling family
+  let warrantWith := decide (bonferroniWarrant withSibling)
+  let warrantWithout := decide (bonferroniWarrant withoutSibling)
+  expect "failed sibling" (countWith, countWithout, warrantWith, warrantWithout) (2, 1, false, true)
+  fixture "failed sibling trial with no attack"
+    s!"family count {countWith} (without it {countWithout}); e-Bonferroni warrant {warrantWith} (without it {warrantWithout})"
+    "two valid process histories with the same successful runs"
+    "family count and the e-Bonferroni warrant of a reported e-value 30 at α = 1/20"
+    "complete histories" [] "none" handModeled
+  let past := verdict pastCompat fun x => warranted x.history
+  let after := decide (warranted Lara.Examples.ProcessFalseLaws.Candidate.later.history)
+  expect "retraction" (past, after) (.certainTrue, false)
+  fixture "later retraction" s!"past completions {past.label}; after retraction warranted={after}"
+    "the asserted history and its continuation with a retraction"
+    "the claim's source is unretracted" "past completions only; the retraction is a future continuation"
+    [] "claim 0 by witness 0" handModeled
+  let keeps := decide (VersionWarranted [newV, oldV] [oldV] [])
+  let withdrawn := !decide (VersionWarranted [newV, oldV] [oldV] [oldV])
+  expect "version change and defect" (keeps, withdrawn) (true, true)
+  fixture "dataset version change and defect"
+    s!"new version keeps the old warrant: {keeps}; defect withdraws it: {withdrawn}"
+    "a warrant reading dataset 1 at version 0" "VersionWarranted"
+    "published versions 0 and 1" [] "none" handModeled
+
+end Contract
 
 def run : IO _root_.Unit := do
   FalseLaws.checks
@@ -273,6 +394,8 @@ def run : IO _root_.Unit := do
   Revision.checks
   Ara.checks
   Adequacy.checks
+  Inquiry.checks
+  Contract.checks
   IO.println "process examples: all research-process checks passed"
 
 end Lara.Process.ExampleRuntime

@@ -1,7 +1,7 @@
 import Lara.Process.Contract
 
 /-!
-R1: the compatible-history core.
+The compatible-history core.
 
 Every result here is a law of the four-valued verdict over a compatibility
 predicate. It is the incomplete-database notion of certain answers, moved from

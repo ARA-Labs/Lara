@@ -2,7 +2,7 @@ import Lara.Process.Conservative
 import Lara.Process.Entitlement
 
 /-!
-R2: warrant over BHL bridge histories.
+Warrant over BHL bridge histories.
 
 `WarrantModel.withArtifact` binds the external artifact check of a warrant
 model over bridge histories to BHL's `ArtifactWarrant`, so `Warranted` is then

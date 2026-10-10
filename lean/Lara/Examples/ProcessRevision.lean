@@ -2,7 +2,7 @@ import Lara.Process.Revision
 import Lara.Examples.ProcessOrder
 
 /-!
-R5 fixtures for revision and transport.
+Fixtures for revision and transport.
 
 * `quarantine_one_support` / `quarantine_all_supports`: with two independent
   supports, quarantining one source keeps the claim and quarantining both loses

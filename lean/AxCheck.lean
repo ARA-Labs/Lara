@@ -223,6 +223,8 @@ import Lara.Process.Bridge
 import Lara.Process.Prov
 import Lara.Examples.ProcessAdequacy
 import Lara.Examples.ProcessARA
+import Lara.Process.Inquiry
+import Lara.Examples.ProcessInquiry
 
 open Lara
 
@@ -6715,9 +6717,11 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.ProcessFalseLaws.past_completion_not_future
 #print axioms Lara.Examples.ProcessFalseLaws.multiset_forgets_plan_order
 
--- lean/Lara/Process/Vocabulary.lean: 2 public theorems.
+-- lean/Lara/Process/Vocabulary.lean: 4 public theorems.
 #print axioms Lara.Process.EvidenceKind.rank_injective
 #print axioms Lara.Process.EvidenceKind.le_iff_rank
+#print axioms Lara.Process.EvidenceKind.mem_all
+#print axioms Lara.Process.ErrorKind.mem_all
 
 -- lean/Lara/Examples/ProcessCore.lean: 7 public theorems.
 #print axioms Lara.Examples.ProcessCore.refine_needs_nonempty
@@ -6950,3 +6954,16 @@ context's own arguments make unavailable. -/
 
 -- lean/Lara/Process/Prov.lean: 1 public theorem.
 #print axioms Lara.Process.provGraph_perm
+
+-- lean/Lara/Examples/ProcessInquiry.lean: 4 public theorems.
+#print axioms Lara.Examples.ProcessInquiry.sensitivity_fixture
+#print axioms Lara.Examples.ProcessInquiry.stable_not_entitled
+#print axioms Lara.Examples.ProcessInquiry.status_does_not_transport
+#print axioms Lara.Examples.ProcessInquiry.leftOnly_completions
+
+-- lean/Lara/Process/Inquiry.lean: 5 public theorems.
+#print axioms Lara.Process.Inquiry.stable_iff_determinate
+#print axioms Lara.Process.Inquiry.sensitivity_empty_iff_stable
+#print axioms Lara.Process.Inquiry.mem_sensitivity
+#print axioms Lara.Process.Inquiry.mem_ofRecord
+#print axioms Lara.Process.Inquiry.ofRecord_stable_iff

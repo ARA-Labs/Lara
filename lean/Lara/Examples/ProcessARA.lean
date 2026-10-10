@@ -2,7 +2,7 @@ import Lara.Process.Bridge
 import Lara.Examples.ProcessOrder
 
 /-!
-R6 fixtures: decoded ARA records with source references.
+Fixtures: decoded ARA records with source references.
 
 Each fixture is an `AraSource` whose entries cite the ARA file and entry they
 came from. The plan commit, the evaluation read and the run reuse the events of

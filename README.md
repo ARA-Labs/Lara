@@ -330,6 +330,12 @@ mechanized results, acceptance evidence and
 `.lara` syntax: it lives in the Lean development under `lean/Lara/BHL/` with
 worked examples in `lean/Lara/Examples/`.
 
+The [research-process layer](docs/theory-process.md) (`lean/Lara/Process/`)
+asks the follow-up question: when does a record that omits part of what
+happened still entitle a claim? A record denotes every complete history it
+could have come from, and a verdict is certain only when all of them agree. It
+adds no syntax or wire format.
+
 ## Quick start
 
 To use the checker without building it, install the prebuilt `lara` binary
@@ -406,6 +412,7 @@ Start with the [documentation index](docs/README.md) for reading paths and theor
 | [`docs/artifact-composition.md`](docs/artifact-composition.md) | `.laramap` manifests, member qualification and linking, cross-member attacks and composite verdicts |
 | [`docs/implementation.md`](docs/implementation.md), [`lean/README.md`](lean/README.md) | Implementation architecture, mechanization discipline, proof catalogue and verification gates |
 | [`docs/theory-bhl.md`](docs/theory-bhl.md) | Belief Hoare Logic: architectural rationale, method and artifact-binding contracts, reference audit and mechanized results ([exact theorem inventory](docs/bhl-theorem-inventory.jsonl)) |
+| [`docs/theory-process.md`](docs/theory-process.md) | Research-process semantics: when an incomplete research record entitles a claim, with the contracts, theorems and fixtures of the `Lara.Process` layer |
 | [`docs/evaluation.md`](docs/evaluation.md) | Performance, mutation and localization contracts, frozen inputs and historical measurement evidence |
 | [`examples/README.md`](examples/README.md) | Index of the worked examples (A/B, E-series, R-series, S-series, running example, and the D3 agreement map in both its single-file and four-artifact forms) |
 

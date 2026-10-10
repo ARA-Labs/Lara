@@ -2,14 +2,14 @@ import Lara.Grounded
 import Lara.Process.Contract
 
 /-!
-R0 of the research-process layer: refutations of six tempting laws.
+Refutations of six tempting laws about research-process records.
 
-Each theorem is a small decidable countermodel. They fix which positive laws
-later stages may attempt:
+Each theorem is a small decidable countermodel. They fix the shape of the
+positive laws:
 
 * `stricter_profile_reinstates`: a stricter evidence profile can entitle *more*
-  claims, so R2 proves only the directional version.
-* `quarantine_reinstates`: quarantine can add warrant, so R5's iff is restricted
+  claims, so only the directional version is proved.
+* `quarantine_reinstates`: quarantine can add warrant, so the quarantine iff is restricted
   to the support-only fragment.
 * `unchanged_status_different_basis`: equal public status does not mean equal
   justification, so entitlement is keyed by witness.

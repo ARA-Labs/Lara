@@ -3,7 +3,7 @@ import Lara.Process.Vocabulary
 import Mathlib.Order.WithBot
 
 /-!
-R4: the warranted level of a ledger, which fails closed by type.
+The warranted level of a ledger, which fails closed by type.
 
 `warrantedLevel` returns the smallest level at which the ledger's reported
 statistic is warranted under its count bound, or `⊤` (no warrant) when any field

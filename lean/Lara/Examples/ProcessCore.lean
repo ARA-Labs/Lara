@@ -3,7 +3,7 @@ import Lara.Process.Conservative
 import Lara.Examples.BHLPartialRecord
 
 /-!
-R1 witnesses for the compatible-history core.
+Witnesses for the compatible-history core.
 
 * `refine_needs_nonempty`: refining to an empty compatible set yields
   `inconsistent`, not the old certainty.

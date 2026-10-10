@@ -174,6 +174,15 @@ inductive RecordCoverage (Policy : Type) where
   | openWorld (scope : CoverageScope)
   deriving DecidableEq, Repr
 
+/-- The one spelling table for coverage kinds; a declared policy is spelled by
+the model that interprets it. -/
+def RecordCoverage.label {Policy : Type} (policyLabel : Policy → String) :
+    RecordCoverage Policy → String
+  | .complete _ => "complete"
+  | .countBounded _ bound => s!"at most {bound}"
+  | .declaredPolicy _ p => policyLabel p
+  | .openWorld _ => "open world"
+
 def RecordCoverage.scope {Policy : Type} : RecordCoverage Policy → CoverageScope
   | .complete scope | .countBounded scope _ | .declaredPolicy scope _ | .openWorld scope => scope
 
@@ -231,6 +240,18 @@ instance : BoundedOrder EvidenceKind where
 
 theorem EvidenceKind.le_iff_rank {a b : EvidenceKind} : a ≤ b ↔ a.rank ≤ b.rank := by rfl
 
+/-- Every evidence kind, in lattice order. -/
+def EvidenceKind.all : List EvidenceKind := [.hypothetical, .conditional, .supported, .observed]
+
+theorem EvidenceKind.mem_all (k : EvidenceKind) : k ∈ EvidenceKind.all := by
+  cases k <;> simp [EvidenceKind.all]
+
+def EvidenceKind.label : EvidenceKind → String
+  | .hypothetical => "hypothetical"
+  | .conditional => "conditional"
+  | .supported => "supported"
+  | .observed => "observed"
+
 /-- Named error sources a method can be required to have probed. -/
 inductive ErrorKind where
   | sampling
@@ -240,6 +261,20 @@ inductive ErrorKind where
   | measurement
   deriving DecidableEq, Repr
 
+/-- Every error kind. -/
+def ErrorKind.all : List ErrorKind :=
+  [.sampling, .selection, .optionalStopping, .misspecification, .measurement]
+
+theorem ErrorKind.mem_all (k : ErrorKind) : k ∈ ErrorKind.all := by
+  cases k <;> simp [ErrorKind.all]
+
+def ErrorKind.label : ErrorKind → String
+  | .sampling => "sampling"
+  | .selection => "selection"
+  | .optionalStopping => "optional stopping"
+  | .misspecification => "misspecification"
+  | .measurement => "measurement"
+
 /-- The guarantee class of a statistical claim. FDR and mFDR are different
 classes: a procedure controlling one need not control the other. -/
 inductive GuaranteeClass where
@@ -248,11 +283,19 @@ inductive GuaranteeClass where
   | mfdr
   deriving DecidableEq, Repr
 
+def GuaranteeClass.label : GuaranteeClass → String
+  | .fwer => "FWER"
+  | .fdr => "FDR"
+  | .mfdr => "mFDR"
+
 /-- The acceptance standard a profile requires of the justification witness.
 The only standard defined here is grounded `justified`. -/
 inductive Acceptance where
   | groundedJustified
   deriving DecidableEq, Repr
+
+def Acceptance.label : Acceptance → String
+  | .groundedJustified => "grounded justified"
 
 /-- An explicit inductive-risk profile. The coverage policy is a decidable
 predicate over scoped assumptions, never an order on `RecordCoverage`

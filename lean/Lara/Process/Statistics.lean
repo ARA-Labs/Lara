@@ -3,7 +3,7 @@ import Mathlib.Algebra.Order.Field.Rat
 import Mathlib.Order.Nat
 
 /-!
-R4: finite statistical validity over incomplete ledgers.
+Finite statistical validity over incomplete ledgers.
 
 The style follows `Lara.BHL.Tests.Binary`: finite carriers, exact rational
 masses (`Lara.BHL.FiniteProbability.Law`) and expectations as finite sums. The

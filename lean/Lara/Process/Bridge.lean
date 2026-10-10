@@ -2,7 +2,7 @@ import Lara.Process.Order
 import Lara.Process.Coverage
 
 /-!
-R6: the ARA decoded-record bridge.
+The ARA decoded-record bridge.
 
 An ARA record is decoded, at the boundary, into a symbolic `DecodedRecord`:
 identified events, explicit precedence constraints and scoped coverage

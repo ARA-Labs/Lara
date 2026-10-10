@@ -4,7 +4,7 @@ import Lara.Process.Order
 import Lara.Examples.ProcessCore
 
 /-!
-R4 fixtures: what a count bound can and cannot certify, and the counterexample
+Fixtures: what a count bound can and cannot certify, and the counterexample
 twin of every positive statistical result.
 
 * `evalue_calibrated`, `countBounded_determinate`, `countBounded_rejection_valid`,
@@ -132,6 +132,9 @@ open Lara.Examples.ProcessCore
 /-- A count bound of two on the complete BHL ledger. -/
 def ledgerBoundTwo : Assumptions Completion _root_.Unit :=
   ⟨fun c _ => (outcome c).state.ledger.card ≤ 2⟩
+
+instance (c : Completion) : DecidablePred (ledgerBoundTwo.Allowed c) :=
+  fun _ => inferInstanceAs (Decidable (_ ≤ _))
 
 /-- Both completions of the BHL partial record have at most two tests, so the
 bound does not make its method conclusion determinate. -/

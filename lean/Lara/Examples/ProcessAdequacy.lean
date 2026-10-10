@@ -5,7 +5,7 @@ import Lara.Examples.ProcessRevision
 import Lara.Examples.ProcessFalseLaws
 
 /-!
-R6 adequacy, part A4: every specified coarsening of a complete history erases a
+Representation adequacy, part A4: every specified coarsening of a complete history erases a
 distinction entitlement depends on.
 
 For each coarsening `π` there are two complete histories with the same

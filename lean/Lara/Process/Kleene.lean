@@ -1,7 +1,7 @@
 import Lara.Process.Verdict
 
 /-!
-R1: the compositional three-valued evaluator and its soundness.
+The compositional three-valued evaluator and its soundness.
 
 The reference verdict is supervaluational: it quantifies over every compatible
 history. A checker may instead evaluate a formula compositionally, combining

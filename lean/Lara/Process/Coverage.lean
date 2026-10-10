@@ -1,7 +1,7 @@
 import Lara.Process.Verdict
 
 /-!
-R1: laws of scoped coverage assumptions.
+Laws of scoped coverage assumptions.
 
 Coverage constructors are compatibility predicates, not a strength ladder.
 Strength is `Assumptions.Stronger`, inclusion of allowed pairs on one model.

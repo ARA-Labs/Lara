@@ -1,7 +1,7 @@
 import Lara.Process.Verdict
 
 /-!
-R3: ordered process histories and analysis-order predicates.
+Ordered process histories and analysis-order predicates.
 
 `Lara.BHL.History` is a multiset and stays one; BHL's ledger semantics depends
 on that. Order lives in `ProcessHistory`, an ordered list of identified events,
