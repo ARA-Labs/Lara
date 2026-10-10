@@ -36,6 +36,69 @@ namespace Lara.Process.Universe
 
 open Lara.Process
 
+/-! ### Permutations by structural recursion
+
+`List.permutations` is defined by well-founded recursion, which the kernel does
+not reduce, so the reference enumerator uses this structural version and small
+fixtures stay checkable by `decide`. -/
+
+/-- Every way to insert `x` into a list. -/
+def interleave {α : Type} (x : α) : List α → List (List α)
+  | [] => [[x]]
+  | y :: ys => (x :: y :: ys) :: (interleave x ys).map (y :: ·)
+
+/-- Every ordering of a list. -/
+def perms {α : Type} : List α → List (List α)
+  | [] => [[]]
+  | x :: xs => (perms xs).flatMap (interleave x)
+
+theorem mem_interleave {α : Type} (x : α) :
+    ∀ (ys l : List α), l ∈ interleave x ys ↔ ∃ a b, ys = a ++ b ∧ l = a ++ x :: b
+  | [], l => by
+    simp only [interleave, List.mem_singleton]
+    constructor
+    · rintro rfl; exact ⟨[], [], rfl, rfl⟩
+    · rintro ⟨a, b, h, rfl⟩
+      obtain ⟨rfl, rfl⟩ := List.append_eq_nil_iff.1 h.symm
+      rfl
+  | y :: ys, l => by
+    simp only [interleave, List.mem_cons, List.mem_map, mem_interleave x ys]
+    constructor
+    · rintro (rfl | ⟨l', ⟨a, b, rfl, rfl⟩, rfl⟩)
+      · exact ⟨[], y :: ys, rfl, rfl⟩
+      · exact ⟨y :: a, b, rfl, rfl⟩
+    · rintro ⟨a, b, h, rfl⟩
+      cases a with
+      | nil => left; simp only [List.nil_append] at h ⊢; rw [h]
+      | cons c a =>
+        simp only [List.cons_append, List.cons.injEq] at h
+        obtain ⟨rfl, rfl⟩ := h
+        exact .inr ⟨a ++ x :: b, ⟨a, b, rfl, rfl⟩, rfl⟩
+
+theorem mem_perms {α : Type} : ∀ (l l' : List α), l' ∈ perms l ↔ l'.Perm l
+  | [], l' => by simp [perms, List.perm_nil]
+  | x :: xs, l' => by
+    simp only [perms, List.mem_flatMap, mem_perms xs, mem_interleave]
+    constructor
+    · rintro ⟨p, hp, a, b, rfl, rfl⟩
+      exact List.perm_middle.trans (hp.cons x)
+    · intro h
+      obtain ⟨a, b, rfl⟩ := List.append_of_mem (h.symm.subset List.mem_cons_self)
+      exact ⟨a ++ b, (List.perm_middle.symm.trans h).cons_inv, a, b, rfl, rfl⟩
+
+theorem interleave_map {α β : Type} (f : α → β) (x : α) :
+    ∀ ys, (interleave x ys).map (List.map f) = interleave (f x) (ys.map f)
+  | [] => rfl
+  | y :: ys => by
+    simp only [interleave, List.map_cons, List.map_map, Function.comp_def, ← interleave_map f x ys]
+
+theorem perms_map {α β : Type} (f : α → β) :
+    ∀ l, (perms l).map (List.map f) = perms (l.map f)
+  | [] => rfl
+  | x :: xs => by
+    simp only [perms, List.map_cons, List.map_flatMap, interleave_map, ← perms_map f xs,
+      List.flatMap_map]
+
 /-! ### The problem and its completions -/
 
 /-- Version 1 interprets no declared reporting policy. -/
@@ -66,7 +129,7 @@ instance (p : Problem) : DecidablePred p.Compat :=
 
 /-- Every interleaving of the recorded events with a sublist of the universe. -/
 def candidates (p : Problem) : List ProcessHistory :=
-  p.unrecorded.dedup.sublists.flatMap fun sub => (p.base ++ sub).permutations
+  p.unrecorded.dedup.sublists.flatMap fun sub => perms (p.base ++ sub)
 
 /-- The completions: compatible candidates, each once. -/
 def completions (p : Problem) : List ProcessHistory :=
@@ -85,14 +148,14 @@ theorem mem_completions (p : Problem) (h : ProcessHistory) :
   constructor
   · rintro ⟨⟨sub, hsub, hperm⟩, hc⟩
     refine ⟨hc, fun e he => ?_⟩
-    have := (List.mem_permutations.1 hperm).subset he
+    have := ((mem_perms _ _).1 hperm).subset he
     rcases List.mem_append.1 this with hb | hs
     · exact .inl hb
     · exact .inr (List.mem_dedup.1 ((List.mem_sublists.1 hsub).subset hs))
   · rintro ⟨hc, hall⟩
     refine ⟨⟨p.unrecorded.dedup.filter fun e => decide (e ∈ h ∧ e ∉ p.base), ?_, ?_⟩, hc⟩
     · exact List.mem_sublists.2 List.filter_sublist
-    · apply List.mem_permutations.2
+    · apply (mem_perms _ _).2
       have hnd : (p.base ++ p.unrecorded.dedup.filter fun e => decide (e ∈ h ∧ e ∉ p.base)).Nodup := by
         refine List.nodup_append.2 ⟨List.nodup_dedup _, (List.nodup_dedup _).filter _, ?_⟩
         intro a ha b hb hab

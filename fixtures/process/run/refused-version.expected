@@ -1,0 +1,1 @@
+(process-error 1 unsupported-version "process-input supports version 1 only")

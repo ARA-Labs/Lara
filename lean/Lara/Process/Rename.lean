@@ -362,7 +362,7 @@ theorem candidates_rename (p : Problem) :
     List.sublists_map, List.flatMap_map, List.map_flatMap]
   congr 1
   funext sub
-  rw [← List.map_append, ← List.map_permutations]
+  rw [← List.map_append, perms_map]
 
 theorem completions_rename (p : Problem) :
     (p.rename ρ).completions = p.completions.map (hrename ρ) := by

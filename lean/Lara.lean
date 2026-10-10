@@ -574,3 +574,7 @@ import Lara.Process.Inquiry
 import Lara.Examples.ProcessInquiry
 import Lara.Process.Characterization
 import Lara.Examples.ProcessCharacterization
+import Lara.Process.Universe
+import Lara.Process.Rename
+import Lara.Process.Wire
+import Lara.Process.Run

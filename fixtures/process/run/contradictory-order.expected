@@ -1,0 +1,1 @@
+(process-result 1 (assumptions (universe (event early-read (access alice test evaluation))) (admitted) (unadmitted) (limits (events 8) (completions 1000))) (answers (answer precommitted inconsistent (completions 0)) (answer predictable inconsistent (completions 0))))
