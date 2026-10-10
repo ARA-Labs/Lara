@@ -262,10 +262,6 @@ def RecordCoverage.rename : RecordCoverage Empty → RecordCoverage Empty
 
 theorem Event.kind_rename (e : Event) : (e.rename ρ).kind = e.kind := by cases e <;> rfl
 
-theorem contains_map {α : Type} [DecidableEq α] {f : α → α} (hf : Function.Injective f)
-    (l : List α) (a : α) : (l.map f).contains (f a) = l.contains a := by
-  rw [Bool.eq_iff_iff]; simp [mem_map_inj hf]
-
 theorem contains_rename (sc : CoverageScope) (index : Nat) (e : Stamped) :
     (sc.rename ρ).Contains index (e.rename ρ) ↔ sc.Contains index e := by
   obtain ⟨id, ev⟩ := e
