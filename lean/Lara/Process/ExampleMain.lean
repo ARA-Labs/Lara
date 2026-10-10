@@ -2,6 +2,7 @@ import Lara.Examples.ProcessFalseLaws
 import Lara.Examples.ProcessCore
 import Lara.Examples.ProcessEntitlement
 import Lara.Examples.ProcessOrder
+import Lara.Examples.ProcessStatistics
 
 /-!
 The `process-examples` runner: computes every research-process fixture through
@@ -119,11 +120,46 @@ def checks : IO _root_.Unit := do
 
 end Order
 
+namespace Stats
+open Lara.Examples.ProcessStatistics
+open Lara.BHL.FiniteProbability
+open Lara.Process.Statistics (stoppedHitProb onlineLevel fdp eBH warrantedLevel)
+
+def checks : IO _root_.Unit := do
+  expect "e-value null expectation" (Statistics.expect evLaw evalue) 1
+  expect "count bound two certifies" (verdict (boundedCompat 2) warrantsRejection) .certainTrue
+  expect "count bound four leaves a failing completion"
+    (verdict (boundedCompat 4) warrantsRejection) .unknown
+  expect "fixed-time p-value" (stoppedHitProb coin crossed (fun _ => false) 2 []) (1 / 2)
+  expect "optional stopping" (stoppedHitProb coin crossed crossed 2 []) (3 / 4)
+  let ville := stoppedHitProb coin (fun p => decide (1 / (1 / 4 : ℚ) ≤ likelihoodRatio p))
+    (fun p => decide (1 / (1 / 4 : ℚ) ≤ likelihoodRatio p)) 4 []
+  expect "likelihood-ratio crossing probability" ville (1 / 16)
+  expect "same-data selection" (eventMass (product fair fair) (fun ω => analysis (!ω.1) ω)) (3 / 4)
+  expect "dependent split" (eventMass correlated (fun ω => matchTest ω.1 ω.2)) 1
+  expect "replay with the non-rejection" (onlineLevel (1 / 20) (1 / 20) [false]) (1 / 80)
+  expect "replay without it" (onlineLevel (1 / 20) (1 / 20) []) (1 / 40)
+  expect "FDR of the mFDR fixture"
+    (fdr fair (fun ω => if ω then 1 else 0) (fun ω => if ω then 1 else 9)) (1 / 2)
+  expect "e-BH at the reported count"
+    (Statistics.expect (product fair fair) (fun ω => fdp (eBH 1 (1 / 2) fun i => pair i ω) {0})) (3 / 4)
+  expect "e-BH at the bound"
+    (Statistics.expect (product fair fair) (fun ω => fdp (eBH 2 (1 / 2) fun i => pair i ω) {0})) 0
+  expect "warranted level" (warrantedLevel ⟨some .eValue, some 60, some 2, some .fwer⟩)
+    ((1 / 30 : ℚ) : WithTop ℚ)
+  expect "zero bound fails closed for a p-value"
+    (warrantedLevel ⟨some .pValue, some (1 / 40), some 0, some .fwer⟩) ⊤
+  expect "missing bound fails closed" (warrantedLevel ⟨some .eValue, some 60, none, some .fwer⟩) ⊤
+  IO.println s!"R4 statistics: Ville crossing {ville} ≤ 1/4; e-value 60 certain under bound 2 and unknown under bound 4; optional stopping 3/4, same-data selection 3/4, dependent split 1, replay 1/40 > 1/80, FDR 1/2 under mFDR, e-BH at reported count 3/4"
+
+end Stats
+
 def run : IO _root_.Unit := do
   FalseLaws.checks
   Core.checks
   Entitlement.checks
   Order.checks
+  Stats.checks
   IO.println "process examples: all research-process checks passed"
 
 end Lara.Process.ExampleRuntime

@@ -213,6 +213,9 @@ import Lara.Process.BridgeWarrant
 import Lara.Process.Order
 import Lara.Process.WorldView
 import Lara.Examples.ProcessOrder
+import Lara.Process.Statistics
+import Lara.Process.Ledger
+import Lara.Examples.ProcessStatistics
 
 open Lara
 
@@ -6830,3 +6833,45 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.contradictory_constraints
 #print axioms Lara.Process.contradictory_constraints_inconsistent
 #print axioms Lara.Process.orderCompatible_mono
+
+-- lean/Lara/Examples/ProcessStatistics.lean: 16 public theorems.
+#print axioms Lara.Examples.ProcessStatistics.evalue_calibrated
+#print axioms Lara.Examples.ProcessStatistics.countBounded_determinate
+#print axioms Lara.Examples.ProcessStatistics.countBounded_rejection_valid
+#print axioms Lara.Examples.ProcessStatistics.partialRecord_unknown_countBounded
+#print axioms Lara.Examples.ProcessStatistics.optional_stopping_inflation
+#print axioms Lara.Examples.ProcessStatistics.same_data_selection_inflates
+#print axioms Lara.Examples.ProcessStatistics.dependent_split_invalid
+#print axioms Lara.Examples.ProcessStatistics.online_replay_anticonservative
+#print axioms Lara.Examples.ProcessStatistics.mfdr_not_fdr
+#print axioms Lara.Examples.ProcessStatistics.eBH_reported_count_unsound
+#print axioms Lara.Examples.ProcessStatistics.warrantedLevel_fixtures
+#print axioms Lara.Examples.ProcessStatistics.warrantsRejection_valid
+#print axioms Lara.Examples.ProcessStatistics.likelihoodRatio_martingale
+#print axioms Lara.Examples.ProcessStatistics.likelihoodRatio_ville
+#print axioms Lara.Examples.ProcessStatistics.same_data_identical_record
+#print axioms Lara.Examples.ProcessStatistics.fair_pvalue
+
+-- lean/Lara/Process/Statistics.lean: 16 public theorems.
+#print axioms Lara.Process.Statistics.markov
+#print axioms Lara.Process.Statistics.eventMass_exists_le
+#print axioms Lara.Process.Statistics.eBonferroni_bounded
+#print axioms Lara.Process.Statistics.fdp_le_sum
+#print axioms Lara.Process.Statistics.selfConsistent_fdr
+#print axioms Lara.Process.Statistics.eBH_selfConsistent
+#print axioms Lara.Process.Statistics.eBH_bounded
+#print axioms Lara.Process.Statistics.stoppedHitProb_le
+#print axioms Lara.Process.Statistics.ville_finite
+#print axioms Lara.Process.Statistics.split_selection_valid
+#print axioms Lara.Process.Statistics.bonferroni_bounded
+#print axioms Lara.Process.Statistics.stoppedHitProb_mem_unit
+#print axioms Lara.Process.Statistics.ville_crossing
+#print axioms Lara.Process.Statistics.eventMass_anyOf_empty
+#print axioms Lara.Process.Statistics.card_le_bound
+#print axioms Lara.Process.Statistics.eq_empty_of_bound_zero
+
+-- lean/Lara/Process/Ledger.lean: 4 public theorems.
+#print axioms Lara.Process.Statistics.warrantedLevel_failClosed
+#print axioms Lara.Process.Statistics.warrantedLevel_needs_fwer
+#print axioms Lara.Process.Statistics.warrantedLevel_eValue
+#print axioms Lara.Process.Statistics.warrantedLevel_pValue

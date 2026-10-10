@@ -111,6 +111,38 @@ A partial-order record (`OrderRecord`) lists reported events and explicit preced
 
 `Lara.Examples.ProcessOrder` supplies the fixtures. `omitted_read_unknown` and `complete_access_certain`: a record stating that the plan commit precedes the reported read leaves an unreported earlier read possible, so precommitment is `unknown`, until complete coverage of evaluation reads excludes the violating history and makes it `certainTrue`. `unordered_record_unknown` and `record_order_irrelevant` admit both orders when no constraint is recorded. `contradictory_record_inconsistent` reports contradictory constraints as `inconsistent`. `failed_sibling_counts` keeps a failed sibling run in the family count although it yields no argument. `run_uses_current_version`, `cutoff_excludes_longer` and `refusing_evaluator` exercise versions, the cutoff and the conservative-evaluator contract, and `startAnnotated` inhabits the annotation contract. `history_forgets_precommitment` gives two valid histories with one event multiset that disagree on `RunPrecommitted`. `split_selection_fixture` separates selection on another dataset from selection on the test data.
 
+## What does the statistical layer prove?
+
+`Lara.Process.Statistics` and `Lara.Process.Ledger` follow the exact-rational style of `Lara.BHL.Tests.Binary`: finite carriers, rational masses (`FiniteProbability.Law`) and expectations as finite sums (`expect`). The pinned Mathlib has no Ville inequality and no e-values, p-values or FDR, so every bound is proved directly. A guarantee survives an incomplete ledger only through a bounded quantity: a certified count bound, or an e-process fixed before its data.
+
+| Theorem | Statement |
+| --- | --- |
+| `markov`, `eventMass_exists_le` | Markov's inequality for an e-value (nonnegative, expectation at most one) and the finite union bound |
+| `bonferroni_bounded` | for every completion with `k ≤ K` tests and calibrated null p-values (`IsPValue`, inhabited by `fair_pvalue`), rejecting a null whose p-value is at most `α/K` has probability at most `α` |
+| `eBonferroni_bounded` | for every completion with `k ≤ K` tests, any null set and arbitrary dependence, rejecting a null whose e-value reaches `K/α` has probability at most `α` |
+| `fdp_le_sum`, `selfConsistent_fdr` | a rejection set in which every rejected e-value reaches `K/(α·|rejected|)` has FDR at most `α·|nulls|/K` |
+| `eBH_selfConsistent`, `eBH_bounded` | e-BH run at the bound `K` is self-consistent, and with unreported tests entering as e-value `0` (never rejected) it controls FDR at `α` for every completion with at most `K` tests, even when which tests are reported depends on the outcome; proved directly rather than from Wang–Ramdas Prop. 2, which fixes the family size |
+| `stoppedHitProb_le`, `ville_finite`, `ville_crossing` | a nonnegative test supermartingale started at most one is at or above `1/α` at any stopping time within any finite horizon with probability at most `α`, and stopping at the first crossing gives the crossing probability; proved by induction on the horizon, not from Mathlib's `maximal_ineq`, which concerns submartingales |
+| `stoppedHitProb_mem_unit` | `stoppedHitProb`, the stopped event's probability computed by conditioning on each next observation, lies in `[0, 1]` |
+| `split_selection_valid` | selection on one sample and a calibrated test on the other keep the level when the joint law is the product of the marginals; independence is that explicit premise |
+| `warrantedLevel_failClosed`, `warrantedLevel_needs_fwer`, `warrantedLevel_eValue`, `warrantedLevel_pValue` | the warranted level of a ledger (`WithTop ℚ`) is `⊤` when the statistic kind, value, count bound or guarantee is missing, the guarantee is not FWER, or the bound or statistic is not positive; a finite level `a` means an e-value reaches the e-Bonferroni threshold `K/a`, or a p-value is at most the Bonferroni threshold `a/K` |
+
+`onlineLevel` is a wealth-spending online rule, used only to show that online replay needs a complete ordered ledger. `SplitSelection` on a process history is what licenses modeling the selection as a function of the selection sample and the test as a function of the test sample, which is how `split_selection_valid` receives read separation; the product law is a separate premise that no process record supplies.
+
+`Lara.Examples.ProcessStatistics` holds the fixtures and every counterexample twin:
+
+- `evalue_calibrated`, `countBounded_determinate`, `countBounded_rejection_valid`, `warrantsRejection_valid`: a calibrated e-value fixture (score `60` with null mass `1/60`). The bound-adjusted e-Bonferroni rejection at `K̄ = 2` and `α = 1/20` (threshold `40`) is `certainTrue` under an admitted count bound of two. Allowing four tests admits completions with three and four tests, where that rejection is not warranted and the four-test threshold `80` exceeds the score, so the verdict is `unknown`. In every warranted completion e-Bonferroni gives FWER at most `α` under any null law and dependence.
+- `partialRecord_unknown_countBounded`: the original BHL conclusion stays `unknown` under a bound of two, because its one-test and two-test completions both satisfy the bound. Its p-value is not reinterpreted as an e-value.
+- `optional_stopping_inflation`: a p-value calibrated at `1/2` at a fixed time reaches `1/2` with probability `3/4` under stopping as soon as it crosses. By contrast `likelihoodRatio_martingale` and `likelihoodRatio_ville` give a concrete test martingale whose crossing probability stays within its level.
+- `same_data_selection_inflates`, `same_data_identical_record`: selecting between two calibrated analyses on the test data rejects with probability `3/4`, while selecting on an independent coin keeps `1/2`; both worlds can report the same record (which analysis was selected and that it rejected).
+- `dependent_split_invalid`: with structurally split reads and distinct dataset identities, but perfectly dependent samples with the same fair marginals, the selected test always rejects; under the product law it keeps its level.
+- `online_replay_anticonservative`: replaying the online rule over a ledger missing a non-rejection grants level `1/40` instead of `1/80`, although both ledgers satisfy a count bound of one.
+- `mfdr_not_fdr`: an outcome law with mFDR at most `1/10` and FDR `1/2`. It separates the guarantee classes a profile must name; a procedure that guarantees mFDR, as alpha-investing does, is not thereby an FDR procedure. The witness is an outcome law, not a run of alpha-investing itself.
+- `eBH_reported_count_unsound`: e-BH run with the reported count one instead of the bound two rejects a null with probability `3/4` at `α = 1/2`.
+- `warrantedLevel_fixtures`: the e-value `60` under bound two is warranted at `1/30` and the p-value `1/40` at `1/20`; a missing bound, a zero bound, an FDR guarantee or a missing kind gives `⊤`.
+
+Infinite-horizon Ville and online FDR procedures over complete ledgers (LORD, e-LOND) are not part of this layer.
+
 ## How is the development checked?
 
 - `cd lean && lake build`
