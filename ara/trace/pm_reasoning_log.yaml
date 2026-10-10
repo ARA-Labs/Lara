@@ -1797,3 +1797,38 @@ entries:
   - "Updated O204's permitted forward promotion pointer after the current constraint heading changed. O205's superseded sequential proposal remains unpromoted and historically unchanged."
   - "Staged O207 rather than adding a scientific claim or novelty assertion. Formal kernel/runtime evidence is not empirical confirmation of research outcomes or physical sampling/log completeness."
   - "No scientific claim status changed. The research baseline is proof/gate-passing, while stage09 integration, version bump, main merge and verified release remain operational requirements; issues23/22 retain the wider theory and inquiry/impact gate."
+
+- turn: 2026-10-10_001#1-4
+  notes:
+  - "First epilogue for this conversation; turns 2-4 captured together. Turn 1 (listing open issues) had no research content and was skipped."
+  - "Recorded N378 and N380 as user decisions and N379 as ai-suggested with status open: committing a living plan is not approval of its design."
+  - "Staged O208-O210 instead of adding claims; they are literature synthesis and proposed constructions with no Lean proof or researcher affirmation."
+  - "Near-miss: O207 (latest-test record boundary) is cited by the new plan as the partialRecord_unknown witness, but a proposed plan is not an artifact commitment; left staged."
+  - "No logic-layer change: constraints.md already states that issue 23 retains incomplete-history reasoning, revision, adequacy and inquiry/impact, which remains accurate."
+
+- turn: 2026-10-10_001#5
+  notes:
+  - "Recorded explicit user approval as N381, user-revised; retained N379's historical proposed status unchanged."
+  - "Promoted O209 via verbal affirmation into the approved process constraint. This records countermodel-first proof obligations, not their completion."
+  - "Did not promote O208's broad survey characterization or O210 verbatim: approval of the corrected design does not affirm novelty or erase the new distinction between claim-level and fixed-witness entitlement."
+  - "Added the adopted contract to the current constraint layer, preserving the implemented BHL boundary. No scientific claim status changed and no empirical gate opened."
+  - "The executable checks are finite sanity checks of planned definitions and fixture arithmetic, not Lean proofs or a production ARA importer. No unrelated observation was stale-flagged."
+
+- turn: 2026-10-10_001#6
+  notes:
+  - "Recorded the implementation as N382 (experiment, ai-executed) and two dead ends found while landing it: the alpha-investing probe (N383) and the vacuous IsPValue hypothesis (N384); N385 records the issue deferrals."
+  - "Crystallized O210 via artifact commitment: Entitlement.lean commits the witness-keyed, profile-relative norm and no-promotion lattice. Its novelty sentence is not carried into the logic layer."
+  - "Reconciled the process-semantics constraint from approved-not-implemented to implemented (artifact commitment) and the BHL Open line (dependency change); before/after in logic_revisions_turn6."
+  - "Near-miss: O207 is now depended on by partialRecord_unknown and latestTest_separates, which is an artifact commitment, but it is a claim and a proved theorem would enter claims.md as hypothesis/testing; left staged for researcher triage rather than mis-statusing a theorem."
+  - "Near-miss: O208 not promoted; the bounded-quantity rule is instantiated (count bound, finite Ville, quarantine labels, verifying traces) but not proved as a general characterization."
+
+- turn: 2026-10-10_001#7
+  notes:
+  - "Recorded N386: the exact DP search resolved the N383 dead end; the counterexample needs a non-monotone policy, not dependence."
+  - "O212 left staged: it is resolved in the trace (non-monotone rule suffices under independence), but no researcher comment yet; not crystallized."
+  - "Dropped issue 38 from the constraint's Open line (empirical resolution of that open item)."
+
+- turn: 2026-10-10_001#8
+  notes:
+  - "Recorded N387: the plan-required Hennessy-Milner attempt succeeded for image-finite systems; dropped issue 40 from the constraint's Open line."
+  - "No logic claim added: the characterization is a theorem recorded in docs/theory-process.md and the trace, consistent with how earlier stages were recorded."

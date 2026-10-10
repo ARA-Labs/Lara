@@ -1,5 +1,5 @@
 name = "lara"
-defaultTargets = ["Lara", "lara-driver", "lara-map-driver", "presentation-shape", "surface-conformance", "pw-example", "pw-run", "bhl-examples", "axiom-withdrawal", "evidence-driver"]
+defaultTargets = ["Lara", "lara-driver", "lara-map-driver", "presentation-shape", "surface-conformance", "pw-example", "pw-run", "bhl-examples", "process-examples", "axiom-withdrawal", "evidence-driver"]
 
 # The core calculus remains independent of Mathlib. BHL uses the explicitly
 # approved pin for genuine real numbers and probability measures.
@@ -74,6 +74,12 @@ root = "Lara.PW.RunMain"
 [[lean_exe]]
 name = "axiom-withdrawal"
 root = "Lara.AxiomWithdrawalMain"
+
+# Research-process reference runner (issue #23): every process fixture through
+# the shared verdict definitions.
+[[lean_exe]]
+name = "process-examples"
+root = "Lara.Process.ExampleMain"
 
 [[lean_exe]]
 name = "evidence-driver"

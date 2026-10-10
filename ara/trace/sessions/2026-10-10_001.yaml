@@ -1,0 +1,284 @@
+session:
+  id: 2026-10-10_001
+  date: '2026-10-10'
+  started: '2026-10-09T18:00:00-07:00'
+  last_turn: '2026-10-10T08:37:46+00:00'
+  turn_count: 8
+  summary: Re-planned issue 23, approved the revised process-semantics design, then implemented
+    and mechanized R0-R7 as one PR with per-stage reviews and passing local gates.
+events_logged:
+- turn: 2
+  type: decision
+  id: N378_process_semantics_replan
+  routing: direct
+  provenance: user
+  summary: New branch for issue 23; lost T0-T8 plan; rescope to the work BHL left open
+- turn: 3
+  type: decision
+  id: N379_compatible_history_plan
+  routing: direct
+  provenance: ai-suggested
+  summary: Propose supervaluational compatible-history core, RecordCoverage, profile entitlement and R0-R7
+    stages
+- turn: 3
+  type: observation
+  id: O208
+  routing: staged
+  provenance: ai-suggested
+  summary: Guarantees survive incompleteness only through a bounded or predictable quantity
+- turn: 3
+  type: observation
+  id: O209
+  routing: staged
+  provenance: ai-suggested
+  summary: Six tempting laws to refute in Lean before positive proofs
+- turn: 3
+  type: observation
+  id: O210
+  routing: staged
+  provenance: ai-suggested
+  summary: Entitlement as profile-relative, witness-keyed justification norm with no-promotion lattice
+- turn: 4
+  type: decision
+  id: N380_lara_paper_not_prior_art
+  routing: direct
+  provenance: user
+  summary: arXiv 2609.25421 is the project's own paper; survey references verified and corrected
+- turn: 5
+  type: decision
+  id: N381_process_semantics_approved
+  routing: direct
+  provenance: user-revised
+  summary: Approved the revised plan and precise decoded-ARA process contract; no implementation claimed.
+- turn: 5
+  type: observation
+  id: O209
+  routing: crystallized
+  provenance: user-revised
+  summary: Adopted countermodel-first proof discipline as an approved constraint, not proved results.
+ai_actions:
+- turn: 2
+  action: Created branch theory/research-process-semantics from main; searched all local and remote refs,
+    worktrees, reflog and GitHub for the cited plan commit 5ba5f63 and found it unreachable.
+  provenance: ai-executed
+  files_changed: []
+- turn: 3
+  action: Ran a five-track literature survey and a repository interface survey, synthesized a report,
+    and wrote the living plan with the survey alongside it.
+  provenance: ai-executed
+  files_changed:
+  - plans/research-process-semantics/README.md
+  - plans/research-process-semantics/research.md
+- turn: 4
+  action: Reclassified the project's own paper, verified the unchecked survey references against
+    Crossref/OpenAlex and sources, committed the plan as 41357a3 and replaced the issue 23 description
+    with the R0-R7 scope.
+  provenance: ai-executed
+  files_changed:
+  - plans/research-process-semantics/README.md
+  - plans/research-process-semantics/research.md
+- turn: 5
+  action: Revised the plan and survey, added ara-contract.md, marked the plan approved,
+    and recorded the approval on issue 23. Local links and code fences passed; finite
+    reference checks exercised nonempty refinement, witness quantifiers and statistical
+    fixture arithmetic. The new contract passed the document style checker after prose review.
+    These checks do not implement or prove the proposed Lean theory.
+  provenance: ai-executed
+  files_changed:
+  - plans/research-process-semantics/README.md
+  - plans/research-process-semantics/research.md
+  - plans/research-process-semantics/ara-contract.md
+claims_touched: []
+logic_revisions:
+- turn: 5
+  entry: logic/solution/constraints.md#research-process-semantics-approved-not-implemented
+  field: section
+  before: null
+  after: Approved, unimplemented process-semantics constraint covering scoped compatible
+    histories, nonempty certainty, fixed-witness audits, extraction preservation and residual
+    physical/probabilistic assumptions; evidence points to the plans and N381.
+  signal: verbal-declaration
+  provenance: user-revised
+  note: O209 crystallizes as required proof discipline, not proof completion. O210 is not
+    promoted verbatim because its witness wording is refined and its novelty assertion is unverified.
+key_context:
+- turn: 2
+  excerpt: Researcher asked what issue 23 is really about; the cited plan and foundations doc no longer
+    exist on any ref, and BHL already covers the complete-history parts.
+- turn: 3
+  excerpt: Researcher asked to write the plan and do deep research while writing it. The profile question
+    went unanswered; the plan uses a parametric profile with one strict instance as the default.
+- turn: 4
+  excerpt: Researcher stated arXiv 2609.25421 is this project's paper and asked to fix unchecked references,
+    commit, update issue 23 and run research-manager.
+- turn: 5
+  excerpt: "sure, revise or add to the plans as needed, then mark it as approved"
+open_threads:
+- Implement the approved R0-R7 plan under issue 23; approval does not complete any stage.
+- Decide whether ArtifactBinding should move from the multiset History to an ordered ledger; R3 avoids
+  it unless R4 requires it.
+- Push the branch; the issue 23 description refers to plan files that exist only on the unpushed branch.
+ai_suggestions_pending:
+- O208 remains staged survey synthesis, not a proved universal characterization.
+- O210 remains a historical proposal; N381 adopts refined witness quantifiers without affirming its novelty assertion.
+events_logged_turn6:
+- turn: 6
+  type: experiment
+  id: N382_process_semantics_implemented
+  routing: direct
+  provenance: ai-executed
+  summary: Implemented and mechanized R0-R7 in lean/Lara/Process; runner, docs and gates pass
+- turn: 6
+  type: dead_end
+  id: N383_alpha_investing_counterexample_probe
+  routing: direct
+  provenance: ai-executed
+  summary: Small conditionally valid alpha-investing runs keep FDR below alpha
+- turn: 6
+  type: dead_end
+  id: N384_unsatisfiable_pvalue_definition
+  routing: direct
+  provenance: ai-executed
+  summary: IsPValue over all thresholds was unsatisfiable; restricted and inhabited
+- turn: 6
+  type: decision
+  id: N385_process_deferrals
+  routing: direct
+  provenance: ai-suggested
+  summary: Deferred items tracked as issues 38, 39 and 40
+- turn: 6
+  type: observation
+  id: O211
+  routing: staged
+  provenance: ai-executed
+  summary: Inhabit every calibration-style hypothesis with a concrete witness
+- turn: 6
+  type: observation
+  id: O212
+  routing: staged
+  provenance: ai-executed
+  summary: Alpha-investing FDR violation likely needs dependence or non-monotone levels
+- turn: 6
+  type: observation
+  id: O210
+  routing: crystallized
+  provenance: ai-suggested
+  summary: Witness-keyed profile entitlement and no-promotion committed in Entitlement.lean
+ai_actions_turn6:
+- turn: 6
+  action: Implemented the approved plan as eight stage commits (b0af183..b176d00), each after spec and
+    quality subagent reviews; opened issues 38-40; verified 59 survey references into docs/lara-related-work.bib;
+    deleted the executed plan; ran make local-gates (passed before the final R7 review fixes) and the
+    ARA gates.
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/Process/
+  - lean/Lara/Examples/Process*.lean
+  - lean/AxCheck.lean
+  - lean/Lara.lean
+  - lean/lakefile.toml
+  - Makefile
+  - docs/theory-process.md
+  - docs/corpus-map.md
+  - docs/theory-bhl.md
+  - docs/lara-related-work.bib
+  - plans/research-process-semantics/
+logic_revisions_turn6:
+- turn: 6
+  entry: logic/solution/constraints.md#research-process-semantics
+  field: section
+  before: '## Research-process semantics (approved, not implemented)
+
+
+    - **Status:** The user approved the revised plan and ARA process-record contract. All implementation
+    and proof obligations remain pending under [issue #23](https://github.com/ARA-Labs/Lara/issues/23).
+
+    - **Constraint:** A record denotes valid histories paired with allowed reporting choices under an
+    explicit model, scoped coverage assumptions and a submission cutoff. Certainty requires a nonempty
+    compatible set. Refuting the proposed false laws precedes later preservation proofs; approval is not
+    proof of those countermodels.
+
+    - **Argument boundary:** Claim-level entitlement allows a different warrant witness in each completion.
+    Auditing a submitted ARA argument fixes its witness and exact source/run/version bindings across all
+    completions. Both judgments remain separate from truth and BHL knowledge.
+
+    - **Extraction boundary:** The decoded-record bridge must preserve every modeled generating history
+    satisfying admitted source assumptions. Missing order or coverage stays unknown; failed sibling trials
+    remain relevant even without attack edges. Finite enumeration bounds, source fidelity, coverage admission
+    and statistical calibration/independence assumptions remain explicit.
+
+    - **Delivery boundary:** The approved work covers the symbolic contract, Lean proofs, decoded fixtures
+    and the reference runner. It does not change the core or wire, regenerate the corpus, implement physical
+    capture or parse arbitrary ARA prose. The empirical-design gate remains closed.
+
+    - **Evidence:** `plans/research-process-semantics/README.md`; `plans/research-process-semantics/ara-contract.md`;
+    `ara/trace/exploration_tree.yaml:N381_process_semantics_approved`.
+
+    - **Provenance:** user-revised
+
+    - **Last revised:** 2026-10-10 (2026-10-10_001#5)'
+  after: 'Implemented research-process semantics: status, constraint, argument, extraction and delivery
+    boundaries reconciled with the landed proofs; evidence now points to docs/theory-process.md and N382;
+    open items are issues 38-40 and 22.'
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: Heading renamed from "(approved, not implemented)"; O209 and the turn-5 revision keep the old
+    anchor as historical pointers.
+- turn: 6
+  entry: logic/solution/constraints.md#belief-hoare-logic-baseline
+  field: Open
+  before: '[Issue #23](https://github.com/ARA-Labs/Lara/issues/23) retains general incomplete-history
+    reasoning, broad revision, representation adequacy and inquiry/impact; [issue #22](https://github.com/ARA-Labs/Lara/issues/22)
+    remains downstream.'
+  after: 'General incomplete-history reasoning, broad revision and representation adequacy are the research-process
+    layer below; [issue #22](https://github.com/ARA-Labs/Lara/issues/22) remains downstream for inquiry/impact.'
+  signal: dependency-change
+  provenance: ai-suggested
+key_context_turn6:
+- turn: 6
+  excerpt: Researcher set the goal "/implement @plans/research-process-semantics/ , one pr".
+open_threads_turn6:
+- Merge the single PR closing issue 23; the empirical-design gate opens only by researcher decision.
+- Issues 38, 39 and 40 hold the unproved plan items.
+ai_suggestions_pending_turn6:
+- 'O208 stays staged: the statistical layer instantiates bounded quantities but does not prove the survey-wide
+  rule.'
+- 'O207 near closure: partialRecord_unknown and latestTest_separates now depend on it.'
+events_logged_turn7:
+- turn: 7
+  type: experiment
+  id: N386_alpha_investing_counterexample_found
+  routing: direct
+  provenance: ai-executed
+  summary: Exact DP finds alpha-investing run with mFDR 183/2033 and FDR 2663/24000 at alpha 1/10; mechanized
+logic_revisions_turn7:
+- turn: 7
+  entry: logic/solution/constraints.md#research-process-semantics
+  field: Open
+  before: 'Issue #38 (an alpha-investing run with mFDR within α and FDR above it), issue #39 ... and issue
+    #40 ...'
+  after: 'Issue #39 ... and issue #40 ...; the alpha-investing run is mechanized'
+  signal: empirical-resolution
+  provenance: ai-suggested
+open_threads_turn7:
+- Merge the single PR closing issues 23 and 38; the empirical-design gate opens only by researcher decision.
+- Issues 39 and 40 hold the remaining items outside the delivered scope.
+events_logged_turn8:
+- turn: 8
+  type: experiment
+  id: N387_hennessy_milner_characterization
+  routing: direct
+  provenance: ai-executed
+  summary: Hennessy-Milner characterization proved for image-finite systems and process histories
+logic_revisions_turn8:
+- turn: 8
+  entry: logic/solution/constraints.md#research-process-semantics
+  field: Open
+  before: 'Issue #39 (infinite-horizon Ville and online FDR) and issue #40 (a Hennessy–Milner characterization).'
+  after: 'Issue #39 (infinite-horizon Ville and online FDR, outside the plan''s scope).'
+  signal: empirical-resolution
+  provenance: ai-suggested
+open_threads_turn8:
+- Merge the single PR closing issues 23, 38 and 40; the empirical-design gate opens only by researcher
+  decision.
+- Issue 39 holds the work the plan placed outside its scope.

@@ -192,6 +192,7 @@ Everything that needs a Lean build runs outside the required workflows:
 | --- | --- | --- |
 | `lake build`, PW example, axiom-withdrawal example, `AxCheck.lean` axiom audit, semantics registry | Included in `make lean-gate` | `Lean` workflow, when a reviewer adds the `lean` label to a PR (or `gh workflow run lean.yml --ref <branch>`) |
 | BHL checker and finite-semantics runner | `make bhl-theory`, also included in `make lean-gate` | not run by the optional Lean workflow |
+| Research-process reference runner | `make process-theory`, also included in `make lean-gate` | not run by the optional Lean workflow |
 | Haskell-Lean cross-checks: presentation parity, surface conformance and its gate test, semantics, certDeps and update-matrix goldens, update and wire differentials, admission and evidence differentials, evidence CLI and measured-input checks, map conformance, PW conformance | `make cross-check` | not run |
 
 `make local-gates` runs both. A PR that changes proofs, or one where review finds something that should be mechanized, gets the `lean` label. Most changes cannot affect the outcome of a Lean build or the cross-checks, which is why the required workflow does not run them.

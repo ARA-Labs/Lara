@@ -199,6 +199,34 @@ import Lara.Examples.PWFinite
 import Lara.Examples.PWFileHost
 import Lara.PW.Run
 import Lara.Examples.PWRun
+import Lara.Process.Vocabulary
+import Lara.Process.Contract
+import Lara.Examples.ProcessFalseLaws
+import Lara.Process.Verdict
+import Lara.Process.Kleene
+import Lara.Process.Coverage
+import Lara.Process.Conservative
+import Lara.Examples.ProcessCore
+import Lara.Process.Entitlement
+import Lara.Examples.ProcessEntitlement
+import Lara.Process.BridgeWarrant
+import Lara.Process.Order
+import Lara.Process.WorldView
+import Lara.Examples.ProcessOrder
+import Lara.Process.Statistics
+import Lara.Process.Ledger
+import Lara.Examples.ProcessStatistics
+import Lara.Process.Revision
+import Lara.Process.RevisionBridge
+import Lara.Examples.ProcessRevision
+import Lara.Process.Bridge
+import Lara.Process.Prov
+import Lara.Examples.ProcessAdequacy
+import Lara.Examples.ProcessARA
+import Lara.Process.Inquiry
+import Lara.Examples.ProcessInquiry
+import Lara.Process.Characterization
+import Lara.Examples.ProcessCharacterization
 
 open Lara
 
@@ -6682,3 +6710,279 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.BHLBridge.incompatible_claim_native_failure
 #print axioms Lara.Examples.BHLBridge.incompatible_origin_copy
 #print axioms Lara.Examples.BHLBridge.incompatible_origin_native_failure
+
+-- lean/Lara/Examples/ProcessFalseLaws.lean: 6 public theorems.
+#print axioms Lara.Examples.ProcessFalseLaws.stricter_profile_reinstates
+#print axioms Lara.Examples.ProcessFalseLaws.quarantine_reinstates
+#print axioms Lara.Examples.ProcessFalseLaws.unchanged_status_different_basis
+#print axioms Lara.Examples.ProcessFalseLaws.empty_compatible_vacuous
+#print axioms Lara.Examples.ProcessFalseLaws.past_completion_not_future
+#print axioms Lara.Examples.ProcessFalseLaws.multiset_forgets_plan_order
+
+-- lean/Lara/Process/Vocabulary.lean: 4 public theorems.
+#print axioms Lara.Process.EvidenceKind.rank_injective
+#print axioms Lara.Process.EvidenceKind.le_iff_rank
+#print axioms Lara.Process.EvidenceKind.mem_all
+#print axioms Lara.Process.ErrorKind.mem_all
+
+-- lean/Lara/Examples/ProcessCore.lean: 7 public theorems.
+#print axioms Lara.Examples.ProcessCore.refine_needs_nonempty
+#print axioms Lara.Examples.ProcessCore.kleene_incomplete
+#print axioms Lara.Examples.ProcessCore.coverage_incomparable
+#print axioms Lara.Examples.ProcessCore.partial_compatible
+#print axioms Lara.Examples.ProcessCore.partialRecord_unknown
+#print axioms Lara.Examples.ProcessCore.partialRecord_not_factors
+#print axioms Lara.Examples.ProcessCore.weaken_assumption_needs_nonempty
+
+-- lean/Lara/Process/Coverage.lean: 8 public theorems.
+#print axioms Lara.Process.RecordCoverage.stronger_openWorld
+#print axioms Lara.Process.RecordCoverage.countBounded_mono
+#print axioms Lara.Process.Assumptions.stronger_refl
+#print axioms Lara.Process.Assumptions.stronger_trans
+#print axioms Lara.Process.Assumptions.and_stronger_left
+#print axioms Lara.Process.Assumptions.and_stronger_right
+#print axioms Lara.Process.complete_scope_events
+#print axioms Lara.Process.complete_coverage_determines
+
+-- lean/Lara/Process/Conservative.lean: 4 public theorems.
+#print axioms Lara.Process.RecordCoverage.ofHistoryCoverage_complete
+#print axioms Lara.Process.coverage_complete_conservative
+#print axioms Lara.Process.completeObservation_conservative
+#print axioms Lara.Process.realized_conservative
+
+-- lean/Lara/Process/Verdict.lean: 20 public theorems.
+#print axioms Lara.Process.verdictOf_cases
+#print axioms Lara.Process.verdictOf_inconsistent_iff
+#print axioms Lara.Process.verdictOf_certainTrue_iff
+#print axioms Lara.Process.verdictOf_certainFalse_iff
+#print axioms Lara.Process.verdictOf_unknown_iff
+#print axioms Lara.Process.verdict_eq_verdictOf
+#print axioms Lara.Process.verdict_sound
+#print axioms Lara.Process.verdict_sound_false
+#print axioms Lara.Process.positive_needs_nonempty
+#print axioms Lara.Process.certain_refine
+#print axioms Lara.Process.determined_iff_no_witness
+#print axioms Lara.Process.verdict_of_generator
+#print axioms Lara.Process.history_independent_verdict
+#print axioms Lara.Process.certain_weaken_assumption
+#print axioms Lara.Process.certain_factor
+#print axioms Lara.Process.naive_sound_iff_factors
+#print axioms Lara.Process.factors_iff_determinate
+#print axioms Lara.Process.RecordSemantics.verdict_eq_verdictOf
+#print axioms Lara.Process.conservativeFor_refl
+#print axioms Lara.Process.refuse_conservative
+
+-- lean/Lara/Process/Kleene.lean: 6 public theorems.
+#print axioms Lara.Process.kleene_value_sound
+#print axioms Lara.Process.kleene_sound
+#print axioms Lara.Process.referenceAtoms_sound
+#print axioms Lara.Process.finiteAtoms_eq
+#print axioms Lara.Process.kleeneVerdictFinite_eq
+#print axioms Lara.Process.kleene_conservative
+
+-- lean/Lara/Examples/ProcessEntitlement.lean: 8 public theorems.
+#print axioms Lara.Examples.ProcessEntitlement.entitled_not_argument
+#print axioms Lara.Examples.ProcessEntitlement.defeated_not_warranted
+#print axioms Lara.Examples.ProcessEntitlement.conditional_not_warranted
+#print axioms Lara.Examples.ProcessEntitlement.warranted_not_true
+#print axioms Lara.Examples.ProcessEntitlement.entitled_not_known
+#print axioms Lara.Examples.ProcessEntitlement.promotion_needs_wellKinded
+#print axioms Lara.Examples.ProcessEntitlement.wellKinded_no_promotion
+#print axioms Lara.Examples.ProcessEntitlement.stricter_directional_instance
+
+-- lean/Lara/Process/Entitlement.lean: 15 public theorems.
+#print axioms Lara.Process.argumentEntitledBy_implies_entitledBy
+#print axioms Lara.Process.argumentEntitled_implies_entitled
+#print axioms Lara.Process.argumentEntitled_verdict
+#print axioms Lara.Process.KindDerivation.kind_le_leafMeet
+#print axioms Lara.Process.KindDerivation.leafMeet_le_of_mem
+#print axioms Lara.Process.KindDerivation.no_promotion_any_leaf
+#print axioms Lara.Process.KindDerivation.no_promotion
+#print axioms Lara.Process.strict_no_promotion
+#print axioms Lara.Process.no_promotion_agrees_blocking
+#print axioms Lara.Process.stricter_directional
+#print axioms Lara.Process.stricter_directional_argument
+#print axioms Lara.Process.Admitted.stronger_coverage
+#print axioms Lara.Process.stricter_directional_entitled
+#print axioms Lara.Process.profile_restriction_nonpromotion
+#print axioms Lara.Process.ancestry_blocking
+
+-- lean/Lara/Process/BridgeWarrant.lean: 3 public theorems.
+#print axioms Lara.Process.bridge_warranted_iff
+#print axioms Lara.Process.bridge_argument_audit
+#print axioms Lara.Process.conditional_not_applied
+
+-- lean/Lara/Examples/ProcessOrder.lean: 12 public theorems.
+#print axioms Lara.Examples.ProcessOrder.omitted_read_unknown
+#print axioms Lara.Examples.ProcessOrder.complete_access_certain
+#print axioms Lara.Examples.ProcessOrder.unordered_record_unknown
+#print axioms Lara.Examples.ProcessOrder.record_order_irrelevant
+#print axioms Lara.Examples.ProcessOrder.contradictory_record_inconsistent
+#print axioms Lara.Examples.ProcessOrder.failed_sibling_counts
+#print axioms Lara.Examples.ProcessOrder.history_forgets_precommitment
+#print axioms Lara.Examples.ProcessOrder.split_selection_fixture
+#print axioms Lara.Examples.ProcessOrder.run_uses_current_version
+#print axioms Lara.Examples.ProcessOrder.cutoff_excludes_longer
+#print axioms Lara.Examples.ProcessOrder.refusing_evaluator
+#print axioms Lara.Examples.ProcessOrder.startAnnotated_process
+
+-- lean/Lara/Process/WorldView.lean: 9 public theorems.
+#print axioms Lara.Process.ledgerDeltas_sum
+#print axioms Lara.Process.testProjection_eq
+#print axioms Lara.Process.traceEdges_chain
+#print axioms Lara.Process.admitted_testProjection
+#print axioms Lara.Process.AnnotatedWorld.steps_length
+#print axioms Lara.Process.AnnotatedWorld.tests_sum
+#print axioms Lara.Process.AnnotatedWorld.test_from_run
+#print axioms Lara.Process.ledgerDeltas_length
+#print axioms Lara.Process.mem_list_sum
+
+-- lean/Lara/Process/Order.lean: 8 public theorems.
+#print axioms Lara.Process.run_some_iff_steps
+#print axioms Lara.Process.valid_prefix
+#print axioms Lara.Process.predictable_runPrecommitted
+#print axioms Lara.Process.familyCount_append_run
+#print axioms Lara.Process.orderCompatible_perm
+#print axioms Lara.Process.contradictory_constraints
+#print axioms Lara.Process.contradictory_constraints_inconsistent
+#print axioms Lara.Process.orderCompatible_mono
+
+-- lean/Lara/Examples/ProcessStatistics.lean: 18 public theorems.
+#print axioms Lara.Examples.ProcessStatistics.evalue_calibrated
+#print axioms Lara.Examples.ProcessStatistics.countBounded_determinate
+#print axioms Lara.Examples.ProcessStatistics.countBounded_rejection_valid
+#print axioms Lara.Examples.ProcessStatistics.partialRecord_unknown_countBounded
+#print axioms Lara.Examples.ProcessStatistics.optional_stopping_inflation
+#print axioms Lara.Examples.ProcessStatistics.same_data_selection_inflates
+#print axioms Lara.Examples.ProcessStatistics.dependent_split_invalid
+#print axioms Lara.Examples.ProcessStatistics.online_replay_anticonservative
+#print axioms Lara.Examples.ProcessStatistics.mfdr_not_fdr
+#print axioms Lara.Examples.ProcessStatistics.eBH_reported_count_unsound
+#print axioms Lara.Examples.ProcessStatistics.warrantedLevel_fixtures
+#print axioms Lara.Examples.ProcessStatistics.warrantsRejection_valid
+#print axioms Lara.Examples.ProcessStatistics.likelihoodRatio_martingale
+#print axioms Lara.Examples.ProcessStatistics.likelihoodRatio_ville
+#print axioms Lara.Examples.ProcessStatistics.same_data_identical_record
+#print axioms Lara.Examples.ProcessStatistics.fair_pvalue
+#print axioms Lara.Examples.ProcessStatistics.investing_pvalues
+#print axioms Lara.Examples.ProcessStatistics.alpha_investing_mfdr_not_fdr
+
+-- lean/Lara/Process/Statistics.lean: 16 public theorems.
+#print axioms Lara.Process.Statistics.markov
+#print axioms Lara.Process.Statistics.eventMass_exists_le
+#print axioms Lara.Process.Statistics.eBonferroni_bounded
+#print axioms Lara.Process.Statistics.fdp_le_sum
+#print axioms Lara.Process.Statistics.selfConsistent_fdr
+#print axioms Lara.Process.Statistics.eBH_selfConsistent
+#print axioms Lara.Process.Statistics.eBH_bounded
+#print axioms Lara.Process.Statistics.stoppedHitProb_le
+#print axioms Lara.Process.Statistics.ville_finite
+#print axioms Lara.Process.Statistics.split_selection_valid
+#print axioms Lara.Process.Statistics.bonferroni_bounded
+#print axioms Lara.Process.Statistics.stoppedHitProb_mem_unit
+#print axioms Lara.Process.Statistics.ville_crossing
+#print axioms Lara.Process.Statistics.eventMass_anyOf_empty
+#print axioms Lara.Process.Statistics.card_le_bound
+#print axioms Lara.Process.Statistics.eq_empty_of_bound_zero
+
+-- lean/Lara/Process/Ledger.lean: 4 public theorems.
+#print axioms Lara.Process.Statistics.warrantedLevel_failClosed
+#print axioms Lara.Process.Statistics.warrantedLevel_needs_fwer
+#print axioms Lara.Process.Statistics.warrantedLevel_eValue
+#print axioms Lara.Process.Statistics.warrantedLevel_pValue
+
+-- lean/Lara/Examples/ProcessRevision.lean: 10 public theorems.
+#print axioms Lara.Examples.ProcessRevision.quarantine_one_support
+#print axioms Lara.Examples.ProcessRevision.quarantine_all_supports
+#print axioms Lara.Examples.ProcessRevision.support_avoids_but_defeated
+#print axioms Lara.Examples.ProcessRevision.stable_not_directional
+#print axioms Lara.Examples.ProcessRevision.grounded_locality_instance
+#print axioms Lara.Examples.ProcessRevision.failed_sibling_changes_warrant
+#print axioms Lara.Examples.ProcessRevision.merge_breaks_corroboration
+#print axioms Lara.Examples.ProcessRevision.incomplete_reads_unsound
+#print axioms Lara.Examples.ProcessRevision.complete_reads
+#print axioms Lara.Examples.ProcessRevision.update_and_revision
+
+-- lean/Lara/Process/Revision.lean: 13 public theorems.
+#print axioms Lara.Process.Derives.mono
+#print axioms Lara.Process.not_derives_empty
+#print axioms Lara.Process.quarantine_iff_support
+#print axioms Lara.Process.grounded_directional_locality
+#print axioms Lara.Process.warranted_natural
+#print axioms Lara.Process.corroboration_injective
+#print axioms Lara.Process.verifying_trace_reuse
+#print axioms Lara.Process.version_update_keeps_old
+#print axioms Lara.Process.revision_withdraws_dependents
+#print axioms Lara.Process.warranted_locality
+#print axioms Lara.Process.derives_reencode
+#print axioms Lara.Process.derives_reencode_iff
+#print axioms Lara.Process.corroboration_preserved_iff
+
+-- lean/Lara/Process/RevisionBridge.lean: 3 public theorems.
+#print axioms Lara.Process.tighten_revision
+#print axioms Lara.Process.update_keeps_old
+#print axioms Lara.Process.update_reestablish
+
+-- lean/Lara/Examples/ProcessARA.lean: 9 public theorems.
+#print axioms Lara.Examples.ProcessARA.omitted_read_ara
+#print axioms Lara.Examples.ProcessARA.admitted_coverage_ara
+#print axioms Lara.Examples.ProcessARA.declared_coverage_not_admitted
+#print axioms Lara.Examples.ProcessARA.generating_history_compatible
+#print axioms Lara.Examples.ProcessARA.failed_trial_preserved
+#print axioms Lara.Examples.ProcessARA.contradictory_ara_inconsistent
+#print axioms Lara.Examples.ProcessARA.submission_extracted
+#print axioms Lara.Examples.ProcessARA.reordered_equivalent
+#print axioms Lara.Examples.ProcessARA.omitted_read_compatible
+
+-- lean/Lara/Examples/ProcessAdequacy.lean: 8 public theorems.
+#print axioms Lara.Examples.ProcessAdequacy.latestTest_separates
+#print axioms Lara.Examples.ProcessAdequacy.multiset_separates
+#print axioms Lara.Examples.ProcessAdequacy.dropFailed_separates
+#print axioms Lara.Examples.ProcessAdequacy.selectionProvenance_separates
+#print axioms Lara.Examples.ProcessAdequacy.collapse_separates
+#print axioms Lara.Examples.ProcessAdequacy.dropRetractions_separates
+#print axioms Lara.Examples.ProcessAdequacy.prov_separates
+#print axioms Lara.Examples.ProcessAdequacy.multiset_record_unknown
+
+-- lean/Lara/Process/Bridge.lean: 10 public theorems.
+#print axioms Lara.Process.extraction_preserves_compatibility
+#print axioms Lara.Process.extraction_verdict_sound
+#print axioms Lara.Process.extraction_overapprox_safe
+#print axioms Lara.Process.encode_extract
+#print axioms Lara.Process.verdict_invariant
+#print axioms Lara.Process.RecordCoverage.allowed_perm
+#print axioms Lara.Process.perm_equivalent
+#print axioms Lara.Process.separation_unknown
+#print axioms Lara.Process.separates_not_factors
+#print axioms Lara.Process.extraction_safe_for_source
+
+-- lean/Lara/Process/Prov.lean: 1 public theorem.
+#print axioms Lara.Process.provGraph_perm
+
+-- lean/Lara/Examples/ProcessInquiry.lean: 4 public theorems.
+#print axioms Lara.Examples.ProcessInquiry.sensitivity_fixture
+#print axioms Lara.Examples.ProcessInquiry.stable_not_entitled
+#print axioms Lara.Examples.ProcessInquiry.status_does_not_transport
+#print axioms Lara.Examples.ProcessInquiry.leftOnly_completions
+
+-- lean/Lara/Process/Inquiry.lean: 5 public theorems.
+#print axioms Lara.Process.Inquiry.stable_iff_determinate
+#print axioms Lara.Process.Inquiry.sensitivity_empty_iff_stable
+#print axioms Lara.Process.Inquiry.mem_sensitivity
+#print axioms Lara.Process.Inquiry.mem_ofRecord
+#print axioms Lara.Process.Inquiry.ofRecord_stable_iff
+
+-- lean/Lara/Examples/ProcessCharacterization.lean: 3 public theorems.
+#print axioms Lara.Examples.ProcessCharacterization.formula_separates
+#print axioms Lara.Examples.ProcessCharacterization.atoms_agree_before_run
+#print axioms Lara.Examples.ProcessCharacterization.not_bisimilar
+
+-- lean/Lara/Process/Characterization.lean: 8 public theorems.
+#print axioms Lara.Process.bisimilar_refl
+#print axioms Lara.Process.bisimilar_sat
+#print axioms Lara.Process.bisimilar_formulaEquivalent
+#print axioms Lara.Process.separating_conjunction
+#print axioms Lara.Process.formulaEquivalent_forth
+#print axioms Lara.Process.formulaEquivalent_isBisimulation
+#print axioms Lara.Process.formulaEquivalent_iff_bisimilar
+#print axioms Lara.Process.process_characterization
