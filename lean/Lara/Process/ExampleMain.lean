@@ -174,6 +174,11 @@ def checks : IO _root_.Unit := do
   expect "replay without it" (onlineLevel (1 / 20) (1 / 20) []) (1 / 40)
   expect "FDR of the mFDR fixture"
     (fdr fair (fun ω => if ω then 1 else 0) (fun ω => if ω then 1 else 9)) (1 / 2)
+  expect "alpha-investing mFDR" investMfdr (183 / 2033)
+  expect "alpha-investing FDR" investFdr (2663 / 24000)
+  require "alpha-investing levels respect the wealth rule"
+    ([true, false].all fun a => [true, false].all fun b =>
+      [(0 : Fin 3), 1, 2].all fun c => (investAt (a, b, c)).lawful)
   expect "e-BH at the reported count"
     (Statistics.expect (product fair fair) (fun ω => fdp (eBH 1 (1 / 2) fun i => pair i ω) {0})) (3 / 4)
   expect "e-BH at the bound"
@@ -183,7 +188,7 @@ def checks : IO _root_.Unit := do
   expect "zero bound fails closed for a p-value"
     (warrantedLevel ⟨some .pValue, some (1 / 40), some 0, some .fwer⟩) ⊤
   expect "missing bound fails closed" (warrantedLevel ⟨some .eValue, some 60, none, some .fwer⟩) ⊤
-  IO.println s!"Statistics: Ville crossing {ville} ≤ 1/4; e-value 60 certain under bound 2 and unknown under bound 4; optional stopping 3/4, same-data selection 3/4, dependent split 1, replay 1/40 > 1/80, FDR 1/2 under mFDR, e-BH at reported count 3/4"
+  IO.println s!"Statistics: Ville crossing {ville} ≤ 1/4; e-value 60 certain under bound 2 and unknown under bound 4; optional stopping 3/4, same-data selection 3/4, dependent split 1, replay 1/40 > 1/80, FDR 1/2 under mFDR, alpha-investing FDR 2663/24000 > 1/10 with mFDR 183/2033, e-BH at reported count 3/4"
 
 end Stats
 

@@ -27,8 +27,9 @@ twin of every positive statistical result.
 * `online_replay_anticonservative`: replaying an online rule over a ledger
   missing a non-rejection grants a larger level, although both ledgers satisfy
   the same count bound.
-* `mfdr_not_fdr`: an outcome law with mFDR at most `α` and FDR above it, so the
-  guarantee class must be stated.
+* `mfdr_not_fdr`, `alpha_investing_mfdr_not_fdr`: an outcome law, and an actual
+  alpha-investing run with independent calibrated p-values, each with mFDR
+  within `α` and FDR above it, so the guarantee class must be stated.
 * `eBH_reported_count_unsound`: running e-BH with the reported count instead of
   the bound inflates the error.
 * `warrantedLevel_fixtures`: the ledger level fails closed.
@@ -293,6 +294,103 @@ theorem mfdr_not_fdr :
     mfdr fair (fun ω => if ω then 1 else 0) (fun ω => if ω then 1 else 9) 0 ≤ 1 / 10 ∧
       fdr fair (fun ω => if ω then 1 else 0) (fun ω => if ω then 1 else 9) = 1 / 2 := by
   constructor <;> norm_num [mfdr, fdr, expect, fair]
+
+/-! ### An alpha-investing run with mFDR within α and FDR above it -/
+
+/-! The laws are numbered by hypothesis position: hypothesis 2 is the
+alternative, whose p-value is `0`. -/
+
+/-- The first null's p-value: `1/20` with mass `1/20`, else `1`. -/
+def law1 : Law Bool where
+  mass b := if b then 1 / 20 else 19 / 20
+  nonnegative b := by cases b <;> norm_num
+  normalized := by simp; norm_num
+
+def pval1 (b : Bool) : ℚ := if b then 1 / 20 else 1
+
+/-- The second null's p-value: `1/10` with mass `1/10`, else `1`. -/
+def law3 : Law Bool where
+  mass b := if b then 1 / 10 else 9 / 10
+  nonnegative b := by cases b <;> norm_num
+  normalized := by simp; norm_num
+
+def pval3 (b : Bool) : ℚ := if b then 1 / 10 else 1
+
+/-- The third null's p-value: `1/40`, `7/40` or `1`, with masses `1/40`, `6/40`
+and `33/40`. -/
+def mass4 : Fin 3 → ℚ
+  | 0 => 1 / 40
+  | 1 => 6 / 40
+  | 2 => 33 / 40
+
+def law4 : Law (Fin 3) where
+  mass := mass4
+  nonnegative i := by fin_cases i <;> norm_num [mass4]
+  normalized := by simp [Fin.sum_univ_three, mass4]; norm_num
+
+def pval4 : Fin 3 → ℚ
+  | 0 => 1 / 40
+  | 1 => 7 / 40
+  | 2 => 1
+
+/-- Each null p-value is calibrated: these are the events of a uniform p-value
+that the policy below reads, each p-value placed at the top of its cell. -/
+theorem investing_pvalues : IsPValue law1 pval1 ∧ IsPValue law3 pval3 ∧ IsPValue law4 pval4 := by
+  refine ⟨fun t ht => ?_, fun t ht => ?_, fun t ht => ?_⟩
+  · simp only [eventMass, law1, pval1, Fintype.sum_bool, if_true, Bool.false_eq_true, if_false,
+      decide_eq_true_eq]
+    split_ifs <;> linarith
+  · simp only [eventMass, law3, pval3, Fintype.sum_bool, if_true, Bool.false_eq_true, if_false,
+      decide_eq_true_eq]
+    split_ifs <;> linarith
+  · simp only [eventMass, law4, pval4, mass4, Fin.sum_univ_three, decide_eq_true_eq]
+    split_ifs <;> linarith
+
+/-- The three null p-values are independent: their joint law is the product. -/
+def investLaw : Law (Bool × Bool × Fin 3) := product law1 (product law3 law4)
+
+/-- Hypotheses in order: a null, an alternative (p-value `0`), two nulls. -/
+def investNulls : List Bool := [true, false, true, true]
+
+def investPvals (ω : Bool × Bool × Fin 3) : List ℚ := [pval1 ω.1, 0, pval3 ω.2.1, pval4 ω.2.2]
+
+/-- The non-monotone policy: test the first null at `1/20` and stop after a
+rejection; otherwise invest `1/40` in the alternative, then test the next null
+at `1/10` and the last at `7/40` after a rejection or `1/40` after none. -/
+def investPolicy : List (Option Bool) → Option ℚ
+  | [] => some (1 / 20)
+  | [some false] => some (1 / 40)
+  | [some false, some true] => some (1 / 10)
+  | [some false, some true, some true] => some (7 / 40)
+  | [some false, some true, some false] => some (1 / 40)
+  | _ => none
+
+def investParams : AlphaInvesting := AlphaInvesting.standard (1 / 10)
+
+def investAt (ω : Bool × Bool × Fin 3) : InvestOutcome :=
+  invest investParams investPolicy investNulls (investPvals ω)
+
+/-- Marginal FDR with smoothing `η = 1 - α`, the quantity alpha-investing
+controls, and FDR, of the run. -/
+def investMfdr : ℚ :=
+  expect investLaw (fun ω => ((investAt ω).falseDiscoveries : ℚ)) /
+    (expect investLaw (fun ω => ((investAt ω).discoveries : ℚ)) + (1 - investParams.alpha))
+
+def investFdr : ℚ :=
+  expect investLaw fun ω =>
+    ((investAt ω).falseDiscoveries : ℚ) / max ((investAt ω).discoveries : ℚ) 1
+
+/-- An alpha-investing run with the standard Foster–Stine parameters at
+`α = 1/10` and independent calibrated p-values. Every chosen level respects
+the wealth rule on every outcome. Its mFDR is `183/2033 ≤ 1/10`, but its FDR
+is `2663/24000 > 1/10`: alpha-investing controls mFDR, not FDR. -/
+theorem alpha_investing_mfdr_not_fdr :
+    (∀ ω, (investAt ω).lawful = true) ∧ investMfdr = 183 / 2033 ∧ investMfdr ≤ 1 / 10 ∧
+      investFdr = 2663 / 24000 ∧ 1 / 10 < investFdr := by
+  have lawful : ∀ ω, (investAt ω).lawful = true := by decide +kernel
+  have mfdr : investMfdr = 183 / 2033 := by decide +kernel
+  have fdr : investFdr = 2663 / 24000 := by decide +kernel
+  exact ⟨lawful, mfdr, by rw [mfdr]; norm_num, fdr, by rw [fdr]; norm_num⟩
 
 /-! ### e-BH needs the bound, not the reported count -/
 

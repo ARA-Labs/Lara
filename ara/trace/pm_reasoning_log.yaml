@@ -1821,3 +1821,9 @@ entries:
   - "Reconciled the process-semantics constraint from approved-not-implemented to implemented (artifact commitment) and the BHL Open line (dependency change); before/after in logic_revisions_turn6."
   - "Near-miss: O207 is now depended on by partialRecord_unknown and latestTest_separates, which is an artifact commitment, but it is a claim and a proved theorem would enter claims.md as hypothesis/testing; left staged for researcher triage rather than mis-statusing a theorem."
   - "Near-miss: O208 not promoted; the bounded-quantity rule is instantiated (count bound, finite Ville, quarantine labels, verifying traces) but not proved as a general characterization."
+
+- turn: 2026-10-10_001#7
+  notes:
+  - "Recorded N386: the exact DP search resolved the N383 dead end; the counterexample needs a non-monotone policy, not dependence."
+  - "O212 left staged: it is resolved in the trace (non-monotone rule suffices under independence), but no researcher comment yet; not crystallized."
+  - "Dropped issue 38 from the constraint's Open line (empirical resolution of that open item)."

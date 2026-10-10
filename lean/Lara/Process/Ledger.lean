@@ -124,4 +124,53 @@ def onlineLevel (reward : ℚ) : ℚ → List Bool → ℚ
   | wealth, rejected :: rest =>
       onlineLevel reward (wealth - wealth / 2 + if rejected then reward else 0) rest
 
+/-! ### Alpha-investing -/
+
+/-- Foster–Stine alpha-investing parameters: target level `α` (read by the mFDR
+it controls, not by the run), initial wealth and the payout earned on each
+rejection. The mFDR guarantee uses initial wealth
+`α(1-α)` and payout `α`. -/
+structure AlphaInvesting where
+  alpha : ℚ
+  initial : ℚ
+  payout : ℚ
+  deriving DecidableEq, Repr
+
+/-- The standard Foster–Stine parameters at level `α`. -/
+def AlphaInvesting.standard (α : ℚ) : AlphaInvesting := ⟨α, α * (1 - α), α⟩
+
+/-- The outcome of an alpha-investing run: false and total discoveries, and
+whether every chosen level respected the wealth rule (`a/(1-a) ≤` current
+wealth). -/
+structure InvestOutcome where
+  falseDiscoveries : ℕ
+  discoveries : ℕ
+  lawful : Bool
+  deriving DecidableEq, Repr
+
+/-- Run an alpha-investing policy over hypotheses in order. `nulls` marks the
+null hypotheses and `pvals` gives the p-values. The policy picks a level, or
+skips, from the history of outcomes so far (`none` for a skipped test). A
+rejection earns the payout; a non-rejection pays `a/(1-a)`. The run ends when
+either list ends, so `nulls` and `pvals` should have equal length. -/
+def investRun (A : AlphaInvesting) (policy : List (Option Bool) → Option ℚ) :
+    List Bool → List ℚ → ℚ → List (Option Bool) → InvestOutcome → InvestOutcome
+  | null :: nulls, p :: pvals, wealth, hist, out =>
+      match policy hist with
+      | none => investRun A policy nulls pvals wealth (hist ++ [none]) out
+      | some a =>
+          let lawful := out.lawful && decide (0 < a ∧ a < 1 ∧ a / (1 - a) ≤ wealth)
+          if p ≤ a then
+            investRun A policy nulls pvals (wealth + A.payout) (hist ++ [some true])
+              ⟨out.falseDiscoveries + (if null then 1 else 0), out.discoveries + 1, lawful⟩
+          else
+            investRun A policy nulls pvals (wealth - a / (1 - a)) (hist ++ [some false])
+              { out with lawful := lawful }
+  | _, _, _, _, out => out
+
+/-- Run from the initial wealth with no discoveries. -/
+def invest (A : AlphaInvesting) (policy : List (Option Bool) → Option ℚ) (nulls : List Bool)
+    (pvals : List ℚ) : InvestOutcome :=
+  investRun A policy nulls pvals A.initial [] ⟨0, 0, true⟩
+
 end Lara.Process.Statistics

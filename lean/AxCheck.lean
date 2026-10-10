@@ -6845,7 +6845,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.contradictory_constraints_inconsistent
 #print axioms Lara.Process.orderCompatible_mono
 
--- lean/Lara/Examples/ProcessStatistics.lean: 16 public theorems.
+-- lean/Lara/Examples/ProcessStatistics.lean: 18 public theorems.
 #print axioms Lara.Examples.ProcessStatistics.evalue_calibrated
 #print axioms Lara.Examples.ProcessStatistics.countBounded_determinate
 #print axioms Lara.Examples.ProcessStatistics.countBounded_rejection_valid
@@ -6862,6 +6862,8 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.ProcessStatistics.likelihoodRatio_ville
 #print axioms Lara.Examples.ProcessStatistics.same_data_identical_record
 #print axioms Lara.Examples.ProcessStatistics.fair_pvalue
+#print axioms Lara.Examples.ProcessStatistics.investing_pvalues
+#print axioms Lara.Examples.ProcessStatistics.alpha_investing_mfdr_not_fdr
 
 -- lean/Lara/Process/Statistics.lean: 16 public theorems.
 #print axioms Lara.Process.Statistics.markov

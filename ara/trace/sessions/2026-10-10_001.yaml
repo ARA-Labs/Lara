@@ -2,8 +2,8 @@ session:
   id: 2026-10-10_001
   date: '2026-10-10'
   started: '2026-10-09T18:00:00-07:00'
-  last_turn: '2026-10-10T07:18:46+00:00'
-  turn_count: 6
+  last_turn: '2026-10-10T08:12:08+00:00'
+  turn_count: 7
   summary: Re-planned issue 23, approved the revised process-semantics design, then implemented
     and mechanized R0-R7 as one PR with per-stage reviews and passing local gates.
 events_logged:
@@ -244,3 +244,22 @@ ai_suggestions_pending_turn6:
 - 'O208 stays staged: the statistical layer instantiates bounded quantities but does not prove the survey-wide
   rule.'
 - 'O207 near closure: partialRecord_unknown and latestTest_separates now depend on it.'
+events_logged_turn7:
+- turn: 7
+  type: experiment
+  id: N386_alpha_investing_counterexample_found
+  routing: direct
+  provenance: ai-executed
+  summary: Exact DP finds alpha-investing run with mFDR 183/2033 and FDR 2663/24000 at alpha 1/10; mechanized
+logic_revisions_turn7:
+- turn: 7
+  entry: logic/solution/constraints.md#research-process-semantics
+  field: Open
+  before: 'Issue #38 (an alpha-investing run with mFDR within α and FDR above it), issue #39 ... and issue
+    #40 ...'
+  after: 'Issue #39 ... and issue #40 ...; the alpha-investing run is mechanized'
+  signal: empirical-resolution
+  provenance: ai-suggested
+open_threads_turn7:
+- Merge the single PR closing issues 23 and 38; the empirical-design gate opens only by researcher decision.
+- Issues 39 and 40 hold the remaining items outside the delivered scope.

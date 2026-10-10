@@ -10951,3 +10951,25 @@ tree:
   status: resolved
   also_depends_on:
   - N382_process_semantics_implemented
+- id: N386_alpha_investing_counterexample_found
+  type: experiment
+  title: Exact search finds an alpha-investing run with mFDR within alpha and FDR above it
+  provenance: ai-executed
+  timestamp: '2026-10-10T08:12:08+00:00'
+  description: >-
+    Exact-rational dynamic programming maximized FDR over all small alpha-investing
+    policies (Foster-Stine wealth rule, initial wealth alpha(1-alpha), payout alpha,
+    independent p-values on a grid) for every order of up to five null/alternative
+    hypotheses, at alpha 1/2, 1/4 and 1/10.
+  result: >-
+    In that search (a scratch script, not kept in the repository) no violation appeared
+    at alpha 1/2 or 1/4. At alpha 1/10 the order (null, alt, null, null)
+    with a non-monotone policy (stop after a first null rejection) has mFDR 183/2033 and
+    FDR 2663/24000. Mechanized as alpha_investing_mfdr_not_fdr with investing_pvalues,
+    closing the issue 38 deferral inside the same PR.
+  evidence:
+  - lean/Lara/Examples/ProcessStatistics.lean
+  - lean/Lara/Process/Ledger.lean
+  status: resolved
+  also_depends_on:
+  - N383_alpha_investing_counterexample_probe
