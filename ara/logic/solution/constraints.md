@@ -327,3 +327,14 @@ deferred.
 - **Provenance:** user-revised approved contract; ai-suggested implementation/scope reconciliation grounded by actual proofs and runtime.
 - **Open:** [Issue #24](https://github.com/ARA-Labs/Lara/issues/24) records operational integration and release verification separately from this formal baseline. [Issue #23](https://github.com/ARA-Labs/Lara/issues/23) retains general incomplete-history reasoning, broad revision, representation adequacy and inquiry/impact; [issue #22](https://github.com/ARA-Labs/Lara/issues/22) remains downstream. No empirical protocol or outcome improvement is released.
 - **Last revised:** 2026-10-09 (2026-10-09_001#1)
+
+## Research-process semantics (approved, not implemented)
+
+- **Status:** The user approved the revised plan and ARA process-record contract. All implementation and proof obligations remain pending under [issue #23](https://github.com/ARA-Labs/Lara/issues/23).
+- **Constraint:** A record denotes valid histories paired with allowed reporting choices under an explicit model, scoped coverage assumptions and a submission cutoff. Certainty requires a nonempty compatible set. Refuting the proposed false laws precedes later preservation proofs; approval is not proof of those countermodels.
+- **Argument boundary:** Claim-level entitlement allows a different warrant witness in each completion. Auditing a submitted ARA argument fixes its witness and exact source/run/version bindings across all completions. Both judgments remain separate from truth and BHL knowledge.
+- **Extraction boundary:** The decoded-record bridge must preserve every modeled generating history satisfying admitted source assumptions. Missing order or coverage stays unknown; failed sibling trials remain relevant even without attack edges. Finite enumeration bounds, source fidelity, coverage admission and statistical calibration/independence assumptions remain explicit.
+- **Delivery boundary:** The approved work covers the symbolic contract, Lean proofs, decoded fixtures and the reference runner. It does not change the core or wire, regenerate the corpus, implement physical capture or parse arbitrary ARA prose. The empirical-design gate remains closed.
+- **Evidence:** `plans/research-process-semantics/README.md`; `plans/research-process-semantics/ara-contract.md`; `ara/trace/exploration_tree.yaml:N381_process_semantics_approved`.
+- **Provenance:** user-revised
+- **Last revised:** 2026-10-10 (2026-10-10_001#5)

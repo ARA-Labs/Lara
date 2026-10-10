@@ -10835,3 +10835,35 @@ tree:
   status: resolved
   also_depends_on:
   - N379_compatible_history_plan
+
+- id: N381_process_semantics_approved
+  type: decision
+  title: Approve process semantics with a precise ARA record boundary
+  provenance: user-revised
+  timestamp: '2026-10-10T05:21:27+00:00'
+  choice: >-
+    Researcher authorizes revising the discussed process-semantics plan and marking
+    it approved. The revised contract models valid histories and reporting choices,
+    scoped coverage assumptions, partial-order observations and compatibility-preserving
+    extraction from decoded ARA records. Claim-level entitlement permits a different
+    witness in each history; auditing a submitted argument fixes its witness across
+    all completions. Relevant failed and sibling trials remain in the process model
+    even when they add no argumentation edge. Refinement and determinacy require
+    nonempty compatibility; split-selection validity states probabilistic premises.
+    The existing one-test/two-test ambiguity remains under a bound of two; the positive
+    bound-adjusted result uses a separate calibrated e-value fixture. All R0-R7
+    implementation and proofs remain pending. Approval establishes neither the
+    mathematical results nor production event capture or arbitrary-prose ingestion.
+  alternatives:
+  - Audit only the displayed successful path
+  - Treat per-history witness existence as verification of the submitted argument
+  - Infer coverage or statistical independence from missing entries or distinct identifiers
+  evidence:
+  - plans/research-process-semantics/README.md
+  - plans/research-process-semantics/ara-contract.md
+  - plans/research-process-semantics/research.md
+  - https://github.com/ARA-Labs/Lara/issues/23#issuecomment-6094160186
+  status: resolved
+  also_depends_on:
+  - N379_compatible_history_plan
+  - N380_lara_paper_not_prior_art

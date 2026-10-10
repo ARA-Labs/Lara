@@ -741,8 +741,8 @@ sessions:
 
 - id: 2026-10-10_001
   date: '2026-10-10'
-  summary: 'Re-planned issue 23 after the original plan proved unreachable; literature survey shaped a proposed compatible-history entitlement theory (R0-R7); plan committed and issue 23 updated.'
-  turn_count: 4
-  events_count: 6
+  summary: 'Approved the revised issue 23 plan with scoped ARA extraction and fixed-witness audits; all process-theory implementation and proofs remain pending.'
+  turn_count: 5
+  events_count: 8
   claims_touched: []
   open_threads: 3

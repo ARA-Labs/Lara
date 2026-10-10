@@ -4247,9 +4247,9 @@ observations:
   potential_type: constraint
   bound_to:
   - N379_compatible_history_plan
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
+  promoted: true
+  promoted_to: logic/solution/constraints.md#research-process-semantics-approved-not-implemented
+  crystallized_via: verbal-affirmation
   stale: false
 
 - id: O210

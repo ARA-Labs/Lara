@@ -2,11 +2,11 @@ session:
   id: 2026-10-10_001
   date: '2026-10-10'
   started: '2026-10-09T18:00:00-07:00'
-  last_turn: '2026-10-10T01:30:00-07:00'
-  turn_count: 4
-  summary: Re-planned issue 23 on a new branch after finding the original plan unreachable; a five-track
-    literature survey shaped a proposed compatible-history entitlement theory (stages R0-R7); plan and
-    verified survey committed, issue 23 updated.
+  last_turn: '2026-10-10T05:21:27+00:00'
+  turn_count: 5
+  summary: Re-planned issue 23, then approved the revised process-semantics design with
+    scoped ARA extraction and separate fixed-witness audits. Implementation and proofs
+    remain pending.
 events_logged:
 - turn: 2
   type: decision
@@ -45,6 +45,18 @@ events_logged:
   routing: direct
   provenance: user
   summary: arXiv 2609.25421 is the project's own paper; survey references verified and corrected
+- turn: 5
+  type: decision
+  id: N381_process_semantics_approved
+  routing: direct
+  provenance: user-revised
+  summary: Approved the revised plan and precise decoded-ARA process contract; no implementation claimed.
+- turn: 5
+  type: observation
+  id: O209
+  routing: crystallized
+  provenance: user-revised
+  summary: Adopted countermodel-first proof discipline as an approved constraint, not proved results.
 ai_actions:
 - turn: 2
   action: Created branch theory/research-process-semantics from main; searched all local and remote refs,
@@ -66,8 +78,30 @@ ai_actions:
   files_changed:
   - plans/research-process-semantics/README.md
   - plans/research-process-semantics/research.md
+- turn: 5
+  action: Revised the plan and survey, added ara-contract.md, marked the plan approved,
+    and recorded the approval on issue 23. Local links and code fences passed; finite
+    reference checks exercised nonempty refinement, witness quantifiers and statistical
+    fixture arithmetic. The new contract passed the document style checker after prose review.
+    These checks do not implement or prove the proposed Lean theory.
+  provenance: ai-executed
+  files_changed:
+  - plans/research-process-semantics/README.md
+  - plans/research-process-semantics/research.md
+  - plans/research-process-semantics/ara-contract.md
 claims_touched: []
-logic_revisions: []
+logic_revisions:
+- turn: 5
+  entry: logic/solution/constraints.md#research-process-semantics-approved-not-implemented
+  field: section
+  before: null
+  after: Approved, unimplemented process-semantics constraint covering scoped compatible
+    histories, nonempty certainty, fixed-witness audits, extraction preservation and residual
+    physical/probabilistic assumptions; evidence points to the plans and N381.
+  signal: verbal-declaration
+  provenance: user-revised
+  note: O209 crystallizes as required proof discipline, not proof completion. O210 is not
+    promoted verbatim because its witness wording is refined and its novelty assertion is unverified.
 key_context:
 - turn: 2
   excerpt: Researcher asked what issue 23 is really about; the cited plan and foundations doc no longer
@@ -78,11 +112,13 @@ key_context:
 - turn: 4
   excerpt: Researcher stated arXiv 2609.25421 is this project's paper and asked to fix unchecked references,
     commit, update issue 23 and run research-manager.
+- turn: 5
+  excerpt: "sure, revise or add to the plans as needed, then mark it as approved"
 open_threads:
-- Review the R0-R7 plan, especially the shared vocabulary and the false-law table, before implementation.
+- Implement the approved R0-R7 plan under issue 23; approval does not complete any stage.
 - Decide whether ArtifactBinding should move from the multiset History to an ordered ledger; R3 avoids
   it unless R4 requires it.
 - Push the branch; the issue 23 description refers to plan files that exist only on the unpushed branch.
 ai_suggestions_pending:
-- N379 design (compatible-history core, RecordCoverage, strict default profile) awaits researcher review.
-- O208, O209 and O210 are staged synthesis without proof or affirmation.
+- O208 remains staged survey synthesis, not a proved universal characterization.
+- O210 remains a historical proposal; N381 adopts refined witness quantifiers without affirming its novelty assertion.
