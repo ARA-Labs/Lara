@@ -1,6 +1,7 @@
 import Lara.Examples.ProcessFalseLaws
 import Lara.Examples.ProcessCore
 import Lara.Examples.ProcessEntitlement
+import Lara.Examples.ProcessOrder
 
 /-!
 The `process-examples` runner: computes every research-process fixture through
@@ -89,10 +90,40 @@ def checks : IO _root_.Unit := do
 
 end Entitlement
 
+namespace Order
+open Lara.Examples.ProcessOrder
+
+def checks : IO _root_.Unit := do
+  expect "stated order alone leaves an earlier read possible" (verdict openCompat precommitted) .unknown
+  expect "complete access coverage certifies precommitment" (verdict coveredCompat precommitted) .certainTrue
+  expect "unordered record" (verdict (unorderedCompat unordered) precommitted) .unknown
+  expect "shuffled record listing" (verdict (unorderedCompat unorderedShuffled) precommitted) .unknown
+  expect "contradictory constraints"
+    (verdict (fun x : Candidate => OrderCompatible contradictory x.trace) precommitted) .inconsistent
+  expect "family count with a failed sibling" (familyCount withSibling family) 2
+  expect "family count without it" (familyCount withoutSibling family) 1
+  require "failed sibling yields no argument"
+    (decide (successfulRuns withSibling = successfulRuns withoutSibling))
+  require "stale input version invalid" (!decide (ValidHistory [commit, update, read, run]))
+  require "cutoff excludes the longer history"
+    (!decide (OrderCompatible { ordered with cutoff := 3 } Candidate.earlierRead.trace))
+  expect "refusing evaluator keeps inconsistency"
+    (refuse (verdict (fun x : Candidate => OrderCompatible contradictory x.trace) precommitted))
+    .inconsistent
+  require "commit-first precommitted" (decide (RunPrecommitted Candidate.committedFirst.trace run0))
+  require "read-first not precommitted" (!decide (RunPrecommitted Candidate.readFirst.trace run0))
+  require "split selection" (decide (SplitSelection [selectRead, commit, read, run] [selectData] [testData]))
+  require "same-data selection is not split"
+    (!decide (SplitSelection [selectOnTest, commit, read, run] [selectData] [testData]))
+  IO.println "R3 order: omitted read unknown, access coverage certain, record order irrelevant, contradictory constraints inconsistent, failed sibling counted, multiset forgets precommitment"
+
+end Order
+
 def run : IO _root_.Unit := do
   FalseLaws.checks
   Core.checks
   Entitlement.checks
+  Order.checks
   IO.println "process examples: all research-process checks passed"
 
 end Lara.Process.ExampleRuntime

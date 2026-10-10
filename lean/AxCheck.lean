@@ -210,6 +210,9 @@ import Lara.Examples.ProcessCore
 import Lara.Process.Entitlement
 import Lara.Examples.ProcessEntitlement
 import Lara.Process.BridgeWarrant
+import Lara.Process.Order
+import Lara.Process.WorldView
+import Lara.Examples.ProcessOrder
 
 open Lara
 
@@ -6731,7 +6734,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.completeObservation_conservative
 #print axioms Lara.Process.realized_conservative
 
--- lean/Lara/Process/Verdict.lean: 18 public theorems.
+-- lean/Lara/Process/Verdict.lean: 20 public theorems.
 #print axioms Lara.Process.verdictOf_cases
 #print axioms Lara.Process.verdictOf_inconsistent_iff
 #print axioms Lara.Process.verdictOf_certainTrue_iff
@@ -6750,13 +6753,16 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.naive_sound_iff_factors
 #print axioms Lara.Process.factors_iff_determinate
 #print axioms Lara.Process.RecordSemantics.verdict_eq_verdictOf
+#print axioms Lara.Process.conservativeFor_refl
+#print axioms Lara.Process.refuse_conservative
 
--- lean/Lara/Process/Kleene.lean: 5 public theorems.
+-- lean/Lara/Process/Kleene.lean: 6 public theorems.
 #print axioms Lara.Process.kleene_value_sound
 #print axioms Lara.Process.kleene_sound
 #print axioms Lara.Process.referenceAtoms_sound
 #print axioms Lara.Process.finiteAtoms_eq
 #print axioms Lara.Process.kleeneVerdictFinite_eq
+#print axioms Lara.Process.kleene_conservative
 
 -- lean/Lara/Examples/ProcessEntitlement.lean: 8 public theorems.
 #print axioms Lara.Examples.ProcessEntitlement.entitled_not_argument
@@ -6789,3 +6795,38 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.bridge_warranted_iff
 #print axioms Lara.Process.bridge_argument_audit
 #print axioms Lara.Process.conditional_not_applied
+
+-- lean/Lara/Examples/ProcessOrder.lean: 12 public theorems.
+#print axioms Lara.Examples.ProcessOrder.omitted_read_unknown
+#print axioms Lara.Examples.ProcessOrder.complete_access_certain
+#print axioms Lara.Examples.ProcessOrder.unordered_record_unknown
+#print axioms Lara.Examples.ProcessOrder.record_order_irrelevant
+#print axioms Lara.Examples.ProcessOrder.contradictory_record_inconsistent
+#print axioms Lara.Examples.ProcessOrder.failed_sibling_counts
+#print axioms Lara.Examples.ProcessOrder.history_forgets_precommitment
+#print axioms Lara.Examples.ProcessOrder.split_selection_fixture
+#print axioms Lara.Examples.ProcessOrder.run_uses_current_version
+#print axioms Lara.Examples.ProcessOrder.cutoff_excludes_longer
+#print axioms Lara.Examples.ProcessOrder.refusing_evaluator
+#print axioms Lara.Examples.ProcessOrder.startAnnotated_process
+
+-- lean/Lara/Process/WorldView.lean: 9 public theorems.
+#print axioms Lara.Process.ledgerDeltas_sum
+#print axioms Lara.Process.testProjection_eq
+#print axioms Lara.Process.traceEdges_chain
+#print axioms Lara.Process.admitted_testProjection
+#print axioms Lara.Process.AnnotatedWorld.steps_length
+#print axioms Lara.Process.AnnotatedWorld.tests_sum
+#print axioms Lara.Process.AnnotatedWorld.test_from_run
+#print axioms Lara.Process.ledgerDeltas_length
+#print axioms Lara.Process.mem_list_sum
+
+-- lean/Lara/Process/Order.lean: 8 public theorems.
+#print axioms Lara.Process.run_some_iff_steps
+#print axioms Lara.Process.valid_prefix
+#print axioms Lara.Process.predictable_runPrecommitted
+#print axioms Lara.Process.familyCount_append_run
+#print axioms Lara.Process.orderCompatible_perm
+#print axioms Lara.Process.contradictory_constraints
+#print axioms Lara.Process.contradictory_constraints_inconsistent
+#print axioms Lara.Process.orderCompatible_mono

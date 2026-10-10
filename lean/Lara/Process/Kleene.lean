@@ -188,6 +188,16 @@ theorem kleene_sound {compat : X → Prop} {val : Atom → X → Prop} {atomV : 
     subst hv
     exact (verdictOf_inconsistent_iff _ _).mpr e
 
+/-- The Kleene evaluator is conservative for the reference verdict. -/
+theorem kleene_conservative {compat : X → Prop} {val : Atom → X → Prop} {atomV : Atom → K3}
+    (sound : AtomSound compat val atomV) (f : Formula Atom) :
+    ConservativeFor (kleeneVerdict compat atomV f) (verdictOf compat (f.holds val)) := by
+  refine ⟨⟨fun h => ?_, fun h => ?_⟩, fun known => (kleene_sound sound f rfl known).symm⟩
+  · exact kleene_sound sound f h (by simp)
+  · have empty := (verdictOf_inconsistent_iff _ _).mp h
+    unfold kleeneVerdict
+    rw [if_pos empty]
+
 /-- The atom valuation read off the reference verdict of each atom. -/
 noncomputable def referenceAtoms (compat : X → Prop) (val : Atom → X → Prop) : Atom → K3 :=
   fun a => match verdictOf compat (val a) with

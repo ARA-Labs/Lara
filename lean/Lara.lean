@@ -557,3 +557,6 @@ import Lara.Examples.ProcessCore
 import Lara.Process.Entitlement
 import Lara.Process.BridgeWarrant
 import Lara.Examples.ProcessEntitlement
+import Lara.Process.Order
+import Lara.Process.WorldView
+import Lara.Examples.ProcessOrder

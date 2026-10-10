@@ -196,6 +196,28 @@ theorem history_independent_verdict {P : Prop} (nonempty : ∃ x, compat x) :
 
 end Laws
 
+/-! ### Conservative evaluators -/
+
+/-- An evaluator's verdict `ev` is conservative for the reference verdict `ref`
+when it reports inconsistency exactly when the reference does and every other
+answer is either the reference's or `unknown`. A conservative evaluator may
+refuse certification, but never confuses uncertainty with inconsistency. -/
+def ConservativeFor (ev ref : Verdict) : Prop :=
+  (ev = .inconsistent ↔ ref = .inconsistent) ∧ (ev ≠ .unknown → ev = ref)
+
+theorem conservativeFor_refl (v : Verdict) : ConservativeFor v v :=
+  ⟨Iff.rfl, fun _ => rfl⟩
+
+/-- The evaluator that always refuses, except on inconsistent records. -/
+def refuse (ref : Verdict) : Verdict :=
+  if ref = .inconsistent then .inconsistent else .unknown
+
+theorem refuse_conservative (ref : Verdict) : ConservativeFor (refuse ref) ref := by
+  unfold refuse ConservativeFor
+  by_cases h : ref = .inconsistent
+  · simp [h]
+  · simp [h]
+
 /-! ### Assumptions and observations -/
 
 section Process
