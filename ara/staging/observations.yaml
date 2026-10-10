@@ -4216,3 +4216,55 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+
+- id: O208
+  timestamp: '2026-10-10T00:30:00-07:00'
+  provenance: ai-suggested
+  content: In the surveyed literature, every guarantee that survives an incomplete research record does
+    so because a quantity is bounded or predictable. Examples are a certified test-count bound, an e-process
+    fixed before its data, a support label disjoint from the quarantine set, and a verifying trace with
+    complete reads. Guarantees that need the completion itself fail, for example online-FDR wealth replay,
+    MAR missingness and exact family size.
+  context: Synthesis of the five-track survey for the issue 23 plan; the organizing rule is a proposal,
+    not a proved theorem.
+  potential_type: claim
+  bound_to:
+  - N379_compatible_history_plan
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O209
+  timestamp: '2026-10-10T00:30:00-07:00'
+  provenance: ai-suggested
+  content: Six natural laws are expected to be false and should be refuted in Lean before positive proofs.
+    A stricter profile need not entitle fewer claims, and quarantine need not only remove warrant, both
+    because grounded labels are nonmonotone under attacks. Unchanged status need not mean unchanged warrant.
+    An empty compatible set makes supervaluation vacuous. Completing the past differs from continuing the
+    future. The multiset History cannot express ordering predicates.
+  context: Pitfall table of the issue 23 plan (R0); the countermodels are proposed, not yet written.
+  potential_type: constraint
+  bound_to:
+  - N379_compatible_history_plan
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+
+- id: O210
+  timestamp: '2026-10-10T00:30:00-07:00'
+  provenance: ai-suggested
+  content: Assertion entitlement should be a non-factive justification norm (Pollock warrant via grounded
+    justified) parameterized by an explicit inductive-risk profile and keyed by justification witness.
+    No-promotion follows from typing rules whose output evidence kind is at most the meet of their inputs.
+    No published no-promotion theorem for scientific claim kinds was found.
+  context: Assertion-entitlement research track and plan stage R2; the profile parameterization and the
+    evidence-kind lattice are the plan's own constructions.
+  potential_type: architecture
+  bound_to:
+  - N379_compatible_history_plan
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

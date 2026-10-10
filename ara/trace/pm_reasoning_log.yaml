@@ -1797,3 +1797,11 @@ entries:
   - "Updated O204's permitted forward promotion pointer after the current constraint heading changed. O205's superseded sequential proposal remains unpromoted and historically unchanged."
   - "Staged O207 rather than adding a scientific claim or novelty assertion. Formal kernel/runtime evidence is not empirical confirmation of research outcomes or physical sampling/log completeness."
   - "No scientific claim status changed. The research baseline is proof/gate-passing, while stage09 integration, version bump, main merge and verified release remain operational requirements; issues23/22 retain the wider theory and inquiry/impact gate."
+
+- turn: 2026-10-10_001#1-4
+  notes:
+  - "First epilogue for this conversation; turns 2-4 captured together. Turn 1 (listing open issues) had no research content and was skipped."
+  - "Recorded N378 and N380 as user decisions and N379 as ai-suggested with status open: committing a living plan is not approval of its design."
+  - "Staged O208-O210 instead of adding claims; they are literature synthesis and proposed constructions with no Lean proof or researcher affirmation."
+  - "Near-miss: O207 (latest-test record boundary) is cited by the new plan as the partialRecord_unknown witness, but a proposed plan is not an artifact commitment; left staged."
+  - "No logic-layer change: constraints.md already states that issue 23 retains incomplete-history reasoning, revision, adequacy and inquiry/impact, which remains accurate."

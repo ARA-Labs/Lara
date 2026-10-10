@@ -10750,3 +10750,88 @@ tree:
   also_depends_on:
   - N375_bhl_artifact_composition
   - N376_bhl_integrated_acceptance
+
+- id: N378_process_semantics_replan
+  type: decision
+  title: Re-plan issue 23 from main around the work BHL left open
+  provenance: user
+  timestamp: '2026-10-09T18:00:00-07:00'
+  choice: >-
+    Researcher asks to start issue 23 on a new branch. Created
+    theory/research-process-semantics from main 42cca17. The plan cited by
+    the issue (plans/research-process-semantics.md at 5ba5f63) and its
+    foundations doc are unreachable from every local and remote ref and from
+    GitHub, so the T0-T8 definitions survive only in the issue text. BHL
+    already landed the complete-history parts of T1-T3 and T6. Issue 23 is
+    rescoped to incomplete-history entitlement, broad revision,
+    representation adequacy, the inquiry interface and the acceptance gate.
+  alternatives:
+  - Reconstruct the lost T0-T8 plan verbatim from the issue text
+  - Treat issue 23 as closed by the BHL release
+  evidence:
+  - https://github.com/ARA-Labs/Lara/issues/23
+  - docs/theory-bhl.md
+  - lean/Lara/Examples/BHLPartialRecord.lean
+  status: resolved
+  also_depends_on:
+  - N376_bhl_integrated_acceptance
+
+- id: N379_compatible_history_plan
+  type: decision
+  title: Propose a supervaluational compatible-history core for entitlement over partial records
+  provenance: ai-suggested
+  timestamp: '2026-10-10T00:30:00-07:00'
+  choice: >-
+    Researcher requests deep research while writing the plan. A five-track
+    literature survey (incomplete databases and epistemic logic, assertion
+    norms, statistical validity under researcher degrees of freedom,
+    revision and provenance, adequacy and prior art) informs stages R0-R7.
+    The proposed core treats a partial record as the finite set of complete
+    histories it could have come from. It has a four-valued verdict
+    (inconsistent, certainTrue, certainFalse, unknown) and a new
+    RecordCoverage omission-model type, leaving HistoryCoverage unchanged
+    and requiring a conservativity theorem. Entitlement is a non-factive,
+    profile-relative, witness-keyed justification norm with a no-promotion
+    evidence-kind lattice. The profile is parametric with one strict
+    instance; the researcher did not choose, so this is the AI default.
+    Statistics use finite exact-rational e-value results with a certified
+    count bound. R0 refutes six tempting false laws before positive proofs.
+    The plan is committed as a living plan, not approved; no definition or
+    theorem exists.
+  alternatives:
+  - Add constructors to HistoryCoverage
+  - Replace the unordered History with an ordered ledger first
+  - Strong-Kleene three-valued semantics as the reference
+  - Knowledge norm of assertion
+  - AGM belief-set revision for quarantine
+  - Several profiles from the start
+  evidence:
+  - plans/research-process-semantics/README.md
+  - plans/research-process-semantics/research.md
+  - https://github.com/ARA-Labs/Lara/issues/23
+  status: open
+  also_depends_on:
+  - N378_process_semantics_replan
+
+- id: N380_lara_paper_not_prior_art
+  type: decision
+  title: Classify arXiv 2609.25421 as this project's own paper
+  provenance: user
+  timestamp: '2026-10-10T01:00:00-07:00'
+  choice: >-
+    Researcher states that arXiv 2609.25421, "Beyond Natural Language: An
+    Agent-Native Language for Autonomous Science", is this project's paper.
+    It is removed from the prior-art table and named as the project's own
+    work. The unchecked survey references were then verified against
+    Crossref/OpenAlex and their sources. One wrong DOI (Hansson kernel
+    contraction) and one misattribution (Katsuno-Mendelzon update vs
+    revision) were corrected. Hansson core-retainment, Hennessy-Milner
+    image-finiteness and Oikarinen-Woltran kernels rest on secondary
+    statements of the result.
+  alternatives:
+  - Cite it as independent prior art
+  evidence:
+  - plans/research-process-semantics/research.md
+  status: resolved
+  also_depends_on:
+  - N379_compatible_history_plan

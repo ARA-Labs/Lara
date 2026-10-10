@@ -1,0 +1,88 @@
+session:
+  id: 2026-10-10_001
+  date: '2026-10-10'
+  started: '2026-10-09T18:00:00-07:00'
+  last_turn: '2026-10-10T01:30:00-07:00'
+  turn_count: 4
+  summary: Re-planned issue 23 on a new branch after finding the original plan unreachable; a five-track
+    literature survey shaped a proposed compatible-history entitlement theory (stages R0-R7); plan and
+    verified survey committed, issue 23 updated.
+events_logged:
+- turn: 2
+  type: decision
+  id: N378_process_semantics_replan
+  routing: direct
+  provenance: user
+  summary: New branch for issue 23; lost T0-T8 plan; rescope to the work BHL left open
+- turn: 3
+  type: decision
+  id: N379_compatible_history_plan
+  routing: direct
+  provenance: ai-suggested
+  summary: Propose supervaluational compatible-history core, RecordCoverage, profile entitlement and R0-R7
+    stages
+- turn: 3
+  type: observation
+  id: O208
+  routing: staged
+  provenance: ai-suggested
+  summary: Guarantees survive incompleteness only through a bounded or predictable quantity
+- turn: 3
+  type: observation
+  id: O209
+  routing: staged
+  provenance: ai-suggested
+  summary: Six tempting laws to refute in Lean before positive proofs
+- turn: 3
+  type: observation
+  id: O210
+  routing: staged
+  provenance: ai-suggested
+  summary: Entitlement as profile-relative, witness-keyed justification norm with no-promotion lattice
+- turn: 4
+  type: decision
+  id: N380_lara_paper_not_prior_art
+  routing: direct
+  provenance: user
+  summary: arXiv 2609.25421 is the project's own paper; survey references verified and corrected
+ai_actions:
+- turn: 2
+  action: Created branch theory/research-process-semantics from main; searched all local and remote refs,
+    worktrees, reflog and GitHub for the cited plan commit 5ba5f63 and found it unreachable.
+  provenance: ai-executed
+  files_changed: []
+- turn: 3
+  action: Ran a five-track literature survey and a repository interface survey, synthesized a report,
+    and wrote the living plan with the survey alongside it.
+  provenance: ai-executed
+  files_changed:
+  - plans/research-process-semantics/README.md
+  - plans/research-process-semantics/research.md
+- turn: 4
+  action: Reclassified the project's own paper, verified the unchecked survey references against
+    Crossref/OpenAlex and sources, committed the plan as 41357a3 and replaced the issue 23 description
+    with the R0-R7 scope.
+  provenance: ai-executed
+  files_changed:
+  - plans/research-process-semantics/README.md
+  - plans/research-process-semantics/research.md
+claims_touched: []
+logic_revisions: []
+key_context:
+- turn: 2
+  excerpt: Researcher asked what issue 23 is really about; the cited plan and foundations doc no longer
+    exist on any ref, and BHL already covers the complete-history parts.
+- turn: 3
+  excerpt: Researcher asked to write the plan and do deep research while writing it. The profile question
+    went unanswered; the plan uses a parametric profile with one strict instance as the default.
+- turn: 4
+  excerpt: Researcher stated arXiv 2609.25421 is this project's paper and asked to fix unchecked references,
+    commit, update issue 23 and run research-manager.
+open_threads:
+- Review the R0-R7 plan, especially the shared vocabulary and the false-law table, before implementation.
+- Decide whether ArtifactBinding should move from the multiset History to an ordered ledger; R3 avoids
+  it unless R4 requires it.
+- Push the branch; the issue 23 description refers to plan files that exist only on the unpushed branch.
+ai_suggestions_pending:
+- N379 design (compatible-history core, RecordCoverage, strict default profile) awaits researcher review.
+- O208, O209 and O210 are staged synthesis without proof or affirmation.
