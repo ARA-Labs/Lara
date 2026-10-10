@@ -1,5 +1,6 @@
 import Lara.Examples.ProcessFalseLaws
 import Lara.Examples.ProcessCore
+import Lara.Examples.ProcessEntitlement
 
 /-!
 The `process-examples` runner: computes every research-process fixture through
@@ -67,9 +68,31 @@ def checks : IO _root_.Unit := do
 
 end Core
 
+namespace Entitlement
+open Lara.Examples.ProcessEntitlement
+
+def checks : IO _root_.Unit := do
+  require "claim entitled" (decide (Entitled model strict reporting admitted () claimC))
+  for w in [Wit.w1, Wit.w2] do
+    require s!"{reprStr w} not argument-entitled"
+      (!decide (ArgumentEntitled model strict reporting admitted () claimC w))
+  require "w1 warrants in left" (decide (Warranted model strict .left claimC .w1))
+  require "w2 warrants in right" (decide (Warranted model strict .right claimC .w2))
+  require "defeated w2 not warranted in left" (!decide (Warranted model strict .left claimC .w2))
+  require "conditional w3 not strictly warranted" (!decide (Warranted model strict .left claimC .w3))
+  require "conditional w3 warranted by the lax profile" (decide (Warranted model lax .left claimC .w3))
+  require "warranted claim false in right" (!decide (model.truth .right claimC))
+  require "entitled claim not known at left" (!decide (Known model sameReport .left claimC))
+  require "promoting rule is not well-kinded"
+    (!decide (KindDerivation.unary .observed (.leaf .hypothetical)).WellKinded)
+  IO.println "R2 entitlement: entitled without a single submitted argument; defeated, conditional, warranted-but-false and entitled-but-not-known separations"
+
+end Entitlement
+
 def run : IO _root_.Unit := do
   FalseLaws.checks
   Core.checks
+  Entitlement.checks
   IO.println "process examples: all research-process checks passed"
 
 end Lara.Process.ExampleRuntime

@@ -207,6 +207,9 @@ import Lara.Process.Kleene
 import Lara.Process.Coverage
 import Lara.Process.Conservative
 import Lara.Examples.ProcessCore
+import Lara.Process.Entitlement
+import Lara.Examples.ProcessEntitlement
+import Lara.Process.BridgeWarrant
 
 open Lara
 
@@ -6754,3 +6757,35 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.referenceAtoms_sound
 #print axioms Lara.Process.finiteAtoms_eq
 #print axioms Lara.Process.kleeneVerdictFinite_eq
+
+-- lean/Lara/Examples/ProcessEntitlement.lean: 8 public theorems.
+#print axioms Lara.Examples.ProcessEntitlement.entitled_not_argument
+#print axioms Lara.Examples.ProcessEntitlement.defeated_not_warranted
+#print axioms Lara.Examples.ProcessEntitlement.conditional_not_warranted
+#print axioms Lara.Examples.ProcessEntitlement.warranted_not_true
+#print axioms Lara.Examples.ProcessEntitlement.entitled_not_known
+#print axioms Lara.Examples.ProcessEntitlement.promotion_needs_wellKinded
+#print axioms Lara.Examples.ProcessEntitlement.wellKinded_no_promotion
+#print axioms Lara.Examples.ProcessEntitlement.stricter_directional_instance
+
+-- lean/Lara/Process/Entitlement.lean: 15 public theorems.
+#print axioms Lara.Process.argumentEntitledBy_implies_entitledBy
+#print axioms Lara.Process.argumentEntitled_implies_entitled
+#print axioms Lara.Process.argumentEntitled_verdict
+#print axioms Lara.Process.KindDerivation.kind_le_leafMeet
+#print axioms Lara.Process.KindDerivation.leafMeet_le_of_mem
+#print axioms Lara.Process.KindDerivation.no_promotion_any_leaf
+#print axioms Lara.Process.KindDerivation.no_promotion
+#print axioms Lara.Process.strict_no_promotion
+#print axioms Lara.Process.no_promotion_agrees_blocking
+#print axioms Lara.Process.stricter_directional
+#print axioms Lara.Process.stricter_directional_argument
+#print axioms Lara.Process.Admitted.stronger_coverage
+#print axioms Lara.Process.stricter_directional_entitled
+#print axioms Lara.Process.profile_restriction_nonpromotion
+#print axioms Lara.Process.ancestry_blocking
+
+-- lean/Lara/Process/BridgeWarrant.lean: 3 public theorems.
+#print axioms Lara.Process.bridge_warranted_iff
+#print axioms Lara.Process.bridge_argument_audit
+#print axioms Lara.Process.conditional_not_applied

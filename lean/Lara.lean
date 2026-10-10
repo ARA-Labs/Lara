@@ -554,3 +554,6 @@ import Lara.Process.Kleene
 import Lara.Process.Coverage
 import Lara.Process.Conservative
 import Lara.Examples.ProcessCore
+import Lara.Process.Entitlement
+import Lara.Process.BridgeWarrant
+import Lara.Examples.ProcessEntitlement
