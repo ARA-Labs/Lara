@@ -5,7 +5,7 @@
 
 [Issue #22](https://github.com/ARA-Labs/Lara/issues/22) adds checked stability and claim-impact analysis on top of the research-process layer that [#41](https://github.com/ARA-Labs/Lara/pull/41) mechanized. Its first stage, P0, freezes the outer contracts every later stage reads and writes: one versioned input document that carries a decoded process record, the finite universe of possible completions, and the queries to answer; one versioned result document; and the limits at which evaluation refuses instead of answering. P0 lands these as Lean definitions with their metatheory, a wire grammar, and a fixture set whose expected outputs the Lean reference computes. It adds no Haskell code. The Haskell codecs and CLI door are P6, and the Haskell evaluator conforms to the frozen contract from P1 on.
 
-Plan status: **draft, awaiting review.** No definition below is frozen until this plan is approved and its Lean port lands.
+Plan status: **draft, awaiting review.** It ships in one PR with its P0 implementation (PR A below). No definition below is frozen until this plan is approved and its Lean port lands.
 
 ## Problem
 
@@ -106,20 +106,27 @@ The enumerator P0 ships is the plain reference one: subsets of the universe, int
 
 ## Stage map for #22 after this plan
 
-| Stage | Scope | Depends on |
-| --- | --- | --- |
-| P0 | This plan: input/result/refusal contracts, universe carrier, limits, Lean codec and metatheory, fixtures | #41 (landed) |
-| P1 | Checked-source runtime: per-completion argumentation framework from the Lara checker, so audits run on real sources | P0 |
-| P2 | Efficient finite family generation, proved equal to the P0 reference enumerator | P0 |
-| P3 | Exact stability, single and joint sensitivity, minimal conditional assumptions | P1, P2 |
-| P4 | Graph-difference locality | P1 |
-| P5 | Source and public-status impact certificates | P3, P4 |
-| P6 | Haskell codecs and `lara process` CLI door | P0 (codec), P3 (analysis) |
-| P7 | Haskell–Lean conformance gate and adversarial runtime cases | P6 |
-| P8 | Bounded semantic evaluation and source-transition measurements | P7 |
-| P9 | Separately designed and budgeted live-loop protocol and run | P8 |
+| Stage | Scope | Depends on | PR |
+| --- | --- | --- | --- |
+| P0 | This plan: input/result/refusal contracts, universe carrier, limits, Lean codec and metatheory, fixtures | #41 (landed) | A |
+| P1 | Checked-source runtime: per-completion argumentation framework from the Lara checker, so audits run on real sources | P0 | B |
+| P2 | Efficient finite family generation, proved equal to the P0 reference enumerator | P0 | B |
+| P3 | Exact stability, single and joint sensitivity, minimal conditional assumptions | P1, P2 | B |
+| P4 | Graph-difference locality | P1 | B |
+| P5 | Source and public-status impact certificates | P3, P4 | B |
+| P6 | Haskell codecs and `lara process` CLI door | P0 (codec), P3 (analysis) | C |
+| P7 | Haskell–Lean conformance gate and adversarial runtime cases | P6 | C |
+| P8 | Bounded semantic evaluation and source-transition measurements | P7 | D |
+| P9 | Separately designed and budgeted live-loop protocol and run | P8 | D |
 
-The Haskell codec half of P6 can start as soon as P0 lands. It does not wait for P3.
+The work lands as four PRs:
+
+- **A:** this plan together with the P0 implementation. The plan is reviewed first, on the PR branch, and then P0 is implemented on the same branch.
+- **B:** P1–P5, after a plan for those stages is approved.
+- **C:** P6–P7.
+- **D:** P8 and P9, each under the separately approved protocol #22 requires.
+
+On merge of A, this plan is deleted and its frozen contracts move into `docs/theory-process.md` and `docs/spec.md`. The Haskell codec half of P6 could start as soon as A lands, but it ships with C.
 
 ## Out of scope
 
@@ -130,4 +137,4 @@ The Haskell codec half of P6 can start as soon as P0 lands. It does not wait for
 
 ## Cost
 
-Estimate: 800–1,500 lines of Lean (codec, renaming invariance, universe semantics, reference enumerator, fixtures), about 15 fixture documents with goldens, and two documentation sections. One PR, titled `feat(process): freeze the inquiry outer contracts`. No corpus regeneration, no axis-(c) rerun, no freeze-tag bump.
+Estimate: 800–1,500 lines of Lean (codec, renaming invariance, universe semantics, reference enumerator, fixtures), about 15 fixture documents with goldens, and two documentation sections. It ships in PR A with this plan, titled `feat(process): freeze the inquiry outer contracts`. No corpus regeneration, no axis-(c) rerun, no freeze-tag bump.
