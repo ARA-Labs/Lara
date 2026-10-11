@@ -1,9 +1,10 @@
 /-
 The Lean reference executable for `process-input 1`: `process-run <file.sexp>`.
 
-It reads one document and prints one S-expression on stdout, either
-`process-result 1` or `process-error 1`, with the exit code `Error.exitCode`
-fixes; stderr stays empty. The Haskell door that implements the same contract
+It reads one document and prints one S-expression on stdout: a
+`process-result 1` exits 0, and a `process-error 1` exits with the code
+`Error.exitCode` fixes (1 for `unsupported` and `limit-exceeded`, 2 for every
+other refusal). Stderr stays empty. The Haskell door that implements the same contract
 is later work (issue #22, P6); until then `make process-theory` checks this
 runner against the committed goldens in `fixtures/process/run/`.
 -/

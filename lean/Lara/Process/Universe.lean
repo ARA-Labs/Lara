@@ -223,7 +223,10 @@ def listVerdict {X : Type} (xs : List X) (φ : X → Prop) [DecidablePred φ] : 
   else .unknown
 
 /-- One answer: the verdict, the number of completions and, for `unknown`, one
-completion where the formula holds and one where it fails. -/
+completion where the formula holds and one where it fails. The two witnesses
+are present exactly when the verdict is `unknown` (`answer_witnesses`,
+`answer_no_witnesses`), so the result encoder, which prints whichever are
+present, prints both or neither. -/
 structure Answer where
   verdict : Verdict
   count : Nat
@@ -263,6 +266,12 @@ theorem answer_witnesses (p : Problem) (q : Query) (unk : (answer p q).verdict =
     exact ⟨z, hz, mz, of_decide_eq_true pz⟩
   · obtain ⟨z, hz, mz, pz⟩ := key (fun h => decide ¬ q.holds Atom.holds h) ⟨x, hx, decide_eq_true nx⟩
     exact ⟨z, hz, mz, of_decide_eq_true pz⟩
+
+/-- A verdict other than `unknown` carries no witnesses. -/
+theorem answer_no_witnesses (p : Problem) (q : Query) (h : (answer p q).verdict ≠ .unknown) :
+    (answer p q).holds = none ∧ (answer p q).fails = none := by
+  simp only [answer, answerOf] at h ⊢
+  exact ⟨if_neg h, if_neg h⟩
 
 /-- Over the declared candidate carrier, the reported verdict is the landed
 `verdict` of the record's compatibility predicate. -/

@@ -6992,7 +6992,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.formulaEquivalent_iff_bisimilar
 #print axioms Lara.Process.process_characterization
 
--- lean/Lara/Process/Universe.lean: 12 public theorems.
+-- lean/Lara/Process/Universe.lean: 13 public theorems.
 #print axioms Lara.Process.Universe.mem_interleave
 #print axioms Lara.Process.Universe.mem_perms
 #print axioms Lara.Process.Universe.interleave_map
@@ -7002,6 +7002,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.Universe.Problem.mem_completions
 #print axioms Lara.Process.Universe.Problem.completions_mono
 #print axioms Lara.Process.Universe.answer_witnesses
+#print axioms Lara.Process.Universe.answer_no_witnesses
 #print axioms Lara.Process.Universe.answerVerdict_eq_verdict
 #print axioms Lara.Process.Universe.certain_antitone_universe
 #print axioms Lara.Process.Universe.auditHolds_iff
