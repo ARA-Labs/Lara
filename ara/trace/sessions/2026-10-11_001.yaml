@@ -25,73 +25,6 @@ events_logged:
   provenance: user-revised
   summary: 'User authorized review/revision/approval; corrected enumeration, kind trust, fixed queries and bounded wire contracts before plan approval.'
 - turn: 3
-  action: 'Implemented and committed the checked-source audit boundary and exact enumeration (stages P1-P2), then the analyses, locality certificate and impact layer (stages P3-P5), each with focused compiles and bounded reductions.'
-  provenance: ai-executed
-  files_changed:
-  - lean/Lara/Process/Source.lean
-  - lean/Lara/Process/SourceModel.lean
-  - lean/Lara/Process/FamilyAudit.lean
-  - lean/Lara/Process/SourceProvenance.lean
-  - lean/Lara/Process/SourceAudit.lean
-  - lean/Lara/Process/SourceLedger.lean
-  - lean/Lara/Process/Enumerate.lean
-  - lean/Lara/Process/Analysis.lean
-  - lean/Lara/Process/Locality.lean
-  - lean/Lara/Process/Impact.lean
-  - lean/Lara/Process/InquiryWire.lean
-  - lean/Lara/Process/InquiryRun.lean
-  - lean/Lara/Examples/ProcessSourceProfiles.lean
-  - lean/Lara/Examples/ProcessEnumerate.lean
-  - lean/Lara/Examples/ProcessAnalysis.lean
-  - lean/Lara/Examples/ProcessLocality.lean
-  - lean/Lara/Examples/ProcessImpact.lean
-- turn: 3
-  action: 'Ran the gate suite repeatedly while integrating; the final run of make local-gates exited 0, covering lake build, the axiom audit and its coverage check over 7162 public declarations, the semantics registry, process theory, and every Haskell-Lean cross-check.'
-  provenance: ai-executed
-  files_changed: []
-- turn: 3
-  action: 'Wrote the subject documentation for the five stages and the wrapper, updated the spec and implementation indexes, registered the new modules in the library root and the axiom audit, and wired the inquiry goldens into make process-theory.'
-  provenance: ai-executed
-  files_changed:
-  - docs/theory-process.md
-  - docs/spec.md
-  - docs/implementation.md
-  - lean/Lara.lean
-  - lean/AxCheck.lean
-  - Makefile
-  - scripts/check-inquiry-run.sh
-  - fixtures/process/inquiry
-- turn: 3
-  action: 'Deleted the executed plan plans/inquiry-p1-p5.md after moving its durable contracts into docs/, and opened issues 45 and 46 for the deferred Haskell door and the unproved search-step ceiling.'
-  provenance: ai-executed
-  files_changed:
-  - plans/inquiry-p1-p5.md
-ai_actions:
-- turn: 1
-  action: 'Created and checked out local branch plan/inquiry-p1-p5 from clean main; wrote plans/inquiry-p1-p5.md and resolved independent targeted review findings.'
-  provenance: ai-executed
-  files_changed:
-  - plans/inquiry-p1-p5.md
-- turn: 1
-  action: 'Ran document style and reference/finite-scenario consistency checks. No implementation builds, experiments, commit, push or PR.'
-  provenance: ai-executed
-  files_changed: []
-- turn: 2
-  action: 'Reviewed existing source semantics and issue 22; revised the plan and marked it APPROVED after independent review. Style checker returned clean. No implementation, new proofs, experiments, commit, push or PR.'
-  provenance: ai-executed
-  files_changed:
-  - plans/inquiry-p1-p5.md
-claims_touched:
-- id: C57
-  action: created
-  turn: 3
-logic_revisions: []
-key_context:
-- turn: 1
-  excerpt: 'yes. do 1 and checkout a new branch to do 2. we puit P1-P5 in one pr'
-- turn: 2
-  excerpt: 'User requested review, revision as needed and approval of the plan only; all implementation checkboxes remain unstarted.'
-- turn: 3
   type: decision
   id: N390_inquiry_p1_p5_implemented
   routing: direct
@@ -151,7 +84,74 @@ key_context:
   routing: crystallized
   provenance: ai-suggested
   summary: 'O213 crystallized to C57 via artifact commitment: the wrapper architecture is now the committed artifact and the gates support it.'
+ai_actions:
+- turn: 1
+  action: 'Created and checked out local branch plan/inquiry-p1-p5 from clean main; wrote plans/inquiry-p1-p5.md and resolved independent targeted review findings.'
+  provenance: ai-executed
+  files_changed:
+  - plans/inquiry-p1-p5.md
+- turn: 1
+  action: 'Ran document style and reference/finite-scenario consistency checks. No implementation builds, experiments, commit, push or PR.'
+  provenance: ai-executed
+  files_changed: []
+- turn: 2
+  action: 'Reviewed existing source semantics and issue 22; revised the plan and marked it APPROVED after independent review. Style checker returned clean. No implementation, new proofs, experiments, commit, push or PR.'
+  provenance: ai-executed
+  files_changed:
+  - plans/inquiry-p1-p5.md
+- turn: 3
+  action: 'Implemented and committed the checked-source audit boundary and exact enumeration (stages P1-P2), then the analyses, locality certificate and impact layer (stages P3-P5), each with focused compiles and bounded reductions.'
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/Process/Source.lean
+  - lean/Lara/Process/SourceModel.lean
+  - lean/Lara/Process/FamilyAudit.lean
+  - lean/Lara/Process/SourceProvenance.lean
+  - lean/Lara/Process/SourceAudit.lean
+  - lean/Lara/Process/SourceLedger.lean
+  - lean/Lara/Process/Enumerate.lean
+  - lean/Lara/Process/Analysis.lean
+  - lean/Lara/Process/Locality.lean
+  - lean/Lara/Process/Impact.lean
+  - lean/Lara/Process/InquiryWire.lean
+  - lean/Lara/Process/InquiryRun.lean
+  - lean/Lara/Examples/ProcessSourceProfiles.lean
+  - lean/Lara/Examples/ProcessEnumerate.lean
+  - lean/Lara/Examples/ProcessAnalysis.lean
+  - lean/Lara/Examples/ProcessLocality.lean
+  - lean/Lara/Examples/ProcessImpact.lean
+- turn: 3
+  action: 'Ran the gate suite repeatedly while integrating; the final run of make local-gates exited 0, covering lake build, the axiom audit and its coverage check over 7162 public declarations, the semantics registry, process theory, and every Haskell-Lean cross-check.'
+  provenance: ai-executed
+  files_changed: []
+- turn: 3
+  action: 'Wrote the subject documentation for the five stages and the wrapper, updated the spec and implementation indexes, registered the new modules in the library root and the axiom audit, and wired the inquiry goldens into make process-theory.'
+  provenance: ai-executed
+  files_changed:
+  - docs/theory-process.md
+  - docs/spec.md
+  - docs/implementation.md
+  - lean/Lara.lean
+  - lean/AxCheck.lean
+  - Makefile
+  - scripts/check-inquiry-run.sh
+  - fixtures/process/inquiry
+- turn: 3
+  action: 'Deleted the executed plan plans/inquiry-p1-p5.md after moving its durable contracts into docs/, and opened issues 45 and 46 for the deferred Haskell door and the unproved search-step ceiling.'
+  provenance: ai-executed
+  files_changed:
+  - plans/inquiry-p1-p5.md
+claims_touched:
+- id: C57
+  action: created
+  turn: 3
+logic_revisions: []
+key_context:
+- turn: 1
+  excerpt: 'yes. do 1 and checkout a new branch to do 2. we puit P1-P5 in one pr'
+- turn: 2
+  excerpt: 'User requested review, revision as needed and approval of the plan only; all implementation checkboxes remain unstarted.'
 open_threads:
-- 'Haskell door and cross-language conformance for the wrapper (issue 45); the search-step ceiling convention (issue 46); push the branch and open the unified PR.'
+- 'Haskell door and cross-language conformance for the wrapper (issue 45); the search-step ceiling convention (issue 46). The unified implementation is open in PR 47.'
 ai_suggestions_pending:
 - 'O214/O215/O216 remain staged pending a closure signal.'
