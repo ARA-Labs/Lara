@@ -44,5 +44,33 @@ for input in "$dir"/*.sexp; do
     echo "FAIL $name: exit $code, expected $want"; fail=1
   fi
 done
+# The usage and io refusals happen at the executable boundary, before any
+# document is read, so no fixture can reach them: drive them by argument shape.
+boundary() {
+  local name=$1 want=$2
+  shift 2
+  local err out code
+  err=$(mktemp)
+  set +e
+  out=$("$bin" "$@" 2>"$err")
+  code=$?
+  set -e
+  count=$((count + 1))
+  if [[ -s "$err" ]]; then
+    echo "FAIL $name: stderr not empty"; cat "$err"; fail=1
+  fi
+  rm -f "$err"
+  # shellcheck disable=SC2053 # $want is a glob pattern on purpose
+  if [[ "$out" != $want ]]; then
+    echo "FAIL $name: unexpected output: $out"; fail=1
+  fi
+  if [[ "$code" != 2 ]]; then
+    echo "FAIL $name: exit $code, expected 2"; fail=1
+  fi
+}
+usage='(process-error 1 usage "usage: process-run FILE")'
+boundary usage-no-args "$usage"
+boundary usage-two-args "$usage" "$dir/empty-universe.sexp" "$dir/empty-universe.sexp"
+boundary io-missing-file '(process-error 1 io "*")' "$dir/does-not-exist.sexp"
 if [[ "$fail" != 0 ]]; then exit 1; fi
-echo "process-run: $count fixtures match their goldens"
+echo "process-run: $count fixtures and boundary cases match"
