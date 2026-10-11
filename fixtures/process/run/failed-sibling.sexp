@@ -1,0 +1,16 @@
+;; process-input 1 fixture
+(process-input 1
+  (names (event commit read run sibling success failure) (actor alice) (plan plan) (run run0 run1) (claim c0) (source) (data test) (family fam) (witness w0))
+  (record (cutoff 20)
+    (event commit (commit-plan alice plan 0) (at "experiments/plan.md" commit-v0))
+    (event read (access alice test evaluation) (at "logs/access.md" read-test 12 18))
+    (event run (run run0 plan 0 (inputs (input test 0)) fam) (at "experiments/run0.md" run0))
+    (order commit read (at "logs/access.md" after-commit 20 21))
+    (submit c0 w0)
+    (event sibling (run run1 plan 0 (inputs (input test 0)) fam) (at "exploration/branches.md" failed-sibling))
+    (event success (result run0 1) (at "experiments/run0.md" result))
+    (event failure (result run1 0) (at "exploration/branches.md" failed-sibling-result)))
+  (reader instrumented-log signed-attestation)
+  (universe)
+  (limits (events 8) (completions 1000))
+  (queries (verdict precommitted (run-precommitted run0)) (verdict one-trial (family-count-at-most fam 1)) (verdict two-trials (family-count-at-most fam 2))))

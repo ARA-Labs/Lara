@@ -227,6 +227,11 @@ import Lara.Process.Inquiry
 import Lara.Examples.ProcessInquiry
 import Lara.Process.Characterization
 import Lara.Examples.ProcessCharacterization
+import Lara.Process.Universe
+import Lara.Process.Rename
+import Lara.Process.Wire
+import Lara.Process.Run
+import Lara.Examples.ProcessWire
 
 open Lara
 
@@ -6986,3 +6991,150 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.formulaEquivalent_isBisimulation
 #print axioms Lara.Process.formulaEquivalent_iff_bisimilar
 #print axioms Lara.Process.process_characterization
+
+-- lean/Lara/Process/Universe.lean: 13 public theorems.
+#print axioms Lara.Process.Universe.mem_interleave
+#print axioms Lara.Process.Universe.mem_perms
+#print axioms Lara.Process.Universe.interleave_map
+#print axioms Lara.Process.Universe.perms_map
+#print axioms Lara.Process.Universe.Problem.completions_nodup
+#print axioms Lara.Process.Universe.Problem.mem_base
+#print axioms Lara.Process.Universe.Problem.mem_completions
+#print axioms Lara.Process.Universe.Problem.completions_mono
+#print axioms Lara.Process.Universe.answer_witnesses
+#print axioms Lara.Process.Universe.answer_no_witnesses
+#print axioms Lara.Process.Universe.answerVerdict_eq_verdict
+#print axioms Lara.Process.Universe.certain_antitone_universe
+#print axioms Lara.Process.Universe.auditHolds_iff
+
+-- lean/Lara/Process/Rename.lean: 53 public theorems.
+#print axioms Lara.Process.EventId.rename_inj
+#print axioms Lara.Process.ActorId.rename_inj
+#print axioms Lara.Process.PlanId.rename_inj
+#print axioms Lara.Process.RunId.rename_inj
+#print axioms Lara.Process.ClaimId.rename_inj
+#print axioms Lara.Process.SourceId.rename_inj
+#print axioms Lara.Process.DataId.rename_inj
+#print axioms Lara.Process.FamilyId.rename_inj
+#print axioms Lara.Process.WitnessId.rename_inj
+#print axioms Lara.Process.EventId.rename_eq_iff
+#print axioms Lara.Process.ActorId.rename_eq_iff
+#print axioms Lara.Process.PlanId.rename_eq_iff
+#print axioms Lara.Process.RunId.rename_eq_iff
+#print axioms Lara.Process.ClaimId.rename_eq_iff
+#print axioms Lara.Process.SourceId.rename_eq_iff
+#print axioms Lara.Process.DataId.rename_eq_iff
+#print axioms Lara.Process.FamilyId.rename_eq_iff
+#print axioms Lara.Process.WitnessId.rename_eq_iff
+#print axioms Lara.Process.mem_map_inj
+#print axioms Lara.Process.keyRename_inj
+#print axioms Lara.Process.accessRename_inj
+#print axioms Lara.Process.Event.rename_inj
+#print axioms Lara.Process.Stamped.rename_inj
+#print axioms Lara.Process.hrename_inj
+#print axioms Lara.Process.version_rename
+#print axioms Lara.Process.step_rename
+#print axioms Lara.Process.run_rename
+#print axioms Lara.Process.validThrough_rename
+#print axioms Lara.Process.precedes_rename
+#print axioms Lara.Process.Event.kind_rename
+#print axioms Lara.Process.contains_rename
+#print axioms Lara.Process.scopeEvents_rename
+#print axioms Lara.Process.allowed_rename
+#print axioms Lara.Process.reported_rename
+#print axioms Lara.Process.compatible_rename
+#print axioms Lara.Process.Universe.base_rename
+#print axioms Lara.Process.Universe.compat_rename
+#print axioms Lara.Process.Universe.candidates_rename
+#print axioms Lara.Process.Universe.completions_rename
+#print axioms Lara.Process.Universe.runSpec?_rename
+#print axioms Lara.Process.Universe.commits?_rename
+#print axioms Lara.Process.Universe.access?_rename
+#print axioms Lara.Process.Universe.forall_toList_map
+#print axioms Lara.Process.Universe.map_eq_some_inj
+#print axioms Lara.Process.Universe.keyed_mem
+#print axioms Lara.Process.Universe.planCommittedBefore_rename
+#print axioms Lara.Process.Universe.runPrecommitted_rename
+#print axioms Lara.Process.Universe.predictable_rename
+#print axioms Lara.Process.Universe.splitSelection_rename
+#print axioms Lara.Process.Universe.familyCount_rename
+#print axioms Lara.Process.Universe.atom_rename
+#print axioms Lara.Process.Universe.query_rename
+#print axioms Lara.Process.Universe.answer_rename
+
+-- lean/Lara/Process/Wire.lean: 61 public theorems.
+#print axioms Lara.Process.Wire.Spelling.parse_text
+#print axioms Lara.Process.Wire.Spelling.parse_some
+#print axioms Lara.Process.Wire.Spelling.text_injective
+#print axioms Lara.Process.Wire.Tag.spelling_complete
+#print axioms Lara.Process.Wire.Tag.spelling_nodup
+#print axioms Lara.Process.Wire.Tag.text_injective
+#print axioms Lara.Process.Wire.EventKind.spelling_complete
+#print axioms Lara.Process.Wire.EventKind.spelling_nodup
+#print axioms Lara.Process.Wire.AccessPurpose.spelling_complete
+#print axioms Lara.Process.Wire.AccessPurpose.spelling_nodup
+#print axioms Lara.Process.Wire.AdmissionBasis.spelling_complete
+#print axioms Lara.Process.Wire.AdmissionBasis.spelling_nodup
+#print axioms Lara.Process.Wire.EvidenceKind.spelling_complete
+#print axioms Lara.Process.Wire.EvidenceKind.spelling_nodup
+#print axioms Lara.Process.Wire.CoverageKind.spelling_complete
+#print axioms Lara.Process.Wire.CoverageKind.spelling_nodup
+#print axioms Lara.Process.Wire.GuaranteeClass.spelling_complete
+#print axioms Lara.Process.Wire.GuaranteeClass.spelling_nodup
+#print axioms Lara.Process.Wire.ErrorKind.spelling_complete
+#print axioms Lara.Process.Wire.ErrorKind.spelling_nodup
+#print axioms Lara.Process.Wire.Acceptance.spelling_complete
+#print axioms Lara.Process.Wire.Acceptance.spelling_nodup
+#print axioms Lara.Process.Wire.Verdict.spelling_complete
+#print axioms Lara.Process.Wire.Verdict.spelling_nodup
+#print axioms Lara.Process.Wire.ErrorTag.spelling_complete
+#print axioms Lara.Process.Wire.ErrorTag.spelling_nodup
+#print axioms Lara.Process.Wire.head_eq_some
+#print axioms Lara.Process.Wire.bind_ok_iff
+#print axioms Lara.Process.Wire.pure_ok_iff
+#print axioms Lara.Process.Wire.bad_ne_ok
+#print axioms Lara.Process.Wire.decodeList_canonical
+#print axioms Lara.Process.Wire.decodeNat_canonical
+#print axioms Lara.Process.Wire.decodeWord_canonical
+#print axioms Lara.Process.Wire.decodeText_canonical
+#print axioms Lara.Process.Wire.decodeIdx_canonical
+#print axioms Lara.Process.Wire.decodeTable_canonical
+#print axioms Lara.Process.Wire.decodeNames_canonical
+#print axioms Lara.Process.Wire.decodeRef_canonical
+#print axioms Lara.Process.Wire.decodeInput_canonical
+#print axioms Lara.Process.Wire.decodeInputs_canonical
+#print axioms Lara.Process.Wire.decodeBody_canonical
+#print axioms Lara.Process.Wire.decodeStamped_canonical
+#print axioms Lara.Process.Wire.decodeOpt_canonical
+#print axioms Lara.Process.Wire.decodeKinds_canonical
+#print axioms Lara.Process.Wire.decodeField_canonical
+#print axioms Lara.Process.Wire.decodeOneIdx_canonical
+#print axioms Lara.Process.Wire.decodeScope_canonical
+#print axioms Lara.Process.Wire.decodeCoverage_canonical
+#print axioms Lara.Process.Wire.decodeEntry_canonical
+#print axioms Lara.Process.Wire.decodeRecord_canonical
+#print axioms Lara.Process.Wire.decodeUniverse_canonical
+#print axioms Lara.Process.Wire.decodeQuery_canonical
+#print axioms Lara.Process.Wire.decodeWords_canonical
+#print axioms Lara.Process.Wire.decodeGuarantee_canonical
+#print axioms Lara.Process.Wire.decodeAcceptance_canonical
+#print axioms Lara.Process.Wire.decodeProfile_canonical
+#print axioms Lara.Process.Wire.decodeQuerySpec_canonical
+#print axioms Lara.Process.Wire.decodeLimits_canonical
+#print axioms Lara.Process.Wire.decodeQueries_canonical
+#print axioms Lara.Process.Wire.decodeDocument_canonical
+#print axioms Lara.Process.Wire.decode_encode
+
+-- lean/Lara/Process/Run.lean: 5 public theorems.
+#print axioms Lara.Process.Wire.run_answers
+#print axioms Lara.Process.Wire.run_within_limits
+#print axioms Lara.Process.Wire.run_eventLimit
+#print axioms Lara.Process.Wire.run_completionLimit
+#print axioms Lara.Process.Wire.run_audit
+
+-- lean/Lara/Examples/ProcessWire.lean: 5 public theorems.
+#print axioms Lara.Examples.ProcessWire.omitted_read_universe
+#print axioms Lara.Examples.ProcessWire.admitted_coverage_universe
+#print axioms Lara.Examples.ProcessWire.declared_coverage_universe
+#print axioms Lara.Examples.ProcessWire.contradictory_universe
+#print axioms Lara.Examples.ProcessWire.empty_universe_certain

@@ -1,0 +1,1 @@
+(process-result 1 (assumptions (universe (event early-read (access alice test evaluation))) (admitted (coverage (complete (scope (kinds data-access) (cutoff 10))) (at logs/access.md coverage) instrumented-log)) (unadmitted) (limits (events 8) (completions 1000))) (answers (answer precommitted certainTrue (completions 2)) (answer predictable certainTrue (completions 2))))

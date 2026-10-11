@@ -77,6 +77,7 @@ bhl-theory:
 
 process-theory:
 	cd lean && lake exe process-examples
+	bash scripts/check-process-run.sh
 
 axiom-withdrawal-example:
 	python3 scripts/check-axiom-withdrawal.py

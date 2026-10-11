@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-The research-process layer (`lean/Lara/Process/`, namespace `Lara.Process`) states when a research record *entitles* a claim to be asserted, as opposed to when the claim is true. A record denotes the set of complete modeled histories and reporting choices it could have come from, relative to an explicit model and scoped coverage assumptions; executable verdicts range over a declared finite carrier. A verdict quantifies over that set and is `inconsistent` when it is empty. Claim-level entitlement requires the profile to accept the admitted coverage, the set to be nonempty, and some warrant in every compatible history; auditing a submitted argument requires one fixed witness to warrant in every compatible history. The layer is an outer layer over the core calculus and [BHL](theory-bhl.md) and changes neither. It adds no wire format, `.lara` syntax, Haskell checker or corpus change. Its fixtures are finite reference models, and no theorem here is an empirical claim.
+The research-process layer (`lean/Lara/Process/`, namespace `Lara.Process`) states when a research record *entitles* a claim to be asserted, as opposed to when the claim is true. A record denotes the set of complete modeled histories and reporting choices it could have come from, relative to an explicit model and scoped coverage assumptions; executable verdicts range over a declared finite carrier. A verdict quantifies over that set and is `inconsistent` when it is empty. Claim-level entitlement requires the profile to accept the admitted coverage, the set to be nonempty, and some warrant in every compatible history; auditing a submitted argument requires one fixed witness to warrant in every compatible history. The layer is an outer layer over the core calculus and [BHL](theory-bhl.md) and changes neither. It adds one separately versioned outer wire format, `process-input 1`, with a Lean reference runner and no Haskell implementation yet, and no `.lara` syntax, core wire or corpus change. Its fixtures are finite reference models, and no theorem here is an empirical claim.
 
 ## What are the boundaries?
 
@@ -208,8 +208,71 @@ The ARA side is an `AraSource`: a list of entries in file order, which carries n
 
 Stability is not scientific adequacy, and status is not entitlement. `Lara.Examples.ProcessInquiry` shows both: `stable_not_entitled` has a claim that is true in every completion of a record's inquiry (`leftOnly_completions`), hence stable, that no witness warrants; `status_does_not_transport` keeps the claim's grounded status `justified` in two histories while the submitted argument is entitled on the record of one history and not on the record of the other. `sensitivity_fixture` exhibits the history that flips an unstable audit.
 
+## What does the `process-input 1` contract fix?
+
+`process-input 1` is the outer document that states a process question outside Lean; `process-result 1` and `process-error 1` are its answers. They are versioned separately from `lara-core@0.3`, like `lara-map@1` and `pw-run 1`, and every #22 stage reads and writes them. The Lean modules are `Lara.Process.Universe` (the carrier, queries and answers), `Lara.Process.Rename` (identifier renaming), `Lara.Process.Wire` (the codec) and `Lara.Process.Run` (evaluation and envelopes); `lake exe process-run FILE` is the reference runner. The Haskell door is #22's P6.
+
+### Grammar
+
+One top-level form, printed by the canonical `Lara.Driver` printer:
+
+```text
+(process-input 1
+  (names (event NAME...) (actor NAME...) (plan NAME...) (run NAME...) (claim NAME...)
+         (source NAME...) (data NAME...) (family NAME...) (witness NAME...))
+  (record (cutoff N) ENTRY...)
+  (reader BASIS...)
+  (universe (event NAME BODY)...)
+  (limits (events N) (completions N))
+  (queries QUERY...))
+
+ENTRY   := (event NAME BODY REF) | (order NAME NAME REF)
+         | (coverage COVERAGE REF BASIS) | (submit CLAIM WITNESS)
+BODY    := (commit-plan ACTOR PLAN V) | (access ACTOR DATA selection|evaluation)
+         | (run RUN PLAN V (inputs (input DATA V)...) FAMILY) | (result RUN N)
+         | (assert CLAIM WITNESS) | (retract SOURCE) | (update-data DATA V)
+REF     := (at FILE ENTRY) | (at FILE ENTRY START END)
+COVERAGE:= (complete SCOPE) | (count-bounded SCOPE N) | (open-world SCOPE)
+SCOPE   := (scope (kinds KIND...) (cutoff N) [(family FAMILY)] [(actors ACTOR...)] [(data DATA...)])
+QUERY   := (verdict LABEL FORMULA) | (audit LABEL CLAIM WITNESS PROFILE)
+FORMULA := (run-precommitted RUN) | (predictable) | (split-selection (DATA...) (DATA...))
+         | (family-count-at-most FAMILY N) | (not F) | (and F F) | (or F F)
+PROFILE := (profile (admissible EVIDENCE...) (accepts complete|count-bounded|open-world...)
+                    (guarantee fwer|fdr|mfdr NUM DEN) (probes ERROR...) (acceptance grounded-justified))
+```
+
+Every fixed vocabulary (event kinds, purposes, admission bases, evidence and error kinds, guarantee classes, verdicts, refusal tags and the structural keywords) has one spelling table in `Lara.Process.Wire`, and each table is injective. Names are interned per namespace to their position in the `names` block; an undeclared or duplicated name is refused. Versions `V` and counts `N` are canonical decimals, never interned, because `ProcessState.version` reads an unupdated dataset as version `0`. The scope clauses are optional but ordered. `FILE`, `ENTRY` and `LABEL` are report strings the semantics never reads. A `declared-policy` coverage form is refused as `unsupported`: version 1 interprets no reporting policy.
+
+`decodeDocument_canonical` proves the decoder loses nothing: every accepted document re-encodes to the exact S-expression it came from, so `decode_encode` holds for every decodable document. Text reading and printing reuse `Lara.Driver` and are tested, not proved.
+
+### What does a document mean?
+
+A document denotes a `Problem`: the record `extract` produces under the reader's admitted bases, and the declared universe of events that may have happened unrecorded. Its completions are exactly the duplicate-free histories compatible with the extracted record that contain only recorded or universe events (`mem_completions`). That set is finite by construction, which supplies the carrier `verdict` needs, and over the candidate carrier the reported verdict is the landed `verdict` of the record's compatibility predicate (`answerVerdict_eq_verdict`), so the wire adds no second semantics. Declaring the universe is a modeling assumption: an empty universe asserts that nothing unrecorded happened, and enlarging it can only lose certainty (`completions_mono`, `certain_antitone_universe`). The universe carrier reads the record's events as the reported ones, as `DecodedRecord.Compatible` does; there is no separate reporting choice, so selective reporting must be stated as a coverage assertion.
+
+A `verdict` query answers with the exact supervaluation verdict, the number of completions and, for `unknown`, one completion where the formula holds and one where it fails (`answer_witnesses`). The Kleene evaluator is sound but weaker (`kleene_incomplete`) and is not reported. An `audit` means `AuditHolds`: the profile accepts every admitted coverage assertion (open-world coverage when none is admitted) and the submitted witness warrants the claim in every completion (`auditHolds_iff`). Warrant needs each completion's argumentation framework from a checked Lara source, which is #22's P1; until then an audit of a submitted witness is refused as `unsupported`, and an audit of a witness the record does not submit as `malformed`.
+
+Positions in the `names` block cannot matter. For one injective renaming per namespace, `step_rename` and `validThrough_rename` commute the transition relation with renaming, `compatible_rename` preserves record compatibility, `completions_rename` maps the completion set, and `answer_rename` keeps every verdict and count while renaming the witnesses.
+
+### Results, refusals and limits
+
+```text
+(process-result 1
+  (assumptions (universe (event NAME BODY)...) (admitted (coverage ...)...)
+               (unadmitted (coverage ...)...) (limits (events N) (completions N)))
+  (answers (answer LABEL VERDICT (completions N) [(holds (history NAME...)) (fails (history NAME...))])...))
+
+(process-error 1 TAG DETAIL)
+```
+
+Every verdict is conditional on the printed universe, admitted coverage and limits; unadmitted attestations are reported and never applied. `TAG` is `syntax`, `malformed`, `unsupported-version`, `unsupported`, `limit-exceeded`, `usage` or `io`; consumers branch on the tag only. The exit code is 0 for a result, 1 for `unsupported` and `limit-exceeded`, and 2 otherwise; stderr stays empty.
+
+The reference enumerator interleaves the recorded events with each sublist of the universe and is exponential in the event count. A document's `limits` are capped by the checker's ceilings `maxProcessEvents = 8` and `maxProcessCompletions = 10000`, which no document can raise; P2 may raise the event ceiling once a faster generator is proved equal to this one. Evaluation fails closed: too many events or completions, or any audit, yields a refusal and no verdict at all (`run_eventLimit`, `run_completionLimit`, `run_audit`). An accepted document's answers are exactly `answer` of its problem, one per verdict query in order (`run_answers`), so every theorem above applies to what the runner prints.
+
+`Lara.Examples.ProcessWire` checks the carrier on the decoded ARA records of `Lara.Examples.ProcessARA` by kernel `decide`: `omitted_read_universe` (with an unrecorded earlier read possible, precommitment is `unknown`, holding on the committed-first history and failing on the early-read one), `admitted_coverage_universe`, `declared_coverage_universe`, `contradictory_universe`, and `empty_universe_certain` (the same record over an empty universe is `certainTrue`). The fixtures in `fixtures/process/run/` spell the same records as wire documents, add identifier-renaming, entry-reordering and failed-sibling documents, and include one refused document per refusal path; `scripts/check-process-run.sh` compares `process-run` with their goldens byte for byte and checks each exit code.
+
 ## How is the development checked?
 
 - `cd lean && lake build`
 - `make process-theory` runs `lake exe process-examples`. It recomputes every fixture through the shared executable definitions, including the decoded-record bridge, and fails on the first disagreement. Each ARA verdict is printed with its model, query, admitted coverage and admission bases, unadmitted attestations, submitted claims and witnesses, and the source reference and span of every decoded fact. Every other contract fixture (the BHL partial record under a count bound of two, the e-value under bounds two and four, the different-witness entitlement with the profile read from its value, dependent samples, the failed sibling, retraction and version change) is printed with its model, query, assumptions, profile, claim and witness, and a note that it is hand-modeled rather than decoded.
+- `make process-theory` then runs `scripts/check-process-run.sh`, which compares `lake exe process-run` with every golden in `fixtures/process/run/` and checks exit codes and empty stderr; `UPDATE=1` rewrites the goldens.
 - `make local-gates`, which includes the `AxCheck.lean` axiom audit and its coverage check; every public theorem of this layer, countermodels included, has an explicit `#print axioms` row and uses only `propext`, `Classical.choice` and `Quot.sound`. No proof uses `native_decide`.
