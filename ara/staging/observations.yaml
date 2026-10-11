@@ -4299,3 +4299,24 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+- id: O213
+  timestamp: '2026-10-11'
+  provenance: ai-suggested
+  content: >-
+    PROPOSED, unapproved: preserve the frozen P0 wire and add an inquiry wrapper
+    with a complete typed Surface.Input codec and one checked-source observer.
+    Reuse existing certified-source bridge constructors; compute rejection-aware
+    finite analyses and full public-status impact, including blocked diagnostics.
+    Audit metadata and residual assumptions remain explicit; hypothetical choices
+    cannot become observed evidence.
+  context: >-
+    Draft plans/inquiry-p1-p5.md on local branch plan/inquiry-p1-p5.
+    Independent targeted feasibility review found no remaining blockers after
+    corrections. This is neither implementation approval nor empirical evidence.
+  potential_type: architecture
+  bound_to:
+  - N388_inquiry_unified_plan
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

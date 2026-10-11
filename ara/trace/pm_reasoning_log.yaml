@@ -1832,3 +1832,9 @@ entries:
   notes:
   - "Recorded N387: the plan-required Hennessy-Milner attempt succeeded for image-finite systems; dropped issue 40 from the constraint's Open line."
   - "No logic claim added: the characterization is a theorem recorded in docs/theory-process.md and the trace, consistent with how earlier stages were recorded."
+
+- turn: 2026-10-11_001#1
+  notes:
+  - "Recorded the user's one-PR delivery instruction as N388; branch and draft preparation are session actions."
+  - "Staged O213 as ai-suggested PROPOSED architecture. Draft review is not user approval, implementation, or empirical validation."
+  - "No closure signal promotes this proposal. No logic entries or unrelated historical observations changed."

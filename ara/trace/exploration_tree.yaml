@@ -10997,3 +10997,18 @@ tree:
   status: resolved
   also_depends_on:
   - N385_process_deferrals
+- id: N388_inquiry_unified_plan
+  type: decision
+  title: Draft inquiry P1-P5 for one implementation PR
+  provenance: user
+  timestamp: '2026-10-11'
+  choice: >-
+    Prepare and review a draft on a new local branch, with P1-P5 together in
+    one PR after plan approval. Drafting does not authorize implementation,
+    committing, pushing or opening a PR.
+  alternatives:
+  - Separate implementation PRs for individual stages
+  evidence:
+  - 'User instruction in session 2026-10-11_001'
+  - 'https://github.com/ARA-Labs/Lara/issues/22'
+  status: resolved
