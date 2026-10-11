@@ -640,3 +640,17 @@ import Lara.Examples.ProcessSourceReplay
 -- Stage P2: bounded, provably reference-equal enumeration with fail-closed caps.
 import Lara.Process.Enumerate
 import Lara.Examples.ProcessEnumerate
+-- Stage P3: rejection-aware observables, reference-relative single/joint slot
+-- sensitivity and every subset-minimal assumption set, over one shared
+-- projection of the checked family.
+import Lara.Process.Analysis
+import Lara.Process.AnalysisWire
+import Lara.Examples.ProcessAnalysis
+-- Stage P4: checked graph-difference locality, grounded semantics only, with the
+-- finite ancestry block it builds on.
+import Lara.Process.Locality
+import Lara.Examples.ProcessLocality
+-- Stage P5: closed source read keys, rejection-aware transitions and
+-- recomputable impact certificates over full public status.
+import Lara.Process.Impact
+import Lara.Examples.ProcessImpact

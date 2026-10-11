@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-11
 
->Status: APPROVED plan; implementation is in progress. P1 (checked-source observer, codecs, stable identity, kind/provenance, families, closed audit specification and the total warrant model) and P2 (bounded reference-equal enumeration with fail-closed caps) have landed in the working tree with their axiom rows and subject documentation, and pass `make local-gates`. Remaining work: P3–P5, the inquiry runner and codecs, the file-driven fixture suite, final verification, and the single PR.
+>Status: APPROVED plan; implementation is in progress. P1 (checked-source observer, codecs, stable identity, kind/provenance, families, closed audit specification and the total warrant model), P2 (bounded reference-equal enumeration with fail-closed caps), P3 (rejection-aware observables, reference-relative single/joint slot sensitivity and every subset-minimal assumption set, over one shared projection), P4 (`Lara.Process.Locality`, the checked graph-difference certificate with its grounded-only scope, plus the additive `Lara.Process.Ancestry` block) and P5 (`Lara.Process.Impact`, endpoint-tagged read keys, first-class transitions, the public-status preservation theorem and recomputable certificates with a closed fault per mutation) have landed in the working tree and pass `make local-gates`. Remaining work: the inquiry runner and codecs, the file-driven fixture suite, final verification, and the single PR.
 
 >For agentic workers: use the subagent-driven-development or executing-plans skill when implementation is separately assigned. Complete the checkboxes in dependency order. Deliver P1-P5 together in one PR for [issue #22](https://github.com/ARA-Labs/Lara/issues/22). This review authorizes no implementation, commit, push or PR.
 
@@ -254,18 +254,18 @@ P1a first settles and implements the shared observer, total kind/provenance calc
 
 ### P3: implement all exact inquiry analyses
 
-- [ ] Define full-observation equality, nonempty stability, reference sensitivity and their Boolean specializations. Prove compatibility with the landed `Inquiry` laws; test empty, all-accepted, mixed-rejection and all-rejected families.
-- [ ] Enumerate each candidate against the named reference, requiring the same history; compute its exact changed-slot set and observation difference. Prove singleton equivalence and joint-set inclusion minimality; return all minimal sets. Test conjunction at reference `(absent, absent)`, with no singleton flip from that reference, and an infeasible combination excluded by guards.
-- [ ] Enumerate the finite assumption catalog's subsets with canonical ordering; require consistency and all-accepted target agreement. Return every subset-minimal set with countercompletion witnesses for deleting each literal. Prove soundness, completeness and minimality, including the empty-set case.
-- [ ] Test duplicate/equivalent literals, contradictory literals, multiple incomparable minimal sets, a shorter and a longer inclusion-minimal set, a restriction leaving only rejections and an empty restriction. Assert exact witnesses and exact acceptance/rejection counts.
-- [ ] Add axiom rows and result codec cases for every analysis; no single-sensitivity-only substitute for the joint analysis and no one-minimum substitute for all minimal assumptions.
+- [x] Define full-observation equality, nonempty stability, reference sensitivity and their Boolean specializations. Prove compatibility with the landed `Inquiry` laws; test empty, all-accepted, mixed-rejection and all-rejected families.
+- [x] Enumerate each candidate against the named reference, requiring the same history; compute its exact changed-slot set and observation difference. Prove singleton equivalence and joint-set inclusion minimality; return all minimal sets. Test conjunction at reference `(absent, absent)`, with no singleton flip from that reference, and an infeasible combination excluded by guards.
+- [x] Enumerate the finite assumption catalog's subsets with canonical ordering; require consistency and all-accepted target agreement. Return every subset-minimal set with countercompletion witnesses for deleting each literal. Prove soundness, completeness and minimality, including the empty-set case.
+- [x] Test duplicate/equivalent literals, contradictory literals, multiple incomparable minimal sets, a shorter and a longer inclusion-minimal set, a restriction leaving only rejections and an empty restriction. Assert exact witnesses and exact acceptance/rejection counts.
+- [x] Add axiom rows and result codec cases for every analysis; no single-sensitivity-only substitute for the joint analysis and no one-minimum substitute for all minimal assumptions.
 
 ### P4: prove graph-difference locality
 
-- [ ] Add countermodels first: a new attacker outside the old graph; an attack propagated through a shared discharge subterm; a node deletion; new complete support from a hole; and unrelated self-attack. Assert the false raw-name/old-ancestor criteria fail.
-- [ ] Implement stable-identity graph alignment, node/edge symmetric differences and finite backwards reachability over both graphs. Prove the checked test implies the existing directional-locality premises without assuming the desired label equality.
-- [ ] Lift per-support label equality to complete-claim status equality, requiring exact support correspondence. Prove reindexing and pure declaration permutation invariance with query identities held fixed.
-- [ ] Test unchanged status despite a failed locality test to pin its sufficient-only scope. Add all theorem/countermodel axiom rows and grounded-semantics-only scope documentation.
+- [x] Add countermodels first: a new attacker outside the old graph; an attack propagated through a shared discharge subterm; a node deletion; new complete support from a hole; and unrelated self-attack. Assert the false raw-name/old-ancestor criteria fail.
+- [x] Implement stable-identity graph alignment, node/edge symmetric differences and finite backwards reachability over both graphs. Prove the checked test implies the existing directional-locality premises without assuming the desired label equality.
+- [x] Lift per-support label equality to complete-claim status equality, requiring exact support correspondence. Prove reindexing and pure declaration permutation invariance with query identities held fixed.
+- [x] Test unchanged status despite a failed locality test to pin its sufficient-only scope. Add all theorem/countermodel axiom rows and grounded-semantics-only scope documentation.
 
 ### P5: certify source and full public-status impact
 
