@@ -136,6 +136,9 @@ for root in fixtures examples bundles corpus-units; do
   # package whose `lara-evidence.sexp` is a canonical ARA manifest and whose
   # `artifact.lara` is driven by `lara check-ara` — the acceptance suite for it
   # is test/evidence-cli.sh, and its byte identities are pinned there.
+  # The eighth is the process-run tree (fixtures/process/): its documents are
+  # `process-input 1` runs, not check-input@1 envelopes, and
+  # scripts/check-process-run.sh pins each one against its golden.
   #
   # Why the exclusions are not the safeguard. This positive half treats "both
   # drivers exit 2 with empty stdout" as agreement, so ANY .sexp under these
@@ -148,7 +151,7 @@ for root in fixtures examples bundles corpus-units; do
   # pass.
   if ! find "$root" -name '*.sexp' -not -path "$root/malformed/*" -not -path "$root/mutants/*" \
       -not -path "$root/admission/*" -not -path "$root/pw/*" -not -path "$root/evidence/*" \
-      -not -path "$root/certified-evidence/*" \
+      -not -path "$root/certified-evidence/*" -not -path "$root/process/*" \
       -not -name 'map.core.sexp' -not -name 'map.verdict.sexp' \
       -print >"$root_anchor_list"; then
     echo "FAIL: could not discover anchors under $root"
