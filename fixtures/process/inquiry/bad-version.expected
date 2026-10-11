@@ -1,0 +1,1 @@
+(inquiry-error 1 () (version "inquiry-input supports version 1 only, found 2"))

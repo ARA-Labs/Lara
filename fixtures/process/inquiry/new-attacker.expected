@@ -1,0 +1,1 @@
+(inquiry-result 1 new-attacker (impact-body (impact-result (transition accepted-to-accepted) ((query-impact (atom t) ((published justified)) ((published defeated)) true false)) ((atom t)) ())))

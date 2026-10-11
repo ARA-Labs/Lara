@@ -654,3 +654,9 @@ import Lara.Examples.ProcessLocality
 -- recomputable impact certificates over full public status.
 import Lara.Process.Impact
 import Lara.Examples.ProcessImpact
+-- Integration: the inquiry wrapper codec and its shared-budget runner. The two
+-- executables (`inquiry-run`, `inquiry-examples`) and the entry module they
+-- link through are Lake targets, not library modules, so they are not imported
+-- here.
+import Lara.Process.InquiryWire
+import Lara.Process.InquiryRun

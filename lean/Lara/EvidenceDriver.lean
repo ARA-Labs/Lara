@@ -208,9 +208,3 @@ def main (args : List String) : IO _root_.Unit := do
   | _ => IO.eprintln "usage: evidence-driver <fixture.sexp>"; IO.Process.exit 2
 
 end Lara.EvidenceDriver
-
-/-- Executable entry point for `evidence-driver`: the driver's `main` lives in
-the `Lara.EvidenceDriver` namespace so that importing the module never collides
-with another executable's entry point. -/
-def main (args : List String) : IO _root_.Unit :=
-  Lara.EvidenceDriver.main args

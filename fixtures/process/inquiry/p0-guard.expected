@@ -1,0 +1,2 @@
+(inquiry-result 1 predictable (history-verdict (history-count 2) (answer predictable certainTrue (completions 2))))
+(inquiry-result 1 guard (status-body (family-status-result ((family-row ((event commit (commit-plan alice plan 0)) (event read (access alice test evaluation)) (event run (run run0 plan 0 (inputs (input test 0)) fam))) (((slot-id 0) (choice-id 0))) () ((published justified)))) 1 1 0 true)))

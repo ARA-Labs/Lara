@@ -1,0 +1,1 @@
+(inquiry-result 1 blocked-conditional (impact-body (impact-result (transition accepted-to-accepted) ((query-impact (atom t) ((evidence-blocked defeated)) ((evidence-blocked justified)) true false)) ((atom t)) ())))

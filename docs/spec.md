@@ -17,6 +17,7 @@ Every argument is a support term. Strict and defeasible are rule modes, strict c
 | Concrete syntax | Separately versioned `.lara` forms in the [surface grammar](lara-surface-grammar.md) |
 | Artifact maps | `lara-map@1` manifests and `map-verdict@2` composite verdicts, separately versioned above the core (§12) |
 | Process records | `process-input 1` documents with `process-result 1` / `process-error 1` envelopes, separately versioned above the core; Lean reference runner only ([research-process semantics](theory-process.md#what-does-the-process-input-1-contract-fix)) |
+| Checked-inquiry wrapper | `inquiry-input 1` documents with `inquiry-result 1` / `inquiry-error 1` envelopes, a second separately versioned entry point that embeds a `process-input 1` document and finite source choices; Lean reference runner only ([research-process semantics](theory-process.md#what-does-the-inquiry-wrapper-add)) |
 
 The semantic corpus study grounds the per-result-cell leaf grain (§3), duplicate-report-group quarantine (§4.3), nine-family scheme vocabulary (§4.5), adapter portfolio (§5.2) and defeat conventions (§7); see [corpus lowering](corpus-map.md). [Evaluation](evaluation.md) holds the frozen inputs and hashes.
 
