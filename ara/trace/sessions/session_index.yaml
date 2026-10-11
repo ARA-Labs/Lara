@@ -749,8 +749,8 @@ sessions:
 
 - id: 2026-10-11_001
   date: '2026-10-11'
-  summary: 'Revised and approved the unified inquiry plan after semantic and contract review; implementation remains unstarted.'
-  turn_count: 2
-  events_count: 3
-  claims_touched: []
+  summary: 'Approved the unified inquiry plan, then implemented and gated the whole P1-P5 checked-inquiry layer plus the inquiry wrapper, runner, fixtures and docs; C57 crystallized from the committed artifact.'
+  turn_count: 3
+  events_count: 13
+  claims_touched: [C57]
   open_threads: 1

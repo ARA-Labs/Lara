@@ -11036,3 +11036,132 @@ tree:
   status: resolved
   also_depends_on:
   - N388_inquiry_unified_plan
+- id: N390_inquiry_p1_p5_implemented
+  type: decision
+  title: Implement and mechanize the approved P1-P5 inquiry plan in one working tree
+  provenance: ai-executed
+  timestamp: '2026-10-11'
+  choice: >-
+    Implement all five semantic stages plus the wrapper in one branch
+    (feat/checked-inquiry-p1-p5): the proof-retaining source observer and its
+    typed codecs, the guarded family product, the stable-identity lift, the
+    cached node-kind calculation with no-promotion, authored dependency
+    provenance, the modeled ledger check, the closed conditional/ledger/BHL
+    audit specification, the total warrant model over the product, bounded
+    reference-equal enumeration, the rejection-aware analyses over one shared
+    projection, the checked graph-difference locality certificate, the impact
+    read/transition/certificate layer, and the separately versioned
+    inquiry-input 1 wrapper with its shared-budget runner and fixtures.
+  alternatives:
+  - Land the stages as separate PRs
+  - Ship a Lean-only function API without the wrapper
+  evidence:
+  - 'make local-gates exit 0 on the final tree'
+  - lean/AxCheck.lean rows for 7162 public declarations, standard trio only
+  - fixtures/process/inquiry (46 documents and goldens) plus scripts/check-inquiry-run.sh
+  - 'https://github.com/ARA-Labs/Lara/issues/45 (Haskell door and cross-language conformance deferred)'
+  status: resolved
+  also_depends_on:
+  - N388_inquiry_unified_plan
+  - N389_inquiry_plan_review
+- id: N391_inquiry_single_projection
+  type: pivot
+  title: Refactor the analyses from a per-read checker run to one shared observation pass
+  provenance: ai-suggested
+  timestamp: '2026-10-11'
+  from: Family analyses call the checker once per compared pair
+  to: Family analyses project one prepared observation table per family
+  trigger: >-
+    Independent quality review measured n^2 to 3^k checker runs per query and
+    the first fixture module failed to elaborate in 13+ minutes.
+  evidence:
+  - lean/Lara/Process/Analysis.lean:statusObservations/auditObservations/tableRead
+  - lean/Lara/Process/Analysis.lean:analyzeWith_eq_perRequest
+  - lean/Lara/Examples/ProcessAnalysis.lean compiles in ~5s (was >800s)
+  status: resolved
+  also_depends_on:
+  - N390_inquiry_p1_p5_implemented
+- id: N392_impact_read_layer_rebuild
+  type: decision
+  title: Rebuild the impact read layer so the recorded reads determine the statuses they accompany
+  provenance: ai-suggested
+  timestamp: '2026-10-11'
+  choice: >-
+    Replace the hollow ReadKey inventory (most keys resolved to absent and were
+    consumed by no calculation, with one key carrying two endpoint values) by
+    Side-tagged keys with a per-key value type, a decode/accepts discipline, an
+    EndpointReport per side, and RecordsReads instances for labelC, statusC and
+    the reused run-level calculations over a finite whole-input key space.
+  alternatives:
+  - Keep the flat key list and record only carriers, blocked closure and supports
+  evidence:
+  - lean/Lara/Process/Impact.lean:ReadKey.Val/decode/inputReading_accepts
+  - lean/Lara/Process/Impact.lean:impactReads_determines_statusRow
+  status: resolved
+  also_depends_on:
+  - N390_inquiry_p1_p5_implemented
+- id: N393_false_fixture_statements
+  type: dead_end
+  title: Two locality fixture statements were false against the real compiled carrier
+  provenance: ai-executed
+  timestamp: '2026-10-11'
+  hypothesis: >-
+    The two `args` assertions (attacked, self) recorded the declaration order of
+    the fixture rather than the compiled carrier order.
+  failure_mode: >-
+    Kernel reduction of a false proposition under `decide +kernel` does not
+    terminate cheaply: one theorem ran 36 minutes at ~820 MB while an earlier
+    pass reached ~81 GiB, and the file appeared to be a reduction-cost problem
+    rather than a wrong-statement problem.
+  lesson: >-
+    Pin one concrete value per fixture and check the expected value against the
+    real compiled carrier before proving it; bound every compile (timeout, -M)
+    so a wrong statement cannot look like a slow proof. The same diagnosis
+    applied to a show-based proof that forced Finset membership reduction in the
+    elaborator.
+  evidence:
+  - lean/Lara/Examples/ProcessLocality.lean (corrected args statements)
+  - 'history://P4Examples (prefix bisection: head -n 851 clean, head -n 890 abort)'
+  status: resolved
+  also_depends_on:
+  - N390_inquiry_p1_p5_implemented
+- id: N394_inquiry_budget_counters
+  type: decision
+  title: Charge every declared counter against the resource the plan names
+  provenance: ai-suggested
+  timestamp: '2026-10-11'
+  choice: >-
+    Repair the shared budget: charge `sources` and `declarations` for the
+    before/after endpoints of every impact and verify-impact request, add the
+    missing `sources` ceiling branch, charge `pairs` for the assumption analysis
+    and for every comparison-heavy request, charge the deduped powerset size,
+    and count slot-extension attempts in `search-steps` via a closed form.
+  alternatives:
+  - Leave the counters as family-row-only guards and document the gap
+  evidence:
+  - lean/Lara/Process/InquiryRun.lean:actualOf_sources_eq/actualOf_declarations_eq
+  - lean/Lara/Process/InquiryRun.lean:checkBudgets_cap_plus_one_searchSteps
+  - fixtures/process/inquiry/limit-*-at-cap and limit-*-cap-plus-one
+  status: resolved
+  also_depends_on:
+  - N390_inquiry_p1_p5_implemented
+- id: N395_evidence_entry_move
+  type: decision
+  title: Move the evidence-driver entry out of the importable library module
+  provenance: ai-executed
+  timestamp: '2026-10-11'
+  choice: >-
+    A root-level `main` in Lara.EvidenceDriver is transitively imported by the
+    source codecs, so any executable root that consumes them cannot declare its
+    own `main`. Move the entry to Lara.EvidenceDriverEntry and point the
+    evidence-driver lake target there, keeping the namespaced helper intact.
+  alternatives:
+  - Give the inquiry executables a different entry shape
+  - Duplicate the codec closure to avoid importing EvidenceDriver
+  evidence:
+  - lean/EvidenceDriverEntry.lean
+  - lean/lakefile.toml (repointed root)
+  - 'lake build evidence-driver inquiry-run inquiry-examples succeeds'
+  status: resolved
+  also_depends_on:
+  - N390_inquiry_p1_p5_implemented

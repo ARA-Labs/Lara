@@ -4316,6 +4316,64 @@ observations:
   potential_type: architecture
   bound_to:
   - N388_inquiry_unified_plan
+  promoted: true
+  promoted_to: "logic/claims.md:C57"
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O214
+  timestamp: '2026-10-11'
+  provenance: ai-suggested
+  content: >-
+    A bounded analysis runner can be made honest by charging one shared budget
+    per request against fixed ceilings, with the exact-at-cap case legal and the
+    cap-plus-one case a whole-document refusal; the observation is that the
+    counters must be charged for the resources the contract names (endpoints of
+    a pairwise request, slot-extension attempts, subset restrictions), or the
+    ceiling refuses nothing that matters.
+  context: >-
+    Independent review of the inquiry runner found sources/declarations/pairs/
+    search-steps under-charged; repaired with per-counter characterizations and
+    at-cap/cap-plus-one fixtures.
+  potential_type: heuristic
+  bound_to:
+  - N394_inquiry_budget_counters
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O215
+  timestamp: '2026-10-11'
+  provenance: ai-executed
+  content: >-
+    Kernel reduction is a poor oracle for fixture truth: `decide +kernel` on a
+    false proposition does not terminate cheaply, so a wrong fixture statement
+    presents as a reduction-cost problem. Pinning one concrete value per fixture
+    and verifying its expected value against the real compiled carrier, with
+    every compile time- and memory-bounded, separates the two failure modes.
+  context: >-
+    Two locality fixture `args` statements were false against the compiled
+    carrier; one theorem ran 36 minutes and an earlier pass reached ~81 GiB.
+  potential_type: heuristic
+  bound_to:
+  - N393_false_fixture_statements
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false
+- id: O216
+  timestamp: '2026-10-11'
+  provenance: ai-executed
+  content: >-
+    A root-level `main` declared in a transitively imported library module
+    prevents every executable whose closure reaches that module from declaring
+    its own `main`; the entry belongs in a module that no library consumer
+    imports.
+  context: >-
+    Lara.EvidenceDriver's trailing exe-entry wrapper blocked linking the inquiry
+    executables through the source codecs; moved to Lara.EvidenceDriverEntry.
+  potential_type: constraint
+  bound_to:
+  - N395_evidence_entry_move
   promoted: false
   promoted_to: null
   crystallized_via: null
