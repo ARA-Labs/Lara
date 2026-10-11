@@ -18,9 +18,9 @@ open Lara.Process
 open Lara.Process.InquiryWire
 open Lara.Process.InquiryRun
 
-/-- Render one decoded document to its canonical output lines and exit code. -/
-def render (input : InquiryInput) : List String × UInt32 :=
-  match runBounded input with
+/-- Render a decoded document, charging the original wire input's UTF-8 bytes. -/
+def render (input : InquiryInput) (sourceBytes : Nat) : List String × UInt32 :=
+  match runBounded input sourceBytes with
   | .error refusal => ([Lara.Driver.printSx (encodeInquiryError ⟨none, refusal⟩)],
       exitCodeOf refusal)
   | .ok results =>
@@ -43,7 +43,7 @@ def main (args : List String) : IO UInt32 := do
         | .ok sx =>
           match parseInquiryInput sx with
           | .error r => pure (refusal r)
-          | .ok input => pure (render input)
+          | .ok input => pure (render input text.utf8ByteSize)
     | _ => pure (refusal (.usage "usage: inquiry-run FILE"))
   for line in lines do out.putStrLn line
   pure code

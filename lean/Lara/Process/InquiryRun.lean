@@ -597,9 +597,9 @@ def slotExtensions (input : InquiryInput) : Nat :=
     slotTraversalNodes history input.slots - 1)
 
 /-- Every counter's actual value for a document, computed deterministically from
-the decoded input. `sourceBytes` is measured on the canonical re-encoding of the
-document (the decoded input carries no raw bytes). `sources` counts every
-observed family row, rejected rows included, plus each endpoint checked for
+the decoded input. `sourceBytes` measures UTF-8 bytes in the canonical encoding
+for typed callers; the executable supplies the original file's byte count.
+`sources` counts every observed family row, rejected rows included, plus each endpoint checked for
 every impact or verification request; `declarations` counts the aggregate
 declarations passed to source checking, including repeated materializations and
 pairwise endpoints; both charge repeated requests again. `searchSteps` counts
@@ -609,7 +609,7 @@ def actualOf (input : InquiryInput) : LimitCounter → Nat
   | .histories => (Enumerate.search (embeddedProblem input)).length
   | .searchSteps => Enumerate.searchSteps (embeddedProblem input) + slotExtensions input
   | .sources => familySize input + sumNat (input.requests.map endpointsOf)
-  | .sourceBytes => (Lara.Driver.printSx (encodeInquiryInput input)).length
+  | .sourceBytes => (Lara.Driver.printSx (encodeInquiryInput input)).utf8ByteSize
   | .declarations =>
       sumNat ((Enumerate.searchFamily (familyOf input)).map fun c =>
         (Family.materialize (familyOf input) c).surface.program.decls.length)
@@ -757,19 +757,35 @@ def checkEmbeddedEvents (input : InquiryInput) : Except RunRefusal _root_.Unit :
       (Wire.Document.eventLimit input.process))
   else .ok ()
 
+/-- Replace the typed input's canonical byte count with the wire input's exact
+UTF-8 size. Whitespace and noncanonical spelling remain charged. -/
+def actualWithSourceBytes (input : InquiryInput) (sourceBytes : Nat) : LimitCounter → Nat
+  | .sourceBytes => sourceBytes
+  | counter => actualOf input counter
+
 /-- The bounded runner: one shared budget (the retained P0 event bound, then the
 whole-document counters), then the reference semantics over the boundedly
 enumerated family. -/
-def runBounded (input : InquiryInput) : Except RunRefusal (List InquiryResult) :=
+def runBounded (input : InquiryInput) (sourceBytes : Nat) :
+    Except RunRefusal (List InquiryResult) :=
   match checkEmbeddedEvents input with
   | .error e => .error e
   | .ok _ =>
-    match checkBudgets input.limits (actualOf input) with
+    match checkBudgets input.limits (actualWithSourceBytes input sourceBytes) with
     | .error e => .error e
     | .ok _ =>
       match Enumerate.enumerateFamily (familyOf input) (limitsOf input) with
       | .error e => .error (ofRefusal e)
       | .ok cs => analyzeWith cs input
+
+/-- The raw byte count is enforced before enumeration or source checking. -/
+theorem runBounded_sourceBytes_limit (input : InquiryInput) (sourceBytes : Nat)
+    (hevents : checkEmbeddedEvents input = .ok ())
+    (overshoot : min input.limits.sourceBytes maxInquirySourceBytes < sourceBytes) :
+    runBounded input sourceBytes =
+      .error (.limit .sourceBytes sourceBytes
+        (min input.limits.sourceBytes maxInquirySourceBytes)) := by
+  simp [runBounded, hevents, checkBudgets, actualWithSourceBytes, overshoot]
 
 /-- The process exit code of a refusal: `unsupported` and `limit` are 1, every
 other refusal 2. -/
@@ -977,8 +993,9 @@ theorem family_sources_cap_plus_one (spec : FamilySpec) (lim : Enumerate.Limits)
 /-- A successful bounded result equals the reference result. The bounded
 enumeration returns the reference family exactly when it fits the caps
 (`enumerateFamily_ok`), and both then run the same `analyzeWith`. -/
-theorem runBounded_eq_reference (input : InquiryInput) {rs : List InquiryResult}
-    (h : runBounded input = .ok rs) : reference input = .ok rs := by
+theorem runBounded_eq_reference (input : InquiryInput) (sourceBytes : Nat)
+    {rs : List InquiryResult}
+    (h : runBounded input sourceBytes = .ok rs) : reference input = .ok rs := by
   unfold runBounded at h
   split at h
   · cases h
@@ -993,20 +1010,21 @@ theorem runBounded_eq_reference (input : InquiryInput) {rs : List InquiryResult}
         simpa [reference] using h
 
 /-- A refused document yields no result at all: no partial rows escape. -/
-theorem runBounded_refusal_no_result (input : InquiryInput) {r : RunRefusal}
-    (h : runBounded input = .error r) : ¬ ∃ rs, runBounded input = .ok rs := by
+theorem runBounded_refusal_no_result (input : InquiryInput) (sourceBytes : Nat)
+    {r : RunRefusal} (h : runBounded input sourceBytes = .error r) :
+    ¬ ∃ rs, runBounded input sourceBytes = .ok rs := by
   rintro ⟨rs, hok⟩
   rw [h] at hok
   exact absurd hok (by simp)
 
 /-- The bounded runner is `reference` whenever the document fits its budget. -/
-theorem runBounded_eq_reference_of_fits (input : InquiryInput)
+theorem runBounded_eq_reference_of_fits (input : InquiryInput) (sourceBytes : Nat)
     (hevents : checkEmbeddedEvents input = .ok ())
-    (hbudget : checkBudgets input.limits (actualOf input) = .ok ())
+    (hbudget : checkBudgets input.limits (actualWithSourceBytes input sourceBytes) = .ok ())
     (hsteps : Enumerate.searchSteps (embeddedProblem input) ≤ (limitsOf input).clamped.steps)
     (hlen : (Enumerate.search (embeddedProblem input)).length ≤ (limitsOf input).clamped.histories)
     (hprod : (Enumerate.searchFamily (familyOf input)).length ≤ (limitsOf input).clamped.products) :
-    runBounded input = reference input := by
+    runBounded input sourceBytes = reference input := by
   unfold runBounded
   rw [hevents, hbudget]
   rw [Enumerate.enumerateFamily_eq_ok (familyOf input) (limitsOf input) hsteps hlen hprod]

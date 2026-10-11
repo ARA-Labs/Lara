@@ -8775,4 +8775,5 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.InquiryRun.subsetsOf_minimalAssumptions_eq_length
 #print axioms Lara.Process.InquiryRun.checkBudgets_at_cap_searchSteps
 #print axioms Lara.Process.InquiryRun.checkBudgets_cap_plus_one_searchSteps
+#print axioms Lara.Process.InquiryRun.runBounded_sourceBytes_limit
 

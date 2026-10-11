@@ -98,7 +98,7 @@ private def require (label : String) (actual : Bool) : IO _root_.Unit :=
 
 /-- Every computed fact the suite asserts. -/
 def checks (doc : InquiryInput) : IO _root_.Unit := do
-  let bounded := runBounded doc
+  let bounded := runBounded doc (actualOf doc .sourceBytes)
   let referenceResults := reference doc
   expect "bounded equals reference" (renderResult doc bounded) (renderResult doc referenceResults)
   require "bounded is a result" bounded.isOk
@@ -111,7 +111,8 @@ def checks (doc : InquiryInput) : IO _root_.Unit := do
   let overBudget := { doc with limits := { doc.limits with sourceBytes := 0 } }
   let expectedRefusal : RunRefusal :=
     .limit .sourceBytes (actualOf overBudget .sourceBytes) (min 0 maxInquirySourceBytes)
-  expect "over budget refuses" (renderResult overBudget (runBounded overBudget))
+  expect "over budget refuses"
+    (renderResult overBudget (runBounded overBudget (actualOf overBudget .sourceBytes)))
     (.error (Lara.Driver.printSx (encodeInquiryError ⟨none, expectedRefusal⟩)))
   expect "limit exit code" (exitCodeOf expectedRefusal) 1
   -- The empty-read certificate is refused with the closed fault.
