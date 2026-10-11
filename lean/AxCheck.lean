@@ -232,6 +232,42 @@ import Lara.Process.Rename
 import Lara.Process.Wire
 import Lara.Process.Run
 import Lara.Examples.ProcessWire
+import Lara.Surface.Source
+import Lara.Process.SourceInput
+import Lara.Process.SourceWire
+import Lara.Process.Source
+import Lara.Process.SourceGraph
+import Lara.Process.SourceCoordinates
+import Lara.Process.SourceKinds
+import Lara.Process.SourceKindTable
+import Lara.Process.SourceProvenance
+import Lara.Process.Family
+import Lara.Process.InquiryProcessWire
+import Lara.Process.FamilyWire
+import Lara.Process.SourceLedger
+import Lara.Process.SourceDiagnosticWire
+import Lara.Process.SourceResultWire
+import Lara.Process.SourceAuditSupport
+import Lara.Process.SourceAuditAssociation
+import Lara.Process.SourceAudit
+import Lara.Process.SourceAuditWire
+import Lara.Process.SourceModel
+import Lara.Process.FamilyAudit
+import Lara.Examples.ProcessSource
+import Lara.Examples.ProcessSourceKinds
+import Lara.Examples.ProcessSourceKindTable
+import Lara.Examples.ProcessSourceCoordinates
+import Lara.Examples.ProcessSourceProvenance
+import Lara.Examples.ProcessFamily
+import Lara.Examples.ProcessFamilyWire
+import Lara.Examples.ProcessSourceLedger
+import Lara.Examples.ProcessSourceResultWire
+import Lara.Examples.ProcessSourceAudit
+import Lara.Examples.ProcessSourceAuditWire
+import Lara.Examples.ProcessSourceProfiles
+import Lara.Examples.ProcessSourceReplay
+import Lara.Process.Enumerate
+import Lara.Examples.ProcessEnumerate
 
 open Lara
 
@@ -7138,3 +7174,778 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.ProcessWire.declared_coverage_universe
 #print axioms Lara.Examples.ProcessWire.contradictory_universe
 #print axioms Lara.Examples.ProcessWire.empty_universe_certain
+
+-- P1: retained source audits, total certificate selection, source families and codecs.
+-- lean/Lara/Surface/Source.lean: 4 additional public theorems.
+#print axioms Lara.Surface.SourceWithEvidenceAudit.output_eq
+#print axioms Lara.Surface.sourceWithEvidenceAudit_erasure
+#print axioms Lara.Surface.SourceWithEvidenceAudit.admitted
+#print axioms Lara.Surface.SourceWithEvidenceAudit.checked
+
+-- lean/Lara/Driver.lean: 5 additional public theorems.
+#print axioms Lara.Driver.firstUnselectedCertificate_none_iff
+#print axioms Lara.Driver.firstUnselectedCertificateList_none_iff
+#print axioms Lara.Driver.firstUnselectedCertificateDischarges_none_iff
+#print axioms Lara.Driver.firstUnselectedCertificateList_eq_firstSome
+#print axioms Lara.Driver.firstUnselectedCertificateDischarges_eq_firstSome
+
+-- lean/Lara/Process/SourceWire.lean: 44 public theorems.
+#print axioms Lara.Process.Source.Wire.Tag.spelling_complete
+#print axioms Lara.Process.Source.Wire.Tag.spelling_nodup
+#print axioms Lara.Process.Source.Wire.Tag.parse_text
+#print axioms Lara.Process.Source.Wire.Tag.parse_some
+#print axioms Lara.Process.Source.Wire.Tag.text_injective
+#print axioms Lara.Process.Source.Wire.decodeList_map
+#print axioms Lara.Process.Source.Wire.canonical_roundtrip
+#print axioms Lara.Process.Source.Wire.canonical_sound
+#print axioms Lara.Process.Source.Wire.injective_of_roundtrip
+#print axioms Lara.Process.Source.Wire.decode_encodePresentation
+#print axioms Lara.Process.Source.Wire.decode_encodeChildren
+#print axioms Lara.Process.Source.Wire.encodePresentation_injective
+#print axioms Lara.Process.Source.Wire.decode_encodePresentationStrict
+#print axioms Lara.Process.Source.Wire.decodePresentationStrict_canonical
+#print axioms Lara.Process.Source.Wire.decode_encodeCoreVersion
+#print axioms Lara.Process.Source.Wire.decode_encodeBackendVersion
+#print axioms Lara.Process.Source.Wire.decode_encodeBackend
+#print axioms Lara.Process.Source.Wire.decode_encodeTheory
+#print axioms Lara.Process.Source.Wire.decode_encodeReplay
+#print axioms Lara.Process.Source.Wire.decode_encodeMeta
+#print axioms Lara.Process.Source.Wire.decode_encodeText
+#print axioms Lara.Process.Source.Wire.decode_encodeJson
+#print axioms Lara.Process.Source.Wire.decode_encodeJsonEntries
+#print axioms Lara.Process.Source.Wire.decode_encodeJsonValues
+#print axioms Lara.Process.Source.Wire.decode_encodeColumn
+#print axioms Lara.Process.Source.Wire.decode_encodeRow
+#print axioms Lara.Process.Source.Wire.decode_encodeCsv
+#print axioms Lara.Process.Source.Wire.decode_encodePayload
+#print axioms Lara.Process.Source.Wire.decode_encodeCaptured
+#print axioms Lara.Process.Source.Wire.decode_encodeCaptureResult
+#print axioms Lara.Process.Source.Wire.decode_encodeSnapshotEntry
+#print axioms Lara.Process.Source.Wire.decode_encodeCapture
+#print axioms Lara.Process.Source.Wire.decode_encodeOptionalCapture
+#print axioms Lara.Process.Source.Wire.decode_encodeSurfaceRaw
+#print axioms Lara.Process.Source.Wire.decode_encodeSurface
+#print axioms Lara.Process.Source.Wire.decodeSurface_canonical
+#print axioms Lara.Process.Source.Wire.decode_encodeRaw
+#print axioms Lara.Process.Source.Wire.decode_encode
+#print axioms Lara.Process.Source.Wire.decode_canonical
+#print axioms Lara.Process.Source.Wire.encode_injective
+#print axioms Lara.Process.Source.Wire.decode_encodeFragmentRaw
+#print axioms Lara.Process.Source.Wire.decode_encodeFragment
+#print axioms Lara.Process.Source.Wire.decodeFragment_canonical
+#print axioms Lara.Process.Source.Wire.encodeFragment_injective
+
+-- lean/Lara/Process/Source.lean: 6 public theorems.
+#print axioms Lara.Process.Source.firstUnselectedDeclared_none_iff
+#print axioms Lara.Process.Source.retainedRun_eq
+#print axioms Lara.Process.Source.AcceptedObservation.exact_source
+#print axioms Lara.Process.Source.AcceptedObservation.exact_audit
+#print axioms Lara.Process.Source.AcceptedObservation.evidence_admitted
+#print axioms Lara.Process.Source.AcceptedObservation.certificates_selected
+
+-- lean/Lara/Process/SourceGraph.lean: 4 public theorems.
+#print axioms Lara.Process.Source.mem_mappedEdges
+#print axioms Lara.Process.Source.liftGraph_iso
+#print axioms Lara.Process.Source.liftGraph_label
+#print axioms Lara.Process.Source.liftGraph_status
+
+-- lean/Lara/Process/SourceCoordinates.lean: 12 public theorems.
+#print axioms Lara.Process.Source.Coordinates.partition
+#print axioms Lara.Process.Source.Coordinates.nodeDecl_bound
+#print axioms Lara.Process.Source.Coordinates.rows_eq_reference
+#print axioms Lara.Process.Source.Coordinates.rows_length
+#print axioms Lara.Process.Source.Coordinates.rows_terms
+#print axioms Lara.Process.Source.Coordinates.names_length
+#print axioms Lara.Process.Source.Coordinates.kept_names_nodup
+#print axioms Lara.Process.Source.Coordinates.names_nodup
+#print axioms Lara.Process.Source.Coordinates.identity_injective
+#print axioms Lara.Process.Source.Coordinates.graph_eq_reference
+#print axioms Lara.Process.Source.Coordinates.graph_label
+#print axioms Lara.Process.Source.Coordinates.supports_exact
+
+-- lean/Lara/Process/SourceKinds.lean: 5 public theorems.
+#print axioms Lara.Process.Source.meetKinds_complete
+#print axioms Lara.Process.Source.meetKinds_le_input
+#print axioms Lara.Process.Source.inputKind_hypothetical
+#print axioms Lara.Process.Source.nodeKind_no_promotion
+#print axioms Lara.Process.Source.nodeKind_missing_metadata
+
+-- lean/Lara/Process/Family.lean: 10 public theorems.
+#print axioms Lara.Process.Family.Guard.eval_iff
+#print axioms Lara.Process.Family.wellFormed_iff
+#print axioms Lara.Process.Family.mem_referenceFamily
+#print axioms Lara.Process.Family.referenceFamily_nodup
+#print axioms Lara.Process.Family.referenceFamily_no_slots
+#print axioms Lara.Process.Family.referenceFamily_no_slots_projection
+#print axioms Lara.Process.Family.materialize_decls
+#print axioms Lara.Process.Family.materialize_common
+#print axioms Lara.Process.Family.mem_selectedKeys
+#print axioms Lara.Process.Family.comparison_nodeKind_hypothetical
+
+-- lean/Lara/Process/InquiryProcessWire.lean: 10 public theorems.
+#print axioms Lara.Process.InquiryProcessWire.head_tagged
+#print axioms Lara.Process.InquiryProcessWire.decode_encodeNat
+#print axioms Lara.Process.InquiryProcessWire.decode_encodeIdx
+#print axioms Lara.Process.InquiryProcessWire.decode_encodeWord
+#print axioms Lara.Process.InquiryProcessWire.decodeList_map_of
+#print axioms Lara.Process.InquiryProcessWire.decode_encodeInput
+#print axioms Lara.Process.InquiryProcessWire.decode_encodeInputs
+#print axioms Lara.Process.InquiryProcessWire.decode_encodeBody
+#print axioms Lara.Process.InquiryProcessWire.decode_encodeStamped
+#print axioms Lara.Process.InquiryProcessWire.decode_encodeQuery
+
+-- lean/Lara/Process/FamilyWire.lean: 26 public theorems.
+#print axioms Lara.Process.Family.Wire.Tag.spelling_complete
+#print axioms Lara.Process.Family.Wire.Tag.spelling_nodup
+#print axioms Lara.Process.Family.Wire.Tag.parse_text
+#print axioms Lara.Process.Family.Wire.Tag.parse_some
+#print axioms Lara.Process.Family.Wire.Tag.text_injective
+#print axioms Lara.Process.Family.Wire.decode_encodeSlotId
+#print axioms Lara.Process.Family.Wire.decode_encodeChoiceId
+#print axioms Lara.Process.Family.Wire.decodeSlotId_canonical
+#print axioms Lara.Process.Family.Wire.decodeChoiceId_canonical
+#print axioms Lara.Process.Family.Wire.encodeSlotId_injective
+#print axioms Lara.Process.Family.Wire.encodeChoiceId_injective
+#print axioms Lara.Process.Family.Wire.decode_encodeGuard
+#print axioms Lara.Process.Family.Wire.decodeGuard_canonical
+#print axioms Lara.Process.Family.Wire.decode_encodeChoice
+#print axioms Lara.Process.Family.Wire.decode_encodeSlot
+#print axioms Lara.Process.Family.Wire.decode_encodeSelection
+#print axioms Lara.Process.Family.Wire.decode_encodeCompletion
+#print axioms Lara.Process.Family.Wire.decodeChoice_canonical
+#print axioms Lara.Process.Family.Wire.decodeSlot_canonical
+#print axioms Lara.Process.Family.Wire.decodeSelection_canonical
+#print axioms Lara.Process.Family.Wire.decodeCompletion_canonical
+#print axioms Lara.Process.Family.Wire.encodeGuard_injective
+#print axioms Lara.Process.Family.Wire.encodeChoice_injective
+#print axioms Lara.Process.Family.Wire.encodeSlot_injective
+#print axioms Lara.Process.Family.Wire.encodeSelection_injective
+#print axioms Lara.Process.Family.Wire.encodeCompletion_injective
+
+-- lean/Lara/Process/SourceLedger.lean: 11 public theorems.
+#print axioms Lara.Process.Source.LedgerCertificate.sound
+#print axioms Lara.Process.Source.checkLedger_sound
+#print axioms Lara.Process.Source.checkLedger_complete
+#print axioms Lara.Process.Source.checkLedger_success_iff
+#print axioms Lara.Process.Source.checkLedger_all_iff
+#print axioms Lara.Process.Source.observeLedger_success_iff
+#print axioms Lara.Process.Source.observeLedger_failure_iff
+#print axioms Lara.Process.Source.LedgerCertificate.pValue_threshold
+#print axioms Lara.Process.Source.LedgerCertificate.eValue_threshold
+#print axioms Lara.Process.Source.ledger_failed_run_counts
+#print axioms Lara.Process.Source.ledger_extension_invalidates
+
+-- lean/Lara/Process/SourceAuditSupport.lean: 2 public theorems.
+#print axioms Lara.Process.Source.ResolvedSupport.exact_raw
+#print axioms Lara.Process.Source.ResolvedSupport.warrant_of_label
+
+-- lean/Lara/Process/SourceAuditAssociation.lean: 2 public theorems.
+#print axioms Lara.Process.Source.checkMethod_sound
+#print axioms Lara.Process.Source.SourceArtifact.method_sound
+
+-- lean/Lara/Examples/ProcessSource.lean: 15 public theorems.
+#print axioms Lara.Examples.ProcessSource.ordinary_accepted
+#print axioms Lara.Examples.ProcessSource.policy_rejection
+#print axioms Lara.Examples.ProcessSource.duplicate_rejection
+#print axioms Lara.Examples.ProcessSource.core_rejection
+#print axioms Lara.Examples.ProcessSource.required_context
+#print axioms Lara.Examples.ProcessSource.syntax_before_structure
+#print axioms Lara.Examples.ProcessSource.admission_before_evidence
+#print axioms Lara.Examples.ProcessSource.evidence_before_core
+#print axioms Lara.Examples.ProcessSource.group_quarantine
+#print axioms Lara.Examples.ProcessSource.group_escalation
+#print axioms Lara.Examples.ProcessSource.evidence_mismatch
+#print axioms Lara.Examples.ProcessSource.escalation_before_evidence
+#print axioms Lara.Examples.ProcessSource.detailed_core_rejection
+#print axioms Lara.Examples.ProcessSource.mismatch_before_core
+#print axioms Lara.Examples.ProcessSource.admission_before_mismatch
+
+-- lean/Lara/Examples/ProcessSourceKinds.lean: 8 public theorems.
+#print axioms Lara.Examples.ProcessSourceKinds.explicit_admission
+#print axioms Lara.Examples.ProcessSourceKinds.replay_label_is_not_admission
+#print axioms Lara.Examples.ProcessSourceKinds.stale_process_binding
+#print axioms Lara.Examples.ProcessSourceKinds.stale_source_binding
+#print axioms Lara.Examples.ProcessSourceKinds.slot_overrides_observed_declaration
+#print axioms Lara.Examples.ProcessSourceKinds.absent_node_metadata
+#print axioms Lara.Examples.ProcessSourceKinds.missing_non_witness_metadata
+#print axioms Lara.Examples.ProcessSourceKinds.discharge_inputs_are_used
+
+-- lean/Lara/Examples/ProcessSourceCoordinates.lean: 6 public theorems.
+#print axioms Lara.Examples.ProcessSourceCoordinates.before_accepted
+#print axioms Lara.Examples.ProcessSourceCoordinates.after_accepted
+#print axioms Lara.Examples.ProcessSourceCoordinates.pruning_shifts_checked_index
+#print axioms Lara.Examples.ProcessSourceCoordinates.selected_identity_is_stable
+#print axioms Lara.Examples.ProcessSourceCoordinates.selected_support_is_exact
+#print axioms Lara.Examples.ProcessSourceCoordinates.deleted_argument_does_not_alias
+
+-- lean/Lara/Examples/ProcessFamily.lean: 9 public theorems.
+#print axioms Lara.Examples.ProcessFamily.guarded_product
+#print axioms Lara.Examples.ProcessFamily.no_slot_p0
+#print axioms Lara.Examples.ProcessFamily.failed_event_retained
+#print axioms Lara.Examples.ProcessFamily.identical_fragments_distinct_choices
+#print axioms Lara.Examples.ProcessFamily.two_slot_product_order
+#print axioms Lara.Examples.ProcessFamily.duplicate_declaration_appended
+#print axioms Lara.Examples.ProcessFamily.duplicate_declaration_rejected
+#print axioms Lara.Examples.ProcessFamily.guard_order_is_history_order
+#print axioms Lara.Examples.ProcessFamily.comparison_observed_metadata_capped
+
+-- lean/Lara/Examples/ProcessFamilyWire.lean: 6 public theorems.
+#print axioms Lara.Examples.ProcessFamilyWire.nested_guard_fragment_roundtrip
+#print axioms Lara.Examples.ProcessFamilyWire.ordered_slot_roundtrip
+#print axioms Lara.Examples.ProcessFamilyWire.ordered_completion_roundtrip
+#print axioms Lara.Examples.ProcessFamilyWire.equal_fragments_distinct_identities
+#print axioms Lara.Examples.ProcessFamilyWire.malformed_arity_rejected
+#print axioms Lara.Examples.ProcessFamilyWire.noncanonical_indices_rejected
+
+-- lean/Lara/Examples/ProcessSourceLedger.lean: 18 public theorems.
+#print axioms Lara.Process.Source.LedgerExamples.pValue_exact_level
+#print axioms Lara.Process.Source.LedgerExamples.eValue_exact_level
+#print axioms Lara.Process.Source.LedgerExamples.missing_kind
+#print axioms Lara.Process.Source.LedgerExamples.missing_value
+#print axioms Lara.Process.Source.LedgerExamples.missing_guarantee
+#print axioms Lara.Process.Source.LedgerExamples.missing_bound
+#print axioms Lara.Process.Source.LedgerExamples.zero_bound
+#print axioms Lara.Process.Source.LedgerExamples.fdr_not_fwer
+#print axioms Lara.Process.Source.LedgerExamples.mfdr_not_fwer
+#print axioms Lara.Process.Source.LedgerExamples.absent_run
+#print axioms Lara.Process.Source.LedgerExamples.absent_result
+#print axioms Lara.Process.Source.LedgerExamples.wrong_family
+#print axioms Lara.Process.Source.LedgerExamples.wrong_outcome
+#print axioms Lara.Process.Source.LedgerExamples.zero_statistic
+#print axioms Lara.Process.Source.LedgerExamples.negative_statistic
+#print axioms Lara.Process.Source.LedgerExamples.hidden_failed_sibling_invalidates
+#print axioms Lara.Process.Source.LedgerExamples.failed_result_still_counts
+#print axioms Lara.Process.Source.LedgerExamples.other_family_does_not_consume_bound
+
+-- lean/Lara/Examples/ProcessSourceAudit.lean: 8 public theorems.
+#print axioms Lara.Examples.ProcessSourceAudit.source_accepted
+#print axioms Lara.Examples.ProcessSourceAudit.actual_declared_association
+#print axioms Lara.Examples.ProcessSourceAudit.unknown_claim_not_associated
+#print axioms Lara.Examples.ProcessSourceAudit.fixed_query_not_reinterpreted
+#print axioms Lara.Examples.ProcessSourceAudit.missing_dependency_not_assumed
+#print axioms Lara.Examples.ProcessSourceAudit.checked_method_application
+#print axioms Lara.Examples.ProcessSourceAudit.false_precondition_remains_conditional
+#print axioms Lara.Examples.ProcessSourceAudit.false_precondition_cannot_be_applied
+
+-- Checked-source audit boundary (#22 P1), generated coverage for the modules
+-- added by that stage: source provenance, kind cache, diagnostics/results,
+-- the audit specification with its wire codec, the total warrant model over
+-- guarded products, and their fixtures.
+-- lean/Lara/Examples/ProcessSourceAuditWire.lean: 14 public declarations.
+#print axioms Lara.Examples.ProcessSourceAuditWire.names_unique
+#print axioms Lara.Examples.ProcessSourceAuditWire.config_named
+#print axioms Lara.Examples.ProcessSourceAuditWire.full_config_roundtrip
+#print axioms Lara.Examples.ProcessSourceAuditWire.invalid_config_preserved
+#print axioms Lara.Examples.ProcessSourceAuditWire.negative_conditional_preserved
+#print axioms Lara.Examples.ProcessSourceAuditWire.negative_conditional_rejected
+#print axioms Lara.Examples.ProcessSourceAuditWire.every_optional_ledger_field
+#print axioms Lara.Examples.ProcessSourceAuditWire.absent_present_distinct
+#print axioms Lara.Examples.ProcessSourceAuditWire.same_digest_stale_pin_distinct
+#print axioms Lara.Examples.ProcessSourceAuditWire.nested_error_roundtrip
+#print axioms Lara.Examples.ProcessSourceAuditWire.nested_application_error_roundtrip
+#print axioms Lara.Examples.ProcessSourceAuditWire.malformed_config_arity
+#print axioms Lara.Examples.ProcessSourceAuditWire.malformed_fault_arity
+#print axioms Lara.Examples.ProcessSourceAuditWire.noncanonical_assumption_id
+
+-- lean/Lara/Examples/ProcessSourceProvenance.lean: 18 public declarations.
+#print axioms Lara.Examples.ProcessSourceProvenance.report_results
+#print axioms Lara.Examples.ProcessSourceProvenance.source_accepted
+#print axioms Lara.Examples.ProcessSourceProvenance.all_arguments_retained
+#print axioms Lara.Examples.ProcessSourceProvenance.checked_node_dependency_capped
+#print axioms Lara.Examples.ProcessSourceProvenance.direct_reference_capped
+#print axioms Lara.Examples.ProcessSourceProvenance.independent_rule_unaffected
+#print axioms Lara.Examples.ProcessSourceProvenance.transitive_reference_capped
+#print axioms Lara.Examples.ProcessSourceProvenance.explicit_discharge_capped
+#print axioms Lara.Examples.ProcessSourceProvenance.inferred_discharge_capped
+#print axioms Lara.Examples.ProcessSourceProvenance.implicit_prior_capped
+#print axioms Lara.Examples.ProcessSourceProvenance.nested_implicit_prior_capped
+#print axioms Lara.Examples.ProcessSourceProvenance.conditional_method_propagated
+#print axioms Lara.Examples.ProcessSourceProvenance.conditional_method_unrelated
+#print axioms Lara.Examples.ProcessSourceProvenance.missing_provenance_fails
+#print axioms Lara.Examples.ProcessSourceProvenance.collision_exact_shared_subterm
+#print axioms Lara.Examples.ProcessSourceProvenance.collision_checked_reference_identity
+#print axioms Lara.Examples.ProcessSourceProvenance.collision_source_accepted
+#print axioms Lara.Examples.ProcessSourceProvenance.identical_roots_rejected
+
+-- lean/Lara/Examples/ProcessSourceReplay.lean: 13 public declarations.
+#print axioms Lara.Examples.ProcessSourceReplay.withoutSelection_clears_both
+#print axioms Lara.Examples.ProcessSourceReplay.selected_certificate_accepted
+#print axioms Lara.Examples.ProcessSourceReplay.unselected_certificate_rejected
+#print axioms Lara.Examples.ProcessSourceReplay.selected_nested_certificate_accepted
+#print axioms Lara.Examples.ProcessSourceReplay.nested_certificate_not_hidden
+#print axioms Lara.Examples.ProcessSourceReplay.selected_discharged_certificate_accepted
+#print axioms Lara.Examples.ProcessSourceReplay.discharged_certificate_not_hidden
+#print axioms Lara.Examples.ProcessSourceReplay.quarantined_certificate_not_hidden
+#print axioms Lara.Examples.ProcessSourceReplay.quarantined_certificate_is_declared_not_retained
+#print axioms Lara.Examples.ProcessSourceReplay.discharged_core_exact
+#print axioms Lara.Examples.ProcessSourceReplay.discharged_core_requires_selection
+#print axioms Lara.Examples.ProcessSourceReplay.accepted_discharge_retains_core
+#print axioms Lara.Examples.ProcessSourceReplay.accepted_discharge_requires_selection
+
+-- lean/Lara/Examples/ProcessSourceResultWire.lean: 13 public declarations.
+#print axioms Lara.Examples.ProcessSourceResultWire.located_roundtrip
+#print axioms Lara.Examples.ProcessSourceResultWire.admission_roundtrip
+#print axioms Lara.Examples.ProcessSourceResultWire.group_roundtrip
+#print axioms Lara.Examples.ProcessSourceResultWire.unselected_roundtrip
+#print axioms Lara.Examples.ProcessSourceResultWire.blocked_labels_distinct
+#print axioms Lara.Examples.ProcessSourceResultWire.malformed_arity
+#print axioms Lara.Examples.ProcessSourceResultWire.noncanonical_number
+#print axioms Lara.Examples.ProcessSourceResultWire.structural_roundtrip
+#print axioms Lara.Examples.ProcessSourceResultWire.compound_roundtrip
+#print axioms Lara.Examples.ProcessSourceResultWire.rejected_outcome_roundtrip
+#print axioms Lara.Examples.ProcessSourceResultWire.blocked_outcome_roundtrip
+#print axioms Lara.Examples.ProcessSourceResultWire.admission_optional_object_distinct
+#print axioms Lara.Examples.ProcessSourceResultWire.unknown_outer_tag
+
+-- lean/Lara/Process/FamilyAudit.lean: 8 public declarations.
+#print axioms Lara.Process.Source.warranted_pullback
+#print axioms Lara.Process.Source.auditRows_iff
+#print axioms Lara.Process.Source.audit_iff
+#print axioms Lara.Process.Source.audit_rejection_fails
+#print axioms Lara.Process.Source.audit_empty_fails
+#print axioms Lara.Process.Source.checkedFamily_carrier_covers
+#print axioms Lara.Process.Source.no_slots_audit_iff
+#print axioms Lara.Process.Source.checked_no_slots_audit_iff
+
+-- lean/Lara/Process/SourceAudit.lean: 8 public declarations.
+#print axioms Lara.Process.Source.checkGuarantee_sound
+#print axioms Lara.Process.Source.checkGuarantee_complete
+#print axioms Lara.Process.Source.AuditConfig.wellFormed_iff
+#print axioms Lara.Process.Source.AuditConfig.mem_conditionalKeys
+#print axioms Lara.Process.Source.WitnessCertificate.source_claim_exact
+#print axioms Lara.Process.Source.observeWitness_sound
+#print axioms Lara.Process.Source.observeWitnesses_ambiguous
+#print axioms Lara.Process.Source.observeWitnesses_sound
+
+-- lean/Lara/Process/SourceAuditWire.lean: 109 public declarations.
+#print axioms Lara.Process.Source.AuditWire.Tag.spelling_complete
+#print axioms Lara.Process.Source.AuditWire.Tag.spelling_nodup
+#print axioms Lara.Process.Source.AuditWire.Tag.parse_text
+#print axioms Lara.Process.Source.AuditWire.Tag.parse_some
+#print axioms Lara.Process.Source.AuditWire.Tag.text_injective
+#print axioms Lara.Process.Source.AuditWire.toOption_ok
+#print axioms Lara.Process.Source.AuditWire.decode_encodeOption
+#print axioms Lara.Process.Source.AuditWire.decode_encodeInt
+#print axioms Lara.Process.Source.AuditWire.decodeInt_canonical
+#print axioms Lara.Process.Source.AuditWire.encodeInt_injective
+#print axioms Lara.Process.Source.AuditWire.decode_encodeRat
+#print axioms Lara.Process.Source.AuditWire.decodeRat_canonical
+#print axioms Lara.Process.Source.AuditWire.encodeRat_injective
+#print axioms Lara.Process.Source.AuditWire.decode_encodeBool
+#print axioms Lara.Process.Source.AuditWire.decode_encodeArgRef
+#print axioms Lara.Process.Source.AuditWire.decode_encodeGuaranteeClass
+#print axioms Lara.Process.Source.AuditWire.decode_encodeEvidenceKind
+#print axioms Lara.Process.Source.AuditWire.decode_encodeErrorKind
+#print axioms Lara.Process.Source.AuditWire.decode_encodeAdmissionBasis
+#print axioms Lara.Process.Source.AuditWire.decode_encodeMethod
+#print axioms Lara.Process.Source.AuditWire.encodeMethod_injective
+#print axioms Lara.Process.Source.AuditWire.decodeMethod_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodePayloadMode
+#print axioms Lara.Process.Source.AuditWire.encodePayloadMode_injective
+#print axioms Lara.Process.Source.AuditWire.decodePayloadMode_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeResidualAssumption
+#print axioms Lara.Process.Source.AuditWire.encodeResidualAssumption_injective
+#print axioms Lara.Process.Source.AuditWire.decodeResidualAssumption_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeStatKind
+#print axioms Lara.Process.Source.AuditWire.encodeStatKind_injective
+#print axioms Lara.Process.Source.AuditWire.decodeStatKind_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeAssociationFault
+#print axioms Lara.Process.Source.AuditWire.encodeAssociationFault_injective
+#print axioms Lara.Process.Source.AuditWire.decodeAssociationFault_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeLedgerFault
+#print axioms Lara.Process.Source.AuditWire.encodeLedgerFault_injective
+#print axioms Lara.Process.Source.AuditWire.decodeLedgerFault_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeApplicationError
+#print axioms Lara.Process.Source.AuditWire.encodeApplicationError_injective
+#print axioms Lara.Process.Source.AuditWire.decodeApplicationError_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeBridgeError
+#print axioms Lara.Process.Source.AuditWire.encodeBridgeError_injective
+#print axioms Lara.Process.Source.AuditWire.decodeBridgeError_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeSupportFault
+#print axioms Lara.Process.Source.AuditWire.encodeSupportFault_injective
+#print axioms Lara.Process.Source.AuditWire.decodeSupportFault_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeArtifactFault
+#print axioms Lara.Process.Source.AuditWire.encodeArtifactFault_injective
+#print axioms Lara.Process.Source.AuditWire.decodeArtifactFault_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeGuaranteeFault
+#print axioms Lara.Process.Source.AuditWire.encodeGuaranteeFault_injective
+#print axioms Lara.Process.Source.AuditWire.decodeGuaranteeFault_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeWitnessFault
+#print axioms Lara.Process.Source.AuditWire.encodeWitnessFault_injective
+#print axioms Lara.Process.Source.AuditWire.decodeWitnessFault_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeProvenanceError
+#print axioms Lara.Process.Source.AuditWire.encodeProvenanceError_injective
+#print axioms Lara.Process.Source.AuditWire.decodeProvenanceError_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeAssumptionId
+#print axioms Lara.Process.Source.AuditWire.encodeAssumptionId_injective
+#print axioms Lara.Process.Source.AuditWire.decodeAssumptionId_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeInterpretationId
+#print axioms Lara.Process.Source.AuditWire.encodeInterpretationId_injective
+#print axioms Lara.Process.Source.AuditWire.decodeInterpretationId_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeKindKey
+#print axioms Lara.Process.Source.AuditWire.encodeKindKey_injective
+#print axioms Lara.Process.Source.AuditWire.decodeKindKey_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeSupportBinding
+#print axioms Lara.Process.Source.AuditWire.encodeSupportBinding_injective
+#print axioms Lara.Process.Source.AuditWire.decodeSupportBinding_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeMethodBinding
+#print axioms Lara.Process.Source.AuditWire.encodeMethodBinding_injective
+#print axioms Lara.Process.Source.AuditWire.decodeMethodBinding_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeArtifactInterpretation
+#print axioms Lara.Process.Source.AuditWire.encodeArtifactInterpretation_injective
+#print axioms Lara.Process.Source.AuditWire.decodeArtifactInterpretation_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeArtifactSpec
+#print axioms Lara.Process.Source.AuditWire.encodeArtifactSpec_injective
+#print axioms Lara.Process.Source.AuditWire.decodeArtifactSpec_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeLedger
+#print axioms Lara.Process.Source.AuditWire.encodeLedger_injective
+#print axioms Lara.Process.Source.AuditWire.decodeLedger_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeKindSpec
+#print axioms Lara.Process.Source.AuditWire.encodeKindSpec_injective
+#print axioms Lara.Process.Source.AuditWire.decodeKindSpec_canonical
+#print axioms Lara.Process.Source.AuditWire.decodeClaimBinding_canonical
+#print axioms Lara.Process.Source.AuditWire.decodeLedgerBinding_canonical
+#print axioms Lara.Process.Source.AuditWire.decodeGuaranteeBinding_canonical
+#print axioms Lara.Process.Source.AuditWire.decodeWitnessSpec_canonical
+#print axioms Lara.Process.Source.AuditWire.decodeCaptureAssumption_canonical
+#print axioms Lara.Process.Source.AuditWire.decodeConfig_canonical
+#print axioms Lara.Process.Source.AuditWire.decode_encodeClaimId
+#print axioms Lara.Process.Source.AuditWire.decode_encodeWitnessId
+#print axioms Lara.Process.Source.AuditWire.decode_encodeRunId
+#print axioms Lara.Process.Source.AuditWire.decode_encodeFamilyId
+#print axioms Lara.Process.Source.AuditWire.decode_encodeStamped
+#print axioms Lara.Process.Source.AuditWire.decode_encodeClaimBinding
+#print axioms Lara.Process.Source.AuditWire.decode_encodeLedgerBinding
+#print axioms Lara.Process.Source.AuditWire.decode_encodeGuaranteeBinding
+#print axioms Lara.Process.Source.AuditWire.decode_encodeWitnessSpec
+#print axioms Lara.Process.Source.AuditWire.decode_encodeCaptureAssumption
+#print axioms Lara.Process.Source.AuditWire.decode_encodeList_of
+#print axioms Lara.Process.Source.AuditWire.decode_encodeConfig
+#print axioms Lara.Process.Source.AuditWire.encodeClaimBinding_injective
+#print axioms Lara.Process.Source.AuditWire.encodeLedgerBinding_injective
+#print axioms Lara.Process.Source.AuditWire.encodeGuaranteeBinding_injective
+#print axioms Lara.Process.Source.AuditWire.encodeWitnessSpec_injective
+#print axioms Lara.Process.Source.AuditWire.encodeCaptureAssumption_injective
+#print axioms Lara.Process.Source.AuditWire.encodeConfig_injective
+
+-- lean/Lara/Process/SourceDiagnosticWire.lean: 20 public declarations.
+#print axioms Lara.Process.Source.ResultWire.decode_encodeNat
+#print axioms Lara.Process.Source.ResultWire.decode_encodeText
+#print axioms Lara.Process.Source.ResultWire.decode_encodeList
+#print axioms Lara.Process.Source.ResultWire.decode_encodePair
+#print axioms Lara.Process.Source.ResultWire.decode_encodeAtom
+#print axioms Lara.Process.Source.ResultWire.decode_encodeTerm
+#print axioms Lara.Process.Source.ResultWire.decode_encodeStatus
+#print axioms Lara.Process.Source.ResultWire.decode_encodePat
+#print axioms Lara.Process.Source.ResultWire.decode_encodePats
+#print axioms Lara.Process.Source.ResultWire.decode_encodeAPat
+#print axioms Lara.Process.Source.ResultWire.decode_encodeSExpr
+#print axioms Lara.Process.Source.ResultWire.decode_encodeSExprs
+#print axioms Lara.Process.Source.ResultWire.decode_encodeCertRef
+#print axioms Lara.Process.Source.ResultWire.decode_encodeAssurance
+#print axioms Lara.Process.Source.ResultWire.decode_encodeVar
+#print axioms Lara.Process.Source.ResultWire.decode_encodeQuestion
+#print axioms Lara.Process.Source.ResultWire.decode_encodeSubst
+#print axioms Lara.Process.Source.ResultWire.decode_encodeSupport
+#print axioms Lara.Process.Source.ResultWire.decode_encodeSupports
+#print axioms Lara.Process.Source.ResultWire.decode_encodeDischarges
+
+-- lean/Lara/Process/SourceKindTable.lean: 4 public declarations.
+#print axioms Lara.Process.Source.KindTable.lookup_build
+#print axioms Lara.Process.Source.KindTable.lookup_build_no_promotion
+#print axioms Lara.Process.Source.KindTable.lookup_build_conditional_cap
+#print axioms Lara.Process.Source.KindTable.lookup_build_complete
+
+-- lean/Lara/Process/SourceModel.lean: 18 public declarations.
+#print axioms Lara.Process.Source.takeSnapshot_materialized
+#print axioms Lara.Process.Source.fixedClaims_iff
+#print axioms Lara.Process.Source.familyCarrier_covers
+#print axioms Lara.Process.Source.warranted_iff
+#print axioms Lara.Process.Source.rejected_not_warranted
+#print axioms Lara.Process.Source.incomplete_not_warranted
+#print axioms Lara.Process.Source.prepare_kind_names
+#print axioms Lara.Process.Source.prepare_graph
+#print axioms Lara.Process.Source.prepare_queries_exact
+#print axioms Lara.Process.Source.gradeNode_exact
+#print axioms Lara.Process.Source.gradeNode_no_promotion
+#print axioms Lara.Process.Source.gradeNode_conditional_cap
+#print axioms Lara.Process.Source.prepare_kinds_exact
+#print axioms Lara.Process.Source.prepare_complete_all_nodes
+#print axioms Lara.Process.Source.profile_graph_exact
+#print axioms Lara.Process.Source.prepare_witness_sound
+#print axioms Lara.Process.Source.Row.witness_member
+#print axioms Lara.Process.Source.warranted_source_witness
+
+-- lean/Lara/Process/SourceProvenance.lean: 39 public declarations.
+#print axioms Lara.Process.Source.Provenance.candidates_terms
+#print axioms Lara.Process.Source.Provenance.resolves_unique
+#print axioms Lara.Process.Source.Provenance.direct_dependency_iff
+#print axioms Lara.Process.Source.Provenance.inherited_member
+#print axioms Lara.Process.Source.Provenance.ordered_prefix
+#print axioms Lara.Process.Source.Provenance.propagation_along_path
+#print axioms Lara.Process.Source.Provenance.consistent_append
+#print axioms Lara.Process.Source.Provenance.lookup_member
+#print axioms Lara.Process.Source.Provenance.lookup_of_member
+#print axioms Lara.Process.Source.Provenance.inherited_resolves
+#print axioms Lara.Process.Source.Provenance.ordered_consistent
+#print axioms Lara.Process.Source.Provenance.ordered_arguments
+#print axioms Lara.Process.Source.Provenance.ordered_own_keys
+#print axioms Lara.Process.Source.Provenance.ordered_edge_propagation
+#print axioms Lara.Process.Source.Provenance.ordered_path_propagation
+#print axioms Lara.Process.Source.Provenance.scalar_le_key
+#print axioms Lara.Process.Source.Provenance.scalar_complete
+#print axioms Lara.Process.Source.Provenance.scalar_no_promotion
+#print axioms Lara.Process.Source.Provenance.scalar_conditional_cap
+#print axioms Lara.Process.Source.Provenance.scalar_inputKind_no_promotion
+#print axioms Lara.Process.Source.Provenance.ofObservation_ordered
+#print axioms Lara.Process.Source.Provenance.carries_lookup
+#print axioms Lara.Process.Source.Provenance.ordered_input_bound
+#print axioms Lara.Process.Source.Provenance.ordered_path_no_promotion
+#print axioms Lara.Process.Source.Provenance.ordered_path_conditional_cap
+#print axioms Lara.Process.Source.Provenance.checkedKeys_stable
+#print axioms Lara.Process.Source.Provenance.lookup_missing
+#print axioms Lara.Process.Source.Provenance.implicitReferences_unique
+#print axioms Lara.Process.Source.Provenance.dischargeReferences_unique
+#print axioms Lara.Process.Source.Provenance.termReferences_unique
+#print axioms Lara.Process.Source.Provenance.namedReferences_unique
+#print axioms Lara.Process.Source.Provenance.namedDischargeReferences_unique
+#print axioms Lara.Process.Source.Provenance.argumentReferences_unique
+#print axioms Lara.Process.Source.Provenance.direct_source_correspondence
+#print axioms Lara.Process.Source.Provenance.premiseKeys_member
+#print axioms Lara.Process.Source.Provenance.dischargeKeys_member
+#print axioms Lara.Process.Source.Provenance.coreInput_keys
+#print axioms Lara.Process.Source.Provenance.ordered_core_input_bound
+#print axioms Lara.Process.Source.Provenance.ordered_prior_method_bound
+
+-- lean/Lara/Process/SourceResultWire.lean: 78 public declarations.
+#print axioms Lara.Process.Source.ResultWire.Tag.spelling_complete
+#print axioms Lara.Process.Source.ResultWire.Tag.spelling_nodup
+#print axioms Lara.Process.Source.ResultWire.Tag.parse_text
+#print axioms Lara.Process.Source.ResultWire.Tag.parse_some
+#print axioms Lara.Process.Source.ResultWire.Tag.text_injective
+#print axioms Lara.Process.Source.ResultWire.decode_encodeCoreLeaf
+#print axioms Lara.Process.Source.ResultWire.decode_encodeRule
+#print axioms Lara.Process.Source.ResultWire.decode_encodeDigest
+#print axioms Lara.Process.Source.ResultWire.decode_encodePolicyId
+#print axioms Lara.Process.Source.ResultWire.decode_encodeLeafId
+#print axioms Lara.Process.Source.ResultWire.decode_encodeArgId
+#print axioms Lara.Process.Source.ResultWire.decode_encodePropId
+#print axioms Lara.Process.Source.ResultWire.decode_encodeValueName
+#print axioms Lara.Process.Source.ResultWire.decode_encodeRuleId
+#print axioms Lara.Process.Source.ResultWire.decode_encodeGroupId
+#print axioms Lara.Process.Source.ResultWire.decode_encodeObject
+#print axioms Lara.Process.Source.ResultWire.decode_encodeLeafKind
+#print axioms Lara.Process.Source.ResultWire.decode_encodeProvenance
+#print axioms Lara.Process.Source.ResultWire.decode_encodeCoreVersion
+#print axioms Lara.Process.Source.ResultWire.decode_encodeBackendIdentity
+#print axioms Lara.Process.Source.ResultWire.decode_encodeObjectOption
+#print axioms Lara.Process.Source.ResultWire.decode_encodeVars
+#print axioms Lara.Process.Source.ResultWire.decode_encodeQuestions
+#print axioms Lara.Process.Source.ResultWire.decode_encodeAPats
+#print axioms Lara.Process.Source.ResultWire.decode_encodeAPatPair
+#print axioms Lara.Process.Source.ResultWire.decode_encodeBackend
+#print axioms Lara.Process.Source.ResultWire.decode_encodeMode
+#print axioms Lara.Process.Source.ResultWire.decode_encodePosElem
+#print axioms Lara.Process.Source.ResultWire.decode_encodePosition
+#print axioms Lara.Process.Source.ResultWire.decode_encodeLocation
+#print axioms Lara.Process.Source.ResultWire.decode_encodeReferenceReason
+#print axioms Lara.Process.Source.ResultWire.decode_encodeSubstitutionReason
+#print axioms Lara.Process.Source.ResultWire.decode_encodePremiseReason
+#print axioms Lara.Process.Source.ResultWire.decode_encodeQuestionReason
+#print axioms Lara.Process.Source.ResultWire.decode_encodeDischargeReason
+#print axioms Lara.Process.Source.ResultWire.decode_encodeAssuranceReason
+#print axioms Lara.Process.Source.ResultWire.decode_encodeBackendReason
+#print axioms Lara.Process.Source.ResultWire.decode_encodeAttackKind
+#print axioms Lara.Process.Source.ResultWire.decode_encodeOccurrenceKind
+#print axioms Lara.Process.Source.ResultWire.decode_encodePositionReason
+#print axioms Lara.Process.Source.ResultWire.decode_encodeRelationReason
+#print axioms Lara.Process.Source.ResultWire.decode_encodeCheckError
+#print axioms Lara.Process.Source.ResultWire.decode_encodeDeclLoc
+#print axioms Lara.Process.Source.ResultWire.decode_encodeMissingConflict
+#print axioms Lara.Process.Source.ResultWire.decode_encodeProgramError
+#print axioms Lara.Process.Source.ResultWire.decode_encodeDuplicateRule
+#print axioms Lara.Process.Source.ResultWire.decode_encodeScopeViolation
+#print axioms Lara.Process.Source.ResultWire.decode_encodeViolation
+#print axioms Lara.Process.Source.ResultWire.decode_encodeSignatureFault
+#print axioms Lara.Process.Source.ResultWire.decode_encodeUnitError
+#print axioms Lara.Process.Source.ResultWire.decode_encodeSurfaceError
+#print axioms Lara.Process.Source.ResultWire.decode_encodeSourceError
+#print axioms Lara.Process.Source.ResultWire.decode_encodeStage
+#print axioms Lara.Process.Source.ResultWire.decode_encodeAdmissionError
+#print axioms Lara.Process.Source.ResultWire.decode_encodeSourceDiagnostic
+#print axioms Lara.Process.Source.ResultWire.decode_encodeReplayError
+#print axioms Lara.Process.Source.ResultWire.decode_encodeRejectionRaw
+#print axioms Lara.Process.Source.ResultWire.decode_encodeRejection
+#print axioms Lara.Process.Source.ResultWire.encodeRejection_injective
+#print axioms Lara.Process.Source.ResultWire.decodeRejection_canonical
+#print axioms Lara.Process.Source.ResultWire.decode_encodePublicStatusRaw
+#print axioms Lara.Process.Source.ResultWire.decode_encodePublicStatus
+#print axioms Lara.Process.Source.ResultWire.encodePublicStatus_injective
+#print axioms Lara.Process.Source.ResultWire.decodePublicStatus_canonical
+#print axioms Lara.Process.Source.ResultWire.decode_encodeQueryOutcomeRaw
+#print axioms Lara.Process.Source.ResultWire.decode_encodeQueryOutcome
+#print axioms Lara.Process.Source.ResultWire.encodeQueryOutcome_injective
+#print axioms Lara.Process.Source.ResultWire.decodeQueryOutcome_canonical
+#print axioms Lara.Process.Source.ResultWire.decodeRejection_unknown
+#print axioms Lara.Process.Source.ResultWire.decodePublicStatus_unknown
+#print axioms Lara.Process.Source.ResultWire.decodeQueryOutcome_unknown
+#print axioms Lara.Process.Source.ResultWire.encodeSourceDiagnostic_injective
+#print axioms Lara.Process.Source.ResultWire.encodeSourceError_injective
+#print axioms Lara.Process.Source.ResultWire.encodeSurfaceError_injective
+#print axioms Lara.Process.Source.ResultWire.encodeAdmissionError_injective
+#print axioms Lara.Process.Source.ResultWire.encodeUnitError_injective
+#print axioms Lara.Process.Source.ResultWire.encodeCheckError_injective
+#print axioms Lara.Process.Source.ResultWire.encodeReplayError_injective
+
+
+-- Stage P2 bounded enumeration: reference-equality, no-duplicate, verdict/
+-- witness invariance, cap-plus-one refusal and the guarded-product traversal.
+-- lean/Lara/Examples/ProcessEnumerate.lean: 36 public declarations.
+#print axioms Lara.Examples.ProcessEnumerate.base_generated
+#print axioms Lara.Examples.ProcessEnumerate.base_reference_recovered
+#print axioms Lara.Examples.ProcessEnumerate.contradictory_orders
+#print axioms Lara.Examples.ProcessEnumerate.repeated_record_entries
+#print axioms Lara.Examples.ProcessEnumerate.base_universe_overlap
+#print axioms Lara.Examples.ProcessEnumerate.optional_event_omission_and_extension
+#print axioms Lara.Examples.ProcessEnumerate.invalid_version_excludes_extension
+#print axioms Lara.Examples.ProcessEnumerate.search_exhaustion_without_histories
+#print axioms Lara.Examples.ProcessEnumerate.base_exact_at_cap
+#print axioms Lara.Examples.ProcessEnumerate.base_steps_cap_plus_one
+#print axioms Lara.Examples.ProcessEnumerate.base_histories_cap_plus_one
+#print axioms Lara.Examples.ProcessEnumerate.exhaustion_steps_cap_plus_one
+#print axioms Lara.Examples.ProcessEnumerate.base_refusal_no_rows
+#print axioms Lara.Examples.ProcessEnumerate.powerset_wellformed
+#print axioms Lara.Examples.ProcessEnumerate.guarded_wellformed
+#print axioms Lara.Examples.ProcessEnumerate.allRejected_wellformed
+#print axioms Lara.Examples.ProcessEnumerate.powerset_growth
+#print axioms Lara.Examples.ProcessEnumerate.powerset_family_reference_recovered
+#print axioms Lara.Examples.ProcessEnumerate.guarded_partition
+#print axioms Lara.Examples.ProcessEnumerate.guarded_family_reference_recovered
+#print axioms Lara.Examples.ProcessEnumerate.all_rejected_alternatives
+#print axioms Lara.Examples.ProcessEnumerate.allRejected_family_reference_recovered
+#print axioms Lara.Examples.ProcessEnumerate.powerset_exact_at_cap
+#print axioms Lara.Examples.ProcessEnumerate.powerset_products_cap_plus_one
+#print axioms Lara.Examples.ProcessEnumerate.powerset_refusal_no_rows
+#print axioms Lara.Examples.ProcessEnumerate.version_verdict_invariance
+#print axioms Lara.Examples.ProcessEnumerate.version_answer_shape
+#print axioms Lara.Examples.ProcessEnumerate.version_witness_holds
+#print axioms Lara.Examples.ProcessEnumerate.version_witness_selected
+#print axioms Lara.Examples.ProcessEnumerate.version_witness_mem
+#print axioms Lara.Examples.ProcessEnumerate.overlap_verdict_certain
+#print axioms Lara.Examples.ProcessEnumerate.overlap_answer_bytes_unchanged
+#print axioms Lara.Examples.ProcessEnumerate.fixture_problem_is_reference
+#print axioms Lara.Examples.ProcessEnumerate.fixture_reference_witnesses
+#print axioms Lara.Examples.ProcessEnumerate.v1_witness_bytes_unchanged
+#print axioms Lara.Examples.ProcessEnumerate.event_ceiling_unchanged
+
+-- lean/Lara/Examples/ProcessSourceProfiles.lean: 23 public declarations.
+#print axioms Lara.Examples.ProcessSourceProfiles.real_family_singleton
+#print axioms Lara.Examples.ProcessSourceProfiles.sources_checked
+#print axioms Lara.Examples.ProcessSourceProfiles.attacker_checked_fields
+#print axioms Lara.Examples.ProcessSourceProfiles.inadmissible_attacker_reinstates
+#print axioms Lara.Examples.ProcessSourceProfiles.defender_checked_fields
+#print axioms Lara.Examples.ProcessSourceProfiles.inadmissible_defender_removes_warrant
+#print axioms Lara.Examples.ProcessSourceProfiles.missing_attacker_global_incomplete
+#print axioms Lara.Examples.ProcessSourceProfiles.observed_needs_admission
+#print axioms Lara.Examples.ProcessSourceProfiles.conditional_guarantee_caps_transitive_use
+#print axioms Lara.Examples.ProcessSourceProfiles.conditional_method_caps_transitive_use
+#print axioms Lara.Examples.ProcessSourceProfiles.same_digest_stale_pin
+#print axioms Lara.Examples.ProcessSourceProfiles.changed_claim_keeps_fixed_query
+#print axioms Lara.Examples.ProcessSourceProfiles.duplicate_metadata_fails_closed
+#print axioms Lara.Examples.ProcessSourceProfiles.every_duplicate_metadata_class_fails
+#print axioms Lara.Examples.ProcessSourceProfiles.observed_needs_exact_capture
+#print axioms Lara.Examples.ProcessSourceProfiles.missing_metadata_filter_alone_reinstates
+#print axioms Lara.Examples.ProcessSourceProfiles.sibling_completions_real
+#print axioms Lara.Examples.ProcessSourceProfiles.failed_sibling_same_graph_status
+#print axioms Lara.Examples.ProcessSourceProfiles.failed_sibling_changes_guarantee_warrant
+#print axioms Lara.Examples.ProcessSourceProfiles.alternating_full_family
+#print axioms Lara.Examples.ProcessSourceProfiles.alternating_actual_checked_witnesses
+#print axioms Lara.Examples.ProcessSourceProfiles.alternating_fixed_witness_audits_fail
+#print axioms Lara.Examples.ProcessSourceProfiles.alternating_existential_claim
+
+-- lean/Lara/Process/Enumerate.lean: 65 public declarations.
+#print axioms Lara.Process.Enumerate.mem_pool
+#print axioms Lara.Process.Enumerate.pool_nodup
+#print axioms Lara.Process.Enumerate.pool_length
+#print axioms Lara.Process.Enumerate.go_zero
+#print axioms Lara.Process.Enumerate.go_succ
+#print axioms Lara.Process.Enumerate.go_sublist
+#print axioms Lara.Process.Enumerate.go_compat
+#print axioms Lara.Process.Enumerate.go_pool
+#print axioms Lara.Process.Enumerate.go_mem
+#print axioms Lara.Process.Enumerate.mem_go_succ
+#print axioms Lara.Process.Enumerate.run_append
+#print axioms Lara.Process.Enumerate.run_singleton
+#print axioms Lara.Process.Enumerate.go_complete
+#print axioms Lara.Process.Enumerate.search_complete
+#print axioms Lara.Process.Enumerate.mem_search
+#print axioms Lara.Process.Enumerate.search_nodup
+#print axioms Lara.Process.Enumerate.search_perm_completions
+#print axioms Lara.Process.Enumerate.search_length
+#print axioms Lara.Process.Enumerate.perm_nil_iff
+#print axioms Lara.Process.Enumerate.listVerdict_perm
+#print axioms Lara.Process.Enumerate.searchAnswer_verdict
+#print axioms Lara.Process.Enumerate.searchAnswer_count
+#print axioms Lara.Process.Enumerate.find_witness
+#print axioms Lara.Process.Enumerate.searchAnswer_holds_is_find
+#print axioms Lara.Process.Enumerate.searchAnswer_holds_mem
+#print axioms Lara.Process.Enumerate.searchAnswer_fails_is_find
+#print axioms Lara.Process.Enumerate.searchAnswer_fails_mem
+#print axioms Lara.Process.Enumerate.searchAnswer_holds_none
+#print axioms Lara.Process.Enumerate.answer_holds_none
+#print axioms Lara.Process.Enumerate.searchAnswer_fails_none
+#print axioms Lara.Process.Enumerate.answer_fails_none
+#print axioms Lara.Process.Enumerate.searchAnswer_eq_of_known
+#print axioms Lara.Process.Enumerate.searchAnswer_bytes_eq_of_known
+#print axioms Lara.Process.Enumerate.run_answers_unchanged
+#print axioms Lara.Process.Enumerate.maxProcessEvents_unchanged
+#print axioms Lara.Process.Enumerate.document_event_ceiling
+#print axioms Lara.Process.Enumerate.clamped_le
+#print axioms Lara.Process.Enumerate.enumerateProblem_eq_ok
+#print axioms Lara.Process.Enumerate.enumerateProblem_ok
+#print axioms Lara.Process.Enumerate.enumerateProblem_refuses
+#print axioms Lara.Process.Enumerate.enumerateProblem_cap_plus_one_steps
+#print axioms Lara.Process.Enumerate.enumerateProblem_cap_plus_one_histories
+#print axioms Lara.Process.Enumerate.enumerateProblem_refusal_no_rows
+#print axioms Lara.Process.Enumerate.guardsHold_cons
+#print axioms Lara.Process.Enumerate.filter_and
+#print axioms Lara.Process.Enumerate.map_ite
+#print axioms Lara.Process.Enumerate.flatMap_ite_filter
+#print axioms Lara.Process.Enumerate.family_product_cons
+#print axioms Lara.Process.Enumerate.guarded_cons
+#print axioms Lara.Process.Enumerate.guarded_eq_filter
+#print axioms Lara.Process.Enumerate.mem_product_guards
+#print axioms Lara.Process.Enumerate.mem_guarded
+#print axioms Lara.Process.Enumerate.familyBlock_eq
+#print axioms Lara.Process.Enumerate.familyBlockRef_eta
+#print axioms Lara.Process.Enumerate.referenceFamily_flatMap
+#print axioms Lara.Process.Enumerate.flatMap_familyBlock
+#print axioms Lara.Process.Enumerate.searchFamily_eq
+#print axioms Lara.Process.Enumerate.mem_searchFamily
+#print axioms Lara.Process.Enumerate.searchFamily_perm
+#print axioms Lara.Process.Enumerate.searchFamily_nodup
+#print axioms Lara.Process.Enumerate.searchFamily_length
+#print axioms Lara.Process.Enumerate.enumerateFamily_eq_ok
+#print axioms Lara.Process.Enumerate.enumerateFamily_ok
+#print axioms Lara.Process.Enumerate.enumerateFamily_cap_plus_one_products
+#print axioms Lara.Process.Enumerate.enumerateFamily_refusal_no_rows
+
+-- lean/Lara/Examples/ProcessSourceProfiles.lean: 2 public declarations.
+#print axioms Lara.Examples.ProcessSourceProfiles.alternating_coverage_accepted
+#print axioms Lara.Examples.ProcessSourceProfiles.alternating_fixed_witness_failure_nonvacuous
+
+-- lean/Lara/Examples/ProcessEnumerate.lean: 4 public declarations.
+#print axioms Lara.Examples.ProcessEnumerate.clamped_only_tightens
+#print axioms Lara.Examples.ProcessEnumerate.huge_declared_cap_is_clamped
+#print axioms Lara.Examples.ProcessEnumerate.base_within_ceilings
+#print axioms Lara.Examples.ProcessEnumerate.powerset_within_ceilings
+
+-- lean/Lara/Process/Enumerate.lean: 4 public declarations.
+#print axioms Lara.Process.Enumerate.clamped_le_self
+#print axioms Lara.Process.Enumerate.admissible_pool_length
+#print axioms Lara.Process.Enumerate.enumerateProblem_within_ceilings
+#print axioms Lara.Process.Enumerate.enumerateFamily_within_ceilings
+
+-- lean/Lara/Examples/ProcessSourceProfiles.lean: 1 public declarations.
+#print axioms Lara.Examples.ProcessSourceProfiles.sibling_full_family_preconditions
+

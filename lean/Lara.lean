@@ -343,6 +343,27 @@
 --     where `preferredSem` and `groundedSem` disagree —
 --     Lara.Invariants.Observation, Lara.Context.Observation,
 --     Lara.Examples.ContextSemantics.
+--   * the checked-source audit boundary (#22 P1): the proof-retaining source
+--     observer (`checkSource`) with its typed rejection sum, every fault
+--     payload carried structurally and the accepted observation owning the
+--     exact audit/evidence/certificate-selection successes; the
+--     stable-coordinate graph lift and exact selected-support
+--     characterization; the total node kind as the meet over a node's own
+--     argument and every support leaf/method key, with no-promotion for slot
+--     keys and a per-family cache proved equal to the direct calculation for
+--     every key; source-ordered provenance built from the authoritative
+--     retained reconstruction rather than from core-subterm coincidence; the
+--     modeled ledger check with a fail-closed metadata bound over all family
+--     siblings; the closed audit specification — pinned source, exact claim
+--     association, independent support inference, the real BHL method bridge,
+--     conditional and ledger guarantees, and fail-closed duplicate metadata;
+--     and the total `WarrantModel` over the guarded product, whose fixed-
+--     witness audit is proved equal to `ProductAuditHolds` and, with no
+--     slots, to the existing `Universe.AuditHolds`. An `observed` grade still
+--     requires a reader-admitted capture assumption and an audit over a
+--     rejected source is false — Lara.Process.Source* and
+--     Lara.Process.Family*, with countermodels in
+--     Lara.Examples.ProcessSource*/ProcessFamily*.
 -- See docs/implementation.md#mechanization-one-core-two-implementations for the result-by-result map.
 import Lara.Prop
 import Lara.Presentation
@@ -579,3 +600,43 @@ import Lara.Process.Rename
 import Lara.Process.Wire
 import Lara.Process.Run
 import Lara.Examples.ProcessWire
+-- The checked-source audit boundary (#22 P1): typed source observer and codec,
+-- stable-coordinate graph lift, cached kind/no-promotion, authored dependency
+-- provenance, modeled ledger checks, the closed audit specification with the
+-- real BHL method bridge, and the total warrant model over guarded products.
+import Lara.Process.SourceInput
+import Lara.Process.SourceWire
+import Lara.Process.Source
+import Lara.Process.SourceGraph
+import Lara.Process.SourceCoordinates
+import Lara.Process.SourceKinds
+import Lara.Process.SourceKindTable
+import Lara.Process.SourceProvenance
+import Lara.Process.SourceLedger
+import Lara.Process.Family
+import Lara.Process.InquiryProcessWire
+import Lara.Process.FamilyWire
+import Lara.Process.SourceDiagnosticWire
+import Lara.Process.SourceResultWire
+import Lara.Process.SourceAuditSupport
+import Lara.Process.SourceAuditAssociation
+import Lara.Process.SourceAudit
+import Lara.Process.SourceAuditWire
+import Lara.Process.SourceModel
+import Lara.Process.FamilyAudit
+import Lara.Examples.ProcessSource
+import Lara.Examples.ProcessSourceKinds
+import Lara.Examples.ProcessSourceKindTable
+import Lara.Examples.ProcessSourceCoordinates
+import Lara.Examples.ProcessSourceProvenance
+import Lara.Examples.ProcessFamily
+import Lara.Examples.ProcessFamilyWire
+import Lara.Examples.ProcessSourceLedger
+import Lara.Examples.ProcessSourceResultWire
+import Lara.Examples.ProcessSourceAudit
+import Lara.Examples.ProcessSourceAuditWire
+import Lara.Examples.ProcessSourceProfiles
+import Lara.Examples.ProcessSourceReplay
+-- Stage P2: bounded, provably reference-equal enumeration with fail-closed caps.
+import Lara.Process.Enumerate
+import Lara.Examples.ProcessEnumerate

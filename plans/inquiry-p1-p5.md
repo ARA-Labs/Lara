@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-11
 
->Status: APPROVED plan after design and feasibility review. All implementation checkboxes remain unimplemented; proposed interfaces and fixtures are not landed contracts.
+>Status: APPROVED plan; implementation is in progress. P1 (checked-source observer, codecs, stable identity, kind/provenance, families, closed audit specification and the total warrant model) and P2 (bounded reference-equal enumeration with fail-closed caps) have landed in the working tree with their axiom rows and subject documentation, and pass `make local-gates`. Remaining work: P3–P5, the inquiry runner and codecs, the file-driven fixture suite, final verification, and the single PR.
 
 >For agentic workers: use the subagent-driven-development or executing-plans skill when implementation is separately assigned. Complete the checkboxes in dependency order. Deliver P1-P5 together in one PR for [issue #22](https://github.com/ARA-Labs/Lara/issues/22). This review authorizes no implementation, commit, push or PR.
 
@@ -27,6 +27,12 @@ Lara makes research arguments checkable rather than establishing their empirical
 ## Constraints
 
 Keep `process-input 1`, `process-result 1`, `process-error 1`, `lara-core@0.3`, all existing corpus bytes and existing P0 fixtures unchanged. The P0 runner remains a history-only runner and continues refusing audits. The separate wrapper is an approved extension, not a reinterpretation of version 1. A future decision to select a version-2 process contract requires a separately reviewed plan revision budgeting all affected codecs, proofs, goldens and P6/P7 work; do not silently rewrite P0's semantics.
+
+Implementation authorization: repair the existing source door's missing
+`rejectOnConflict` enforcement before evidence replay. The observer's exact
+correspondence is to that corrected door. This source-level correction includes
+typed diagnostics, affected proofs and regression coverage; P0, the core wire,
+the core checker and corpus remain unchanged.
 
 The symbolic layer uses closed constructors and distinct identifiers. Strings are confined to wire names, labels and the existing raw argument-name exception in `Update.SourceState`. Every frozen definition lands with its independent semantics, executable correspondence proofs and explicit `AxCheck.lean` rows. Proofs use no `sorry` or `native_decide`; only `propext`, `Classical.choice` and `Quot.sound` are allowed. No desired result is accepted as a certificate premise.
 
@@ -229,22 +235,22 @@ P1a first settles and implements the shared observer, total kind/provenance calc
 
 ### P1: check every materialized source and audit the submitted witness
 
-- [ ] Add kernel-decidable source examples before implementing the observer: accepted single leaf, policy reject, group quarantine, escalated group reject, duplicate declaration, core rejection, evidence mismatch and a required extraction with no evidence context. Assert typed rejection reasons, including mixed admission/evidence/core failures.
-- [ ] Compose the existing presentation codecs into the typed source envelope, then implement the proof-retaining observer with the evidence-policy syntax guard, ordinary assembly/admission, all-declared evidence replay and core finish in that order. Prove projection to `sourceWithEvidence`, exact source/audit output agreement and the `CertifiedSource`/`AcceptedRun` construction using existing BHL helpers. Retain detailed rejection payloads and prove their erasure agrees with existing errors. No core or `applyUpdate` behavior changes.
-- [ ] Define typed declaration fragments, deterministic append/materialization, slots and guarded product completions. Prove exact membership and the no-slot P0 specialization. Keep invalid materialized sources in the family as rejected outcomes.
-- [ ] Resolve claim/witness names, lift checked graphs to stable declaration identities, and prove label preservation and selected-support exactness. Test an earlier pruned declaration shifting every later checked index.
-- [ ] Implement the closed conditional, ledger and BHL audit specifications, constructing every `BridgeCertificate` premise from the authoritative source and existing BHL helpers. Prove computed audit iff the reused warrant/coverage predicate, fixed-witness quantifier order, no hypothetical promotion and fail-closed missing metadata. Test swapped witnesses, false preconditions, failed siblings, stale bindings and mixed admission/evidence/core failures.
-- [ ] Add fixed-atom claim-change, forged-observed replay, inadmissible-attacker reinstatement and defender-kind examples; prove every checked node's kind calculation and profile graph agree with the warrant model.
-- [ ] Add explicit `AxCheck.lean` rows for every public theorem and countermodel in this task; update the source-boundary portion of the subject document only after definitions are settled.
+- [x] Add kernel-decidable source examples before implementing the observer: accepted single leaf, policy reject, group quarantine, escalated group reject, duplicate declaration, core rejection, evidence mismatch and a required extraction with no evidence context. Assert typed rejection reasons, including mixed admission/evidence/core failures.
+- [x] Compose the existing presentation codecs into the typed source envelope, then implement the proof-retaining observer with the evidence-policy syntax guard, ordinary assembly/admission, all-declared evidence replay and core finish in that order. Prove projection to `sourceWithEvidence`, exact source/audit output agreement and the `CertifiedSource`/`AcceptedRun` construction using existing BHL helpers. Retain detailed rejection payloads and prove their erasure agrees with existing errors. No core or `applyUpdate` behavior changes.
+- [x] Define typed declaration fragments, deterministic append/materialization, slots and guarded product completions. Prove exact membership and the no-slot P0 specialization. Keep invalid materialized sources in the family as rejected outcomes.
+- [x] Resolve claim/witness names, lift checked graphs to stable declaration identities, and prove label preservation and selected-support exactness. Test an earlier pruned declaration shifting every later checked index.
+- [x] Implement the closed conditional, ledger and BHL audit specifications, constructing every `BridgeCertificate` premise from the authoritative source and existing BHL helpers. Prove computed audit iff the reused warrant/coverage predicate, fixed-witness quantifier order, no hypothetical promotion and fail-closed missing metadata. Test swapped witnesses, false preconditions, failed siblings, stale bindings and mixed admission/evidence/core failures.
+- [x] Add fixed-atom claim-change, forged-observed replay, inadmissible-attacker reinstatement and defender-kind examples; prove every checked node's kind calculation and profile graph agree with the warrant model.
+- [x] Add explicit `AxCheck.lean` rows for every public theorem and countermodel in this task; update the source-boundary portion of the subject document only after definitions are settled.
 
 ### P2: enumerate exactly and stop at declared limits
 
-- [ ] Add exhaustive small-model examples comparing reference histories and slot products with generated families, including contradictory orders, repeated record entries, base/universe overlap, empty universe, invalid current dataset versions and all-rejected source alternatives.
-- [ ] Add an optional-event fixture emitting both omission and valid extension, and a valid short history whose optional extension is invalid.
-- [ ] Implement prefix history DFS and guarded slot traversal with bounded counters. Prove soundness, completeness, no duplicates, finite-set equality to the reference and cap-plus-one refusal correctness. Do not prune partial coverage without the corresponding lemma.
-- [ ] Prove count/verdict invariance and deterministic new-runner witness selection. Test that v1 witness bytes stay unchanged because its runner is untouched.
-- [ ] Add boundary examples at and above each limit, including search exhaustion with few accepted histories and powerset growth with few source completions. No partial rows or positive result may escape a refusal.
-- [ ] Add axiom audit rows and document exactly which limits count histories, source products and analysis work. Do not raise the P0 event ceiling as part of this PR.
+- [x] Add exhaustive small-model examples comparing reference histories and slot products with generated families, including contradictory orders, repeated record entries, base/universe overlap, empty universe, invalid current dataset versions and all-rejected source alternatives.
+- [x] Add an optional-event fixture emitting both omission and valid extension, and a valid short history whose optional extension is invalid.
+- [x] Implement prefix history DFS and guarded slot traversal with bounded counters. Prove soundness, completeness, no duplicates, finite-set equality to the reference and cap-plus-one refusal correctness. Do not prune partial coverage without the corresponding lemma.
+- [x] Prove count/verdict invariance and deterministic new-runner witness selection. Test that v1 witness bytes stay unchanged because its runner is untouched.
+- [x] Add boundary examples at and above each limit, including search exhaustion with few accepted histories and powerset growth with few source completions. No partial rows or positive result may escape a refusal.
+- [x] Add axiom audit rows and document exactly which limits count histories, source products and analysis work. Do not raise the P0 event ceiling as part of this PR.
 
 ### P3: implement all exact inquiry analyses
 
