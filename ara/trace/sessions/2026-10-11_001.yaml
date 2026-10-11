@@ -3,8 +3,8 @@ session:
   date: '2026-10-11'
   started: '2026-10-11'
   last_turn: '2026-10-11'
-  turn_count: 1
-  summary: 'Prepared and reviewed an unapproved unified P1-P5 draft; no implementation or empirical claims.'
+  turn_count: 2
+  summary: 'Revised and approved the unified inquiry plan; implementation remains unstarted.'
 events_logged:
 - turn: 1
   type: decision
@@ -18,6 +18,12 @@ events_logged:
   routing: staged
   provenance: ai-suggested
   summary: 'PROPOSED wrapper, complete typed source codec, shared observer and explicit audit assumptions remain unapproved.'
+- turn: 2
+  type: decision
+  id: N389_inquiry_plan_review
+  routing: direct
+  provenance: user-revised
+  summary: 'User authorized review/revision/approval; corrected enumeration, kind trust, fixed queries and bounded wire contracts before plan approval.'
 ai_actions:
 - turn: 1
   action: 'Created and checked out local branch plan/inquiry-p1-p5 from clean main; wrote plans/inquiry-p1-p5.md and resolved independent targeted review findings.'
@@ -28,12 +34,19 @@ ai_actions:
   action: 'Ran document style and reference/finite-scenario consistency checks. No implementation builds, experiments, commit, push or PR.'
   provenance: ai-executed
   files_changed: []
+- turn: 2
+  action: 'Reviewed existing source semantics and issue 22; revised the plan and marked it APPROVED after independent review. Style checker returned clean. No implementation, new proofs, experiments, commit, push or PR.'
+  provenance: ai-executed
+  files_changed:
+  - plans/inquiry-p1-p5.md
 claims_touched: []
 logic_revisions: []
 key_context:
 - turn: 1
   excerpt: 'yes. do 1 and checkout a new branch to do 2. we puit P1-P5 in one pr'
+- turn: 2
+  excerpt: 'User requested review, revision as needed and approval of the plan only; all implementation checkboxes remain unstarted.'
 open_threads:
-- 'User review and approval of the complete plan, including added outer wrapper, full typed Surface.Input codec and audit assumptions.'
+- 'Implement the approved unified P1-P5 plan only when separately assigned; all implementation and proof acceptance obligations remain open.'
 ai_suggestions_pending:
-- 'O213 remains PROPOSED; feasibility review did not approve implementation or validate scientific or performance claims.'
+- 'O213 is retained as immutable draft history; N389 records plan approval and corrections, not a new scientific claim or implementation result.'

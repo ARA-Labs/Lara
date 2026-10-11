@@ -11012,3 +11012,27 @@ tree:
   - 'User instruction in session 2026-10-11_001'
   - 'https://github.com/ARA-Labs/Lara/issues/22'
   status: resolved
+- id: N389_inquiry_plan_review
+  type: decision
+  title: Approve revised inquiry plan without starting implementation
+  provenance: user-revised
+  timestamp: '2026-10-11'
+  choice: >-
+    User authorized review, revision and marking the P1-P5 plan approved.
+    AI-executed revisions require prefix-complete history enumeration, total
+    graph kinds with metadata-completeness failure before positive audits,
+    fixed query atoms, and structural hypothetical provenance with printed
+    reader-admitted capture assumptions. The source envelope reuses presentation
+    codecs. All implementation remains unstarted and scoped to one later PR.
+  alternatives:
+  - Approve the draft without resolving the semantic and wire-contract gaps
+  - Implement or publish changes during the plan review
+  evidence:
+  - plans/inquiry-p1-p5.md
+  - lean/Lara/Process/Universe.lean
+  - lean/Lara/Process/Entitlement.lean
+  - lean/Lara/Surface/Source.lean
+  - 'Session 2026-10-11_001 turn 2 user review authorization'
+  status: resolved
+  also_depends_on:
+  - N388_inquiry_unified_plan

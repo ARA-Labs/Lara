@@ -2,9 +2,9 @@
 
 **Date:** 2026-10-11
 
->Status: DRAFT, pending user approval. This document proposes work; no interface, theorem or fixture named as proposed below exists yet.
+>Status: APPROVED plan after design and feasibility review. All implementation checkboxes remain unimplemented; proposed interfaces and fixtures are not landed contracts.
 
->For agentic workers: after approval, use the subagent-driven-development or executing-plans skill. Complete the checkboxes in dependency order. Deliver P1-P5 together in one PR for [issue #22](https://github.com/ARA-Labs/Lara/issues/22). Drafting this plan does not authorize implementation, commits, a push or a PR.
+>For agentic workers: use the subagent-driven-development or executing-plans skill when implementation is separately assigned. Complete the checkboxes in dependency order. Deliver P1-P5 together in one PR for [issue #22](https://github.com/ARA-Labs/Lara/issues/22). This review authorizes no implementation, commit, push or PR.
 
 Goal: compute exact finite source-completion analyses and dependency-correct impact certificates from the real Lara checker, including rejected sources and evidence-blocked conditional statuses.
 
@@ -14,7 +14,7 @@ Tech stack: Lean, the existing symbolic Lara checker and S-expression boundary, 
 
 ## TL;DR
 
-P0 cannot carry this work unchanged: its document has no source, its answers contain only history verdicts, and `run_audit` proves every audit is refused. The recommended design leaves those version-1 bytes and theorems true and adds an `inquiry-input 1` wrapper and `inquiry-run` Lean executable in this same P1-P5 PR. The wrapper embeds the P0 document and finite concrete source alternatives; it never accepts a caller-supplied argumentation framework or status function. Approval must explicitly cover this additional outer contract, the finite source-choice semantics and the audit metadata trust boundary. No core wire change, corpus regeneration, mutation-base rewrite or freeze-tag bump is planned.
+P0 cannot carry this work unchanged: its document has no source, its answers contain only history verdicts, and `run_audit` proves every audit is refused. The approved design leaves those version-1 bytes and theorems true and adds an `inquiry-input 1` wrapper and `inquiry-run` Lean executable in this same P1-P5 PR. The wrapper embeds the P0 document and finite concrete source alternatives; it never accepts a caller-supplied argumentation framework or status function. Plan approval covers this additional outer contract, the finite source-choice semantics and the audit metadata trust boundary. No core wire change, corpus regeneration, mutation-base rewrite or freeze-tag bump is planned.
 
 ## Problem
 
@@ -22,9 +22,11 @@ The existing `Inquiry` holds a finite set of completions, with Boolean-property 
 
 The integration boundary must retain more than a grounded status. `Update.PublicReport` intentionally collapses blocked diagnostics, whereas `Driver.PublicStatus` and `BHL.ordinaryStatus` retain `evidenceBlocked conditionalStatus`. `Update.AcceptedRun` retains the exact admission result and proof-bearing checked unit needed by `BHL.observeOrdinary`; this is the existing boundary to reuse (`lean/Lara/Update.lean:70-85,2048-2056`, `lean/Lara/BHL/LaraBridge.lean:398-435`).
 
+Lara makes research arguments checkable rather than establishing their empirical truth (`README.md:8-34,64-90`). This extension asks whether those arguments withstand declared alternatives, which missing observations matter jointly, which explicit conditions stabilize an answer, and which edits preserve a claim's public status. These are useful questions about the declared model; this plan claims neither automatic experiment selection nor measured discovery or performance gains.
+
 ## Constraints
 
-Keep `process-input 1`, `process-result 1`, `process-error 1`, `lara-core@0.3`, all existing corpus bytes and existing P0 fixtures unchanged. The P0 runner remains a history-only runner and continues refusing audits. A separate wrapper is an extension requiring approval, not a reinterpretation of version 1. If review instead selects a version-2 process contract, replace this plan's wrapper design before implementation and budget all affected codecs, proofs, goldens and P6/P7 work; do not silently rewrite P0's semantics.
+Keep `process-input 1`, `process-result 1`, `process-error 1`, `lara-core@0.3`, all existing corpus bytes and existing P0 fixtures unchanged. The P0 runner remains a history-only runner and continues refusing audits. The separate wrapper is an approved extension, not a reinterpretation of version 1. A future decision to select a version-2 process contract requires a separately reviewed plan revision budgeting all affected codecs, proofs, goldens and P6/P7 work; do not silently rewrite P0's semantics.
 
 The symbolic layer uses closed constructors and distinct identifiers. Strings are confined to wire names, labels and the existing raw argument-name exception in `Update.SourceState`. Every frozen definition lands with its independent semantics, executable correspondence proofs and explicit `AxCheck.lean` rows. Proofs use no `sorry` or `native_decide`; only `propext`, `Classical.choice` and `Quot.sound` are allowed. No desired result is accepted as a certificate premise.
 
@@ -38,7 +40,9 @@ Add a proposed `Lara.Process.Source` module over authoritative typed `Surface.In
 
 Match `Surface.sourceWithEvidence`'s full failure priority (`lean/Lara/Surface/Source.lean:99-109`): first reject a duplicate evidence-checker allowlist as `evidenceSyntax`, even with no evidence leaves; then ordinary structural assembly/admission (including group policy), evidence admission over every semantic declaration, and core checking. Replay certified/extraction leaves even when unused or quarantined, using `Evidence.admit` under the fixed production registry `Evidence.extract`. After the initial syntax guard, a policy rejection wins over an evidence mismatch; after admission succeeds, an evidence mismatch wins over a core rejection. The proof-retaining helper keeps the elaboration audit from the same assembly and proves its `elaborateWithAudit` equation and output agreement, rather than rerunning expansion/inference. Retain typed core errors before `finishAssembled` collapses them to `.unsupported`, and prove the observer projects to the existing result after diagnostic erasure. Add mixed-failure fixtures for all three priorities.
 
-The proposed source record contains typed `Surface.Input`, backend theory/replay declarations and an optional evidence snapshot/manifest. Its policy already owns admission and evidence-checker declarations, and its program owns leaves, arguments, claims, groups and attacks. `Process.SourceWire` must encode every constructor of that existing typed input with canonical round-trip laws; it is a new AST codec, not a `.lara` parser. Reuse existing atom, support/certificate and evidence codecs where their types match. Build the symbolic environment from the production canonicalizer and closed shipped backend/evidence registries; do not decode function-valued registries. Missing evidence context is legal only when no semantic leaf needs it; otherwise retain a source rejection. No caller-supplied raw source can disagree with the surface: all raw carriers are derived from the elaboration audit. The unchanged `check-input` envelope remains the core parity format, not the authoritative source format. Adding this typed source codec is a substantial, explicitly budgeted P1 task; no file fetch or Haskell elaborator is added.
+The proposed source record contains typed `Surface.Input`, backend theory/replay declarations and an optional evidence snapshot/manifest. Its policy already owns admission and evidence-checker declarations, and its program owns leaves, arguments, claims, groups and attacks. `Process.SourceWire` composes the existing AST codecs into a source envelope with canonical round-trip laws; it is not a `.lara` parser. Reuse existing atom, support/certificate and evidence codecs where their types match. Build the symbolic environment from the production canonicalizer and closed shipped backend/evidence registries; do not decode function-valued registries. Missing evidence context is legal only when no semantic leaf needs it; otherwise retain a source rejection. No caller-supplied raw source can disagree with the surface: all raw carriers are derived from the elaboration audit. The unchanged `check-input` envelope remains the core parity format, not the authoritative source format. Adding this envelope and its laws is an explicitly budgeted P1 task; no file fetch or Haskell elaborator is added.
+
+Reuse `Presentation.printProgram`/`parseProgram`, `printPolicy`/`parsePolicy`, and their `parse_printProgram`/`parse_printPolicy` laws for `Surface.Input`'s two fields. Reuse `sxDecl`/`unDecl` and `un_sxList_Decl` for fragments (`lean/Lara/Presentation.lean:1487-1525,1559-1588`). The new codec adds the source envelope and capture/backend context, a lossless bridge from `Presentation.Sx` to the runner boundary, and missing strict canonical/injective laws. It must not introduce a second AST spelling convention.
 
 ### What is one completion?
 
@@ -68,13 +72,15 @@ observeCompletion (spec : FamilySpec) (c : Completion) : CompletionObservation
 generate (limits : InquiryLimits) (spec : FamilySpec) : Except RunRefusal (List Completion)
 
 -- Analysis.lean: analyses project the shared observations, never rerun a new model.
-analyze (request : AnalysisRequest) (rows : List CompletionObservation) : AnalysisResult
+analyze (request : FamilyRequest) (rows : List CompletionObservation) : FamilyResult
 
 -- Locality.lean and Impact.lean: check complete material, not a desired status equality.
 checkLocality (before after : AcceptedObservation) (q : Lara.Atom) : LocalityCheck
 impact (before after : SourceObservation) (queries : List Lara.Atom) : ImpactResult
 verifyImpact (before after : SourceInput) (certificate : ImpactCertificate) : Bool
 ```
+
+`FamilyRequest` contains only status, audit, stability, reference/slot sensitivity and minimal-assumptions requests. `FamilyResult` is their result sum. `AnalysisRequest` wraps a family request or independent impact/verification inputs; the runner dispatches the latter to `impact`/`verifyImpact`, never through `analyze`. These signatures describe pure reference semantics. The bounded runner threads one shared budget through enumeration, observation and each dispatched analysis, returning `Except RunRefusal AnalysisResult`; prove successful bounded results equal the reference results. Rejected sources remain family rows.
 
 `SourceInput` owns authoritative typed `Surface.Input`, backend/replay declarations and evidence capture inputs. `SourceRejection` is a closed sum distinguishing structural/admission/group errors, replay incompatibility, evidence admission error and core unit rejection, retaining existing typed reasons and locations. Free-form decode text stays in `RunRefusal`. `SourceObservation` contains either that rejection or an accepted snapshot, the exact source/audit successes, `AcceptedRun`, certified evidence, fresh raw/checked coordinate maps, compiled graph, complete support/hole projections, `BHL.observeOrdinary` and `BHL.ordinaryHoleRows`. `AcceptedObservation` is the accepted constructor's payload, not independently forgeable data.
 
@@ -85,6 +91,14 @@ verifyImpact (before after : SourceInput) (certificate : ImpactCertificate) : Bo
 ### How does a checked source become a submitted-witness audit?
 
 Resolve each process `ClaimId` to a declared symbolic query atom and each `WitnessId` to a stable raw argument identifier. Recompute its checked-node coordinate per completion; `WarrantModel.argOf` is history-independent, but compact checked indices are not. Build the family-wide argument carrier from stable declaration identifiers, lift each checked graph injectively into that carrier, and prove grounded-label preservation. An absent/pruned/incomplete selected argument has no warrant; it never points to whatever now occupies its former index. Two witnesses that alternate support across completions do not certify the one submitted witness.
+
+Freeze the wrapper's `ClaimId -> Atom` bindings before enumeration. Every status and impact query uses that exact atom, even if an alternative removes its declaration or changes a same-named claim's formal proposition. Audits additionally require the authoritative declaration and selected argument to associate with that fixed atom; absence or mismatch fails the audit, not an otherwise successful source check. Never compare different propositions under one claim label.
+
+Compute a kind for every checked node, including every attacker and defender, from all its used leaf and method inputs. Prove the rule/input meet law for this calculation. Build `WarrantModel.underProfile` from this total labeling and check the witness's grounded label there (`lean/Lara/Process/Entitlement.lean:36-72`). Keep ordinary public status separate: removing an inadmissible attacker can reinstate a witness. No transfer to the ordinary graph follows without the existing ancestry premise.
+
+Every slot contribution is hypothetical by construction, with no producer-controlled observed override. Propagate this cap through each dependent support and method derivation. Base-source process kinds are admitted separately from presentation leaf labels and successful replay: a modeled observed kind requires explicitly reader-admitted capture/source-fidelity assumptions and exact source/process bindings. Without that admission its kind is at most conditional; absent required audit metadata still fails the audit. Replay proves pinned-content agreement, not physical observation or calibration.
+
+Require complete kind metadata for every node in an accepted framework before any positive audit of that completion. An unknown kind may have a total placeholder for evaluation, but a separate metadata-completeness check forces every audit on that framework false. An unknown attacker cannot disappear under profile filtering and create an affirmative audit. Ordinary public status is unaffected. Print every reader-admitted modeled-observation assumption in the result; no parser field certifies physical observation.
 
 There is a second missing prerequisite beyond source checking: raw source data alone supplies neither scientific probes, guarantee levels nor the artifact checks in `WarrantModel`. Add an explicit, closed audit specification in the wrapper. Each witness declares its source interpretation, required dependencies, evidence-kind upper bounds, probed error kinds and either a conditional guarantee declaration or an FWER ledger binding. Conditional declarations are reported as assumptions, bound the witness kind by `conditional`, and can never satisfy the strict observed-only profile. Missing metadata yields a failed audit check, never an unconditional `True` artifact field. A ledger binding names the actual run, family, statistic kind/value and a declared count bound; verify run/result association and count every family run in each history, including failed siblings. Reuse `Statistics.warrantedLevel`; missing/nonpositive fields and a violated bound give no warrant. Calibration, interpretation fidelity and capture adequacy remain explicit residual assumptions. Do not claim `warrantedLevel` proves external calibration.
 
@@ -102,7 +116,9 @@ Minimal conditional assumptions use a finite user-declared catalog of literals: 
 
 ### How will P2 enumerate without changing semantics?
 
-Keep `Universe.Problem.completions` as the history reference. Add a prefix depth-first search (DFS) whose state contains `ProcessState`, remaining event identities and satisfied precedence constraints. Extend only with an event whose `ProcessState.step` succeeds; enforce cutoff and already-forced order constraints early. Check complete coverage/count restrictions at leaves unless an explicit prefix-monotonicity lemma licenses earlier pruning. Rejecting a short prefix for omitting a required recorded event would lose valid longer histories. Enumerate source slot products with guard pruning only when the guard is already determined.
+Keep `Universe.Problem.completions` as the history reference. Add a prefix depth-first search (DFS) whose state contains `ProcessState`, remaining event identities and satisfied precedence constraints. Extend only with an event whose `ProcessState.step` succeeds; enforce cutoff and already-forced order constraints early. Check complete coverage/count restrictions at each stop candidate unless an explicit prefix-monotonicity lemma licenses earlier pruning. Rejecting a short prefix for omitting a required recorded event would lose valid longer histories. Enumerate source slot products with guard pruning only when the guard is already determined.
+
+DFS starts from the deduplicated union of recorded and universe events. At every executable prefix, including the empty prefix, offer a stop branch: emit it exactly when full compatibility, recorded-event, order and coverage checks pass. Then independently explore its executable extensions. Remaining optional events do not prevent emission; missing required events prevent emission but not extension (`lean/Lara/Process/Universe.lean:130-145`).
 
 Prove history membership, uniqueness and equality of finite sets with the reference, then product-family equivalence. P0 answer witnesses depend on list order (`find?`), so do not replace its runner's list with a permutation-equivalent DFS list. The new runner uses one documented lexicographic history/choice witness order. Prove permutation invariance for verdicts/counts and equivalence of the new witness membership guarantees. Leave P0 ceilings and its enumeration untouched. New inquiry limits include events, process histories, source completions, source bytes/declarations, analysis comparisons and assumption subsets; each is capped by a checker constant. Exceeding any cap aborts the entire result; exactly at a cap remains legal if the complete search finishes there. Stop after cap plus one outputs, and check bounded products/powers before allocating Cartesian products or powersets. A finite search-step cap also bounds searches that produce few valid completions.
 
@@ -130,6 +146,8 @@ The wrapper has its own closed tag table, strict version check, canonical encode
   (base SOURCE-INPUT)
   (slots (slot SLOT (choice CHOICE GUARD SOURCE-FRAGMENT)...)...)
   (bindings CLAIM-BINDING... WITNESS-AUDIT-SPEC...)
+  (kind-metadata KIND-SPEC...)
+  (admitted-assumptions CAPTURE-ASSUMPTION...)
   (assumption-catalog LITERAL...)
   (inquiry-limits (histories N) (sources N) (source-bytes N)
                   (declarations N) (search-steps N) (pairs N) (subsets N))
@@ -141,6 +159,34 @@ REQUEST := (status LABEL CLAIM) | (audit LABEL CLAIM WITNESS PROFILE)
          | (impact LABEL SOURCE-INPUT SOURCE-INPUT (queries CLAIM...))
          | (verify-impact LABEL SOURCE-INPUT SOURCE-INPUT IMPACT-CERTIFICATE)
 ```
+
+`KIND-SPEC` and `CAPTURE-ASSUMPTION` encode the finite typed records below. Resolve their identities against authoritative declarations and process events; require unique keys and reject conflicting entries. Missing required entries fail audit metadata completeness rather than source acceptance. Slot provenance is derived from materialization and imposes its hypothetical cap regardless of these declarations. An admitted assumption records the reader's trust decision, never evidence that the physical observation occurred.
+
+The following records fix the wrapper contract. All identifiers are typed and references must resolve; failures of outer reference validation are malformed input, not source rejections.
+
+| Record/request | Required fields and result |
+| --- | --- |
+| `FamilySpec` | Embedded process document, base source, ordered slots/choices with guards/fragments, fixed claim bindings, witness audit specifications, reader-admitted kind assumptions and assumption catalog |
+| `KindSpec` | Source identity, typed leaf/method/argument identity, evidence-kind upper cap and optional admitted-assumption reference; node kinds are computed from these inputs, not accepted as labels |
+| `CaptureAssumption` | Distinct assumption identity, exact source/leaf/method/argument and process event/run bindings, capture and source-fidelity assertions, and reader-admitted `AdmissionBasis`; print the assumption and basis in results |
+| `Reference` | Ordered history plus one choice for every slot; membership in the guarded product family is required |
+| `Observable` | `status ClaimId` at its fixed atom, or `audit ClaimId WitnessId Profile` |
+| `Target` | `status ClaimId PublicStatus`, including a blocked conditional label, or positive `audit ClaimId WitnessId Profile` |
+| Status/audit result | Complete ordered family rows with history, assignment and rejected reason or accepted status/audit checks; exact total/accepted/rejected counts, and the fixed-witness aggregate verdict for audit |
+| Stability/sensitivity result | Observable, counts, whole/accepted-domain stability or reference and all differing rows; slot sensitivity additionally returns every minimal changed-slot set and a realizing row |
+| Minimal-assumptions result | Target, catalog, counts and every minimal literal set with its surviving family and immediate-deletion countercompletions |
+| `LocalityCheck` | Checked node/support correspondence, node/compiled-edge differences, both ancestry regions and success/failure of the sufficient test |
+| `ImpactResult` / `ImpactCertificate` | Both source snapshots and identities, exact rejection/acceptance transitions, fixed query atoms, before/after full statuses where defined, changed/unchanged partitions, node/support maps, graph differences, locality checks and exact read keys/values |
+| `VerificationResult` | Verified or the closed certificate fault described above, preserving the request label |
+| `RunRefusal` | Closed malformed, syntax, unsupported, version, usage, I/O and limit cases with typed location/limit details; decode text is diagnostic only |
+
+`InquiryLimits` counters apply to the whole document, not separately to each request. Each declared bound is also capped by a fixed checker ceiling. The embedded event bound limits the deduplicated recorded/universe carrier. The history bound is the minimum of the embedded completion bound and inquiry history bound, and counts all unguarded compatible histories, including those excluded by source guards. `sources` counts every observed family row, rejected rows included, plus each endpoint checked for every impact or verification request; repeated requests consume the same shared budget again. `source-bytes` bounds the UTF-8 input document, including pairwise snapshots and certificates, and `declarations` bounds the aggregate declarations passed to source checking, including repeated materializations and pairwise endpoints. `search-steps` counts each attempted history extension/stop and slot extension. `pairs` counts each observation comparison, graph node/edge comparison and read-value comparison across all requests. `subsets` counts each visited assumption subset across all requests. All counters are checked before the charged operation.
+
+Exactly at a cap is legal if the entire computation finishes there; discovering one additional output or required operation refuses the entire document. Product and powerset upper bounds are allocation guards only: a loose upper bound must not refuse a guarded family that fits the actual counters. Use bounded traversal rather than allocating the upper-bound product. Limits cover pairwise-only documents and certificate verification as well as family analyses; no partial answers escape.
+
+Implementation chooses the new numeric checker ceilings once, documents them as fixed version-1 constants and supplies exact-at-cap and cap-plus-one fixtures for every counter. Increasing a frozen ceiling requires explicit review; a ceiling is never optional.
+
+Emit embedded queries first in their original order, then wrapper requests in their order. Labels must be unique across both lists. Tag history-verdict results separately from source-family results and retain distinct unguarded history and guarded source counts. Embedded verdicts retain P0 semantics and limits; embedded audits intentionally use the new checked-source product semantics. New-runner witnesses need membership proofs, not byte equality with P0 witnesses.
 
 Embedded P0 verdict queries use the complete P0 history family, before source-choice guards; their count never silently shrinks when a source guard excludes a history. Source-family queries report their guarded product count separately. Embedded audits use the product source family and the same fixed submitted witness as wrapper audits. Construct the problem through `Document.problem`; do not call `Wire.run` and discard its audit error. Prove P0 verdict/count agreement, with the new wrapper's documented witness order and the old executable's bytes unchanged. Preserve request order and labels, and validate duplicate labels and unresolved references. A checker-rejected source appears inside a completed inquiry result (exit 0); outer malformed/syntax/version/usage/I/O errors exit 2 and unsupported forms/limits exit 1. Emit one envelope on stdout with empty stderr and no partial result.
 
@@ -158,15 +204,19 @@ Finite typed declaration fragments give source completions explicit choices whil
 
 The largest proof risks are the stable identity lift from compact checked nodes, exact evidence/source admission ordering, and public blocking after graph locality. The source observer must preserve source rejection distinctions while integrating the existing admission, group and evidence phases. P3's minimality proof is finite but combinatorial; limits must cover the analysis itself, not just the number of histories. P4/P5 recheck both sources, so this PR establishes correctness and explanatory locality, not an incremental performance claim.
 
-The proposed audit specification is a material contract decision: conditional declarations must be printed as assumptions and capped at conditional kind; modeled certificate replay cannot become evidence of a real observation. Checked BHL method adapters need finite executable construction and explicit proof obligations for every used binding field. Approval of this plan accepts that additional P1 work; it does not permit replacing missing guarantees or artifact checks by defaults. New source slots, wrapper versions and limit values are frozen only after review; P0 and core semantics remain unchanged.
+The approved audit specification requires conditional declarations to be printed as assumptions and capped at conditional kind; modeled certificate replay cannot become evidence of a real observation. Checked BHL method adapters need finite executable construction and explicit proof obligations for every used binding field. This additional P1 work is included; missing guarantees or artifact checks cannot be replaced by defaults. Source-slot semantics and wrapper version 1 are approved. Numeric ceilings follow the implementation rule above; P0 and core semantics remain unchanged.
 
 ## Migration
 
-No existing consumer migrates in this draft. After approval, add the new reference executable and fixtures while running all legacy gates unchanged. Update `docs/theory-process.md` to describe both entry points and the shared observer, with current-tense contracts only; update `docs/implementation.md`, `lean/README.md` and `docs/spec.md` only where their command/wire indexes require it. Keep alternatives and approval history in this living plan and the research record, not durable documentation. When the unified implementation lands, move durable contracts into those subject documents and delete this executed plan.
+No existing consumer migrates during this plan review. When implementation lands, add the new reference executable and fixtures while running all legacy gates unchanged. Update `docs/theory-process.md` to describe both entry points and the shared observer, with current-tense contracts only; update `docs/implementation.md`, `lean/README.md` and `docs/spec.md` only where their command/wire indexes require it. Keep alternatives and approval history in this living plan and the research record, not durable documentation. When the unified implementation lands, move durable contracts into those subject documents and delete this executed plan.
+
+When implementation lands, explicitly replace `docs/theory-process.md:213`'s statement that every stage reads and writes `process-input 1` with the two-entry-point contract. Until then the durable document remains unchanged.
 
 ### Which files does each task own?
 
 Every new path below is proposed. Existing paths were inspected for the named integration seam. One integration owner owns shared imports, axiom rows, build/gate registration and final documentation. The P1 source contract must settle before P3/P5 code is split among workers.
+
+P1a first settles and implements the shared observer, total kind/provenance calculation, fixed query bindings and stable declaration identity contract. Its source correspondence, kind meet/no-promotion, graph-lift and support-exactness proofs must land in the working tree before P2/P3/P4/P5 implementation is split among workers. P1 audit construction then consumes that boundary; later stages share it rather than inventing adapters. This dependency order changes no acceptance scope: all stages still ship together in one PR.
 
 | Task | Create | Modify | Responsibility |
 | --- | --- | --- | --- |
@@ -180,15 +230,17 @@ Every new path below is proposed. Existing paths were inspected for the named in
 ### P1: check every materialized source and audit the submitted witness
 
 - [ ] Add kernel-decidable source examples before implementing the observer: accepted single leaf, policy reject, group quarantine, escalated group reject, duplicate declaration, core rejection, evidence mismatch and a required extraction with no evidence context. Assert typed rejection reasons, including mixed admission/evidence/core failures.
-- [ ] Add the complete typed `Surface.Input` codec, then implement the proof-retaining observer with the evidence-policy syntax guard, ordinary assembly/admission, all-declared evidence replay and core finish in that order. Prove projection to `sourceWithEvidence`, exact source/audit output agreement and the `CertifiedSource`/`AcceptedRun` construction using existing BHL helpers. Retain detailed rejection payloads and prove their erasure agrees with existing errors. No core or `applyUpdate` behavior changes.
+- [ ] Compose the existing presentation codecs into the typed source envelope, then implement the proof-retaining observer with the evidence-policy syntax guard, ordinary assembly/admission, all-declared evidence replay and core finish in that order. Prove projection to `sourceWithEvidence`, exact source/audit output agreement and the `CertifiedSource`/`AcceptedRun` construction using existing BHL helpers. Retain detailed rejection payloads and prove their erasure agrees with existing errors. No core or `applyUpdate` behavior changes.
 - [ ] Define typed declaration fragments, deterministic append/materialization, slots and guarded product completions. Prove exact membership and the no-slot P0 specialization. Keep invalid materialized sources in the family as rejected outcomes.
 - [ ] Resolve claim/witness names, lift checked graphs to stable declaration identities, and prove label preservation and selected-support exactness. Test an earlier pruned declaration shifting every later checked index.
 - [ ] Implement the closed conditional, ledger and BHL audit specifications, constructing every `BridgeCertificate` premise from the authoritative source and existing BHL helpers. Prove computed audit iff the reused warrant/coverage predicate, fixed-witness quantifier order, no hypothetical promotion and fail-closed missing metadata. Test swapped witnesses, false preconditions, failed siblings, stale bindings and mixed admission/evidence/core failures.
+- [ ] Add fixed-atom claim-change, forged-observed replay, inadmissible-attacker reinstatement and defender-kind examples; prove every checked node's kind calculation and profile graph agree with the warrant model.
 - [ ] Add explicit `AxCheck.lean` rows for every public theorem and countermodel in this task; update the source-boundary portion of the subject document only after definitions are settled.
 
 ### P2: enumerate exactly and stop at declared limits
 
 - [ ] Add exhaustive small-model examples comparing reference histories and slot products with generated families, including contradictory orders, repeated record entries, base/universe overlap, empty universe, invalid current dataset versions and all-rejected source alternatives.
+- [ ] Add an optional-event fixture emitting both omission and valid extension, and a valid short history whose optional extension is invalid.
 - [ ] Implement prefix history DFS and guarded slot traversal with bounded counters. Prove soundness, completeness, no duplicates, finite-set equality to the reference and cap-plus-one refusal correctness. Do not prune partial coverage without the corresponding lemma.
 - [ ] Prove count/verdict invariance and deterministic new-runner witness selection. Test that v1 witness bytes stay unchanged because its runner is untouched.
 - [ ] Add boundary examples at and above each limit, including search exhaustion with few accepted histories and powerset growth with few source completions. No partial rows or positive result may escape a refusal.
@@ -233,10 +285,16 @@ For `joint-only`, build checked source arguments whose compiled graph has `b1 ->
 | Requirement | Fixture / exact construction | Required result |
 | --- | --- | --- |
 | P0 compatibility | `p0-verdict.sexp`: embed `fixtures/process/run/empty-universe.sexp`, no source slots | P0 history verdict/count agree; all old process fixtures unchanged |
+| Strong P0 compatibility | `p0-unknown.sexp`, `p0-guard.sexp`, `p0-rejected.sexp`, `p0-embedded-audit.sexp` | Unknown verdict witnesses remain valid; guards and all-rejected source rows leave embedded verdict/count unchanged; submitted embedded audits execute under the new semantics |
 | Checked source family | `source-rejections.sexp`: choices accepted, policy reject, core reject and failed evidence extraction | All choices counted; rejection kind/location retained; no fabricated AF |
 | Submitted audit | `fixed-witness.sexp`: two completions with alternating support witnesses | Claim-level existential cannot become a positive fixed-witness audit |
 | No promotion | `hypothetical-audit.sexp`: simulated source choice with valid replay | Strict profile never reports observed entitlement |
 | Audit metadata | `ledger-sibling.sexp`: ledger bound one, same source graph, second failed family run in one history | Bound check fails only in the two-run completion; public status stays equal, fixed-witness warrant changes |
+| Fixed query identity | `fixed-query.sexp`: choices change the formal proposition of the same named claim | Every status still queries the fixed atom; the mismatched declared association fails audit |
+| Forged observation | `forged-observed.sexp`: slot leaf declares observed and passes replay | Derived hypothetical cap remains; strict audit fails |
+| Unknown attacker metadata | `unknown-attacker-kind.sexp`: otherwise warranting witness has an attacker without kind metadata | Framework metadata check prevents every positive audit; ordinary status is still computed |
+| Profile acceptance | `profile-reinstatement.sexp`: fully kinded inadmissible attacker is filtered | Profile witness can become accepted; ordinary public status remains separately reported |
+| Optional history prefixes | `optional-prefix.sexp`: optional executable event and a separate invalid extension | Both omission and valid extension occur; valid shorter history survives its invalid extension |
 | Empty family | `inconsistent.sexp`: contradictory precedence | Inconsistent; no stability or conditional certificate from an empty domain |
 | Stability/rejection | `mixed-stability.sexp`: same accepted status plus one rejected source | Accepted-only result labeled; whole-outcome stability differs |
 | Single/joint sensitivity | `joint-only.sexp`: two independent Boolean slots, reference `(absent, absent)`, with observable conjunction | Minimal joint set of both slots relative to that reference; no singleton flip from the reference |
@@ -267,7 +325,7 @@ make local-gates
 
 Expected outcome: the theorem build and examples succeed; the joint-only smoke prints an `inquiry-result 1` containing exactly the two-slot minimal witness; each golden gate prints its actual fixture count and no mismatches; `make local-gates` succeeds without updating corpus or old goldens. These are future acceptance commands, not tests run while drafting. The implementation PR must report actual output and any allowed changes, not copy these expectations as evidence.
 
-Draft-only checks, authorized for this planning task:
+Document-only checks, authorized for this planning task:
 
 ```bash
 /home/yfhe/.claude/skills/write-doc/scripts/check-style.sh plans/inquiry-p1-p5.md
@@ -275,10 +333,10 @@ Draft-only checks, authorized for this planning task:
 # inspect stage/acceptance coverage, and scan for unresolved placeholders.
 ```
 
-The draft review must confirm the exact source/evidence phase ordering, that the wrapper really leaves `run_audit` true, that single/joint sensitivity and minimality refer to the same finite family, and that blocking plus its conditional label survive every projection. No expensive code test is required for this document-only change.
+Plan review covers the exact source/evidence phase ordering, preservation of `run_audit`, the shared finite family for sensitivity and minimality, and retention of blocking and its conditional label. Implementation must prove these obligations. No expensive code test is required for this document-only change.
 
 ## Next Steps
 
-1. Review and approve or revise the wrapper contract, finite source slots and audit assumptions before writing implementation code. These choices are explicitly unapproved; the draft is not a landed contract.
-2. Resolve source-boundary and proof feasibility objections in this plan, keeping all P1-P5 acceptance rows in one deliverable. No missing prerequisite may be disguised as an arbitrary runtime oracle or a later adapter.
-3. After approval, implement the checked source boundary first, then the generator and analyses against it, and finish locality/impact and the complete runner before requesting the single PR review. Record proposed design material only after the drafting/review task is complete; no research claim is empirically validated by this plan.
+1. The wrapper, source-choice semantics and audit trust boundary are approved as a plan after the corrections above. All implementation checkboxes remain open; approval does not claim that code or proofs exist.
+2. On a separately assigned implementation task, settle P1a and its proofs before splitting later work. Resolve any newly discovered contract conflict in this living plan without dropping acceptance requirements or using arbitrary runtime oracles.
+3. Deliver the checked boundary, generator, analyses, locality, impact and complete runner together before requesting the single PR review. This review performs and authorizes no implementation, commit, push or PR. Record material design corrections only after review is complete; no empirical utility claim follows.

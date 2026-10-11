@@ -1838,3 +1838,8 @@ entries:
   - "Recorded the user's one-PR delivery instruction as N388; branch and draft preparation are session actions."
   - "Staged O213 as ai-suggested PROPOSED architecture. Draft review is not user approval, implementation, or empirical validation."
   - "No closure signal promotes this proposal. No logic entries or unrelated historical observations changed."
+- turn: 2026-10-11_001#2
+  notes:
+  - "Recorded N389 as the user's approved design decision with AI-executed corrections; this closes plan review, not implementation."
+  - "Preserved O213 as immutable draft history. No logic crystallization: this turn establishes a plan choice, not new proved or empirical knowledge."
+  - "Material corrections concern prefix completeness, nonmonotone profile filtering, fixed query identity and evidence trust; routine style checks are session actions, not experiments."
