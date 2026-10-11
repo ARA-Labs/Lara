@@ -632,8 +632,8 @@ the result is stated but not yet proved or mechanized._
 - **Sources**: [
   `R2 documented trigger, unsatisfiable` ← `ara/staging/observations.yaml:1222-1223` «("non-ground term where ground required") was unsatisfiable by construction, because Term has no variable constructor.» [input];
   `why the trigger cannot fire` ← `docs/spec.md:1622-1623` «R2 has no groundness clause: `Term ::= num | str | con(...)` has no variable constructor, so every `Prop` is ground structurally» [input];
-  `coverage prose asserting exercise` ← `git dfa9811~1:docs/rejection-surface.md:93` «Two classes are not individually anchored above because they are exercised only inside larger» [input];
-  `0` ← `git dfa9811~1:fixtures/mutants/MANIFEST.tsv` «`cut -f5 | grep -c '^reject-R2$'` → 0 over 369 rows» [result];
+  `coverage prose asserting exercise (historical observation O59)` ← `ara/staging/observations.yaml:1220-1221` «docs/rejection-surface.md described it as "exercised only inside larger worked cases", which was false» [input; recorded observation, not a directly verifiable quotation from the former file];
+  `pre-enforcement counts (historical measurement N152)` ← `ara/trace/exploration_tree.yaml:3720-3721` «Suite 369 -> 496 mutants; reject-R2 0 -> 107.» [result; recorded measurement, not a recount of the former manifest];
   `107` ← `fixtures/mutants/MANIFEST.tsv` «`cut -f5 | grep -c '^reject-R2$'` → 107 over 496 rows, after enforcement landed» [result]
   ]
 - **Status**: supported
@@ -647,7 +647,7 @@ the result is stated but not yet proved or mechanized._
 - **Statement**: Adding an early stage to a checker silently migrates a seeded-defect suite into the new class wherever the operators synthesize their own vocabulary — the injected symbols are, by construction, exactly what the new stage rejects. "The suite's expected outcomes did not move" is therefore a claim about the generators having been made aware of the new stage, and is only meaningful if it is measured after that change rather than assumed from the stage's intent.
 - **Conditions**: Holds where the new stage rejects *undeclared* material and the suite's operators create material rather than only permuting existing declarations. The complementary half is class-boundary discipline: the delta also depends on the new stage declining jurisdiction it could plausibly claim (here, substitution-domain totality and rule-id resolution, which stay R3 and R1). Observed once, over one suite; the untested boundary is a stage that rejects *relational* rather than *declarational* facts.
 - **Sources**: [
-  `369` ← `git dfa9811~1:fixtures/mutants/MANIFEST.tsv` «369 data rows (`wc -l` minus header)» [input];
+  `369 pre-existing mutants (historical observation O60)` ← `ara/staging/observations.yaml:1250-1251` «Measured: the expected-column diff over the 369 pre-existing mutants is empty, after the generators were changed.» [input; recorded measurement, not a recount of the former manifest];
   `empty` ← `measurements/frozen/lara-core-0.2-regeneration-diffs.md:37` «(empty)» [result];
   `three operator groups` ← `measurements/frozen/lara-core-0.2-regeneration-diffs.md:40` «**Why it is empty, and why that was not free.** Three operator groups synthesize» [result]
   ]
