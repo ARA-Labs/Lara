@@ -4,6 +4,7 @@ import itertools
 import pathlib
 import re
 import subprocess
+import sys
 import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -78,7 +79,10 @@ def success(history: bytes, assignments: list[tuple[int, ...]]) -> bytes:
     ).encode()
 
 
-def check() -> None:
+def check(command: list[str] | None = None, observer=None) -> None:
+    """Check seven cases; observe verified output before temporary-file cleanup."""
+    command = [str(BIN)] if command is None else list(command)
+    assert command and all(isinstance(arg, str) and arg for arg in command), command
     base = (FIXTURES / "limit-sources-at-cap.sexp").read_text(encoding="utf-8")
     history = (FIXTURES / "limit-sources-at-cap.expected").read_bytes()
     assert history == (
@@ -112,19 +116,21 @@ def check() -> None:
             path.write_bytes(document(base, guards, cap))
             try:
                 result = subprocess.run(
-                    [str(BIN), str(path)], capture_output=True, timeout=TIMEOUT,
+                    command + [str(path)], capture_output=True, timeout=TIMEOUT,
                 )
-            except subprocess.TimeoutExpired as error:
+            except (OSError, subprocess.TimeoutExpired) as error:
                 raise AssertionError(
-                    f"{name}: inquiry-run exceeded {TIMEOUT}s; "
-                    f"stdout={error.stdout!r}, stderr={error.stderr!r}"
+                    f"{name}: command failed within {TIMEOUT}s: {command!r}: {error}"
                 ) from error
+            assert result.returncode >= 0, ("driver killed by signal", command, result)
             # Exact output also rejects partial result envelopes before refusal.
             assert (result.returncode, result.stdout, result.stderr) == (
                 code, expected, b""
             ), (name, result, expected)
+            if observer is not None:
+                observer(path, result.stdout)
     print(f"inquiry bounded products: {len(cases)} cases pass")
 
 
 if __name__ == "__main__":
-    check()
+    check(sys.argv[1:] or None)

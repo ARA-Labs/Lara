@@ -1,7 +1,7 @@
 # Convenience targets. The repo's source of truth stays cabal + scripts/;
 # these wrap the common entry points.
 
-.PHONY: build test doctest docs docs-haskell docs-lean bench bench-map bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry semantics-registry-test backend-deps-golden update-goldens update-differential differential admission-differential evidence-differential evidence-cli evidence-measured evidence-measured-test ara-source-spans ara-session-index map-check map-conformance pw-conformance lean-build pw-example bhl-theory process-theory axiom-withdrawal-example axiom-audit lean-gate cross-check local-gates
+.PHONY: build test doctest docs docs-haskell docs-lean bench bench-map bench-image bench-container measure presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens semantics-registry semantics-registry-test backend-deps-golden update-goldens update-differential differential admission-differential evidence-differential evidence-cli evidence-measured evidence-measured-test ara-source-spans ara-session-index map-check map-conformance pw-conformance inquiry-conformance lean-build pw-example bhl-theory process-theory axiom-withdrawal-example axiom-audit lean-gate cross-check local-gates
 
 build:
 	cabal build all
@@ -62,7 +62,7 @@ docs-lean:
 
 lean-gate: lean-build pw-example bhl-theory process-theory axiom-withdrawal-example axiom-audit semantics-registry semantics-registry-test
 
-cross-check: presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens backend-deps-golden update-goldens update-differential differential admission-differential evidence-differential evidence-cli evidence-measured evidence-measured-test map-conformance pw-conformance
+cross-check: presentation-parity surface-conformance surface-conformance-gate-test semantics-goldens backend-deps-golden update-goldens update-differential differential admission-differential evidence-differential evidence-cli evidence-measured evidence-measured-test map-conformance pw-conformance inquiry-conformance
 
 local-gates: lean-gate cross-check
 
@@ -234,6 +234,9 @@ map-conformance:
 # Pass UPDATE=1 to regenerate the committed goldens (only after both agree).
 pw-conformance:
 	python3 scripts/check-pw-conformance.py $(if $(UPDATE),--update,)
+
+inquiry-conformance:
+	python3 scripts/check-inquiry-conformance.py
 
 # E1 checker-performance bench: measures the production checker
 # on the frozen corpus units and the manifest-discovered harness, prints the

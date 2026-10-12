@@ -3,6 +3,7 @@
 import pathlib
 import re
 import subprocess
+import sys
 import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -15,8 +16,11 @@ def with_cap(text: str, cap: int) -> str:
     return LIMIT.sub(f"(source-bytes {cap})", text)
 
 
-def check() -> None:
-    base = (FIXTURES / "limit-source-bytes-at-cap.sexp").read_text()
+def check(command: list[str] | None = None, observer=None) -> None:
+    """Check six cases; observe verified output while its input still exists."""
+    command = [str(BIN)] if command is None else list(command)
+    assert command and all(isinstance(arg, str) and arg for arg in command), command
+    base = (FIXTURES / "limit-source-bytes-at-cap.sexp").read_text(encoding="utf-8")
     expected = (FIXTURES / "limit-source-bytes-at-cap.expected").read_bytes()
     cases = {
         "ascii": base,
@@ -35,7 +39,11 @@ def check() -> None:
                     cap = required
                 path = pathlib.Path(directory) / f"{name}-{excess}.sexp"
                 path.write_bytes(document)
-                result = subprocess.run([str(BIN), str(path)], capture_output=True)
+                try:
+                    result = subprocess.run(command + [str(path)], capture_output=True, timeout=10)
+                except (OSError, subprocess.TimeoutExpired) as error:
+                    raise AssertionError(f"{name}-{excess}: command failed: {command!r}: {error}") from error
+                assert result.returncode >= 0, ("driver killed by signal", command, result)
                 if excess:
                     output = (
                         "(inquiry-error 1 () (limit (counter source-bytes) "
@@ -46,8 +54,10 @@ def check() -> None:
                 assert (result.returncode, result.stdout, result.stderr) == (
                     excess, output, b""
                 ), (name, excess, cap, len(document), result)
+                if observer is not None:
+                    observer(path, result.stdout)
     print("inquiry UTF-8 byte limits: 6 boundary cases pass")
 
 
 if __name__ == "__main__":
-    check()
+    check(sys.argv[1:] or None)

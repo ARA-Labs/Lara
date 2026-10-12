@@ -428,6 +428,17 @@ Compatibility with the old entry point is a theorem, not an assumption: `embedde
 
 `lake exe inquiry-run FILE` is the reference runner and `lake exe inquiry-examples` recomputes a built-in suite; `fixtures/process/inquiry/` holds one executable document per acceptance row with its `.expected` golden, and `scripts/check-inquiry-run.sh` compares stdout, stderr and exit codes byte for byte (`UPDATE=1` rewrites the goldens). `make process-theory` runs both the old process gates and this one.
 
+`make inquiry-conformance` builds the native Haskell and Lean inquiry drivers,
+discovers every inquiry fixture, and checks each driver's raw stdout, exit code
+and empty stderr independently against the unchanged golden. It also sends the
+original inputs and actual outputs through the Haskell consumer codecs, including
+the temporary byte/product boundary inputs. Generated cases pin allocation
+guards, shared counters and refusal precedence, full certificate faults and
+read-value validation, empty output, reader depth, UTF-8 and locale-independent
+paths. A missing golden, empty fixture family, nested or unowned process input,
+spawn failure, signal or timeout fails the gate. This target is part of
+`make cross-check`, hence `make local-gates`; it has no golden-update mode.
+
 ## How is the development checked?
 
 - `cd lean && lake build`

@@ -136,9 +136,10 @@ for root in fixtures examples bundles corpus-units; do
   # package whose `lara-evidence.sexp` is a canonical ARA manifest and whose
   # `artifact.lara` is driven by `lara check-ara` — the acceptance suite for it
   # is test/evidence-cli.sh, and its byte identities are pinned there.
-  # The eighth is the process-run tree (fixtures/process/): its documents are
-  # `process-input 1` runs, not check-input@1 envelopes, and
-  # scripts/check-process-run.sh pins each one against its golden.
+  # The eighth is the process tree (fixtures/process/): process-input and
+  # inquiry-input documents are not check-input@1 envelopes. Run fixtures belong
+  # to scripts/check-process-run.sh; scripts/check-inquiry-conformance.py pins
+  # inquiry parity against unchanged goldens and asserts total subtree ownership.
   #
   # Why the exclusions are not the safeguard. This positive half treats "both
   # drivers exit 2 with empty stdout" as agreement, so ANY .sexp under these
