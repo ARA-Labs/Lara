@@ -646,6 +646,7 @@ import Lara.Examples.ProcessEnumerate
 import Lara.Process.Analysis
 import Lara.Process.AnalysisWire
 import Lara.Examples.ProcessAnalysis
+import Lara.Examples.ProcessSensitivityFast
 -- Stage P4: checked graph-difference locality, grounded semantics only, with the
 -- finite ancestry block it builds on.
 import Lara.Process.Locality

@@ -1,6 +1,6 @@
 # Restore the approved inquiry evaluation
 
-**Status:** Corrective implementation reviewed: engineering review CLEAR by independent agent on 2026-10-12, for code/proof/candidate preparation only. The original P8 run is sealed incomplete. This plan authorizes no new measurement. Researcher approval of the exact corrected protocol, code/input pins and a fresh budget is required before Task 4.
+**Status:** Task 1 is complete; Tasks 2–4 remain. Corrective implementation reviewed: engineering review CLEAR by independent agent on 2026-10-12, for code/proof/candidate preparation only. The original P8 run is sealed incomplete. This plan authorizes no new measurement. Researcher approval of the exact corrected protocol, code/input pins and a fresh budget is required before Task 4.
 
 **Tracker:** [Issue #49](https://github.com/ARA-Labs/Lara/issues/49), with P8/P9 remaining in issue #22.
 
@@ -14,10 +14,10 @@ Keep `Analysis.minimalSlotSets` as the frozen reference. Add a corpus-independen
 
 Prove exact list equality with the frozen reference, including order and duplicate handling. Preserve all differing rows and the existing first-realizer `find?`. Switch runtime sensitivity only through a full result-equality theorem. Add every new theorem to `AxCheck.lean`; remain sorry-free within `propext`, `Classical.choice` and `Quot.sound`, without `Lean.ofReduceBool`.
 
-- [ ] Implement candidate normalization, minimality and ordering with named module seams.
-- [ ] Prove `minimalSlotSetsFast_eq_minimalSlotSets` and complete sensitivity-result equality.
-- [ ] Verify no flips, differing histories, rejected observations, duplicate identities/changed sets, incomparable minima, nonnumeric declaration order, first realizers and empty-change zero/nonzero-universe cases.
-- [ ] Build and run required local gates; independent spec and quality review before commit.
+- [x] Implement candidate normalization, minimality and ordering with named module seams.
+- [x] Prove `minimalSlotSetsFast_eq_minimalSlotSets` and complete sensitivity-result equality.
+- [x] Verify no flips, differing histories, rejected observations, duplicate identities/changed sets, incomparable minima, nonnumeric declaration order, first realizers and empty-change zero/nonzero-universe cases.
+- [x] Build and run required local gates; independent spec and quality review before commit.
 
 No wire, ceiling, legacy golden, corpus, mutation-seed or freeze-tag change is needed. This is substantial local proof/build work; Haskell tests remain conformance evidence.
 
