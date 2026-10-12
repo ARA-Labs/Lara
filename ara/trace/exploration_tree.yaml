@@ -11165,3 +11165,118 @@ tree:
   status: resolved
   also_depends_on:
   - N390_inquiry_p1_p5_implemented
+- id: N396_inquiry_native_port
+  type: decision
+  title: Implement the approved independent Haskell inquiry door
+  provenance: ai-executed
+  timestamp: '2026-10-12T16:44'
+  choice: >-
+    Port the frozen embedded process, typed source, audit, bounded family,
+    finite analysis and impact definitions into native Haskell. Retain the
+    production checker's accepted value and one family-owned observation
+    projection; reuse impact endpoint observations for accounting and dispatch.
+    Expose input/result/error consumers and lara inquiry FILE without a Lean
+    subprocess or golden reads in runtime code. Keep original UTF-8 byte
+    charging, refusal priority and the standalone Lean process runner unchanged.
+  alternatives:
+  - Delegate the native command to the Lean executable
+  - Publish an encoder-only API without the real observer and result consumers
+  evidence:
+  - https://github.com/ARA-Labs/Lara/blob/e639975/plans/inquiry-p6-p7.md
+  - src/Lara/Process/Inquiry/Run.hs
+  - src/Lara/Process/Projection.hs
+  - src/Lara/Process/Impact.hs
+  - ara/evidence/inquiry-p6-p7-gates.log
+  status: resolved
+  also_depends_on:
+  - N390_inquiry_p1_p5_implemented
+- id: N397_inquiry_native_conformance
+  type: experiment
+  title: Exercise independent inquiry implementations and the integrated gates
+  provenance: ai-executed
+  timestamp: '2026-10-12T16:44'
+  result: >-
+    Both drivers independently matched the raw stdout, exit code and empty
+    stderr of every unchanged inquiry golden and the generated expected
+    outcomes. Original inputs and actual outputs, including temporary
+    byte/product boundaries, passed native consumer decoding and re-encoding.
+    The integrated local gates and both Haskell test suites passed. These are
+    finite conformance checks, not a new soundness proof, performance
+    measurement, scientific-discovery improvement or P8/P9 evaluation.
+  evidence:
+  - ara/evidence/inquiry-p6-p7-gates.log
+  - scripts/check-inquiry-conformance.py
+  - scripts/inquiry_conformance_cases.py
+  - scripts/inquiry-codec-client.hs
+  status: resolved
+  also_depends_on:
+  - N396_inquiry_native_port
+- id: N398_inquiry_consumer_review
+  type: decision
+  title: Require independent consumer expectations and full certificate value checks
+  provenance: ai-executed
+  timestamp: '2026-10-12T16:44'
+  choice: >-
+    Resolve independent spec-review gaps before committing: preserve public
+    result/error version-refusal classification; render error output fully
+    before emission; require a valid original input to decode successfully
+    even when its runtime result is a refusal; consume all temporary boundary
+    inputs and actual outputs; test wrong and conflicting duplicate read values
+    with complete key coverage; and pin labels before references before
+    unresolved impact bindings. Re-review each correction before quality review.
+  alternatives:
+  - Treat driver agreement or an output error as sufficient consumer evidence
+  - Verify only read-key coverage or the presence of one correct duplicate
+  evidence:
+  - test/ProcessSpec.hs
+  - scripts/inquiry-codec-client.hs
+  - scripts/inquiry_conformance_cases.py
+  - ara/evidence/inquiry-p6-p7-gates.log
+  status: resolved
+  also_depends_on:
+  - N396_inquiry_native_port
+  - N397_inquiry_native_conformance
+- id: N399_inquiry_sensitive_candidates
+  type: decision
+  title: Derive slot minima from bounded differing rows instead of the full slot powerset
+  provenance: ai-executed
+  timestamp: '2026-10-12T17:44'
+  choice: >-
+    Resolve the final integration review's unbudgeted sensitivity traversal.
+    Nonempty minimal admitting sets are inclusion-minimal changed sets of
+    retained same-history differing rows; an empty changed set yields every
+    universe singleton under the frozen nonempty minimality rule. Normalize
+    repeated identities and sort reversed declaration-position lists to retain
+    subsequence order. Keep raw differing rows, first realizers, budgets,
+    public APIs and the Lean reference definitions unchanged.
+  alternatives:
+  - Traverse every declared-slot subset even when there are no differing rows
+  - Change the frozen subset charges or ceilings to mask the computation
+  evidence:
+  - src/Lara/Process/Analysis.hs
+  - test/InquirySpec.hs:prop_sparseLargeSensitivity
+  - ara/evidence/inquiry-p6-p7-gates.log
+  status: resolved
+  also_depends_on:
+  - N396_inquiry_native_port
+  - N398_inquiry_consumer_review
+- id: N400_inquiry_sensitive_regression
+  type: experiment
+  title: Exercise sparse sensitivity and rerun every integrated gate
+  provenance: ai-executed
+  timestamp: '2026-10-12T17:44'
+  result: >-
+    The actual native singleton-slot probe failed its deadline before the fix.
+    Afterwards it and the joint-sensitive fixture extended with inert
+    singleton choices returned exact expected bytes, success and empty stderr.
+    The permanent real-source regression also covers nonnumeric slot order,
+    singleton and joint minima, and duplicate slot identities with an empty
+    changed set and exact realizers. Full local gates and both Haskell suites
+    passed again. This is consumer-visible liveness and finite-conformance
+    evidence, not a performance or scientific-discovery claim.
+  evidence:
+  - ara/evidence/inquiry-p6-p7-gates.log
+  - test/InquirySpec.hs:prop_sparseLargeSensitivity
+  status: resolved
+  also_depends_on:
+  - N399_inquiry_sensitive_candidates

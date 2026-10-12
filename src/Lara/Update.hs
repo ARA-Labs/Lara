@@ -239,7 +239,7 @@ dischargeAt question answer pos term = case (pos, term) of
     case indexAt premises i of
       Just child ->
         fmap
-          (\child' -> SRule rule theta (setAt i child' premises) discharges holes assurance)
+          (\child' -> SRule rule theta (setAt (fromInteger i) child' premises) discharges holes assurance)
           (dischargeAt question answer rest child)
       Nothing -> Nothing
   (StepQuestion q : rest, SRule rule theta premises discharges holes assurance) ->
@@ -300,12 +300,11 @@ applyBatch = go 0
       Left reason -> Left (BatchEdit index reason)
       Right next -> go (index + 1) next rest
 
-indexAt :: [a] -> Int -> Maybe a
-indexAt xs i
-  | i < 0 = Nothing
-  | otherwise = case drop i xs of
-      (x : _) -> Just x
-      [] -> Nothing
+indexAt :: [a] -> Integer -> Maybe a
+indexAt _ i | i < 0 = Nothing
+indexAt [] _ = Nothing
+indexAt (x : _) 0 = Just x
+indexAt (_ : xs) i = indexAt xs (i - 1)
 
 setAt :: Int -> a -> [a] -> [a]
 setAt i x xs = [if j == i then x else y | (j, y) <- zip [0 ..] xs]

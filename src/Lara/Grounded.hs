@@ -33,6 +33,8 @@ module Lara.Grounded
   , labelC
   , Claim (..)
   , statusC
+  , labelWithGrounded
+  , statusWithLabels
     -- * Computed complete-claim projection (Lean @completeClaimFor@)
   , claimSupportFor
   , completeClaimFor
@@ -86,14 +88,17 @@ grounded f = iter f (length (afArgs f))
 -- | The compiled labelling read off @grounded@ (Lean @labelC@): @in@ if
 -- grounded, else @out@ if some grounded argument attacks it, else @undec@.
 labelC :: AF -> Int -> Label
-labelC f a =
-  let g = grounded f
-   in if a `elem` g
-        then LIn
-        else
-          if any (\c -> c `elem` g && afAttack f c a) (afArgs f)
-            then LOut
-            else LUndec
+labelC f = labelWithGrounded f (grounded f)
+
+-- The supplied extension is caller-owned; labelC supplies the graph's own.
+labelWithGrounded :: AF -> [Int] -> Int -> Label
+labelWithGrounded f g a =
+  if a `elem` g
+    then LIn
+    else
+      if any (\c -> c `elem` g && afAttack f c a) (afArgs f)
+        then LOut
+        else LUndec
 
 -- | A claim with its complete checked support arguments and its (incomplete)
 -- hole-bearing supporting arguments (Lean @Grounded.Claim@, whose @support@ and
@@ -123,10 +128,14 @@ data Claim = Claim
 -- @statusC@): @gap@ on empty complete support; else @justified@ if some support
 -- argument is @in@; else @contested@ if some is @undec@; else @defeated@.
 statusC :: AF -> Claim -> Status
-statusC f c
+statusC f = statusWithLabels (labelC f)
+
+-- Aggregate labels in the same frozen four-state priority order.
+statusWithLabels :: (Int -> Label) -> Claim -> Status
+statusWithLabels label c
   | null (claimSupport c) = Gap
-  | any (\a -> labelC f a == LIn) (claimSupport c) = Justified
-  | any (\a -> labelC f a == LUndec) (claimSupport c) = Contested
+  | any (\a -> label a == LIn) (claimSupport c) = Justified
+  | any (\a -> label a == LUndec) (claimSupport c) = Contested
   | otherwise = Defeated
 
 -- ---------------------------------------------------------------------------

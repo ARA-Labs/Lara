@@ -1,4 +1,4 @@
-module Lara.Evidence.CSV (CsvTable (..), CsvIndex, decodeCSV, decodeCSVIndex, selectCSV, indexCSV, selectIndexedCSV) where
+module Lara.Evidence.CSV (CsvTable (..), CsvIndex, decodeCSV, decodeCSVIndex, selectCSV, indexCSV, selectIndexedCSV, selectIndexedCSVModeled) where
 
 import Control.Monad (unless)
 import qualified Data.ByteString as B
@@ -70,8 +70,13 @@ buildIndex (CsvTable header rows) = CsvIndex header (Map.fromList
   [(column,Map.fromListWith (++) [(row !! i,[row]) | row <- rows]) | (i,column) <- zip [0..] header])
 
 selectIndexedCSV :: CsvIndex -> ColumnName -> String -> [CsvSelector] -> Pred -> Either String Prop
-selectIndexedCSV (CsvIndex header indices) key raw selectors predicate = do
+selectIndexedCSV table key raw selectors predicate = do
   unless (length selectors <= 256) (Left "selector bound exceeded")
+  selectIndexedCSVModeled table key raw selectors predicate
+
+-- The immutable source model does not impose the package selector ceiling.
+selectIndexedCSVModeled :: CsvIndex -> ColumnName -> String -> [CsvSelector] -> Pred -> Either String Prop
+selectIndexedCSVModeled (CsvIndex header indices) key raw selectors predicate = do
   values <- maybe (Left "missing CSV column") Right (Map.lookup key indices)
   row <- case Map.findWithDefault [] raw values of
     [r] -> Right r

@@ -106,7 +106,7 @@ lowerCertPayload resolve cert =
 -- | The schemas declared for a presentation backend name at a version. The
 -- presentation 'BackendId' is name-only; the version rides separately on
 -- the 'Cert', so both are matched against the schema's strict identity.
-schemasFor :: BackendId -> Int -> [SlotSchema]
+schemasFor :: BackendId -> Integer -> [SlotSchema]
 schemasFor (BackendId name) version =
   [ s
   | s <- slotSchemas
@@ -116,14 +116,14 @@ schemasFor (BackendId name) version =
 
 -- | Whether a backend\@version declares any schema at all. Schema'd
 -- backends get the dead-wire rule; schema-less ones always pass through.
-backendHasSchema :: BackendId -> Int -> Bool
+backendHasSchema :: BackendId -> Integer -> Bool
 backendHasSchema b v = not (null (schemasFor b v))
 
 -- | The unique schema matching the certificate's backend\@version, head
 -- keyword, and arity, with the payload split into head and arguments.
 -- Anything less specific — wrong head, wrong arity, not a list — is no
 -- match.
-matchSchema :: BackendId -> Int -> SExpr -> Maybe (SlotSchema, String, [SExpr])
+matchSchema :: BackendId -> Integer -> SExpr -> Maybe (SlotSchema, String, [SExpr])
 matchSchema b v (SList (SAtom h : args)) =
   case [s | s <- schemasFor b v, ssHead s == h, ssArity s == length args] of
     [schema] -> Just (schema, h, args)

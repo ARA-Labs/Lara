@@ -1657,7 +1657,7 @@ peekNecessityParen = do
     scan _ = False
 
 -- | @backendRef ::= ident "@" nat@ — shared by 'certRefP' and 'assuranceP'.
-backendVersionP :: P (BackendId, Int)
+backendVersionP :: P (BackendId, Integer)
 backendVersionP = do
   b <- identifier
   symbol '@'
@@ -1665,7 +1665,7 @@ backendVersionP = do
   pure (BackendId b, v)
 
 -- | @certRef ::= \"(\" backendRef \",\" digest \")\"@ (grammar §4). The backend
--- version is a checker-facing NAT here (@CertRef.certRefVersion :: Int@).
+-- version is an unbounded checker-facing natural.
 certRefP :: P CertRef
 certRefP = do
   symbol '('
@@ -1745,7 +1745,7 @@ sexpLitP = do
           scan nextDepth nextInStr nextEsc nextInComment (acc ++ [ch])
 
 -- | A canonical natural (no sign, no leading zeros beyond a lone @0@).
-natLit :: P Int
+natLit :: P Integer
 natLit = do
   skipTrivia
   ds <- takeWhileP isDigit

@@ -30,6 +30,30 @@ The policy validator computes strict-reachable patterns and rejects a policy who
 
 Layers beyond the spine are `Lara.Admission` (the `.lara` source-boundary admission judgment), the `ra@1`, `ord@1`, and `insp@1` strict backends beside `nd@1`, `Lara.Runtime` (the cached-adjacency production evaluator), `Lara.Reporting` (the `holes(P,p)` / `incompleteAlternative` claim diagnostics), `Lara.Mutate` with `Lara.Measure` (the seeded mutation suite and the axis-(c) harness), `Lara.ClaimSupport` with `Lara.BindingAudit` (reporting and the blinded audit pipeline), the multi-artifact map loader, and the cross-language presentation-parity guard (`scripts/check-presentation-parity.sh`).
 
+The checked-inquiry layer is `Lara.Process.Inquiry.Types`, `.Wire` and `.Run`,
+over the family-owned `Enumerate` / `Projection` cache and the shared source,
+audit, analysis and impact observers. It uses the production Haskell checker;
+Lean supplies an independent reference implementation and proofs.
+
+## Which commands run checked inquiries?
+
+| Purpose | Command or library API |
+| --- | --- |
+| Run a native checked inquiry | `cabal run lara -- inquiry FILE` (installed binary: `lara inquiry FILE`) |
+| Decode and encode inquiry input | `Lara.Process.Inquiry.Wire.parseInquiryInputBS` / `encodeInquiryInput` |
+| Consume typed output | `parseInquiryResult` / `encodeInquiryResult` with the embedded document's `Names`; `parseInquiryError` / `encodeInquiryError` without `Names` |
+| Run from typed data or a file | `Lara.Process.Inquiry.Run.runBounded :: InquiryInput -> Natural -> Either RunRefusal [InquiryResult]`, `runInquiryFile`, `exitCodeOf` |
+| Run the independent Lean inquiry reference | `(cd lean && lake exe inquiry-run FILE)` |
+| Run standalone process records (Lean-only) | `(cd lean && lake exe process-run FILE)` |
+| Check the Lean process and inquiry examples and goldens | `make process-theory` |
+| Check both inquiry drivers and the actual Haskell consumers | `make inquiry-conformance` |
+
+The `Natural` argument to `runBounded` is the original input byte count.
+The file runner validates strict UTF-8 and supplies that count. The
+[inquiry contract](theory-process.md#what-does-the-inquiry-wrapper-add)
+defines output ordering, atomic refusals, exit codes, fixed resource counters
+and refusal priority. The standalone process runner's semantics are unchanged.
+
 ## Checker acceptance is one fixed pipeline
 
 `Lara.Check.checkUnit` decides whole-unit acceptance in one fixed stage order, mirrored exactly by `lean/Lara/Check/Unit.lean`:
@@ -184,6 +208,16 @@ Goldens must state the intended verdict. Investigate a disagreement between a go
 
 Two workflows are required, and both run on every push to `main` and every PR into it. The `Haskell` workflow (`.github/workflows/haskell.yml`) gates the Haskell compiler only. It runs `cabal build`, `cabal test`, the Haddock build, the Python unit tests, the policy-copy authenticity check, the walking-skeleton golden, replay, and tamper gates, and the mutation-suite freshness check. No step in it installs Lean or runs `lake`. The additive certified-evidence corpus and the frozen JSON/TSV reports are rechecked against the built Haskell binary, and that gate does not need Lean.
 
+The Haskell gate uses GHC 9.6. Local verification uses the same compiler series:
+`ghcup run --ghc 9.6.6 -- cabal build all --enable-tests` and
+`ghcup run --ghc 9.6.6 -- cabal test all --test-show-details=direct`
+(substitute the installed 9.6 patch version). The selected GHC must also be on
+`PATH` because doctest launches a nested `cabal repl`; `--with-compiler` alone
+does not select that nested compiler. A build with a newer GHC does not establish
+9.6 compatibility. For example, GHC 9.10's `Prelude` exports `foldl'`, but GHC
+9.6's does not; use a qualified `Data.List` import and `List.foldl'` to compile
+on both without redundant-import warnings.
+
 The `ARA` workflow (`.github/workflows/ara.yml`) checks this project's research artifact and builds neither Haskell nor Lean. Its checks cover source quotations, session-index consistency, and unique effective observation lookup. It has no path filter, because a quotation can cite any file in the repository. The observation gate validates append-only aliases and qualified historical references; it does not rewrite the trace. Its operational contract is [`../CONTRIBUTING.md`](../CONTRIBUTING.md#observation-identity-and-historical-lookup), and the session-file schema and what `session_index.yaml` rows project from it are [`../CONTRIBUTING.md`](../CONTRIBUTING.md#session-records-and-their-index).
 
 Everything that needs a Lean build runs outside the required workflows:
@@ -194,10 +228,11 @@ Everything that needs a Lean build runs outside the required workflows:
 | BHL checker and finite-semantics runner | `make bhl-theory`, also included in `make lean-gate` | not run by the optional Lean workflow |
 | Research-process reference runner and `process-run` goldens, plus the checked-inquiry wrapper runner and its goldens | `make process-theory`, also included in `make lean-gate` | not run by the optional Lean workflow |
 | Haskell-Lean cross-checks: presentation parity, surface conformance and its gate test, semantics, certDeps and update-matrix goldens, update and wire differentials, admission and evidence differentials, evidence CLI and measured-input checks, map conformance, PW conformance | `make cross-check` | not run |
+| Independent inquiry conformance: both drivers' raw stdout, exits and stderr against unchanged goldens and generated expectations, plus actual Haskell consumer decoding | `make inquiry-conformance`, also included in `make cross-check` | not run, including by the optional Lean workflow |
 
-`make local-gates` runs both. A PR that changes proofs, or one where review finds something that should be mechanized, gets the `lean` label. Most changes cannot affect the outcome of a Lean build or the cross-checks, which is why the required workflow does not run them.
+`make local-gates` runs `make lean-gate` and `make cross-check`. A PR that changes proofs, or one where review finds something that should be mechanized, gets the `lean` label. The optional workflow runs selected Lean checks, not the full local gate; it omits `process-theory` and the inquiry conformance gate.
 
-Nothing on GitHub checks, on every change, that the Haskell and Lean implementations still agree, and a gate that nothing runs drifts silently. The safeguard is procedural: a change that touches `lean/`, a wire or envelope contract, or any golden that either side emits runs `make local-gates` before review.
+Neither required GitHub workflow builds Lean or checks agreement between Haskell and Lean. The safeguard is procedural: a change that touches `lean/`, a wire or envelope contract, or any golden that either side emits runs `make local-gates` before review and reports its result in the PR. Passing the finite inquiry gate is conformance evidence, not a soundness proof, performance result or scientific-discovery claim.
 
 ## Test discipline
 

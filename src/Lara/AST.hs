@@ -304,7 +304,7 @@ data Question = Question
 -- backend paired with the theory digest it is allowed to use.
 data CertRef = CertRef
   { certRefBackend :: BackendId
-  , certRefVersion :: Int -- ^ backend version (a wire NAT)
+  , certRefVersion :: Integer -- ^ authored version; wire NATs and signed presentation integers
   , certRefTheory :: TheoryDigest
   }
   deriving (Eq, Show)
@@ -511,7 +511,7 @@ newtype TheoryDigest = TheoryDigest String deriving (Eq, Ord, Show)
 -- replay. Thus 'certPayload' stays wire-opaque.
 data Cert = Cert
   { certBackend :: BackendId
-  , certVersion :: Int -- ^ backend version (a wire NAT)
+  , certVersion :: Integer -- ^ authored version; wire NATs and signed presentation integers
   , certTheory :: TheoryDigest
   , certPayload :: SExpr -- ^ opaque, backend-decoded (kappa)
   }
@@ -568,7 +568,7 @@ data SupportTerm
 
 -- | A single step in a position path (spec §7): a premise index or a
 -- critical-question name. @π ::= ε | π.i | π.q@.
-data Step = StepPremise Int | StepQuestion QuestionId
+data Step = StepPremise Integer | StepQuestion QuestionId
   deriving (Eq, Ord, Show)
 
 -- | A position @π@ in a support term: the empty path is the root (its
@@ -614,7 +614,7 @@ data Attack
 --
 -- The terminal @rule@\/@leaf@ marker of §7 is __not__ a step and never appears
 -- here. Index basis is 0-based, as for 'StepPremise'.
-data SurfaceStep = StepIndex Int | StepName String
+data SurfaceStep = StepIndex Integer | StepName String
   deriving (Eq, Show)
 
 -- | A typed positional attack __as authored__ (grammar §7 AMENDMENT). The three

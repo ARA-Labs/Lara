@@ -7,7 +7,7 @@
 # the manifest disagree, so this is the one step that makes a new anchor part of
 # the differential rather than a setup failure.
 #
-# The exclusions below are the same five the discovery loop applies, and they
+# The exclusions below match the discovery loop, and they
 # are exclusions of whole FAMILIES with their own harnesses, not of individual
 # names: fixtures/malformed/ is the negative half of this script,
 # fixtures/mutants/ is discovered manifest-driven, fixtures/admission/ belongs to
@@ -16,7 +16,9 @@
 # pw drivers, and the .lara world-source run files of fixtures/pw/source/) and
 # scripts/check-pw-example.py (fixtures/pw/declared.sexp, the
 # Lean pw-example host's fixture), with the former asserting totality over the
-# whole subtree; and a map's two committed artifacts are
+# whole subtree; fixtures/process/ belongs to scripts/check-process-run.sh
+# (run/) and scripts/check-inquiry-conformance.py (inquiry parity and total
+# process-subtree ownership). A map's two committed artifacts are
 # map-check-input@1 and map-verdict@2 rather than check-input@1 and belong to
 # scripts/check-map-conformance.sh.
 #

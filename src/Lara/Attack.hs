@@ -98,12 +98,11 @@ subterm (SRule _ _ _ d _ _) (StepQuestion q : pos) =
     Just w -> subterm w pos
     Nothing -> Nothing
 
-indexMaybe :: [a] -> Int -> Maybe a
-indexMaybe xs i
-  | i < 0 = Nothing
-  | otherwise = case drop i xs of
-      (x : _) -> Just x
-      [] -> Nothing
+indexMaybe :: [a] -> Integer -> Maybe a
+indexMaybe _ i | i < 0 = Nothing
+indexMaybe [] _ = Nothing
+indexMaybe (x : _) 0 = Just x
+indexMaybe (_ : xs) i = indexMaybe xs (i - 1)
 
 -- ---------------------------------------------------------------------------
 -- Exact contrary matching (Lean @contraryMatchB@ / @matchAPat@)

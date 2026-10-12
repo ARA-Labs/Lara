@@ -82,6 +82,32 @@ library
                       Lara.ConstantSpec
                       Lara.Kernel
                       Lara.Wire
+                      Lara.Process.Types
+                      Lara.Process.History
+                      Lara.Process.Wire
+                      Lara.Process.Source
+                      Lara.Process.Source.Types
+                      Lara.Process.Source.Wire
+                      Lara.Process.Source.Evidence
+                      Lara.Process.Source.Diagnostic
+                      Lara.Process.Source.Diagnostic.Wire
+                      Lara.Process.Source.CoreDiagnostic
+                      Lara.Process.Source.Provenance
+                      Lara.Process.Audit.Types
+                      Lara.Process.Audit
+                      Lara.Process.AuditWire
+                      Lara.Process.CheckedMethods
+                      Lara.Process.Family
+                      Lara.Process.Enumerate
+                      Lara.Process.Projection
+                      Lara.Process.Analysis
+                      Lara.Process.AnalysisWire
+                      Lara.Process.Locality
+                      Lara.Process.Impact
+                      Lara.Process.ResultWire
+                      Lara.Process.Inquiry.Types
+                      Lara.Process.Inquiry.Wire
+                      Lara.Process.Inquiry.Run
                       Lara.Map.Types
                       Lara.Map.Wire
                       Lara.Map.Load
@@ -130,7 +156,7 @@ library
                       Lara.RunningExample
                       Lara.WorkedExamples
     build-depends:    base >=4 && <5
-                    , bytestring
+                    , bytestring >=0.11.2.0
                     , containers
                     , directory
                     , filepath
@@ -231,6 +257,12 @@ test-suite lara-test
                       OrdSpec
                       InspSpec
                       WireSpec
+                      ProcessSpec
+                      InquirySpec
+                      AuditRuntimeSpec
+                      AuditWireSpec
+                      CheckedMethodsSpec
+                      SourceComparisonSpec
                       MapWireSpec
                       MapLoadSpec
                       MapLinkSpec

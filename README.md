@@ -330,11 +330,13 @@ mechanized results, acceptance evidence and
 `.lara` syntax: it lives in the Lean development under `lean/Lara/BHL/` with
 worked examples in `lean/Lara/Examples/`.
 
-The [research-process layer](docs/theory-process.md) (`lean/Lara/Process/`)
-asks the follow-up question: when does a record that omits part of what
-happened still entitle a claim? A record denotes every complete history it
-could have come from, and a verdict is certain only when all of them agree. It
-adds no syntax or wire format.
+The [research-process layer](docs/theory-process.md) asks when a record that
+omits part of what happened still entitles a claim. A record denotes every
+complete history it could have come from, and a verdict is certain only when
+all of them agree. The Haskell library and `lara inquiry FILE` evaluate the
+separately versioned `inquiry-input 1` wrapper over finite source choices.
+Lean supplies the independent reference semantics and proofs. The standalone
+`process-input 1` runner remains Lean-only; neither entry point adds `.lara` syntax.
 
 ## Quick start
 
@@ -354,12 +356,21 @@ cabal build all                          # library + CLI
 cabal run lara -- check <file.lara>      # check an artifact
 cabal run lara -- check <file.laramap>   # check a map of several artifacts
 cabal run lara -- deps <file.lara>       # what evidence an accepted artifact cites
+cabal run lara -- inquiry <file.sexp>    # evaluate a bounded checked inquiry
 cabal test                               # test suites (property + doctest)
 ```
 
 `check` takes an optional `--out <path>`, which writes the verdict to a file
 instead of stdout — atomically, and only when the check accepts, so a failed run
 leaves the previous file intact. `make map-check` is the same thing for a map.
+
+`inquiry` prints one `inquiry-result 1` line per embedded query, then per wrapper
+request. An empty query/request list produces no output. A refusal prints one
+`inquiry-error 1` line and no partial results; stderr stays empty. Success
+(including an invalid-certificate result) exits 0, unsupported or limit refusals
+exit 1, and other refusals exit 2. See the
+[resource limits and refusal order](docs/theory-process.md#what-does-the-inquiry-wrapper-add)
+and the [library and command index](docs/implementation.md#which-commands-run-checked-inquiries).
 
 Lean mechanization (elan / lean / lake on `PATH`; toolchain pinned in
 [`lean/lean-toolchain`](lean/lean-toolchain)):
@@ -371,11 +382,16 @@ Lean mechanization (elan / lean / lake on `PATH`; toolchain pinned in
 
 The required `Haskell` workflow builds and tests the checker on every push
 to `main` and every PR into it, and the required `ARA` workflow checks the
-research artifact under `ara/`. The Lean side runs outside it: `make lean-gate`
-(the build, the `AxCheck.lean` axiom audit, and the Lean examples) also runs on
-a PR in the optional Lean workflow when a reviewer adds the `lean` label, while
-`make cross-check` (the Haskell-Lean conformance gates) runs only locally
-([why](docs/implementation.md#ci-and-local-gates)).
+research artifact under `ara/`. Neither runs Lean or cross-language gates.
+The optional Lean workflow runs the build, axiom audit and selected examples
+when a reviewer adds the `lean` label; it does not run `make process-theory`
+or `make inquiry-conformance`. Locally, `make inquiry-conformance` checks both
+inquiry drivers against unchanged goldens and independent generated expectations,
+then decodes their actual output with the Haskell consumer codecs.
+`make local-gates` combines `make lean-gate` and `make cross-check`, including
+that inquiry gate. Run it before review for proof, wire-contract or golden
+changes and report the result in the PR
+([details](docs/implementation.md#ci-and-local-gates)).
 
 ## Syntax versions
 

@@ -1,6 +1,7 @@
 module Lara.Evidence.Runner
   ( SuccessfulJudgment, runEvidence, judgmentLeaf, judgmentRequest, judgmentProp, judgmentDeps
   , EvidenceObservation, replayTypedEvidence
+  , TypedReplayFault (..), replayTypedEvidenceWith
   ) where
 
 import Control.Monad (unless)
@@ -55,32 +56,67 @@ replayTypedEvidence
   -> [(ObjectId, Either String (ObjectMeta,TypedObject))]
   -> [BoundRequest]
   -> Either EvidenceRejection [EvidenceObservation]
-replayTypedEvidence metadata snapshot requests = do
-  mapM_ capture [(meta,leaf) | meta <- metadata, Just leaf <- [earliestObjectLeaf requests (objectId meta)]]
+replayTypedEvidence metadata snapshot requests =
+  either (Left . convert) Right $
+    replayTypedEvidenceWith objectId prepareRequestObject runPreparedRegistry
+      metadata snapshot requests
+  where
+    convert fault = case fault of
+      TypedCaptureFault leaf ident reason -> EvidenceRejection CaptureStage leaf (Just ident) reason
+      TypedExtractionFault leaf ident reason -> EvidenceRejection ExtractionStage leaf ident reason
+      TypedMismatch leaf -> EvidenceRejection ExtractionStage leaf Nothing "extracted proposition mismatch"
+      TypedPayloadCount leaf -> EvidenceRejection ExtractionStage leaf Nothing "invalid dependency count"
+      TypedMissingDependency leaf ident -> EvidenceRejection ExtractionStage leaf (Just ident) "missingdep"
+
+data TypedReplayFault failure
+  = TypedCaptureFault LeafId ObjectId String
+  | TypedExtractionFault LeafId (Maybe ObjectId) failure
+  | TypedMismatch LeafId
+  | TypedPayloadCount LeafId
+  | TypedMissingDependency LeafId ObjectId
+  deriving (Eq, Show)
+
+-- Metadata-independent replay: capture every requested manifest row first,
+-- then extract in leaf order. Snapshot lookup is deliberately first-match.
+replayTypedEvidenceWith
+  :: Eq metadata
+  => (metadata -> ObjectId)
+  -> (LeafCheckerId -> TypedObject -> Either failure PreparedObject)
+  -> (ExtractionRequest -> PreparedObject -> Either failure Prop)
+  -> [metadata]
+  -> [(ObjectId, Either String (metadata,TypedObject))]
+  -> [BoundRequest]
+  -> Either (TypedReplayFault failure) [(LeafId,ExtractionRequest,Prop,[metadata])]
+replayTypedEvidenceWith identOf prepare extract metadata snapshot requests = do
+  mapM_ capture [(meta,leaf) | meta <- metadata, Just leaf <- [earliestObjectLeaf requests (identOf meta)]]
   mapM one requests
   where
     prepared = Map.fromList
-      [ ((ident,requestChecker request), fmap (meta,) (prepareRequestObject (requestChecker request) payload))
+      [ ((ident,requestChecker request), fmap (meta,) (prepare (requestChecker request) payload))
       | bound <- requests
       , let request = boundRequest bound
       , ident <- requestObjects request
       , Just (Right (meta,payload)) <- [lookup ident snapshot]
       ]
     capture (expected,leaf) =
-      let ident = objectId expected
-          reject reason = Left (EvidenceRejection CaptureStage leaf (Just ident) reason)
+      let ident = identOf expected
+          reject reason = Left (TypedCaptureFault leaf ident reason)
       in case lookup ident snapshot of
         Nothing -> reject "missingdep"
         Just (Left reason) -> reject reason
-        Just (Right (actual,_)) -> unless (actual == expected) (reject "metadata")
+        Just (Right (actual,_)) -> unless (identOf actual == ident && actual == expected) (reject "metadata")
     one bound = do
       let leaf = boundLeaf bound
+          leafIdent = leafId leaf
           request = boundRequest bound
-          reject object reason = Left (EvidenceRejection ExtractionStage (leafId leaf) object reason)
       supplied <- mapM (\ident -> case Map.lookup (ident,requestChecker request) prepared of
-        Just result -> either (reject (Just ident)) Right result
-        Nothing -> reject (Just ident) "missingdep") (requestObjects request)
-      compareExtraction bound supplied
+        Just result -> either (Left . TypedExtractionFault leafIdent (Just ident)) Right result
+        Nothing -> Left (TypedMissingDependency leafIdent ident)) (requestObjects request)
+      output <- case supplied of
+        [(meta,payload)] -> either (Left . TypedExtractionFault leafIdent (Just (identOf meta))) Right (extract request payload)
+        _ -> Left (TypedPayloadCount leafIdent)
+      unless (equiv output (leafProp leaf)) (Left (TypedMismatch leafIdent))
+      pure (leafIdent,request,output,map fst supplied)
 
 compareExtraction :: BoundRequest -> [(ObjectMeta,PreparedObject)] -> Either EvidenceRejection EvidenceObservation
 compareExtraction bound supplied = do

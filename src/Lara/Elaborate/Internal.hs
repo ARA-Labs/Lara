@@ -46,15 +46,23 @@ module Lara.Elaborate.Internal
   , elaborate
   , elaborateWithProvenance
   , elaborateWithSemanticProgram
+  , validatePremiseLabels
+  , elaborateInquiryWithSemanticProgram
+  , validateCanonicalPremiseLabels
+  , firstInquiryDuplicate
   , GeneratedArg (..)
   ) where
 
 import Control.Monad (foldM, when)
 import Data.List (find)
+import qualified Data.Set as Set
 
 import Lara.AST
 import Lara.Elaborate.CertSlots (SlotRefError (..), lowerCertPayload)
-import Lara.Elaborate.Comparison (GeneratedArg (..), expandSurfaceProvenance)
+import Lara.Elaborate.Comparison
+  ( GeneratedArg (..), expandSurfaceProvenance, expandInquirySurfaceProvenance
+  , prepareInquiryAuthoredDecls, AuthoredDecl (..)
+  )
 import Lara.Elaborate.Error (ElabError (..), elabErrorMessage)
 import Lara.Elaborate.NDNamed (NamedRefError (..), lowerNamedPayload)
 import Lara.Elaborate.Subst
@@ -66,6 +74,9 @@ import Lara.Syntax (attackPathTerminalMarkers)
 import Lara.Prop (Prop, equiv)
 import qualified Lara.Strict as Strict
 import Lara.Strict.ND (ndBackendId)
+import Lara.Elaborate.ValueBinding (validateInquiryAuthoredNls)
+import Lara.SupportTerm (instAPat)
+import Lara.Process.Source.Types (inquiryCorePolicy)
 
 -- ---------------------------------------------------------------------------
 -- Caller-supplied environment inputs
@@ -101,6 +112,9 @@ registryOf = TheoryRegistry . policyTheories
 -- policy before any argument is lowered.
 data Env = Env
   { envPolicy :: Policy
+  , envMode :: ElaborationMode
+  , envPreserveEnriched :: Bool
+  , envComparisonConclusions :: [(ArgId, Prop)]
   , envGamma :: [(LeafId, Prop)] -- ^ Γ: all declared leaves (all-admit default)
   , envClaims :: [Claim]
   , envLeafIds :: [LeafId]
@@ -173,21 +187,35 @@ elaborateWithSemanticProgram
   -> Program
   -> Policy
   -> Either ElabError (Unit, [GeneratedArg], Program)
-elaborateWithSemanticProgram reg prog0 pol0 = do
+elaborateWithSemanticProgram = elaborateWithSemanticProgramIn LegacyElaboration
+
+elaborateInquiryWithSemanticProgram
+  :: TheoryRegistry -> Program -> Policy -> Either ElabError (Unit, [GeneratedArg], Program)
+elaborateInquiryWithSemanticProgram = elaborateWithSemanticProgramIn InquiryElaboration
+
+data ElaborationMode = LegacyElaboration | InquiryElaboration
+
+elaborateWithSemanticProgramIn
+  :: ElaborationMode -> TheoryRegistry -> Program -> Policy -> Either ElabError (Unit, [GeneratedArg], Program)
+elaborateWithSemanticProgramIn mode reg prog0 pol0 = do
   when (programPolicy prog0 /= policyId pol0) $
     Left (PolicyIdMismatch (programPolicy prog0) (policyId pol0))
-  -- Reclassify pattern identifiers (grammar §2): the shallow parser records
-  -- every bare pattern ident as a 'PVar', but a non-parameter ident is a ground
-  -- constant. The checker's premise instantiation ('instAPat') treats an unbound
-  -- 'PVar' as failure (R3), so this resolution is mandatory elaborator work.
-  let pol = reclassifyPolicy pol0
+  -- Text syntax records bare pattern identifiers as 'PVar' before resolving
+  -- ground constants. The typed inquiry wire has already chosen the constructor.
+  let pol = case mode of
+        LegacyElaboration -> reclassifyPolicy pol0
+        InquiryElaboration -> pol0
   -- Policy well-formedness for premise labels (App. B.4), rejected at
   -- declaration time rather than discovered at an attack site. The parser
   -- enforces the same three rules, but a 'Program' built in memory never went
   -- through it, and the disjointness is what makes B.5's name resolution
   -- single-valued.
-  validatePremiseLabels (policyRules pol)
-  (prog, generated) <- expandSurfaceProvenance pol prog0
+  case mode of
+    LegacyElaboration -> validatePremiseLabels (policyRules pol)
+    InquiryElaboration -> validateCanonicalPremiseLabels (policyRules pol)
+  (prog, generated) <- case mode of
+    LegacyElaboration -> expandSurfaceProvenance pol prog0
+    InquiryElaboration -> expandInquirySurfaceProvenance pol prog0
   let decls = programDecls prog
       gamma = [(leafId l, leafProp l) | DeclLeaf l <- decls]
       claims = [c | DeclClaim c <- decls]
@@ -198,6 +226,9 @@ elaborateWithSemanticProgram reg prog0 pol0 = do
       env =
         Env
           { envPolicy = pol
+          , envMode = mode
+          , envPreserveEnriched = False
+          , envComparisonConclusions = []
           , envGamma = gamma
           , envClaims = claims
           , envLeafIds = map fst gamma
@@ -206,28 +237,46 @@ elaborateWithSemanticProgram reg prog0 pol0 = do
   -- Raw ids drive quarantine retention and raw/resolved attack alignment. Make
   -- their uniqueness a front-door invariant before either operation can use an
   -- ambiguous lookup, matching the wire decoder's R14 check.
-  case firstDup (envArgIds env) of
+  let duplicateArgument = case mode of
+        LegacyElaboration -> firstDup (envArgIds env)
+        InquiryElaboration -> firstInquiryDuplicate (envArgIds env)
+  case duplicateArgument of
     Just aid -> Left (DuplicateArgId aid)
     Nothing -> Right ()
+  case mode of
+    LegacyElaboration -> Right ()
+    InquiryElaboration -> do
+      case firstInquiryDuplicate [claimId claim | DeclClaim claim <- programDecls prog0] of
+        Just claim -> Left (DuplicateClaimId claim)
+        Nothing -> Right ()
+      when (not (ruleNamespacesWellFormed pol)) $
+        Left (MalformedRuleNamespace (RuleId ""))
   case find (`notElem` envArgIds env) (concatMap surfaceAttackEndpoints surfaceAttacks) of
     Just aid -> Left (AttackEndpointUndeclared aid)
     Nothing -> Right ()
   validateGroups (envLeafIds env) groups
   elaboratedRev <- foldM (elabOne env) [] argDecls
+  let coreArguments = [ (identifier, core) | ElaboratedArgument identifier _ core <- reverse elaboratedRev ]
   -- Attack paths resolve last: a 'StepName' is resolved against the rule at its
   -- position in the *elaborated* target argument, which does not exist until
   -- every argument is lowered.
-  attacks <- mapM (resolveSurfaceAttack pol (reverse elaboratedRev)) surfaceAttacks
+  attacks <- mapM (resolveSurfaceAttack mode pol coreArguments) surfaceAttacks
   queries <- mapM (resolveStatus claims) statusIds
+  case mode of
+    LegacyElaboration -> Right ()
+    InquiryElaboration -> validateInquiryAuthored env prog0
+  let corePolicy = case mode of
+        LegacyElaboration -> pol
+        InquiryElaboration -> inquiryCorePolicy pol
   pure
     ( Unit
         { unitSigma = policySigma pol
-        , unitRules = map stripPremiseLabels (policyRules pol)
+        , unitRules = map stripPremiseLabels (policyRules corePolicy)
         , unitContraries = policyContraries pol
         , unitExceptions = policyExceptions pol
         , unitTheories = registryTheories reg
         , unitLeaves = gamma
-        , unitArgs = reverse elaboratedRev
+        , unitArgs = coreArguments
         , unitAttacks = attacks
         , unitQueries = queries
         , unitGroups = groups
@@ -236,6 +285,37 @@ elaborateWithSemanticProgram reg prog0 pol0 = do
     , generated
     , prog
     )
+
+-- Frozen supported-fragment predicates inspect the authored input after the
+-- precise semantic fold/path/status stages. In particular, let substitution
+-- cannot make an originally unbuildable argument admissible.
+validateInquiryAuthored :: Env -> Program -> Either ElabError ()
+validateInquiryAuthored semanticEnv authored = do
+  validateInquiryAuthoredNls authored
+  prepared <- prepareInquiryAuthoredDecls (envPolicy semanticEnv) authored
+  let declarations = programDecls authored
+      originalEnv = semanticEnv
+        { envPreserveEnriched = True
+        , envComparisonConclusions = concat
+            [[(first, before), (second, after)]
+            | AuthoredComparison (first, _, before) (second, _, after) <- prepared]
+        , envGamma = [(leafId leaf, leafProp leaf) | DeclLeaf leaf <- declarations]
+        , envClaims = [claim | DeclClaim claim <- declarations]
+        , envLeafIds = [leafId leaf | DeclLeaf leaf <- declarations]
+        }
+      build priors (AuthoredDeclaration (DeclArg argument)) = do
+        term <- elabInstantiation originalEnv (reverse priors) (argId argument) (argInstantiation argument)
+        pure ((argId argument, term) : priors)
+      build priors (AuthoredComparison (first, before, _) (second, after, _)) =
+        Right ((second, after) : (first, before) : priors)
+      build priors (AuthoredDeclaration _) = Right priors
+      lower priors (identifier, term) = do
+        _ <- lowerReconstructed originalEnv (reverse priors) identifier term
+        pure ((identifier, term) : priors)
+  rebuilt <- reverse <$> foldM build [] prepared
+  _ <- foldM lower [] rebuilt
+  mapM_ (resolveSurfaceAttack InquiryElaboration (envPolicy originalEnv) rebuilt)
+    [attack | DeclAttack attack <- declarations]
 
 -- | Drop a rule's presentation-only premise labels on the way into 'Unit'.
 --
@@ -259,14 +339,15 @@ stripPremiseLabels r = r {rulePremiseLabels = []}
 -- lower to the same 'Position', which is why the compiled AF is byte-identical
 -- whichever the author wrote.
 resolveSurfaceAttack
-  :: Policy
+  :: ElaborationMode
+  -> Policy
   -> [(ArgId, SupportTerm)]
   -> SurfaceAttack
   -> Either ElabError Attack
-resolveSurfaceAttack pol args k = case k of
+resolveSurfaceAttack mode pol args k = case k of
   SRebut w u -> Right (Rebut w u)
-  SUndercut w u steps -> Undercut w u <$> resolvePath pol args w u steps
-  SUndermine w u steps -> Undermine w u <$> resolvePath pol args w u steps
+  SUndercut w u steps -> Undercut w u <$> resolvePath mode pol args w u steps
+  SUndermine w u steps -> Undermine w u <$> resolvePath mode pol args w u steps
 
 -- | Resolve one position path against the elaborated target argument.
 --
@@ -279,20 +360,26 @@ resolveSurfaceAttack pol args k = case k of
 -- preserving the old reading is what keeps every existing example's 'Unit'
 -- unchanged.
 resolvePath
-  :: Policy
+  :: ElaborationMode
+  -> Policy
   -> [(ArgId, SupportTerm)]
   -> ArgId
   -> ArgId
   -> [SurfaceStep]
   -> Either ElabError [Step]
-resolvePath pol args source target = go (lookup target args)
+resolvePath mode pol args source target = go (lookup target args)
   where
+    invalid = Left (InquiryAttackUnresolvable source target)
     go _ [] = Right []
     go mterm (s : rest) = case mterm >>= occurrence of
-      Nothing -> Right (map legacyStep (s : rest))
+      Nothing -> case mode of
+        LegacyElaboration -> Right (map legacyStep (s : rest))
+        InquiryElaboration -> invalid
       Just (rule, prems, disch) -> do
         (step, next) <- resolveStep rule prems disch s
-        (step :) <$> go next rest
+        case (mode, next) of
+          (InquiryElaboration, Nothing) -> invalid
+          _ -> (step :) <$> go next rest
 
     -- The rule occurrence at the current position, with its sub-terms.
     occurrence (SRule rid _ prems disch _ _) =
@@ -302,16 +389,17 @@ resolvePath pol args source target = go (lookup target args)
     resolveStep rule prems disch s = case s of
       StepIndex i -> Right (StepPremise i, prems `at` i)
       StepName n
-        | Just i <- premiseLabelIndex rule n -> Right (StepPremise i, prems `at` i)
+        | Just i <- premiseLabelIndex rule n -> Right (StepPremise (toInteger i), prems `at` toInteger i)
         | Just q <- questionNamed rule n -> Right (StepQuestion q, lookup q disch)
         | otherwise -> Left (AttackStepUnresolved source target n)
 
     legacyStep (StepIndex i) = StepPremise i
     legacyStep (StepName n) = StepQuestion (QuestionId n)
 
-    xs `at` i
-      | i >= 0, i < length xs = Just (xs !! i)
-      | otherwise = Nothing
+    at _ i | i < 0 = Nothing
+    at [] _ = Nothing
+    at (x : _) 0 = Just x
+    at (_ : xs) i = at xs (i - 1)
 
 -- | The __0-based__ premise slot a rule's premise label names (App. B.4, eng
 -- review 6A). 'rulePremiseLabels' is positionally aligned with 'rulePremises',
@@ -351,6 +439,32 @@ validatePremiseLabels = mapM_ one
       case find (\(PremiseLabel l) -> l `elem` questions) labels of
         Just l -> Left (PremiseLabelQuestionCollision (ruleId rule) l)
         Nothing -> Right ()
+
+-- | The inquiry prologue checks canonical label shape before source identities.
+-- Namespace uniqueness and collisions belong to its later identifier stage.
+validateCanonicalPremiseLabels :: [Rule] -> Either ElabError ()
+validateCanonicalPremiseLabels = mapM_ one
+  where
+    one rule
+      | null labels = Right ()
+      | length labels == length (rulePremises rule), any labelled labels = Right ()
+      | otherwise = Left (NoncanonicalPremiseLabels (ruleId rule))
+      where labels = rulePremiseLabels rule
+    labelled (Just _) = True
+    labelled Nothing = False
+
+ruleNamespacesWellFormed :: Policy -> Bool
+ruleNamespacesWellFormed policy =
+  not (hasDuplicates (map ruleId (policyRules policy))) && all wellFormed (policyRules policy)
+  where
+    hasDuplicates xs = case firstDup xs of
+      Nothing -> False
+      Just _ -> True
+    wellFormed rule =
+      let labels = [text | Just (PremiseLabel text) <- rulePremiseLabels rule]
+          questions = [text | QuestionId text <- map questionId (ruleQuestions rule)]
+       in not (hasDuplicates labels) && not (hasDuplicates questions)
+          && all (\label -> label /= "rule" && label /= "leaf" && label `notElem` questions) labels
 
 
 -- | Raw argument endpoints of an authored attack, in source order. The @.lara@
@@ -398,19 +512,33 @@ firstDup = go []
       | x `elem` seen = Just x
       | otherwise = go (x : seen) rest
 
+-- Inquiry's frozen selector returns the earliest declaration that has a later
+-- duplicate. Group and legacy diagnostics deliberately use firstDup instead.
+firstInquiryDuplicate :: Ord a => [a] -> Maybe a
+firstInquiryDuplicate = snd . foldr step (Set.empty, Nothing)
+  where
+    step value (seen, duplicate)
+      | value `Set.member` seen = (seen, Just value)
+      | otherwise = (Set.insert value seen, duplicate)
+
+data ElaboratedArgument = ElaboratedArgument ArgId SupportTerm SupportTerm
+
 -- | Elaborate one argument, threading the prior arguments (accumulated in
 -- reverse declaration order) so premise reconstruction can resolve to them.
 elabOne
   :: Env
-  -> [(ArgId, SupportTerm)]
+  -> [ElaboratedArgument]
   -> Arg
-  -> Either ElabError [(ArgId, SupportTerm)]
+  -> Either ElabError [ElaboratedArgument]
 elabOne env acc arg = do
   let aid = argId arg
-      priors = reverse acc -- declaration order (lookup is order-insensitive)
-  term <- elabInstantiation env priors aid (argInstantiation arg)
+      priors = [(identifier, rebuilt) | ElaboratedArgument identifier rebuilt _ <- reverse acc]
+  reconstructed <- elabInstantiation env priors aid (argInstantiation arg)
+  term <- case envMode env of
+    LegacyElaboration -> Right reconstructed
+    InquiryElaboration -> lowerReconstructed env priors aid reconstructed
   validateConcl env aid (argConcl arg) term
-  pure ((aid, term) : acc)
+  pure (ElaboratedArgument aid reconstructed term : acc)
 
 -- | Lower the complete presentation support payload to a semantic term.
 elabInstantiation
@@ -424,12 +552,18 @@ elabInstantiation env priors aid inst = case inst of
   InferTheta r refs shallowDisch holes assurance -> do
     rule <- lookupRule env aid r
     (theta, prems) <- inferTheta env priors aid rule refs
+    requireRootConclusion env RootReconstruction aid (instAPat theta (ruleConclusion rule))
+    case envMode env of
+      LegacyElaboration -> Right ()
+      InquiryElaboration ->
+        when (any (\(question, _) -> question `notElem` map questionId (ruleQuestions rule)) shallowDisch) $
+          Left (InquiryArgumentUnbuildable aid)
     disch <- resolveArgDischarges env priors aid shallowDisch
     -- lara-syntax@0.6: named certificate premise slots lower here,
     -- after premise resolution, because a slot is an index into @prems@. The
     -- rule rides along from @0.8: its declared premise labels are the
     -- third class a name resolves in.
-    assurance' <- lowerArgCert env rule priors aid prems assurance
+    assurance' <- prepareAssurance env rule priors aid prems assurance
     pure (SRule r theta prems disch holes assurance')
 
 lookupRule :: Env -> ArgId -> RuleId -> Either ElabError Rule
@@ -444,8 +578,28 @@ elabTerm
   -> ArgId
   -> SupportTerm
   -> Either ElabError SupportTerm
-elabTerm env priors aid term = case term of
-  SLeaf l -> pure (SLeaf l)
+elabTerm = elabTermAt RootReconstruction
+
+data ReconstructionPosition = RootReconstruction | NestedReconstruction
+
+-- Only the argument boundary requires a structural conclusion. A missing
+-- nested leaf remains the core checker's located R1, as in the source calculus.
+requireRootConclusion :: Env -> ReconstructionPosition -> ArgId -> Maybe Prop -> Either ElabError ()
+requireRootConclusion env position aid conclusion = case (envMode env, position) of
+  (InquiryElaboration, RootReconstruction) -> case conclusion of
+    Nothing -> Left (InquiryArgumentUnbuildable aid)
+    Just _ -> Right ()
+  _ -> Right ()
+
+elabTermAt :: ReconstructionPosition -> Env -> [(ArgId, SupportTerm)] -> ArgId -> SupportTerm -> Either ElabError SupportTerm
+elabTermAt position env priors aid term = case term of
+  SLeaf leaf -> do
+    requireRootConclusion env position aid (lookup leaf (envGamma env))
+    pure term
+  SRule _ _ shallowPrems _ _ _
+    | envPreserveEnriched env, not (null shallowPrems) -> do
+        requireRootConclusion env position aid (conclusionFor env term)
+        pure term
   SRule r posTheta shallowPrems shallowDisch holes assurance -> do
     rule <- lookupRule env aid r
     (theta, prems) <- do
@@ -455,10 +609,11 @@ elabTerm env priors aid term = case term of
       when (nGot /= nExp) $ Left (ArityMismatch aid r nExp nGot)
       -- Re-associate positional θ with the rule's declared parameter names.
       let theta' = zip params (map snd posTheta)
+      requireRootConclusion env position aid (instAPat theta' (ruleConclusion rule))
       prems' <-
         if null shallowPrems
           then resolvePremises env priors aid r rule theta'
-          else mapM (elabTerm env priors aid) shallowPrems
+          else mapM (elabTermAt NestedReconstruction env priors aid) shallowPrems
       pure (theta', prems')
     disch <- resolveDischarges env priors aid shallowDisch
     -- lara-syntax@0.2: lower assurance verbatim. Legality (strict mode,
@@ -468,7 +623,7 @@ elabTerm env priors aid term = case term of
     -- 'elabTerm' recurses, so a nested instance's certificate lowers against
     -- its own premise list — and, from @0.8, against its own rule's
     -- premise labels — not the enclosing one's (D8).
-    assurance' <- lowerArgCert env rule priors aid prems assurance
+    assurance' <- prepareAssurance env rule priors aid prems assurance
     pure (SRule r theta prems disch holes assurance')
 
 -- | The one namespace lookup shared by every argument-body source reference:
@@ -591,6 +746,9 @@ lowerArgCert
   -> Assurance
   -> Either ElabError Assurance
 lowerArgCert env rule priors aid prems assurance = case assurance of
+  AssuranceCert certificate
+    | InquiryElaboration <- envMode env, certVersion certificate < 0 ->
+        Left (InquiryCertificateUnlowerable aid)
   AssuranceCert cert ->
     if isNdCert cert
       then
@@ -602,6 +760,48 @@ lowerArgCert env rule priors aid prems assurance = case assurance of
           Right cert' -> Right (AssuranceCert cert')
           Left (name, err) -> Left (certSlotError aid (ruleId rule) cert name err)
   _ -> Right assurance
+
+-- Inquiry reconstructs the entire argument before any certificate is lowered.
+-- Legacy lowering stays at its original occurrence in the recursive fold.
+prepareAssurance :: Env -> Rule -> [(ArgId, SupportTerm)] -> ArgId -> [SupportTerm] -> Assurance -> Either ElabError Assurance
+prepareAssurance env rule priors aid premises assurance = case envMode env of
+  LegacyElaboration -> lowerArgCert env rule priors aid premises assurance
+  InquiryElaboration -> Right assurance
+
+lowerReconstructed :: Env -> [(ArgId, SupportTerm)] -> ArgId -> SupportTerm -> Either ElabError SupportTerm
+lowerReconstructed env priors aid original = do
+  changed <- lower original
+  pure (maybe original id changed)
+  where
+    -- Nothing denotes an unchanged subtree: ordinary supports retain their
+    -- existing spine instead of allocating a second certificate-free tree.
+    lower SLeaf{} = Right Nothing
+    lower (SRule name theta premises discharges holes assurance) = do
+      assurance' <- case assurance of
+        AssuranceCert{} -> do
+          rule <- lookupRule env aid name
+          Just <$> lowerArgCert env rule priors aid premises assurance
+        _ -> Right Nothing
+      premises' <- lowerList premises
+      discharges' <- lowerDischarges discharges
+      pure $ case (assurance', premises', discharges') of
+        (Nothing, Nothing, Nothing) -> Nothing
+        _ -> Just (SRule name theta (maybe premises id premises')
+              (maybe discharges id discharges') holes (maybe assurance id assurance'))
+    lowerList [] = Right Nothing
+    lowerList (term : rest) = do
+      term' <- lower term
+      rest' <- lowerList rest
+      pure $ case (term', rest') of
+        (Nothing, Nothing) -> Nothing
+        _ -> Just (maybe term id term' : maybe rest id rest')
+    lowerDischarges [] = Right Nothing
+    lowerDischarges (entry@(question, term) : rest) = do
+      term' <- lower term
+      rest' <- lowerDischarges rest
+      pure $ case (term', rest') of
+        (Nothing, Nothing) -> Nothing
+        _ -> Just (maybe entry ((,) question) term' : maybe rest id rest')
 
 -- | The named proof-term presentation pass is owned by precisely the
 -- registered @nd\@1@ identity, never merely a similarly named backend.
@@ -662,8 +862,8 @@ resolveArgRef env priors aid rid i ref@(ArgRef name) =
   case refMatches env priors name of
     ([(leafId, prop)], []) ->
       Right (ResolvedArgRef (SLeaf leafId) prop)
-    ([], [(_, term)]) ->
-      case conclOf (envPolicy env) (envGamma env) term of
+    ([], [(identifier, term)]) ->
+      case priorConclusion env identifier term of
         Just prop -> Right (ResolvedArgRef term prop)
         Nothing -> Left (ThetaReferenceConclUnderivable aid rid i ref)
     ([], []) -> Left (ThetaReferenceUnresolved aid rid i ref)
@@ -687,11 +887,13 @@ inferTheta env priors aid rule refs = do
   theta0 <- foldM matchOne [] $
     zip3 [1 :: Int ..] refs (zip (rulePremises rule) resolved)
   mapM_ (requireThetaParameter aid rid theta0) (ruleParams rule)
-  let theta =
-        [ (param, term)
-        | param <- ruleParams rule
-        , Just term <- [lookup param theta0]
-        ]
+  let theta = case envMode env of
+        InquiryElaboration -> theta0
+        LegacyElaboration ->
+          [ (param, term)
+          | param <- ruleParams rule
+          , Just term <- [lookup param theta0]
+          ]
   pure (theta, map resolvedRefTerm resolved)
   where
     matchOne sub (i, ref, (apat, resolved)) =
@@ -736,23 +938,32 @@ resolvePremises env priors aid r rule theta =
   mapM resolve (zip [1 ..] (rulePremises rule))
   where
     resolve :: (Int, AtomPat) -> Either ElabError SupportTerm
-    resolve (i, apat) =
-      let ground = apatToProp theta apat
-          leafMatches =
-            [ (l, SLeaf lid)
-            | (lid@(LeafId l), p) <- envGamma env
-            , equiv p ground
+    resolve (i, apat) = do
+      ground <- case envMode env of
+        LegacyElaboration -> Right (apatToProp theta apat)
+        InquiryElaboration -> maybe (Left (InquiryArgumentUnbuildable aid)) Right (instAPat theta apat)
+      let leafMatches =
+            [ (name, SLeaf leaf)
+            | (leaf@(LeafId name), proposition) <- envGamma env
+            , equiv proposition ground
             ]
           argMatches =
-            [ (a, t)
-            | (ArgId a, t) <- priors
-            , maybe False (equiv ground) (conclOf (envPolicy env) (envGamma env) t)
+            [ (name, term)
+            | (identifier@(ArgId name), term) <- priors
+            , maybe False (equiv ground) (priorConclusion env identifier term)
             ]
           matches = leafMatches ++ argMatches
-       in case matches of
-            [(_, t)] -> Right t
-            [] -> Left (UnresolvedPremise aid r i ground)
-            _ -> Left (AmbiguousPremise aid r i ground (map fst matches))
+      case matches of
+        [(_, term)] -> Right term
+        [] -> Left (UnresolvedPremise aid r i ground)
+        _ -> Left (AmbiguousPremise aid r i ground (map fst matches))
+
+-- Original comparison priors have an intentionally empty substitution and a
+-- separately stored conclusion. Named and implicit references read that value.
+priorConclusion :: Env -> ArgId -> SupportTerm -> Maybe Prop
+priorConclusion env identifier term = case lookup identifier (envComparisonConclusions env) of
+  Just conclusion -> Just conclusion
+  Nothing -> conclusionFor env term
 
 -- | Re-point each shallow discharge target: a declared leaf stays an 'SLeaf'; a
 -- prior-argument id becomes that argument's elaborated term. (The answer-pattern
@@ -768,9 +979,9 @@ resolveDischarges env priors aid = mapM one
     one (q, SLeaf (LeafId ref)) = do
       target <- resolveDischargeRef env priors aid q ref
       pure (q, target)
-    -- The parser only ever produces 'SLeaf' discharge targets; a non-leaf
-    -- sub-term is passed through unchanged (totality).
-    one (q, t) = Right (q, t)
+    one (question, term) = case envMode env of
+      LegacyElaboration -> Right (question, term)
+      InquiryElaboration -> Left (SourceExplicitDischargeShape aid question)
 
 -- | Resolve the identifier-only discharge map carried by an inferred payload.
 resolveArgDischarges
@@ -821,12 +1032,13 @@ validateConcl :: Env -> ArgId -> ArgConcl -> SupportTerm -> Either ElabError ()
 validateConcl env aid ac term = case ac of
   SupportsClaim c -> case find ((== c) . claimId) (envClaims env) of
     -- Declared claim: verify concl(w) ≡ its formal (spec §3.1).
-    Just claim -> case conclOf (envPolicy env) (envGamma env) term of
+    Just claim -> case conclusionFor env term of
       Just w
         | equiv w (claimFormal claim) -> Right ()
         | otherwise -> Left (ConclusionMismatch aid c w (claimFormal claim))
-      -- Undeclared leaf root: concl unknown here; checkUnit rejects it (R1).
-      Nothing -> Right ()
+      Nothing -> case envMode env of
+        LegacyElaboration -> Right ()
+        InquiryElaboration -> Left (InquiryArgumentUnbuildable aid)
     -- Not a declared claim: treat as SupportsDerived (no error).
     Nothing -> Right ()
   SupportsDerived _ -> Right ()
@@ -856,6 +1068,15 @@ conclOf _ gamma (SLeaf l) = lookup l gamma
 conclOf pol _ (SRule r theta _ _ _ _) = do
   rule <- find ((== r) . ruleId) (policyRules pol)
   Just (apatToProp theta (ruleConclusion rule))
+
+conclusionFor :: Env -> SupportTerm -> Maybe Prop
+conclusionFor env term = case envMode env of
+  LegacyElaboration -> conclOf (envPolicy env) (envGamma env) term
+  InquiryElaboration -> case term of
+    SLeaf leaf -> lookup leaf (envGamma env)
+    SRule ruleName theta _ _ _ _ -> do
+      rule <- find ((== ruleName) . ruleId) (policyRules (envPolicy env))
+      instAPat theta (ruleConclusion rule)
 
 -- ---------------------------------------------------------------------------
 -- Pattern reclassification (grammar §2)

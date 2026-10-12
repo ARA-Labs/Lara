@@ -39,7 +39,7 @@ import Lara.Check (CheckedUnit, checkUnit, cuNodeDecls, cuNodes, cuProgram)
 import Lara.Compile (checkedAF)
 import Lara.Prop (Prop (..))
 import Lara.Reporting
-import Lara.SupportTerm (CertOk, CertOutcome (..), cnConclusion)
+import Lara.SupportTerm (CertOk, CertOutcome (..), CertRejectionCause (..), cnConclusion)
 
 -- ---------------------------------------------------------------------------
 -- Shared vocabulary
@@ -117,7 +117,7 @@ gamma l = lookup l leavesGamma
 
 -- | No strict rule appears, so the certificate oracle is never consulted.
 noCert :: CertOk
-noCert _ _ _ = CertRejected "no certificate oracle in this fixture"
+noCert _ _ _ = CertRejected CertificateReplayRejected "no certificate oracle in this fixture"
 
 -- | Assemble a unit over @[r1, r2, r3]@ with the shared leaf context, given
 -- arguments, attacks, and queries.

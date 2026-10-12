@@ -104,8 +104,9 @@ Deviations a reader should not mistake for parity:
   how the frozen Lean semantic core (`Lara.Prop`) already spells them. The
   identifier-newtype discipline above therefore stops at the `Lara.Prop`
   boundary; it is not weakened anywhere this module owns.
-* Wire NATs (`certVersion`, `certRefVersion`) and premise indices (`Step`,
-  `SurfaceStep`) are `Int`, following the Haskell `Int`.
+* Authored certificate versions (`certVersion`, `certRefVersion`) and premise
+  indices (`Step`, `SurfaceStep`) are unbounded signed integers: Lean `Int`
+  and Haskell `Integer`. The core conversion uses `Int.toNat`.
 * `Rule.premiseLabels` round-trips *whatever list it is given*. `Lara.AST`
   additionally declares a canonical form (`[]`, or exactly `premises.length`
   entries with at least one `some`); a non-canonical all-`none` list is a real

@@ -207,7 +207,7 @@ claimCtor = Claim
 questionCtor :: QuestionId -> AtomPat -> Necessity -> Question
 questionCtor = Question
 
-certRefCtor :: BackendId -> Int -> TheoryDigest -> CertRef
+certRefCtor :: BackendId -> Integer -> TheoryDigest -> CertRef
 certRefCtor = CertRef
 
 ruleCtor ::
@@ -246,7 +246,7 @@ policyCtor ::
 policyCtor = Policy
 
 -- | Exemption 2: @payload@ is the native S-expression type and is not compared.
-certCtor :: BackendId -> Int -> TheoryDigest -> SExpr -> Cert
+certCtor :: BackendId -> Integer -> TheoryDigest -> SExpr -> Cert
 certCtor = Cert
 
 sruleCtor ::
@@ -294,7 +294,7 @@ m5ComparisonCarrier = Comparison
 m5ValueBindingCarrier :: ValueName -> P.Term -> ValueBinding
 m5ValueBindingCarrier = ValueBinding
 
-m5CertCarrier :: BackendId -> Int -> TheoryDigest -> SExpr -> Cert
+m5CertCarrier :: BackendId -> Integer -> TheoryDigest -> SExpr -> Cert
 m5CertCarrier = Cert
 
 -- ---------------------------------------------------------------------------
@@ -334,7 +334,7 @@ assuranceCertCtor = AssuranceCert
 supportLeafCtor :: LeafId -> SupportTerm
 supportLeafCtor = SLeaf
 
-stepPremiseCtor :: Int -> Step
+stepPremiseCtor :: Integer -> Step
 stepPremiseCtor = StepPremise
 
 stepQuestionCtor :: QuestionId -> Step
@@ -349,7 +349,7 @@ undercutCtor = Undercut
 undermineCtor :: ArgId -> ArgId -> ExpectedPosition -> Attack
 undermineCtor = Undermine
 
-surfaceStepIndexCtor :: Int -> SurfaceStep
+surfaceStepIndexCtor :: Integer -> SurfaceStep
 surfaceStepIndexCtor = StepIndex
 
 surfaceStepNameCtor :: String -> SurfaceStep

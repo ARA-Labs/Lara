@@ -46,6 +46,10 @@ import System.Process
 import Test.QuickCheck
 import Lara.Replay (inputReplayId)
 import Lara.Wire (decodeCheckInputFile, encodeReplayId, printSExpr)
+import qualified Data.ByteString as BS
+import qualified Lara.Process.Inquiry.Types as Inquiry
+import qualified Lara.Process.Inquiry.Wire as InquiryWire
+import qualified Lara.Process.Wire as ProcessWire
 
 -- | The executable name; Cabal puts it on @PATH@ during @cabal test@ via the
 -- test-suite's @build-tool-depends: lara:lara@.
@@ -1544,6 +1548,46 @@ prop_cliDepsCodecError = once $ ioProperty $
         , counterexample "stdout empty" (out === "")
         ]
 
+prop_cliInquirySmokes :: Property
+prop_cliInquirySmokes = once $ ioProperty $ do
+  checks <- traverse check ["joint-only","reference-sensitivity","verified-certificate","tampered-certificate","unresolved-claim-impact"]
+  pure (conjoin checks)
+  where
+    check name = do
+      expected <- readFile ("fixtures/process/inquiry/" ++ name ++ ".expected")
+      actual <- runLaraIn [] ["inquiry","fixtures/process/inquiry/" ++ name ++ ".sexp"]
+      let code = if name == "unresolved-claim-impact" then ExitFailure 2 else ExitSuccess
+      pure (counterexample name (actual === (code,expected,"")))
+
+prop_cliInquiryBoundary :: Property
+prop_cliInquiryBoundary = once $ ioProperty $ do
+  usageCases <- traverse (runLaraIn [] . ("inquiry":)) [[],["file","extra"],["file","--help"]]
+  missing <- runLaraIn [] ["inquiry","/lara-inquiry-does-not-exist"]
+  invalid <- withTempSexp "" $ \path -> do
+    BS.writeFile path (BS.pack [40,59,255])
+    actual <- runLaraIn [] ["inquiry",path]
+    pure (actual === failure (Inquiry.IOFailure ("cannot read " ++ path)))
+  parser <- withTempSexp "\\" $ \path -> runLaraIn [] ["inquiry",path]
+  unicode <- withTempSexp "" $ \path -> do
+    BS.writeFile path (BS.pack [206,177])
+    runLaraIn cLocale ["inquiry",path]
+  empty <- do
+    bytes <- BS.readFile "fixtures/process/inquiry/joint-only.sexp"
+    case InquiryWire.parseInquiryInputBS bytes of
+      Left refusal -> pure (counterexample (show refusal) False)
+      Right input ->
+        let changed = input { Inquiry.inquiryRequests = []
+              ,Inquiry.inquiryProcess = (Inquiry.inquiryProcess input) { ProcessWire.documentQueries = [] } }
+         in withTempSexp (printSExpr (InquiryWire.encodeInquiryInput changed)) $ \path -> do
+              actual <- runLaraIn [] ["inquiry",path]
+              pure (actual === (ExitSuccess,"",""))
+  pure (conjoin
+    [conjoin [actual === failure (Inquiry.Usage "usage: lara inquiry FILE") | actual <- usageCases]
+    ,missing === failure (Inquiry.IOFailure "cannot read /lara-inquiry-does-not-exist")
+    ,invalid,parser === failure (Inquiry.SyntaxError "line 1, column 1: unexpected character '\\'")
+    ,unicode === failure (Inquiry.SyntaxError "line 1, column 1: unexpected character 'α'"),empty])
+  where failure refusal = (ExitFailure 2,printSExpr (InquiryWire.encodeInquiryError (Inquiry.InquiryError Nothing refusal)) ++ "\n","")
+
 cliSpecProps :: [(String, IO Result)]
 cliSpecProps =
   [ ("cli accept exit 0 + bytes", quickCheckResult prop_cliAccept)
@@ -1557,6 +1601,8 @@ cliSpecProps =
   , ("cli codec error exit 2", quickCheckResult prop_cliCodecError)
   , ("cli unreadable file exit 2", quickCheckResult prop_cliUnreadable)
   , ("cli usage exit 2", quickCheckResult prop_cliUsage)
+  , ("cli inquiry mandatory real analyses and certificate smokes match frozen bytes", quickCheckResult prop_cliInquirySmokes)
+  , ("cli inquiry usage IO whole UTF8 and parser boundary have atomic stdout", quickCheckResult prop_cliInquiryBoundary)
   , ("cli .lara accept A exit 0 + bytes", quickCheckResult prop_cliLaraAcceptA)
   , ("cli .lara accept B exit 0 + bytes", quickCheckResult prop_cliLaraAcceptB)
   , ("cli .lara accept S1 strict cert exit 0 + bytes", quickCheckResult prop_cliLaraAcceptS1)

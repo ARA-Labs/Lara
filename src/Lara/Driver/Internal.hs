@@ -35,6 +35,7 @@ module Lara.Driver.Internal
   , buildCertOk
   , buildAccept
   , declaredTypedHole
+  , holeRows
   , acceptedRawUnit
   , runCheck
   , runCheckLocated
@@ -42,6 +43,11 @@ module Lara.Driver.Internal
   , runCheckLocatedReported
   , runCheckWithPrune
   , runCheckReported
+  , CheckReport (..)
+  , checkReportAccepted
+  , checkReportFailure
+  , CheckFailure (..)
+  , runCheckAfterReplayReported
     -- * Certificate dependency reports
   , unitCertDeps
   , runCheckDeps
@@ -118,6 +124,7 @@ import Lara.SupportTerm
   ( BackendReason (..)
   , CertOk
   , CertOutcome (..)
+  , CertRejectionCause (..)
   , CheckError (..)
   , CheckLoc (..)
   , SlotSource (..)
@@ -181,9 +188,9 @@ runCheckLocatedReported
   -> CheckInput
   -> (Verdict, Maybe LocatedRejection, [String])
 runCheckLocatedReported cfg input =
-  let (verdict, located, diagnostics, slots, _, _) =
-        runCheckReported cfg input (prune (inputUnit input))
-   in (verdict, located, diagnostics ++ slotMappingLines slots)
+  let report = runCheckReported cfg input (prune (inputUnit input))
+   in (checkReportVerdict report, checkReportLocated report,
+       checkReportDiagnostics report ++ slotMappingLines (checkReportSlots report))
 
 -- | Execute the checker against a source-boundary prune while retaining replay
 -- preflight and group decisions over the original declared unit.  The source
@@ -195,69 +202,68 @@ runCheckLocatedReported cfg input =
 -- @
 runCheckWithPrune :: CheckConfig -> CheckInput -> Prune -> (Verdict, Maybe LocatedRejection)
 runCheckWithPrune cfg input pruned =
-  let (verdict, located, _, _, _, _) = runCheckReported cfg input pruned
-   in (verdict, located)
+  let report = runCheckReported cfg input pruned
+   in (checkReportVerdict report, checkReportLocated report)
 
--- | 'runCheckWithPrune' plus rejection diagnostics, certificate dependencies,
--- claim reports, and AF-node names, all from __one__ pass. Every projection
--- describes the same decision and the same accepted cache.
---
--- That single-pass property is the whole reason this exists. The alternative —
--- computing diagnostics from the input in a second traversal — either re-runs
--- the checker (doubling the work the E1 bench measures) or reconstructs the
--- decision independently and risks disagreeing with it.
---
--- __The reports cost nothing unless demanded__. The fifth component is
--- the certificate dependency report and the sixth retains claim reports and
--- AF-node names from the accepted cache. They are built lazily, so callers that
--- only want the verdict never force these reports or replay a certificate for
--- accounting. All report lists are empty on rejection: a rejected unit has no
--- accepted checked term for the reporting to range over.
-runCheckReported
-  :: CheckConfig
-  -> CheckInput
-  -> Prune
-  -> (Verdict, Maybe LocatedRejection, [String], [SlotSource], [(ArgId, [CertDep])], ([ClaimReport], [ArgId]))
-runCheckReported cfg input pruned =
-  let replayId = inputReplayId input
-      verdict outcome = Verdict replayId outcome
-   in case runtimeReplayFailure input of
-        Just failure ->
-          ( verdict (Reject (RejectClass R13))
-          , Just (LocatedRejection (RejectClass R13) StageReplayPreflight (replayFailureConstituent failure))
-          , [replayFailureMessage failure]
-          , []
-          , []
-          , ([], [])
-          )
-        Nothing
-          | groupConflictRejectPrune pruned ->
-              ( verdict (Reject (RejectClass R9))
-              , Just (LocatedRejection (RejectClass R9) StageGroupBoundary (groupConflictConstituent pruned))
-              , maybe [] (: []) (groupConflictMessageWithPrune pruned)
-              , []
-              , []
-              , ([], [])
-              )
-          | otherwise ->
-              let checked = pruneChecked pruned
-               in case checkUnitWith cfg (buildGamma (unitLeaves checked)) (buildCertOk (unitTheories checked)) checked of
-                    Left err ->
-                      ( verdict (Reject (rejectionOf err))
-                      , Just (locate err)
-                      , maybe [] (: []) (backendRejectionMessage err)
-                      , backendRejectionSlots err
-                      , []
-                      , ([], [])
-                      )
-                    Right accepted ->
-                      ( verdict (buildAccept pruned accepted)
-                      , Nothing
-                      , []
-                      , []
-                      , unitCertDeps checked
-                      , (claimReports checked accepted, nodeArgIds checked accepted)
-                      )
+-- | Every projection describes one checker decision. Accepted cache and full
+-- failures are retained before the CLI's class-only and prose projections.
+-- Dependency and claim reports stay lazy and are empty on rejection.
+data CheckReport = CheckReport
+  { checkReportVerdict :: Verdict
+  , checkReportLocated :: Maybe LocatedRejection
+  , checkReportDiagnostics :: [String]
+  , checkReportSlots :: [SlotSource]
+  , checkReportDeps :: [(ArgId, [CertDep])]
+  , checkReportClaims :: ([ClaimReport], [ArgId])
+  , checkReportDecision :: Either CheckFailure CheckedUnit
+  }
+
+data CheckFailure
+  = CheckReplayFailure ReplayFailure
+  | CheckGroupFailure GroupId
+  | CheckCoreFailure UnitError
+  deriving (Eq, Show)
+
+checkReportAccepted :: CheckReport -> Maybe CheckedUnit
+checkReportAccepted = either (const Nothing) Just . checkReportDecision
+
+checkReportFailure :: CheckReport -> Maybe CheckFailure
+checkReportFailure = either Just (const Nothing) . checkReportDecision
+
+runCheckReported :: CheckConfig -> CheckInput -> Prune -> CheckReport
+runCheckReported cfg input pruned = case runtimeReplayFailure input of
+  Just failure ->
+    CheckReport
+      (Verdict (inputReplayId input) (Reject (RejectClass R13)))
+      (Just (LocatedRejection (RejectClass R13) StageReplayPreflight (replayFailureConstituent failure)))
+      [replayFailureMessage failure] [] [] ([], []) (Left (CheckReplayFailure failure))
+  Nothing -> runCheckAfterReplayReported cfg input pruned
+
+-- | The shared group/core decision after the caller's replay boundary.
+-- Inquiry checks selected certificates after core acceptance; the legacy
+-- driver checks them in 'runCheckReported' before reaching this branch.
+runCheckAfterReplayReported :: CheckConfig -> CheckInput -> Prune -> CheckReport
+runCheckAfterReplayReported cfg input pruned =
+  case (unitGroupMode (pruneDeclared pruned), pruneInconsistentGroups pruned) of
+    (RejectOnConflict, DupGroup gid _ : _) ->
+      CheckReport
+        (verdict (Reject (RejectClass R9)))
+        (Just (LocatedRejection (RejectClass R9) StageGroupBoundary (CGroup gid)))
+        (maybe [] (: []) (groupConflictMessageWithPrune pruned))
+        [] [] ([], []) (Left (CheckGroupFailure gid))
+    _ ->
+      case checkUnitWith cfg (buildGamma (unitLeaves checked)) (buildCertOk (unitTheories checked)) checked of
+        Left err ->
+          CheckReport (verdict (Reject (rejectionOf err))) (Just (locate err))
+            (maybe [] (: []) (backendRejectionMessage err)) (backendRejectionSlots err)
+            [] ([], []) (Left (CheckCoreFailure err))
+        Right accepted ->
+          CheckReport (verdict (buildAccept pruned accepted)) Nothing [] []
+            (unitCertDeps checked) (claimReports checked accepted, nodeArgIds checked accepted)
+            (Right accepted)
+  where
+    verdict = Verdict (inputReplayId input)
+    checked = pruneChecked pruned
 
 -- | The checked unit and accepted cache behind a raw-door accepting verdict:
 -- the checked half of the group-only prune, re-checked exactly as
@@ -304,19 +310,17 @@ acceptedRawUnit input = case runtimeReplayFailure input of
 -- mechanized seam to carry prose, which buys nothing a proof depends on.
 backendRejectionMessage :: UnitError -> Maybe String
 backendRejectionMessage err = case err of
-  UEProgram (PERejection _ (CE_R13 _ (ReplayRejected (BackendId name) (TheoryDigest digest) ref reason _)))
-    | not (null reason) ->
-        Just
-          ( "certificate replay: "
-              ++ name
-              ++ "@"
-              ++ show (certRefVersion ref)
-              ++ " (theory "
-              ++ digest
-              ++ ") rejected the certificate: "
-              ++ reason
-          )
+  UEProgram (PERejection _ (CE_R13 _ failure)) -> case failure of
+    BackendMissing backend version digest reason _ -> render backend version digest reason
+    DigestMissing backend version digest reason _ -> render backend version digest reason
+    ReplayRejected backend digest ref _ reason _ -> render backend (certRefVersion ref) digest reason
   _ -> Nothing
+  where
+    render (BackendId name) version (TheoryDigest digest) reason
+      | null reason = Nothing
+      | otherwise = Just
+          ( "certificate replay: " ++ name ++ "@" ++ show version
+              ++ " (theory " ++ digest ++ ") rejected the certificate: " ++ reason )
 
 -- | The slot → source mapping of a __checker-side__ R13: what the
 -- checked term put in each premise slot the refused certificate cites. Empty
@@ -329,7 +333,10 @@ backendRejectionMessage err = case err of
 -- so it cannot describe a different instance than the one that was refused.
 backendRejectionSlots :: UnitError -> [SlotSource]
 backendRejectionSlots err = case err of
-  UEProgram (PERejection _ (CE_R13 _ (ReplayRejected _ _ _ _ slots))) -> slots
+  UEProgram (PERejection _ (CE_R13 _ failure)) -> case failure of
+    BackendMissing _ _ _ _ slots -> slots
+    DigestMissing _ _ _ _ slots -> slots
+    ReplayRejected _ _ _ _ _ slots -> slots
   _ -> []
 
 -- | Render a slot → source mapping as one @stderr@ line per slot, under the
@@ -369,14 +376,6 @@ replayFailureConstituent failure = case failure of
   UnknownSelectedBackend{} -> CReplayEnvelope
   CertificateBackendNotSelected index _ _ _ -> CArgument index
 
--- | The located constituent of an escalated group-conflict (R9): the first @≢@
--- group in declaration order (the same group 'groupConflictMessage' names).
--- 'CPolicy' is unreachable when 'groupConflictReject' held.
-groupConflictConstituent :: Prune -> Constituent
-groupConflictConstituent pruned =
-  case pruneInconsistentGroups pruned of
-    DupGroup gid _ : _ -> CGroup gid
-    [] -> CPolicy
 
 -- | The leaf context @Gamma@ from the wire @leaves@ section (first-match lookup,
 -- Lean @buildGamma@).
@@ -427,7 +426,7 @@ buildCertOk :: [(TheoryDigest, [Prop])] -> CertOk
 buildCertOk theories cert as c = case cert of
   Cert (BackendId name) v _ payload ->
     case St.lookupBackend registry (St.BackendId name v) of
-      Nothing -> CertRejected ("no registered backend " ++ name ++ "@" ++ show v)
+      Nothing -> CertRejected CertificateBackendMissing ("no registered backend " ++ name ++ "@" ++ show v)
       Just backend ->
         case St.runBackend backend (toStrictDigest (certTheory cert)) as c payload of
           -- The adapter's 'St.Dependency' report is retained, not discarded:
@@ -437,7 +436,10 @@ buildCertOk theories cert as c = case cert of
           -- acceptance — 'certAccepted' is a 'Bool' — and is read only by
           -- "Lara.Strict.Deps" (design note D9 in "Lara.SupportTerm").
           Right deps -> CertAccepted deps
-          Left reason -> CertRejected reason
+          Left reason ->
+            CertRejected
+              (if certTheory cert `elem` map fst theories then CertificateReplayRejected else CertificateDigestMissing)
+              reason
   where
     registry =
       St.mkRegistry
@@ -547,7 +549,7 @@ holeRows pruned accepted =
 -- __Input contract.__ @unit@ must be one 'Lara.Check.checkUnit' accepted, and
 -- must be the /checked/ unit — @pruneChecked@'s reduced program, not the
 -- declared one. Both conditions are met at the single call site
--- ('runCheckReported'\'s accepting branch), and both matter:
+-- ('runCheckAfterReplayReported'\'s accepting branch), and both matter:
 --
 -- * On an accepted unit every certificate node's oracle call succeeds, which is
 --   the case Lean's @cert_node_accounted@ covers and the only case in which the
@@ -590,9 +592,8 @@ unitCertDeps unit =
 -- The report therefore rides beside the verdict, never inside it.
 runCheckDeps :: CheckConfig -> CheckInput -> (Verdict, [(ArgId, [CertDep])])
 runCheckDeps cfg input =
-  let (verdict, _, _, _, deps, _) =
-        runCheckReported cfg input (prune (inputUnit input))
-   in (verdict, deps)
+  let report = runCheckReported cfg input (prune (inputUnit input))
+   in (checkReportVerdict report, checkReportDeps report)
 
 -- | Render an argument-keyed report as text: one @argument \<id\>@ header per
 -- argument, then that argument's dependency lines in
