@@ -378,6 +378,30 @@ The checked-inquiry wrapper is a second, separately versioned entry point; it le
 
 `Lara.Process.InquiryRun` is the reference semantics and the bounded runner. The reference side projects one `checkFamily` per family, so the checker runs once per completion and every request reads the shared projection. The runner threads a single budget through enumeration, observation and each dispatched request and returns a refusal instead of a partial answer; `runBounded_eq_reference` proves a successful bounded result equals the reference result, and every cap has an exact-at-cap and a cap-plus-one lemma (`checkBudgets_at_cap_*` / `checkBudgets_cap_plus_one_*`, `family_at_cap`, `family_histories_cap_plus_one`, `family_steps_cap_plus_one`, `family_sources_cap_plus_one`). Product and powerset bounds are allocation guards only, so a loose declared bound never refuses a guarded family that fits the actual counters. Embedded verdict queries are emitted first in their original order and wrapper requests after them, with labels required to be unique across the two lists, history-verdict results tagged separately from source-family results, and the unguarded history count kept distinct from the guarded source count.
 
+The native Haskell door is `lara inquiry FILE`. Its input, result and error
+consumers are `Lara.Process.Inquiry.Wire`; result decoding takes the embedded
+document's `Names`, while error decoding needs no namespace table. The
+`Lara.Process.Inquiry.Run` library exposes `runBounded`, `runInquiryFile` and
+`exitCodeOf`. It retains one checked family for all family requests and reuses
+observed impact endpoints for pair accounting and dispatch. Unresolved impact
+claim bindings are malformed refusals after budget, label and reference checks;
+the reference's inert query contributes only to private prevalidation accounting.
+
+The CLI reads strict bytes and validates the entire file as UTF-8 before parsing,
+including comments and trailing bytes. Read failures and invalid UTF-8 produce
+`io "cannot read PATH"` with the original path. Every argument list beginning
+with `inquiry` uses this stdout-only boundary; missing or extra arguments report
+`usage "usage: lara inquiry FILE"`. The shared reader keeps legacy diagnostics
+unchanged and uses the reference's singleton-character spelling for inquiry
+syntax errors.
+
+All output is rendered before emission. Success prints one LF-terminated
+`inquiry-result 1` per embedded query, then per wrapper request; no queries or
+requests means zero stdout bytes. Refusal prints exactly one LF-terminated
+`inquiry-error 1`, with no preceding results. Stderr stays empty. Success,
+including an invalid-certificate result, exits 0; unsupported or limit refusals
+exit 1; other refusals exit 2.
+
 `source-bytes` counts the original file's UTF-8 bytes, including whitespace and
 multibyte characters. The executable passes that count to `runBounded`; typed
 callers without a file use `actualOf input .sourceBytes`, the canonical

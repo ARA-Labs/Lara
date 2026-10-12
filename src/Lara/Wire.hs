@@ -128,6 +128,7 @@ module Lara.Wire
     ParseError (..)
   , parseSExpr
   , parseSExprBS
+  , parseSExprBSWithCharRenderer
   , printSExpr
   , maxDepth
     -- * The closed tag vocabulary
@@ -323,9 +324,14 @@ maxDepth = 10000
 -- | Parse exactly one top-level form from UTF-8 bytes; a second form is an
 -- error. This is the primitive; 'parseSExpr' is the 'String' wrapper.
 parseSExprBS :: ByteString -> Either ParseError SExpr
-parseSExprBS input = do
+parseSExprBS = parseSExprBSWithCharRenderer show
+
+-- | The same reader with a producer-side renderer for unexpected characters.
+-- Legacy callers retain 'show'; inquiry uses the reference's singleton quotes.
+parseSExprBSWithCharRenderer :: (Char -> String) -> ByteString -> Either ParseError SExpr
+parseSExprBSWithCharRenderer renderChar input = do
   let start = skipSpace (P input 1 1)
-  (e, rest) <- parseForm 0 start
+  (e, rest) <- parseForm renderChar 0 start
   let rest' = skipSpace rest
   if B.null (pInput rest')
     then Right e
@@ -339,8 +345,8 @@ parseSExprBS input = do
 parseSExpr :: String -> Either ParseError SExpr
 parseSExpr = parseSExprBS . TE.encodeUtf8 . T.pack
 
-parseForm :: Int -> P -> Either ParseError (SExpr, P)
-parseForm depth p
+parseForm :: (Char -> String) -> Int -> P -> Either ParseError (SExpr, P)
+parseForm renderChar depth p
   | depth > maxDepth =
       perr p ("maximum S-expression nesting depth exceeded (" ++ show maxDepth ++ ")")
   | otherwise = case B.uncons (pInput p) of
@@ -354,7 +360,7 @@ parseForm depth p
                 p' = p {pInput = rest, pCol = pCol p + B.length tok}
              in Right (SAtom (BC.unpack tok), p')
         | otherwise -> case peekCodePoint (pInput p) of
-            Just c -> perr p ("unexpected character " ++ show c)
+            Just c -> perr p ("unexpected character " ++ renderChar c)
             Nothing -> perr p "invalid UTF-8 byte sequence"
       Nothing -> perr p "unexpected end of input"
   where
@@ -364,7 +370,7 @@ parseForm depth p
             Just (0x29, rest) -> Right (SList (reverse acc), step1 rest q')
             Nothing -> perr q' "unclosed list"
             _ -> do
-              (e, q'') <- parseForm (depth + 1) q'
+              (e, q'') <- parseForm renderChar (depth + 1) q'
               parseList q'' (e : acc)
     -- Quoted payloads accumulate raw byte slices and are UTF-8 decoded once at
     -- the closing quote. Escape scanning on bytes is safe because @"@, @\\@ and

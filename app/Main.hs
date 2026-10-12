@@ -158,6 +158,9 @@ import Lara.Source.Load
   , renderSourceLoadError
   )
 import Lara.Strict.Deps (CertDep)
+import qualified Lara.Process.Inquiry.Types as Inquiry
+import qualified Lara.Process.Inquiry.Wire as InquiryWire
+import qualified Lara.Process.Inquiry.Run as InquiryRun
 import Lara.Wire
   ( Outcome (..)
   , Verdict (..)
@@ -171,6 +174,7 @@ main :: IO ()
 main = do
   args <- textBoundary =<< getArgs
   case args of
+    "inquiry":options -> inquiryRun options
     ["check", file] -> check file ToStdout
     ["check", file, "--out", out] -> check file (ToFile out)
     "check-ara":root:options -> case araOptions options of
@@ -181,6 +185,22 @@ main = do
     ["pw", file] -> pwRun file
     ["pw-input", file] -> pwInput file
     _ -> usage >> exitWith (ExitFailure 2)
+
+inquiryRun :: [String] -> IO ()
+inquiryRun arguments = do
+  outcome <- case arguments of
+    [path] -> InquiryRun.runInquiryFile path
+    _ -> pure (Left (Inquiry.Usage "usage: lara inquiry FILE"))
+  case outcome of
+    Left refusal -> do
+      let output = printSExpr (InquiryWire.encodeInquiryError (Inquiry.InquiryError Nothing refusal)) ++ "\n"
+      _ <- evaluate (length output)
+      putStr output
+      exitWith (ExitFailure (InquiryRun.exitCodeOf refusal))
+    Right (names,results) -> do
+      let output = concatMap (\result -> printSExpr (InquiryWire.encodeInquiryResult names result) ++ "\n") results
+      _ <- evaluate (length output)
+      putStr output
 
 usage :: IO ()
 usage = do

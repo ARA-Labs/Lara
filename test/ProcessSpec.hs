@@ -19,6 +19,12 @@ import qualified Lara.Process.Enumerate as Enumerate
 import qualified Lara.Process.Source.Types as Source
 import Lara.Strict (SExpr (..))
 import Lara.Wire (parseSExpr)
+import qualified Data.ByteString as BS
+import qualified Lara.Process.Inquiry.Wire as InquiryWire
+import qualified Lara.Process.Inquiry.Run as InquiryRun
+import qualified Lara.Process.Inquiry.Types as Inquiry
+import qualified Lara.Wire as RawWire
+import qualified Lara.Process.Analysis as InquiryLiteral
 
 fixture :: String -> (Document -> Property) -> Property
 fixture name check = once $ ioProperty $ do
@@ -675,6 +681,188 @@ familyEnumerationProps =
     , ("family materialization preserves metadata coordinates duplicates and hypothetical comparisons", prop_familyMaterialization)
     ]]
 
+prop_inquiryUnresolvedBudget :: Property
+prop_inquiryUnresolvedBudget = once $ ioProperty $ do
+  bytes <- BS.readFile "fixtures/process/inquiry/unresolved-claim-impact.sexp"
+  pure $ case InquiryWire.parseInquiryInputBS bytes of
+    Left refusal -> counterexample (show refusal) False
+    Right input ->
+      let withPairs cap = input { Inquiry.inquiryLimits =
+            (Inquiry.inquiryLimits input) { Inquiry.limitPairs = cap } }
+          run cap = InquiryRun.runBounded (withPairs cap) (fromIntegral (BS.length bytes))
+       in conjoin
+          [run 17 === Left (Inquiry.Limit Inquiry.Pairs 18 17)
+          ,run 18 === Left (Inquiry.Malformed "unresolved claim in impact request")]
+
+prop_inquiryCompleteConsumers :: Property
+prop_inquiryCompleteConsumers = once $ ioProperty $ do
+  checks <- traverse check
+    ["p0-verdict","p0-embedded-audit","fixed-query","fixed-witness","mixed-stability"
+    ,"reference-sensitivity","joint-only","minimal-conditions","new-attacker"
+    ,"verified-certificate","tampered-certificate","impact-rejected","source-rejections"]
+  pure (conjoin checks)
+  where
+    check name = do
+      bytes <- BS.readFile ("fixtures/process/inquiry/" ++ name ++ ".sexp")
+      expected <- readFile ("fixtures/process/inquiry/" ++ name ++ ".expected")
+      pure $ case InquiryWire.parseInquiryInputBS bytes of
+        Left refusal -> counterexample (name ++ ": " ++ show refusal) False
+        Right input ->
+          let names = documentNames (Inquiry.inquiryProcess input)
+              decoded = traverse (\line -> either (Left . show) Right (parseSExpr line)
+                >>= either (Left . show) Right . InquiryWire.parseInquiryResult names) (lines expected)
+           in case (decoded,InquiryRun.runBounded input (fromIntegral (BS.length bytes))) of
+             (Right wanted,Right actual) -> conjoin
+               [actual === wanted,conjoin [InquiryWire.parseInquiryResult names
+                 (InquiryWire.encodeInquiryResult names result) === Right result | result <- actual]]
+             pair -> counterexample (name ++ ": " ++ show pair) False
+
+prop_inquiryRefusalConsumers :: Property
+prop_inquiryRefusalConsumers = conjoin
+  [ InquiryWire.parseInquiryError (InquiryWire.encodeInquiryError error') === Right error'
+  | label <- [Nothing,Just "",Just "report"]
+  , refusal <- [Inquiry.Malformed "detail",Inquiry.SyntaxError "line 1",Inquiry.Unsupported "feature"
+    ,Inquiry.Version "2",Inquiry.Usage "usage: lara inquiry FILE",Inquiry.IOFailure "cannot read path"]
+    ++ [Inquiry.Limit counter (2^(128 :: Natural)) (2^(127 :: Natural)) | counter <- [minBound..maxBound]]
+  , let error' = Inquiry.InquiryError label refusal]
+
+prop_inquiryConsumerRefusals :: Property
+prop_inquiryConsumerRefusals = once $ ioProperty $ do
+  bytes <- BS.readFile "fixtures/process/inquiry/joint-only.sexp"
+  pure $ case InquiryWire.parseInquiryInputBS bytes of
+    Left refusal -> counterexample (show refusal) False
+    Right input ->
+      let namespace = documentNames (Inquiry.inquiryProcess input)
+          check tag parse = conjoin
+            [ parse (SList [SAtom tag,SAtom "2"]) ===
+                Left (Inquiry.Version (tag ++ " supports version 1 only, found 2"))
+            , parse (SList [SAtom tag,SAtom "1"]) ===
+                Left (Inquiry.Malformed ("malformed " ++ tag))
+            , parse (SList [SAtom tag]) ===
+                Left (Inquiry.Malformed ("expected an " ++ tag ++ " envelope"))
+            ]
+       in check "inquiry-result" (InquiryWire.parseInquiryResult namespace)
+          .&&. check "inquiry-error" InquiryWire.parseInquiryError
+
+prop_inquiryParserRenderer :: Property
+prop_inquiryParserRenderer = conjoin
+  [ InquiryWire.parseInquiryInputBS (BS.pack bytes) === Left (Inquiry.SyntaxError detail)
+  | (bytes,detail) <- [([92],"line 1, column 1: unexpected character '\\'")
+    ,([206,177],"line 1, column 1: unexpected character 'α'")
+    ,([1],"line 1, column 1: unexpected character '\SOH'")]]
+  .&&. RawWire.parseSExprBS (BS.pack [92]) ===
+    Left (RawWire.ParseError 1 1 ("unexpected character " ++ show '\\'))
+
+prop_inquiryBudgetBoundaries :: Property
+prop_inquiryBudgetBoundaries = once $ ioProperty $ do
+  checks <- traverse check
+    ["limit-histories-at-cap","limit-histories-cap-plus-one","limit-sources-at-cap","limit-sources"
+    ,"limit-declarations-at-cap","limit-declarations-cap-plus-one","limit-pairs-at-cap"
+    ,"limit-pairs-cap-plus-one","limit-subsets-at-cap","limit-subsets","limit-search-at-cap","limit-search"
+    ,"limit-source-bytes-at-cap","limit-source-bytes-cap-plus-one"]
+  pure (conjoin checks)
+  where
+    check name = do
+      bytes <- BS.readFile ("fixtures/process/inquiry/" ++ name ++ ".sexp")
+      expected <- readFile ("fixtures/process/inquiry/" ++ name ++ ".expected")
+      pure $ case InquiryWire.parseInquiryInputBS bytes of
+        Left refusal -> counterexample (name ++ ": " ++ show refusal) False
+        Right input ->
+          let names = documentNames (Inquiry.inquiryProcess input)
+              output = case InquiryRun.runBounded input (fromIntegral (BS.length bytes)) of
+                Left refusal -> [InquiryWire.encodeInquiryError (Inquiry.InquiryError Nothing refusal)]
+                Right results -> map (InquiryWire.encodeInquiryResult names) results
+           in traverse parseSExpr (lines expected) === Right output
+
+prop_inquiryAllocationPrecedence :: Property
+prop_inquiryAllocationPrecedence = once $ ioProperty $ do
+  bytes <- BS.readFile "fixtures/process/inquiry/minimal-conditions.sexp"
+  pure $ case InquiryWire.parseInquiryInputBS bytes of
+    Left refusal -> counterexample (show refusal) False
+    Right input -> case [target | Inquiry.MinimalAssumptionsRequest _ target <- Inquiry.inquiryRequests input] of
+      target:_ ->
+        let huge = 2^(128 :: Natural)
+            catalog = [InquiryLiteral.SlotEq (Audit.SlotId index) (Audit.ChoiceId 0) | index <- [0..127]]
+            changed = input { Inquiry.inquiryCatalog = catalog
+              ,Inquiry.inquiryRequests = [Inquiry.MinimalAssumptionsRequest "duplicate" target,Inquiry.MinimalAssumptionsRequest "duplicate" target]
+              ,Inquiry.inquiryLimits = (Inquiry.inquiryLimits input) { Inquiry.limitSubsets = 1,Inquiry.limitPairs = 0 } }
+         in InquiryRun.runBounded changed (fromIntegral (BS.length bytes)) === Left (Inquiry.Limit Inquiry.Subsets (2*huge) 1)
+      [] -> counterexample "missing authored minimal assumption target" False
+
+prop_inquiryLabelsAfterPairs :: Property
+prop_inquiryLabelsAfterPairs = once $ ioProperty $ do
+  bytes <- BS.readFile "fixtures/process/inquiry/unresolved-claim-impact.sexp"
+  pure $ case InquiryWire.parseInquiryInputBS bytes of
+    Left refusal -> counterexample (show refusal) False
+    Right input -> case Inquiry.inquiryRequests input of
+      request@(Inquiry.ImpactRequest label _ _ _):_ ->
+        let changed cap = input { Inquiry.inquiryRequests = [request]
+              ,Inquiry.inquiryProcess = (Inquiry.inquiryProcess input) { documentQueries = [VerdictQuery label (QueryAtom Predictable)] }
+              ,Inquiry.inquiryLimits = (Inquiry.inquiryLimits input) { Inquiry.limitPairs = cap } }
+            run cap = InquiryRun.runBounded (changed cap) (fromIntegral (BS.length bytes))
+         in conjoin [run 17 === Left (Inquiry.Limit Inquiry.Pairs 18 17)
+                    ,run 18 === Left (Inquiry.Malformed "duplicate result labels")]
+      _ -> counterexample "missing authored impact request" False
+
+prop_inquiryEventsBeforeBytes :: Property
+prop_inquiryEventsBeforeBytes = once $ ioProperty $ do
+  bytes <- BS.readFile "fixtures/process/inquiry/p0-verdict.sexp"
+  pure $ case InquiryWire.parseInquiryInputBS bytes of
+    Left refusal -> counterexample (show refusal) False
+    Right input ->
+      let document = Inquiry.inquiryProcess input
+          p = problem document
+          count = naturalLength (dedupLast (base p ++ problemUnrecorded p))
+          changed = input { Inquiry.inquiryProcess = document
+                { documentLimits = (documentLimits document) { limitEvents = 0 } }
+            ,Inquiry.inquiryLimits = (Inquiry.inquiryLimits input) { Inquiry.limitSourceBytes = 0 } }
+       in conjoin [property (count > 0)
+                  ,InquiryRun.runBounded changed (fromIntegral (BS.length bytes)) === Left (Inquiry.Limit Inquiry.Histories count 0)]
+
+prop_inquiryReferencesBeforeBindings :: Property
+prop_inquiryReferencesBeforeBindings = once $ ioProperty $ do
+  bytes <- BS.readFile "fixtures/process/inquiry/unresolved-claim-impact.sexp"
+  pure $ case InquiryWire.parseInquiryInputBS bytes of
+    Left refusal -> counterexample (show refusal) False
+    Right input -> case Inquiry.inquiryRequests input of
+      impact@(Inquiry.ImpactRequest _ _ _ (claim:_)):_ ->
+        let badReference = Inquiry.ReferenceSpec [] [(Audit.SlotId (2^(128 :: Natural)),Audit.ChoiceId 0)]
+            changed = input { Inquiry.inquiryRequests =
+              [Inquiry.SensitivityRequest "outside-family" badReference (InquiryLiteral.StatusObservable claim),impact]
+              ,Inquiry.inquiryLimits = (Inquiry.inquiryLimits input) { Inquiry.limitPairs = 4096 } }
+         in InquiryRun.runBounded changed (fromIntegral (BS.length bytes)) ===
+              Left (Inquiry.Malformed "unresolved or out-of-family source reference")
+      _ -> counterexample "missing authored unresolved claim" False
+
+prop_inquiryAllocationSourcesFirst :: Property
+prop_inquiryAllocationSourcesFirst = once $ ioProperty $ do
+  bytes <- BS.readFile "fixtures/process/inquiry/minimal-conditions.sexp"
+  pure $ case InquiryWire.parseInquiryInputBS bytes of
+    Left refusal -> counterexample (show refusal) False
+    Right input -> case [target | Inquiry.MinimalAssumptionsRequest _ target <- Inquiry.inquiryRequests input] of
+      target:_ ->
+        let p = problem (Inquiry.inquiryProcess input)
+            spec = Audit.FamilySpec p (Inquiry.inquiryBase input) (Inquiry.inquirySlots input)
+            limits = Inquiry.inquiryLimits input
+            enumLimits = Audit.EnumerationLimits
+              (min (Inquiry.limitHistories limits) (limitCompletions (documentLimits (Inquiry.inquiryProcess input))))
+              (Inquiry.limitSearchSteps limits) (Inquiry.limitSources limits)
+            changed = input { Inquiry.inquiryRequests =
+              [Inquiry.MinimalAssumptionsRequest "subsets" target
+              ,Inquiry.ImpactRequest "impact" (Inquiry.inquiryBase input) (Inquiry.inquiryBase input) []]
+              ,Inquiry.inquiryLimits = limits { Inquiry.limitSubsets = 0,Inquiry.limitDeclarations = 0,Inquiry.limitPairs = 0 } }
+         in case Enumerate.enumerateFamily spec enumLimits of
+              Left refusal -> counterexample (show refusal) False
+              Right enumeration ->
+                let rows = naturalLength (Enumerate.enumeratedCompletions enumeration)
+                    actual = rows + 2
+                    restricted = changed { Inquiry.inquiryLimits =
+                      (Inquiry.inquiryLimits changed) { Inquiry.limitSources = rows } }
+                 in InquiryRun.runBounded restricted (fromIntegral (BS.length bytes)) === Left (Inquiry.Limit Inquiry.Sources actual rows)
+      _ -> counterexample "missing minimal assumptions request" False
+
+
+
 processSpecProps :: [(String, IO Result)]
 processSpecProps =
   [ ("process empty universe preserves precommitment", quickCheckResult (fixtureVerdict "empty-universe" CertainTrue 2))
@@ -708,5 +896,16 @@ processSpecProps =
   , ("process claim and submitted witness quantifiers remain distinct", quickCheckResult prop_witnessQuantifiers)
   , ("process fixture reencoding is canonical without losing fields", quickCheckResult prop_canonicalFixture)
   , ("process boundary records enforce exact arity", quickCheckResult prop_boundaryArity)
+  , ("inquiry unresolved impact charges its exact budget before malformed binding", quickCheckResult prop_inquiryUnresolvedBudget)
+  , ("inquiry complete consumers match every frozen result body", quickCheckResult prop_inquiryCompleteConsumers)
+  , ("inquiry errors roundtrip optional labels and unbounded structured counters", quickCheckResult prop_inquiryRefusalConsumers)
+  , ("inquiry consumers distinguish wrong versions malformed bodies and missing envelopes", quickCheckResult prop_inquiryConsumerRefusals)
+  , ("inquiry parser renders portable unicode details without changing legacy", quickCheckResult prop_inquiryParserRenderer)
+  , ("inquiry exact caps and cap plus one match frozen whole document outcomes", quickCheckResult prop_inquiryBudgetBoundaries)
+  , ("inquiry huge deduplicated catalogs refuse allocation before pair work and labels", quickCheckResult prop_inquiryAllocationPrecedence)
+  , ("inquiry pairs precede cross-list labels which precede unresolved bindings", quickCheckResult prop_inquiryLabelsAfterPairs)
+  , ("inquiry embedded event limit precedes even a zero byte cap", quickCheckResult prop_inquiryEventsBeforeBytes)
+  , ("inquiry references resolve before missing impact bindings after budgets", quickCheckResult prop_inquiryReferencesBeforeBindings)
+  , ("inquiry endpoint allocation precedes subset declaration and pair gates", quickCheckResult prop_inquiryAllocationSourcesFirst)
   ]
   ++ familyEnumerationProps
