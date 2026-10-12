@@ -113,10 +113,10 @@ def referenceCompletion (spec : FamilySpec) (r : ReferenceSpec) : Completion :=
   (resolveCompletion spec r).getD ⟨r.history, []⟩
 
 /-- The fixed atom a claim binding pins a `ClaimId` to. The fallback is inert:
-well-formed documents resolve every queried claim before this is read. -/
+well-formed documents resolve every queried claim before this is read
+(`impactClaimsResolve`). -/
 def claimAtom (input : InquiryInput) (c : ClaimId) : Atom :=
   ((input.claims.find? (fun b => b.claim = c)).map (fun b => b.query)).getD (Atom.atom "" .nil)
-
 /-! ## Labels -/
 
 /-- The report label of a P0 query spec. -/
@@ -320,6 +320,17 @@ def referencesResolve (cs : List Completion) (input : InquiryInput) : Bool :=
     | .slotsSensitive _ reference _ => referenceResolves cs input reference
     | _ => true
 
+
+/-- A claim identifier resolves if it is bound in the document's claim bindings. -/
+def claimResolves (input : InquiryInput) (c : ClaimId) : Bool :=
+  input.claims.any fun b => b.claim = c
+
+/-- Every claim referenced in an impact request resolves in the document's bindings. -/
+def impactClaimsResolve (input : InquiryInput) : Bool :=
+  input.requests.all fun r =>
+    match r with
+    | .impact _ _ _ queries => queries.all (claimResolves input)
+    | _ => true
 /-- The document's single observer projection: one `Source.checkFamily` pass over
 the enumerated completions. Every embedded query and wrapper request reads this
 same value, so the checker runs once per completion per family, not once per
@@ -359,11 +370,12 @@ def analyzeWith (cs : List Completion) (input : InquiryInput) :
     Except RunRefusal (List InquiryResult) :=
   if labelsDistinct input then
     if referencesResolve cs input then
-      let checked := projectionOf input cs
-      .ok (embeddedResults checked input ++ requestResults checked input)
+      if impactClaimsResolve input then
+        let checked := projectionOf input cs
+        .ok (embeddedResults checked input ++ requestResults checked input)
+      else .error (.malformed "unresolved claim in impact request")
     else .error (.malformed "unresolved or out-of-family source reference")
   else .error (.malformed "duplicate result labels")
-
 /-! ### The shared projection is the per-request observer -/
 
 /-- The pre-sharing reference semantics: every embedded query and wrapper
@@ -374,13 +386,15 @@ def analyzeWithPerRequest (cs : List Completion) (input : InquiryInput) :
     Except RunRefusal (List InquiryResult) :=
   if labelsDistinct input then
     if referencesResolve cs input then
-      .ok ((input.process.queries.map fun q =>
-              embeddedResult (perRequestProjection input cs) input q) ++
-            (input.requests.map fun r =>
-              ⟨RequestSpec.label r, requestBody (perRequestProjection input cs) input r⟩))
+      if impactClaimsResolve input then
+        .ok ((input.process.queries.map fun q =>
+                embeddedResult (perRequestProjection input cs) input q) ++
+              (input.requests.map fun r =>
+                ⟨RequestSpec.label r,
+                  requestBody (perRequestProjection input cs) input r⟩))
+      else .error (.malformed "unresolved claim in impact request")
     else .error (.malformed "unresolved or out-of-family source reference")
   else .error (.malformed "duplicate result labels")
-
 /-- **Observer sharing.** The shared one-pass projection is exactly the checker
 application a result would re-run for itself. -/
 theorem projectionOf_eq_checkFamily (input : InquiryInput) (cs : List Completion) :
@@ -431,9 +445,10 @@ theorem analyzeWith_eq_perRequest (cs : List Completion) (input : InquiryInput) 
     analyzeWith cs input = analyzeWithPerRequest cs input := by
   unfold analyzeWith analyzeWithPerRequest
   split
-  · split <;> rfl
+  · split
+    · split <;> rfl
+    · rfl
   · rfl
-
 /-- The reference semantics of a whole document. It enumerates the *reference*
 family (the declared product filtered by the guards, in the documented order)
 and analyses it. -/
@@ -1201,6 +1216,7 @@ followed by the request results. -/
 theorem analyzeWith_ok_split (cs : List Completion) (input : InquiryInput)
     {xs : List InquiryResult} (h : analyzeWith cs input = .ok xs) :
     labelsDistinct input = true ∧ referencesResolve cs input = true ∧
+      impactClaimsResolve input = true ∧
       xs = embeddedResults (projectionOf input cs) input
         ++ requestResults (projectionOf input cs) input := by
   unfold analyzeWith at h
@@ -1208,12 +1224,14 @@ theorem analyzeWith_ok_split (cs : List Completion) (input : InquiryInput)
   · rename_i hlabels
     split at h
     · rename_i hrefs
-      refine ⟨hlabels, hrefs, ?_⟩
-      dsimp only at h
-      exact (Except.ok.inj h).symm
+      split at h
+      · rename_i hclaims
+        refine ⟨hlabels, hrefs, hclaims, ?_⟩
+        dsimp only at h
+        exact (Except.ok.inj h).symm
+      · cases h
     · cases h
   · cases h
-
 /-- The emitted verdict result for an embedded verdict query is exactly the P0
 answer, placed in the embedded order. -/
 theorem analyzeWith_embedded_verdict_mem (input : InquiryInput) (cs : List Completion)
@@ -1222,7 +1240,7 @@ theorem analyzeWith_embedded_verdict_mem (input : InquiryInput) (cs : List Compl
     {xs : List InquiryResult} (h : analyzeWith cs input = .ok xs) :
     ⟨name, .histories (embeddedProblem input).completions.length
       (OutcomeAnswer.ofAnswer (Universe.answer (embeddedProblem input) f))⟩ ∈ xs := by
-  obtain ⟨-, -, rfl⟩ := analyzeWith_ok_split cs input h
+  obtain ⟨-, -, -, rfl⟩ := analyzeWith_ok_split cs input h
   refine List.mem_append_left _ ?_
   rw [embeddedResults]
   exact List.mem_map.mpr ⟨.verdict name f, mem, rfl⟩
@@ -1233,7 +1251,7 @@ theorem analyzeWith_request_mem (input : InquiryInput) (cs : List Completion)
     {r : RequestSpec} (mem : r ∈ input.requests)
     {xs : List InquiryResult} (h : analyzeWith cs input = .ok xs) :
     ⟨RequestSpec.label r, requestBody (projectionOf input cs) input r⟩ ∈ xs := by
-  obtain ⟨-, -, rfl⟩ := analyzeWith_ok_split cs input h
+  obtain ⟨-, -, -, rfl⟩ := analyzeWith_ok_split cs input h
   refine List.mem_append_right _ ?_
   rw [requestResults]
   exact List.mem_map.mpr ⟨r, mem, rfl⟩
