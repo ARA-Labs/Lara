@@ -30,12 +30,15 @@ permutation.
 
 ## Slot products
 
-`guarded` is the generated guarded slot traversal: it prunes a choice whose
-guard already evaluates to `false` at the fixed history, and recurses. Guard
-pruning is sound and complete because `Family.guardsHold` is a conjunction over
-the assignment (`guarded_eq_filter`, `mem_guarded`). `searchFamily` combines the
-generated history search with the generated traversal and is proved equal, as a
-finite set, to `Family.referenceFamily` (`mem_searchFamily`, `searchFamily_perm`).
+`guarded` is the generated guarded slot traversal: it filters choices at the
+fixed history, stops at an empty choice list, and shares each suffix across the
+surviving choices. Guard pruning is sound and complete because
+`Family.guardsHold` is a conjunction over the assignment (`guarded_eq_filter`,
+`mem_guarded`). `searchFamily` combines the generated history search with this
+traversal and is proved equal, as a finite set, to `Family.referenceFamily`
+(`mem_searchFamily`, `searchFamily_perm`). Before allocating family rows,
+`enumerateFamily` counts the guarded products with multiplication and addition
+saturated at the product cap plus one (`guardedCount_eq`, `familyCount_eq`).
 
 ## Limits
 
@@ -73,8 +76,9 @@ convention. The event ceiling is reused, never raised
 `enumerateProblem_within_ceilings` / `enumerateFamily_within_ceilings` show that
 a returned result's step, history and row counts are bounded by the
 corresponding ceiling. Exactly-at-cap and cap-plus-one are stated against the
-effective (clamped) cap, and a refusal's `actual` field always reports the true
-observed count, never the cap.
+effective (clamped) cap. Product refusals report the first excess, `cap + 1`,
+without constructing the product; history and step refusals report their full
+observed counts.
 
 Every bounded entry point returns `Except Refusal _`: over any cap it is a
 refusal carrying no rows at all, exactly at a cap it is legal when the complete
@@ -699,18 +703,25 @@ theorem family_product_cons (slot : Slot) (rest : List Slot) :
       (Family.product rest).map (Selection.mk slot.id choice :: ·)) := by
   cases choices : slot.choices <;> simp [Family.product, choices]
 
-/-- The generated guarded slot traversal. A choice whose guard is already
-`false` at the fixed history is pruned; the remaining choices recurse. -/
+/-- The generated guarded slot traversal. Guards depend only on the fixed
+history. An empty choice list stops before the suffix is expanded; otherwise
+the suffix is computed once and shared by every surviving choice. -/
 def guarded (history : ProcessHistory) : List Slot → List (List Selection)
   | [] => [[]]
   | slot :: rest =>
-      (slot.choices.filter (fun choice => choice.guard.eval history)).flatMap fun choice =>
-        (guarded history rest).map (Selection.mk slot.id choice :: ·)
+      match slot.choices.filter (fun choice => choice.guard.eval history) with
+      | [] => []
+      | choice :: choices =>
+          let suffix := guarded history rest
+          (choice :: choices).flatMap fun choice =>
+            suffix.map (Selection.mk slot.id choice :: ·)
 
 theorem guarded_cons (history : ProcessHistory) (slot : Slot) (rest : List Slot) :
     guarded history (slot :: rest) =
       (slot.choices.filter (fun choice => choice.guard.eval history)).flatMap fun choice =>
-        (guarded history rest).map (Selection.mk slot.id choice :: ·) := rfl
+        (guarded history rest).map (Selection.mk slot.id choice :: ·) := by
+  cases h : slot.choices.filter (fun choice => choice.guard.eval history) <;>
+    simp [guarded, h]
 
 /-- Guard pruning is sound and complete: the traversal equals the declared
 product filtered by the conjunction of guard evaluations. -/
@@ -759,6 +770,69 @@ theorem mem_guarded (history : ProcessHistory) (slots : List Slot) (assignment :
     assignment ∈ guarded history slots ↔ Family.Chooses history slots assignment := by
   rw [guarded_eq_filter, List.mem_filter]
   exact mem_product_guards history slots assignment
+
+private theorem guarded_length_cons (history : ProcessHistory) (slot : Slot)
+    (rest : List Slot) :
+    (guarded history (slot :: rest)).length =
+      slot.choices.countP (fun choice => choice.guard.eval history) *
+        (guarded history rest).length := by
+  rw [guarded_cons, List.countP_eq_length_filter]
+  generalize slot.choices.filter (fun choice => choice.guard.eval history) = choices
+  induction choices with
+  | nil => simp
+  | cons choice choices ih =>
+    simp only [List.flatMap_cons, List.length_append, List.length_map,
+      List.length_cons, ih, Nat.add_mul, Nat.one_mul]
+    omega
+
+/-- Whenever traversal expands a suffix, its row count is no greater than
+the enclosing product's. Thus an accepted product cap also bounds every
+allocated suffix, including products with no surviving assignments. -/
+theorem guarded_tail_length_le (history : ProcessHistory) (slot : Slot)
+    (rest : List Slot)
+    (hchoices : 0 < slot.choices.countP (fun choice => choice.guard.eval history)) :
+    (guarded history rest).length ≤ (guarded history (slot :: rest)).length := by
+  rw [guarded_length_cons]
+  calc
+    (guarded history rest).length = 1 * (guarded history rest).length := by simp
+    _ ≤ _ := Nat.mul_le_mul_right _ hchoices
+
+private theorem min_mul_min_right (limit a b : Nat) :
+    min limit (a * min limit b) = min limit (a * b) := by
+  by_cases ha : a = 0
+  · simp [ha]
+  by_cases hb : b ≤ limit
+  · rw [min_eq_right hb]
+  · have hbl : limit ≤ b := by omega
+    have hal : limit ≤ a * limit := by
+      calc
+        limit = 1 * limit := by simp
+        _ ≤ a * limit := Nat.mul_le_mul_right limit (by omega)
+    have hab : limit ≤ a * b := hal.trans (Nat.mul_le_mul_left a hbl)
+    rw [min_eq_left hbl, min_eq_left hal, min_eq_left hab]
+
+/-- Count surviving assignments without constructing them. Each multiplication
+is saturated at the first excess, and a zero choice count stops the traversal.
+`countP` avoids allocating filtered choice lists during this preflight. -/
+def guardedCount (cap : Nat) (history : ProcessHistory) : List Slot → Nat
+  | [] => 1
+  | slot :: rest =>
+      let choices := slot.choices.countP (fun choice => choice.guard.eval history)
+      if choices = 0 then 0
+      else min (cap + 1) (choices * guardedCount cap history rest)
+
+theorem guardedCount_eq (cap : Nat) (history : ProcessHistory) (slots : List Slot) :
+    guardedCount cap history slots = min (cap + 1) (guarded history slots).length := by
+  induction slots with
+  | nil =>
+    simp only [guardedCount, guarded, List.length_cons, List.length_nil]
+    omega
+  | cons slot rest ih =>
+    rw [guarded_length_cons]
+    simp only [guardedCount]
+    by_cases hzero : slot.choices.countP (fun choice => choice.guard.eval history) = 0
+    · simp [hzero]
+    · rw [if_neg hzero, ih, min_mul_min_right]
 
 /-! ## Generated family enumeration -/
 
@@ -833,15 +907,62 @@ theorem searchFamily_length (spec : FamilySpec) :
     (searchFamily spec).length = (Family.referenceFamily spec).length :=
   (searchFamily_perm spec).length_eq
 
-/-- Bounded family enumeration. The history search runs first under the same
-clamped history/step caps, then the clamped product cap bounds the rows. -/
+private def familyCountFrom (spec : FamilySpec) (cap total : Nat) :
+    List ProcessHistory → Nat
+  | [] => total
+  | history :: rest =>
+      let next := min (cap + 1) (total + guardedCount cap history spec.slots)
+      if cap < next then next else familyCountFrom spec cap next rest
+
+private theorem familyCountFrom_eq (spec : FamilySpec) (cap total : Nat)
+    (histories : List ProcessHistory) (htotal : total ≤ cap + 1) :
+    familyCountFrom spec cap total histories =
+      min (cap + 1) (total + (histories.flatMap (familyBlock spec)).length) := by
+  induction histories generalizing total with
+  | nil => simp [familyCountFrom, min_eq_right htotal]
+  | cons history rest ih =>
+    have hcount : guardedCount cap history spec.slots =
+        min (cap + 1) (familyBlock spec history).length := by
+      simpa only [familyBlock, List.length_map] using
+        guardedCount_eq cap history spec.slots
+    simp only [familyCountFrom, List.flatMap_cons, List.length_append]
+    rw [hcount]
+    split
+    · omega
+    · rw [ih _ (min_le_left _ _)]
+      omega
+
+/-- Sum guarded product counts across the already bounded histories without
+allocating assignment or completion rows. The accumulator stops immediately
+at the first excess, including when several individually small blocks exceed
+the cap together. -/
+def familyCount (spec : FamilySpec) (cap : Nat) (histories : List ProcessHistory) : Nat :=
+  familyCountFrom spec cap 0 histories
+
+theorem familyCount_eq (spec : FamilySpec) (cap : Nat) (histories : List ProcessHistory) :
+    familyCount spec cap histories =
+      min (cap + 1) (histories.flatMap (familyBlock spec)).length := by
+  simpa only [familyCount, Nat.zero_add] using
+    familyCountFrom_eq spec cap 0 histories (by omega)
+
+theorem familyCount_search_eq (spec : FamilySpec) (cap : Nat) :
+    familyCount spec cap (search spec.problem) =
+      min (cap + 1) (Family.referenceFamily spec).length := by
+  rw [familyCount_eq, flatMap_familyBlock, searchFamily_length]
+
+/-- Bounded family enumeration. After the history/step checks, a saturated
+count checks the clamped product cap before any family rows are constructed.
+Refusal reports `cap + 1`, not an eagerly materialized full product length.
+On success, suffix sharing and empty-choice pruning keep every intermediate
+product within the same cap (`guarded_tail_length_le`). -/
 def enumerateFamily (spec : FamilySpec) (lim : Limits) : Except Refusal (List Completion) :=
   match enumerateProblem spec.problem lim with
   | .error e => .error e
   | .ok hs =>
     let cap := lim.clamped
-    let cs := hs.flatMap (familyBlock spec)
-    if cap.products < cs.length then .error (.products cs.length cap.products) else .ok cs
+    let count := familyCount spec cap.products hs
+    if cap.products < count then .error (.products count cap.products)
+    else .ok (hs.flatMap (familyBlock spec))
 
 theorem enumerateFamily_eq_ok (spec : FamilySpec) (lim : Limits)
     (hsteps : searchSteps spec.problem ≤ lim.clamped.steps)
@@ -851,7 +972,9 @@ theorem enumerateFamily_eq_ok (spec : FamilySpec) (lim : Limits)
   unfold enumerateFamily
   rw [enumerateProblem_eq_ok spec.problem lim hsteps hlen]
   dsimp only
-  rw [flatMap_familyBlock, if_neg (Nat.not_lt_of_ge hprod)]
+  rw [familyCount_eq, flatMap_familyBlock,
+    min_eq_right (show (searchFamily spec).length ≤ lim.clamped.products + 1 by omega),
+    if_neg (Nat.not_lt_of_ge hprod)]
 
 theorem enumerateFamily_ok (spec : FamilySpec) (lim : Limits) {cs : List Completion}
     (h : enumerateFamily spec lim = .ok cs) :
@@ -865,12 +988,13 @@ theorem enumerateFamily_ok (spec : FamilySpec) (lim : Limits) {cs : List Complet
     have hb := enumerateProblem_ok spec.problem lim heq
     rw [hb.1] at h
     dsimp only at h
+    rw [familyCount_eq, flatMap_familyBlock] at h
     by_cases hp : lim.clamped.products <
-        (List.flatMap (familyBlock spec) (search spec.problem)).length
+        min (lim.clamped.products + 1) (searchFamily spec).length
     · rw [if_pos hp] at h; cases h
     · rw [if_neg hp] at h
-      have hcs : List.flatMap (familyBlock spec) (search spec.problem) = cs := Except.ok.inj h
-      exact ⟨hcs.symm.trans (flatMap_familyBlock spec), hb.2.1, hb.2.2, Nat.le_of_not_lt hp⟩
+      have hcs : searchFamily spec = cs := Except.ok.inj h
+      exact ⟨hcs.symm, hb.2.1, hb.2.2, by omega⟩
 
 /-- A successful family run's step, history and row counts are bounded by the
 frozen ceilings, whatever the caller declared. -/
@@ -892,7 +1016,7 @@ theorem enumerateFamily_cap_plus_one_products (spec : FamilySpec) (lim : Limits)
   unfold enumerateFamily
   rw [enumerateProblem_eq_ok spec.problem lim hsteps hlen]
   dsimp only
-  rw [flatMap_familyBlock, if_pos (by omega), overshoot]
+  rw [familyCount_eq, flatMap_familyBlock, overshoot, min_self, if_pos (by omega)]
 
 theorem enumerateFamily_refusal_no_rows (spec : FamilySpec) (lim : Limits) (e : Refusal)
     (h : enumerateFamily spec lim = .error e) : ¬ ∃ cs, enumerateFamily spec lim = .ok cs := by

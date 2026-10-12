@@ -339,6 +339,20 @@ is refused before source checking (after the embedded event-bound check).
 `scripts/check_inquiry_bytes.py` exercises exact-cap and cap-plus-one inputs
 with ASCII, extra whitespace and multibyte text through the real executable.
 
+Before allocating family rows, `Enumerate.familyCount` counts guard-surviving
+choices per slot and accumulates product sizes across bounded histories,
+saturating at `sources + 1` (using the effective, ceiling-clamped cap).
+An over-cap product reports that first excess rather than constructing the
+complete product to report its size. Empty choice lists prune the suffix;
+nonempty lists share the computed suffix. The count equals the capped reference
+family length, and every expanded suffix is bounded by its enclosing product.
+The runner reuses the bounded rows for accounting and checks source and subset
+allocation limits before materialization and subset comparisons.
+`scripts/check_inquiry_products.py` exercises large products with tiny caps,
+exact-cap boundaries and early/late empty guards, with a timeout on each CLI
+invocation. Logical search-step charges still apply when late guards eliminate
+every final row.
+
 Compatibility with the old entry point is a theorem, not an assumption: `embeddedVerdicts_eq_p0` and `embedded_verdict_bytes_eq_p0` state that a slotless wrapper document's embedded verdicts and their bytes agree with P0's own `answer`, and `p0_run_answers_preserved` and `p0_run_audit_preserved` pin that the old runner's verdict list and its audit refusal are unchanged. New-runner witnesses carry membership proofs rather than byte equality with P0 witnesses. A `verify-impact` request decodes a typed certificate, reruns the shared observer on both sources and returns the labelled `VerificationResult`; `verifyCertificate_verified_iff` proves its `verified` case equivalent to `verifyImpact = true`, a false claim returns `invalid-certificate` with the closed fault, and a malformed wire certificate is an outer refusal. Exit codes are 0 for a result, 1 for `unsupported` and `limit`, and 2 for every other refusal, with empty stderr on the success path.
 
 `lake exe inquiry-run FILE` is the reference runner and `lake exe inquiry-examples` recomputes a built-in suite; `fixtures/process/inquiry/` holds one executable document per acceptance row with its `.expected` golden, and `scripts/check-inquiry-run.sh` compares stdout, stderr and exit codes byte for byte (`UPDATE=1` rewrites the goldens). `make process-theory` runs both the old process gates and this one.

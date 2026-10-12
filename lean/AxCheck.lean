@@ -8777,3 +8777,12 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.InquiryRun.checkBudgets_cap_plus_one_searchSteps
 #print axioms Lara.Process.InquiryRun.runBounded_sourceBytes_limit
 
+
+-- Bounded product counting and runtime counter reuse.
+#print axioms Lara.Process.Enumerate.guarded_tail_length_le
+#print axioms Lara.Process.Enumerate.guardedCount_eq
+#print axioms Lara.Process.Enumerate.familyCount_eq
+#print axioms Lara.Process.Enumerate.familyCount_search_eq
+#print axioms Lara.Process.InquiryRun.actualFor_reference
+#print axioms Lara.Process.InquiryRun.checkBudgets_allocation_bounds
+#print axioms Lara.Process.InquiryRun.checkAllocationBudgets_of_fits

@@ -75,3 +75,4 @@ boundary io-missing-file '(inquiry-error 1 () (io "*"))' "$dir/does-not-exist.se
 if [[ "$fail" != 0 ]]; then exit 1; fi
 echo "inquiry-run: $count fixtures and boundary cases match"
 python3 "$root/scripts/check_inquiry_bytes.py"
+python3 "$root/scripts/check_inquiry_products.py"

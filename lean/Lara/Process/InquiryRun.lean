@@ -556,16 +556,20 @@ row. A `minimal-assumptions` request charges one observation comparison per
 surviving restriction row of every visited catalog subset (`assumptionPairs`).
 Impact and verification requests charge the per-query status, graph node/edge
 and read-value comparisons. -/
-def pairsOf (input : InquiryInput) : RequestSpec → Nat
-  | .status .. => familySize input
-  | .audit .. => familySize input
-  | .stable .. => familySize input
-  | .sensitivity .. => familySize input
-  | .slotsSensitive .. => familySize input
-  | .minimalAssumptions .. =>
-      assumptionPairs (Enumerate.searchFamily (familyOf input)) input.catalog
+def pairsFor (input : InquiryInput) (cs : List Completion) : RequestSpec → Nat
+  | .status .. => cs.length
+  | .audit .. => cs.length
+  | .stable .. => cs.length
+  | .sensitivity .. => cs.length
+  | .slotsSensitive .. => cs.length
+  | .minimalAssumptions .. => assumptionPairs cs input.catalog
   | .impact _ before after queries => impactPairs before after (queries.map (claimAtom input))
   | .verifyImpact _ before after certificate => impactPairs before after certificate.queries
+
+/-- Reference comparison costs; the executable supplies its already bounded
+family to `pairsFor` instead of enumerating it again. -/
+def pairsOf (input : InquiryInput) : RequestSpec → Nat :=
+  pairsFor input (Enumerate.searchFamily (familyOf input))
 
 /-- The assumption-subset cost of one request: the number of catalog subsets
 the minimal-assumptions analysis visits, `catalog.dedup.sublists`. -/
@@ -605,17 +609,24 @@ declarations passed to source checking, including repeated materializations and
 pairwise endpoints; both charge repeated requests again. `searchSteps` counts
 the history prefix-DFS (`Enumerate.searchSteps`) plus every attempted slot
 extension (`slotExtensions`). -/
-def actualOf (input : InquiryInput) : LimitCounter → Nat
+def actualFor (input : InquiryInput) (cs : List Completion) (sourceBytes : Nat) :
+    LimitCounter → Nat
   | .histories => (Enumerate.search (embeddedProblem input)).length
   | .searchSteps => Enumerate.searchSteps (embeddedProblem input) + slotExtensions input
-  | .sources => familySize input + sumNat (input.requests.map endpointsOf)
-  | .sourceBytes => (Lara.Driver.printSx (encodeInquiryInput input)).utf8ByteSize
+  | .sources => cs.length + sumNat (input.requests.map endpointsOf)
+  | .sourceBytes => sourceBytes
   | .declarations =>
-      sumNat ((Enumerate.searchFamily (familyOf input)).map fun c =>
+      sumNat (cs.map fun c =>
         (Family.materialize (familyOf input) c).surface.program.decls.length)
       + sumNat (input.requests.map endpointDeclarationsOf)
-  | .pairs => sumNat (input.requests.map (pairsOf input))
+  | .pairs => sumNat (input.requests.map (pairsFor input cs))
   | .subsets => sumNat (input.requests.map (subsetsOf input))
+
+/-- Reference counters. Runtime accounting uses `actualFor` on the bounded
+enumerator's returned rows, never a second reference enumeration. -/
+def actualOf (input : InquiryInput) : LimitCounter → Nat :=
+  actualFor input (Enumerate.searchFamily (familyOf input))
+    (Lara.Driver.printSx (encodeInquiryInput input)).utf8ByteSize
 
 /-! ### Counter characterizations -/
 
@@ -763,20 +774,45 @@ def actualWithSourceBytes (input : InquiryInput) (sourceBytes : Nat) : LimitCoun
   | .sourceBytes => sourceBytes
   | counter => actualOf input counter
 
-/-- The bounded runner: one shared budget (the retained P0 event bound, then the
-whole-document counters), then the reference semantics over the boundedly
-enumerated family. -/
+/-- Runtime counts agree with the reference when bounded enumeration succeeds. -/
+theorem actualFor_reference (input : InquiryInput) (sourceBytes : Nat) :
+    actualFor input (Enumerate.searchFamily (familyOf input)) sourceBytes =
+      actualWithSourceBytes input sourceBytes := by
+  funext counter
+  cases counter <;> rfl
+
+/-- Bounds that must precede materialization and subset comparisons. The supplied
+counter function must count sources and subsets without constructing either. -/
+def checkAllocationBudgets (l : InquiryLimits) (actual : LimitCounter → Nat) :
+    Except RunRefusal _root_.Unit :=
+  if min l.sources Enumerate.maxSearchProducts < actual .sources then
+    .error (.limit .sources (actual .sources) (min l.sources Enumerate.maxSearchProducts))
+  else if min l.subsets maxInquirySubsets < actual .subsets then
+    .error (.limit .subsets (actual .subsets) (min l.subsets maxInquirySubsets))
+  else .ok ()
+
+/-- The bounded runner checks raw bytes before traversal, bounds the family
+before materializing sources, and bounds subsets before comparison accounting.
+Only then can observation and result dispatch begin. -/
 def runBounded (input : InquiryInput) (sourceBytes : Nat) :
     Except RunRefusal (List InquiryResult) :=
   match checkEmbeddedEvents input with
   | .error e => .error e
   | .ok _ =>
-    match checkBudgets input.limits (actualWithSourceBytes input sourceBytes) with
-    | .error e => .error e
-    | .ok _ =>
+    if min input.limits.sourceBytes maxInquirySourceBytes < sourceBytes then
+      .error (.limit .sourceBytes sourceBytes
+        (min input.limits.sourceBytes maxInquirySourceBytes))
+    else
       match Enumerate.enumerateFamily (familyOf input) (limitsOf input) with
       | .error e => .error (ofRefusal e)
-      | .ok cs => analyzeWith cs input
+      | .ok cs =>
+        let actual := actualFor input cs sourceBytes
+        match checkAllocationBudgets input.limits actual with
+        | .error e => .error e
+        | .ok _ =>
+          match checkBudgets input.limits actual with
+          | .error e => .error e
+          | .ok _ => analyzeWith cs input
 
 /-- The raw byte count is enforced before enumeration or source checking. -/
 theorem runBounded_sourceBytes_limit (input : InquiryInput) (sourceBytes : Nat)
@@ -785,7 +821,7 @@ theorem runBounded_sourceBytes_limit (input : InquiryInput) (sourceBytes : Nat)
     runBounded input sourceBytes =
       .error (.limit .sourceBytes sourceBytes
         (min input.limits.sourceBytes maxInquirySourceBytes)) := by
-  simp [runBounded, hevents, checkBudgets, actualWithSourceBytes, overshoot]
+  simp [runBounded, hevents, overshoot]
 
 /-- The process exit code of a refusal: `unsupported` and `limit` are 1, every
 other refusal 2. -/
@@ -808,6 +844,27 @@ theorem checkBudgets_eq_ok (l : InquiryLimits) (actual : LimitCounter → Nat)
   rw [if_neg (Nat.not_lt_of_ge h₁), if_neg (Nat.not_lt_of_ge h₂),
     if_neg (Nat.not_lt_of_ge h₃), if_neg (Nat.not_lt_of_ge h₄),
     if_neg (Nat.not_lt_of_ge h₅), if_neg (Nat.not_lt_of_ge h₆)]
+
+/-- A successful full budget check implies the cheap allocation prerequisites. -/
+theorem checkBudgets_allocation_bounds (l : InquiryLimits) (actual : LimitCounter → Nat)
+    (h : checkBudgets l actual = .ok ()) :
+    actual .sourceBytes ≤ min l.sourceBytes maxInquirySourceBytes ∧
+      actual .sources ≤ min l.sources Enumerate.maxSearchProducts ∧
+      actual .subsets ≤ min l.subsets maxInquirySubsets := by
+  unfold checkBudgets at h
+  split at h <;> try contradiction
+  split at h <;> try contradiction
+  split at h <;> try contradiction
+  split at h <;> try contradiction
+  split at h <;> try contradiction
+  split at h <;> try contradiction
+  omega
+
+theorem checkAllocationBudgets_of_fits (l : InquiryLimits) (actual : LimitCounter → Nat)
+    (h : checkBudgets l actual = .ok ()) :
+    checkAllocationBudgets l actual = .ok () := by
+  obtain ⟨_, hsources, hsubsets⟩ := checkBudgets_allocation_bounds l actual h
+  simp [checkAllocationBudgets, Nat.not_lt_of_ge hsources, Nat.not_lt_of_ge hsubsets]
 
 /-- Exactly at the source-byte cap is legal (given the whole computation fits). -/
 theorem checkBudgets_at_cap_sourceBytes (l : InquiryLimits) (actual : LimitCounter → Nat)
@@ -1006,8 +1063,13 @@ theorem runBounded_eq_reference (input : InquiryInput) (sourceBytes : Nat)
       · rename_i cs hcs
         have hcs' : cs = Enumerate.searchFamily (familyOf input) :=
           (Enumerate.enumerateFamily_ok (familyOf input) (limitsOf input) hcs).1
-        rw [hcs'] at h
-        simpa [reference] using h
+        dsimp only at h
+        split at h
+        · cases h
+        · split at h
+          · cases h
+          · rw [hcs'] at h
+            simpa [reference] using h
 
 /-- A refused document yields no result at all: no partial rows escape. -/
 theorem runBounded_refusal_no_result (input : InquiryInput) (sourceBytes : Nat)
@@ -1025,9 +1087,14 @@ theorem runBounded_eq_reference_of_fits (input : InquiryInput) (sourceBytes : Na
     (hlen : (Enumerate.search (embeddedProblem input)).length ≤ (limitsOf input).clamped.histories)
     (hprod : (Enumerate.searchFamily (familyOf input)).length ≤ (limitsOf input).clamped.products) :
     runBounded input sourceBytes = reference input := by
+  have hbytes := (checkBudgets_allocation_bounds _ _ hbudget).1
+  have halloc := checkAllocationBudgets_of_fits _ _ hbudget
+  change sourceBytes ≤ _ at hbytes
   unfold runBounded
-  rw [hevents, hbudget]
+  rw [hevents]
+  simp only [if_neg (Nat.not_lt_of_ge hbytes)]
   rw [Enumerate.enumerateFamily_eq_ok (familyOf input) (limitsOf input) hsteps hlen hprod]
+  simp only [actualFor_reference, halloc, hbudget]
   rfl
 
 /-! ### The embedded event-bound fixtures -/
