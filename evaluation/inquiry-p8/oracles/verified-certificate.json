@@ -1,0 +1,119 @@
+{
+  "schema": "inquiry-p8-oracle",
+  "schema_version": 1,
+  "case_id": "verified-certificate",
+  "oracle_kind": "existing-conformance-golden",
+  "expected": {
+    "result_kind": "results",
+    "exit_code": 0,
+    "results": [
+      [
+        "inquiry-result",
+        "1",
+        "v0",
+        [
+          "history-verdict",
+          [
+            "history-count",
+            "1"
+          ],
+          [
+            "answer",
+            "v0",
+            "certainTrue",
+            [
+              "completions",
+              "1"
+            ]
+          ]
+        ]
+      ],
+      [
+        "inquiry-result",
+        "1",
+        "verified-certificate",
+        [
+          "verification-body",
+          [
+            "verified"
+          ]
+        ]
+      ]
+    ]
+  },
+  "semantic_specification": {
+    "kind": "development-control",
+    "histories": [
+      []
+    ],
+    "history_search_steps": 1,
+    "rows": [
+      {
+        "choices": []
+      }
+    ],
+    "graphs": [
+      {
+        "names": [
+          "n0",
+          "n1",
+          "n2"
+        ],
+        "edges": [],
+        "query_ancestry": [
+          "n0",
+          "n1",
+          "n2"
+        ],
+        "query_support": [
+          "q"
+        ],
+        "blocked": false
+      },
+      {
+        "names": [
+          "n0",
+          "n1"
+        ],
+        "edges": [],
+        "query_ancestry": [
+          "n0",
+          "n1"
+        ],
+        "query_support": [
+          "q"
+        ],
+        "blocked": false
+      }
+    ]
+  },
+  "review_provenance": {
+    "status": "disclosed-development-control",
+    "author": "Codex case author",
+    "author_provenance": "ai-executed",
+    "reviewer": "Codex independent spec reviewer /root/cases_spec",
+    "driver_output_used": false,
+    "analysis_implementation_imported": false,
+    "specification_references": [
+      "docs/theory-process.md#what-do-the-exact-inquiry-analyses-compute",
+      "docs/theory-process.md#how-is-an-edits-impact-certified",
+      "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
+    ],
+    "reviewed_input_sha256": "c383439212c72e264d28f28d005f0b9bfacdb6a0bfef2b30bc376e953222e599",
+    "semantic_content_sha256": "11721df68b379d235532d69fb66fb492f4a06300ccfdb06eb855fdfa5c675145",
+    "review_path": "independent-review.json",
+    "review_sha256": "5adfd9bee4582cb14db6fb7c8a956a21057843af5ce960e69154728fc5d79b70",
+    "quality_review_path": "quality-review.json",
+    "quality_review_sha256": "c8d6ee58c855a326bc6c6ffed2c93c4e70e3ea465ab98d1d770d0fe4e56447e2"
+  },
+  "development_provenance": {
+    "case_id": "verified-certificate",
+    "input_path": "fixtures/process/inquiry/verified-certificate.sexp",
+    "input_sha256": "c383439212c72e264d28f28d005f0b9bfacdb6a0bfef2b30bc376e953222e599",
+    "golden_path": "fixtures/process/inquiry/verified-certificate.expected",
+    "golden_sha256": "ffe51d8130a470a964c622b240ce52c0f45299e11cc3fefed57e0571030d501a",
+    "classification": "development-control",
+    "oracle_kind": "existing-conformance-golden",
+    "destination_input_path": "inputs/verified-certificate.sexp"
+  }
+}

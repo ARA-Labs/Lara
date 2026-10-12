@@ -1,0 +1,64 @@
+{
+  "schema": "inquiry-p8-quality-review",
+  "schema_version": 1,
+  "status": "PASS",
+  "reviewer": "Codex quality reviewer /root/cases_quality",
+  "provenance": "ai-executed",
+  "independent_semantic_review_sha256": "5adfd9bee4582cb14db6fb7c8a956a21057843af5ce960e69154728fc5d79b70",
+  "scope": "Freeze/provenance and review-receipt IO fixes after independent semantic review; no input or semantic expectation changes.",
+  "generator_path": "scripts/inquiry_evaluation_cases.py",
+  "generator_sha256": "868a55e965319a5e59a682ba34300acff82f28372f722e8115966f952c4e7b81",
+  "audit_tool_path": "evaluation/inquiry-p8/review/independent_finite_audit.py",
+  "audit_tool_sha256": "68a846726fe681ac49de237013384a1ca4e5b05038371285cb9743e6cb18f056",
+  "boundary_test_path": "test/inquiry_evaluation_boundaries.py",
+  "boundary_test_sha256": "850bb5f4e93086a020a04f0b7fdb03e43f82080d5a8fa090a421b7813a1f592d",
+  "verification": [
+    {
+      "command": [
+        "python3",
+        "test/inquiry_evaluation_boundaries.py"
+      ],
+      "exit_code": 0,
+      "tests_passed": 7
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/inquiry_evaluation_cases.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "cases": 96
+    },
+    {
+      "command": [
+        "python3",
+        "evaluation/inquiry-p8/review/independent_finite_audit.py"
+      ],
+      "exit_code": 0,
+      "independent_ast_checks": 80
+    },
+    {
+      "check": "An intentionally wrong oracle produces FAIL and exit 1; existing review receipt remains unchanged.",
+      "reviewer_verified": true
+    },
+    {
+      "check": "All 96 historical consumer-only evidence input and pre-provenance oracle hashes match the reviewed bytes.",
+      "reviewer_verified": true
+    }
+  ],
+  "driver_invocations": 0,
+  "findings": [],
+  "final_freeze_verification": {
+    "status": "PASS",
+    "reviewer": "Codex quality reviewer /root/cases_quality",
+    "checks": [
+      "7 boundary tests after frozen metadata",
+      "96-case read-only reproduction",
+      "80 independent AST checks",
+      "protocol manifest hash",
+      "all reviewed input and semantic content digests"
+    ],
+    "test_setup_correction": "Only the isolated authoring-edit scenario explicitly sets its temporary manifest to awaiting-independent-review."
+  }
+}

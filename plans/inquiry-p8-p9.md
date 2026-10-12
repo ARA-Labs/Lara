@@ -8,7 +8,7 @@
 
 **Tech stack:** Haskell production checker and consumer codecs, Lean reference semantics, Python standard-library evaluation tooling, versioned S-expression inputs and append-only ARA evidence.
 
-**Status:** Approved by Yifeng He on 2026-10-12 for implementation and for the P8 local measurement budget defined below. Task 1 is complete; Tasks 2–5 remain. Approval does not authorize P9: any live-loop pilot or evaluation, agent call or paid compute still needs its own approved protocol.
+**Status:** Approved by Yifeng He on 2026-10-12 for implementation and for the P8 local measurement budget defined below. Tasks 1–2 are complete; Tasks 3–5 remain. Approval does not authorize P9: any live-loop pilot or evaluation, agent call or paid compute still needs its own approved protocol.
 
 **Date:** 2026-10-12
 
@@ -75,7 +75,7 @@ The 64 size variants are four levels on four axes, applied to four specified see
 | Axis | Levels | Four seed controls | Semantic expectation |
 | --- | --- | --- | --- |
 | Inert singleton slots | 0, 1, 4, 40 added slots | T09, T10, T11, T12 | Keep histories, row observables and sensitive original slots unchanged; singleton choices add no alternative completions. Record the frozen empty-changed-set rule if applicable. |
-| Inert source declarations | 0, 1, 4, 16 added declarations | T01, T05, T06, T07 | Add disconnected accepted leaf-root arguments with fresh identities, fresh atoms and their required signature entries to both endpoints; a repeated leaf is a source rejection (as in `dup-plain`), not an inert addition. Query statuses and changed partitions stay fixed; read inventories can grow. |
+| Inert source declarations | 0, 1, 4, 16 added leaf-root groups (0, 2, 8, 32 AST declarations per endpoint) | T01, T05, T06, T07 | Add disconnected accepted leaf-root arguments with fresh identities, fresh atoms and their required signature entries to both endpoints; a repeated leaf is a source rejection (as in `dup-plain`), not an inert addition. Query statuses and changed partitions stay fixed; read inventories can grow. |
 | Additional assumption literals | 0, 1, 2, 4 distinct added literals | T09, T10, T13, T14 | Each seed has one explicit `minimal-assumptions` request. Add distinct unused-slot inequalities that are true in every row; record their exact evaluations. They must introduce no new minimal satisfying sets. |
 | Repeated query work | 1, 2, 4, 8 copies of the seed's wrapper request list | T01, T05, T11, T12 | Fresh labels preserve each answer's content until the shared budget refuses the whole document. Do not deduplicate repeated work in the runner or multiply cases in semantic success denominators. |
 
@@ -196,10 +196,10 @@ Files: create `evaluation/inquiry-p8/protocol.json` and `evaluation/inquiry-p8/M
 
 Files: create `evaluation/inquiry-p8/inputs/*.sexp`, `evaluation/inquiry-p8/oracles/*.json` and `scripts/inquiry_evaluation_cases.py`; populate the manifest.
 
-- [ ] Copy the 16 development controls unchanged and generate the 16 new controls and 64 variants using the recipes above. Keep source manipulations structural via `parse`/`canonical`, not string replacement.
-- [ ] Give the independent reviewer the semantic specifications and byte-level inputs. Store their exact row, graph, audit, sensitivity, conditional and transition expectations plus review provenance.
-- [ ] Confirm all strata and four acceptance classes are present, distinguish expected limit refusals from source rejections, and identify duplicate hashes.
-- [ ] Freeze the inputs/oracles/manifest in an input commit before the final measurement run. The freeze commits the additive suite only; it creates no legacy freeze tag and changes no existing corpus.
+- [x] Copy the 16 development controls unchanged and generate the 16 new controls and 64 variants using the recipes above. Keep source manipulations structural via `parse`/`canonical`, not string replacement.
+- [x] Give the independent reviewer the semantic specifications and byte-level inputs. Store their exact row, graph, audit, sensitivity, conditional and transition expectations plus review provenance.
+- [x] Confirm all strata and four acceptance classes are present, distinguish expected limit refusals from source rejections, and identify duplicate hashes.
+- [x] Freeze the inputs/oracles/manifest in an input commit before the final measurement run. The freeze commits the additive suite only; it creates no legacy freeze tag and changes no existing corpus.
 
 ### Task 3: Implement the runner and exercise its failure boundaries
 

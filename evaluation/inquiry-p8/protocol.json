@@ -264,7 +264,14 @@
           "T06",
           "T07"
         ],
-        "construction": "Add disconnected accepted leaf-root arguments, fresh identities/atoms and required signatures to both endpoints."
+        "construction": "Add disconnected accepted leaf-root groups, each with one fresh leaf, one fresh root argument, fresh atom and required signature entry, to both endpoints. Record the exact AST declaration charge separately.",
+        "level_unit": "fresh leaf-root groups per endpoint",
+        "ast_declarations_per_endpoint": [
+          0,
+          2,
+          8,
+          32
+        ]
       },
       {
         "axis": "assumption-literals",
@@ -314,7 +321,11 @@
     },
     "empty_changed_set_rule": "Use the frozen inquiry semantics; an empty changed partition does not establish equality of rejection payloads.",
     "unused_slot_inequality_rule": "Fresh undeclared slot inequalities are true because selectionFor returns no choice; annotate every predicate value.",
-    "duplicates": "Disclose duplicate input hashes and exclude them from unique-semantic-input denominators. Variants remain correlated with their seeds."
+    "duplicates": "Disclose duplicate input hashes and exclude them from unique-semantic-input denominators. Variants remain correlated with their seeds.",
+    "generator_sha256": "868a55e965319a5e59a682ba34300acff82f28372f722e8115966f952c4e7b81",
+    "independent_audit_tool_sha256": "68a846726fe681ac49de237013384a1ca4e5b05038371285cb9743e6cb18f056",
+    "certificate_producer_path": "scripts/inquiry-impact-producer.hs",
+    "certificate_producer_sha256": "e0cc0a76c63a540d49e4e9d840acf21a51b5a47168df8678e395261fc30266aa"
   },
   "ceilings": {
     "histories": 10000,
@@ -380,13 +391,59 @@
   },
   "freeze": {
     "manifest_path": "evaluation/inquiry-p8/MANIFEST.json",
-    "manifest_sha256": null,
-    "state": "incomplete",
+    "manifest_sha256": "c2784f151de337f2d3af0800ea73ad4c5e1d18183871c70e43fb79ef679dd774",
+    "state": "frozen",
     "input_commit_location": "run.json input_commit",
     "input_commit_rule": "Commit the completed additive inputs, oracles and manifest first. Record that existing commit in run metadata rather than its own contents.",
     "manifest_hash_rule": "After independent input review, hash the final MANIFEST.json bytes into protocol.json before measurement. MANIFEST.json must not hash protocol.json.",
     "driver_binary_hashes_location": "run.json",
-    "legacy_freeze_tag_created": false
+    "legacy_freeze_tag_created": false,
+    "supporting_artifacts": [
+      {
+        "path": "independent-review.json",
+        "sha256": "5adfd9bee4582cb14db6fb7c8a956a21057843af5ce960e69154728fc5d79b70"
+      },
+      {
+        "path": "quality-review.json",
+        "sha256": "c8d6ee58c855a326bc6c6ffed2c93c4e70e3ea465ab98d1d770d0fe4e56447e2"
+      },
+      {
+        "path": "authoring-validation.json",
+        "sha256": "3427b5c47e22a63a39d38c78520860f6c81722334014b715da8326cc454a3101"
+      },
+      {
+        "path": "certificates/T01-source-declarations-1.sexp",
+        "sha256": "f0a1513ccbc6a836764f7dfbbbd676ec0d7c24bf4a6686fe186d29e8f4f7e6bc"
+      },
+      {
+        "path": "certificates/T01-source-declarations-16.sexp",
+        "sha256": "9151ece2813819d69443c1332ef59d4be859e2b22a6958507f4bb6b24c63540e"
+      },
+      {
+        "path": "certificates/T01-source-declarations-4.sexp",
+        "sha256": "d0198e773f9b0717eb823d5b9507a5ef4215846ebb60d66eb4e3b86b0484360e"
+      },
+      {
+        "path": "certificates/T01.sexp",
+        "sha256": "b9d9e052d2ee46f663a6f7c5f8011dcc2d51669404ee2b6c44d7397ace54950c"
+      },
+      {
+        "path": "certificates/T02.sexp",
+        "sha256": "248213d20470dc33be928ef2f785004b91489115ed66fd7ccae2025162e086b0"
+      },
+      {
+        "path": "certificates/T03.sexp",
+        "sha256": "ff6de7f371182bc2dd4d1d062fce2666db6112a657fc4eada16ac17230cc25be"
+      },
+      {
+        "path": "certificates/T04.sexp",
+        "sha256": "0f9e16e50060024675ec53da0482641b0dec7eadb31cc06b77f8b0da50bd667e"
+      },
+      {
+        "path": "certificates/T08.sexp",
+        "sha256": "97e03950f1d31d0d75ef818130755404c816b7d1ff2af34e43296dc60bbcf171"
+      }
+    ]
   },
   "legacy_inputs": {
     "code_commit": "a904130af7781fd5b308d049be7f4f43bdf9e256",
@@ -596,5 +653,19 @@
     ],
     "tracker": "https://github.com/ARA-Labs/Lara/issues/22",
     "decision_rule": "Review the complete immutable P8 report and apply the approved P9 decision table before choosing a separately specified and budgeted live protocol."
-  }
+  },
+  "amendments": [
+    {
+      "id": "source-axis-groups",
+      "researcher": "Yifeng He",
+      "date": "2026-10-12",
+      "provenance": "user",
+      "approval_source": "explicit response to the source-axis clarification question before input freeze and measurement",
+      "approval_text": "Count leaf-root groups; clarify the protocol accordingly (Recommended)",
+      "approval_text_sha256": "2eb0a7803a18e0b863c6d353c501f466984c04af6844d275af5fe41682491ea3",
+      "interpretation": "Source-declarations levels 0, 1, 4, 16 count fresh leaf-root groups. Each group adds one leaf and one root argument, hence 0, 2, 8, 32 AST declarations per endpoint.",
+      "budget_change": false,
+      "legacy_regeneration": false
+    }
+  ]
 }
