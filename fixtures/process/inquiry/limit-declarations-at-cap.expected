@@ -1,0 +1,1 @@
+(inquiry-result 1 optional (history-verdict (history-count 8) (answer optional unknown (completions 8) (holds (history commit read run)) (fails (history commit read run run-b)))))

@@ -1382,24 +1382,128 @@ def firstSome {α β : Type} (f : α → Option β) : List α → Option β
       | some value => some value
       | none => firstSome f xs
 
-partial def firstUnselectedCertificate
-    (selected : List (String × String)) : SupportTerm → Option BackendId
-  | .leaf _ => none
-  | .inst _ _ premises discharges _ assurance =>
-      let atNode :=
-        match assurance with
-        | .cert backend _ _ =>
-            if selected.contains (backendPair backend) then none else some backend
-        | _ => none
-      match atNode with
-      | some backend => some backend
+/- Production preorder: assurance at this node, then premises left-to-right,
+then discharge supports left-to-right. All recursive shapes are total. -/
+mutual
+  def firstUnselectedCertificate
+      (selected : List (String × String)) : SupportTerm → Option BackendId
+    | .leaf _ => none
+    | .inst _ _ premises discharges _ assurance =>
+        let atNode :=
+          match assurance with
+          | .cert backend _ _ =>
+              if selected.contains (backendPair backend) then none else some backend
+          | _ => none
+        match atNode with
+        | some backend => some backend
+        | none =>
+            match firstUnselectedCertificateList selected premises with
+            | some backend => some backend
+            | none => firstUnselectedCertificateDischarges selected discharges
+  def firstUnselectedCertificateList
+      (selected : List (String × String)) : List SupportTerm → Option BackendId
+    | [] => none
+    | term :: rest =>
+        match firstUnselectedCertificate selected term with
+        | some backend => some backend
+        | none => firstUnselectedCertificateList selected rest
+  def firstUnselectedCertificateDischarges
+      (selected : List (String × String)) :
+      List (QuestionId × SupportTerm) → Option BackendId
+    | [] => none
+    | (_, term) :: rest =>
+        match firstUnselectedCertificate selected term with
+        | some backend => some backend
+        | none => firstUnselectedCertificateDischarges selected rest
+end
+
+/-- Independent selection specification: every certificate assurance is
+selected, including assurances in every premise and discharged question. -/
+def AssuranceSelected (selected : List (String × String)) : Assurance → Prop
+  | .cert backend _ _ => selected.contains (backendPair backend) = true
+  | _ => True
+
+mutual
+  def CertificatesSelected (selected : List (String × String)) : SupportTerm → Prop
+    | .leaf _ => True
+    | .inst _ _ premises discharges _ assurance =>
+        AssuranceSelected selected assurance ∧
+          CertificatesSelectedList selected premises ∧
+          CertificatesSelectedDischarges selected discharges
+  def CertificatesSelectedList (selected : List (String × String)) :
+      List SupportTerm → Prop
+    | [] => True
+    | term :: rest => CertificatesSelected selected term ∧ CertificatesSelectedList selected rest
+  def CertificatesSelectedDischarges (selected : List (String × String)) :
+      List (QuestionId × SupportTerm) → Prop
+    | [] => True
+    | (_, term) :: rest =>
+        CertificatesSelected selected term ∧ CertificatesSelectedDischarges selected rest
+end
+
+mutual
+  theorem firstUnselectedCertificate_none_iff (selected : List (String × String)) :
+      ∀ term, firstUnselectedCertificate selected term = none ↔ CertificatesSelected selected term
+    | .leaf _ => by simp [firstUnselectedCertificate, CertificatesSelected]
+    | .inst _ _ premises discharges _ assurance => by
+      have premisesSpec := firstUnselectedCertificateList_none_iff selected premises
+      have dischargesSpec := firstUnselectedCertificateDischarges_none_iff selected discharges
+      cases assurance with
       | none =>
-          match firstSome (firstUnselectedCertificate selected) premises with
-          | some backend => some backend
-          | none =>
-              firstSome
-                (fun discharge => firstUnselectedCertificate selected discharge.2)
-                discharges
+        cases hp : firstUnselectedCertificateList selected premises <;>
+          cases hd : firstUnselectedCertificateDischarges selected discharges <;>
+          simp_all [firstUnselectedCertificate, CertificatesSelected, AssuranceSelected]
+      | trusted =>
+        cases hp : firstUnselectedCertificateList selected premises <;>
+          cases hd : firstUnselectedCertificateDischarges selected discharges <;>
+          simp_all [firstUnselectedCertificate, CertificatesSelected, AssuranceSelected]
+      | cert backend theory reference =>
+        by_cases hselected : backendPair backend ∈ selected <;>
+          cases hp : firstUnselectedCertificateList selected premises <;>
+          cases hd : firstUnselectedCertificateDischarges selected discharges <;>
+          simp_all [firstUnselectedCertificate, CertificatesSelected, AssuranceSelected]
+  theorem firstUnselectedCertificateList_none_iff (selected : List (String × String)) :
+      ∀ terms, firstUnselectedCertificateList selected terms = none ↔
+        CertificatesSelectedList selected terms
+    | [] => by simp [firstUnselectedCertificateList, CertificatesSelectedList]
+    | term :: rest => by
+      have termSpec := firstUnselectedCertificate_none_iff selected term
+      have restSpec := firstUnselectedCertificateList_none_iff selected rest
+      cases ht : firstUnselectedCertificate selected term <;>
+        cases hr : firstUnselectedCertificateList selected rest <;>
+        simp_all [firstUnselectedCertificateList, CertificatesSelectedList]
+  theorem firstUnselectedCertificateDischarges_none_iff (selected : List (String × String)) :
+      ∀ discharges, firstUnselectedCertificateDischarges selected discharges = none ↔
+        CertificatesSelectedDischarges selected discharges
+    | [] => by simp [firstUnselectedCertificateDischarges, CertificatesSelectedDischarges]
+    | (_, term) :: rest => by
+      have termSpec := firstUnselectedCertificate_none_iff selected term
+      have restSpec := firstUnselectedCertificateDischarges_none_iff selected rest
+      cases ht : firstUnselectedCertificate selected term <;>
+        cases hr : firstUnselectedCertificateDischarges selected rest <;>
+        simp_all [firstUnselectedCertificateDischarges, CertificatesSelectedDischarges]
+end
+
+theorem firstUnselectedCertificateList_eq_firstSome (selected : List (String × String))
+    (terms : List SupportTerm) :
+    firstUnselectedCertificateList selected terms =
+      firstSome (firstUnselectedCertificate selected) terms := by
+  induction terms with
+  | nil => rfl
+  | cons term rest ih =>
+    cases hterm : firstUnselectedCertificate selected term <;>
+      simp [firstUnselectedCertificateList, firstSome, hterm, ih]
+
+theorem firstUnselectedCertificateDischarges_eq_firstSome (selected : List (String × String))
+    (discharges : List (QuestionId × SupportTerm)) :
+    firstUnselectedCertificateDischarges selected discharges =
+      firstSome (fun discharge => firstUnselectedCertificate selected discharge.2) discharges := by
+  induction discharges with
+  | nil => rfl
+  | cons discharge rest ih =>
+    rcases discharge with ⟨question, term⟩
+    cases hterm : firstUnselectedCertificate selected term <;>
+      simp [firstUnselectedCertificateDischarges, firstSome, hterm, ih]
 
 inductive ReplayFailure where
   | duplicateSelectedBackend : (String × String) → ReplayFailure

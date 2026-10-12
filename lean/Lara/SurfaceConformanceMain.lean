@@ -1159,10 +1159,12 @@ private def sourceErrorTag (input : Lara.Surface.Input) : Surface.SourceError �
   | .structural error => errorTag input error
   | .evidence _ => some "certified-evidence"
   | .evidenceSyntax => some "evidence-syntax"
+  | .groupConflict _ => some "R9"
 private def sourceErrorText : Surface.SourceError → String
   | .structural error => surfaceErrorText error
   | .evidence _ => "certified-evidence"
   | .evidenceSyntax => "evidence-syntax"
+  | .groupConflict _ => "group-conflict"
 
 private def evaluateCase (row : ManifestRow) : Except String OutputRow := do
   let spec ← validateManifestCase row

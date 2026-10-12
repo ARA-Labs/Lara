@@ -1832,3 +1832,23 @@ entries:
   notes:
   - "Recorded N387: the plan-required Hennessy-Milner attempt succeeded for image-finite systems; dropped issue 40 from the constraint's Open line."
   - "No logic claim added: the characterization is a theorem recorded in docs/theory-process.md and the trace, consistent with how earlier stages were recorded."
+
+- turn: 2026-10-11_001#1
+  notes:
+  - "Recorded the user's one-PR delivery instruction as N388; branch and draft preparation are session actions."
+  - "Staged O213 as ai-suggested PROPOSED architecture. Draft review is not user approval, implementation, or empirical validation."
+  - "No closure signal promotes this proposal. No logic entries or unrelated historical observations changed."
+- turn: 2026-10-11_001#2
+  notes:
+  - "Recorded N389 as the user's approved design decision with AI-executed corrections; this closes plan review, not implementation."
+  - "Preserved O213 as immutable draft history. No logic crystallization: this turn establishes a plan choice, not new proved or empirical knowledge."
+  - "Material corrections concern prefix completeness, nonmonotone profile filtering, fixed query identity and evidence trust; routine style checks are session actions, not experiments."
+
+- turn: 2026-10-11_001#3
+  notes:
+  - "Routed the implementation itself as N390 (decision) rather than a claim: it is an action, and the substantive design choices got their own nodes (N391 pivot, N392/N394/N395 decisions)."
+  - "Routed N393 as a dead_end, not an experiment: the two false fixture statements were wrong, and the lesson is about using kernel reduction as an oracle."
+  - "Crystallized O213 to C57 via artifact commitment (the wrapper is the committed artifact and make local-gates exits 0). Fresh observations O214/O215/O216 were staged, NOT crystallized: one turn of use is not a closure signal for a heuristic."
+  - "C57's numbers are grounded by re-opening their sources this turn (the coverage script's own output line, the fixture listing, the gate exit code); no value was carried over from a worker report."
+  - "Did NOT add a constraint entry for O216: a build-hygiene fact about exe entry modules is not yet a project constraint, and Stage 4 defaults to no change."
+  - "Near-miss: the review's residual fault-granularity note (outcomeMismatch grouping three checks) was considered for the logic layer and rejected — the plan's own fault taxonomy is that granularity."

@@ -1,0 +1,1 @@
+(inquiry-result 1 admission (status-body (family-status-result ((family-row () () ((source (source (structural (admission-rejected measured))))) ())) 1 0 1 true)))

@@ -87,9 +87,22 @@ root = "Lara.Process.ExampleMain"
 name = "process-run"
 root = "Lara.Process.RunMain"
 
+# The finite executable reference for `inquiry-input 1` (issue #22, shared
+# protocol): one wrapper document in, one or more `inquiry-result 1` envelopes
+# or a single `inquiry-error 1` out, with the closed exit codes.
+[[lean_exe]]
+name = "inquiry-run"
+root = "Lara.Process.InquiryRunMain"
+
+# The `inquiry-input 1` example suite: recomputes a built-in document through the
+# reference semantics and the bounded runner and fails on the first disagreement.
+[[lean_exe]]
+name = "inquiry-examples"
+root = "Lara.Process.InquiryExampleMain"
+
 [[lean_exe]]
 name = "evidence-driver"
-root = "Lara.EvidenceDriver"
+root = "Lara.EvidenceDriverEntry"
 
 [[lean_exe]]
 name = "bhl-examples"

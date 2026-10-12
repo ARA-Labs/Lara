@@ -1,0 +1,2 @@
+(inquiry-result 1 dup-plain (impact-body (impact-result (transition rejected-to-accepted) ((query-impact (atom t) () ((published justified)) true false)) ((atom t)) ())))
+(inquiry-result 1 reject-dup (impact-body (impact-result (transition rejected-to-rejected) ((query-impact (atom t) () () false false)) () ())))

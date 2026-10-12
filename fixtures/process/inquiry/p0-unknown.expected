@@ -1,0 +1,1 @@
+(inquiry-result 1 precommitted (history-verdict (history-count 10) (answer precommitted unknown (completions 10) (holds (history commit read run)) (fails (history early-read commit read run)))))

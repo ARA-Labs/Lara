@@ -328,4 +328,185 @@ theorem revision_withdraws_dependents (published reads defects : List (DataId ×
     · subst eq; exact notRead hr
     · exact (h r hr).2 mem
 
+namespace Ancestry
+
+/-! ### Finite ancestry regions
+
+`Ancestor` above is the declarative ancestry relation. The region a claim's
+status can depend on is its *finite* ancestry: every carrier node from which a
+member of the support is attack-reachable. `ancestors` computes it by a bounded
+backward closure and `mem_ancestors_iff` proves the computed list has exactly
+the `Ancestor` members, so the plan's graph-difference locality test
+(`Lara.Process.Locality`) can decide region membership while its theorems still
+speak about `Ancestor`. -/
+
+/-- One backward step: keep every carrier member that is already selected or
+attacks a selected member. -/
+def ancestorStep (F : AF) (S : List Arg) : List Arg :=
+  F.args.filter fun a => memB a S || S.any (fun b => F.attack a b)
+
+theorem mem_ancestorStep {F : AF} {S : List Arg} {a : Arg} :
+    a ∈ ancestorStep F S ↔ a ∈ F.args ∧ (a ∈ S ∨ ∃ b ∈ S, F.attack a b = true) := by
+  simp only [ancestorStep, List.mem_filter, Bool.or_eq_true, memB_iff, List.any_eq_true]
+
+/-- The bounded backward closure, ascending by construction. -/
+def ancestorIter (F : AF) (S : List Arg) : Nat → List Arg
+  | 0 => F.args.filter fun a => memB a S
+  | k + 1 => ancestorStep F (ancestorIter F S k)
+
+/-- The ancestry region: the backward closure iterated `|args|` times, which
+`ancestor_stable` shows is already a fixed point. -/
+def ancestors (F : AF) (S : List Arg) : List Arg := ancestorIter F S F.args.length
+
+theorem ancestorIter_subset_args {F : AF} {S : List Arg} :
+    ∀ k a, a ∈ ancestorIter F S k → a ∈ F.args
+  | 0, _, h => (List.mem_filter.mp h).1
+  | _ + 1, _, h => (mem_ancestorStep.mp h).1
+
+theorem ancestorIter_mono {F : AF} {S : List Arg} :
+    ∀ k a, a ∈ ancestorIter F S k → a ∈ ancestorIter F S (k + 1) := by
+  intro k a h
+  refine mem_ancestorStep.mpr ⟨ancestorIter_subset_args k a h, ?_⟩
+  exact Or.inl h
+
+/-- `astable k`: the backward closure has reached a fixed point at step `k`. -/
+def astable (F : AF) (S : List Arg) (k : Nat) : Prop :=
+  ∀ a, a ∈ ancestorIter F S (k + 1) → a ∈ ancestorIter F S k
+
+theorem astable_succ {F : AF} {S : List Arg} {k : Nat} (h : astable F S k) :
+    astable F S (k + 1) := by
+  intro a ha
+  have ha' : a ∈ ancestorStep F (ancestorIter F S (k + 1)) := ha
+  obtain ⟨hargs, hstep⟩ := mem_ancestorStep.mp ha'
+  refine mem_ancestorStep.mpr ⟨hargs, ?_⟩
+  rcases hstep with hmem | ⟨b, hb, hab⟩
+  · exact Or.inl (h a hmem)
+  · exact Or.inr ⟨b, h b hb, hab⟩
+
+theorem astable_add {F : AF} {S : List Arg} {k : Nat} (h : astable F S k) :
+    ∀ j, astable F S (k + j)
+  | 0 => h
+  | j + 1 => astable_succ (astable_add h j)
+
+theorem adeficit_lt {F : AF} {S : List Arg} {k : Nat} (h : ¬ astable F S k) :
+    deficit F (ancestorIter F S (k + 1)) < deficit F (ancestorIter F S k) := by
+  have hex : ∃ a, a ∈ ancestorIter F S (k + 1) ∧ ¬ a ∈ ancestorIter F S k :=
+    Classical.byContradiction (fun hcon =>
+      h (fun a hain => Classical.byContradiction (fun hnotin => hcon ⟨a, hain, hnotin⟩)))
+  obtain ⟨a, ha1, ha0⟩ := hex
+  unfold deficit
+  apply filter_length_lt (w := a)
+  · intro x _ hx
+    have hnx : ¬ x ∈ ancestorIter F S (k + 1) := by
+      cases hh : memB x (ancestorIter F S (k + 1)) with
+      | false => simp only [memB, decide_eq_false_iff_not] at hh; exact hh
+      | true => rw [hh] at hx; simp at hx
+    have hb0 : memB x (ancestorIter F S k) = false := by
+      simp only [memB, decide_eq_false_iff_not]
+      intro hc; exact hnx (ancestorIter_mono k x hc)
+    simp [hb0]
+  · exact ancestorIter_subset_args (k + 1) a ha1
+  · have : memB a (ancestorIter F S k) = false := by
+      simp only [memB, decide_eq_false_iff_not]; exact ha0
+    simp [this]
+  · have : memB a (ancestorIter F S (k + 1)) = true := by
+      simp only [memB, decide_eq_true_eq]; exact ha1
+    simp [this]
+
+theorem adeficit_bound {F : AF} {S : List Arg} :
+    ∀ k, (∀ j, j < k → ¬ astable F S j) → deficit F (ancestorIter F S k) + k ≤ F.args.length
+  | 0, _ => by
+      have h : deficit F (ancestorIter F S 0) ≤ F.args.length := by
+        unfold deficit
+        exact List.length_filter_le _ _
+      omega
+  | k + 1, h => by
+    have hk : ¬ astable F S k := h k (Nat.lt_succ_self k)
+    have IH : deficit F (ancestorIter F S k) + k ≤ F.args.length :=
+      adeficit_bound k (fun j hj => h j (Nat.lt_succ_of_lt hj))
+    have hlt := adeficit_lt hk
+    omega
+
+/-- The backward closure reaches a fixed point within `|args|` steps. -/
+theorem ancestor_stable {F : AF} {S : List Arg} : astable F S F.args.length := by
+  by_cases hs : ∃ j, j < F.args.length ∧ astable F S j
+  · obtain ⟨j, hj, hjs⟩ := hs
+    have := astable_add hjs (F.args.length - j)
+    rwa [Nat.add_sub_cancel' (Nat.le_of_lt hj)] at this
+  · have hs : ∀ j, j < F.args.length → ¬ astable F S j := fun j hj hst => hs ⟨j, hj, hst⟩
+    have hb := adeficit_bound F.args.length (fun j hj => hs j hj)
+    have hdef : deficit F (ancestorIter F S F.args.length) = 0 := by omega
+    have hall : ∀ a, a ∈ F.args → a ∈ ancestorIter F S F.args.length := by
+      intro a ha
+      apply Classical.byContradiction
+      intro hna
+      have hmem : a ∈ F.args.filter (fun a => ! memB a (ancestorIter F S F.args.length)) := by
+        rw [List.mem_filter]
+        refine ⟨ha, ?_⟩
+        have : memB a (ancestorIter F S F.args.length) = false := by
+          simp only [memB, decide_eq_false_iff_not]; exact hna
+        simp [this]
+      have : 0 < deficit F (ancestorIter F S F.args.length) := by
+        unfold deficit; exact List.length_pos_of_mem hmem
+      omega
+    intro a ha
+    exact hall a (ancestorIter_subset_args (F.args.length + 1) a ha)
+
+/-- The seed is contained in its ancestry region. -/
+theorem ancestors_seed {F : AF} {S : List Arg} {a : Arg}
+    (ha : a ∈ F.args) (hs : a ∈ S) : a ∈ ancestors F S := by
+  have h0 : a ∈ ancestorIter F S 0 := List.mem_filter.mpr ⟨ha, memB_iff.mpr hs⟩
+  unfold ancestors
+  induction F.args.length with
+  | zero => exact h0
+  | succ n ih => exact ancestorIter_mono n a ih
+
+/-- The ancestry region is backward closed: any carrier attacker of a member is
+itself a member. -/
+theorem ancestors_closed {F : AF} {S : List Arg} {y : Arg} (hy : y ∈ ancestors F S)
+    {x : Arg} (hx : x ∈ F.args) (hxy : F.attack x y = true) : x ∈ ancestors F S := by
+  have hstep : x ∈ ancestorIter F S (F.args.length + 1) := by
+    refine mem_ancestorStep.mpr ⟨hx, ?_⟩
+    exact Or.inr ⟨y, by simpa [ancestors] using hy, hxy⟩
+  exact ancestor_stable x hstep
+
+theorem ancestors_subset_args {F : AF} {S : List Arg} {a : Arg}
+    (h : a ∈ ancestors F S) : a ∈ F.args :=
+  ancestorIter_subset_args _ _ (by simpa [ancestors] using h)
+
+/-- Membership in the ancestry region, for a seed inside the carrier, is
+exactly being attack-reachable from the seed. -/
+theorem mem_ancestors_iff {F : AF} {S : List Arg} {a : Arg}
+    (hS : ∀ b ∈ S, b ∈ F.args) : a ∈ ancestors F S ↔ ∃ b ∈ S, Ancestor F b a := by
+  constructor
+  · have sound : ∀ k (x : Arg), x ∈ ancestorIter F S k → ∃ b ∈ S, Ancestor F b x := by
+      intro k
+      induction k with
+      | zero =>
+          intro x h0
+          exact ⟨x, memB_iff.mp (List.mem_filter.mp h0).2, Ancestor.self⟩
+      | succ k ih =>
+          intro x h1
+          obtain ⟨hxargs, hmem | ⟨b, hb, hab⟩⟩ := mem_ancestorStep.mp h1
+          · exact ih x hmem
+          · obtain ⟨c, hc, hanc⟩ := ih b hb
+            exact ⟨c, hc, Ancestor.attacker hanc hxargs hab⟩
+    intro h
+    exact sound _ a (by simpa [ancestors] using h)
+  · rintro ⟨b, hb, hanc⟩
+    induction hanc with
+    | self => exact ancestors_seed (hS b hb) hb
+    | attacker _ hx hxy ih => exact ancestors_closed ih hx hxy
+
+/-- The ancestry region of a carrier-contained seed is the `Ancestor` set
+together with its carrier membership. -/
+theorem ancestors_mem_iff {F : AF} {S : List Arg} {a : Arg} (hS : ∀ b ∈ S, b ∈ F.args) :
+    a ∈ ancestors F S ↔ a ∈ F.args ∧ ∃ b ∈ S, Ancestor F b a :=
+  ⟨fun h => ⟨ancestors_subset_args h, (mem_ancestors_iff hS).mp h⟩,
+   fun h => (mem_ancestors_iff hS).mpr h.2⟩
+
+
+end Ancestry
+
+
 end Lara.Process

@@ -16,7 +16,7 @@ the result is stated but not yet proved or mechanized._
   ground-substituted away before a proposition forms). If the corpus needs AC predicates or binders,
   the normal form extends with argument sorting / de Bruijn indexing and the same properties must be
   re-established (the documented flip criterion), so the claim is bounded to the v0.1 atom language.
-- **Sources**: ["`≡` is thus decidable, total, reflexive, symmetric, transitive, and linear in term size — a trivial addition to the TCB." ← docs/spec.md:319 «`≡` is thus decidable, total, reflexive, symmetric, transitive, and linear in term size» [input]", "8/8 properties pass ← evidence/status/test_status.md «prop ≡ reflexive … +++ OK, passed 100 tests» [result]"]
+- **Sources**: ["`≡` is thus decidable, total, reflexive, symmetric, transitive, and linear in term size — a trivial addition to the TCB." ← docs/spec.md:320 «`≡` is thus decidable, total, reflexive, symmetric, transitive, and linear in term size» [input]", "8/8 properties pass ← evidence/status/test_status.md «prop ≡ reflexive … +++ OK, passed 100 tests» [result]"]
 - **Status**: supported
 - **Falsification criteria**: Exhibit two propositions the corpus treats as the same claim that
   `nf`/`≡` separates (or vice versa) without the AC/binder extension applying — i.e. a support
@@ -36,7 +36,7 @@ the result is stated but not yet proved or mechanized._
 - **Conditions**: Holds under a policy-declared `contrary` relation (not classical negation) and the
   ASPIC+ restriction that strict rules are unattackable; positions are paths of premise indices and
   question names.
-- **Sources**: ["\"The three attack kinds are exactly the three kinds of positions in a term\" ← `docs/spec.md:1107` «The three attack kinds are exactly the three kinds of positions in a term» [input]", "\"Attack checking is subterm-occurrence checking plus a contrary-relation lookup: decidable and local\" ← `docs/spec.md:1132` «Attack checking is subterm-occurrence checking plus a contrary-relation lookup» [input]"]
+- **Sources**: ["\"The three attack kinds are exactly the three kinds of positions in a term\" ← `docs/spec.md:1108` «The three attack kinds are exactly the three kinds of positions in a term» [input]", "\"Attack checking is subterm-occurrence checking plus a contrary-relation lookup: decidable and local\" ← `docs/spec.md:1133` «Attack checking is subterm-occurrence checking plus a contrary-relation lookup» [input]"]
 - **Status**: supported
 - **Falsification criteria**: A defeat pattern the corpus annotators find that cannot be typed as an
   attack on a root / internal-rule / leaf position (e.g. a genuine attack on something other than
@@ -154,7 +154,7 @@ the result is stated but not yet proved or mechanized._
 - **Conditions**: Non-monotonicity is at the *consequence level*, across extensions of the input
   framework; for a *fixed* framework the internal transfer operator is monotone over a finite-height
   lattice, so grounded evaluation is still deterministic and terminating (no contradiction).
-- **Sources**: ["\"adding evidence or attacks can retract a claim's justified status even though the original support term remains well typed\" ← `docs/spec.md:1302` «adding evidence or attacks can retract a claim's `justified` status even though the» [input]", "Proposition 8 (monotonic consequence cannot represent defeat-driven retraction), proved by a subset counterexample ← evidence/proofs/nonfactivity_and_defeat.md [result]"]
+- **Sources**: ["\"adding evidence or attacks can retract a claim's justified status even though the original support term remains well typed\" ← `docs/spec.md:1303` «adding evidence or attacks can retract a claim's `justified` status even though the» [input]", "Proposition 8 (monotonic consequence cannot represent defeat-driven retraction), proved by a subset counterexample ← evidence/proofs/nonfactivity_and_defeat.md [result]"]
 - **Status**: supported
 - **Falsification criteria**: A monotonic consequence relation that reproduces LARA's grounded claim
   acceptance under all framework extensions (i.e. never needs to retract) — its existence would refute
@@ -179,7 +179,7 @@ the result is stated but not yet proved or mechanized._
 - **Conditions**: Holds because `Args` is finite and the operator is monotone on the subset lattice;
   `contested` = grounded `undec`, which is broader than mutual defeat (even/odd cycles,
   undec-propagation) and must be explained by the responsible SCC in the report.
-- **Sources**: ["\"the ascending chain stabilizes after at most `|Args|` strict-growth steps, so grounded evaluation is deterministic and terminating; attack cycles produce `undec` labels rather than nontermination\" ← `docs/spec.md:1297-1298` «grounded evaluation is deterministic and terminating; attack cycles produce `undec` labels rather than nontermination» [input]"]
+- **Sources**: ["\"the ascending chain stabilizes after at most `|Args|` strict-growth steps, so grounded evaluation is deterministic and terminating; attack cycles produce `undec` labels rather than nontermination\" ← `docs/spec.md:1298-1299` «grounded evaluation is deterministic and terminating; attack cycles produce `undec` labels rather than nontermination» [input]"]
 - **Status**: supported
 - **Provenance**: ai-suggested
 - **Falsification criteria**: A finite compiled framework on which grounded iteration fails to
@@ -207,7 +207,7 @@ the result is stated but not yet proved or mechanized._
   strict-certificate theory dependencies are reported separately via each backend's `uses` function.
 - **Conditions**: Holds for checked support terms; every leaf in `leaves(w)` must be declared in the
   admitted context `Γ`, and backend dependencies (`certDeps`) are unioned in from accepted certificates.
-- **Sources**: ["\"The former accountability theorem … is thereby an inversion lemma on term structure: the reported leaf dependency set is exactly `leaves(w)`.\" ← `docs/spec.md:969` «the reported leaf dependency set is exactly `leaves(w)`» [input]"]
+- **Sources**: ["\"The former accountability theorem … is thereby an inversion lemma on term structure: the reported leaf dependency set is exactly `leaves(w)`.\" ← `docs/spec.md:970` «the reported leaf dependency set is exactly `leaves(w)`» [input]"]
 - **Status**: supported
 - **Falsification criteria**: A checked support term whose actual load-bearing leaf set differs from
   `leaves(w)`, or a strict certificate whose consulted theory/premise dependency is not returned by
@@ -238,7 +238,7 @@ the result is stated but not yet proved or mechanized._
   all four rationality postulates at the cost of structuring the contrary relation. The v0.1
   executable `mayOverlap` check is conservative for non-linear patterns: it may reject a safe policy
   but cannot accept two patterns with canonically equivalent ground instances.
-- **Sources**: ["\"strict closure introduces no new conflict and direct = indirect consistency hold by construction — two contrary claims are never jointly justified\" ← `docs/spec.md:1367` «introduces no new conflict and direct = indirect consistency hold by construction — two contrary» [input]"]
+- **Sources**: ["\"strict closure introduces no new conflict and direct = indirect consistency hold by construction — two contrary claims are never jointly justified\" ← `docs/spec.md:1368` «introduces no new conflict and direct = indirect consistency hold by construction — two contrary» [input]"]
 - **Status**: supported
 - **Falsification criteria**: A Path-B-well-formed policy under which two contrary claims are both
   labelled `justified` by grounded semantics — refuting consistency (spec §9 result 7); or corpus
@@ -631,7 +631,7 @@ the result is stated but not yet proved or mechanized._
 - **Conditions**: Holds for a frozen, enumerated rejection surface whose classes are documented ahead of implementation and whose test suite is generated from the implemented classes. Observed on one class (R2) in one system; the untested boundary is whether a class enforced *partially* drifts the same way, and whether a hand-written (rather than generated) suite would have caught it.
 - **Sources**: [
   `R2 documented trigger, unsatisfiable` ← `ara/staging/observations.yaml:1222-1223` «("non-ground term where ground required") was unsatisfiable by construction, because Term has no variable constructor.» [input];
-  `why the trigger cannot fire` ← `docs/spec.md:1621-1622` «R2 has no groundness clause: `Term ::= num | str | con(...)` has no variable constructor, so every `Prop` is ground structurally» [input];
+  `why the trigger cannot fire` ← `docs/spec.md:1622-1623` «R2 has no groundness clause: `Term ::= num | str | con(...)` has no variable constructor, so every `Prop` is ground structurally» [input];
   `coverage prose asserting exercise (historical observation O59)` ← `ara/staging/observations.yaml:1220-1221` «docs/rejection-surface.md described it as "exercised only inside larger worked cases", which was false» [input; recorded observation, not a directly verifiable quotation from the former file];
   `pre-enforcement counts (historical measurement N152)` ← `ara/trace/exploration_tree.yaml:3720-3721` «Suite 369 -> 496 mutants; reject-R2 0 -> 107.» [result; recorded measurement, not a recount of the former manifest];
   `107` ← `fixtures/mutants/MANIFEST.tsv` «`cut -f5 | grep -c '^reject-R2$'` → 107 over 496 rows, after enforcement landed» [result]
@@ -910,7 +910,7 @@ the result is stated but not yet proved or mechanized._
 ## C51: Whether a strict backend's goal family needs a declared contrary pair is decided by what its goals are settled against — and Path B then fixes where the conflict may live
 - **Statement**: For a certificate-checked strict backend, intra-family exclusivity is a theorem exactly when the family's goals are settled against data the goal itself carries; when they are settled against a value a premise supplies, two accepted instances can conflict, because two units may declare different premises about the same subject. The first kind needs no `contrary` declaration and gains nothing from one; the second has a genuine conflict that only the attack layer can carry. The placement of that conflict is then not a design choice: under a strict-reachability restriction on `contrary` (Path B), a strict conclusion pattern may not overlap either side of a declared pair, so the conflict must be lifted to the conclusions of a defeasible bridge one layer above the certified step.
 - **Conditions**: Established over two shipped adapters of one seam — `ord@1`, whose `num_lt`/`num_le` goals carry both compared numerals, and `insp@1`, whose `code_absent`/`code_present` goals are settled against an inventory the cited premise declares. Both directions are mechanized. The untested boundary is a *mixed* family, some of whose members are goal-settled and some premise-settled; nothing here says such a family must split, only that its two halves would answer this question differently. The Path B half is conditional on that restriction being in force — under Path A (contrary as a total involutive contradictory map with strict rules closed under transposition) the placement argument does not apply.
-- **Sources**: [`exclusivity is a theorem for ord@1` ← lean/Lara/Ord.lean «theorem ordModels_excl_of_lt {Γ Γ' : List Lara.Atom} {φ ψ : Lara.Atom}» [result]; `co-acceptability for insp@1` ← lean/Lara/Insp.lean «theorem inspModels_absent_present_sat {φ ψ : Lara.Atom} {src feat : Lara.Term}» [result]; `exclusivity only at a shared premise` ← lean/Lara/Insp.lean «theorem inspModels_excl_of_same_entry {Γ Γ' : List Lara.Atom} {φ ψ : Lara.Atom}» [result]; `Path B forbids the overlap` ← `docs/spec.md:1374` «rule and contrary pair. `lean/Lara/Policy.lean` mechanizes the finite strict-reachable set,» [input]]
+- **Sources**: [`exclusivity is a theorem for ord@1` ← lean/Lara/Ord.lean «theorem ordModels_excl_of_lt {Γ Γ' : List Lara.Atom} {φ ψ : Lara.Atom}» [result]; `co-acceptability for insp@1` ← lean/Lara/Insp.lean «theorem inspModels_absent_present_sat {φ ψ : Lara.Atom} {src feat : Lara.Term}» [result]; `exclusivity only at a shared premise` ← lean/Lara/Insp.lean «theorem inspModels_excl_of_same_entry {Γ Γ' : List Lara.Atom} {φ ψ : Lara.Atom}» [result]; `Path B forbids the overlap` ← `docs/spec.md:1375` «rule and contrary pair. `lean/Lara/Policy.lean` mechanizes the finite strict-reachable set,» [input]]
 - **Status**: testing
 - **Provenance**: ai-suggested
 - **Falsification**: Exhibit a registered backend whose goals are settled entirely against data carried in the goal and for which two conflicting family members are nonetheless both accepted (refuting the first half); or a backend whose goals are settled against a premise-supplied value and for which conflicting members are provably never co-accepted without an extra restriction on the premises (refuting the second). Separately, exhibit a policy that carries such a conflict as a contrary on the strict conclusions themselves and is accepted by the §8.1 validator — that would refute the placement half.
@@ -1004,3 +1004,15 @@ the result is stated but not yet proved or mechanized._
 - **Tags**: composition, linking, saturation, grounded-semantics, multi-artifact
 - **Last revised**: 2026-09-11 (2026-09-11_001#2)
 
+
+## C57: A finite checked-source inquiry layer can sit above a frozen history-only contract without reinterpreting it, when every analysis projects one shared observation pass, the budget is charged per request against fixed ceilings, and the wrapper is separately versioned
+
+- **Statement**: An outer layer that answers finite questions about *checked sources* — audit of a submitted witness, outcome stability, reference and joint slot sensitivity, minimal conditional assumptions, graph-difference locality and pairwise source impact — can be added above an unchanged history-only process contract, provided the layer (i) runs the source checker once per family completion and projects that one prepared view into every analysis rather than re-running the checker per compared pair, (ii) charges a single per-document budget against fixed ceilings, per request, so a declared bound refuses the whole computation instead of yielding a partial answer, and (iii) is versioned separately from the contract it embeds, so the embedded results keep their original bytes.
+- **Conditions**: Established for the Lean reference implementation of the wrapper. The locality result is grounded-semantics locality only — no stable, preferred or other extension-semantics claim follows. An `observed` evidence grade requires a reader-admitted capture assumption with exact source and process bindings, an unknown-kind node forces every positive audit false, and an audit over a family containing a rejected source is false, so the layer's affirmatives are conditional on the assumptions a result prints. Determinacy of the recorded impact reads routes through a recorded whole-input read, which is the conservative fallback the contract allows. Untested boundary: no non-Lean implementation of the wrapper exists, so cross-language agreement is unverified.
+- **Sources**: ["7162 ← scripts/check-axcheck-coverage.py «AxCheck coverage passed (7162 declarations).» [result]", "46 ← ls fixtures/process/inquiry/*.sexp «46» [result]", "exit 0 ← make local-gates «gates_exit=0» [result]", "P0 verdict bytes unchanged ← lean/Lara/Process/InquiryRun.lean «embedded_verdict_bytes_eq_p0» [input]"]
+- **Status**: supported
+- **Provenance**: ai-suggested
+- **Falsification**: Exhibit a wrapper document whose embedded history verdicts or their bytes differ from `process-run` on the same embedded document; or a bounded run that returns a result where the reference semantics would return one the caps should have refused (or the reverse); or an analysis whose conclusion depends on a checker run that the shared per-family projection never performed. Any of these refutes the corresponding clause rather than the whole claim.
+- **Proof**: [trace/exploration_tree.yaml:N390_inquiry_p1_p5_implemented — the five stages plus the wrapper land in one working tree and `make local-gates` exits 0; lean/Lara/Process/InquiryRun.lean:embeddedVerdicts_eq_p0 and embedded_verdict_bytes_eq_p0 and p0_run_answers_preserved and p0_run_audit_preserved — the old entry point's verdicts, bytes, verdict list and audit refusal are unchanged; lean/Lara/Process/InquiryRun.lean:analyzeWith_eq_perRequest — the shared-projection runner equals the semantics that re-runs the checker per request, so sharing is a cost change and not a semantic one; lean/Lara/Process/InquiryRun.lean:runBounded_eq_reference — every successful bounded result equals the reference result; fixtures/process/inquiry (46 documents and goldens) with scripts/check-inquiry-run.sh — one executable document per acceptance row, each golden showing the required outcome]
+- **Dependencies**: []
+- **Tags**: inquiry, wrapper, checked-source, budget, conformance, grounded-semantics
