@@ -270,6 +270,12 @@ Minimal conditional assumptions use a finite user-declared catalog of literals �
 
 None of this is a statement about truth, calibration or entitlement transfer: the analyses are conditional on the printed assumptions and on the declared finite family, the enumerations are exponential in the catalog and product, and the caps below refuse the whole inquiry rather than returning a partial answer.
 
+The Haskell `Lara.Process.Analysis` reads the same retained `CheckedFamily` rows.
+`AnalysisWire` provides the observable, target, literal and finite-result codecs.
+Wrapper profiles use bare evidence/coverage/probe lists and retain a zero
+denominator's reference meaning; the embedded process profile codec keeps its
+tagged lists and positive-denominator requirement.
+
 ## What does graph-difference locality prove?
 
 `Lara.Process.Locality` decides whether an edit could have changed a grounded label, and proves that its decision is sound. It compares two actually checked sources after lifting both compiled frameworks to a common declaration-identity carrier (`sharedCarrier`, `claimOf`, `querySupport_exact` reusing `Coordinates.supports_exact`). It then builds the symmetric difference of node membership and of compiled incoming edges (`nodeDiff`, `edgeDiff`, with `mem_nodeDiff` and `mem_edgeDiff`), computes the backward ancestry of the queried claim's complete support in both graphs, and requires that the two supports correspond and that no changed node or changed incoming edge reaches that combined region (`LocalityClaim`, `Contained`, `supportCorresponds`, `correlates`, `accepted_iff`, `checkLocality`, `checkLocality_accepts_iff`).
@@ -291,6 +297,16 @@ The certificate's dependency evidence is a closed read inventory. `ReadKey` name
 Proved coverage backs that inventory. `recordsReads_labelC` and `recordsReads_statusC` show the grounded label and status are determined by their small footprints, exactly the compiled carrier plus the ancestry attack rows, and `impactReads_covers_status`/`_after` prove every key of every queried footprint is recorded under its side. The reused run-level calculations — `Source.checkSource`'s outcome record, `BHL.ordinaryStatus`'s public-status row, `Update.blockedQueriesForRun` and `transitionOf` — are each covered by a `RecordsReads` instance over the finite whole-input key space, which is the conservative whole-input fallback the plan allows where a smaller footprint is not justified; `impactReads_determines_statusRow` then proves that any environment agreeing with the recorded reads reproduces both endpoints' public-status rows. `Support.certDeps` is never used as a dependency footprint, because it only reports backend acceptance dependencies.
 
 `verifyImpact` reruns the shared observer on both supplied inputs and recomputes every certificate field, returning `verified` or an `invalid-certificate` with a closed fault. `verified_iff_verifyImpact_true` states the equivalence, `verifyImpact_verified_*` exposes what a verified certificate asserts (binding, transition, rows, partition, graph, locality, reads, impact, result), the `verifyImpact_false*` theorems show a fault cannot be produced without its condition, and `firstFault_some_iff` gives the converse, so a fault fires exactly for its condition. A well-formed but false certificate is a result, not a refusal. Finally, the impact layer deliberately does not transport entitlement: `no_entitlement_from_public_status` is the standing theorem that equal public status proves nothing about warrant, and `impact_records_distinction` records that a failed sibling can leave the graph and the public status equal while the audit's count or guarantee changes.
+
+The Haskell `Lara.Process.Impact` retains each endpoint's production checker
+outcome in an opaque `Endpoint`, then shares a `Comparison` across result,
+certificate, read-count and verification consumers. Verification uses the supplied
+endpoints and the certificate's query list, not its untrusted embedded source
+fields. `ResultWire` decodes complete false certificates as data. Read triples
+retain wire order and duplicates; verification accepts reordered or repeated
+identical triples but rejects missing keys, conflicting values and wrong-shaped
+values. `Locality` keeps endpoint-compact read coordinates separate from the
+shared declaration-identity coordinates used for graph differences.
 
 ## What does the `process-input 1` contract fix?
 

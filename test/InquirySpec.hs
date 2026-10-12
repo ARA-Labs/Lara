@@ -27,6 +27,15 @@ import Lara.Evidence.Types
 import qualified Lara.Evidence.Manifest as Package
 import qualified Lara.Evidence.Admission as Admission
 import qualified Lara.Evidence.Runner as Runner
+import qualified Lara.Process.Analysis as Analysis
+import qualified Lara.Process.AnalysisWire as AnalysisWire
+import qualified Lara.Process.Locality as Locality
+import qualified Lara.Process.Impact as Impact
+import qualified Lara.Process.ResultWire as ResultWire
+import qualified Lara.Process.Wire as ProcessWire
+import qualified Lara.Process.Enumerate as Enumerate
+import qualified Lara.Process.Projection as Projection
+import Lara.Process.History (naturalLength)
 
 sourceTrees :: SExpr -> [SExpr]
 sourceTrees value@(SList (SAtom "checked-source" : _)) = [value]
@@ -737,6 +746,346 @@ prop_diagnosticConstructorInventory = once $ conjoin
         D.DuplicateTheory,D.TheoryMismatch,D.ArtifactMismatch]
       ++ [D.MissingEvidence leaf,D.UnselectedCertificate huge argument backend]
 
+prop_impactReadInventory :: Property
+prop_impactReadInventory = withSource "normalized-support" 2 $ \source ->
+  let huge = 2^(96 :: Int)
+      argument = A.ArgId "argument"
+      backend = C.CoreBackend (A.BackendId "backend") huge
+      query = Prop (Pred "t") [TNum "+01.000",TStr "\SOHé"]
+      keys = [Impact.LeafContent (A.LeafId "leaf"),Impact.LeafMeta (A.LeafId "leaf"),
+        Impact.RuleLookup argument,Impact.AdmissionLookup argument,Impact.AbsentLookup argument,
+        Impact.GroupMember argument,Impact.GroupConflict argument,Impact.RawEndpoint huge,Impact.Retention huge,
+        Impact.Signature argument,Impact.PolicyContrary argument,Impact.Substitution argument,
+        Impact.BackendTheory backend,Impact.BackendDigest backend,Impact.CertificateInput backend,
+        Impact.PremiseSubterm huge,Impact.DischargeSubterm huge,Impact.ConclusionEquiv argument,
+        Impact.SupportMember query huge,Impact.HoleMember query huge,Impact.ReferenceCarrier,
+        Impact.CheckedCarrier,Impact.CompiledCarrier,Impact.BlockedClosure,Impact.BlockedQuery query,
+        Impact.SupportNodes query,Impact.HoleNodes query,Impact.AttackEdge huge 0,Impact.WholeInput]
+      values = [Impact.ReadAbsent,Impact.ReadAtom query,Impact.ReadAtoms [query,query],Impact.ReadNat huge,
+        Impact.ReadNats [huge,0,huge],Impact.ReadBool False,Impact.ReadName argument,
+        Impact.ReadNames [argument,argument],Impact.ReadText "\SOHé",Impact.ReadTexts ["","é",""],
+        Impact.ReadSource source]
+  in conjoin [conjoin [ResultWire.decodeReadKey (ResultWire.encodeReadKey key) === Right key | key <- keys],
+    conjoin [ResultWire.decodeReadVal (ResultWire.encodeReadVal value) === Right value | value <- values],
+    conjoin [ResultWire.decodeReadEntry (ResultWire.encodeReadEntry (side,key,value)) === Right (side,key,value) |
+      side <- [Impact.BeforeSide,Impact.AfterSide],key <- keys,value <- values]]
+
+prop_crossHistorySensitivity :: Property
+prop_crossHistorySensitivity = withSource "normalized-support" 2 $ \source ->
+  let event = Process.Stamped (Process.EventId 0) (Process.Access (Process.ActorId 0) (Process.DataId 0) Process.Selection)
+      problem = Process.Problem (Process.DecodedRecord [] [] [] [] 1) [event]
+      leaves = [leaf | A.DeclLeaf leaf <- A.programDecls (T.sourceProgram source)]
+  in case (T.mkFragment [],leaves) of
+    (Right empty,leaf:_) -> case T.mkFragment [A.DeclLeaf leaf] of
+      Left err -> counterexample err False
+      Right duplicate ->
+        let choices = [Audit.Choice (Audit.ChoiceId 0) Audit.GuardTruth empty,
+              Audit.Choice (Audit.ChoiceId 1) (Audit.GuardPresent event) duplicate]
+            spec = Audit.FamilySpec problem source [Audit.Slot (Audit.SlotId 0) choices]
+            config = Audit.AuditConfig [] [] [] []
+        in case Enumerate.enumerateFamily spec (Audit.EnumerationLimits 100 1000 100) of
+          Left err -> counterexample (show err) False
+          Right enumeration -> case Enumerate.enumeratedCompletions enumeration of
+            reference:_ -> case Analysis.sensitivity (Projection.checkFamily config enumeration)
+                (Analysis.StatusObservable (Process.ClaimId 0)) reference of
+              Nothing -> counterexample "missing cross-history reference" False
+              Just result -> conjoin [Analysis.sensitivityTotal result === 3,
+                Analysis.sensitivityCount result === 1,Analysis.sensitivityDiffering result === [],
+                Analysis.sensitivityMinimal result === [],Analysis.sensitivityRealizing result === []]
+            [] -> counterexample "missing positive family" False
+    _ -> counterexample "missing source leaf" False
+
+prop_jointAndAssumptionSets :: Property
+prop_jointAndAssumptionSets = withSource "normalized-support" 2 $ \source ->
+  let problem = Process.Problem (Process.DecodedRecord [] [] [] [] 0) []
+      firstLeaf = [leaf | A.DeclLeaf leaf <- A.programDecls (T.sourceProgram source)]
+  in case (firstLeaf,T.mkFragment []) of
+    (leaf:_,Right empty) ->
+      let extra = A.DeclLeaf leaf{A.leafId = A.LeafId "independent-extra"}
+      in case (T.mkFragment [A.DeclLeaf leaf],T.mkFragment [extra]) of
+        (Right duplicate,Right shared) ->
+          let slot ident fragment = Audit.Slot (Audit.SlotId ident)
+                [Audit.Choice (Audit.ChoiceId 0) Audit.GuardTruth empty,
+                 Audit.Choice (Audit.ChoiceId 1) Audit.GuardTruth fragment]
+              spec = Audit.FamilySpec problem source [slot 0 duplicate,slot 1 shared,slot 2 shared]
+              claim = Process.ClaimId 0
+              config = Audit.AuditConfig [Audit.ClaimBinding claim (A.PropId "claim") (atom "t")] [] [] []
+          in case Enumerate.enumerateFamily spec (Audit.EnumerationLimits 100 10000 100) of
+            Left err -> counterexample (show err) False
+            Right enumeration -> case Enumerate.enumeratedCompletions enumeration of
+              [] -> counterexample "missing positive reference" False
+              reference:_ ->
+                let checked = Projection.checkFamily config enumeration
+                    eq slot' = Analysis.SlotEq (Audit.SlotId slot') (Audit.ChoiceId 0)
+                    catalog = [eq 0,eq 1,eq 2,eq 0]
+                    target = Analysis.StatusTarget claim (Published A.Gap)
+                    assumptions = Analysis.assumptions checked target catalog
+                    names = ProcessWire.Names [] [] [] [] ["claim"] [] [] [] []
+                    chosen index fragment = Audit.Choice (Audit.ChoiceId index) Audit.GuardTruth
+                      (if index == 0 then empty else fragment)
+                    completion a b c = Audit.Completion []
+                      [Audit.Selection (Audit.SlotId 0) (chosen a duplicate),
+                       Audit.Selection (Audit.SlotId 1) (chosen b shared),
+                       Audit.Selection (Audit.SlotId 2) (chosen c shared)]
+                    c000 = completion 0 0 0
+                    c001 = completion 0 0 1
+                    c010 = completion 0 1 0
+                    c011 = completion 0 1 1
+                    c100 = completion 1 0 0
+                    c101 = completion 1 0 1
+                    c110 = completion 1 1 0
+                    expectedMinimal =
+                      [Analysis.MinimalSet [eq 1,eq 0] [c000,c001]
+                        [Analysis.Deletion (eq 1) [c000,c001,c010,c011] (Just c011),
+                         Analysis.Deletion (eq 0) [c000,c001,c100,c101] (Just c100)],
+                       Analysis.MinimalSet [eq 2,eq 0] [c000,c010]
+                        [Analysis.Deletion (eq 2) [c000,c001,c010,c011] (Just c011),
+                         Analysis.Deletion (eq 0) [c000,c010,c100,c110] (Just c100)]]
+                    retainedObservations = Analysis.statusObservations checked claim
+                    counterFailsTarget deletion = case Analysis.deletionCounter deletion of
+                      Nothing -> counterexample "minimal deletion lacks its expected countercompletion" False
+                      Just counter -> case lookup counter retainedObservations of
+                        Nothing -> counterexample "deletion counter is absent from retained observations" False
+                        Just value -> property (value /= Right (Just (Published A.Gap)))
+                in case Analysis.sensitivity checked (Analysis.StatusObservable claim) reference of
+                  Nothing -> counterexample "unresolved family reference" False
+                  Just sensitive -> conjoin
+                    [Analysis.sensitivityMinimal sensitive === [[Audit.SlotId 0],[Audit.SlotId 1,Audit.SlotId 2]],
+                     Analysis.assumptionCatalog assumptions === catalog,
+                     map Analysis.minimalLiterals (Analysis.assumptionMinimal assumptions) === [[eq 1,eq 0],[eq 2,eq 0]],
+                     property (all (not . null . Analysis.minimalSurviving) (Analysis.assumptionMinimal assumptions)),
+                     Analysis.assumptionMinimal assumptions === expectedMinimal,
+                     conjoin [counterFailsTarget deletion | minimal <- Analysis.assumptionMinimal assumptions,
+                       deletion <- Analysis.minimalDeletions minimal],
+                     AnalysisWire.decodeSensitivityResult names (AnalysisWire.encodeSensitivityResult names sensitive) === Right sensitive,
+                     AnalysisWire.decodeAssumptionResult names (AnalysisWire.encodeAssumptionResult names assumptions) === Right assumptions,
+                     case Projection.rowAt checked reference of
+                       Just row -> property (not (isLeft (Projection.rowView row)))
+                       Nothing -> counterexample "missing cached reference" False]
+        other -> counterexample (show other) False
+    _ -> counterexample "missing fixture leaf or empty fragment" False
+
+prop_equalStatusChangedReads :: Property
+prop_equalStatusChangedReads = withSource "normalized-support" 2 $ \source ->
+  accepted source $ \beforeObservation ->
+    let program = (T.sourceProgram source){A.programArtifact = A.programArtifact (T.sourceProgram source) ++ "-changed"}
+    in case T.replaceSourceProgram source program of
+      Left err -> counterexample err False
+      Right changed -> accepted changed $ \afterObservation ->
+        let before = Impact.observeEndpoint source
+            after = Impact.observeEndpoint changed
+            original = Impact.compareEndpoints before before [atom "t"]
+            comparison = Impact.compareEndpoints before after [atom "t"]
+            certificate = Impact.impactCertificate original
+        in conjoin [S.publicStatus beforeObservation (atom "t") === S.publicStatus afterObservation (atom "t"),
+          Impact.verifyImpact original certificate === Impact.Verified,
+          Impact.verifyImpact comparison (Impact.impactCertificate comparison) === Impact.Verified,
+          Impact.verifyImpact comparison certificate === Impact.InvalidCertificate Impact.FalseReadEvidence,
+          Impact.verifyImpact original certificate{Impact.certificateBeforeInput = changed,
+            Impact.certificateAfterInput = changed} === Impact.Verified]
+
+prop_finiteAnalysis :: Property
+prop_finiteAnalysis = withSource "normalized-support" 2 $ \source ->
+  let problem = Process.Problem (Process.DecodedRecord [] [] [] [] 0) []
+      spec = Audit.FamilySpec problem source []
+      claim = Process.ClaimId 0
+      config = Audit.AuditConfig [Audit.ClaimBinding claim (A.PropId "claim") (Prop (Pred "t") [TNum "1"])] [] [] []
+  in case Enumerate.enumerateFamily spec (Audit.EnumerationLimits 100 1000 100) of
+    Left err -> counterexample (show err) False
+    Right enumerated ->
+      let checked = Projection.checkFamily config enumerated
+          result = Analysis.stability checked (Analysis.StatusObservable claim)
+          missing = Analysis.stability checked (Analysis.StatusObservable (Process.ClaimId 99))
+          emptyRestriction = Analysis.conditionalStability checked (Analysis.StatusObservable claim)
+            [Analysis.SlotEq (Audit.SlotId 999) (Audit.ChoiceId 0)]
+          names = ProcessWire.Names [] [] [] [] ["claim"] [] [] [] ["witness"]
+          positive = Analysis.assumptions checked (Analysis.StatusTarget claim (Published A.Justified)) []
+          profile = Process.ProfileSpec [Process.Observed] [] Process.FWER 0 0 [] Process.GroundedJustified
+          statuses = Analysis.familyStatus checked claim
+          audits = Analysis.familyAudit checked claim (Process.WitnessId 0) profile
+      in conjoin [Analysis.stabilityTotal result === 1,Analysis.stabilityWhole result === True,
+        Analysis.stabilityAccepted result === 1,Analysis.stabilityAcceptedDomain result === True,
+        Analysis.statusObservations checked (Process.ClaimId 99) === [(Audit.Completion [] [],Right Nothing)],
+        Analysis.stabilityWhole missing === True,
+        Analysis.stabilityTotal emptyRestriction === 0,Analysis.stabilityWhole emptyRestriction === False,
+        Analysis.stabilityAcceptedDomain emptyRestriction === False,
+        map Analysis.minimalLiterals (Analysis.assumptionMinimal positive) === [[]],
+        AnalysisWire.decodeStabilityResult names (AnalysisWire.encodeStabilityResult names result) === Right result,
+        AnalysisWire.decodeAssumptionResult names (AnalysisWire.encodeAssumptionResult names positive) === Right positive,
+        ResultWire.decodeFamilyStatusResult names (ResultWire.encodeFamilyStatusResult names statuses) === Right statuses,
+        ResultWire.decodeFamilyAuditResult names (ResultWire.encodeFamilyAuditResult names audits) === Right audits,
+        Analysis.assumptionMinimal (Analysis.assumptions checked
+          (Analysis.StatusTarget (Process.ClaimId 99) (Published A.Gap)) []) === []]
+
+prop_rejectionStability :: Property
+prop_rejectionStability = once $
+  let first = D.MissingEvidence (A.LeafId "a")
+      second = D.MissingEvidence (A.LeafId "b")
+      rejectedValues = [Left first,Left first] :: [Either D.SourceRejection Bool]
+  in conjoin [Analysis.wholeStable rejectedValues === True,Analysis.acceptedStable rejectedValues === False,
+    Analysis.wholeStable [Left first,Left second :: Either D.SourceRejection Bool] === False,
+    Analysis.wholeStable ([] :: [Either D.SourceRejection Bool]) === False]
+
+prop_analysisCodecs :: Property
+prop_analysisCodecs = once $
+  let names = ProcessWire.Names ["event"] ["actor"] ["plan"] ["run"] ["claim"] ["source"] ["data"] ["family"] ["witness"]
+      profile = Process.ProfileSpec [Process.Hypothetical,Process.Observed,Process.Hypothetical]
+        [Process.OpenWorldKind] Process.FDR (2^(96 :: Int)) 0 [Process.Measurement] Process.GroundedJustified
+      profiles = [Process.ProfileSpec [minBound..maxBound] [minBound..maxBound] cls (2^(96 :: Int)) den [minBound..maxBound] Process.GroundedJustified
+        | cls <- [minBound..maxBound],den <- [0,1,2^(96 :: Int)]]
+      event = Process.Stamped (Process.EventId 0) (Process.Result (Process.RunId 0) 1)
+      query = Process.QueryNot (Process.QueryOr (Process.QueryAtom Process.Predictable)
+        (Process.QueryAtom (Process.FamilyCountAtMost (Process.FamilyId 0) (2^(96 :: Int)))))
+      observables = [Analysis.StatusObservable (Process.ClaimId 0),
+        Analysis.AuditObservable (Process.ClaimId 0) (Process.WitnessId 0) profile]
+      targets = [Analysis.StatusTarget (Process.ClaimId 0) (wrap status) |
+        wrap <- [Published,EvidenceBlocked],status <- [A.Gap,A.Justified,A.Contested,A.Defeated]]
+        ++ [Analysis.AuditTarget (Process.ClaimId 0) (Process.WitnessId 0) profile]
+      literals = [Analysis.SlotEq (Audit.SlotId (2^(96 :: Int))) (Audit.ChoiceId 1),
+        Analysis.SlotNe (Audit.SlotId 0) (Audit.ChoiceId 1),Analysis.Present event,
+        Analysis.Absent event,Analysis.Before event event,Analysis.Formula query,Analysis.NotFormula query]
+      completion = Audit.Completion [event] []
+  in conjoin [AnalysisWire.decodeProfile (AnalysisWire.encodeProfile profile) === Right profile,
+    conjoin [AnalysisWire.decodeObservable names (AnalysisWire.encodeObservable names value) === Right value | value <- observables],
+    conjoin [AnalysisWire.decodeTarget names (AnalysisWire.encodeTarget names value) === Right value | value <- targets],
+    conjoin [AnalysisWire.decodeLiteral names (AnalysisWire.encodeLiteral names value) === Right value | value <- literals],
+    conjoin [AnalysisWire.decodeProfile (AnalysisWire.encodeProfile value) === Right value | value <- profiles],
+    property (not (Analysis.literalHolds (Analysis.SlotEq (Audit.SlotId 0) (Audit.ChoiceId 0)) completion)),
+    property (Analysis.literalHolds (Analysis.SlotNe (Audit.SlotId 0) (Audit.ChoiceId 0)) completion),
+    property (not (Analysis.literalHolds (Analysis.Before event event) completion))]
+
+prop_localityGraphs :: Property
+prop_localityGraphs = once $
+  let before = Locality.graph [0,1] [(1,0)]
+      reordered = Locality.graph [1,0] [(1,0)]
+      unrelated = Locality.graph [0,1,2] [(1,0),(2,2)]
+      attacker = Locality.graph [0,1,2] [(1,0),(2,0)]
+      bothAttack = Locality.graph [0,1,2] [(1,0),(2,0)]
+      orderAttack = Locality.graph [2,1,0] [(1,0),(2,0)]
+      full = Locality.graph [0,1] [(0,1),(7,7)]
+      reduced = Locality.graph [0] [(0,1),(7,7)]
+      moderateCarrier = [0..63]
+      dense = Locality.graph moderateCarrier [(source,target) | source <- moderateCarrier,target <- moderateCarrier]
+      isolated = Locality.graph [0..255] []
+  in conjoin [Locality.localityAccepted (Locality.checkLocality before unrelated [0] [0]) === True,
+    Locality.localityAccepted (Locality.checkLocality before attacker [0] [0]) === False,
+    Locality.localityAccepted (Locality.checkLocality before reordered [0] [0]) === True,
+    Locality.localityAccepted (Locality.checkLocality bothAttack orderAttack [0] [0]) === False,
+    Locality.localityAccepted (Locality.checkLocality before before [0,0] [0]) === True,
+    Locality.ancestors before [0] === [0,1],
+    property (Locality.attacks reduced 0 1 && Locality.attacks reduced 7 7),
+    Locality.graphEdges reduced === [],
+    Locality.edgeDiff full reduced === [(0,1)],
+    Locality.edgeDiff reduced full === [(0,1)],
+    Locality.edgeDiff dense dense === [],
+    Locality.ancestors dense [0] === moderateCarrier,
+    Locality.ancestors isolated [123] === [123],
+    Locality.ancestors isolated [] === []]
+
+withComparison :: String -> Int -> Int -> [Prop] -> (Impact.Comparison -> Property) -> Property
+withComparison name beforeIndex afterIndex queries check = withSources name $ \sources ->
+  case (drop beforeIndex sources,drop afterIndex sources) of
+    (before:_,after:_) -> check (Impact.compareEndpoints (Impact.observeEndpoint before) (Impact.observeEndpoint after) queries)
+    _ -> counterexample "missing impact endpoint" False
+
+prop_honestImpact :: Property
+prop_honestImpact = withComparison "normalized-support" 2 2 [Prop (Pred "t") [TNum "1"],Prop (Pred "t") [TNum "1"]] $ \comparison ->
+  let certificate = Impact.impactCertificate comparison
+  in conjoin [property (Impact.endpointAccepted (Impact.certificateBeforeReport certificate)),
+    Impact.verifyImpact comparison certificate === Impact.Verified,
+    ResultWire.decodeImpactCertificate (ResultWire.encodeImpactCertificate certificate) === Right certificate,
+    Impact.impactUnchanged (Impact.comparisonResult comparison) === Impact.certificateQueries certificate,
+    Impact.verifyImpact comparison certificate{Impact.certificateReads = reverse (Impact.certificateReads certificate)
+      ++ Impact.certificateReads certificate} === Impact.Verified,
+    case ResultWire.decodeImpactCertificate (ResultWire.encodeImpactCertificate
+        certificate{Impact.certificateReads = reverse (Impact.certificateReads certificate) ++ Impact.certificateReads certificate}) of
+      Left err -> counterexample (show err) False
+      Right decoded -> Impact.verifyImpact comparison decoded === Impact.Verified,
+    property (any (\(_,key,value) -> case (key,value) of
+      (Impact.AttackEdge _ _,Impact.ReadBool False) -> True; _ -> False) (Impact.certificateReads certificate)),
+    Impact.comparisonReadCount comparison === 28,
+    Impact.comparisonPairCount comparison === 32,
+    conjoin [property ((side,Impact.AttackEdge source target,Impact.ReadBool False) `elem` Impact.certificateReads certificate)
+      | side <- [Impact.BeforeSide,Impact.AfterSide],source <- [0,1],target <- [0,1]],
+    Impact.comparisonPairCount comparison === 4 + naturalLength (Impact.certificateReads certificate)]
+
+prop_tamperImpact :: Property
+prop_tamperImpact = withComparison "normalized-support" 2 2 [Prop (Pred "t") [TNum "1"]] $ \comparison ->
+  let certificate = Impact.impactCertificate comparison
+      fault value expected = Impact.verifyImpact comparison value === Impact.InvalidCertificate expected
+      report = Impact.certificateBeforeReport certificate
+      changedIdentity = (Impact.certificateBeforeIdentity certificate){T.replayArtifact = A.Digest "tampered"}
+      badSnapshot = [(ObjectId "snapshot",Left "tampered")]
+      reportVariants =
+        [report{Impact.endpointAccepted = False},report{Impact.endpointRejection = Just (D.MissingEvidence (A.LeafId "x"))},
+         report{Impact.endpointReferenceCarrier = [999]},report{Impact.endpointCheckedCarrier = [999]},
+         report{Impact.endpointCompiledCarrier = [999]},report{Impact.endpointBlockedQueries = [atom "x"]},
+         report{Impact.endpointSupports = []}]
+      outcomeVariants =
+        [certificate{Impact.certificateBeforeReport = value} | value <- reportVariants] ++
+        [certificate{Impact.certificateAfterReport = value} | value <- reportVariants] ++
+        [certificate{Impact.certificateTransition = Impact.RejectedToRejected},
+         certificate{Impact.certificateBlockedBefore = [atom "x"]},
+         certificate{Impact.certificateBlockedAfter = [atom "x"]}]
+  in conjoin [Impact.verifyImpact comparison certificate === Impact.Verified,
+    property (Impact.endpointAccepted report),
+    conjoin [fault value Impact.OutcomeMismatch | value <- outcomeVariants],
+    fault certificate{Impact.certificateBeforeSnapshot = badSnapshot} Impact.MismatchedSnapshots,
+    fault certificate{Impact.certificateAfterSnapshot = badSnapshot} Impact.MismatchedSnapshots,
+    fault certificate{Impact.certificateBeforeSnapshot = badSnapshot,Impact.certificateBeforeIdentity = changedIdentity,
+      Impact.certificateRows = [],Impact.certificateReads = []} Impact.MismatchedSnapshots,
+    fault certificate{Impact.certificateAfterIdentity = changedIdentity} Impact.MismatchedIdentities,
+    fault certificate{Impact.certificateBeforeIdentity = changedIdentity,Impact.certificateRows = []} Impact.MismatchedIdentities,
+    fault certificate{Impact.certificateBeforeReport = report{Impact.endpointSupports = []},
+      Impact.certificateRows = [],Impact.certificateReads = []} Impact.OutcomeMismatch,
+    fault certificate{Impact.certificateChanged = [atom "x"],Impact.certificateCarrier = []} Impact.InvalidSupports,
+    fault certificate{Impact.certificateNodeDiff = [999]} Impact.InvalidGraph,
+    fault certificate{Impact.certificateEdgeDiff = [(999,0)]} Impact.InvalidGraph,
+    fault certificate{Impact.certificateCarrier = [],Impact.certificateLocality = []} Impact.InvalidGraph,
+    fault certificate{Impact.certificateLocality = [],Impact.certificateReads = []} Impact.FalseLocality,
+    case Impact.certificateRows certificate of
+      [row] -> conjoin [fault certificate{Impact.certificateRows = [value]} Impact.StatusMismatch | value <-
+        [row{Impact.impactQuery = atom "x"},row{Impact.impactBeforeStatus = Nothing},row{Impact.impactAfterStatus = Nothing},
+         row{Impact.impactBeforeStatus = Just (EvidenceBlocked A.Justified)},
+         row{Impact.impactAfterStatus = Just (Published A.Contested)},row{Impact.impactQueryChanged = True},
+         row{Impact.impactQueryLocality = False}]]
+      _ -> counterexample "missing accepted query row" False,
+    fault certificate{Impact.certificateBeforeIdentity = changedIdentity} Impact.MismatchedIdentities,
+    fault certificate{Impact.certificateBeforeReport = report{Impact.endpointAccepted = False}} Impact.OutcomeMismatch,
+    fault certificate{Impact.certificateRows = []} Impact.StatusMismatch,
+    fault certificate{Impact.certificateUnchanged = []} Impact.InvalidSupports,
+    fault certificate{Impact.certificateCarrier = []} Impact.InvalidGraph,
+    fault certificate{Impact.certificateLocality = []} Impact.FalseLocality,
+    fault certificate{Impact.certificateReads = []} Impact.FalseReadEvidence,
+    fault certificate{Impact.certificateReads = (Impact.BeforeSide,Impact.WholeInput,Impact.ReadBool True)
+      : Impact.certificateReads certificate} Impact.FalseReadEvidence,
+    fault certificate{Impact.certificateRows = [],Impact.certificateReads = []} Impact.StatusMismatch,
+    case ResultWire.decodeImpactCertificate (ResultWire.encodeImpactCertificate
+        certificate{Impact.certificateReads = [(Impact.BeforeSide,Impact.WholeInput,Impact.ReadNat 999)]}) of
+      Left err -> counterexample (show err) False
+      Right decoded -> fault decoded Impact.FalseReadEvidence,
+    fault certificate{Impact.certificateQueries = [atom "different"]} Impact.OutcomeMismatch,
+    Impact.verifyImpact (Impact.compareEndpoints (Impact.comparisonBefore comparison)
+      (Impact.comparisonAfter comparison) [atom "different"]) certificate === Impact.Verified]
+
+prop_impactHole :: Property
+prop_impactHole = withComparison "reindex-hole" 1 2 [atom "t"] $ \comparison ->
+  let certificate = Impact.impactCertificate comparison
+  in conjoin [Impact.verifyImpact comparison certificate === Impact.Verified,
+    Impact.impactChanged (Impact.comparisonResult comparison) === [atom "t"],
+    Impact.certificateNodeDiff certificate === [0,1],
+    property (all (\(_,key,_) -> case key of Impact.HoleMember _ _ -> False; _ -> True) (Impact.certificateReads certificate))]
+
+prop_impactRejected :: Property
+prop_impactRejected = withComparison "admission-evidence-fail" 0 0 [atom "t",atom "t"] $ \comparison ->
+  let certificate = Impact.impactCertificate comparison
+  in conjoin [Impact.verifyImpact comparison certificate === Impact.Verified,
+    Impact.impactTransition (Impact.comparisonResult comparison) === Impact.RejectedToRejected,
+    Impact.impactChanged (Impact.comparisonResult comparison) === [],
+    Impact.impactUnchanged (Impact.comparisonResult comparison) === [],
+    Impact.comparisonPairCount comparison === 20,
+    Impact.endpointSupports (Impact.certificateBeforeReport certificate) === [(atom "t",[]),(atom "t",[])]]
+
 inquirySpecProps :: [(String, IO Result)]
 inquirySpecProps =
   [("source wire: " ++ name,quickCheckResult (roundtripFixture name)) | name <-
@@ -782,4 +1131,176 @@ inquirySpecProps =
      ("source duplicate scan preserves earliest declaration with a later duplicate",prop_duplicateScanOrder),
      ("source diagnostics cover every closed constructor with canonical codecs",prop_diagnosticConstructorInventory),
      ("source evidence factoring preserves legacy typed missing-dependency payload",prop_legacyTypedMissingDependency)]]
+  ++ [(name,quickCheckResult prop) | (name,prop) <-
+    [("finite analysis uses cached accepted rows and missing binding",prop_finiteAnalysis),
+     ("finite stability compares full nonempty rejection outcomes",prop_rejectionStability),
+     ("analysis codecs cover literals and zero-denominator wrapper profiles",prop_analysisCodecs),
+     ("locality preserves ordered incoming lists and mutual support membership",prop_localityGraphs),
+     ("impact honest certificates preserve query multiplicity and set-valued reads",prop_honestImpact),
+     ("impact verification recomputes fields and ordered first fault",prop_tamperImpact),
+     ("impact hole completion uses stable identity and empty complete holes",prop_impactHole),
+     ("impact rejected endpoints preserve reasons and neither partition",prop_impactRejected)]]
+  ++ [("impact whole-input reads distinguish equal-status authored changes",quickCheckResult prop_equalStatusChangedReads)]
+  ++ [("finite analyses enumerate every inclusion-minimal slot and literal set",quickCheckResult prop_jointAndAssumptionSets)]
+  ++ [("finite sensitivity counts different histories but restricts slot flips to reference history",quickCheckResult prop_crossHistorySensitivity)]
+  ++ [("impact codecs roundtrip all read keys and independent value shapes",quickCheckResult prop_impactReadInventory)]
   ++ auditRuntimeSpecProps
+  ++ finiteImpactAdditionalProps
+
+prop_entitlementReadChange :: Property
+prop_entitlementReadChange = withSource "normalized-support" 2 $ \source -> accepted source $ \beforeObservation ->
+  let program = (T.sourceProgram source){A.programDecls = map change (A.programDecls (T.sourceProgram source))}
+      change (A.DeclLeaf leaf) = A.DeclLeaf leaf{A.leafRefs = A.SourceRef "changed-entitlement-provenance" : A.leafRefs leaf}
+      change declaration = declaration
+      query = Prop (Pred "t") [TNum "1"]
+  in case T.replaceSourceProgram source program of
+    Left err -> counterexample err False
+    Right changed -> accepted changed $ \afterObservation ->
+      let before = Impact.observeEndpoint source
+          original = Impact.compareEndpoints before before [query]
+          comparison = Impact.compareEndpoints before (Impact.observeEndpoint changed) [query]
+      in conjoin [S.publicStatus beforeObservation query === S.publicStatus afterObservation query,
+        S.observationSupport beforeObservation query === S.observationSupport afterObservation query,
+        S.observationNames beforeObservation === S.observationNames afterObservation,
+        Impact.verifyImpact comparison (Impact.impactCertificate comparison) === Impact.Verified,
+        Impact.verifyImpact comparison (Impact.impactCertificate original) === Impact.InvalidCertificate Impact.FalseReadEvidence]
+
+prop_impactTransitions :: Property
+prop_impactTransitions = withSource "normalized-support" 2 $ \source -> accepted source $ \_ ->
+  let reject version = T.mkSourceInput (T.sourceProgram source) (T.sourcePolicy source)
+        (T.sourceReplay source){T.replayCore = T.CoreVersion version} (T.sourceCapture source)
+      queries = [atom "t",atom "t"]
+  in case (reject "unsupported-before",reject "unsupported-after") of
+    (Right first,Right second) ->
+      let acceptedEndpoint = Impact.observeEndpoint source
+          rejectedBefore = Impact.observeEndpoint first
+          rejectedAfter = Impact.observeEndpoint second
+          mixedBefore = Impact.compareEndpoints acceptedEndpoint rejectedBefore queries
+          mixedAfter = Impact.compareEndpoints rejectedBefore acceptedEndpoint queries
+          bothRejected = Impact.compareEndpoints rejectedBefore rejectedAfter queries
+          mixed comparison transition =
+            let mixedCertificate = Impact.impactCertificate comparison
+            in conjoin [Impact.certificateTransition mixedCertificate === transition,
+              Impact.certificateChanged mixedCertificate === queries,Impact.certificateUnchanged mixedCertificate === [],
+              Impact.certificateCarrier mixedCertificate === [A.ArgId "witness",A.ArgId "alias"],
+              Impact.certificateNodeDiff mixedCertificate === [],Impact.certificateEdgeDiff mixedCertificate === [],
+              Impact.certificateLocality mixedCertificate === [(atom "t",False),(atom "t",False)],
+              Impact.verifyImpact comparison mixedCertificate === Impact.Verified]
+          certificate = Impact.impactCertificate bothRejected
+      in conjoin [mixed mixedBefore Impact.AcceptedToRejected,mixed mixedAfter Impact.RejectedToAccepted,
+        Impact.verifyImpact bothRejected certificate === Impact.Verified,
+        Impact.certificateChanged certificate === [],Impact.certificateUnchanged certificate === [],
+        property (Impact.endpointRejection (Impact.certificateBeforeReport certificate)
+          /= Impact.endpointRejection (Impact.certificateAfterReport certificate))]
+    other -> counterexample (show other) False
+
+prop_impactBlocked :: Property
+prop_impactBlocked = withComparison "blocked-conditional" 0 2 [atom "t",atom "t"] $ \comparison ->
+  let certificate = Impact.impactCertificate comparison
+  in conjoin [Impact.verifyImpact comparison certificate === Impact.Verified,
+    Impact.certificateBlockedBefore certificate === [atom "t",atom "t"],
+    Impact.certificateBlockedAfter certificate === [atom "t",atom "t"],
+    map (\row -> (Impact.impactBeforeStatus row,Impact.impactAfterStatus row)) (Impact.certificateRows certificate)
+      === replicate 2 (Just (EvidenceBlocked A.Defeated),Just (EvidenceBlocked A.Justified)),
+    Impact.certificateChanged certificate === [atom "t",atom "t"]]
+
+finiteImpactAdditionalProps :: [(String,IO Result)]
+finiteImpactAdditionalProps =
+  [("impact exact reads distinguish equal grounded status with changed entitlement provenance",quickCheckResult prop_entitlementReadChange),
+   ("impact all transitions preserve independent rejection payloads and no mixed graph",quickCheckResult prop_impactTransitions),
+   ("impact compares full blocked statuses with duplicate requested blocked rows",quickCheckResult prop_impactBlocked)]
+  ++ [("impact actual frozen verified certificate recomputes successfully",quickCheckResult (prop_actualVerification "verified-certificate" True)),
+      ("impact actual frozen tampered certificate is a verification result",quickCheckResult (prop_actualVerification "tampered-certificate" False)),
+      ("impact read footprint includes compiled discharge dependencies",quickCheckResult prop_impactCompiledDependency)]
+  ++ [("finite conditional stability retains full rejected rows without vacuity",quickCheckResult prop_conditionalRejectedFamily),
+      ("finite changed slots compare full first choices and literals compare full stamped events",quickCheckResult prop_fullChoiceAndStampedLiteral)]
+  ++ [("locality lifts cached compact ancestry in carrier order: " ++ name,quickCheckResult (prop_liftedRegions name)) |
+      name <- ["normalized-support","shared-discharge","reindex-hole"]]
+
+verificationRequests :: SExpr -> [(SExpr,SExpr,SExpr)]
+verificationRequests (SList [SAtom "verify-impact",_,before,after,certificate]) = [(before,after,certificate)]
+verificationRequests (SList values) = concatMap verificationRequests values
+verificationRequests _ = []
+
+prop_actualVerification :: String -> Bool -> Property
+prop_actualVerification name expected = once $ ioProperty $ do
+  parsed <- fixtureTree name
+  pure $ case parsed of
+    Left err -> counterexample err False
+    Right tree -> conjoin
+      [property (not (null (verificationRequests tree))),
+       conjoin [case (W.decodeSource before,W.decodeSource after,ResultWire.decodeImpactCertificate wire) of
+         (Right first,Right second,Right certificate) ->
+           let comparison = Impact.compareEndpoints (Impact.observeEndpoint first) (Impact.observeEndpoint second)
+                 (Impact.certificateQueries certificate)
+           in conjoin [ResultWire.encodeImpactCertificate certificate === wire,
+             (Impact.verifyImpact comparison certificate == Impact.Verified) === expected]
+         other -> counterexample (show other) False | (before,after,wire) <- verificationRequests tree]]
+
+prop_impactCompiledDependency :: Property
+prop_impactCompiledDependency = withComparison "shared-discharge" 2 2 [atom "t"] $ \comparison ->
+  let certificate = Impact.impactCertificate comparison
+  in conjoin [property (Impact.endpointAccepted (Impact.certificateBeforeReport certificate)),
+    Impact.verifyImpact comparison certificate === Impact.Verified,
+    map Impact.impactBeforeStatus (Impact.certificateRows certificate) === [Just (Published A.Defeated)],
+    property (any (\(_,key,value) -> case (key,value) of
+      (Impact.AttackEdge _ _,Impact.ReadBool True) -> True; _ -> False) (Impact.certificateReads certificate))]
+
+prop_conditionalRejectedFamily :: Property
+prop_conditionalRejectedFamily = withSource "admission-evidence-fail" 0 $ \source ->
+  case T.mkFragment [] of
+    Left err -> counterexample err False
+    Right empty ->
+      let slot = Audit.Slot (Audit.SlotId 0) [Audit.Choice (Audit.ChoiceId index) Audit.GuardTruth empty | index <- [0,1]]
+          spec = Audit.FamilySpec (Process.Problem (Process.DecodedRecord [] [] [] [] 0) []) source [slot]
+          config = Audit.AuditConfig [] [] [] []
+          observable = Analysis.StatusObservable (Process.ClaimId 0)
+      in case Enumerate.enumerateFamily spec (Audit.EnumerationLimits 100 1000 100) of
+        Left err -> counterexample (show err) False
+        Right enumeration ->
+          let checked = Projection.checkFamily config enumeration
+              whole = Analysis.stability checked observable
+              conditional = Analysis.conditionalStability checked observable [Analysis.SlotEq (Audit.SlotId 0) (Audit.ChoiceId 0)]
+          in conjoin [Analysis.stabilityTotal whole === 2,Analysis.stabilityRejected whole === 2,
+            Analysis.stabilityWhole whole === True,Analysis.stabilityAcceptedDomain whole === False,
+            Analysis.stabilityTotal conditional === 1,Analysis.stabilityRejected conditional === 1,
+            Analysis.stabilityWhole conditional === True,Analysis.stabilityAcceptedDomain conditional === False,
+            Analysis.assumptionMinimal (Analysis.assumptions checked (Analysis.StatusTarget (Process.ClaimId 0) (Published A.Gap))
+              [Analysis.SlotEq (Audit.SlotId 0) (Audit.ChoiceId 0)]) === []]
+
+prop_fullChoiceAndStampedLiteral :: Property
+prop_fullChoiceAndStampedLiteral = withSource "normalized-support" 2 $ \source -> case T.mkFragment [] of
+  Left err -> counterexample err False
+  Right empty ->
+    let event = Process.Stamped (Process.EventId 0) (Process.Access (Process.ActorId 0) (Process.DataId 0) Process.Selection)
+        other = Process.Stamped (Process.EventId 0) (Process.Access (Process.ActorId 0) (Process.DataId 0) Process.Evaluation)
+        second = event{Process.stampedId = Process.EventId 1}
+        firstChoice = Audit.Choice (Audit.ChoiceId 0) Audit.GuardTruth empty
+        changedChoice = firstChoice{Audit.choiceGuard = Audit.GuardNot Audit.GuardTruth}
+        alternative = firstChoice{Audit.choiceId = Audit.ChoiceId 1}
+        spec = Audit.FamilySpec (Process.Problem (Process.DecodedRecord [] [] [] [] 0) []) source
+          [Audit.Slot (Audit.SlotId 0) [firstChoice,alternative]]
+        reference = Audit.Completion [event,second] [Audit.Selection (Audit.SlotId 0) firstChoice]
+        changed = reference{Audit.completionAssignment = [Audit.Selection (Audit.SlotId 0) changedChoice]}
+        firstMatch = reference{Audit.completionAssignment = Audit.completionAssignment reference ++ [Audit.Selection (Audit.SlotId 0) alternative]}
+    in conjoin [Analysis.changedSlots spec reference changed === [Audit.SlotId 0],
+      Analysis.changedSlots spec reference firstMatch === [],
+      property (Analysis.literalHolds (Analysis.SlotEq (Audit.SlotId 0) (Audit.ChoiceId 0)) changed),
+      property (Analysis.literalHolds (Analysis.Present event) reference),
+      property (not (Analysis.literalHolds (Analysis.Present other) reference)),
+      property (Analysis.literalHolds (Analysis.Absent other) reference),
+      property (Analysis.literalHolds (Analysis.Before event second) reference),
+      property (not (Analysis.literalHolds (Analysis.Before second event) reference))]
+
+prop_liftedRegions :: String -> Property
+prop_liftedRegions name = withSource name 2 $ \source -> accepted source $ \observation ->
+  let native = Locality.observationGraph observation
+      carrier = reverse (S.observationNames observation) ++ [A.ArgId "outside-comparison"]
+      lifted = Locality.liftObservation carrier observation
+      framework = Locality.liftedGraph lifted
+      queries = [atom "t",Prop (Pred "t") [TNum "1"],atom "unknown"]
+  in conjoin [let support = Locality.liftedSupport lifted query
+                  region = Locality.liftedRegion lifted (Locality.ancestors native (S.observationSupport observation query))
+              in conjoin [region === Locality.ancestors framework support,
+                Locality.regionsCorrespond framework framework support support region region ===
+                  Locality.localityHolds framework framework support support] | query <- queries]

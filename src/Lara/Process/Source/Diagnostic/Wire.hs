@@ -2,6 +2,7 @@
 module Lara.Process.Source.Diagnostic.Wire
   ( encodeRejection, decodeRejection, encodeSourceDiagnostic, decodeSourceDiagnostic
   , encodeCoreError, decodeCoreError, encodeCheckFault, decodeCheckFault
+  , encodePublicStatus, decodePublicStatus, encodeBackend, decodeBackend
   ) where
 
 import Control.Monad (unless)
@@ -13,6 +14,7 @@ import qualified Lara.Wire as Raw
 import qualified Lara.Process.Wire as W
 import qualified Lara.Process.Source.Wire as Source
 import qualified Lara.Process.Source.Types as T
+import Lara.Wire (PublicStatus (..))
 import Lara.Process.Source.CoreDiagnostic
 import Lara.Process.Source.Diagnostic
 import Lara.Evidence.Types (ObjectId (..))
@@ -456,3 +458,32 @@ encodeCheckFault :: CheckFault -> SExpr
 encodeCheckFault = enc
 decodeCheckFault :: SExpr -> Result CheckFault
 decodeCheckFault = canonical
+
+data PublicStatusTag = PublishedTag | EvidenceBlockedTag deriving (Eq, Enum, Bounded)
+instance W.WireWord PublicStatusTag where
+  wordText PublishedTag = "published"
+  wordText EvidenceBlockedTag = Raw.tagToString Raw.TEvidenceBlocked
+encodePublicStatus :: PublicStatus -> SExpr
+encodePublicStatus value = case value of
+  Published status -> W.tagged (W.wordText PublishedTag) [statusValue status]
+  EvidenceBlocked status -> W.tagged (W.wordText EvidenceBlockedTag) [statusValue status]
+  where
+    statusValue status = SAtom (Raw.tagToString (case status of
+      A.Gap -> Raw.TGap; A.Justified -> Raw.TJustified; A.Contested -> Raw.TContested; A.Defeated -> Raw.TDefeated))
+decodePublicStatus :: SExpr -> Result PublicStatus
+decodePublicStatus (SList [SAtom tag,SAtom value]) = do
+  status <- case Raw.parseTag value of
+    Just Raw.TGap -> Right A.Gap
+    Just Raw.TJustified -> Right A.Justified
+    Just Raw.TContested -> Right A.Contested
+    Just Raw.TDefeated -> Right A.Defeated
+    _ -> bad
+  case W.parseWord tag of
+    Just PublishedTag -> Right (Published status)
+    Just EvidenceBlockedTag -> Right (EvidenceBlocked status)
+    _ -> bad
+decodePublicStatus _ = bad
+encodeBackend :: CoreBackend -> SExpr
+encodeBackend = enc
+decodeBackend :: SExpr -> Result CoreBackend
+decodeBackend = canonical

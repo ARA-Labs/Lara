@@ -3,6 +3,7 @@ module Lara.Process.Source.Wire
   ( decodeSource, encodeSource, decodeFragment, encodeFragment
   , decodeProp, encodeProp, decodeReplay, encodeReplay, decodeCapture, encodeCapture
   , encodeLeafKind, decodeLeafKind, encodeProvenance, decodeProvenance
+  , encodeSnapshot, decodeSnapshot
   ) where
 
 import Control.Monad (unless)
@@ -282,17 +283,24 @@ decodeTyped (SList [SAtom "csv",SList [SList header,SList rows]]) = CsvPayload <
   where row (SList cells) = traverse W.decodeText cells; row _ = bad
 decodeTyped (SList [SAtom "json",j]) = JsonPayload <$> decodeJson j
 decodeTyped _ = bad
-encodeCapture :: T.EvidenceCapture -> SExpr
-encodeCapture (T.EvidenceCapture snapshot manifest) = W.tagged "evidence" [SList (map entry snapshot),SList (map encodeMeta manifest)]
-  where entry (ObjectId i,result) = SList [SAtom i,case result of Left reason -> W.tagged "failed" [SAtom reason]; Right (meta,p) -> W.tagged "captured" [SList [encodeMeta meta,encodeTyped p]]]
-decodeCapture :: SExpr -> Result T.EvidenceCapture
-decodeCapture (SList [SAtom "evidence",SList snapshot,SList manifest]) = T.EvidenceCapture <$> traverse entry snapshot <*> traverse decodeMeta manifest
+encodeSnapshot :: [(ObjectId,Either String (T.ObjectMeta,TypedObject))] -> SExpr
+encodeSnapshot = SList . map entry
+  where entry (ObjectId i,result) = SList [SAtom i,case result of
+          Left reason -> W.tagged "failed" [SAtom reason]
+          Right (meta,capturedObject) -> W.tagged "captured" [SList [encodeMeta meta,encodeTyped capturedObject]]]
+decodeSnapshot :: SExpr -> Result [(ObjectId,Either String (T.ObjectMeta,TypedObject))]
+decodeSnapshot (SList snapshot) = traverse entry snapshot
   where
     entry (SList [SAtom i,result]) = (,) (ObjectId i) <$> capture result
     entry _ = bad
     capture (SList [SAtom "failed",SAtom reason]) = Right (Left reason)
-    capture (SList [SAtom "captured",SList [meta,p]]) = Right <$> ((,) <$> decodeMeta meta <*> decodeTyped p)
+    capture (SList [SAtom "captured",SList [meta,capturedObject]]) = Right <$> ((,) <$> decodeMeta meta <*> decodeTyped capturedObject)
     capture _ = bad
+decodeSnapshot _ = bad
+encodeCapture :: T.EvidenceCapture -> SExpr
+encodeCapture (T.EvidenceCapture snapshot manifest) = W.tagged "evidence" [encodeSnapshot snapshot,SList (map encodeMeta manifest)]
+decodeCapture :: SExpr -> Result T.EvidenceCapture
+decodeCapture (SList [SAtom "evidence",snapshot,SList manifest]) = T.EvidenceCapture <$> decodeSnapshot snapshot <*> traverse decodeMeta manifest
 decodeCapture _ = bad
 encodeSource :: T.SourceInput -> SExpr
 encodeSource source = W.tagged "checked-source"

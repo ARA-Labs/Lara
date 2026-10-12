@@ -100,6 +100,11 @@ library
                       Lara.Process.Family
                       Lara.Process.Enumerate
                       Lara.Process.Projection
+                      Lara.Process.Analysis
+                      Lara.Process.AnalysisWire
+                      Lara.Process.Locality
+                      Lara.Process.Impact
+                      Lara.Process.ResultWire
                       Lara.Map.Types
                       Lara.Map.Wire
                       Lara.Map.Load

@@ -17,6 +17,7 @@ import qualified Lara.Process.Audit.Types as D
 import qualified Lara.Process.Audit as Audit
 import qualified Lara.Process.Enumerate as E
 import qualified Lara.Process.Projection as R
+import qualified Lara.Process.Analysis as Analysis
 
 sourceTrees :: SExpr -> [SExpr]
 sourceTrees value@(SList (SAtom "checked-source" : _)) = [value]
@@ -217,6 +218,8 @@ prop_survivingAlternativeTransition = withBase $ \base ->
          checked (family revised [D.Slot (D.SlotId 0) [D.Choice (D.ChoiceId 0) D.GuardTruth fragment]]) metadata $ \after -> conjoin
           [R.audit after allKinds (P.ClaimId 0) (P.WitnessId 0) === False,
            R.audit after allKinds (P.ClaimId 0) (P.WitnessId 1) === True,
+           map snd (Analysis.auditObservations after (P.ClaimId 0) (P.WitnessId 0) allKinds) === [Right False],
+           map snd (Analysis.auditObservations after (P.ClaimId 0) (P.WitnessId 1) allKinds) === [Right True],
            inspectRows after $ \observation ->
              Audit.observeWitness revised observation history claim methodWitness
                === Left (D.WitnessArtifact (D.ArtifactMethod D.DefeatedSupport))]]
