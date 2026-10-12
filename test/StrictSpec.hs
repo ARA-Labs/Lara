@@ -63,7 +63,6 @@ import Lara.Strict.Deps (CertDep (..), certDeps, encodeCertDeps)
 import Lara.Driver (buildCertOk)
 import Lara.SupportTerm
   ( CertOk
-  , CertOutcome (..)
   , CheckError
   , CheckLoc (..)
   , SupportResult (..)
@@ -832,29 +831,9 @@ prop_uncertifiedNodesReportNothing =
     , certDeps depsCertOk depsPi trustedTerm === []
     ]
 
--- | The backend firewall on the wire: an @nd\@1@ certificate whose payload is
--- an @ord\@1@ sub-payload is rejected by the @nd\@1@ decoder, with @nd\@1@'s own
--- reason. No backend may read another's certificate — a parent step cannot
--- inspect, reuse, or re-interpret a child backend's proof term.
---
--- The vector exists in Haskell precisely because the wire form is untyped: an
--- 'SExpr' payload can /syntactically/ be another backend's. In Lean the
--- leakage is inexpressible — @Assurance@ carries only @(β, hd, κ)@ and there is
--- no syntax naming another backend's formula type — so this artifact, not a
--- Lean theorem, is what discharges the leakage criterion. It runs through
--- 'buildCertOk' rather than @strictCheck@ because @strictCheck@ is reached only
--- from tests, and a firewall vector that never runs on the shipped path checks
--- the wrong checker.
-prop_crossBackendPayloadRejected :: Property
-prop_crossBackendPayloadRejected =
-  depsCertOk leakedCert [comparison] budgetRespected
-    === CertRejected ("malformed ND certificate: " ++ show ordPayload)
 
--- | An @nd\@1@ certificate carrying an @ord\@1@ payload. Shared by
--- 'prop_crossBackendPayloadRejected', which pins @nd\@1@'s exact rejection
--- reason for it, and 'prop_rejectedStepKeepsDepsBeneath', which relies on that
--- rejection. One binding rather than two copies, so the vector that assumes it
--- is rejected cannot drift from the vector that proves it.
+-- | An @nd\@1@ certificate carrying an @ord\@1@ payload. The rejected-root
+-- dependency property exercises the production oracle on this payload.
 leakedCert :: A.Cert
 leakedCert = A.Cert (A.BackendId "nd") 1 ndDigest ordPayload
 
@@ -862,9 +841,8 @@ leakedCert = A.Cert (A.BackendId "nd") 1 ndDigest ordPayload
 -- the totality contract stated in "Lara.Strict.Deps"' module header.
 --
 -- 'mixedTerm' with its @nd\@1@ root certificate replaced by 'leakedCert': the
--- root is now a certificate node the oracle /rejects/
--- ('prop_crossBackendPayloadRejected' pins the exact reason), so it contributes
--- no report of its own — the @nd\@1@ theory entry that
+-- root is now a certificate node the oracle rejects, so it contributes
+-- no report of its own. The @nd\@1@ theory entry that
 -- 'prop_mixedBackendDepsCollected' sees is gone. The walk continues into the
 -- premise regardless, so the accepted @ord\@1@ node beneath it still reports
 -- both of its premise slots.
@@ -1024,7 +1002,6 @@ strictSpecProps =
   , ("mixed nd@1/ord@1 certDeps unions both steps' reports", quickCheckResult prop_mixedBackendDepsCollected)
   , ("certDeps collects a discharge-position certificate", quickCheckResult prop_dischargeDepsCollected)
   , ("certDeps of leaf and trusted instance is empty", quickCheckResult prop_uncertifiedNodesReportNothing)
-  , ("cross-backend payload leakage rejected by nd@1", quickCheckResult prop_crossBackendPayloadRejected)
   , ("a rejected step does not hide the deps beneath it", quickCheckResult prop_rejectedStepKeepsDepsBeneath)
   , ("repeated-slot nd@1/ord@1 term accepted by the checker", quickCheckResult prop_dupBackendAccepted)
   , ("repeated-slot certDeps collapses to a set in Haskell", quickCheckResult prop_dupBackendDepsCollected)

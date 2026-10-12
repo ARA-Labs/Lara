@@ -69,7 +69,7 @@ data ReplayError
 data ReplayFailure
   = DuplicateSelectedBackend BackendId String
   | UnknownSelectedBackend BackendId String
-  | CertificateBackendNotSelected Int ArgId BackendId Int
+  | CertificateBackendNotSelected Int ArgId BackendId Integer
   deriving (Eq, Show)
 
 mkReplayId

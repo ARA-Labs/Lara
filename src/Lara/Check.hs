@@ -119,18 +119,16 @@ import Lara.SupportTerm.Internal (CheckedHole (..), CheckedNode (..))
 data DeclLoc = DLArgument Int | DLAttack Int
   deriving (Eq, Show)
 
--- | An undeclared attackable contrary pair between complete arguments (Lean
--- @Program.MissingConflict@). The two indices are __checked declaration__
--- indices, the space every other rejection constituent uses: the scan runs
--- over AF nodes (Lean's @ConflictNode.index@ is the node position, which the
--- Lean driver never renders), and 'checkProgramDetailed' maps each through the
--- node-to-declaration map before reporting. With no holes the two spaces
--- coincide.
+-- | An undeclared attackable contrary pair between complete arguments.
+-- Declaration indices locate legacy CLI errors; node indices retain the
+-- conflict scan's coordinates for structured source consumers.
 data MissingConflictInfo = MissingConflictInfo
   { mcSourceIndex :: Int
   , mcTargetIndex :: Int
   , mcSourceConclusion :: Prop
   , mcTargetConclusion :: Prop
+  , mcSourceNodeIndex :: Int
+  , mcTargetNodeIndex :: Int
   }
   deriving (Eq, Show)
 
@@ -419,6 +417,8 @@ firstMissingConflictInfo dp cache =
                         (cnfIndex t)
                         (cnfConclusion s)
                         (cnfConclusion t)
+                        (cnfIndex s)
+                        (cnfIndex t)
                     )
             else Nothing
       | otherwise = Nothing

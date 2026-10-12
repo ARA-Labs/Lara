@@ -51,7 +51,7 @@ mkIdentity backends theories =
     Right replayId -> replayId
     Left err -> error (replayErrorMessage err)
 
-certRule :: BackendId -> Int -> [SupportTerm] -> [(QuestionId, SupportTerm)] -> SupportTerm
+certRule :: BackendId -> Integer -> [SupportTerm] -> [(QuestionId, SupportTerm)] -> SupportTerm
 certRule backend version premises discharges =
   SRule
     (RuleId "strict")

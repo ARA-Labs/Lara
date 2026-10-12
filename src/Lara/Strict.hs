@@ -78,7 +78,7 @@ import Lara.Prop (Prop)
 -- (decision doc §2 obligation 5).
 data BackendId = BackendId
   { backendName    :: String
-  , backendVersion :: Int
+  , backendVersion :: Integer
   }
   deriving (Eq, Ord, Show)
 

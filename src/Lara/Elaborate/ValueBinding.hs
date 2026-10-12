@@ -6,15 +6,17 @@
 -- binding RHS is never rewritten through another binding.
 module Lara.Elaborate.ValueBinding
   ( expandValueBindings
+  , expandInquiryValueBindings
+  , validateInquiryAuthoredNls
   ) where
 
-import Data.List (find)
+import Data.List (find, stripPrefix)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 
 import Lara.AST
 import Lara.Elaborate.Error (ElabError (..))
-import Lara.Prop (FunSym (..), Prop (..), Term (..), prettyTerm)
+import Lara.Prop (Prop (..), Term (..), prettyTerm)
 import Lara.Sigma (Sigma, lookupCon, sortCheckProp, sortOf)
 import Lara.Syntax (nlCellDirective)
 import qualified Lara.Strict.Cell as Cell
@@ -24,11 +26,40 @@ import qualified Lara.Strict.Cell as Cell
 -- The returned 'Program' contains no bindings. Its declaration terms and prose
 -- are the exact semantic presentation consumed by comparison expansion.
 expandValueBindings :: Sigma -> Program -> Either ElabError Program
-expandValueBindings sigma authored = do
+expandValueBindings = expandValueBindingsWith LegacyInterpolation
+
+expandInquiryValueBindings :: Sigma -> Program -> Either ElabError Program
+expandInquiryValueBindings = expandValueBindingsWith InquiryInterpolation
+
+data InterpolationMode = LegacyInterpolation | InquiryInterpolation
+
+data NlPurpose = ProduceNl | CheckNl
+
+-- The final supported-fragment guard checks directive membership in the
+-- original source, not in its let-substituted leaves. No prose is rendered.
+validateInquiryAuthoredNls :: Program -> Either ElabError ()
+validateInquiryAuthoredNls program = mapM_ checkDeclaration (programDecls program)
+  where
+    bindings = programValueBindings program
+    env = Map.fromList [(valueName binding, valueTerm binding) | binding <- bindings]
+    gamma = [(leafId leaf, leafProp leaf) | DeclLeaf leaf <- programDecls program]
+    blame = case bindings of
+      binding : _ -> valueName binding
+      [] -> ValueName ""
+    check identifier text = case expandNl CheckNl InquiryInterpolation env gamma identifier text of
+      Left _ -> Left (InquiryNlInvalid blame)
+      Right _ -> Right ()
+    checkDeclaration (DeclClaim claim) = check (claimId claim) (claimNl claim)
+    checkDeclaration (DeclComparison comparison) =
+      check (ccId (cmpClaim comparison)) (ccNlRaw (cmpClaim comparison))
+    checkDeclaration _ = Right ()
+
+expandValueBindingsWith :: InterpolationMode -> Sigma -> Program -> Either ElabError Program
+expandValueBindingsWith mode sigma authored = do
   env <- bindingEnvironment sigma (programValueBindings authored)
   let substituted = authored {programDecls = map (substDecl env) (programDecls authored)}
   if Map.null env then Right () else validateClaimFormals sigma (programDecls substituted)
-  expandedDecls <- expandDeclNls env (programDecls substituted)
+  expandedDecls <- expandDeclNls mode env (programDecls substituted)
   pure substituted {programValueBindings = [], programDecls = expandedDecls}
 
 -- Name checks intentionally precede all RHS checks. This makes malformed
@@ -124,17 +155,17 @@ validateClaimFormals sigma = mapM_ validate
           Nothing -> Right ()
       _ -> Right ()
 
-expandDeclNls :: Map ValueName Term -> [Decl] -> Either ElabError [Decl]
-expandDeclNls env decls = mapM expandOne decls
+expandDeclNls :: InterpolationMode -> Map ValueName Term -> [Decl] -> Either ElabError [Decl]
+expandDeclNls mode env decls = mapM expandOne decls
   where
     gamma = [(leafId leaf, leafProp leaf) | DeclLeaf leaf <- decls]
     expandOne decl = case decl of
       DeclClaim claim -> do
-        prose <- expandNl env gamma (claimId claim) (claimNl claim)
+        prose <- expandNl ProduceNl mode env gamma (claimId claim) (claimNl claim)
         pure (DeclClaim claim {claimNl = prose})
       DeclComparison comparison -> do
         let comparisonClaim = cmpClaim comparison
-        prose <- expandNl env gamma (ccId comparisonClaim) (ccNlRaw comparisonClaim)
+        prose <- expandNl ProduceNl mode env gamma (ccId comparisonClaim) (ccNlRaw comparisonClaim)
         pure
           ( DeclComparison
               comparison
@@ -146,32 +177,55 @@ expandDeclNls env decls = mapM expandOne decls
 -- One left-to-right pass over the raw brace language. Escaped braces are emitted
 -- as semantic prose and are never fed through this function a second time.
 expandNl
-  :: Map ValueName Term
+  :: NlPurpose
+  -> InterpolationMode
+  -> Map ValueName Term
   -> [(LeafId, Prop)]
   -> PropId
   -> String
   -> Either ElabError String
-expandNl env gamma claim = go
+expandNl purpose mode env gamma claim = go
   where
     go source = case source of
       [] -> Right []
-      '{' : '{' : rest -> ('{' :) <$> go rest
-      '}' : '}' : rest -> ('}' :) <$> go rest
-      '}' : _ -> Left (NlStrayBrace claim)
+      '{' : '{' : rest -> literal '{' <$> go rest
+      '}' : '}' : rest -> literal '}' <$> go rest
+      '}' : _ -> Left (case mode of
+        LegacyInterpolation -> NlStrayBrace claim
+        InquiryInterpolation -> InquiryNlInvalid (claimValue claim))
       '{' : rest -> do
         (body, after) <- splitDirective rest
         value <- directive body
         (value ++) <$> go after
-      char : rest -> (char :) <$> go rest
+      char : rest -> literal char <$> go rest
+
+    literal = case purpose of
+      ProduceNl -> (:)
+      CheckNl -> \_ rest -> rest
+    present text = case purpose of
+      ProduceNl -> Right text
+      CheckNl -> Right []
 
     splitDirective rest = case break (== '}') rest of
       (body, '}' : after) -> Right (body, after)
-      _ -> Left (NlUnterminatedBrace claim)
+      _ -> Left (case mode of
+        LegacyInterpolation -> NlUnterminatedBrace claim
+        InquiryInterpolation -> InquiryNlInvalid (claimValue claim))
 
-    directive body = case words body of
-      [name, arg] | name == nlCellDirective -> cellValue (LeafId arg)
-      [name] | name /= nlCellDirective -> bindingValue (ValueName name)
-      _ -> Left (NlUnknownDirective claim body)
+    directive body = case mode of
+      LegacyInterpolation -> case words body of
+        [name, arg] | name == nlCellDirective -> cellValue (LeafId arg)
+        [name] | name /= nlCellDirective -> bindingValue (ValueName name)
+        _ -> Left (NlUnknownDirective claim body)
+      InquiryInterpolation -> case Map.lookup (ValueName body) env of
+        Just term -> present (prettyInquiryTerm term)
+        Nothing -> case stripPrefix "cell " body >>= \name -> lookup (LeafId name) gamma of
+          Just proposition -> case Cell.premiseCell proposition of
+            Right rationalValue -> present (Cell.renderDecimal rationalValue)
+            Left _ -> Left (InquiryNlInvalid (ValueName body))
+          Nothing -> Left (InquiryNlInvalid (ValueName body))
+
+    claimValue (PropId name) = ValueName name
 
     bindingValue name = case Map.lookup name env of
       Just term -> Right (prettyTerm term)
@@ -182,3 +236,21 @@ expandNl env gamma claim = go
       Just proposition -> case Cell.premiseCell proposition of
         Left _ -> Left (NlCellObligation claim leafName)
         Right rationalValue -> Right (Cell.renderDecimal rationalValue)
+
+-- The modeled renderer preserves every scalar except its five escape cases.
+prettyInquiryTerm :: Term -> String
+prettyInquiryTerm term = case term of
+  TNum spelling -> spelling
+  TStr text -> "\"" ++ concatMap escape text ++ "\""
+  TCon (FunSym name) [] -> name
+  TCon (FunSym name) args -> name ++ "(" ++ renderArgs args ++ ")"
+  where
+    escape '"' = "\\\""
+    escape '\\' = "\\\\"
+    escape '\n' = "\\n"
+    escape '\t' = "\\t"
+    escape '\r' = "\\r"
+    escape c = [c]
+    renderArgs [] = ""
+    renderArgs [arg] = prettyInquiryTerm arg
+    renderArgs (arg:rest) = prettyInquiryTerm arg ++ ", " ++ renderArgs rest

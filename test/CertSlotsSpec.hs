@@ -139,7 +139,7 @@ res _ = Left SlotNameUnresolved
 
 -- | A presentation certificate over the given backend name\/version, with a
 -- fixed theory digest, as the elaborator holds it after parsing.
-certOver :: String -> Int -> SExpr -> Cert
+certOver :: String -> Integer -> SExpr -> Cert
 certOver name version payload =
   Cert
     { certBackend = AST.BackendId name

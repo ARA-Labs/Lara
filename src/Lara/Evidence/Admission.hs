@@ -3,6 +3,7 @@ module Lara.Evidence.Admission
   , BoundRequest, boundLeaf, boundRequest, bindEvidence, noEvidenceRejection
   , requiredObjects, earliestObjectLeaf, captureRejection
   , bindEvidenceMetadata, requiredObjectMetadata
+  , bindEvidencePaths
   ) where
 
 import Control.Monad (unless)
@@ -38,7 +39,12 @@ bindEvidence :: Manifest -> Policy -> [Leaf] -> Either EvidenceRejection [BoundR
 bindEvidence manifest policy = bindEvidenceMetadata (manifestObjects manifest) (policyEvidenceCheckers policy)
 
 bindEvidenceMetadata :: [ObjectMeta] -> [(LeafCheckerId,CheckerVersion)] -> [Leaf] -> Either EvidenceRejection [BoundRequest]
-bindEvidenceMetadata metadata allowlist = fmap concat . mapM one
+bindEvidenceMetadata metadata = bindEvidencePaths
+  [(objectId meta, packagePathText (objectPath meta)) | meta <- metadata]
+
+-- Binding depends on authored identities and paths, not package IO restrictions.
+bindEvidencePaths :: [(ObjectId,String)] -> [(LeafCheckerId,CheckerVersion)] -> [Leaf] -> Either EvidenceRejection [BoundRequest]
+bindEvidencePaths metadata allowlist = fmap concat . mapM one
   where
     one leaf = case (leafKind leaf,leafExtraction leaf) of
       (Certified,Nothing) -> failLeaf leaf Nothing "missing extraction request"
@@ -53,8 +59,7 @@ bindEvidenceMetadata metadata allowlist = fmap concat . mapM one
       (_,Just _) -> failLeaf leaf Nothing "extraction request on noncertified leaf"
       _ -> Right []
     objectBinding leaf ident = do
-      meta <- maybe (failLeaf leaf (Just ident) "undeclared evidence object") Right (find ((==ident) . objectId) metadata)
-      let path = packagePathText (objectPath meta)
+      path <- maybe (failLeaf leaf (Just ident) "undeclared evidence object") Right (lookup ident metadata)
       unless (any (\(SourceRef r) -> takeWhile (/='#') r == path) (leafRefs leaf)) (failLeaf leaf (Just ident) "object does not resolve an existing leaf reference")
     failLeaf leaf object reason = Left (EvidenceRejection BindingStage (leafId leaf) object reason)
 

@@ -85,6 +85,15 @@ library
                       Lara.Process.Types
                       Lara.Process.History
                       Lara.Process.Wire
+                      Lara.Process.Source
+                      Lara.Process.Source.Types
+                      Lara.Process.Source.Wire
+                      Lara.Process.Source.Evidence
+                      Lara.Process.Source.Diagnostic
+                      Lara.Process.Source.Diagnostic.Wire
+                      Lara.Process.Source.CoreDiagnostic
+                      Lara.Process.Source.Provenance
+                      Lara.Process.Audit.Types
                       Lara.Map.Types
                       Lara.Map.Wire
                       Lara.Map.Load
@@ -235,6 +244,8 @@ test-suite lara-test
                       InspSpec
                       WireSpec
                       ProcessSpec
+                      InquirySpec
+                      SourceComparisonSpec
                       MapWireSpec
                       MapLoadSpec
                       MapLinkSpec

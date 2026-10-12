@@ -1,4 +1,4 @@
-module Lara.Evidence.JSON (JsonValue (..), ValidatedJSON, decodeJSON, decodeValidatedJSON, selectJSON, validateJSON, selectValidatedJSON) where
+module Lara.Evidence.JSON (JsonValue (..), ValidatedJSON, decodeJSON, decodeValidatedJSON, selectJSON, validateJSON, selectValidatedJSON, validateModeledJSON, selectValidatedJSONModeled) where
 
 import Control.Monad (unless)
 import qualified Data.ByteString as B
@@ -27,6 +27,7 @@ decodeJSON bytes = do
   pure v
   where
     ws = dropWhile (`elem` " \t\r\n")
+    value :: Int -> Int -> String -> Either String (JsonValue, String, Int)
     value depth count input = do
       unless (depth <= 128) (Left "JSON depth bound exceeded")
       unless (count < 100000) (Left "JSON node bound exceeded")
@@ -118,12 +119,39 @@ validateJSON root = do
     foldChildren _ count [] = Right count
     foldChildren depth count (v:vs) = do n <- validate (depth+1) count v; foldChildren depth n vs
 
+-- Modeled depth counts nonempty containers, including the root container.
+validateModeledJSON :: JsonValue -> Either String ValidatedJSON
+validateModeledJSON root = do
+  _ <- validate (0 :: Int) (0 :: Int) root
+  pure (ValidatedJSON root)
+  where
+    validate depth count value = do
+      unless (count < 100000) (Left "JSON structure bound exceeded")
+      case value of
+        JsonObject entries -> do
+          unless (length entries == Set.size (Set.fromList (map fst entries))) (Left "duplicate JSON key")
+          children depth (count + 1) (map snd entries)
+        JsonArray values -> children depth (count + 1) values
+        _ -> Right (count + 1)
+    children _ count [] = Right count
+    children depth count values = do
+      unless (depth < 128) (Left "JSON structure bound exceeded")
+      foldChildren (depth + 1) count values
+    foldChildren _ count [] = Right count
+    foldChildren depth count (value : rest) = do
+      next <- validate depth count value
+      foldChildren depth next rest
+
 selectJSON :: JsonValue -> [JsonSelector] -> Pred -> Either String Prop
 selectJSON root selectors predicate =
   validateJSON root >>= \validated -> selectValidatedJSON validated selectors predicate
 selectValidatedJSON :: ValidatedJSON -> [JsonSelector] -> Pred -> Either String Prop
-selectValidatedJSON (ValidatedJSON root) selectors predicate = do
+selectValidatedJSON tree selectors predicate = do
   unless (length selectors <= 256) (Left "selector bound exceeded")
+  selectValidatedJSONModeled tree selectors predicate
+
+selectValidatedJSONModeled :: ValidatedJSON -> [JsonSelector] -> Pred -> Either String Prop
+selectValidatedJSONModeled (ValidatedJSON root) selectors predicate = do
   terms <- mapM one selectors
   pure (nf (Prop predicate terms))
   where

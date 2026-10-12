@@ -212,6 +212,23 @@ Stability is not scientific adequacy, and status is not entitlement. `Lara.Examp
 
 `Lara.Process.Source` is the proof-retaining source observer the audit layer reads. `checkSource` returns `SourceOutcome input` — an `Except SourceRejection (AcceptedObservation input)` — so a rejected source never acquires a graph, a public status or a warrant. An accepted observation carries the exact `Surface.SourceWithEvidenceAudit` result, replay compatibility, the capture/evidence guard and certificate selection together, and `exact_source`, `exact_audit`, `evidence_admitted` and `certificates_selected` project them; nothing re-runs the checker to recover what it already proved. `Lara.Process.SourceWire` is the source envelope codec, and `SourceDiagnosticWire` with `SourceResultWire` give complete typed codecs for every rejection payload and for `Driver.PublicStatus` and `QueryOutcome`, so the four fault categories (surface, admission, check, evidence) cross the wire with their locations rather than as rendered text.
 
+The Haskell companion is `Lara.Process.Source` with `Source.Types`, `Source.Wire`,
+and `Source.Diagnostic.Wire`. Its opaque `SourceInput` and `Fragment` keep authored
+ASTs coupled to the original typed opaque certificate payloads. Authored versions
+and positions are unbounded signed integers; source lowering rejects negative
+certificate versions and attack indices, while policy certificate references use
+the reference's nonnegative core conversion.
+
+`Lara.Elaborate.SourceResult` retains one production checker decision: either the
+full failure or an opaque `AcceptedSource` containing its source admission state
+and `CheckedUnit`. The source observer derives the framework, grounded labels,
+blocked overlay, support index and hole coordinates from that retained result.
+Modeled capture admission accepts the reference's arbitrary metadata and ordered
+JSON values; package metadata validation remains a separate boundary. Original
+authored-source guards run after semantic reconstruction and status resolution,
+so substitution cannot repair an unsupported original directive, argument or
+comparison.
+
 Four computations turn an accepted source into warrant data, each stated as an equation against an independently defined reference rather than against a producer label:
 
 - `Lara.Process.SourceCoordinates` lifts the checked framework to stable declaration identities. `graph_label` shows a lifted node's grounded label is the compiled one, and `supports_exact` characterizes a query's support as exactly the checked nodes whose conclusion is `≡` to it.

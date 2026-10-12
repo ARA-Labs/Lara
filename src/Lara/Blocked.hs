@@ -81,6 +81,7 @@ module Lara.Blocked
   , carrierChecked
     -- * The driver entry points
   , blockedSeed
+  , blockedArgs
   , blockedQueries
   ) where
 

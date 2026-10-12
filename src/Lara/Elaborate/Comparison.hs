@@ -57,6 +57,9 @@
 module Lara.Elaborate.Comparison
   ( expandSurface
   , expandSurfaceProvenance
+  , expandInquirySurfaceProvenance
+  , prepareInquiryAuthoredDecls
+  , AuthoredDecl (..)
   , GeneratedArg (..)
   ) where
 
@@ -65,9 +68,10 @@ import Data.List (find, nub)
 
 import Lara.AST
 import Lara.Elaborate.Error (ElabError (..))
-import Lara.Elaborate.ValueBinding (expandValueBindings)
+import Lara.Elaborate.ValueBinding (expandValueBindings, expandInquiryValueBindings)
 import Lara.Elaborate.Subst (apatToProp, matchAPat, patToTerm, sameTerm)
 import Lara.Prop (Prop (..), Term (..))
+import qualified Lara.Sigma
 import Lara.Strict (SExpr (..))
 import qualified Lara.Strict as Strict
 import qualified Lara.Strict.Cell as Cell
@@ -122,8 +126,52 @@ expandSurface pol prog = fst <$> expandSurfaceProvenance pol prog
 -- argument this expansion did not emit. Callers that only need the program keep
 -- using 'expandSurface'.
 expandSurfaceProvenance :: Policy -> Program -> Either ElabError (Program, [GeneratedArg])
-expandSurfaceProvenance pol authored = do
-  prog <- expandValueBindings (policySigma pol) authored
+expandSurfaceProvenance = expandSurfaceProvenanceWith expandValueBindings
+
+expandInquirySurfaceProvenance :: Policy -> Program -> Either ElabError (Program,[GeneratedArg])
+expandInquirySurfaceProvenance = expandSurfaceProvenanceWith expandInquiryValueBindings
+
+-- The original supported-fragment fold uses certificate-free comparison
+-- placeholders and their stored conclusions, not the semantic expansion.
+data AuthoredDecl
+  = AuthoredDeclaration Decl
+  | AuthoredComparison (ArgId, SupportTerm, Prop) (ArgId, SupportTerm, Prop)
+
+data ComparisonExpansion = ComparisonExpansion
+  { comparisonDeclarations :: [Decl]
+  , comparisonBreadcrumbs :: [GeneratedArg]
+  , comparisonOriginal :: AuthoredDecl
+  }
+
+prepareInquiryAuthoredDecls :: Policy -> Program -> Either ElabError [AuthoredDecl]
+prepareInquiryAuthoredDecls policy program =
+  case validate of
+    Left _ -> Left (InquiryComparisonUnbuildable blame)
+    Right prepared -> Right prepared
+  where
+    declarations = programDecls program
+    comparisons = [comparison | DeclComparison comparison <- declarations]
+    gamma = [(leafId leaf, leafProp leaf) | DeclLeaf leaf <- declarations]
+    claims = [claimId claim | DeclClaim claim <- declarations] ++ map (ccId . cmpClaim) comparisons
+    blame = case comparisons of
+      comparison : _ -> ccId (cmpClaim comparison)
+      [] -> PropId ""
+    validate = do
+      checkGeneratedIds declarations comparisons
+      checkDuplicateBlocks comparisons
+      mapM prepare declarations
+    prepare (DeclComparison comparison) = do
+      expansion <- expandComparison policy gamma comparison
+      case cmpSupports comparison of
+        Just claim | claim `notElem` claims -> Left (InquiryComparisonUnbuildable blame)
+        _ -> Right (comparisonOriginal expansion)
+    prepare declaration = Right (AuthoredDeclaration declaration)
+
+expandSurfaceProvenanceWith
+  :: (Lara.Sigma.Sigma -> Program -> Either ElabError Program)
+  -> Policy -> Program -> Either ElabError (Program,[GeneratedArg])
+expandSurfaceProvenanceWith expandBindings pol authored = do
+  prog <- expandBindings (policySigma pol) authored
   let decls = programDecls prog
       blocks = [c | DeclComparison c <- decls]
       -- Γ for comparison expansion: leaves are never generated.
@@ -134,7 +182,9 @@ expandSurfaceProvenance pol authored = do
   pure (prog {programDecls = concatMap fst expanded}, concatMap snd expanded)
   where
     one gamma decl = case decl of
-      DeclComparison comparison -> expandComparison pol gamma comparison
+      DeclComparison comparison -> do
+        expansion <- expandComparison pol gamma comparison
+        pure (comparisonDeclarations expansion, comparisonBreadcrumbs expansion)
       _ -> Right ([decl], [])
 
 -- | The generated @recheck@\/@bridge@\/@claims@ ids must collide with nothing:
@@ -187,7 +237,7 @@ expandComparison
   :: Policy
   -> [(LeafId, Prop)]
   -> Comparison
-  -> Either ElabError ([Decl], [GeneratedArg])
+  -> Either ElabError ComparisonExpansion
 expandComparison pol gamma cmp = do
   -- (1) polarity — declared domain knowledge, never inferred (App. B.1).
   polarity <- case find ((== cmpMeasurand cmp) . measurandId) (policyMeasurands pol) of
@@ -434,10 +484,18 @@ expandComparison pol gamma cmp = do
           , gaBaseline = cmpBaseline cmp
           , gaMeasurand = cmpMeasurand cmp
           }
-  pure
-    ( [DeclClaim subClaim, DeclArg recheckArg, DeclArg bridgeArg]
-    , [crumb (cmpRecheckArg cmp), crumb (cmpBridgeArg cmp)]
-    )
+  let originalRecheck = SRule (ruleId recheck) []
+        [SLeaf (cmpResult cmp), SLeaf (cmpBaseline cmp)] [] [] AssuranceNone
+      originalBridge = SRule (ruleId bridge) []
+        [SLeaf (cmpBinding cmp), originalRecheck] [] [] AssuranceNone
+      originalConclusion = Prop authoredPred [sysTerm, baseTerm, qTerm, dTerm]
+  pure ComparisonExpansion
+    { comparisonDeclarations = [DeclClaim subClaim, DeclArg recheckArg, DeclArg bridgeArg]
+    , comparisonBreadcrumbs = [crumb (cmpRecheckArg cmp), crumb (cmpBridgeArg cmp)]
+    , comparisonOriginal = AuthoredComparison
+        (cmpRecheckArg cmp, originalRecheck, goal)
+        (cmpBridgeArg cmp, originalBridge, originalConclusion)
+    }
   where
     cid = ccId (cmpClaim cmp)
 

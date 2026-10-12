@@ -57,11 +57,33 @@ module Lara.Elaborate
   , prepareSource
   , StructuralSource
   , prepareSourceStructure
+  , prepareInquirySourceStructure
+  , structuralDeclared
+  , structuralProgram
+  , structuralSemantic
+  , structuralPolicy
   , structuralLeaves
   , sourceEvidenceBindings
   , admitSourceEvidence
+  , admitModeledSourceEvidence
   , SourceResult
   , runSourceCheck
+  , runInquirySourceCheck
+  , AcceptedSource
+  , sourceResultAcceptedSource
+  , sourceResultFailure
+  , sourceResultDecision
+  , CheckFailure (..)
+  , acceptedSourceChecked
+  , acceptedSourceDeclared
+  , acceptedSourcePrune
+  , acceptedSourceProgram
+  , acceptedSourceSemantic
+  , acceptedSourcePolicy
+  , acceptedSourceAudit
+  , acceptedSourceCheckInput
+  , acceptedSourceEvidence
+  , acceptedSourceModeledEvidence
   , sourceResultCertDeps
   , sourceResultEvidence
   , sourceResultDeclaredLeafIds
@@ -92,6 +114,9 @@ import Lara.Evidence.Manifest (Manifest, manifestObjects)
 import Lara.Evidence.Runner
 import Lara.Evidence.Snapshot (Snapshot)
 import Lara.Evidence.Syntax (decodeRequest, encodeRequest)
+import Lara.Process.Source.Evidence (ModeledJudgment, runModeledEvidence)
+import Lara.Process.Source.Types
+  ( EvidenceCapture, EvidenceError )
 
 import Data.Bifunctor (first)
 import Data.List (find, sort)
@@ -118,13 +143,16 @@ import Lara.Elaborate.SlotNames
   , authoredSlotMap
   , renderAuthoredSlots
   )
-import Lara.Check (fullConfig)
+import Lara.Check (CheckConfig, CheckedUnit, fullConfig)
 import Lara.Diagnostics
   ( Constituent (..)
   , LocatedRejection (..)
   , Stage (..)
   )
-import Lara.Driver.Internal (runCheckReported, slotMappingLines)
+import Lara.Driver.Internal
+  ( CheckReport (..), CheckFailure (..), runCheckReported
+  , runCheckAfterReplayReported, slotMappingLines
+  )
 import Lara.Strict.Deps (CertDep)
 import Lara.Reporting (ClaimReport)
 import Lara.SupportTerm (SlotSource)
@@ -134,8 +162,11 @@ import Lara.Elaborate.Internal
   , TheoryRegistry (..)
   , elabErrorMessage
   , elaborateWithSemanticProgram
+  , elaborateInquiryWithSemanticProgram
   , emptyRegistry
   , registryOf
+  , validateCanonicalPremiseLabels
+  , firstInquiryDuplicate
   )
 import Lara.Replay
   ( CheckInput
@@ -181,7 +212,7 @@ data PreparedSource
   | SourceAccepted SourceCheckInput
 
 -- | The constructor is hidden.  Program, policy, fully elaborated declared
--- unit, explicit policy seed, final one-pass prune, audit, replay identity, and
+-- unit, final one-pass prune, audit, replay identity, and
 -- the @comparison@ expansion's surface breadcrumb travel together, so a
 -- presentation caller cannot forge independently paired halves.
 --
@@ -190,22 +221,35 @@ data PreparedSource
 -- and without it, and the @examples\/*\/example.core.sexp@ goldens are the
 -- standing check.
 data SourceCheckInput = SourceCheckInput
-  Program
-  Policy
-  Unit
-  [LeafId]
-  Prune
-  AdmissionAudit
-  CheckInput
-  [GeneratedArg]
-
-  [SuccessfulJudgment]
+  { checkSourceProgram :: Program
+  , checkSourcePolicy :: Policy
+  , checkSourceDeclared :: Unit
+  , checkSourcePrune :: Prune
+  , checkSourceAudit :: AdmissionAudit
+  , checkSourceInput :: CheckInput
+  , checkSourceGenerated :: [GeneratedArg]
+  , checkSourceJudgments :: [SuccessfulJudgment]
+  , checkSourceSemantic :: Program
+  , checkSourceModeledJudgments :: [ModeledJudgment]
+  }
 
 -- Structural validation has no projection to an accepted raw-core envelope.
 data StructuralSource = StructuralSource Program Policy Unit CheckInput [GeneratedArg] Program
 
 structuralLeaves :: StructuralSource -> [Leaf]
 structuralLeaves (StructuralSource _ _ _ _ _ semantic) = [l | DeclLeaf l <- programDecls semantic]
+
+structuralDeclared :: StructuralSource -> Unit
+structuralDeclared (StructuralSource _ _ declared _ _ _) = declared
+
+structuralProgram :: StructuralSource -> Program
+structuralProgram (StructuralSource program _ _ _ _ _) = program
+
+structuralSemantic :: StructuralSource -> Program
+structuralSemantic (StructuralSource _ _ _ _ _ semantic) = semantic
+
+structuralPolicy :: StructuralSource -> Policy
+structuralPolicy (StructuralSource _ policy _ _ _ _) = policy
 
 sourceEvidenceBindings :: Manifest -> StructuralSource -> Either EvidenceRejection [BoundRequest]
 sourceEvidenceBindings manifest structural@(StructuralSource _ policy _ _ _ _) =
@@ -217,36 +261,91 @@ admitSourceEvidence manifest snapshot structural = do
   maybe (Right ()) Left (captureRejection snapshot (manifestObjects manifest) requests)
   judgments <- runEvidence snapshot requests
   pure (promoteSource structural judgments)
+
+-- | Modeled evidence passes its own typed admission gate before promotion.
+-- Package metadata restrictions remain in 'admitSourceEvidence'.
+admitModeledSourceEvidence :: EvidenceCapture -> StructuralSource -> Either EvidenceError SourceCheckInput
+admitModeledSourceEvidence capture structural = do
+  judgments <- runModeledEvidence capture (structuralPolicy structural) (structuralLeaves structural)
+  pure (promoteSourceWith structural [] judgments)
+
 -- | Public source result.  Diagnostics and the located rejection are produced by
 -- the same declared input and prune that produced the verdict; callers observe
 -- verdict, audit, and location through total projections.
 data SourceResult = SourceResult
-  Verdict
-  AdmissionAudit
-  [String]
-  (Maybe LocatedRejection)
-  ([ArgId], [ArgId])
-  CheckInput
-  [GeneratedArg]
-  [SlotSource]
-  [(ArgId, [AuthoredSlot])]
-  [AuthoredFormula]
-  [(ArgId, [CertDep])]
-  [SuccessfulJudgment]
-  ([ClaimReport], [ArgId])
+  { resultVerdict :: Verdict
+  , resultAudit :: AdmissionAudit
+  , resultDiagnostics :: [String]
+  , resultLocated :: Maybe LocatedRejection
+  , resultArgumentIds :: ([ArgId], [ArgId])
+  , resultInput :: CheckInput
+  , resultGenerated :: [GeneratedArg]
+  , resultSlots :: [SlotSource]
+  , resultAuthoredSlots :: [(ArgId, [AuthoredSlot])]
+  , resultFormulas :: [AuthoredFormula]
+  , resultCertDeps :: [(ArgId, [CertDep])]
+  , resultJudgments :: [SuccessfulJudgment]
+  , resultReports :: ([ClaimReport], [ArgId])
+  , resultDecision :: Either CheckFailure AcceptedSource
+  }
+
+-- The input and checked cache are minted together by the source runner.
+-- Neither this constructor nor the private record labels are exported.
+data AcceptedSource = AcceptedSource SourceCheckInput CheckedUnit
+
+acceptedInput :: AcceptedSource -> SourceCheckInput
+acceptedInput (AcceptedSource input _) = input
+
+acceptedSourceChecked :: AcceptedSource -> CheckedUnit
+acceptedSourceChecked (AcceptedSource _ checked) = checked
+
+acceptedSourceDeclared :: AcceptedSource -> Unit
+acceptedSourceDeclared = checkSourceDeclared . acceptedInput
+
+acceptedSourcePrune :: AcceptedSource -> Prune
+acceptedSourcePrune = checkSourcePrune . acceptedInput
+
+acceptedSourceProgram :: AcceptedSource -> Program
+acceptedSourceProgram = checkSourceProgram . acceptedInput
+
+acceptedSourceSemantic :: AcceptedSource -> Program
+acceptedSourceSemantic = checkSourceSemantic . acceptedInput
+
+acceptedSourcePolicy :: AcceptedSource -> Policy
+acceptedSourcePolicy = checkSourcePolicy . acceptedInput
+
+acceptedSourceAudit :: AcceptedSource -> AdmissionAudit
+acceptedSourceAudit = checkSourceAudit . acceptedInput
+
+acceptedSourceCheckInput :: AcceptedSource -> CheckInput
+acceptedSourceCheckInput = checkSourceInput . acceptedInput
+
+acceptedSourceEvidence :: AcceptedSource -> [SuccessfulJudgment]
+acceptedSourceEvidence = checkSourceJudgments . acceptedInput
+
+acceptedSourceModeledEvidence :: AcceptedSource -> [ModeledJudgment]
+acceptedSourceModeledEvidence = checkSourceModeledJudgments . acceptedInput
+
+sourceResultAcceptedSource :: SourceResult -> Maybe AcceptedSource
+sourceResultAcceptedSource = either (const Nothing) Just . resultDecision
+
+sourceResultFailure :: SourceResult -> Maybe CheckFailure
+sourceResultFailure = either Just (const Nothing) . resultDecision
+
+sourceResultDecision :: SourceResult -> Either CheckFailure AcceptedSource
+sourceResultDecision = resultDecision
 
 sourceResultEvidence :: SourceResult -> [SuccessfulJudgment]
-sourceResultEvidence (SourceResult _ _ _ _ _ _ _ _ _ _ _ judgments _) = judgments
+sourceResultEvidence = resultJudgments
 
 sourceResultDeclaredLeafIds :: SourceResult -> [LeafId]
-sourceResultDeclaredLeafIds (SourceResult _ _ _ _ _ input _ _ _ _ _ _ _) =
-  map fst (unitLeaves (inputUnit input))
+sourceResultDeclaredLeafIds = map fst . unitLeaves . inputUnit . resultInput
 
 sourceResultVerdict :: SourceResult -> Verdict
-sourceResultVerdict (SourceResult verdict _ _ _ _ _ _ _ _ _ _ _ _) = verdict
+sourceResultVerdict = resultVerdict
 
 sourceResultAudit :: SourceResult -> AdmissionAudit
-sourceResultAudit (SourceResult _ audit _ _ _ _ _ _ _ _ _ _ _) = audit
+sourceResultAudit = resultAudit
 
 -- | The @stderr@ lines this result's rejection warrants, in the raw driver's
 -- established precedence: a replay-preflight R13
@@ -261,7 +360,7 @@ sourceResultAudit (SourceResult _ audit _ _ _ _ _ _ _ _ _ _ _) = audit
 -- verdict, so a line here can never explain a rejection this result did not
 -- make.
 sourceResultDiagnostics :: SourceResult -> [String]
-sourceResultDiagnostics (SourceResult _ _ diagnostics _ _ _ _ _ _ _ _ _ _) = diagnostics
+sourceResultDiagnostics = resultDiagnostics
 
 -- | The located rejection that produced this result's verdict, from the /same/
 -- decision path ("Lara.Driver.Internal".@runCheckReported@): its class, failing
@@ -273,36 +372,34 @@ sourceResultDiagnostics (SourceResult _ _ diagnostics _ _ _ _ _ _ _ _ _ _) = dia
 -- rather than in a message line — so an R1 on a pruned source would print an
 -- empty diagnostic.
 sourceResultLocatedRejection :: SourceResult -> Maybe LocatedRejection
-sourceResultLocatedRejection (SourceResult _ _ _ located _ _ _ _ _ _ _ _ _) = located
+sourceResultLocatedRejection = resultLocated
 
--- | The argument ids of the __checked__ (post-prune) program, in the order the
--- checker indexed them. Checker-stage constituents resolve against this list;
--- replay preflight instead uses 'sourceResultDeclaredArgIds'. Ids alone are
--- exported — the checked 'Unit' is deliberately not, so a caller still cannot
--- rebuild a policy-pruned envelope without the blocked-status overlay.
+-- | Checked argument identifiers locate ordinary checker diagnostics.
+-- Replay preflight instead uses 'sourceResultDeclaredArgIds'; accepted-source
+-- observers read the cache together with its source-boundary prune.
 sourceResultCheckedArgIds :: SourceResult -> [ArgId]
-sourceResultCheckedArgIds (SourceResult _ _ _ _ (checked, _) _ _ _ _ _ _ _ _) = checked
+sourceResultCheckedArgIds = fst . resultArgumentIds
 
 -- | The declared argument ids in replay-preflight order, before any prune.
 sourceResultDeclaredArgIds :: SourceResult -> [ArgId]
-sourceResultDeclaredArgIds (SourceResult _ _ _ _ (_, declared) _ _ _ _ _ _ _ _) = declared
+sourceResultDeclaredArgIds = snd . resultArgumentIds
 
 -- | Per-query support and hole reports from the accepted checker cache.
 -- Empty on rejection; published statuses still come from the verdict so the
 -- policy/group blocked overlay is preserved.
 sourceResultClaimReports :: SourceResult -> [ClaimReport]
-sourceResultClaimReports (SourceResult _ _ _ _ _ _ _ _ _ _ _ _ (reports, _)) = reports
+sourceResultClaimReports = fst . resultReports
 
 -- | Argument ids in AF-node order, excluding holes and pruned arguments.
 sourceResultNodeArgIds :: SourceResult -> [ArgId]
-sourceResultNodeArgIds (SourceResult _ _ _ _ _ _ _ _ _ _ _ _ (_, nodeIds)) = nodeIds
+sourceResultNodeArgIds = snd . resultReports
 
 -- | Every argument this source's @comparison@ blocks generated, tied back to
 -- the block that minted it (plan D5).  Empty for a program that authors no
 -- @comparison@ — which is every raw @.sexp@ input, and every @lara-syntax\@0.2@
 -- program.
 sourceResultGeneratedArgs :: SourceResult -> [GeneratedArg]
-sourceResultGeneratedArgs (SourceResult _ _ _ _ _ _ generated _ _ _ _ _ _) = generated
+sourceResultGeneratedArgs = resultGenerated
 
 -- | The __structural__ premise-slot mapping of a checker-side R13: what
 -- the checked term put in each slot the refused certificate cites, read off the
@@ -314,7 +411,7 @@ sourceResultGeneratedArgs (SourceResult _ _ _ _ _ _ generated _ _ _ _ _ _) = gen
 -- authored one so a caller can tell the two apart rather than parsing them back
 -- out of a rendered line.
 sourceResultSlotSources :: SourceResult -> [SlotSource]
-sourceResultSlotSources (SourceResult _ _ _ _ _ _ _ slots _ _ _ _ _) = slots
+sourceResultSlotSources = resultSlots
 
 -- | The __authored__ premise-slot spelling of every checked argument,
 -- keyed by argument id: the leaf, prior-argument, and premise-label names the
@@ -325,7 +422,7 @@ sourceResultSlotSources (SourceResult _ _ _ _ _ _ _ slots _ _ _ _ _) = slots
 -- no rule-instance arguments — which is every raw @.sexp@ input, since a wire
 -- program has no authored names to recover.
 sourceResultAuthoredSlots :: SourceResult -> [(ArgId, [AuthoredSlot])]
-sourceResultAuthoredSlots (SourceResult _ _ _ _ _ _ _ _ authored _ _ _ _) = authored
+sourceResultAuthoredSlots = resultAuthoredSlots
 
 -- | The __authored__ spelling of every formula this source can name:
 -- the @lara-syntax\@0.10@ @(prop TEXT)@ annotations of its @nd\@1@ payloads,
@@ -337,7 +434,7 @@ sourceResultAuthoredSlots (SourceResult _ _ _ _ _ _ _ _ authored _ _ _ _) = auth
 -- of the program rather than of the verdict. Empty for a raw @.sexp@ input,
 -- which has no authored spellings to recover.
 sourceResultAuthoredFormulas :: SourceResult -> [AuthoredFormula]
-sourceResultAuthoredFormulas (SourceResult _ _ _ _ _ _ _ _ _ formulas _ _ _) = formulas
+sourceResultAuthoredFormulas = resultFormulas
 
 -- | The validated raw core envelope bound into this source result, unless
 -- policy admission removed source material. Duplicate-group quarantine is
@@ -347,9 +444,10 @@ sourceResultAuthoredFormulas (SourceResult _ _ _ _ _ _ _ _ _ formulas _ _ _) = f
 -- fail closed rather than recompute the declared envelope through
 -- 'Lara.Driver.runCheck'.
 sourceResultCheckInput :: SourceResult -> Either AdmissionAudit CheckInput
-sourceResultCheckInput (SourceResult _ audit _ _ _ checkInput _ _ _ _ _ _ _)
+sourceResultCheckInput result
   | admissionAuditHasPolicyQuarantine audit = Left audit
-  | otherwise = Right checkInput
+  | otherwise = Right (resultInput result)
+  where audit = resultAudit result
 
 -- | The same envelope, read off the prepared source __before__ it is checked,
 -- under the same rule: exportable unless policy admission removed source
@@ -357,9 +455,10 @@ sourceResultCheckInput (SourceResult _ audit _ _ _ checkInput _ _ _ _ _ _ _)
 -- itself (@lara pw@'s @lara@ world sources), checking here as well would
 -- only compute a verdict nobody reads.
 preparedCheckInput :: SourceCheckInput -> Either AdmissionAudit CheckInput
-preparedCheckInput (SourceCheckInput _ _ _ _ _ audit checkInput _ _)
+preparedCheckInput input
   | admissionAuditHasPolicyQuarantine audit = Left audit
-  | otherwise = Right checkInput
+  | otherwise = Right (checkSourceInput input)
+  where audit = checkSourceAudit input
 
 -- | The certificate dependency report of the unit this source result accepted,
 -- keyed by the checked unit's argument ids.
@@ -375,7 +474,7 @@ preparedCheckInput (SourceCheckInput _ _ _ _ _ audit checkInput _ _)
 -- is the same asymmetry 'sourceResultCheckInput' already documents, and it is
 -- why the source door cannot simply be routed through the raw entry point.
 sourceResultCertDeps :: SourceResult -> [(ArgId, [CertDep])]
-sourceResultCertDeps (SourceResult _ _ _ _ _ _ _ _ _ _ deps _ _) = deps
+sourceResultCertDeps = resultCertDeps
 
 -- | Validate and lower one presentation source.  Structural elaboration sees
 -- every declared leaf; admission is considered only after elaboration and
@@ -395,60 +494,105 @@ prepareSource program policy = do
       Nothing -> pure (SourceAccepted (promoteSource input []))
 
 prepareSourceStructure :: Program -> Policy -> Either SourceInvalid (Either AdmissionRejection StructuralSource)
-prepareSourceStructure program policy = do
+prepareSourceStructure = prepareSourceStructureIn LegacyPreparation
+
+prepareInquirySourceStructure :: Program -> Policy -> Either SourceInvalid (Either AdmissionRejection StructuralSource)
+prepareInquirySourceStructure = prepareSourceStructureIn InquiryPreparation
+
+data PreparationOrder = LegacyPreparation | InquiryPreparation
+
+prepareSourceStructureIn
+  :: PreparationOrder -> Program -> Policy -> Either SourceInvalid (Either AdmissionRejection StructuralSource)
+prepareSourceStructureIn order program policy = do
+  case order of
+    LegacyPreparation -> Right ()
+    InquiryPreparation -> evidenceSyntax
   if programPolicy program /= policyId policy
     then Left (SourceElaborationError (PolicyIdMismatch (programPolicy program) (policyId policy)))
     else Right ()
-  case validateAdmissionKeys (policyAdmission policy) of
-    Left (kind, provenance) -> Left (DuplicateAdmissionKey kind provenance)
-    Right () -> Right ()
-  if length (policyEvidenceCheckers policy) /= Set.size (Set.fromList (policyEvidenceCheckers policy))
-    then Left (SourceEvidenceSyntaxError "duplicate evidence checker entry") else Right ()
+  case order of
+    LegacyPreparation -> Right ()
+    InquiryPreparation -> first SourceElaborationError (validateCanonicalPremiseLabels (policyRules policy))
+  case order of
+    LegacyPreparation -> case validateAdmissionKeys (policyAdmission policy) of
+      Left (kind, provenance) -> Left (DuplicateAdmissionKey kind provenance)
+      Right () -> Right ()
+    InquiryPreparation -> case firstInquiryDuplicate (map fst (policyAdmission policy)) of
+      Just (kind, provenance) -> Left (DuplicateAdmissionKey kind provenance)
+      Nothing -> Right ()
+  case order of
+    LegacyPreparation -> evidenceSyntax
+    InquiryPreparation -> Right ()
   let leaves = [leaf | DeclLeaf leaf <- programDecls program]
-  case firstDuplicateLeafId leaves of
+      duplicateLeaf = case order of
+        LegacyPreparation -> firstDuplicateLeafId leaves
+        InquiryPreparation -> firstInquiryDuplicate (map leafId leaves)
+  case duplicateLeaf of
     Just leaf -> Left (DuplicateSourceLeafId leaf)
     Nothing -> Right ()
-  mapM_ (\leaf -> case leafExtraction leaf of
-    Nothing -> Right ()
-    Just request -> first SourceEvidenceSyntaxError (() <$ decodeRequest (encodeRequest request))) leaves
-  (declared, generated, semantic) <-
-    first SourceElaborationError
-      (elaborateWithSemanticProgram (registryOf policy) program policy)
+  case order of
+    LegacyPreparation -> mapM_ requestSyntax leaves
+    InquiryPreparation -> Right ()
+  (declared, generated, semantic) <- first SourceElaborationError $
+    case order of
+      LegacyPreparation -> elaborateWithSemanticProgram (registryOf policy) program policy
+      InquiryPreparation -> elaborateInquiryWithSemanticProgram (registryOf policy) program policy
   checkInput <- first SourceReplayError (sourceReplayInput program policy declared)
   case firstAdmissionRejection (policyAdmission policy) leaves of
     Just rejection -> pure (Left rejection)
     Nothing -> pure (Right (StructuralSource program policy declared checkInput generated semantic))
+  where
+    evidenceSyntax
+      | length checkers == Set.size (Set.fromList checkers) = Right ()
+      | otherwise = Left (SourceEvidenceSyntaxError "duplicate evidence checker entry")
+      where checkers = policyEvidenceCheckers policy
+    requestSyntax leaf = case leafExtraction leaf of
+      Nothing -> Right ()
+      Just request -> first SourceEvidenceSyntaxError (() <$ decodeRequest (encodeRequest request))
 
 promoteSource :: StructuralSource -> [SuccessfulJudgment] -> SourceCheckInput
-promoteSource (StructuralSource program policy declared checkInput generated semantic) judgments =
+promoteSource structural judgments = promoteSourceWith structural judgments []
+
+promoteSourceWith :: StructuralSource -> [SuccessfulJudgment] -> [ModeledJudgment] -> SourceCheckInput
+promoteSourceWith (StructuralSource program policy declared checkInput generated semantic) judgments modeled =
   let leaves = [leaf | DeclLeaf leaf <- programDecls semantic]
       policySeed = policyQuarantineSeed (policyAdmission policy) leaves
       finalPrune = pruneWithPolicySeed policySeed declared
       audit = buildAdmissionAudit finalPrune
-  in SourceCheckInput program policy declared policySeed finalPrune audit checkInput generated judgments
+   in SourceCheckInput program policy declared finalPrune audit checkInput generated judgments semantic modeled
 
 runSourceCheck :: SourceCheckInput -> SourceResult
-runSourceCheck (SourceCheckInput program policy declared _ finalPrune audit checkInput generated judgments) =
-  let checked = pruneChecked finalPrune
-      (verdict, located, diagnostics, slots, deps, reports) =
-        runCheckReported fullConfig checkInput finalPrune
+runSourceCheck = runSourceCheckWith runCheckReported
+
+runInquirySourceCheck :: SourceCheckInput -> SourceResult
+runInquirySourceCheck = runSourceCheckWith runCheckAfterReplayReported
+
+runSourceCheckWith
+  :: (CheckConfig -> CheckInput -> Prune -> CheckReport) -> SourceCheckInput -> SourceResult
+runSourceCheckWith runReport input =
+  let program = checkSourceProgram input
+      policy = checkSourcePolicy input
+      declared = checkSourceDeclared input
+      finalPrune = checkSourcePrune input
+      checked = pruneChecked finalPrune
+      checkInput = checkSourceInput input
+      report = runReport fullConfig checkInput finalPrune
    in SourceResult
-        verdict
-        audit
-        diagnostics
-        located
-        (map fst (unitArgs checked), map fst (unitArgs declared))
-        checkInput
-        generated
-        slots
-        (authoredSlotMap policy (unitArgs checked))
-        -- Built from the __declared__ unit, not the checked one: a leaf a
-        -- policy prune removed can still be named by a rejection reason, and
-        -- an entry the reason never mentions costs nothing.
-        (authoredFormulaMap program declared)
-        deps
-        judgments
-        reports
+        { resultVerdict = checkReportVerdict report
+        , resultAudit = checkSourceAudit input
+        , resultDiagnostics = checkReportDiagnostics report
+        , resultLocated = checkReportLocated report
+        , resultArgumentIds = (map fst (unitArgs checked), map fst (unitArgs declared))
+        , resultInput = checkInput
+        , resultGenerated = checkSourceGenerated input
+        , resultSlots = checkReportSlots report
+        , resultAuthoredSlots = authoredSlotMap policy (unitArgs checked)
+        , resultFormulas = authoredFormulaMap program declared
+        , resultCertDeps = checkReportDeps report
+        , resultJudgments = checkSourceJudgments input
+        , resultReports = checkReportClaims report
+        , resultDecision = AcceptedSource input <$> checkReportDecision report
+        }
 
 -- ---------------------------------------------------------------------------
 -- The author-facing layer (plan D5, eng review 2A)

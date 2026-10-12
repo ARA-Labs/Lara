@@ -714,7 +714,7 @@ decodeCertifier e = do
   name <- atomText "certifier" b
   version <- parseNatText "certifier" v
   digest <- atomText "certifier" h
-  ok (CertRef (BackendId name) version (TheoryDigest digest))
+  ok (CertRef (BackendId name) (toInteger version) (TheoryDigest digest))
 
 encodeRule :: Rule -> SExpr
 encodeRule r =
@@ -828,7 +828,7 @@ decodeAssurance e = case e of
         digest <- atomText "assurance" h
         ok
           ( AssuranceCert
-              (Cert (BackendId name) version (TheoryDigest digest) payload)
+              (Cert (BackendId name) (toInteger version) (TheoryDigest digest) payload)
           )
   _ -> werr "assurance" ("malformed assurance: " ++ show e)
 
@@ -906,7 +906,7 @@ decodePosition e = do
       SList (SAtom k : _)
         | parseTag k == Just TPrem -> do
             [i] <- matchTagged "position" TPrem 1 s
-            StepPremise <$> parseNatText "position" i
+            StepPremise . toInteger <$> parseNatText "position" i
         | parseTag k == Just TQues -> do
             [q] <- matchTagged "position" TQues 1 s
             StepQuestion . QuestionId <$> atomText "position" q

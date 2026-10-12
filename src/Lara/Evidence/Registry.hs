@@ -2,6 +2,7 @@ module Lara.Evidence.Registry
   ( TypedObject (..), runTypedRegistry, runRegistry, implementedChecker
   , PreparedObject, prepareTypedObject, runPreparedRegistry
   , prepareRequestObject, prepareBytesObject
+  , TypedExtractionError (..), prepareModeledObject, runModeledRegistry
   ) where
 
 import qualified Data.ByteString as B
@@ -12,6 +13,24 @@ import Lara.Prop (Prop)
 
 data TypedObject = CsvPayload CsvTable | JsonPayload JsonValue deriving (Eq,Show)
 data PreparedObject = PreparedCSV CsvIndex | PreparedJSON ValidatedJSON
+
+data TypedExtractionError = CSVSelectionFailure | JSONSelectionFailure | WrongPayload
+  deriving (Eq, Ord, Show)
+
+prepareModeledObject :: LeafCheckerId -> TypedObject -> Either TypedExtractionError PreparedObject
+prepareModeledObject CsvRow (CsvPayload table) =
+  either (const (Left CSVSelectionFailure)) (Right . PreparedCSV) (indexCSV table)
+prepareModeledObject JsonPointer (JsonPayload value) =
+  either (const (Left JSONSelectionFailure)) (Right . PreparedJSON) (validateModeledJSON value)
+prepareModeledObject _ _ = Left WrongPayload
+
+runModeledRegistry :: ExtractionRequest -> PreparedObject -> Either TypedExtractionError Prop
+runModeledRegistry request payload = case (request,payload) of
+  (CsvRowRequest _ _ key raw selectors predicate,PreparedCSV table) ->
+    either (const (Left CSVSelectionFailure)) Right (selectIndexedCSVModeled table key raw selectors predicate)
+  (JsonPointerRequest _ _ selectors predicate,PreparedJSON tree) ->
+    either (const (Left JSONSelectionFailure)) Right (selectValidatedJSONModeled tree selectors predicate)
+  _ -> Left WrongPayload
 prepareTypedObject :: TypedObject -> Either String PreparedObject
 prepareTypedObject (CsvPayload table) = PreparedCSV <$> indexCSV table
 prepareTypedObject (JsonPayload tree) = PreparedJSON <$> validateJSON tree

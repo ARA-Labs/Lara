@@ -96,7 +96,7 @@ genNumString =
         pure (sign ++ digits ++ frac)
     ]
 
-genCanonicalNat :: Gen Int
+genCanonicalNat :: Gen Integer
 genCanonicalNat = choose (0, 9999)
 
 genSExpr :: Gen SExpr

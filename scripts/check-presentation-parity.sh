@@ -42,7 +42,7 @@ fi
 lean_bin="lean/.lake/build/bin/presentation-shape"
 [ -x "$lean_bin" ] || { echo "presentation parity: FAIL: no Lean binary at $lean_bin" >&2; exit 1; }
 
-cabal exec -- runghc scripts/presentation-shape.hs > "$tmp_dir/haskell.tsv"
+cabal exec -- runghc --ghc-arg=-package --ghc-arg=lara scripts/presentation-shape.hs > "$tmp_dir/haskell.tsv"
 "$lean_bin" > "$tmp_dir/lean.tsv"
 
 for output in "$tmp_dir/haskell.tsv" "$tmp_dir/lean.tsv"; do

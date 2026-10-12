@@ -28,7 +28,7 @@ if [[ ! -x "$lean_bin" ]]; then
   exit 1
 fi
 
-if ! cabal exec -- runghc scripts/update-preconditions.hs > "$tmp_dir/haskell.tsv"; then
+if ! cabal exec -- runghc --ghc-arg=-package --ghc-arg=lara scripts/update-preconditions.hs > "$tmp_dir/haskell.tsv"; then
   echo "update differential: FAIL: Haskell emitter" >&2
   exit 1
 fi

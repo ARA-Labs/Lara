@@ -43,7 +43,7 @@ import qualified Lara.Strict.Insp as Insp
 import qualified Lara.Strict.ND as ND
 import qualified Lara.Strict.Ord as Ord
 import qualified Lara.Strict.RA as RA
-import Lara.SupportTerm (CertOutcome (..))
+import Lara.SupportTerm (CertOutcome (..), CertRejectionCause (..))
 import qualified Lara.SupportTerm as SupportTerm
 import Lara.Syntax (parsePolicy, parseProgram)
 import Lara.Evidence.Types
@@ -124,7 +124,7 @@ loadManifest path = do
 -- Structured presentation encoding (independent mirror of Lean)
 -- --------------------------------------------------------------------------
 
-data Sx = SStr String | SInt Int | SBigInt Integer | SNode String [Sx]
+data Sx = SStr String | SInt Integer | SNode String [Sx]
 
 sxList :: (a -> Sx) -> [a] -> Sx
 sxList encoder = SNode "l" . map encoder
@@ -262,16 +262,16 @@ sxBinding binding = SNode "bind"
 sxExtraction :: ExtractionRequest -> Sx
 sxExtraction request = case request of
   CsvRowRequest (CheckerVersion v) (ObjectId object) (ColumnName key) raw selectors (P.Pred predicate) ->
-    SNode (checkerText CsvRow) [SBigInt v,SStr object,SStr key,SStr raw,sxList csvSelector selectors,SStr predicate]
+    SNode (checkerText CsvRow) [SInt v,SStr object,SStr key,SStr raw,sxList csvSelector selectors,SStr predicate]
   JsonPointerRequest (CheckerVersion v) (ObjectId object) selectors (P.Pred predicate) ->
-    SNode (checkerText JsonPointer) [SBigInt v,SStr object,sxList jsonSelector selectors,SStr predicate]
+    SNode (checkerText JsonPointer) [SInt v,SStr object,sxList jsonSelector selectors,SStr predicate]
   where
     encoding enc = SNode (encodingText enc) []
     csvSelector (CsvSelector (ColumnName column) enc) = SNode "select" [SStr column,encoding enc]
     jsonSelector (JsonSelector tokens enc) = SNode "select" [sxList (\(JsonToken token) -> SStr token) tokens,encoding enc]
 sxEvidenceChecker :: (LeafCheckerId,CheckerVersion) -> Sx
 sxEvidenceChecker (checker,CheckerVersion version) =
-  SNode "p" [SNode (checkerText checker) [],SBigInt version]
+  SNode "p" [SNode (checkerText checker) [],SInt version]
 sxLeaf :: Leaf -> Sx
 sxLeaf leaf = SNode "leaf"
   [ let LeafId name = leafId leaf in SStr name
@@ -462,7 +462,6 @@ failUtf8 message = do
 renderSx :: Sx -> String
 renderSx (SStr value) = "s" ++ show (utf8Length value) ++ ":" ++ value
 renderSx (SInt value) = "i" ++ show value ++ ";"
-renderSx (SBigInt value) = "i" ++ show value ++ ";"
 renderSx (SNode tag children) =
   "n" ++ show (utf8Length tag) ++ ":" ++ tag ++ show (length children)
     ++ "[" ++ concatMap renderSx children ++ "]"
@@ -633,11 +632,14 @@ buildGamma leaves leaf = lookup leaf leaves
 buildCertOk :: [(TheoryDigest, [P.Prop])] -> SupportTerm.CertOk
 buildCertOk theories cert premises conclusion =
   case Strict.lookupBackend registry (Strict.BackendId name version) of
-    Nothing -> CertRejected ("no registered backend " ++ name ++ "@" ++ show version)
+    Nothing -> CertRejected CertificateBackendMissing ("no registered backend " ++ name ++ "@" ++ show version)
     Just backend ->
       case Strict.runBackend backend (Strict.TheoryDigest theory) premises conclusion payload of
         Right dependencies -> CertAccepted dependencies
-        Left reason -> CertRejected reason
+        Left reason ->
+          CertRejected
+            (if Strict.TheoryDigest theory `elem` map fst table then CertificateReplayRejected else CertificateDigestMissing)
+            reason
   where
     Cert (BackendId name) version (TheoryDigest theory) payload = cert
     table = [(Strict.TheoryDigest digest, propositions)

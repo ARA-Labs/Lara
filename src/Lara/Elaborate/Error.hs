@@ -29,6 +29,15 @@ import Lara.Sigma (SortFault (..), sortText)
 data ElabError
   = -- | @programPolicy prog@ ≠ @policyId policy@ (the header-match invariant).
     PolicyIdMismatch PolicyId PolicyId
+  | DuplicateClaimId PropId
+  | MalformedRuleNamespace RuleId
+  | NoncanonicalPremiseLabels RuleId
+  | InquiryNlInvalid ValueName
+  | InquiryArgumentUnbuildable ArgId
+  | SourceExplicitDischargeShape ArgId QuestionId
+  | InquiryCertificateUnlowerable ArgId
+  | InquiryAttackUnresolvable ArgId ArgId
+  | InquiryComparisonUnbuildable PropId
   | -- | a @by r(…)@ names a rule absent from the policy: @arg@, @rule@.
     UnknownRule ArgId RuleId
   | -- | the number of inferred references differs from the rule's premise count.
@@ -60,41 +69,41 @@ data ElabError
     -- citing 'RuleId': whose labels were consulted is part of the answer.
   | -- | the reference names no premise label of the citing rule, no declared
     -- leaf, and no prior argument.
-    CertSlotUnresolved ArgId BackendId Int ArgRef RuleId
+    CertSlotUnresolved ArgId BackendId Integer ArgRef RuleId
   | -- | the reference names both a declared leaf and a prior argument.
-    CertSlotAmbiguous ArgId BackendId Int ArgRef
+    CertSlotAmbiguous ArgId BackendId Integer ArgRef
   | -- | the reference names both a premise label of the citing rule and a
     -- declared leaf or prior argument. Rejected even when the two
     -- classes agree on the slot: one collision policy, no carve-outs.
-    CertSlotLabelAmbiguous ArgId BackendId Int ArgRef RuleId
+    CertSlotLabelAmbiguous ArgId BackendId Integer ArgRef RuleId
   | -- | the reference resolves, but to nothing this instance takes as a premise.
-    CertSlotNotAPremise ArgId BackendId Int ArgRef
+    CertSlotNotAPremise ArgId BackendId Integer ArgRef
   | -- | the named premise fills multiple slots, so the name cannot say which:
     -- the first two witnesses, 0-based — the same numbering the author writes
     -- back into @(prem N)@, so these are /not/ converted at the message
     -- boundary. The final flag says whether every matching slot has a premise
     -- label, so the renderer advertises the label repair only when it is
     -- available for whichever matching slot the author intended.
-    CertSlotMultiSlot ArgId BackendId Int ArgRef Int Int Bool
+    CertSlotMultiSlot ArgId BackendId Integer ArgRef Int Int Bool
   | -- | a reference atom that is neither a canonical numeral nor a source
     -- identifier, such as @007@ or @-1@.
-    CertSlotNonCanonicalNumeral ArgId BackendId Int ArgRef
+    CertSlotNonCanonicalNumeral ArgId BackendId Integer ArgRef
   | -- | the payload does not match the backend's declared premise-reference
     -- schema yet carries a symbolic reference. A symbolic name is never valid
     -- wire there, so the certificate is rejected here rather than handed to a
     -- backend that must refuse it (the dead-wire rule).
-    CertSlotSchemaMismatch ArgId BackendId Int ArgRef
+    CertSlotSchemaMismatch ArgId BackendId Integer ArgRef
     -- * Named natural-deduction proof terms (@lara-syntax\@0.9@;
     -- formula annotations @lara-syntax\@0.10@)
-  | CertNdBinderUnbound ArgId BackendId Int ArgRef
-  | CertNdBinderShadowed ArgId BackendId Int ArgRef
-  | CertNdBinderShadowsPremise ArgId BackendId Int ArgRef
-  | CertNdMalformedBinder ArgId BackendId Int ArgRef
-  | CertNdNonCanonicalIndex ArgId BackendId Int ArgRef
-  | CertNdKernelIndex ArgId BackendId Int ArgRef
-  | CertNdPremOutOfRange ArgId BackendId Int ArgRef Integer Int
-  | CertNdFormulaMalformed ArgId BackendId Int ArgRef
-  | CertNdResidualNamed ArgId BackendId Int ArgRef
+  | CertNdBinderUnbound ArgId BackendId Integer ArgRef
+  | CertNdBinderShadowed ArgId BackendId Integer ArgRef
+  | CertNdBinderShadowsPremise ArgId BackendId Integer ArgRef
+  | CertNdMalformedBinder ArgId BackendId Integer ArgRef
+  | CertNdNonCanonicalIndex ArgId BackendId Integer ArgRef
+  | CertNdKernelIndex ArgId BackendId Integer ArgRef
+  | CertNdPremOutOfRange ArgId BackendId Integer ArgRef Integer Int
+  | CertNdFormulaMalformed ArgId BackendId Integer ArgRef
+  | CertNdResidualNamed ArgId BackendId Integer ArgRef
   | -- | positional θ length ≠ the rule's parameter count: @arg@, @rule@,
     -- expected, got.
     ArityMismatch ArgId RuleId Int Int
@@ -272,6 +281,17 @@ elabErrorMessage :: ElabError -> String
 elabErrorMessage e = case e of
   PolicyIdMismatch (PolicyId p) (PolicyId q) ->
     "program declares policy '" ++ p ++ "' but the supplied policy is '" ++ q ++ "'"
+  DuplicateClaimId (PropId claim) -> "duplicate claim id '" ++ claim ++ "'"
+  MalformedRuleNamespace (RuleId rule) -> "malformed rule namespace '" ++ rule ++ "'"
+  NoncanonicalPremiseLabels (RuleId rule) -> "noncanonical premise labels for rule '" ++ rule ++ "'"
+  InquiryNlInvalid (ValueName name) -> "invalid modeled interpolation '" ++ name ++ "'"
+  InquiryArgumentUnbuildable (ArgId argument) -> "cannot reconstruct modeled argument '" ++ argument ++ "'"
+  SourceExplicitDischargeShape (ArgId argument) (QuestionId question) ->
+    "arg '" ++ argument ++ "': modeled discharge '" ++ question ++ "' needs a source reference"
+  InquiryCertificateUnlowerable (ArgId argument) -> "cannot lower modeled certificate in '" ++ argument ++ "'"
+  InquiryAttackUnresolvable (ArgId source) (ArgId target) ->
+    "cannot resolve modeled attack from '" ++ source ++ "' to '" ++ target ++ "'"
+  InquiryComparisonUnbuildable (PropId claim) -> "unsupported authored comparison '" ++ claim ++ "'"
   UnknownRule (ArgId a) (RuleId r) ->
     "arg '" ++ a ++ "': unknown rule '" ++ r ++ "' (not declared in the policy)"
   ThetaReferenceCountMismatch (ArgId a) (RuleId r) expected got ->
@@ -503,19 +523,19 @@ elabErrorMessage e = case e of
 -- 'CertSlotSchemaMismatch' is the one member of the family that does not use
 -- it — that failure is about the payload, and only mentions the reference to
 -- say why the payload could not be passed through.
-certSlotPrefix :: ArgId -> BackendId -> Int -> ArgRef -> String
+certSlotPrefix :: ArgId -> BackendId -> Integer -> ArgRef -> String
 certSlotPrefix (ArgId a) backend version (ArgRef name) =
   "arg '" ++ a ++ "': certificate '" ++ certBackendSpelling backend version
     ++ "' premise reference '" ++ name ++ "' "
 
-certNdPrefix :: ArgId -> BackendId -> Int -> String
+certNdPrefix :: ArgId -> BackendId -> Integer -> String
 certNdPrefix (ArgId a) backend version =
   "arg '" ++ a ++ "': certificate '" ++ certBackendSpelling backend version ++ "' "
 
 argRefText :: ArgRef -> String
 argRefText (ArgRef name) = name
 
-certBackendSpelling :: BackendId -> Int -> String
+certBackendSpelling :: BackendId -> Integer -> String
 certBackendSpelling (BackendId backend) version = backend ++ "@" ++ show version
 
 -- | Location prefix for a @comparison@ block, named by the sub-claim it
