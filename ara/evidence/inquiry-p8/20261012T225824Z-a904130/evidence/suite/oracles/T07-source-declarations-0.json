@@ -1,0 +1,246 @@
+{
+  "schema": "inquiry-p8-oracle",
+  "schema_version": 1,
+  "case_id": "T07-source-declarations-0",
+  "oracle_kind": "independent-finite-semantic-annotation",
+  "expected": {
+    "result_kind": "results",
+    "exit_code": 0,
+    "results": [
+      [
+        "inquiry-result",
+        "1",
+        "T07",
+        [
+          "impact-body",
+          [
+            "impact-result",
+            [
+              "transition",
+              "accepted-to-accepted"
+            ],
+            [
+              [
+                "query-impact",
+                [
+                  "atom",
+                  "t"
+                ],
+                [
+                  [
+                    "published",
+                    "defeated"
+                  ]
+                ],
+                [
+                  [
+                    "published",
+                    "defeated"
+                  ]
+                ],
+                "false",
+                "false"
+              ]
+            ],
+            [],
+            [
+              [
+                "atom",
+                "t"
+              ]
+            ]
+          ]
+        ]
+      ]
+    ]
+  },
+  "semantic_specification": {
+    "kind": "impact",
+    "statuses": [
+      [
+        "published",
+        "defeated"
+      ],
+      [
+        "published",
+        "defeated"
+      ]
+    ],
+    "rejections": [
+      null,
+      null
+    ],
+    "graphs": [
+      {
+        "names": [
+          "witness",
+          "consumer",
+          "attacker"
+        ],
+        "edges": [
+          [
+            "attacker",
+            "witness"
+          ],
+          [
+            "attacker",
+            "consumer"
+          ]
+        ],
+        "query_ancestry": [
+          "witness",
+          "attacker"
+        ],
+        "query_support": [
+          "witness"
+        ],
+        "blocked": false,
+        "grounded_labels": {
+          "witness": "defeated",
+          "consumer": "defeated",
+          "attacker": "justified"
+        }
+      },
+      {
+        "names": [
+          "witness",
+          "consumer",
+          "attacker",
+          "new-attacker"
+        ],
+        "edges": [
+          [
+            "attacker",
+            "witness"
+          ],
+          [
+            "attacker",
+            "consumer"
+          ],
+          [
+            "new-attacker",
+            "witness"
+          ],
+          [
+            "new-attacker",
+            "consumer"
+          ]
+        ],
+        "query_ancestry": [
+          "witness",
+          "attacker",
+          "new-attacker"
+        ],
+        "query_support": [
+          "witness"
+        ],
+        "blocked": false,
+        "grounded_labels": {
+          "witness": "defeated",
+          "consumer": "defeated",
+          "attacker": "justified",
+          "new-attacker": "justified"
+        }
+      }
+    ],
+    "transition": "accepted-to-accepted",
+    "expected_body": [
+      "impact-body",
+      [
+        "impact-result",
+        [
+          "transition",
+          "accepted-to-accepted"
+        ],
+        [
+          [
+            "query-impact",
+            [
+              "atom",
+              "t"
+            ],
+            [
+              [
+                "published",
+                "defeated"
+              ]
+            ],
+            [
+              [
+                "published",
+                "defeated"
+              ]
+            ],
+            "false",
+            "false"
+          ]
+        ],
+        [],
+        [
+          [
+            "atom",
+            "t"
+          ]
+        ]
+      ]
+    ],
+    "locality": false,
+    "locality_reason": "relevant ancestry or acceptance differs",
+    "wire_boundary": "impact-result omits endpoint rejection payloads; annotations are not runtime telemetry",
+    "histories": [
+      []
+    ],
+    "history_search_steps": 1,
+    "row_truth_table": [
+      {
+        "endpoint": "before",
+        "accepted": true,
+        "status": [
+          "published",
+          "defeated"
+        ],
+        "rejection": null
+      },
+      {
+        "endpoint": "after",
+        "accepted": true,
+        "status": [
+          "published",
+          "defeated"
+        ],
+        "rejection": null
+      }
+    ],
+    "assumption_truth_table": [],
+    "process_scope": "Empty process history; endpoint analyses do not consume process assurance.",
+    "specification": "Hand graph: attacker defeats witness and its consumer. Add a second unattacked attacker of witness, whose attack also propagates to consumer. Witness remains defeated; incoming ancestry changes.",
+    "variant": {
+      "axis": "source-declarations",
+      "level": 0,
+      "only_designated_axis_changed": true
+    },
+    "added_argument_groups": 0,
+    "added_ast_declarations_per_endpoint": 0,
+    "source_axis_level_unit": "fresh leaf-root groups per endpoint",
+    "source_axis_approval": "protocol.json amendments/source-axis-groups: explicit researcher clarification before freeze; each group is one leaf plus one root argument"
+  },
+  "review_provenance": {
+    "status": "independently-reviewed",
+    "author": "Codex case author",
+    "author_provenance": "ai-executed",
+    "reviewer": "Codex independent spec reviewer /root/cases_spec",
+    "driver_output_used": false,
+    "analysis_implementation_imported": false,
+    "specification_references": [
+      "docs/theory-process.md#what-do-the-exact-inquiry-analyses-compute",
+      "docs/theory-process.md#how-is-an-edits-impact-certified",
+      "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
+    ],
+    "reviewed_input_sha256": "6abd96bcec0a8ca40670eefed67c3259133c0b3b7cfb6de8796baf2e5e8a2834",
+    "semantic_content_sha256": "108c18e824ef2acae803bacc5e6c3a21c358c05dabfee7ec5f99633ff710bcdb",
+    "review_path": "independent-review.json",
+    "review_sha256": "5adfd9bee4582cb14db6fb7c8a956a21057843af5ce960e69154728fc5d79b70",
+    "quality_review_path": "quality-review.json",
+    "quality_review_sha256": "c8d6ee58c855a326bc6c6ffed2c93c4e70e3ea465ab98d1d770d0fe4e56447e2"
+  }
+}

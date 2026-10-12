@@ -1,0 +1,89 @@
+{
+  "schema": "inquiry-p8-oracle",
+  "schema_version": 1,
+  "case_id": "mixed-stability",
+  "oracle_kind": "existing-conformance-golden",
+  "expected": {
+    "result_kind": "results",
+    "exit_code": 0,
+    "results": [
+      [
+        "inquiry-result",
+        "1",
+        "stability",
+        [
+          "stability-body",
+          [
+            "stability-result",
+            [
+              "observable",
+              [
+                "status-obs",
+                "claim"
+              ]
+            ],
+            "2",
+            "1",
+            "1",
+            "false",
+            "true"
+          ]
+        ]
+      ]
+    ]
+  },
+  "semantic_specification": {
+    "kind": "development-control",
+    "histories": [
+      []
+    ],
+    "history_search_steps": 1,
+    "rows": [
+      {
+        "choices": [
+          [
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "choices": [
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    ]
+  },
+  "review_provenance": {
+    "status": "disclosed-development-control",
+    "author": "Codex case author",
+    "author_provenance": "ai-executed",
+    "reviewer": "Codex independent spec reviewer /root/cases_spec",
+    "driver_output_used": false,
+    "analysis_implementation_imported": false,
+    "specification_references": [
+      "docs/theory-process.md#what-do-the-exact-inquiry-analyses-compute",
+      "docs/theory-process.md#how-is-an-edits-impact-certified",
+      "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
+    ],
+    "reviewed_input_sha256": "3965c657eccfcaf7f48dc6d7f6d8dc6faa90522db42e15f24443e14b1b0837cf",
+    "semantic_content_sha256": "b0570f0ec1633aa976c888d3cdf77e1d51c2ec1991a0e720e5282aef46aa3323",
+    "review_path": "independent-review.json",
+    "review_sha256": "5adfd9bee4582cb14db6fb7c8a956a21057843af5ce960e69154728fc5d79b70",
+    "quality_review_path": "quality-review.json",
+    "quality_review_sha256": "c8d6ee58c855a326bc6c6ffed2c93c4e70e3ea465ab98d1d770d0fe4e56447e2"
+  },
+  "development_provenance": {
+    "case_id": "mixed-stability",
+    "input_path": "fixtures/process/inquiry/mixed-stability.sexp",
+    "input_sha256": "3965c657eccfcaf7f48dc6d7f6d8dc6faa90522db42e15f24443e14b1b0837cf",
+    "golden_path": "fixtures/process/inquiry/mixed-stability.expected",
+    "golden_sha256": "8de386ade88f49b0ec6e3e8fb821f058db4f5f70ff1afeaab116eb2a09ab02cc",
+    "classification": "development-control",
+    "oracle_kind": "existing-conformance-golden",
+    "destination_input_path": "inputs/mixed-stability.sexp"
+  }
+}

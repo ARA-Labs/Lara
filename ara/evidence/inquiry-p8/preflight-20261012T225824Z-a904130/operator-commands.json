@@ -1,0 +1,89 @@
+{
+  "provenance": "Root operator message 2026-10-12; actual executed commands and observed process exits; no setup commands rerun by measurement operator",
+  "records": [
+    {
+      "command_text": "make local-gates > /tmp/inquiry-p8-local-gates.log 2>&1",
+      "argv": [
+        "make",
+        "local-gates"
+      ],
+      "environment": {},
+      "cwd": "/home/yfhe/ara/Lara",
+      "exit_code": 2,
+      "saved_log": "inquiry-p8-local-gates.log",
+      "saved_log_sha256": "acb1b50d2b06c4b1b8e519e4a0af9913b4d35009ef30a012d5fecc396d29cb11"
+    },
+    {
+      "command_text": "CABAL_CONFIG=/tmp/inquiry-p8-cabal.config make local-gates > /tmp/inquiry-p8-local-gates-rerun.log 2>&1",
+      "argv": [
+        "make",
+        "local-gates"
+      ],
+      "environment": {
+        "CABAL_CONFIG": "/tmp/inquiry-p8-cabal.config"
+      },
+      "cwd": "/home/yfhe/ara/Lara",
+      "exit_code": 2,
+      "saved_log": "inquiry-p8-local-gates-rerun.log",
+      "saved_log_sha256": "43b65d45c9cf75dcab1ea1764f79c836dde04a7bff86c11f4557aef3d1e1a0ae"
+    },
+    {
+      "command_text": "UPDATE= CABAL_CONFIG=/tmp/inquiry-p8-cabal.config make local-gates > /tmp/inquiry-p8-local-gates-final.log 2>&1",
+      "argv": [
+        "make",
+        "local-gates"
+      ],
+      "environment": {
+        "UPDATE": "",
+        "CABAL_CONFIG": "/tmp/inquiry-p8-cabal.config"
+      },
+      "cwd": "/home/yfhe/ara/Lara",
+      "exit_code": 0,
+      "saved_log": "inquiry-p8-local-gates-final.log",
+      "saved_log_sha256": "5350142bdb7eb72c1db4db4819f3e0346f241b99d58350b3ae8643b99703002f"
+    },
+    {
+      "command_text": "CABAL_CONFIG=/tmp/inquiry-p8-cabal.config cabal test all > /tmp/inquiry-p8-cabal-test-all.log 2>&1",
+      "argv": [
+        "cabal",
+        "test",
+        "all"
+      ],
+      "environment": {
+        "CABAL_CONFIG": "/tmp/inquiry-p8-cabal.config"
+      },
+      "cwd": "/home/yfhe/ara/Lara",
+      "exit_code": 0,
+      "saved_log": "inquiry-p8-cabal-test-all.log",
+      "saved_log_sha256": "1dfe7d077fa08f0a6eb22af6c12c28fc7f94768a17f2f358b1fe3c1a2315b620"
+    },
+    {
+      "command_text": "CABAL_CONFIG=/tmp/inquiry-p8-cabal.config cabal build exe:lara > /tmp/inquiry-p8-selected-native-build.log 2>&1",
+      "argv": [
+        "cabal",
+        "build",
+        "exe:lara"
+      ],
+      "environment": {
+        "CABAL_CONFIG": "/tmp/inquiry-p8-cabal.config"
+      },
+      "cwd": "/home/yfhe/ara/Lara",
+      "exit_code": 0,
+      "saved_log": "inquiry-p8-selected-native-build.log",
+      "saved_log_sha256": "215517150aee2d4e7c37e9a89aed453be29626db56807e943248b5085841cc31"
+    },
+    {
+      "command_text": "lake build inquiry-run > /tmp/inquiry-p8-selected-lean-build.log 2>&1",
+      "argv": [
+        "lake",
+        "build",
+        "inquiry-run"
+      ],
+      "environment": {},
+      "cwd": "/home/yfhe/ara/Lara/lean",
+      "exit_code": 0,
+      "saved_log": "inquiry-p8-selected-lean-build.log",
+      "saved_log_sha256": "b00fb68c133eed9e214927b31872a3be0da9106dd02258690f0cede48d5d8569"
+    }
+  ]
+}

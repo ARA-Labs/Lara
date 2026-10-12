@@ -1,0 +1,136 @@
+{
+  "schema": "inquiry-p8-reproduction-receipt",
+  "generated_utc": "2026-10-12T23:00:13.735904+00:00",
+  "scope": "one production attempt and one process-free captured-output replay; incomplete remains incomplete",
+  "original_directory": "/home/yfhe/ara/Lara/ara/evidence/inquiry-p8/20261012T225824Z-a904130",
+  "replay_directory": "/home/yfhe/ara/Lara/ara/evidence/inquiry-p8/20261012T225824Z-a904130-replay",
+  "preflight_directory": "/home/yfhe/ara/Lara/ara/evidence/inquiry-p8/preflight-20261012T225824Z-a904130",
+  "production_command": [
+    "python3",
+    "scripts/inquiry-evaluate.py",
+    "--manifest",
+    "evaluation/inquiry-p8/MANIFEST.json",
+    "--native",
+    "/home/yfhe/ara/Lara/dist-newstyle/build/x86_64-linux/ghc-9.10.3/lara-0.2.0.0/x/lara/build/lara/lara",
+    "--lean",
+    "/home/yfhe/ara/Lara/lean/.lake/build/bin/inquiry-run",
+    "--consumer",
+    "/tmp/p8-consumer",
+    "--out",
+    "ara/evidence/inquiry-p8/20261012T225824Z-a904130"
+  ],
+  "production_exit_code": 1,
+  "replay_command": [
+    "python3",
+    "scripts/inquiry-evaluate.py",
+    "--manifest",
+    "evaluation/inquiry-p8/MANIFEST.json",
+    "--replay",
+    "ara/evidence/inquiry-p8/20261012T225824Z-a904130",
+    "--out",
+    "ara/evidence/inquiry-p8/20261012T225824Z-a904130-replay"
+  ],
+  "replay_exit_code": 1,
+  "deterministic_files": {
+    "results.jsonl": {
+      "original": "81926d1e43a6505833fda8195bfd9f4e5c6a4e77370b1d9da89dd494db2fe82c",
+      "replay": "81926d1e43a6505833fda8195bfd9f4e5c6a4e77370b1d9da89dd494db2fe82c",
+      "identical": true
+    },
+    "summary.json": {
+      "original": "488c64b539e276070e0d5ee91b64af307e63bd9ee85351b629ad86004a345c11",
+      "replay": "488c64b539e276070e0d5ee91b64af307e63bd9ee85351b629ad86004a345c11",
+      "identical": true
+    },
+    "summary.tsv": {
+      "original": "e393a35449ca6ea529adb0f02ab38f2706d3462f56377063dbab2f9fd3926059",
+      "replay": "e393a35449ca6ea529adb0f02ab38f2706d3462f56377063dbab2f9fd3926059",
+      "identical": true
+    },
+    "run.json": {
+      "original": "7820345b004a996d87b4352f520d9b3c942842f14f59618db42f6f4db74ee17e",
+      "replay": "7820345b004a996d87b4352f520d9b3c942842f14f59618db42f6f4db74ee17e",
+      "identical": true
+    },
+    "run.sha256": {
+      "original": "30411abd6ab47379483721e1a53c35a97b6ab27d5dbfeda9a52fee661c3c8bb0",
+      "replay": "30411abd6ab47379483721e1a53c35a97b6ab27d5dbfeda9a52fee661c3c8bb0",
+      "identical": true
+    }
+  },
+  "all_original_artifacts_verified_identical": true,
+  "original_artifact_count": 565,
+  "facts_from_retained_run": {
+    "completion": "INCOMPLETE",
+    "passed": false,
+    "stop_reason": "timeout",
+    "sealed": true,
+    "aggregate_elapsed_ms": 25761.876774951816,
+    "planned_documents": 96,
+    "unique_inputs": 80,
+    "driver_attempts": {
+      "native": 43,
+      "lean": 44
+    },
+    "total_driver_attempts": 87,
+    "missing_driver_invocations": 105,
+    "accepted_consumer_checks": 86,
+    "oracle_correctness": {
+      "documents": 96,
+      "lean": {
+        "denominator": 80,
+        "fraction": 0.375,
+        "numerator": 30,
+        "scope": "unique input hashes; every duplicate capture must agree"
+      },
+      "native": {
+        "denominator": 80,
+        "fraction": 0.375,
+        "numerator": 30,
+        "scope": "unique input hashes; every duplicate capture must agree"
+      }
+    },
+    "validated_correctness": {
+      "documents": 96,
+      "lean": {
+        "denominator": 80,
+        "fraction": 0.375,
+        "numerator": 30,
+        "scope": "unique input hashes; every duplicate capture must match the oracle and pass protocol and consumer checks"
+      },
+      "native": {
+        "denominator": 80,
+        "fraction": 0.375,
+        "numerator": 30,
+        "scope": "unique input hashes; every duplicate capture must match the oracle and pass protocol and consumer checks"
+      }
+    },
+    "captured_semantic_mismatch_case_ids": [
+      "T07"
+    ],
+    "all_captured_locality_sound": true,
+    "last_invocation": {
+      "case_id": "T11-singleton-slots-40",
+      "command": [
+        "/home/yfhe/ara/Lara/lean/.lake/build/bin/inquiry-run",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8/inputs/T11-singleton-slots-40.sexp"
+      ],
+      "driver": "lean",
+      "driver_failure": "timeout",
+      "elapsed_ms": 10879.956607,
+      "exit_code": -9,
+      "failure": "timeout",
+      "process_started": true,
+      "signal": 9,
+      "spawn_failure": null,
+      "stderr_bytes": 0,
+      "stderr_path": "raw/T11-singleton-slots-40.lean.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stdout_path": "raw/T11-singleton-slots-40.lean.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timeout": true,
+      "timeout_seconds": 10
+    }
+  }
+}

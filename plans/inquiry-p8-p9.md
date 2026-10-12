@@ -8,7 +8,7 @@
 
 **Tech stack:** Haskell production checker and consumer codecs, Lean reference semantics, Python standard-library evaluation tooling, versioned S-expression inputs and append-only ARA evidence.
 
-**Status:** Approved by Yifeng He on 2026-10-12 for implementation and for the P8 local measurement budget defined below. Tasks 1–3 are complete; Tasks 4–5 remain. Approval does not authorize P9: any live-loop pilot or evaluation, agent call or paid compute still needs its own approved protocol.
+**Status:** Approved by Yifeng He on 2026-10-12 for implementation and for the P8 local measurement budget defined below. Tasks 1–3 are complete. Task 4 retained and replayed an incomplete attempt (Lean T11 40-slot timeout and T07 oracle disagreement); a complete P8 run and Task 5 remain. Corrective review, a new additive input freeze and researcher approval of a fresh measurement budget are required before another final run. Approval does not authorize P9: any live-loop pilot or evaluation, agent call or paid compute still needs its own approved protocol.
 
 **Date:** 2026-10-12
 
