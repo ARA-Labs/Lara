@@ -4397,7 +4397,7 @@ observations:
   potential_type: architecture
   bound_to:
   - N401_inquiry_evaluation_draft
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
+  promoted: true
+  promoted_to: logic/solution/constraints.md:checked-inquiry-evaluation
+  crystallized_via: verbal-affirmation
   stale: false

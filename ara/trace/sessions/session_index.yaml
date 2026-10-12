@@ -757,8 +757,10 @@ sessions:
 
 - id: 2026-10-12_001
   date: '2026-10-12'
-  summary: 'Implemented and gated native P6-P7 inquiry; drafted the P8 bounded evaluation protocol and result-dependent P9 approval path without running evaluations.'
-  turn_count: 2
-  events_count: 7
-  claims_touched: [C57]
+  summary: Native inquiry gates established previously; approved P8 protocol now pinned and Task 1 committed.
+    Suite authoring and current correctness gates remain running; no P8 measurement or P9 live run yet.
+  turn_count: 3
+  events_count: 10
+  claims_touched:
+  - C57
   open_threads: 4

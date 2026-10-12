@@ -2,10 +2,10 @@ session:
   id: 2026-10-12_001
   date: '2026-10-12'
   started: 2026-10-12T07:34
-  last_turn: 2026-10-12T20:35:54Z
-  turn_count: 2
-  summary: Implemented and gated the native P6-P7 inquiry door; then drafted the P8 bounded
-    evaluation protocol and result-dependent P9 approval path without running evaluations.
+  last_turn: '2026-10-12T21:37:24Z'
+  turn_count: 3
+  summary: Native inquiry gates established previously; approved P8 protocol now pinned and Task 1 committed.
+    Suite authoring and current correctness gates remain running; no P8 measurement or P9 live run yet.
 events_logged:
 - turn: 1
   type: decision
@@ -52,6 +52,24 @@ events_logged:
   routing: staged
   provenance: ai-suggested
   summary: Propose an additive authored P8 protocol and separately approved result-dependent live evaluation.
+- turn: 3
+  type: decision
+  id: N402_inquiry_p8_approved
+  routing: direct
+  provenance: user
+  summary: Approve the bounded local inquiry evaluation and keep live work separately gated
+- turn: 3
+  type: decision
+  id: N403_inquiry_p8_boundary
+  routing: direct
+  provenance: ai-executed
+  summary: Pin the additive inquiry evaluation boundary before authoring the final suite
+- turn: 3
+  type: observation
+  id: O217
+  routing: crystallized
+  provenance: user-revised
+  summary: Approved protocol becomes the bounded evaluation constraint; no outcome claim.
 ai_actions:
 - turn: 1
   action: Execute the approved seven-step implementation with sequential commits and independent spec
@@ -85,6 +103,16 @@ ai_actions:
     No implementation, measurements, commits, pushes or PR were performed.
   provenance: ai-executed
   files_changed:
+  - plans/inquiry-p8-p9.md
+- turn: 3
+  action: Complete Task 1 via sequential implement/spec/quality agents and commit 0818b67. Start Task
+    2 structural authoring with independent expectations; it remains in progress. Launch make local-gates
+    to /tmp/inquiry-p8-local-gates.log; live exec session 37469 remains running at turn end, so no gate
+    success is claimed.
+  provenance: ai-executed
+  files_changed:
+  - evaluation/inquiry-p8/protocol.json
+  - evaluation/inquiry-p8/MANIFEST.json
   - plans/inquiry-p8-p9.md
 claims_touched:
 - id: C57
@@ -155,6 +183,31 @@ logic_revisions:
   provenance: ai-suggested
   note: Replace the obsolete no-native-wrapper boundary with exercised finite conformance evidence; retain
     supported status and do not claim universal Haskell equivalence or empirical improvement.
+- turn: 3
+  entry: checked-inquiry-evaluation
+  field: created
+  before: absent
+  after: "## Checked-inquiry evaluation (approved protocol)\n\n- **Status:** The bounded local protocol\
+    \ is approved. The suite and runner must be independently reviewed and frozen before measurement;\
+    \ no measurement result is established by protocol approval.\n- **Constraint:** Evaluate the existing\
+    \ native and Lean inquiry drivers on additive authored inputs. Score exact decoded meanings against\
+    \ independent finite annotations. Keep development controls, new inputs, correlated size variants\
+    \ and duplicate hashes separate in the denominators.\n- **Execution boundary:** The approved budget\
+    \ permits one invocation per driver and document with fixed timeouts and an aggregate deadline. Retain\
+    \ refusals and partial evidence; infrastructure failure requires a reviewed protocol revision before\
+    \ another final run. No legacy corpus, golden, version, ceiling or freeze changes are authorized.\n\
+    - **Claim boundary:** Modeled capture admissions do not establish physical capture, and descriptive\
+    \ finite costs or diagnostic contrasts do not establish agent success or scientific discovery. A live\
+    \ workflow needs its own researcher-approved task, comparison, data policy and budget.\n- **Sources:**\
+    \ evaluation/inquiry-p8/protocol.json \xAB\"p9_approved\": false\xBB [input]; evaluation/inquiry-p8/protocol.json\
+    \ \xAB\"driver_outputs_as_expectations\": false\xBB [input]; evaluation/inquiry-p8/protocol.json \xAB\
+    \"repeats\": 0\xBB [input]; staging/observations.yaml:O217.\n- **Provenance:** user-revised approved\
+    \ protocol.\n- **Evidence:** trace/exploration_tree.yaml:N402_inquiry_p8_approved; trace/exploration_tree.yaml:N403_inquiry_p8_boundary;\
+    \ evaluation/inquiry-p8/protocol.json.\n- **Open:** Issue #22 tracks the unfinished bounded evaluation\
+    \ and separately approved live evaluation.\n- **Last revised:** 2026-10-12 (2026-10-12_001#3)"
+  signal: verbal-declaration
+  provenance: user-revised
+  note: Approved protocol is a constraint, not an empirical outcome or a soundness claim.
 key_context:
 - turn: 1
   excerpt: 'User: finish @plans/inquiry-p6-p7.md , pr'
@@ -165,11 +218,14 @@ key_context:
   excerpt: >-
     User: checkout a new branch and draft a plan. the plan should cover P8
     protocol and how to follow P9 after its results
+- turn: 3
+  excerpt: 'User goal: finish $implement plans/inquiry-p8-p9.md. Plan approval pins P8 only; full implementation,
+    measurement, interpretation and PR remain underway.'
 open_threads:
 - 'Issue #22 remains open for P8 bounded semantic/source-transition evaluation and P9 separately approved
   live-loop protocol.'
 - 'Issue #39 remains open for infinite-horizon Ville and online FDR over complete ledgers.'
 - 'Issue #46 remains open for proving or revising the search-step ceiling rationale.'
-- Review and approve or revise plans/inquiry-p8-p9.md before implementing or executing P8.
-ai_suggestions_pending:
-- O217's additive P8 case matrix, proposed budgets and conditional P9 paired workflow remain unapproved.
+- "Finish P8 Tasks 2\u20135: independent input freeze, runner, single approved measurement, replay, report,\
+  \ researcher review and PR."
+ai_suggestions_pending: []

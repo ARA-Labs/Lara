@@ -11299,3 +11299,38 @@ tree:
   also_depends_on:
   - N397_inquiry_native_conformance
   - N400_inquiry_sensitive_regression
+- id: N402_inquiry_p8_approved
+  type: decision
+  title: Approve the bounded local inquiry evaluation and keep live work separately gated
+  provenance: user
+  timestamp: '2026-10-12T21:37:24Z'
+  choice: Yifeng He approved the P8 implementation and local measurement protocol in a904130; the active
+    request invokes implement on the approved plan. P9 live calls, paid compute and pilot runs require
+    their own protocol approval.
+  alternatives:
+  - Execute a live evaluation under the synthetic-case budget
+  evidence:
+  - evaluation/inquiry-p8/protocol.json
+  - staging/observations.yaml:O217
+  - git:a904130af7781fd5b308d049be7f4f43bdf9e256:plans/inquiry-p8-p9.md
+  status: resolved
+  also_depends_on:
+  - N401_inquiry_evaluation_draft
+- id: N403_inquiry_p8_boundary
+  type: decision
+  title: Pin the additive inquiry evaluation boundary before authoring the final suite
+  provenance: ai-executed
+  timestamp: '2026-10-12T21:37:24Z'
+  choice: Commit approval/code pointers, frozen budgets and recipes, original control hashes, legacy inventory
+    hashes and local dependency checks as 0818b67. Independent spec and quality review passed. The manifest
+    explicitly remains incomplete until all cases and independent annotations are reviewed; no measurement
+    driver was invoked.
+  alternatives:
+  - Measure an unpinned moving worktree
+  evidence:
+  - evaluation/inquiry-p8/protocol.json
+  - evaluation/inquiry-p8/MANIFEST.json
+  - git:0818b67
+  status: resolved
+  also_depends_on:
+  - N402_inquiry_p8_approved
