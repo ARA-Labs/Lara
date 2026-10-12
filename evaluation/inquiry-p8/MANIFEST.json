@@ -1,0 +1,196 @@
+{
+  "schema": "inquiry-p8-manifest",
+  "schema_version": 1,
+  "state": "incomplete",
+  "code_commit": "a904130af7781fd5b308d049be7f4f43bdf9e256",
+  "recipe_version": "inquiry-p8-recipes@1",
+  "expected_partition": {
+    "development_controls": 16,
+    "authored_controls": 16,
+    "generated_variants": 64,
+    "total": 96
+  },
+  "legacy_controls": [
+    {
+      "case_id": "source-rejections",
+      "input_path": "fixtures/process/inquiry/source-rejections.sexp",
+      "input_sha256": "7855614c13c9a319e1c5f623ce3ce815b70974113e4a743b7893d78a59f8967b",
+      "golden_path": "fixtures/process/inquiry/source-rejections.expected",
+      "golden_sha256": "928b67c93ba4bd26b40a7c04123fbc7c4a3f1bb3f474571e99b5aebe92641050",
+      "classification": "development-control",
+      "oracle_kind": "existing-conformance-golden",
+      "destination_input_path": "inputs/source-rejections.sexp"
+    },
+    {
+      "case_id": "mixed-stability",
+      "input_path": "fixtures/process/inquiry/mixed-stability.sexp",
+      "input_sha256": "3965c657eccfcaf7f48dc6d7f6d8dc6faa90522db42e15f24443e14b1b0837cf",
+      "golden_path": "fixtures/process/inquiry/mixed-stability.expected",
+      "golden_sha256": "8de386ade88f49b0ec6e3e8fb821f058db4f5f70ff1afeaab116eb2a09ab02cc",
+      "classification": "development-control",
+      "oracle_kind": "existing-conformance-golden",
+      "destination_input_path": "inputs/mixed-stability.sexp"
+    },
+    {
+      "case_id": "inconsistent",
+      "input_path": "fixtures/process/inquiry/inconsistent.sexp",
+      "input_sha256": "b9a0a607dbccdcf4a5cc3df70171128ba7781e6e5609a1fa7661d54848b2c266",
+      "golden_path": "fixtures/process/inquiry/inconsistent.expected",
+      "golden_sha256": "61cb54ee53958d784e5e1d7a3d5122b49f0652da9e176d28db595295a4764544",
+      "classification": "development-control",
+      "oracle_kind": "existing-conformance-golden",
+      "destination_input_path": "inputs/inconsistent.sexp"
+    },
+    {
+      "case_id": "fixed-witness",
+      "input_path": "fixtures/process/inquiry/fixed-witness.sexp",
+      "input_sha256": "ba3879cd0d0783d772763867278e005710fe15d529f38e955f999e558063f75e",
+      "golden_path": "fixtures/process/inquiry/fixed-witness.expected",
+      "golden_sha256": "34a237d1bf69d32477a0f22bbf8799968d863ff7a727ddf83eb679f7a60dcc0f",
+      "classification": "development-control",
+      "oracle_kind": "existing-conformance-golden",
+      "destination_input_path": "inputs/fixed-witness.sexp"
+    },
+    {
+      "case_id": "hypothetical-audit",
+      "input_path": "fixtures/process/inquiry/hypothetical-audit.sexp",
+      "input_sha256": "41b86a76b98e8f771040a863f29d750ab593edc16bf444df9b3462f1ded528a2",
+      "golden_path": "fixtures/process/inquiry/hypothetical-audit.expected",
+      "golden_sha256": "6fcb4607c1dfc256b6e55c5166c1241d0f546a6fb25e18efae76a81817437cf8",
+      "classification": "development-control",
+      "oracle_kind": "existing-conformance-golden",
+      "destination_input_path": "inputs/hypothetical-audit.sexp"
+    },
+    {
+      "case_id": "forged-observed",
+      "input_path": "fixtures/process/inquiry/forged-observed.sexp",
+      "input_sha256": "5b00e668d37d71fc6b103eb8696b1c6b36f70b3a695378cffef37814fab03d05",
+      "golden_path": "fixtures/process/inquiry/forged-observed.expected",
+      "golden_sha256": "658c76cdfeba7cb8e701094ec2e843b43b4cbcd83b4a7d55533d9163a4d3e217",
+      "classification": "development-control",
+      "oracle_kind": "existing-conformance-golden",
+      "destination_input_path": "inputs/forged-observed.sexp"
+    },
+    {
+      "case_id": "reference-sensitivity",
+      "input_path": "fixtures/process/inquiry/reference-sensitivity.sexp",
+      "input_sha256": "d1f2cae162bee97ddf7fd23dd15da3a93f7b4b78ff91af085dc5a5992ec899a4",
+      "golden_path": "fixtures/process/inquiry/reference-sensitivity.expected",
+      "golden_sha256": "33e2aa28b0aece3e6bd5aa9255e0d6a8697d2a0962599fd30bcfaef20bbf18aa",
+      "classification": "development-control",
+      "oracle_kind": "existing-conformance-golden",
+      "destination_input_path": "inputs/reference-sensitivity.sexp"
+    },
+    {
+      "case_id": "joint-only",
+      "input_path": "fixtures/process/inquiry/joint-only.sexp",
+      "input_sha256": "158d9a47064e56fd8803a117acbaca8278a5591081cf4964f1420570f478eba4",
+      "golden_path": "fixtures/process/inquiry/joint-only.expected",
+      "golden_sha256": "086b3c9a759df659eb9b231b55d3966e0ef79bef2a841ba49e2c1996728e467f",
+      "classification": "development-control",
+      "oracle_kind": "existing-conformance-golden",
+      "destination_input_path": "inputs/joint-only.sexp"
+    },
+    {
+      "case_id": "minimal-conditions",
+      "input_path": "fixtures/process/inquiry/minimal-conditions.sexp",
+      "input_sha256": "02a77d9b3390ec987ec0c808fa54c09947413bcdc1c9ee7baf8371f08b37bb10",
+      "golden_path": "fixtures/process/inquiry/minimal-conditions.expected",
+      "golden_sha256": "e3a51bac6d7a47cd05ce8092e0d5d24e03842f89950de559640e7b2f1a415dd3",
+      "classification": "development-control",
+      "oracle_kind": "existing-conformance-golden",
+      "destination_input_path": "inputs/minimal-conditions.sexp"
+    },
+    {
+      "case_id": "new-attacker",
+      "input_path": "fixtures/process/inquiry/new-attacker.sexp",
+      "input_sha256": "9d9c4d2bc28739d82f5d0b14f80a85a60a3440d3514e27fa3513b03af5edc993",
+      "golden_path": "fixtures/process/inquiry/new-attacker.expected",
+      "golden_sha256": "78609d1909eddbc40dc0bf4aadddf58ecef4a017c1ca3ab1c8593fb318739bd7",
+      "classification": "development-control",
+      "oracle_kind": "existing-conformance-golden",
+      "destination_input_path": "inputs/new-attacker.sexp"
+    },
+    {
+      "case_id": "shared-discharge",
+      "input_path": "fixtures/process/inquiry/shared-discharge.sexp",
+      "input_sha256": "53baca2eb89a4aadca838786319e5aa2ee2f6fb30fd8d7a0b3282e3b8dd15894",
+      "golden_path": "fixtures/process/inquiry/shared-discharge.expected",
+      "golden_sha256": "f6f313ef44fc3c8cb98290d0d7c55bff42d7b3657b1d7bdb17478244f6efc0ba",
+      "classification": "development-control",
+      "oracle_kind": "existing-conformance-golden",
+      "destination_input_path": "inputs/shared-discharge.sexp"
+    },
+    {
+      "case_id": "unrelated-self-attack",
+      "input_path": "fixtures/process/inquiry/unrelated-self-attack.sexp",
+      "input_sha256": "1d9df679b20640751c5d8063ac8379a7d24cf520ce965bc4c95700e24990acf1",
+      "golden_path": "fixtures/process/inquiry/unrelated-self-attack.expected",
+      "golden_sha256": "178154614fb02cedefc6ecec07d0d02ef29922f9246bae3026ee4e43dd28cb21",
+      "classification": "development-control",
+      "oracle_kind": "existing-conformance-golden",
+      "destination_input_path": "inputs/unrelated-self-attack.sexp"
+    },
+    {
+      "case_id": "blocked-conditional",
+      "input_path": "fixtures/process/inquiry/blocked-conditional.sexp",
+      "input_sha256": "468d08bd6be39e80ff2388311f2b0e17f24c3595db1ef328eb0a1f77e91a1a68",
+      "golden_path": "fixtures/process/inquiry/blocked-conditional.expected",
+      "golden_sha256": "9e10169c95670a358789642dc5ab1c258af5374a2a888c4872a9cbb731b3ace8",
+      "classification": "development-control",
+      "oracle_kind": "existing-conformance-golden",
+      "destination_input_path": "inputs/blocked-conditional.sexp"
+    },
+    {
+      "case_id": "impact-rejected",
+      "input_path": "fixtures/process/inquiry/impact-rejected.sexp",
+      "input_sha256": "1b4939d0889370a2d9db142cacc2d3d5ac01ad9e6771cc2a5c291cf557d12e2e",
+      "golden_path": "fixtures/process/inquiry/impact-rejected.expected",
+      "golden_sha256": "7a19c46607c88bbd0915ae4e7a23d7a03408ea686dcd104978783836ebc11cf4",
+      "classification": "development-control",
+      "oracle_kind": "existing-conformance-golden",
+      "destination_input_path": "inputs/impact-rejected.sexp"
+    },
+    {
+      "case_id": "verified-certificate",
+      "input_path": "fixtures/process/inquiry/verified-certificate.sexp",
+      "input_sha256": "c383439212c72e264d28f28d005f0b9bfacdb6a0bfef2b30bc376e953222e599",
+      "golden_path": "fixtures/process/inquiry/verified-certificate.expected",
+      "golden_sha256": "ffe51d8130a470a964c622b240ce52c0f45299e11cc3fefed57e0571030d501a",
+      "classification": "development-control",
+      "oracle_kind": "existing-conformance-golden",
+      "destination_input_path": "inputs/verified-certificate.sexp"
+    },
+    {
+      "case_id": "tampered-certificate",
+      "input_path": "fixtures/process/inquiry/tampered-certificate.sexp",
+      "input_sha256": "398895a18547ebe47432d8a4c4444f59a5af6b99609304a1ea318a9c16927809",
+      "golden_path": "fixtures/process/inquiry/tampered-certificate.expected",
+      "golden_sha256": "9701e78c645be8e15c4270f7b0b5c095ad6a8e60f1e5fe267bb75fc8ba5ecc78",
+      "classification": "development-control",
+      "oracle_kind": "existing-conformance-golden",
+      "destination_input_path": "inputs/tampered-certificate.sexp"
+    }
+  ],
+  "cases": [],
+  "input_commit_location": "run.json input_commit",
+  "completion_rule": "Task 2 must populate and independently review exactly 96 cases in the approved partition before freeze and measurement.",
+  "case_fields_required": [
+    "case_id",
+    "stratum",
+    "classification",
+    "source_ancestry",
+    "input_path",
+    "input_sha256",
+    "oracle_path",
+    "oracle_sha256",
+    "query_order",
+    "reference",
+    "catalog",
+    "effective_declared_limits",
+    "expected_counters",
+    "expected_result_kind",
+    "review_provenance"
+  ],
+  "expected_counter_rule": "Expected logical counters come from finite construction and are not runtime telemetry. Actual counters are recorded only where a refusal prints them."
+}

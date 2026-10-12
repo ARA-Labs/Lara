@@ -8,7 +8,7 @@
 
 **Tech stack:** Haskell production checker and consumer codecs, Lean reference semantics, Python standard-library evaluation tooling, versioned S-expression inputs and append-only ARA evidence.
 
-**Status:** Approved by Yifeng He on 2026-10-12 for implementation and for the P8 local measurement budget defined below. All tasks remain. Approval does not authorize P9: any live-loop pilot or evaluation, agent call or paid compute still needs its own approved protocol.
+**Status:** Approved by Yifeng He on 2026-10-12 for implementation and for the P8 local measurement budget defined below. Task 1 is complete; Tasks 2–5 remain. Approval does not authorize P9: any live-loop pilot or evaluation, agent call or paid compute still needs its own approved protocol.
 
 **Date:** 2026-10-12
 
@@ -188,9 +188,9 @@ P9 completes only when its separately approved protocol has been run, the full l
 
 Files: create `evaluation/inquiry-p8/protocol.json` and `evaluation/inquiry-p8/MANIFEST.json`. The researcher approved this plan on 2026-10-12. These paths and the commands below are proposed deliverables, not existing executables.
 
-- [ ] Review the questions, case matrix, 96-document cap, local execution budget and P9 separation. Record the approving researcher and the Git blob hash of this plan at its approval commit in `protocol.json`; later status-banner edits do not change the approved protocol.
-- [ ] Pin the code commit and verify the native/Lean/toolchain dependencies are locally available. Record any required setup separately from measurement time.
-- [ ] Record hashes of the legacy input trees and selected fixture/golden controls. Do not run a regeneration or `UPDATE=1` command.
+- [x] Review the questions, case matrix, 96-document cap, local execution budget and P9 separation. Record the approving researcher and the Git blob hash of this plan at its approval commit in `protocol.json`; later status-banner edits do not change the approved protocol.
+- [x] Pin the code commit and verify the native/Lean/toolchain dependencies are locally available. Record any required setup separately from measurement time.
+- [x] Record hashes of the legacy input trees and selected fixture/golden controls. Do not run a regeneration or `UPDATE=1` command.
 
 ### Task 2: Author, independently review and freeze all cases
 
