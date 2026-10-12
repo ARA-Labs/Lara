@@ -1,0 +1,17 @@
+.........................
+----------------------------------------------------------------------
+Ran 25 tests in 62.284s
+
+OK
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-xs42qvi1/saved
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-xs42qvi1/replay
+COMPLETE: PASS: /tmp/inquiry-runner-boundaries-xs42qvi1/complete
+REPLAY COMPLETE: PASS: /tmp/inquiry-runner-boundaries-xs42qvi1/complete-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-xs42qvi1/deep-output
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-xs42qvi1/deep-output-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-xs42qvi1/publication-deadline
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-xs42qvi1/publication-deadline-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-xs42qvi1/write-failure
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-xs42qvi1/write-failure-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-xs42qvi1/unattached
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-xs42qvi1/unattached-replay

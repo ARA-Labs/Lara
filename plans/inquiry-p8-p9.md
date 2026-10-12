@@ -8,7 +8,7 @@
 
 **Tech stack:** Haskell production checker and consumer codecs, Lean reference semantics, Python standard-library evaluation tooling, versioned S-expression inputs and append-only ARA evidence.
 
-**Status:** Approved by Yifeng He on 2026-10-12 for implementation and for the P8 local measurement budget defined below. Tasks 1–2 are complete; Tasks 3–5 remain. Approval does not authorize P9: any live-loop pilot or evaluation, agent call or paid compute still needs its own approved protocol.
+**Status:** Approved by Yifeng He on 2026-10-12 for implementation and for the P8 local measurement budget defined below. Tasks 1–3 are complete; Tasks 4–5 remain. Approval does not authorize P9: any live-loop pilot or evaluation, agent call or paid compute still needs its own approved protocol.
 
 **Date:** 2026-10-12
 
@@ -205,9 +205,9 @@ Files: create `evaluation/inquiry-p8/inputs/*.sexp`, `evaluation/inquiry-p8/orac
 
 Files: create `scripts/inquiry-evaluate.py`; reuse `scripts/evidence_measured.py` and `scripts/inquiry-codec-client.hs` without changing their existing contract.
 
-- [ ] Implement the CLI specified above, hash checks, direct invocation, aggregate deadline and append-only raw captures. Produce `run.json`, `raw/CASE.DRIVER.{stdout,stderr}`, `results.jsonl`, `summary.json` and `summary.tsv` under the supplied output directory.
-- [ ] Implement semantic scoring from the reviewed oracle data, separate control/unique/generated denominators and a snapshot-only projection from the same captures. The runner exits nonzero for an incomplete run or oracle/consumer disagreement even when both drivers agree with each other.
-- [ ] Use throwaway runner probes to prove missing/hash-mismatched inputs fail before driver execution, a real timeout/signal is retained as incomplete, an intentionally wrong oracle fails, and an attempted reused output directory does not overwrite evidence. Remove the probes after verification; add permanent tests only for uncertain consumer-visible boundaries.
+- [x] Implement the CLI specified above, hash checks, direct invocation, aggregate deadline and append-only raw captures. Produce `run.json`, `raw/CASE.DRIVER.{stdout,stderr}`, `results.jsonl`, `summary.json` and `summary.tsv` under the supplied output directory.
+- [x] Implement semantic scoring from the reviewed oracle data, separate control/unique/generated denominators and a snapshot-only projection from the same captures. The runner exits nonzero for an incomplete run or oracle/consumer disagreement even when both drivers agree with each other.
+- [x] Use throwaway runner probes to prove missing/hash-mismatched inputs fail before driver execution, a real timeout/signal is retained as incomplete, an intentionally wrong oracle fails, and an attempted reused output directory does not overwrite evidence. Remove the probes after verification; add permanent tests only for uncertain consumer-visible boundaries.
 
 ### Task 4: Run the frozen P8 protocol and retain the observations
 

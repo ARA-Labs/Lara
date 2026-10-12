@@ -1,0 +1,24 @@
+{
+  "schema": "inquiry-p8-runner-review",
+  "schema_version": 1,
+  "spec_review": {
+    "status": "PASS",
+    "reviewer": "Codex independent spec reviewer /root/runner_spec"
+  },
+  "quality_review": {
+    "status": "PASS",
+    "reviewer": "Codex quality reviewer /root/runner_quality"
+  },
+  "source_sha256": {
+    "scripts/inquiry-evaluate.py": "ca4f933fdc94b48c141bfa66b5eb9e1ec1361b72e24b28f5fc986851d8e592a2",
+    "scripts/inquiry_evaluation_manifest.py": "ec2692172be74f74cdaa84931cc14c69751df62197579b251a071b00e2be927e",
+    "scripts/inquiry_evaluation_report.py": "f292ccc819b6d5e0e429d1812c5fd49453b07be6f620c330ccec88c62b1d2e08",
+    "test/inquiry_evaluation_runner.py": "7d2e40c0a2f89ebfb83eac5221ebf8aa09c1cc7632c3bfb63dc683a0ea055e31"
+  },
+  "validation_sha256": "571b71f98539a34a61ae627a4704441faea13f73f884b1a658f3ab87630120fe",
+  "test_log_sha256": "9406e6ac1c2fbb4cf4c3492182300f9dfec894639a6d196e0d3e7422d23f039d",
+  "probe_sha256": "338590cdef3fe9f3ff0937556a51921ea0f9003b84958c08aeb098dbf051a415",
+  "tests_passed": 25,
+  "production_driver_invocations": 0,
+  "scope": "Implementation and fake-process boundary evidence only; final P8 measurement remains unexecuted."
+}
