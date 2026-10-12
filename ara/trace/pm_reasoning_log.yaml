@@ -1859,3 +1859,7 @@ entries:
   - "Revised only C57 Conditions, Sources and Proof to remove the obsolete no-native-wrapper boundary. Exact before/after is in today's session; supported status and ai-suggested provenance remain unchanged."
   - "Kept prior staged heuristics unpromoted: reuse of frozen accounting definitions does not establish a new general heuristic or researcher affirmation. No historical trace or observation content was rewritten."
   - "Preserved issue 22's P8/P9 boundary and issues 39/46. The standalone process runner remains Lean-only; the native door is the separately versioned inquiry wrapper."
+- turn: 2026-10-12_001#1
+  notes:
+  - "Appended N399/N400 after final integration review exposed an unbudgeted declared-slot powerset. The actual native timeout and matching post-fix CLI outputs are recorded without rewriting earlier successful finite-case evidence."
+  - "The correction changes the native algorithm, not frozen minimality, output order, first realizers, counters, ceilings or Lean definitions. Both full gates and Haskell suites passed again; no new claim or status change is introduced."

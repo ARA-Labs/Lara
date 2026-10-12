@@ -2,7 +2,7 @@ session:
   id: 2026-10-12_001
   date: '2026-10-12'
   started: 2026-10-12T07:34
-  last_turn: 2026-10-12T16:44
+  last_turn: 2026-10-12T17:44
   turn_count: 1
   summary: Implemented the native P6-P7 inquiry door and independent conformance gate; integrated local
     gates and both Haskell suites pass; C57 now records finite cross-language evidence.
@@ -28,6 +28,18 @@ events_logged:
   provenance: ai-executed
   summary: Resolve consumer acceptance, error rendering, read-value and validation-precedence review gaps
     before commits
+- turn: 1
+  type: decision
+  id: N399_inquiry_sensitive_candidates
+  routing: direct
+  provenance: ai-executed
+  summary: Replace unbudgeted sensitivity powersets with ordered minimal changed-set candidates while preserving frozen edge cases.
+- turn: 1
+  type: experiment
+  id: N400_inquiry_sensitive_regression
+  routing: direct
+  provenance: ai-executed
+  summary: Reproduce the native sparse sensitivity timeout, verify both real CLI corrections, and rerun the full integrated gates.
 ai_actions:
 - turn: 1
   action: Execute the approved seven-step implementation with sequential commits and independent spec

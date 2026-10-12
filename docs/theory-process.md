@@ -275,6 +275,11 @@ The Haskell `Lara.Process.Analysis` reads the same retained `CheckedFamily` rows
 Wrapper profiles use bare evidence/coverage/probe lists and retain a zero
 denominator's reference meaning; the embedded process profile codec keeps its
 tagged lists and positive-denominator requirement.
+Native sensitivity derives inclusion-minimal sets from the retained same-history
+differing rows rather than enumerating every subset of the declared slots.
+Sets retain the reference's subsequence order and first realizing completion.
+If a differing row has no changed slot identity, the reference's nonempty
+minimality rule yields every universe singleton.
 
 ## What does graph-difference locality prove?
 

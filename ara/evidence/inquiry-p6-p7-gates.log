@@ -34,3 +34,19 @@ Test suite lara-test: PASS
 Scope: finite conformance and contract-boundary execution, not a new soundness proof,
 performance measurement, scientific-discovery improvement, or P8/P9 evaluation.
 No fixture, golden, corpus, manifest, version, ceiling or Lean theory was changed.
+
+Final integration correction, 2026-10-12:
+The pre-fix actual native 40-singleton-slot sensitivity probe timed out after 3s
+with no stdout/stderr despite one compatible completion and no flips.
+After deriving minima from differing rows, the same probe and joint-only plus
+40 inert singleton slots matched independently expected result bytes, exit 0
+and empty stderr within the same 3s deadline. This is a bounded regression check,
+not a throughput benchmark.
+
+make local-gates && cabal test all completed successfully again after the fix.
+Selected final output:
+inquiry conformance: 49 frozen fixtures, 70 generated cases, both boundary suites and CLI/locale contracts pass independently for both drivers
+Test suite lara-doctest: PASS
+== finite sensitivity avoids irrelevant slot powersets and preserves empty-change minima
++++ OK, passed 1 test.
+Test suite lara-test: PASS

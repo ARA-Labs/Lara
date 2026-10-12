@@ -11236,3 +11236,47 @@ tree:
   also_depends_on:
   - N396_inquiry_native_port
   - N397_inquiry_native_conformance
+- id: N399_inquiry_sensitive_candidates
+  type: decision
+  title: Derive slot minima from bounded differing rows instead of the full slot powerset
+  provenance: ai-executed
+  timestamp: '2026-10-12T17:44'
+  choice: >-
+    Resolve the final integration review's unbudgeted sensitivity traversal.
+    Nonempty minimal admitting sets are inclusion-minimal changed sets of
+    retained same-history differing rows; an empty changed set yields every
+    universe singleton under the frozen nonempty minimality rule. Normalize
+    repeated identities and sort reversed declaration-position lists to retain
+    subsequence order. Keep raw differing rows, first realizers, budgets,
+    public APIs and the Lean reference definitions unchanged.
+  alternatives:
+  - Traverse every declared-slot subset even when there are no differing rows
+  - Change the frozen subset charges or ceilings to mask the computation
+  evidence:
+  - src/Lara/Process/Analysis.hs
+  - test/InquirySpec.hs:prop_sparseLargeSensitivity
+  - ara/evidence/inquiry-p6-p7-gates.log
+  status: resolved
+  also_depends_on:
+  - N396_inquiry_native_port
+  - N398_inquiry_consumer_review
+- id: N400_inquiry_sensitive_regression
+  type: experiment
+  title: Exercise sparse sensitivity and rerun every integrated gate
+  provenance: ai-executed
+  timestamp: '2026-10-12T17:44'
+  result: >-
+    The actual native singleton-slot probe failed its deadline before the fix.
+    Afterwards it and the joint-sensitive fixture extended with inert
+    singleton choices returned exact expected bytes, success and empty stderr.
+    The permanent real-source regression also covers nonnumeric slot order,
+    singleton and joint minima, and duplicate slot identities with an empty
+    changed set and exact realizers. Full local gates and both Haskell suites
+    passed again. This is consumer-visible liveness and finite-conformance
+    evidence, not a performance or scientific-discovery claim.
+  evidence:
+  - ara/evidence/inquiry-p6-p7-gates.log
+  - test/InquirySpec.hs:prop_sparseLargeSensitivity
+  status: resolved
+  also_depends_on:
+  - N399_inquiry_sensitive_candidates

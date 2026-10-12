@@ -865,6 +865,51 @@ prop_jointAndAssumptionSets = withSource "normalized-support" 2 $ \source ->
         other -> counterexample (show other) False
     _ -> counterexample "missing fixture leaf or empty fragment" False
 
+prop_sparseLargeSensitivity :: Property
+prop_sparseLargeSensitivity = within 5000000 $ withSource "normalized-support" 2 $ \source ->
+  let problem = Process.Problem (Process.DecodedRecord [] [] [] [] 0) []
+      leaves = [leaf | A.DeclLeaf leaf <- A.programDecls (T.sourceProgram source)]
+  in case (T.mkFragment [],leaves) of
+    (Right empty,leaf:_) ->
+      let extra = A.DeclLeaf leaf{A.leafId = A.LeafId "sparse-extra"}
+      in case (T.mkFragment [A.DeclLeaf leaf],T.mkFragment [extra]) of
+        (Right duplicate,Right shared) ->
+          let fixed ident = Audit.Slot (Audit.SlotId ident)
+                [Audit.Choice (Audit.ChoiceId 0) Audit.GuardTruth empty]
+              varying ident fragment = Audit.Slot (Audit.SlotId ident)
+                [Audit.Choice (Audit.ChoiceId 0) Audit.GuardTruth empty,
+                 Audit.Choice (Audit.ChoiceId 1) Audit.GuardTruth fragment]
+              singletonSlots = map fixed [100..139]
+              observable = Analysis.StatusObservable (Process.ClaimId 99)
+              config = Audit.AuditConfig [] [] [] []
+              check slots expectedTotal expectedCount expectedSets emptyChange =
+                case Enumerate.enumerateFamily (Audit.FamilySpec problem source slots)
+                    (Audit.EnumerationLimits 100 10000 100) of
+                  Left err -> counterexample (show err) False
+                  Right enumeration -> case Enumerate.enumeratedCompletions enumeration of
+                    [] -> counterexample "missing sparse reference" False
+                    reference:rest -> case Analysis.sensitivity
+                        (Projection.checkFamily config enumeration) observable reference of
+                      Nothing -> counterexample "missing sparse sensitivity" False
+                      Just result -> conjoin
+                        [Analysis.sensitivityTotal result === expectedTotal,
+                         Analysis.sensitivityCount result === expectedCount,
+                         Analysis.sensitivityMinimal result === expectedSets,
+                         if emptyChange then case rest of
+                           [flipped] -> conjoin
+                             [map Analysis.sensitivityChanged (Analysis.sensitivityDiffering result) === [[]],
+                              Analysis.sensitivityRealizing result === [(slots',flipped) | slots' <- expectedSets]]
+                           _ -> counterexample "expected exactly one duplicate-identity flip" False
+                         else property True]
+          in conjoin
+            [check singletonSlots 1 0 [] False,
+             check ([varying 7 duplicate,varying 3 shared,varying 9 shared] ++ singletonSlots)
+               8 5 [[Audit.SlotId 7],[Audit.SlotId 3,Audit.SlotId 9]] False,
+             check ([fixed 0,varying 0 duplicate] ++ singletonSlots)
+               2 1 (map ((:[]) . Audit.SlotId) (0:[100..139])) True]
+        other -> counterexample (show other) False
+    _ -> counterexample "missing sparse source leaf or empty fragment" False
+
 prop_equalStatusChangedReads :: Property
 prop_equalStatusChangedReads = withSource "normalized-support" 2 $ \source ->
   accepted source $ \beforeObservation ->
@@ -1143,6 +1188,7 @@ inquirySpecProps =
   ++ [("impact whole-input reads distinguish equal-status authored changes",quickCheckResult prop_equalStatusChangedReads)]
   ++ [("finite analyses enumerate every inclusion-minimal slot and literal set",quickCheckResult prop_jointAndAssumptionSets)]
   ++ [("finite sensitivity counts different histories but restricts slot flips to reference history",quickCheckResult prop_crossHistorySensitivity)]
+  ++ [("finite sensitivity avoids irrelevant slot powersets and preserves empty-change minima",quickCheckResult prop_sparseLargeSensitivity)]
   ++ [("impact codecs roundtrip all read keys and independent value shapes",quickCheckResult prop_impactReadInventory)]
   ++ auditRuntimeSpecProps
   ++ finiteImpactAdditionalProps

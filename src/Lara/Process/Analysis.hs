@@ -2,8 +2,9 @@
 module Lara.Process.Analysis where
 
 import Data.Either (isRight)
-import Data.List (find, subsequences)
+import Data.List (find, sortOn, subsequences)
 import Data.Maybe (mapMaybe)
+import qualified Data.Set as Set
 import Numeric.Natural (Natural)
 import Lara.Process.Audit.Types
 import qualified Lara.Process.Family as Family
@@ -89,9 +90,18 @@ sensitivity checked observable reference = do
   let different = [(completion,value) | (completion,value) <- table,value /= referenceValue]
       sameHistory = [SensitivityRow completion (changedSlots spec reference completion) |
         (completion,_) <- different,completionHistory completion == completionHistory reference]
-      admits slots = any (all (`elem` slots) . sensitivityChanged) sameHistory
-      minimal slots = not (null slots) && admits slots && all (\smaller -> null smaller || not (admits smaller)) (immediateDeletions slots)
-      sets = filter minimal (subsequences (dedupLast (map slotId (familySlots spec))))
+      universe = zip (dedupLast (map slotId (familySlots spec))) [0 :: Natural ..]
+      changes = dedupLast (map (Set.fromList . sensitivityChanged) sameHistory)
+      -- A nonempty minimal flip set must be one of the differing rows' changed
+      -- sets; a proper superset still admits that row after deleting an extra
+      -- slot. An empty changed set instead makes every singleton minimal.
+      minimal change = not (any (`Set.isProperSubsetOf` change) changes)
+      candidates = [[(position,slot) | (slot,position) <- universe,Set.member slot change]
+        | change <- changes,minimal change]
+      -- Reversed universe positions have the same colex order as subsequences,
+      -- without constructing the slot universe's unbudgeted powerset.
+      sets = if any Set.null changes then [[slot] | (slot,_) <- universe]
+        else map (map snd) (sortOn (reverse . map fst) candidates)
       realizing slots = (slots,) . sensitivityCompletion <$> find (all (`elem` slots) . sensitivityChanged) sameHistory
   pure (SensitivityResult observable reference (naturalLength table) (naturalLength different) sameHistory sets (mapMaybe realizing sets))
   where
