@@ -54,6 +54,7 @@ import SurfaceConformanceSpec (surfaceConformanceSpecProps)
 import SyntaxSpec (syntaxSpecProps)
 import ValueBindingsSpec (valueBindingSpecProps)
 import WireSpec (wireSpecProps)
+import ProcessSpec (processSpecProps)
 import MapWireSpec (mapWireSpecProps)
 import MapLoadSpec (mapLoadSpecProps)
 import MapLinkSpec (mapLinkSpecProps)
@@ -219,6 +220,7 @@ main = do
         ++ [run name act | (name, act) <- inspSpecProps]
         ++ [run name act | (name, act) <- replaySpecProps]
         ++ [run name act | (name, act) <- wireSpecProps]
+        ++ [run name act | (name, act) <- processSpecProps]
         ++ [run name act | (name, act) <- mapWireSpecProps]
         ++ [run name act | (name, act) <- mapLoadSpecProps]
         ++ [run name act | (name, act) <- mapLinkSpecProps]

@@ -82,6 +82,9 @@ library
                       Lara.ConstantSpec
                       Lara.Kernel
                       Lara.Wire
+                      Lara.Process.Types
+                      Lara.Process.History
+                      Lara.Process.Wire
                       Lara.Map.Types
                       Lara.Map.Wire
                       Lara.Map.Load
@@ -231,6 +234,7 @@ test-suite lara-test
                       OrdSpec
                       InspSpec
                       WireSpec
+                      ProcessSpec
                       MapWireSpec
                       MapLoadSpec
                       MapLinkSpec

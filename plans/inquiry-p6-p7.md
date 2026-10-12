@@ -4,7 +4,7 @@
 
 **Date:** 2026-10-12
 
-**Status:** Approved 2026-10-12. No implementation task has started. All tasks below remain.
+**Status:** Approved 2026-10-12. Task 1 is implemented and passed spec/quality review, the Haskell suite, and decoded-fixture smoke scenarios. Tasks 2–7 remain.
 
 **Goal:** Deliver an independent Haskell implementation of `inquiry-input 1`, its result and error codecs, and a CLI whose outputs agree with the Lean reference on the full committed inquiry suite and the resource-boundary cases.
 
@@ -164,11 +164,11 @@ Haskell property tests and differentials establish conformance, not soundness. T
 
 Files: create `Types.hs`, `History.hs`, `Wire.hs` under `src/Lara/Process/`; create `test/ProcessSpec.hs`; modify `lara.cabal` and `test/Spec.hs`.
 
-- [ ] Read `Vocabulary.lean`, `WorldView.lean`, `Order.lean`, `Coverage.lean`, `Bridge.lean`, `Contract.lean`, `Universe.lean`, `Verdict.lean`, `Wire.lean`, and `InquiryProcessWire.lean` at their executable declarations. Map each constructor and spelling into the three Haskell modules. Port scoped coverage and default dataset version 0 exactly.
-- [ ] Add behavioral tests before the port for an omitted earlier evaluation/selection read changing precommitment to unknown, admitted coverage removing that completion, contradictory coverage producing inconsistent, and a data update invalidating the old input version. Use actual decoded process records from `fixtures/process/run/`, not mocked transition results.
-- [ ] Implement namespace interning, exact arity, ordered optional clauses, canonical decimal naturals, duplicate and undeclared-name refusal, and profile/formula codecs. Preserve the embedded codec's supported/unsupported coverage forms. The inquiry parser must translate an embedded decode failure to its own generic malformed-input result exactly as Lean does.
-- [ ] Implement extraction under admitted bases, state steps, cutoff validity, compatible histories, formula truth and the four verdicts. Preserve P0 completion order and witness selection for embedded unknown verdicts; its `Universe.answer` path is separate from guarded source-family results.
-- [ ] Exercise `fixtures/process/run/empty-universe.sexp`, `omitted-read.sexp`, `admitted-coverage.sexp`, `contradictory-order.sexp`, and `renamed-identifiers.sexp`. Construct the data-version transition as typed events, since it has no dedicated process-run fixture. Add valid-name/record roundtrips and refusals for leading-zero naturals and swapped identifier namespaces. No standalone process CLI is part of this task.
+- [x] Read `Vocabulary.lean`, `WorldView.lean`, `Order.lean`, `Coverage.lean`, `Bridge.lean`, `Contract.lean`, `Universe.lean`, `Verdict.lean`, `Wire.lean`, and `InquiryProcessWire.lean` at their executable declarations. Map each constructor and spelling into the three Haskell modules. Port scoped coverage and default dataset version 0 exactly.
+- [x] Add behavioral tests before the port for an omitted earlier evaluation/selection read changing precommitment to unknown, admitted coverage removing that completion, contradictory coverage producing inconsistent, and a data update invalidating the old input version. Use actual decoded process records from `fixtures/process/run/`, not mocked transition results.
+- [x] Implement namespace interning, exact arity, ordered optional clauses, canonical decimal naturals, duplicate and undeclared-name refusal, and profile/formula codecs. Preserve the embedded codec's supported/unsupported coverage forms. The inquiry parser must translate an embedded decode failure to its own generic malformed-input result exactly as Lean does.
+- [x] Implement extraction under admitted bases, state steps, cutoff validity, compatible histories, formula truth and the four verdicts. Preserve P0 completion order and witness selection for embedded unknown verdicts; its `Universe.answer` path is separate from guarded source-family results.
+- [x] Exercise `fixtures/process/run/empty-universe.sexp`, `omitted-read.sexp`, `admitted-coverage.sexp`, `contradictory-order.sexp`, and `renamed-identifiers.sexp`. Construct the data-version transition as typed events, since it has no dedicated process-run fixture. Add valid-name/record roundtrips and refusals for leading-zero naturals and swapped identifier namespaces. No standalone process CLI is part of this task.
 
 Run `cabal test lara-test` after the task is integrated. Expected: existing suites and the new process behavior properties pass. For a commit, use `feat(process): port the embedded process model and codec`.
 
