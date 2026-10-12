@@ -1883,3 +1883,8 @@ entries:
     observations or claim statuses changed.
   - Retain failed preflight output and live rerun handle; no full-gate success or P8 driver result is
     claimed.
+- turn: 2026-10-12_001#4
+  notes:
+  - At the turn boundary, the earlier rerun became terminal on the separate Cabal build-summary path.
+    Corrected and verified that setup, then recorded live final rerun83397; no gate pass is claimed. This
+    remains setup for the qualifying input-freeze turn, not a new empirical observation.

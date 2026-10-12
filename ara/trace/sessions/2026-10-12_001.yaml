@@ -147,6 +147,14 @@ ai_actions:
   - scripts/inquiry-impact-producer.hs
   - test/inquiry_evaluation_boundaries.py
   - plans/inquiry-p8-p9.md
+- turn: 4
+  action: The second preflight gate run (86481) ended at surface-conformance because the copied Cabal
+    config retained an explicit read-only build-summary path. Redirect that path to /tmp/inquiry-p8-cabal-logs/build.log
+    as well; cabal build exe:surface-conformance exits 0. Start the complete final preflight rerun with
+    UPDATE empty and CABAL_CONFIG=/tmp/inquiry-p8-cabal.config, live session 83397, output /tmp/inquiry-p8-local-gates-final.log.
+    Preserve both failed preflight outputs; final inquiry measurement remains unstarted.
+  provenance: ai-executed
+  files_changed: []
 claims_touched:
 - id: C57
   action: revised
