@@ -9,6 +9,7 @@ module Lara.Process.Enumerate
   ) where
 
 import Data.List (delete)
+import qualified Data.List as List
 import Numeric.Natural (Natural)
 import Lara.Process.Audit.Types
 import Lara.Process.Family (guardHolds)
@@ -59,7 +60,7 @@ historySearch problem =
       let !nextVisited = visited + 1
           history = reverse reversedPrefix
           !nextOutput = if History.problemCompatible problem history then history : output else output
-       in foldl' (extend state reversedPrefix remaining) (nextVisited, nextOutput) remaining
+       in List.foldl' (extend state reversedPrefix remaining) (nextVisited, nextOutput) remaining
     extend state reversedPrefix remaining (visited, output) event = case History.step state event of
       Nothing -> (visited, output)
       Just nextState -> go nextState (event : reversedPrefix) (delete event remaining) visited output
@@ -78,7 +79,7 @@ slotCounts cap history (slot : rest)
           nodes = 1 + choices * suffixNodes
        in (products, nodes)
   where
-    choices = foldl' (\count choice -> if guardHolds (choiceGuard choice) history then count + 1 else count) 0 (slotChoices slot)
+    choices = List.foldl' (\count choice -> if guardHolds (choiceGuard choice) history then count + 1 else count) 0 (slotChoices slot)
 
 -- Saturated addition stops at the first excess, before any selections or rows
 -- exist. Logical extensions are exact on every successful bounded enumeration.

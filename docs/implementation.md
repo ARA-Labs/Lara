@@ -208,6 +208,16 @@ Goldens must state the intended verdict. Investigate a disagreement between a go
 
 Two workflows are required, and both run on every push to `main` and every PR into it. The `Haskell` workflow (`.github/workflows/haskell.yml`) gates the Haskell compiler only. It runs `cabal build`, `cabal test`, the Haddock build, the Python unit tests, the policy-copy authenticity check, the walking-skeleton golden, replay, and tamper gates, and the mutation-suite freshness check. No step in it installs Lean or runs `lake`. The additive certified-evidence corpus and the frozen JSON/TSV reports are rechecked against the built Haskell binary, and that gate does not need Lean.
 
+The Haskell gate uses GHC 9.6. Local verification uses the same compiler series:
+`ghcup run --ghc 9.6.6 -- cabal build all --enable-tests` and
+`ghcup run --ghc 9.6.6 -- cabal test all --test-show-details=direct`
+(substitute the installed 9.6 patch version). The selected GHC must also be on
+`PATH` because doctest launches a nested `cabal repl`; `--with-compiler` alone
+does not select that nested compiler. A build with a newer GHC does not establish
+9.6 compatibility. For example, GHC 9.10's `Prelude` exports `foldl'`, but GHC
+9.6's does not; use a qualified `Data.List` import and `List.foldl'` to compile
+on both without redundant-import warnings.
+
 The `ARA` workflow (`.github/workflows/ara.yml`) checks this project's research artifact and builds neither Haskell nor Lean. Its checks cover source quotations, session-index consistency, and unique effective observation lookup. It has no path filter, because a quotation can cite any file in the repository. The observation gate validates append-only aliases and qualified historical references; it does not rewrite the trace. Its operational contract is [`../CONTRIBUTING.md`](../CONTRIBUTING.md#observation-identity-and-historical-lookup), and the session-file schema and what `session_index.yaml` rows project from it are [`../CONTRIBUTING.md`](../CONTRIBUTING.md#session-records-and-their-index).
 
 Everything that needs a Lean build runs outside the required workflows:

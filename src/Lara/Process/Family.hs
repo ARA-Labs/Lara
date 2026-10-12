@@ -7,6 +7,7 @@ module Lara.Process.Family
   ) where
 
 import Data.List (find)
+import qualified Data.List as List
 import qualified Data.Set as Set
 import qualified Lara.AST as A
 import Lara.Process.Audit.Types
@@ -98,7 +99,7 @@ selectedDecls = concatMap (fragmentDecls . choiceFragment . selectionChoice) . c
 -- | Append the opaque carriers, preserving all base metadata and payload coordinates.
 -- No fragment is checked separately, reordered, repaired or discarded.
 materialize :: FamilySpec -> Completion -> SourceInput
-materialize spec = foldl' appendSelection (familyBase spec) . completionAssignment
+materialize spec = List.foldl' appendSelection (familyBase spec) . completionAssignment
   where
     appendSelection input = appendFragment input . choiceFragment . selectionChoice
 
