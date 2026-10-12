@@ -384,7 +384,7 @@ familyInput = Source.mkSourceInput program policy replay (Just capture)
       A.RejectOnConflict [] [] []
     replay = Source.ReplayIdentity (Source.CoreVersion "family-core") policyId
       [Source.BackendIdentity backend (Source.BackendVersion "7")] [theory] digest
-    meta = Source.ObjectMeta (ObjectId "captured") "capture.csv" 4 "digest"
+    meta = Source.ObjectMeta (ObjectId "captured") (Source.ObjectPath "capture.csv") 4 (A.Digest "digest")
     capture = Source.EvidenceCapture [(ObjectId "captured", Left "retained failure")] [meta]
 
 familyAtom :: String -> Prop

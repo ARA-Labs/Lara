@@ -165,7 +165,7 @@ modeledContext source = (policy,leaves,meta,capture)
   where
     policy = (T.sourcePolicy source){A.policyAdmission = []}
     leaves = [leaf{A.leafRefs = [A.SourceRef "../../arbitrary"]} | A.DeclLeaf leaf <- A.programDecls (T.sourceProgram source)]
-    meta = T.ObjectMeta (ObjectId "data") "../../arbitrary" 999999999999999999999 "not-a-package-digest"
+    meta = T.ObjectMeta (ObjectId "data") (T.ObjectPath "../../arbitrary") 999999999999999999999 (A.Digest "not-a-package-digest")
     payload = CsvPayload (CsvTable [ColumnName "id",ColumnName "value"] [["one","7"]])
     capture = T.EvidenceCapture [(ObjectId "data",Right (meta,payload))] [meta]
 prop_modeledMetadata :: Property
@@ -365,7 +365,7 @@ prop_jsonDepthBoundary = withSource "admission-evidence-fail" 0 $ \source ->
 prop_orderedDuplicateCapture :: Property
 prop_orderedDuplicateCapture = withSource "admission-evidence-fail" 0 $ \source ->
   let (policy,leaves,meta,capture) = modeledContext source
-      duplicate = capture{T.captureManifest = [meta,meta{T.objectDigest = "different"}]}
+      duplicate = capture{T.captureManifest = [meta,meta{T.objectDigest = A.Digest "different"}]}
       wrongId = capture{T.captureSnapshot =
         [(ObjectId "data",Right (meta{T.objectId = ObjectId "wrong"},JsonPayload JsonNull))]}
       lexemes = capture{T.captureSnapshot =
@@ -910,6 +910,43 @@ prop_sparseLargeSensitivity = within 5000000 $ withSource "normalized-support" 2
         other -> counterexample (show other) False
     _ -> counterexample "missing sparse source leaf or empty fragment" False
 
+prop_multiChoiceSlotSensitivity :: Property
+prop_multiChoiceSlotSensitivity = withSource "normalized-support" 2 $ \source ->
+  let problem = Process.Problem (Process.DecodedRecord [] [] [] [] 0) []
+      leaves = [leaf | A.DeclLeaf leaf <- A.programDecls (T.sourceProgram source)]
+  in case (T.mkFragment [], leaves) of
+    (Right empty, leaf:_) ->
+      let extra = leaf{A.leafId = A.LeafId "multi-choice-extra"}
+      in case (T.mkFragment [A.DeclLeaf leaf], T.mkFragment [A.DeclLeaf leaf, A.DeclLeaf extra]) of
+        (Right flip1, Right flip2) ->
+          let slot3 = Audit.Slot (Audit.SlotId 0)
+                [ Audit.Choice (Audit.ChoiceId 0) Audit.GuardTruth empty
+                , Audit.Choice (Audit.ChoiceId 1) Audit.GuardTruth flip1
+                , Audit.Choice (Audit.ChoiceId 2) Audit.GuardTruth flip2
+                ]
+              spec = Audit.FamilySpec problem source [slot3]
+              claim = Process.ClaimId 0
+              config = Audit.AuditConfig [Audit.ClaimBinding claim (A.PropId "claim") (atom "t")] [] [] []
+          in case Enumerate.enumerateFamily spec (Audit.EnumerationLimits 100 1000 100) of
+            Left err -> counterexample (show err) False
+            Right enumeration -> case Enumerate.enumeratedCompletions enumeration of
+              ref:c1:c2:_ ->
+                let checked = Projection.checkFamily config enumeration
+                    observable = Analysis.StatusObservable claim
+                in case Analysis.sensitivity checked observable ref of
+                  Nothing -> counterexample "missing sensitivity result" False
+                  Just res -> conjoin
+                    [ Analysis.sensitivityTotal res === 3
+                    , Analysis.sensitivityCount res === 2
+                    , map Analysis.sensitivityCompletion (Analysis.sensitivityDiffering res) === [c1, c2]
+                    , map Analysis.sensitivityChanged (Analysis.sensitivityDiffering res) === [[Audit.SlotId 0], [Audit.SlotId 0]]
+                    , Analysis.sensitivityMinimal res === [[Audit.SlotId 0]]
+                    , Analysis.sensitivityRealizing res === [([Audit.SlotId 0], c1)]
+                    ]
+              _ -> counterexample "expected at least 3 completions" False
+        other -> counterexample (show other) False
+    _ -> counterexample "missing source leaf or empty fragment" False
+
 prop_equalStatusChangedReads :: Property
 prop_equalStatusChangedReads = withSource "normalized-support" 2 $ \source ->
   accepted source $ \beforeObservation ->
@@ -1189,6 +1226,7 @@ inquirySpecProps =
   ++ [("finite analyses enumerate every inclusion-minimal slot and literal set",quickCheckResult prop_jointAndAssumptionSets)]
   ++ [("finite sensitivity counts different histories but restricts slot flips to reference history",quickCheckResult prop_crossHistorySensitivity)]
   ++ [("finite sensitivity avoids irrelevant slot powersets and preserves empty-change minima",quickCheckResult prop_sparseLargeSensitivity)]
+  ++ [("finite sensitivity deduplicates identical flip sets across multi-choice slots and pairs first completion",quickCheckResult prop_multiChoiceSlotSensitivity)]
   ++ [("impact codecs roundtrip all read keys and independent value shapes",quickCheckResult prop_impactReadInventory)]
   ++ auditRuntimeSpecProps
   ++ finiteImpactAdditionalProps

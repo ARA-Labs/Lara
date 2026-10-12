@@ -312,8 +312,8 @@ decodeConfig names (SList [SAtom "audit-config",claims,witnesses,kinds,assumptio
   <*> unList decodeKindSpec kinds <*> unList (decodeCaptureAssumption names) assumptions
 decodeConfig _ _ = bad
 
--- FamilyWire deliberately has no FamilySpec envelope. The inquiry document
--- owner combines its embedded process problem, source and slots.
+-- The family wire codecs in this module deliberately define no FamilySpec envelope.
+-- The inquiry document owner combines its embedded process problem, source and slots.
 encodeSlotId :: SlotId -> SExpr
 encodeSlotId (SlotId index) = form "slot-id" [W.encodeNat index]
 decodeSlotId :: SExpr -> Result SlotId

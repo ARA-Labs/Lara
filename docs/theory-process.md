@@ -445,9 +445,9 @@ at the effective cap is accepted. The counters measure the following work:
 | `histories` | 10000 | Distinct unguarded history completions, also clamped by the embedded document's completion limit |
 | `sources` | 10000 | Actual guard-surviving family rows, including rejected sources, plus two endpoints per `impact` or `verify-impact` request |
 | `source-bytes` | 1048576 | Original input UTF-8 bytes, including whitespace and comments |
-| `declarations` | 10000 | Aggregate declarations in materialized family rows, plus both endpoint declaration counts for each impact request |
+| `declarations` | 10000 | Aggregate declarations in materialized family rows, plus both endpoint declaration counts for each impact or verify-impact request |
 | `search-steps` | 200000 | Full history DFS visits plus logical slot extensions, including prefixes whose later guard leaves zero rows |
-| `pairs` | 4096 | Family rows per ordinary wrapper request; sum of surviving rows over all catalog subsets per `minimal-assumptions` request; twice the original query-list length plus the distinct side-tagged read-key count per impact request |
+| `pairs` | 4096 | Family rows per ordinary wrapper request; sum of surviving rows over all catalog subsets per `minimal-assumptions` request; twice the original query-list length plus the distinct side-tagged read-key count per impact or verify-impact request |
 | `subsets` | 4096 | Sum of `2 ^ length (dedupLast catalog)` over all `minimal-assumptions` requests |
 
 For `verify-impact`, the query list used in pair accounting comes from the

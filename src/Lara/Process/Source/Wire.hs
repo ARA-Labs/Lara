@@ -250,9 +250,9 @@ decodeReplay (SList [SAtom "replay",SAtom c,SAtom p,SList bs,SList ts,SAtom a]) 
   where backend (SList [SAtom "backend",SAtom b,SAtom v]) = Right (T.BackendIdentity (BackendId b) (T.BackendVersion v)); backend _ = bad
 decodeReplay _ = bad
 encodeMeta :: T.ObjectMeta -> SExpr
-encodeMeta (T.ObjectMeta (ObjectId i) p n d) = W.tagged "object" [SAtom i,SAtom p,W.encodeNat n,SAtom d]
+encodeMeta (T.ObjectMeta (ObjectId i) (T.ObjectPath p) n (Digest d)) = W.tagged "object" [SAtom i,SAtom p,W.encodeNat n,SAtom d]
 decodeMeta :: SExpr -> Result T.ObjectMeta
-decodeMeta (SList [SAtom "object",SAtom i,SAtom p,n,SAtom d]) = T.ObjectMeta (ObjectId i) p <$> W.decodeNat n <*> pure d
+decodeMeta (SList [SAtom "object",SAtom i,SAtom p,n,SAtom d]) = T.ObjectMeta (ObjectId i) (T.ObjectPath p) <$> W.decodeNat n <*> pure (Digest d)
 decodeMeta _ = bad
 encodeJson :: JsonValue -> SExpr
 encodeJson (JsonObject es) = W.tagged "object" [entries es]

@@ -305,6 +305,21 @@ prop_profileRequirements = withBase $ \base -> checked (family base []) (config 
    R.audit result profile{P.profileProbes = [P.Sampling,P.Measurement]} (P.ClaimId 0) (P.WitnessId 0) === False,
    R.audit result profile{P.profileAccepts = [P.CompleteKind]} (P.ClaimId 0) (P.WitnessId 0) === False]
 
+prop_ambiguousMetadataFailure :: Property
+prop_ambiguousMetadataFailure = withBase $ \base ->
+  case S.checkSource base of
+    Left rejection -> counterexample (show rejection) False
+    Right observation ->
+      let baseConfig = config base
+          dupWitnesses = [witness base (P.WitnessId 0) "submitted", witness base (P.WitnessId 0) "other"]
+          ambiguousConfig = baseConfig{D.auditWitnesses = dupWitnesses}
+          metadata = Audit.auditMetadata base ambiguousConfig
+          checkedResults = Audit.checkWitnesses metadata observation history
+          observedResults = Audit.observeWitnesses ambiguousConfig base observation history
+      in conjoin
+        [ Audit.metadataWellFormed metadata === False,
+          map (\(w, r) -> (w, either Left (const (Right ())) r)) checkedResults === [(P.WitnessId 0, Left D.AmbiguousMetadata), (P.WitnessId 0, Left D.AmbiguousMetadata)],
+          observedResults === [(P.WitnessId 0, Left D.AmbiguousMetadata), (P.WitnessId 0, Left D.AmbiguousMetadata)] ]
 auditRuntimeSpecProps :: [(String,IO Result)]
 auditRuntimeSpecProps = [(name,quickCheckResult prop) | (name,prop) <-
   [("audit ledger counts failed/no-result siblings and keeps unclamped exact levels",prop_ledgerFailedSibling),
@@ -320,4 +335,5 @@ auditRuntimeSpecProps = [(name,quickCheckResult prop) | (name,prop) <-
    ("audit checked methods distinguish conditional interpretation from actual applicability",prop_methodPayload),
    ("audit authored claim association is not inferred from matching conclusion",prop_authoredAssociation),
    ("audit fragment-only claim cannot alter base-fixed binding",prop_baseFixedClaims),
-   ("audit profile enforces coverage, guarantee class and level, and probes",prop_profileRequirements)]]
+   ("audit profile enforces coverage, guarantee class and level, and probes",prop_profileRequirements),
+   ("audit duplicate conflicting witness IDs fail closed with Left AmbiguousMetadata",prop_ambiguousMetadataFailure)]]

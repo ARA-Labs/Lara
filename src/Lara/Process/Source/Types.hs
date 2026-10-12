@@ -1,6 +1,6 @@
 module Lara.Process.Source.Types
   ( CoreVersion (..), BackendVersion (..), BackendIdentity (..), ReplayIdentity (..)
-  , ObjectMeta (..), EvidenceCapture (..), EvidenceJudgment (..)
+  , ObjectPath (..), ObjectMeta (..), EvidenceCapture (..), EvidenceJudgment (..)
   , SourceHole (..), SourceHoleObligation (..)
   , EvidenceStage (..), EvidenceError (..)
   , CertificatePayload (..), CertificateStep (..), CertificateCoordinate (..)
@@ -27,8 +27,9 @@ data ReplayIdentity = ReplayIdentity
   { replayCore :: CoreVersion, replayPolicy :: PolicyId, replayBackends :: [BackendIdentity]
   , replayTheories :: [TheoryDigest], replayArtifact :: Digest
   } deriving (Eq, Show)
+newtype ObjectPath = ObjectPath String deriving (Eq, Ord, Show)
 data ObjectMeta = ObjectMeta
-  { objectId :: ObjectId, objectPath :: String, objectLength :: Natural, objectDigest :: String
+  { objectId :: ObjectId, objectPath :: ObjectPath, objectLength :: Natural, objectDigest :: Digest
   } deriving (Eq, Ord, Show)
 data EvidenceCapture = EvidenceCapture
   { captureSnapshot :: [(ObjectId, Either String (ObjectMeta, TypedObject))]

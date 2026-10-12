@@ -34,7 +34,7 @@ lookupCapture capture ident = case lookup ident (captureSnapshot capture) of
 runModeledEvidence :: EvidenceCapture -> Policy -> [Leaf] -> Either EvidenceError [ModeledJudgment]
 runModeledEvidence capture policy leaves = do
   requests <- first (\failure -> EvidenceError EvidenceBindingStage (A.evidenceLeaf failure) (A.evidenceObject failure) "binding") $
-    A.bindEvidencePaths [(objectId m,objectPath m) | m <- captureManifest capture]
+    A.bindEvidencePaths [(objectId m, let ObjectPath p = objectPath m in p) | m <- captureManifest capture]
       (policyEvidenceCheckers policy) leaves
   results <- first normalize $
     replayTypedEvidenceWith objectId prepareModeledObject runModeledRegistry
