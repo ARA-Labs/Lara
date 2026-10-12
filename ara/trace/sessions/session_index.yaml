@@ -757,8 +757,8 @@ sessions:
 
 - id: 2026-10-12_001
   date: '2026-10-12'
-  summary: 'Implemented the native P6-P7 inquiry door and independent conformance gate; integrated local gates and both Haskell suites pass; C57 now records finite cross-language evidence.'
-  turn_count: 1
-  events_count: 5
+  summary: 'Implemented and gated native P6-P7 inquiry; drafted the P8 bounded evaluation protocol and result-dependent P9 approval path without running evaluations.'
+  turn_count: 2
+  events_count: 7
   claims_touched: [C57]
-  open_threads: 3
+  open_threads: 4

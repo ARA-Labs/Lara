@@ -11280,3 +11280,22 @@ tree:
   status: resolved
   also_depends_on:
   - N399_inquiry_sensitive_candidates
+- id: N401_inquiry_evaluation_draft
+  type: decision
+  title: Draft the P8 protocol and a result-dependent P9 follow-on on a new branch
+  provenance: user
+  timestamp: '2026-10-12T20:35:54Z'
+  choice: >-
+    User requested a new branch and a draft covering the P8 protocol and how
+    to follow P9 after its results. Drafting does not authorize implementation,
+    evaluation runs, live compute, commits, pushes or a PR.
+  alternatives:
+  - Begin evaluation without an approved protocol
+  evidence:
+  - plans/inquiry-p8-p9.md
+  - https://github.com/ARA-Labs/Lara/issues/22
+  - https://github.com/ARA-Labs/Lara/pull/48
+  status: resolved
+  also_depends_on:
+  - N397_inquiry_native_conformance
+  - N400_inquiry_sensitive_regression

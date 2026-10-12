@@ -4378,3 +4378,26 @@ observations:
   promoted_to: null
   crystallized_via: null
   stale: false
+- id: O217
+  timestamp: '2026-10-12T20:35:54Z'
+  provenance: ai-suggested
+  content: >-
+    Propose additive, authored P8 inputs with independently reviewed finite
+    semantic expectations, all four source acceptance transitions, full blocked
+    statuses, fixed-witness audits, minimality checks and conservative locality
+    coverage. Limit the draft to 96 documents and 192 direct driver invocations,
+    with 10-second invocation timeouts and a 45-minute aggregate budget.
+    Follow the measured results with a separately approved paired live-loop
+    protocol; no workflow or scientific-discovery result follows from P8.
+  context: >-
+    Drafted plans/inquiry-p8-p9.md on plan/inquiry-p8-p9 from merged P6-P7 main
+    at f1af470. All protocol values are proposals, not measurements or researcher
+    approvals. Existing controls, generated cases and unique denominators stay
+    separate; no corpus, golden, ceiling, freeze or runtime changes were made.
+  potential_type: architecture
+  bound_to:
+  - N401_inquiry_evaluation_draft
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

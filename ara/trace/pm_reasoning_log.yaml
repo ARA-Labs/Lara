@@ -1863,3 +1863,9 @@ entries:
   notes:
   - "Appended N399/N400 after final integration review exposed an unbudgeted declared-slot powerset. The actual native timeout and matching post-fix CLI outputs are recorded without rewriting earlier successful finite-case evidence."
   - "The correction changes the native algorithm, not frozen minimality, output order, first realizers, counters, ceilings or Lean definitions. Both full gates and Haskell suites passed again; no new claim or status change is introduced."
+- turn: 2026-10-12_001#2
+  notes:
+  - "Recorded the user's drafting request as N401; branch creation and document verification are session actions, not experiments."
+  - "Staged the AI-proposed P8 matrix/budgets and P9 follow-on as O217. Draft creation is not researcher approval or an executed artifact commitment; no observation crystallized and no logic entry changed."
+  - "Kept P8's authored finite measurements distinct from P9's live workflow claim; preserved issue 22's separate protocol approvals and issues 39/46. No corpus, golden, ceiling, version or freeze changed."
+  - "Final plain-language/humanizer draft passes the available write-doc/scripts/check-style.sh; fixture/link and budget smoke checks pass. No evaluation or code tests ran in this planning turn."

@@ -2,10 +2,10 @@ session:
   id: 2026-10-12_001
   date: '2026-10-12'
   started: 2026-10-12T07:34
-  last_turn: 2026-10-12T17:44
-  turn_count: 1
-  summary: Implemented the native P6-P7 inquiry door and independent conformance gate; integrated local
-    gates and both Haskell suites pass; C57 now records finite cross-language evidence.
+  last_turn: 2026-10-12T20:35:54Z
+  turn_count: 2
+  summary: Implemented and gated the native P6-P7 inquiry door; then drafted the P8 bounded
+    evaluation protocol and result-dependent P9 approval path without running evaluations.
 events_logged:
 - turn: 1
   type: decision
@@ -40,6 +40,18 @@ events_logged:
   routing: direct
   provenance: ai-executed
   summary: Reproduce the native sparse sensitivity timeout, verify both real CLI corrections, and rerun the full integrated gates.
+- turn: 2
+  type: decision
+  id: N401_inquiry_evaluation_draft
+  routing: direct
+  provenance: user
+  summary: Request a new branch and draft for P8 with a P9 follow-on after its results.
+- turn: 2
+  type: observation
+  id: O217
+  routing: staged
+  provenance: ai-suggested
+  summary: Propose an additive authored P8 protocol and separately approved result-dependent live evaluation.
 ai_actions:
 - turn: 1
   action: Execute the approved seven-step implementation with sequential commits and independent spec
@@ -64,6 +76,16 @@ ai_actions:
   - docs/implementation.md
   - docs/spec.md
   - README.md
+- turn: 2
+  action: >-
+    Create plan/inquiry-p8-p9 from clean merged main at f1af470; draft and revise
+    plans/inquiry-p8-p9.md using plain-language and humanizer passes. The final
+    style checker passes; a document smoke check resolves all 16 fixture/golden
+    pairs and three local links and verifies case/call arithmetic and placeholders.
+    No implementation, measurements, commits, pushes or PR were performed.
+  provenance: ai-executed
+  files_changed:
+  - plans/inquiry-p8-p9.md
 claims_touched:
 - id: C57
   action: revised
@@ -139,9 +161,15 @@ key_context:
 - turn: 1
   excerpt: The native and Lean drivers independently match unchanged fixture bytes and generated expected
     outcomes; make local-gates and cabal test all completed successfully.
+- turn: 2
+  excerpt: >-
+    User: checkout a new branch and draft a plan. the plan should cover P8
+    protocol and how to follow P9 after its results
 open_threads:
 - 'Issue #22 remains open for P8 bounded semantic/source-transition evaluation and P9 separately approved
   live-loop protocol.'
 - 'Issue #39 remains open for infinite-horizon Ville and online FDR over complete ledgers.'
 - 'Issue #46 remains open for proving or revising the search-step ceiling rationale.'
-ai_suggestions_pending: []
+- Review and approve or revise plans/inquiry-p8-p9.md before implementing or executing P8.
+ai_suggestions_pending:
+- O217's additive P8 case matrix, proposed budgets and conditional P9 paired workflow remain unapproved.
