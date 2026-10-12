@@ -3,7 +3,7 @@ module Lara.Process.Source
   , observationInput, observationAcceptedSource, observationResult
   , observationAF, observationNames, observationEdges, observationSupport
   , observationHoles, publicStatus, blockedClosure, replayCompatible
-  , observationCarriers, observationBlockedArguments
+  , observationCarriers, observationBlockedArguments, observationNodeLabel
   ) where
 
 import Control.Monad (unless)
@@ -73,6 +73,10 @@ observationCarriers :: AcceptedObservation -> ([Natural],[Natural])
 observationCarriers = retainedNaturalCarriers
 observationBlockedArguments :: AcceptedObservation -> [Natural]
 observationBlockedArguments = retainedNaturalBlocked
+observationNodeLabel :: AcceptedObservation -> Natural -> Maybe A.Label
+observationNodeLabel observation node
+  | node > fromIntegral (maxBound :: Int) = Nothing
+  | otherwise = IntMap.lookup (fromIntegral node) (retainedLabels observation)
 
 blockedClosure :: AcceptedObservation -> [Prop] -> [Prop]
 blockedClosure observation = filter blocked

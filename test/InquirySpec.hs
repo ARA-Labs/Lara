@@ -2,6 +2,7 @@ module InquirySpec (inquirySpecProps) where
 
 import Data.Either (isLeft)
 import Test.QuickCheck
+import AuditRuntimeSpec (auditRuntimeSpecProps)
 import qualified Lara.AST as A
 import Lara.Attack (subterm)
 import Lara.Prop (Prop (..), Pred (..), FunSym (..), Term (..))
@@ -781,3 +782,4 @@ inquirySpecProps =
      ("source duplicate scan preserves earliest declaration with a later duplicate",prop_duplicateScanOrder),
      ("source diagnostics cover every closed constructor with canonical codecs",prop_diagnosticConstructorInventory),
      ("source evidence factoring preserves legacy typed missing-dependency payload",prop_legacyTypedMissingDependency)]]
+  ++ auditRuntimeSpecProps

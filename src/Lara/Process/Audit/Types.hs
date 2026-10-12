@@ -6,6 +6,7 @@ import Lara.Prop (Prop)
 import Lara.Process.Source.CoreDiagnostic (CheckFault)
 import Lara.Process.Types
 import Lara.Process.Source.Types (SourceInput, Fragment)
+import Lara.Wire (PublicStatus)
 
 newtype InterpretationId = InterpretationId Natural deriving (Eq, Ord, Show)
 newtype AssumptionId = AssumptionId Natural deriving (Eq, Ord, Show)
@@ -112,3 +113,12 @@ data EnumerationLimits = EnumerationLimits
   } deriving (Eq, Show)
 data EnumerationRefusal = HistoriesRefusal Natural Natural | StepsRefusal Natural Natural
   | ProductsRefusal Natural Natural deriving (Eq, Show)
+
+data NodeGrade = NodeGrade
+  { gradeArgument :: A.ArgId, gradeKeys :: Either ProvenanceError [KindKey]
+  , gradeValue :: (EvidenceKind,Bool)
+  } deriving (Eq, Show)
+data QueryFields = QueryFields
+  { queryClaim :: ClaimId, queryProposition :: Prop, queryStatus :: PublicStatus
+  , querySupports :: [A.ArgId]
+  } deriving (Eq, Show)

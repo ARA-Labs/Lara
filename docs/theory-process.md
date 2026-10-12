@@ -229,6 +229,20 @@ authored-source guards run after semantic reconstruction and status resolution,
 so substitution cannot repair an unsupported original directive, argument or
 comparison.
 
+The Haskell `Lara.Process.Audit` and `CheckedMethods` implement the closed support,
+association, method and ledger checks. Native method applications retain the
+computed finite execution; conditional interpretations do not assert execution.
+The audit checks the submitted node itself, so another justified support for the
+same query cannot rescue a defeated witness.
+
+`Lara.Process.Enumerate` retains the originating family, bounded completions and
+exact history/search counts in an opaque value. It counts guarded products before
+allocation and charges live prefixes even when a later empty guard removes every
+row. `Lara.Process.Projection.checkFamily` takes that enumeration and its audit
+configuration, not a separately replaceable family. It snapshots each completion
+once, retains source rejections, and shares stable coordinates, grades, witness
+checks and fixed-claim observations across consumers.
+
 Four computations turn an accepted source into warrant data, each stated as an equation against an independently defined reference rather than against a producer label:
 
 - `Lara.Process.SourceCoordinates` lifts the checked framework to stable declaration identities. `graph_label` shows a lifted node's grounded label is the compiled one, and `supports_exact` characterizes a query's support as exactly the checked nodes whose conclusion is `≡` to it.

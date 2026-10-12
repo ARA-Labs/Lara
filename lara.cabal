@@ -94,6 +94,12 @@ library
                       Lara.Process.Source.CoreDiagnostic
                       Lara.Process.Source.Provenance
                       Lara.Process.Audit.Types
+                      Lara.Process.Audit
+                      Lara.Process.AuditWire
+                      Lara.Process.CheckedMethods
+                      Lara.Process.Family
+                      Lara.Process.Enumerate
+                      Lara.Process.Projection
                       Lara.Map.Types
                       Lara.Map.Wire
                       Lara.Map.Load
@@ -245,6 +251,9 @@ test-suite lara-test
                       WireSpec
                       ProcessSpec
                       InquirySpec
+                      AuditRuntimeSpec
+                      AuditWireSpec
+                      CheckedMethodsSpec
                       SourceComparisonSpec
                       MapWireSpec
                       MapLoadSpec

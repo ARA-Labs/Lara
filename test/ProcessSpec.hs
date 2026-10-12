@@ -1,4 +1,4 @@
-module ProcessSpec (processSpecProps) where
+module ProcessSpec (processSpecProps, familyEnumerationProps) where
 
 import Data.Either (isLeft)
 import Data.List (find)
@@ -9,6 +9,14 @@ import Test.QuickCheck
 import Lara.Process.Types
 import Lara.Process.History
 import Lara.Process.Wire
+import qualified Lara.AST as A
+import Lara.Evidence.Types (ObjectId (..))
+import Lara.Prop (Prop (..), Pred (..), Term (..))
+import Lara.Sigma (emptySigma)
+import qualified Lara.Process.Audit.Types as Audit
+import qualified Lara.Process.Family as Family
+import qualified Lara.Process.Enumerate as Enumerate
+import qualified Lara.Process.Source.Types as Source
 import Lara.Strict (SExpr (..))
 import Lara.Wire (parseSExpr)
 
@@ -357,6 +365,316 @@ prop_boundaryArity = conjoin
       ]
     fixed _ _ = counterexample "encoder did not produce a form" False
 
+familyInput :: Either String Source.SourceInput
+familyInput = Source.mkSourceInput program policy replay (Just capture)
+  where
+    policyId = A.PolicyId "family-policy"
+    digest = A.Digest "family-artifact"
+    backend = A.BackendId "family-backend"
+    theory = A.TheoryDigest "family-theory"
+    program = A.Program "family" digest policyId [(backend, "7")]
+      [A.ValueBinding (A.ValueName "authored") (TNum "+01.0")] [familyClaim "base" (familyAtom "base")]
+    policy = A.Policy policyId emptySigma [] [] [] [] [(theory, [])]
+      A.RejectOnConflict [] [] []
+    replay = Source.ReplayIdentity (Source.CoreVersion "family-core") policyId
+      [Source.BackendIdentity backend (Source.BackendVersion "7")] [theory] digest
+    meta = Source.ObjectMeta (ObjectId "captured") "capture.csv" 4 "digest"
+    capture = Source.EvidenceCapture [(ObjectId "captured", Left "retained failure")] [meta]
+
+familyAtom :: String -> Prop
+familyAtom name = Prop (Pred name) []
+
+familyClaim :: String -> Prop -> A.Decl
+familyClaim name formal = A.DeclClaim
+  (A.Claim (A.PropId name) ("claim " ++ name) formal (A.Binding "author" "rationale" A.Reviewed))
+
+withFamilyInput :: (Source.SourceInput -> Property) -> Property
+withFamilyInput check = case familyInput of
+  Left err -> counterexample err False
+  Right input -> check input
+
+familyProblemFor :: [Stamped] -> [Stamped] -> Natural -> Problem
+familyProblemFor recorded optional cutoff =
+  Problem (DecodedRecord [DecodedEvent event ref | event <- recorded] [] [] [] cutoff) optional
+  where ref = SourceRef "family" "record" Nothing
+
+familyAccess :: Natural -> Stamped
+familyAccess index = Stamped (EventId index) (Access (ActorId 0) (DataId 0) Evaluation)
+
+familyLimits :: Audit.EnumerationLimits
+familyLimits = Audit.EnumerationLimits 10000 200000 10000
+
+withEnumeration :: Audit.FamilySpec -> Audit.EnumerationLimits
+  -> (Enumerate.EnumeratedFamily -> Property) -> Property
+withEnumeration spec limits check = case Enumerate.enumerateFamily spec limits of
+  Left err -> counterexample (show err) False
+  Right enumerated -> check enumerated
+
+withChoices :: [(Natural, [Audit.Guard])] -> ([Audit.Slot] -> Property) -> Property
+withChoices descriptions check = case Source.mkFragment [] of
+  Left err -> counterexample err False
+  Right fragment -> check
+    [Audit.Slot (Audit.SlotId slot)
+      [Audit.Choice (Audit.ChoiceId index) guard fragment | (index, guard) <- zip [0 ..] guards]
+    | (slot, guards) <- descriptions]
+
+prop_familyGuards :: Property
+prop_familyGuards =
+  let first = familyAccess 0
+      second = familyAccess 1
+      different = first { stampedEvent = Access (ActorId 0) (DataId 1) Evaluation }
+      h = [first, second, first]
+   in conjoin
+      [ Family.guardHolds Audit.GuardTruth [] === True
+      , Family.guardHolds (Audit.GuardQuery (QueryAtom Predictable)) h === queryHolds (QueryAtom Predictable) h
+      , Family.guardHolds (Audit.GuardPresent first) h === True
+      , Family.guardHolds (Audit.GuardPresent different) h === False
+      , Family.guardHolds (Audit.GuardBefore first second) h === True
+      , Family.guardHolds (Audit.GuardBefore first first) h === True
+      , Family.guardHolds (Audit.GuardBefore first first) [first] === False
+      , Family.guardHolds (Audit.GuardBefore different second) h === False
+      , Family.guardHolds (Audit.GuardBefore first second) [second, first] === False
+      , Family.guardHolds (Audit.GuardNot (Audit.GuardPresent second)) [first] === True
+      , Family.guardHolds (Audit.GuardAnd (Audit.GuardPresent first) (Audit.GuardPresent second)) h === True
+      , Family.guardHolds (Audit.GuardOr (Audit.GuardPresent different) (Audit.GuardPresent second)) h === True
+      ]
+
+prop_familyIdentity :: Property
+prop_familyIdentity = withFamilyInput $ \input ->
+  withChoices [(8, [Audit.GuardTruth, Audit.GuardNot Audit.GuardTruth]), (3, [Audit.GuardTruth])] $ \slots ->
+  let spec = Audit.FamilySpec (familyProblemFor [] [] 0) input slots
+      references = [(Audit.SlotId 8, Audit.ChoiceId 0), (Audit.SlotId 3, Audit.ChoiceId 0)]
+   in case (slots,Family.resolveAssignment spec references) of
+      (_,Nothing) -> counterexample "declared selection failed to resolve" False
+      (firstSlot:_,Just assignment@(firstSelection:rest)) -> conjoin
+        [ Family.familyWellFormed spec === True
+        , Family.familyWellFormed spec { Audit.familySlots = slots ++ [firstSlot] } === False
+        , Family.familyWellFormed spec { Audit.familySlots = [Audit.Slot (Audit.SlotId 0) []] } === False
+        , Family.familyWellFormed spec { Audit.familySlots =
+            [Audit.Slot (Audit.SlotId 0) [Audit.selectionChoice firstSelection, Audit.selectionChoice firstSelection]] } === False
+        , Family.resolveSlot spec (Audit.SlotId 8) (Audit.ChoiceId 0) === Just firstSelection
+        , Family.resolveAssignment spec [(Audit.SlotId 8, Audit.ChoiceId 99)] === Nothing
+        , Family.resolveAssignment spec [] === Just []
+        , Family.assignmentWellFormed spec assignment === True
+        , Family.assignmentWellFormed spec (reverse assignment) === False
+        , Family.assignmentWellFormed spec (take 1 assignment) === False
+        , Family.assignmentMember spec [] assignment === True
+        , Family.completionMember spec (Audit.Completion [] assignment) === True
+        , Family.completionMember spec (Audit.Completion [familyAccess 99] assignment) === False
+        , let forged = firstSelection { Audit.selectionChoice =
+                (Audit.selectionChoice firstSelection) { Audit.choiceGuard = Audit.GuardNot Audit.GuardTruth } }
+           in Family.assignmentWellFormed spec (forged : rest) === False
+        , case Family.resolveAssignment spec [(Audit.SlotId 8, Audit.ChoiceId 1), (Audit.SlotId 3, Audit.ChoiceId 0)] of
+            Nothing -> counterexample "guarded declared selection failed to resolve" False
+            Just guarded -> conjoin [Family.assignmentWellFormed spec guarded === True,
+              Family.assignmentMember spec [] guarded === False]
+        ]
+      _ -> counterexample "expected nonempty slots and resolved assignment" False
+
+prop_familyFixedClaims :: Property
+prop_familyFixedClaims = withFamilyInput $ \input ->
+  let spec = Audit.FamilySpec (familyProblemFor [] [] 0) input []
+      bound = Audit.ClaimBinding (ClaimId 0) (A.PropId "base") (familyAtom "base")
+      changed = bound { Audit.bindingQuery = familyAtom "different" }
+      fragmentOnly = bound { Audit.bindingDeclaration = A.PropId "fragment", Audit.bindingQuery = familyAtom "fragment" }
+   in case Source.mkFragment [familyClaim "fragment" (familyAtom "fragment")] of
+      Left err -> counterexample err False
+      Right fragment -> conjoin
+        [ Family.claimBindingValid spec bound === True
+        , Family.claimBindingValid spec changed === False
+        , Family.claimBindingValid spec fragmentOnly === False
+        , Family.fixedClaims spec (Audit.AuditConfig [bound] [] [] []) === True
+        , Family.fixedClaims spec (Audit.AuditConfig [bound, fragmentOnly] [] [] []) === False
+        , A.programDecls (Source.sourceProgram (Family.materialize spec
+            (Audit.Completion [] [Audit.Selection (Audit.SlotId 0) (Audit.Choice (Audit.ChoiceId 0) Audit.GuardTruth fragment)])))
+            === A.programDecls (Source.sourceProgram input) ++ [familyClaim "fragment" (familyAtom "fragment")]
+        ]
+
+prop_familyDFSOrder :: Property
+prop_familyDFSOrder = withFamilyInput $ \input ->
+  let a = familyAccess 0
+      b = familyAccess 1
+      spec = Audit.FamilySpec (familyProblemFor [] [a, b] 2) input []
+      expected = [[], [a], [a, b], [b], [b, a]]
+   in withEnumeration spec (Audit.EnumerationLimits 5 5 5) $ \enumerated -> conjoin
+      [ Enumerate.enumeratedSpec enumerated === spec
+      , Enumerate.enumeratedHistories enumerated === expected
+      , Enumerate.enumeratedCompletions enumerated === [Audit.Completion h [] | h <- expected]
+      , Enumerate.enumeratedHistorySteps enumerated === 5
+      , Enumerate.enumeratedLogicalExtensions enumerated === 0
+      , Enumerate.enumeratedProductCount enumerated === 5
+      , completions (Audit.familyProblem spec) === [[], [a], [b], [a, b], [b, a]]
+      ]
+
+prop_familyDFSNoPruning :: Property
+prop_familyDFSNoPruning = withFamilyInput $ \input ->
+  let a = familyAccess 0
+      b = familyAccess 1
+      p = familyProblemFor [b] [a, b, a] 2
+      spec = Audit.FamilySpec p input []
+      ref = SourceRef "family" "constraint" Nothing
+      ordered = p { problemRecord = (problemRecord p) { recordOrder = [DecodedOrder (EventId 0) (EventId 1) ref] } }
+      scope = CoverageScope [DataAccess] Nothing Nothing Nothing 2
+      covered = p { problemRecord = (problemRecord p) { recordCoverage = [CoverageAssertion (Complete scope) ref InstrumentedLog] } }
+   in conjoin
+      [ withEnumeration spec familyLimits $ \e -> conjoin
+          [Enumerate.enumeratedHistories e === [[b], [b, a], [a, b]], Enumerate.enumeratedHistorySteps e === 5]
+      , withEnumeration spec { Audit.familyProblem = ordered } familyLimits $ \e -> conjoin
+          [Enumerate.enumeratedHistories e === [[a, b]], Enumerate.enumeratedHistorySteps e === 5]
+      , withEnumeration spec { Audit.familyProblem = covered } familyLimits $ \e -> conjoin
+          [Enumerate.enumeratedHistories e === [[b]], Enumerate.enumeratedHistorySteps e === 5]
+      , withEnumeration spec { Audit.familyProblem = p { problemRecord = (problemRecord p) { recordCutoff = 0 } } }
+          familyLimits $ \e -> conjoin
+          [Enumerate.enumeratedHistories e === [], Enumerate.enumeratedHistorySteps e === 5, Enumerate.enumeratedProductCount e === 0]
+      , withEnumeration (Audit.FamilySpec (familyProblemFor [] [] 0) input []) (Audit.EnumerationLimits 1 1 1) $ \e ->
+          conjoin [Enumerate.enumeratedHistories e === [[]], Enumerate.enumeratedHistorySteps e === 1]
+      ]
+
+prop_familyNativeBranches :: Property
+prop_familyNativeBranches = withFamilyInput $ \input ->
+  let commit = Stamped (EventId 0) (CommitPlan (ActorId 0) (PlanId 0) (VersionId 0))
+      run = Stamped (EventId 1) (Run (RunId 0) (PlanId 0) (VersionId 0) [(DataId 0, VersionId 0)] (FamilyId 0))
+      result = Stamped (EventId 2) (Result (RunId 0) 1)
+      duplicate = Stamped (EventId 3) (Run (RunId 0) (PlanId 0) (VersionId 0) [] (FamilyId 0))
+      updated = Stamped (EventId 4) (UpdateData (DataId 0) (VersionId 1))
+      retract = Stamped (EventId 5) (Retract (SourceId 0))
+      repeated = Stamped (EventId 6) (Retract (SourceId 0))
+      collision = Stamped (EventId 0) (Assert (ClaimId 0) (WitnessId 0))
+      spec = Audit.FamilySpec (familyProblemFor [] [result, run, commit] 3) input []
+   in conjoin
+      [ withEnumeration spec familyLimits $ \e -> conjoin
+          [Enumerate.enumeratedHistories e === [[], [commit], [commit, run], [commit, run, result]],
+           Enumerate.enumeratedHistorySteps e === 4]
+      , withEnumeration spec { Audit.familyProblem = familyProblemFor [] [commit, run, duplicate, updated, retract, repeated, collision] 7 }
+          familyLimits $ \e -> conjoin
+          [property (all validHistory (Enumerate.enumeratedHistories e)),
+           property ([commit, run, duplicate] `notElem` Enumerate.enumeratedHistories e),
+           property ([commit, updated, run] `notElem` Enumerate.enumeratedHistories e),
+           property ([retract, repeated] `notElem` Enumerate.enumeratedHistories e),
+           property ([commit, collision] `notElem` Enumerate.enumeratedHistories e)]
+      ]
+
+prop_familyExactLimits :: Property
+prop_familyExactLimits = once $ withFamilyInput $ \input ->
+  let spec = Audit.FamilySpec (familyProblemFor [] [familyAccess 0, familyAccess 1] 2) input []
+      refused limits expected = case Enumerate.enumerateFamily spec limits of
+        Left actual -> actual === expected
+        Right _ -> counterexample "over-cap enumeration returned rows" False
+      ceilingSpec = Audit.FamilySpec (familyProblemFor [] (map familyAccess [0 .. 7]) 8) input []
+      stepsCeilingSpec = Audit.FamilySpec (familyProblemFor [] (map familyAccess [0 .. 8]) 0) input []
+   in conjoin
+      [ withEnumeration spec (Audit.EnumerationLimits 5 5 5) $ \e -> Enumerate.enumeratedProductCount e === 5
+      , refused (Audit.EnumerationLimits 0 0 0) (Audit.StepsRefusal 5 0)
+      , refused (Audit.EnumerationLimits 5 4 5) (Audit.StepsRefusal 5 4)
+      , refused (Audit.EnumerationLimits 4 5 5) (Audit.HistoriesRefusal 5 4)
+      , refused (Audit.EnumerationLimits 1 5 0) (Audit.HistoriesRefusal 5 1)
+      , refused (Audit.EnumerationLimits 5 5 4) (Audit.ProductsRefusal 5 4)
+      , refused (Audit.EnumerationLimits 5 5 0) (Audit.ProductsRefusal 1 0)
+      , Enumerate.clampedLimits (Audit.EnumerationLimits 10001 200001 10001) === familyLimits
+      , case Enumerate.enumerateFamily ceilingSpec (Audit.EnumerationLimits 1000000 1000000 1000000) of
+          Left actual -> actual === Audit.HistoriesRefusal 109601 10000
+          Right _ -> counterexample "frozen history ceiling was bypassed" False
+      , case Enumerate.enumerateFamily stepsCeilingSpec (Audit.EnumerationLimits 1000000 1000000 1000000) of
+          Left actual -> actual === Audit.StepsRefusal 986410 200000
+          Right _ -> counterexample "frozen step ceiling was bypassed" False
+      ]
+
+prop_familyProductsAndLogicalExtensions :: Property
+prop_familyProductsAndLogicalExtensions = once $ withFamilyInput $ \input ->
+  let emptyProblem = familyProblemFor [] [] 0
+      check guards expectedProducts expectedExtensions =
+        withChoices (zip [0 ..] guards) $ \slots ->
+          withEnumeration (Audit.FamilySpec emptyProblem input slots) familyLimits $ \e -> conjoin
+            [Enumerate.enumeratedProductCount e === expectedProducts,
+             Enumerate.enumeratedLogicalExtensions e === expectedExtensions]
+   in conjoin
+      [ check [replicate 3 Audit.GuardTruth, [Audit.GuardNot Audit.GuardTruth]] 0 3
+      , check [replicate 3 Audit.GuardTruth, replicate 2 Audit.GuardTruth, [Audit.GuardNot Audit.GuardTruth]] 0 9
+      , check [replicate 3 Audit.GuardTruth, replicate 2 Audit.GuardTruth] 6 9
+      , withChoices [(0, replicate 10001 Audit.GuardTruth), (1, [Audit.GuardNot Audit.GuardTruth])] $ \slots ->
+          withEnumeration (Audit.FamilySpec emptyProblem input slots) (Audit.EnumerationLimits 1 1 0) $ \e -> conjoin
+            [Enumerate.enumeratedCompletions e === [], Enumerate.enumeratedProductCount e === 0,
+             Enumerate.enumeratedLogicalExtensions e === 10001]
+      , withChoices [(0, replicate 10000 Audit.GuardTruth)] $ \slots ->
+          withEnumeration (Audit.FamilySpec emptyProblem input slots) (Audit.EnumerationLimits 1 1 10000) $ \e ->
+            Enumerate.enumeratedProductCount e === 10000
+      , withChoices [(0, replicate 10001 Audit.GuardTruth)] $ \slots ->
+          case Enumerate.enumerateFamily (Audit.FamilySpec emptyProblem input slots) (Audit.EnumerationLimits 1 1 1000000) of
+            Left err -> err === Audit.ProductsRefusal 10001 10000
+            Right _ -> counterexample "frozen product ceiling was bypassed" False
+      ]
+
+prop_familyHistoryChoiceOrder :: Property
+prop_familyHistoryChoiceOrder = withFamilyInput $ \input ->
+  withChoices [(9, [Audit.GuardTruth, Audit.GuardPresent (familyAccess 0)]), (4, replicate 2 Audit.GuardTruth)] $ \slots ->
+  withEnumeration (Audit.FamilySpec (familyProblemFor [] [familyAccess 0] 1) input slots) familyLimits $ \e ->
+  let identity completion =
+        (map stampedId (Audit.completionHistory completion),
+         [(Audit.selectionSlot selection, Audit.choiceId (Audit.selectionChoice selection)) | selection <- Audit.completionAssignment completion])
+      assignment first second = [(Audit.SlotId 9, Audit.ChoiceId first), (Audit.SlotId 4, Audit.ChoiceId second)]
+   in conjoin
+      [ map identity (Enumerate.enumeratedCompletions e) ===
+          [([], assignment 0 0), ([], assignment 0 1),
+           ([EventId 0], assignment 0 0), ([EventId 0], assignment 0 1),
+           ([EventId 0], assignment 1 0), ([EventId 0], assignment 1 1)]
+      , Enumerate.enumeratedLogicalExtensions e === 9
+      , Enumerate.enumeratedProductCount e === 6
+      ]
+
+prop_familyMaterialization :: Property
+prop_familyMaterialization = withFamilyInput $ \input ->
+  let certificate name = A.DeclArg (A.Arg (A.ArgId name) (A.SupportsDerived (A.PropId name))
+        (A.ExplicitTheta (A.SRule (A.RuleId "certificate") [] [] [] []
+          (A.AssuranceCert (A.Cert (A.BackendId "family-backend") 7 (A.TheoryDigest "family-theory") (SAtom "7"))))))
+      firstDecls = [A.DeclLeaf (A.Leaf (A.LeafId "hypothesis") (familyAtom "h") A.Assumed A.User [] Nothing), certificate "first"]
+      comparison = A.Comparison (familyAtom "better") (A.MeasurandId "accuracy") (A.DatasetId "data")
+        A.StrictlyBetter (A.ArgId "recheck") (A.ArgId "bridge") (A.LeafId "result")
+        (A.LeafId "baseline") (A.LeafId "binding") (A.ComparisonClaim (A.PropId "comparison") "raw" (A.Binding "author" "" A.Unreviewed)) Nothing
+      secondDecls = [certificate "second", A.DeclComparison comparison, A.DeclStatus (A.PropId "base"), certificate "second"]
+      firstPayload = [(Source.DeclarationCertificate 1 [], Source.CertificateInteger 7)]
+      secondPayload = [(Source.DeclarationCertificate 0 [], Source.CertificateString "7"),
+        (Source.DeclarationCertificate 3 [], Source.CertificateInteger 7)]
+   in case (Source.mkFragmentWithPayloads firstDecls firstPayload, Source.mkFragmentWithPayloads secondDecls secondPayload) of
+      (Right first, Right second) ->
+        let a = Audit.Choice (Audit.ChoiceId 0) Audit.GuardTruth first
+            b = Audit.Choice (Audit.ChoiceId 1) Audit.GuardTruth second
+            spec = Audit.FamilySpec (familyProblemFor [] [] 0) input [Audit.Slot (Audit.SlotId 0) [a], Audit.Slot (Audit.SlotId 1) [b]]
+            completion = Audit.Completion [] [Audit.Selection (Audit.SlotId 0) a, Audit.Selection (Audit.SlotId 1) b]
+            materialized = Family.materialize spec completion
+         in conjoin
+            [ Family.selectedDecls completion === firstDecls ++ secondDecls
+            , A.programDecls (Source.sourceProgram materialized) === A.programDecls (Source.sourceProgram input) ++ firstDecls ++ secondDecls
+            , (Source.sourceProgram materialized) { A.programDecls = A.programDecls (Source.sourceProgram input) } === Source.sourceProgram input
+            , Source.sourcePolicy materialized === Source.sourcePolicy input
+            , Source.sourceReplay materialized === Source.sourceReplay input
+            , Source.sourceCapture materialized === Source.sourceCapture input
+            , Source.sourceCertificatePayloads materialized ===
+                [(Source.DeclarationCertificate 2 [], Source.CertificateInteger 7),
+                 (Source.DeclarationCertificate 3 [], Source.CertificateString "7"),
+                 (Source.DeclarationCertificate 6 [], Source.CertificateInteger 7)]
+            , Family.hypotheticalKeys completion ===
+                [Audit.LeafKey (A.LeafId "hypothesis"), Audit.ArgumentKey (A.ArgId "first"),
+                 Audit.ArgumentKey (A.ArgId "second"), Audit.ArgumentKey (A.ArgId "recheck"),
+                 Audit.ArgumentKey (A.ArgId "bridge"), Audit.ArgumentKey (A.ArgId "second")]
+            , withEnumeration spec familyLimits $ \e -> Enumerate.enumeratedCompletions e === [completion]
+            ]
+      other -> counterexample (show other) False
+
+familyEnumerationProps :: [(String, IO Result)]
+familyEnumerationProps =
+  [(description, quickCheckResult prop) | (description, prop) <-
+    [ ("family guards retain exact stamped occurrences and fixed-history semantics", prop_familyGuards)
+    , ("family resolution retains exact choices and validates slot identity", prop_familyIdentity)
+    , ("family fixed claims bind only exact base declarations", prop_familyFixedClaims)
+    , ("family DFS includes root and preserves prefix order without changing P0", prop_familyDFSOrder)
+    , ("family compatibility filters output without pruning executable prefixes", prop_familyDFSNoPruning)
+    , ("family DFS executes native run version retraction and event-identity gates", prop_familyNativeBranches)
+    , ("family refusals report full steps and histories before saturated products", prop_familyExactLimits)
+    , ("family late empty guards retain logical prefixes without allocating products", prop_familyProductsAndLogicalExtensions)
+    , ("family products retain history outer and choice outer order", prop_familyHistoryChoiceOrder)
+    , ("family materialization preserves metadata coordinates duplicates and hypothetical comparisons", prop_familyMaterialization)
+    ]]
+
 processSpecProps :: [(String, IO Result)]
 processSpecProps =
   [ ("process empty universe preserves precommitment", quickCheckResult (fixtureVerdict "empty-universe" CertainTrue 2))
@@ -391,3 +709,4 @@ processSpecProps =
   , ("process fixture reencoding is canonical without losing fields", quickCheckResult prop_canonicalFixture)
   , ("process boundary records enforce exact arity", quickCheckResult prop_boundaryArity)
   ]
+  ++ familyEnumerationProps

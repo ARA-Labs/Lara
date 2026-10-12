@@ -56,6 +56,8 @@ import ValueBindingsSpec (valueBindingSpecProps)
 import WireSpec (wireSpecProps)
 import ProcessSpec (processSpecProps)
 import InquirySpec (inquirySpecProps)
+import AuditWireSpec (auditWireSpecProps)
+import CheckedMethodsSpec (checkedMethodsSpecProps)
 import SourceComparisonSpec (sourceComparisonSpecProps)
 import MapWireSpec (mapWireSpecProps)
 import MapLoadSpec (mapLoadSpecProps)
@@ -224,6 +226,8 @@ main = do
         ++ [run name act | (name, act) <- wireSpecProps]
         ++ [run name act | (name, act) <- processSpecProps]
         ++ [run name act | (name, act) <- inquirySpecProps]
+        ++ [run name act | (name, act) <- auditWireSpecProps]
+        ++ [run name act | (name, act) <- checkedMethodsSpecProps]
         ++ [run name act | (name, act) <- sourceComparisonSpecProps]
         ++ [run name act | (name, act) <- mapWireSpecProps]
         ++ [run name act | (name, act) <- mapLoadSpecProps]

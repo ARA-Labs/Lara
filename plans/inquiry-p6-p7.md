@@ -4,7 +4,7 @@
 
 **Date:** 2026-10-12
 
-**Status:** Approved 2026-10-12. Tasks 1–2 are implemented and passed spec/quality review, the Haskell suite, decoded-fixture smoke scenarios, and existing source/checker differentials. Tasks 3–7 remain.
+**Status:** Approved 2026-10-12. Tasks 1–3 passed spec/quality review, the Haskell suite, and decoded-fixture smoke scenarios. Task 2 also passed the existing source/checker differentials. Tasks 4–7 remain.
 
 **Goal:** Deliver an independent Haskell implementation of `inquiry-input 1`, its result and error codecs, and a CLI whose outputs agree with the Lean reference on the full committed inquiry suite and the resource-boundary cases.
 
@@ -109,8 +109,8 @@ enumerateFamily :: FamilySpec -> EnumerationLimits
                 -> Either EnumerationRefusal EnumeratedFamily
 
 -- Lara.Process.Projection
--- CheckedFamily retains every completion, including source-rejected ones.
-checkFamily :: FamilySpec -> AuditConfig -> EnumeratedFamily -> CheckedFamily
+-- CheckedFamily retains every completion and uses the enumeration's own family.
+checkFamily :: AuditConfig -> EnumeratedFamily -> CheckedFamily
 
 -- Lara.Process.Inquiry.Run
 -- Raw file byte count is supplied separately from the typed input.
@@ -189,14 +189,14 @@ Run `cabal test lara-test` and the existing source/checker differentials after i
 
 Files: create `Audit.hs`, `AuditWire.hs`, `CheckedMethods.hs`, `Family.hs`, `Enumerate.hs`, and `Projection.hs` under `src/Lara/Process/`; extend `Audit/Types.hs`, `ProcessSpec.hs` and `InquirySpec.hs`; register modules.
 
-- [ ] Port claim and witness bindings, process/BHL witness specifications, capture assumptions, kind metadata and their codecs. Implement the source association and ledger predicates used by `Source.warranted`; include retraction/version changes, failed siblings, family selection, submitted-witness identity, conditional/evidence-blocked outcomes, and profile admission/guarantee requirements.
-- [ ] Port all six checked methods (`two`, `low`, `up`, `disjunction`, `conjunction`, `conditionalFalse`) from `lean/Lara/BHL/CheckedMethods.lean` and source-bound checks from `lean/Lara/BHL/LaraBridge.lean`. Check model/premise/program/postcondition binding, allowed parameters, before/after points and actual modeled application. Conditional interpretation does not assert execution; `conditionalFalse` fails applied preconditions. A matching method name is insufficient.
-- [ ] Pin each witness to the base source and check claim/alternative association, inferred support, retention and profile-filtered grounded warrant. Check admissible kinds, required probes, guarantee class and attained level. Conditional levels lie in [0,1]; exact ledger formulas include failed trials. Duplicate audit metadata and missing kinds make the modeled audit incomplete where Lean specifies it, not a new wrapper decode error.
-- [ ] Append every supported fragment declaration in order, including extraction/comparison declarations and generated contribution keys. Preserve base policy, replay identity, artifact digest and capture. Implement guards at the fixed history, fixed claim binding, stable slot/choice identities, assignment resolution and family membership. Keep duplicate/absence cases at their specified semantic-failure or refusal boundary.
-- [ ] Implement prefix DFS with its empty-prefix stop branch, compatible-history deduplication and deterministic pool order. Preserve full reported history/search counts and the refusal precedence in `Enumerate.enumerateFamily`. Do not silently filter source failures.
-- [ ] Count guard-surviving products using capped arithmetic before allocation. An empty choice list prunes the final rows, including a late empty guard; logical slot-extension counts still apply. Share each bounded suffix and retain the enumerated history/row/count record for later accounting.
-- [ ] Implement `Projection.checkFamily`: snapshot each bounded completion once, form the shared node/witness-name carrier, and prepare graph, grades, witnesses and fixed-claim observations from retained source results. Share this record across all requests. Distinguish raw argument occurrence, retained declaration and AF-node coordinates.
-- [ ] Add transition properties where a different valid witness cannot rescue the submitted witness, observed capture cannot be inferred for hypothetical fragments, a failed ledger sibling remains relevant, and an added attacker defeats the prior warrant. Keep timeout/product tests in the executable gate rather than a flaky QuickCheck timeout property.
+- [x] Port claim and witness bindings, process/BHL witness specifications, capture assumptions, kind metadata and their codecs. Implement the source association and ledger predicates used by `Source.warranted`; include retraction/version changes, failed siblings, family selection, submitted-witness identity, conditional/evidence-blocked outcomes, and profile admission/guarantee requirements.
+- [x] Port all six checked methods (`two`, `low`, `up`, `disjunction`, `conjunction`, `conditionalFalse`) from `lean/Lara/BHL/CheckedMethods.lean` and source-bound checks from `lean/Lara/BHL/LaraBridge.lean`. Check model/premise/program/postcondition binding, allowed parameters, before/after points and actual modeled application. Conditional interpretation does not assert execution; `conditionalFalse` fails applied preconditions. A matching method name is insufficient.
+- [x] Pin each witness to the base source and check claim/alternative association, inferred support, retention and profile-filtered grounded warrant. Check admissible kinds, required probes, guarantee class and attained level. Conditional levels lie in [0,1]; exact ledger formulas include failed trials. Duplicate audit metadata and missing kinds make the modeled audit incomplete where Lean specifies it, not a new wrapper decode error.
+- [x] Append every supported fragment declaration in order, including extraction/comparison declarations and generated contribution keys. Preserve base policy, replay identity, artifact digest and capture. Implement guards at the fixed history, fixed claim binding, stable slot/choice identities, assignment resolution and family membership. Keep duplicate/absence cases at their specified semantic-failure or refusal boundary.
+- [x] Implement prefix DFS with its empty-prefix stop branch, compatible-history deduplication and deterministic pool order. Preserve full reported history/search counts and the refusal precedence in `Enumerate.enumerateFamily`. Do not silently filter source failures.
+- [x] Count guard-surviving products using capped arithmetic before allocation. An empty choice list prunes the final rows, including a late empty guard; logical slot-extension counts still apply. Share each bounded suffix and retain the enumerated history/row/count record for later accounting.
+- [x] Implement `Projection.checkFamily`: snapshot each bounded completion once, form the shared node/witness-name carrier, and prepare graph, grades, witnesses and fixed-claim observations from retained source results. Share this record across all requests. Distinguish raw argument occurrence, retained declaration and AF-node coordinates.
+- [x] Add transition properties where a different valid witness cannot rescue the submitted witness, observed capture cannot be inferred for hypothetical fragments, a failed ledger sibling remains relevant, and an added attacker defeats the prior warrant. Keep timeout/product tests in the executable gate rather than a flaky QuickCheck timeout property.
 
 Run `cabal test lara-test` after integration. Expected: history/family/audit properties pass without weakening the legacy process audit refusal in Lean. Commit: `feat(inquiry): port audits and bounded source families`.
 
