@@ -2,11 +2,11 @@ session:
   id: 2026-10-12_001
   date: '2026-10-12'
   started: 2026-10-12T07:34
-  last_turn: '2026-10-12T22:05:48Z'
-  turn_count: 4
-  summary: Approved P8 protocol and independently annotated additive input suite are committed; source-axis
-    group interpretation confirmed. Runner implementation and correctness-gate rerun remain active; no
-    P8 measurement or P9 live run yet.
+  last_turn: '2026-10-12T23:15:47Z'
+  turn_count: 5
+  summary: Runner and gates pass; the sole approved P8 run is incomplete at a Lean timeout and T07 annotation
+    error, with exact incomplete replay retained. Corrective design reviewed and Lean proof implementation
+    started; fresh measurement and P9 remain unapproved.
 events_logged:
 - turn: 1
   type: decision
@@ -89,6 +89,36 @@ events_logged:
   routing: direct
   provenance: ai-executed
   summary: Verify independent expectations, consumer decoding and immutable freeze boundaries
+- turn: 5
+  type: decision
+  id: N407_inquiry_p8_runner
+  routing: direct
+  provenance: ai-executed
+  summary: Land a reviewed immutable inquiry capture and replay runner
+- turn: 5
+  type: experiment
+  id: N408_inquiry_p8_incomplete
+  routing: direct
+  provenance: ai-executed
+  summary: Retain the approved incomplete inquiry attempt and its exact replay
+- turn: 5
+  type: dead_end
+  id: N409_inquiry_t07_duplicate_support
+  routing: direct
+  provenance: ai-executed
+  summary: Argument renaming does not produce a distinct checked support term
+- turn: 5
+  type: decision
+  id: N410_inquiry_p8_corrective_design
+  routing: direct
+  provenance: ai-executed
+  summary: Prepare semantics-preserving corrections before requesting a fresh measurement budget
+- turn: 5
+  type: observation
+  id: O218
+  routing: staged
+  provenance: ai-suggested
+  summary: Stage semantic-support uniqueness prereview guard after T07 authoring failure.
 ai_actions:
 - turn: 1
   action: Execute the approved seven-step implementation with sequential commits and independent spec
@@ -155,6 +185,27 @@ ai_actions:
     Preserve both failed preflight outputs; final inquiry measurement remains unstarted.
   provenance: ai-executed
   files_changed: []
+- turn: 5
+  action: Complete runner Task3 through spec/quality correction loops and final 25 boundary tests; full
+    local-gates and both Haskell suites pass. Resolve/build selected drivers before the sole approved
+    production attempt. Retain incomplete run/replay and report in 664a65f, update public trackers with
+    verified merge status and required work/costs, and review the corrective implementation plan. The
+    first detailed issue payload was rejected by automatic approval review; verify the public repository
+    and publish a revised public-code-only work payload as issue49, without internal evaluation details.
+    Start /root/lean_sparse for the reviewed proof/runtime correction; no fresh measurement approval or
+    execution.
+  provenance: ai-executed
+  files_changed:
+  - scripts/inquiry-evaluate.py
+  - scripts/inquiry_evaluation_manifest.py
+  - scripts/inquiry_evaluation_report.py
+  - test/inquiry_evaluation_runner.py
+  - evaluation/inquiry-runner-validation/
+  - ara/evidence/inquiry-p8/20261012T225824Z-a904130/
+  - ara/evidence/inquiry-p8/20261012T225824Z-a904130-replay/
+  - ara/evidence/inquiry-p8/preflight-20261012T225824Z-a904130/
+  - plans/inquiry-p8-p9.md
+  - plans/inquiry-p8-corrections.md
 claims_touched:
 - id: C57
   action: revised
@@ -260,6 +311,20 @@ logic_revisions:
   signal: artifact-commitment
   provenance: ai-suggested
   note: Input freeze is committed and reviewed; no completed driver measurement or new soundness claim.
+- turn: 5
+  entry: checked-inquiry-evaluation
+  field: Status
+  before: The bounded local protocol is approved, and the additive input suite is committed after independent
+    semantic and quality review. The runner remains under implementation and must pass review before measurement;
+    no measurement result is established by input freeze.
+  after: The reviewed runner and additive suite have produced one sealed incomplete attempt. A Lean timeout
+    and a source-annotation disagreement prevent P8 completion. Corrective proof/code and independently
+    reviewed candidate inputs are being prepared; no fresh input freeze or measurement is authorized without
+    researcher approval of exact pins and a new budget.
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: Retained raw run and report establish incompleteness; no universal soundness/performance or workflow
+    claim changes.
 key_context:
 - turn: 1
   excerpt: 'User: finish @plans/inquiry-p6-p7.md , pr'
@@ -281,5 +346,8 @@ open_threads:
   live-loop protocol.'
 - 'Issue #39 remains open for infinite-horizon Ville and online FDR over complete ledgers.'
 - 'Issue #46 remains open for proving or revising the search-step ceiling rationale.'
-- 'Finish P8 Tasks 3–5: runner, single approved measurement, replay, report, researcher review and PR.'
-ai_suggestions_pending: []
+- 'Issue #49: prove sparse Lean sensitivity, fail-fast semantic checkpoints, and independently prepare
+  a corrected T07 candidate; then obtain fresh protocol/budget approval before rerunning P8.'
+ai_suggestions_pending:
+- O218 semantic-support uniqueness guard is staged until the correction is implemented and independently
+  reviewed.

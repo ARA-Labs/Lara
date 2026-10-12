@@ -342,7 +342,7 @@ deferred.
 
 ## Checked-inquiry evaluation (approved protocol)
 
-- **Status:** The bounded local protocol is approved, and the additive input suite is committed after independent semantic and quality review. The runner remains under implementation and must pass review before measurement; no measurement result is established by input freeze.
+- **Status:** The reviewed runner and additive suite have produced one sealed incomplete attempt. A Lean timeout and a source-annotation disagreement prevent P8 completion. Corrective proof/code and independently reviewed candidate inputs are being prepared; no fresh input freeze or measurement is authorized without researcher approval of exact pins and a new budget.
 - **Constraint:** Evaluate the existing native and Lean inquiry drivers on additive authored inputs. Score exact decoded meanings against independent finite annotations. Keep development controls, new inputs, correlated size variants and duplicate hashes separate in the denominators.
 - **Execution boundary:** The approved budget permits one invocation per driver and document with fixed timeouts and an aggregate deadline. Retain refusals and partial evidence; infrastructure failure requires a reviewed protocol revision before another final run. No legacy corpus, golden, version, ceiling or freeze changes are authorized.
 - **Claim boundary:** Modeled capture admissions do not establish physical capture, and descriptive finite costs or diagnostic contrasts do not establish agent success or scientific discovery. A live workflow needs its own researcher-approved task, comparison, data policy and budget.
@@ -350,4 +350,4 @@ deferred.
 - **Provenance:** user-revised approved protocol.
 - **Evidence:** trace/exploration_tree.yaml:N402_inquiry_p8_approved; trace/exploration_tree.yaml:N403_inquiry_p8_boundary; evaluation/inquiry-p8/protocol.json.
 - **Open:** Issue #22 tracks the unfinished bounded evaluation and separately approved live evaluation.
-- **Last revised:** 2026-10-12 (2026-10-12_001#4)
+- **Last revised:** 2026-10-12 (2026-10-12_001#5)

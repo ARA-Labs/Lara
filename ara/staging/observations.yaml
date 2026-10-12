@@ -4401,3 +4401,19 @@ observations:
   promoted_to: logic/solution/constraints.md:checked-inquiry-evaluation
   crystallized_via: verbal-affirmation
   stale: false
+- id: O218
+  timestamp: '2026-10-12T23:15:47Z'
+  provenance: ai-suggested
+  content: Independent accepted-source annotation should check fully expanded semantic support-term uniqueness
+    before graph reasoning; argument and derived claim names alone do not distinguish checked arguments.
+  context: T07 was independently annotated as accepted despite cloning an existing support term. Both
+    captured drivers reject its after-source, and static source inspection confirms the duplicate. A distinct-rule
+    correction and bounded prereview guard are proposed but not implemented or refrozen.
+  potential_type: heuristic
+  bound_to:
+  - N409_inquiry_t07_duplicate_support
+  - N410_inquiry_p8_corrective_design
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

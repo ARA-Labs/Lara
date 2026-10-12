@@ -11390,3 +11390,85 @@ tree:
   status: resolved
   also_depends_on:
   - N405_inquiry_p8_input_freeze
+- id: N407_inquiry_p8_runner
+  type: decision
+  title: Land a reviewed immutable inquiry capture and replay runner
+  provenance: ai-executed
+  timestamp: '2026-10-12T23:15:47Z'
+  choice: Commit fddf532 after independent spec and quality review. Keep oracle, driver, protocol and
+    consumer judgments separate; enforce fixed process/aggregate budgets; retain atomic incomplete evidence
+    and portable process-free replay. Boundary review corrected rejected-status comparisons, proof-context
+    aggregation, audit declarations, failure counts, interruption recovery and malformed-output handling.
+  alternatives:
+  - Treat matching driver output as independent oracle evidence
+  evidence:
+  - evaluation/inquiry-runner-validation/
+  - scripts/inquiry-evaluate.py
+  - git:fddf532
+  status: resolved
+  also_depends_on:
+  - N405_inquiry_p8_input_freeze
+- id: N408_inquiry_p8_incomplete
+  type: experiment
+  title: Retain the approved incomplete inquiry attempt and its exact replay
+  provenance: ai-executed
+  timestamp: '2026-10-12T23:15:47Z'
+  result: The one approved production attempt is INCOMPLETE. Lean T11-singleton-slots-40 timed out; both
+    completed T07 outputs disagree with the frozen accepted-to-accepted oracle. Completed consumer decoding
+    succeeds; missing invocations remain missing. One capture-only replay retains the incomplete result
+    and matches all sealed artifacts and deterministic reports. No retry or selected-driver diagnosis
+    was executed.
+  evidence:
+  - ara/evidence/inquiry-p8/20261012T225824Z-a904130/run.json
+  - ara/evidence/inquiry-p8/20261012T225824Z-a904130/summary.json
+  - ara/evidence/inquiry-p8/20261012T225824Z-a904130/results.jsonl
+  - ara/evidence/inquiry-p8/20261012T225824Z-a904130/report.md
+  - ara/evidence/inquiry-p8/20261012T225824Z-a904130-reproduction.json
+  - git:664a65f
+  status: resolved
+  also_depends_on:
+  - N407_inquiry_p8_runner
+- id: N409_inquiry_t07_duplicate_support
+  type: dead_end
+  title: Argument renaming does not produce a distinct checked support term
+  provenance: ai-executed
+  timestamp: '2026-10-12T23:15:47Z'
+  hypothesis: Cloning the attacker with a new argument and derived-claim identity yields the annotated
+    accepted after-graph.
+  failure_mode: T07 retains the same rule, seed premise, substitution, discharges, holes and assurance.
+    Lowered SupportTerm excludes the renamed identities; checkProgramDetailed rejects its first duplicate
+    before graph checking. The independent annotation review missed this boundary.
+  lesson: Inspect fully expanded semantic support keys before drawing an accepted graph. Preserve the
+    failed freeze and correct the source rather than weakening the intended accepted-to-accepted contrast.
+  evidence:
+  - ara/evidence/inquiry-p8/20261012T225824Z-a904130/raw/T07.native.stdout
+  - ara/evidence/inquiry-p8/20261012T225824Z-a904130/raw/T07.lean.stdout
+  - src/Lara/AST.hs
+  - src/Lara/Check.hs
+  - plans/inquiry-p8-corrections.md
+  status: resolved
+  also_depends_on:
+  - N408_inquiry_p8_incomplete
+- id: N410_inquiry_p8_corrective_design
+  type: decision
+  title: Prepare semantics-preserving corrections before requesting a fresh measurement budget
+  provenance: ai-executed
+  timestamp: '2026-10-12T23:15:47Z'
+  choice: 'Engineering review clears corrective implementation only: prove a sparse Lean algorithm exactly
+    equal to the immutable slot-sublist reference, retain pair-level semantic stop diagnoses, and independently
+    prepare a distinct-rule T07 candidate outside the old frozen suite. Track work and proof/compute/freeze
+    costs in issue 49. Start Lean proof work; do not refreeze inputs or rerun production measurement until
+    the researcher approves exact corrective pins and a fresh budget.'
+  alternatives:
+  - Drop forty-slot workloads
+  - Increase timeouts to conceal the reference traversal
+  - Replace the T07 expected outcome with source rejection
+  evidence:
+  - plans/inquiry-p8-corrections.md
+  - https://github.com/ARA-Labs/Lara/issues/49
+  - https://github.com/ARA-Labs/Lara/issues/22#issuecomment-6134392748
+  - ara/evidence/inquiry-p8/20261012T225824Z-a904130/report.md
+  status: resolved
+  also_depends_on:
+  - N408_inquiry_p8_incomplete
+  - N409_inquiry_t07_duplicate_support

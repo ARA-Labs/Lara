@@ -1888,3 +1888,13 @@ entries:
   - At the turn boundary, the earlier rerun became terminal on the separate Cabal build-summary path.
     Corrected and verified that setup, then recorded live final rerun83397; no gate pass is claimed. This
     remains setup for the qualifying input-freeze turn, not a new empirical observation.
+- turn: 2026-10-12_001#5
+  notes:
+  - Recorded runner implementation N407, actual incomplete production/replay N408, failed T07 authoring
+    assumption N409 and reviewed corrective path N410. O218 is staged as a guard heuristic, not a new
+    semantic claim.
+  - Updated only current evaluation constraint Status. C57 soundness/conformance scope remains unchanged;
+    an authored invalid source and unbudgeted reference traversal do not establish a new soundness counterexample.
+  - All failed and missing invocations remain in the ledger; no production retry. Public issue49 payload
+    was reduced to public code/work/costs after verifying destination, resolving the automatic approval
+    rejection safely.

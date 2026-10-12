@@ -757,11 +757,11 @@ sessions:
 
 - id: 2026-10-12_001
   date: '2026-10-12'
-  summary: Approved P8 protocol and independently annotated additive input suite are committed; source-axis
-    group interpretation confirmed. Runner implementation and correctness-gate rerun remain active; no
-    P8 measurement or P9 live run yet.
-  turn_count: 4
-  events_count: 13
+  summary: Runner and gates pass; the sole approved P8 run is incomplete at a Lean timeout and T07 annotation
+    error, with exact incomplete replay retained. Corrective design reviewed and Lean proof implementation
+    started; fresh measurement and P9 remain unapproved.
+  turn_count: 5
+  events_count: 18
   claims_touched:
   - C57
   open_threads: 4
