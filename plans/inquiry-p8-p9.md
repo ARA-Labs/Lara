@@ -1,6 +1,6 @@
 # Inquiry P8 protocol and P9 follow-on plan
 
->For agentic workers: use `subagent-driven-development` or `executing-plans` only after this draft is approved. Track execution with the checkboxes below.
+>For agentic workers: this plan is approved; execute it with `subagent-driven-development` or `executing-plans` and track progress with the checkboxes below.
 
 **Goal:** Evaluate the frozen checked-inquiry semantics on bounded families and explicit source transitions, then use the results to design and approve a separate live-loop evaluation.
 
@@ -8,7 +8,7 @@
 
 **Tech stack:** Haskell production checker and consumer codecs, Lean reference semantics, Python standard-library evaluation tooling, versioned S-expression inputs and append-only ARA evidence.
 
-**Status:** Draft, not approved for implementation or execution. All tasks remain. Creating this plan authorizes neither P8 measurements nor P9 compute, commits, pushes or a PR.
+**Status:** Approved by Yifeng He on 2026-10-12 for implementation and for the P8 local measurement budget defined below. All tasks remain. Approval does not authorize P9: any live-loop pilot or evaluation, agent call or paid compute still needs its own approved protocol.
 
 **Date:** 2026-10-12
 
@@ -58,7 +58,7 @@ The 16 existing controls are `source-rejections`, `mixed-stability`, `inconsiste
 | T05 | Extract the `blocked-conditional` pair. Both endpoints stay blocked while the conditional label changes from defeated to justified; require that the full public-status query is changed. |
 | T06 | Extract the `unrelated-self-attack` pair. The queried status stays defeated and locality succeeds despite an unrelated edit. |
 | T07 | Author an accepted pair with an edit inside the query's ancestry that leaves its status unchanged but fails the sufficient locality test. Specify its small graph by hand before encoding it. |
-| T08 | Author a declaration permutation of T07's before source with stable identity correspondence and a fixed query atom. Require equal statuses; compare certificates structurally under that correspondence, not by raw indices. |
+| T08 | Pair T07's before source with an authored declaration permutation of it, keeping stable identity correspondence and a fixed query atom. Require equal statuses and a successful locality check; compare certificates structurally under that correspondence, not by raw indices. |
 | T09 | Author a nonempty family whose rows all have the same rejection outcome. Require whole-outcome stability without inventing an accepted status; score accepted-only stability using the frozen empty-accepted-domain rule. |
 | T10 | Author two accepted family rows with the same claim status but different fixed-witness audit results. Require stable status and unstable audit; record the exact profile and process bindings. |
 | T11 | Extend the `reference-sensitivity` family with a third choice producing the same flip set as an existing choice. Require every differing row, deduplicated minima and the first declaration-order realizer. |
@@ -66,7 +66,7 @@ The 16 existing controls are `source-rejections`, `mixed-stability`, `inconsiste
 | T13 | Author a family with no row satisfying its requested accepted target and a catalog containing a slot equality and its contradictory inequality. Require no satisfying subset, including the full catalog that eliminates every row; empty restriction cannot establish the unreachable target. |
 | T14 | Use a family already satisfying its accepted target and a catalog containing irrelevant literals. Require the empty minimal set and no spurious nonempty minimum. |
 | T15 | Bind one modeled observed witness to an exact admitted capture, then alter the source/process binding. In one bounded family require the affirmative only on the correctly bound row; no label alone earns observed assurance. |
-| T16 | On the T01 accepted identity pair, generate an impact certificate with the sanctioned impact API and verify it against the supplied endpoints; alter one recorded read value while retaining its key. Require `verified` for the original and `invalid-certificate` for the altered value, not an inquiry refusal. |
+| T16 | On the T01 accepted identity pair, generate an impact certificate with the sanctioned impact API and verify it against the supplied endpoints; replace one recorded read value with a different value of the same `ReadKey.Val` type while retaining its key. A wrong-shaped value would test a different fault, so it is out of scope here. Require `verified` for the original and `invalid-certificate` for the altered value, not an inquiry refusal. |
 
 Prepare T07-T15 from the same source vocabulary as the controls, with independently drawn graphs, row observations, histories and assumption truth tables in the oracle annotations. The author must not read a new driver's output to decide the expected result. T16's certificate producer may compute the certificate, but the expected transition, query partition and tamper fault are independently specified. Do not infer correctness merely because a producer and verifier share an implementation.
 
@@ -75,7 +75,7 @@ The 64 size variants are four levels on four axes, applied to four specified see
 | Axis | Levels | Four seed controls | Semantic expectation |
 | --- | --- | --- | --- |
 | Inert singleton slots | 0, 1, 4, 40 added slots | T09, T10, T11, T12 | Keep histories, row observables and sensitive original slots unchanged; singleton choices add no alternative completions. Record the frozen empty-changed-set rule if applicable. |
-| Inert source declarations | 0, 1, 4, 16 added declarations | T01, T05, T06, T07 | Add disconnected accepted leaf-root arguments with fresh identities and nonconflicting atoms to both endpoints. Query statuses and changed partitions stay fixed; read inventories can grow. |
+| Inert source declarations | 0, 1, 4, 16 added declarations | T01, T05, T06, T07 | Add disconnected accepted leaf-root arguments with fresh identities, fresh atoms and their required signature entries to both endpoints; a repeated leaf is a source rejection (as in `dup-plain`), not an inert addition. Query statuses and changed partitions stay fixed; read inventories can grow. |
 | Additional assumption literals | 0, 1, 2, 4 distinct added literals | T09, T10, T13, T14 | Each seed has one explicit `minimal-assumptions` request. Add distinct unused-slot inequalities that are true in every row; record their exact evaluations. They must introduce no new minimal satisfying sets. |
 | Repeated query work | 1, 2, 4, 8 copies of the seed's wrapper request list | T01, T05, T11, T12 | Fresh labels preserve each answer's content until the shared budget refuses the whole document. Do not deduplicate repeated work in the runner or multiply cases in semantic success denominators. |
 
@@ -186,9 +186,9 @@ P9 completes only when its separately approved protocol has been run, the full l
 
 ### Task 1: Approve the protocol and establish the additive input boundary
 
-Files: create `evaluation/inquiry-p8/protocol.json` and `evaluation/inquiry-p8/MANIFEST.json`; update this plan's status only after researcher approval. These paths and the commands below are proposed deliverables, not existing executables.
+Files: create `evaluation/inquiry-p8/protocol.json` and `evaluation/inquiry-p8/MANIFEST.json`. The researcher approved this plan on 2026-10-12. These paths and the commands below are proposed deliverables, not existing executables.
 
-- [ ] Review the questions, case matrix, 96-document cap, local execution budget and P9 separation. Record the approving researcher and exact protocol text hash in `protocol.json`.
+- [ ] Review the questions, case matrix, 96-document cap, local execution budget and P9 separation. Record the approving researcher and the Git blob hash of this plan at its approval commit in `protocol.json`; later status-banner edits do not change the approved protocol.
 - [ ] Pin the code commit and verify the native/Lean/toolchain dependencies are locally available. Record any required setup separately from measurement time.
 - [ ] Record hashes of the legacy input trees and selected fixture/golden controls. Do not run a regeneration or `UPDATE=1` command.
 
@@ -251,6 +251,6 @@ Files: create `ara/evidence/inquiry-p8/RUN_ID/report.md`; update `docs/evaluatio
 
 ## Next Steps
 
-1. Review and approve or revise this draft. No measurements or live compute start from the draft alone.
+1. Commit this approved plan so its blob hash can be pinned in `protocol.json`.
 2. Execute P8 Tasks 1-5 under the approved freeze and local budget.
 3. Review the P8 findings and approve a fully specified, separately budgeted P9 protocol before its pilot or evaluation run.
