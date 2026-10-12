@@ -2,10 +2,11 @@ session:
   id: 2026-10-12_001
   date: '2026-10-12'
   started: 2026-10-12T07:34
-  last_turn: '2026-10-12T21:37:24Z'
-  turn_count: 3
-  summary: Native inquiry gates established previously; approved P8 protocol now pinned and Task 1 committed.
-    Suite authoring and current correctness gates remain running; no P8 measurement or P9 live run yet.
+  last_turn: '2026-10-12T22:05:48Z'
+  turn_count: 4
+  summary: Approved P8 protocol and independently annotated additive input suite are committed; source-axis
+    group interpretation confirmed. Runner implementation and correctness-gate rerun remain active; no
+    P8 measurement or P9 live run yet.
 events_logged:
 - turn: 1
   type: decision
@@ -70,6 +71,24 @@ events_logged:
   routing: crystallized
   provenance: user-revised
   summary: Approved protocol becomes the bounded evaluation constraint; no outcome claim.
+- turn: 4
+  type: decision
+  id: N404_inquiry_source_axis_groups
+  routing: direct
+  provenance: user
+  summary: Count source-axis levels as leaf-root groups and disclose the AST charge
+- turn: 4
+  type: decision
+  id: N405_inquiry_p8_input_freeze
+  routing: direct
+  provenance: ai-executed
+  summary: Freeze the independently annotated inquiry suite before any driver measurement
+- turn: 4
+  type: experiment
+  id: N406_inquiry_freeze_verification
+  routing: direct
+  provenance: ai-executed
+  summary: Verify independent expectations, consumer decoding and immutable freeze boundaries
 ai_actions:
 - turn: 1
   action: Execute the approved seven-step implementation with sequential commits and independent spec
@@ -113,6 +132,20 @@ ai_actions:
   files_changed:
   - evaluation/inquiry-p8/protocol.json
   - evaluation/inquiry-p8/MANIFEST.json
+  - plans/inquiry-p8-p9.md
+- turn: 4
+  action: Author and review Task 2, resolve source-axis wording with the researcher, add the wrong-run
+    capture control, fix freeze/provenance/receipt IO boundaries, pass focused tests, and commit 95f63bf.
+    Launch Task 3 implementer /root/runner. First local-gates process ended at Cabal log permission failure
+    after Lean and registry checks passed; preserve /tmp/inquiry-p8-local-gates.log. Redirect logs with
+    CABAL_CONFIG=/tmp/inquiry-p8-cabal.config and start rerun, live session 86481, output /tmp/inquiry-p8-local-gates-rerun.log.
+    Neither full gate success nor final measurement completion is claimed.
+  provenance: ai-executed
+  files_changed:
+  - evaluation/inquiry-p8/
+  - scripts/inquiry_evaluation_cases.py
+  - scripts/inquiry-impact-producer.hs
+  - test/inquiry_evaluation_boundaries.py
   - plans/inquiry-p8-p9.md
 claims_touched:
 - id: C57
@@ -208,6 +241,17 @@ logic_revisions:
   signal: verbal-declaration
   provenance: user-revised
   note: Approved protocol is a constraint, not an empirical outcome or a soundness claim.
+- turn: 4
+  entry: checked-inquiry-evaluation
+  field: Status
+  before: The bounded local protocol is approved. The suite and runner must be independently reviewed
+    and frozen before measurement; no measurement result is established by protocol approval.
+  after: The bounded local protocol is approved, and the additive input suite is committed after independent
+    semantic and quality review. The runner remains under implementation and must pass review before measurement;
+    no measurement result is established by input freeze.
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: Input freeze is committed and reviewed; no completed driver measurement or new soundness claim.
 key_context:
 - turn: 1
   excerpt: 'User: finish @plans/inquiry-p6-p7.md , pr'
@@ -221,11 +265,13 @@ key_context:
 - turn: 3
   excerpt: 'User goal: finish $implement plans/inquiry-p8-p9.md. Plan approval pins P8 only; full implementation,
     measurement, interpretation and PR remain underway.'
+- turn: 4
+  excerpt: 'Researcher reply: Count leaf-root groups; clarify the protocol accordingly (Recommended).
+    This resolves the source-axis interpretation before input freeze.'
 open_threads:
 - 'Issue #22 remains open for P8 bounded semantic/source-transition evaluation and P9 separately approved
   live-loop protocol.'
 - 'Issue #39 remains open for infinite-horizon Ville and online FDR over complete ledgers.'
 - 'Issue #46 remains open for proving or revising the search-step ceiling rationale.'
-- "Finish P8 Tasks 2\u20135: independent input freeze, runner, single approved measurement, replay, report,\
-  \ researcher review and PR."
+- 'Finish P8 Tasks 3–5: runner, single approved measurement, replay, report, researcher review and PR.'
 ai_suggestions_pending: []

@@ -11334,3 +11334,59 @@ tree:
   status: resolved
   also_depends_on:
   - N402_inquiry_p8_approved
+- id: N404_inquiry_source_axis_groups
+  type: decision
+  title: Count source-axis levels as leaf-root groups and disclose the AST charge
+  provenance: user
+  timestamp: '2026-10-12T22:05:48Z'
+  choice: The researcher explicitly chose leaf-root groups for the source-declaration levels. Each group
+    consists of a fresh leaf and its root argument; the protocol records both the group level and exact
+    AST declaration count. Execution limits and legacy inputs remain unchanged.
+  alternatives:
+  - Keep literal AST declaration counts and revise the construction
+  evidence:
+  - evaluation/inquiry-p8/protocol.json:amendments/source-axis-groups
+  - plans/inquiry-p8-p9.md
+  status: resolved
+  also_depends_on:
+  - N402_inquiry_p8_approved
+- id: N405_inquiry_p8_input_freeze
+  type: decision
+  title: Freeze the independently annotated inquiry suite before any driver measurement
+  provenance: ai-executed
+  timestamp: '2026-10-12T22:05:48Z'
+  choice: Commit the additive suite as 95f63bf after independent semantic/spec and quality review. Retain
+    exact row, graph, history, guard, sensitivity, assumption, capture and certificate annotations. Revise
+    the observed-capture case to include an actual wrong-run alternative with valid common ledger evidence,
+    rather than absence alone. Keep code, wire, legacy corpus and freeze tags unchanged.
+  alternatives:
+  - Infer expected results from a final driver run
+  - Use capture absence as the sole wrong-binding control
+  evidence:
+  - evaluation/inquiry-p8/MANIFEST.json
+  - evaluation/inquiry-p8/independent-review.json
+  - evaluation/inquiry-p8/oracles/T15.json
+  - evaluation/inquiry-p8/quality-review.json
+  - git:95f63bf
+  status: resolved
+  also_depends_on:
+  - N403_inquiry_p8_boundary
+  - N404_inquiry_source_axis_groups
+- id: N406_inquiry_freeze_verification
+  type: experiment
+  title: Verify independent expectations, consumer decoding and immutable freeze boundaries
+  provenance: ai-executed
+  timestamp: '2026-10-12T22:05:48Z'
+  result: The independent finite audit and source/graph inspection pass for all authored and generated
+    documents; original development input/golden pairs remain unchanged. Real consumer-only checks accept
+    original input and expected ASTs. Focused tests verify input-bound review provenance, non-overwriting
+    frozen generation and read-only audit replay. These are authoring/conformance checks, not P8 latency
+    or live-workflow observations; no production inquiry driver measurement was run.
+  evidence:
+  - evaluation/inquiry-p8/independent-review.json
+  - evaluation/inquiry-p8/authoring-validation.json
+  - evaluation/inquiry-p8/quality-review.json
+  - test/inquiry_evaluation_boundaries.py
+  status: resolved
+  also_depends_on:
+  - N405_inquiry_p8_input_freeze

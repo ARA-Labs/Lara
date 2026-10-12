@@ -1875,3 +1875,11 @@ entries:
     constraint after researcher approval and protocol commitment.
   - No empirical result or claim status changed. Case authoring and make local-gates remain live; no final
     driver measurement started. Prior trace and observation prose remain immutable.
+- turn: 2026-10-12_001#4
+  notes:
+  - Recorded explicit source-axis clarification N404, committed independent input freeze N405 and actual
+    authoring/conformance verification N406. No performance or workflow outcome is introduced.
+  - Revised only the current evaluation constraint Status via artifact commitment. No unrelated staged
+    observations or claim statuses changed.
+  - Retain failed preflight output and live rerun handle; no full-gate success or P8 driver result is
+    claimed.

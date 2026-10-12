@@ -757,10 +757,11 @@ sessions:
 
 - id: 2026-10-12_001
   date: '2026-10-12'
-  summary: Native inquiry gates established previously; approved P8 protocol now pinned and Task 1 committed.
-    Suite authoring and current correctness gates remain running; no P8 measurement or P9 live run yet.
-  turn_count: 3
-  events_count: 10
+  summary: Approved P8 protocol and independently annotated additive input suite are committed; source-axis
+    group interpretation confirmed. Runner implementation and correctness-gate rerun remain active; no
+    P8 measurement or P9 live run yet.
+  turn_count: 4
+  events_count: 13
   claims_touched:
   - C57
   open_threads: 4
