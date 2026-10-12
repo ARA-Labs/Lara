@@ -254,7 +254,7 @@ Four computations turn an accepted source into warrant data, each stated as an e
 
 `Lara.Process.SourceModel` and `Lara.Process.FamilyAudit` assemble those fields into the total model. `prepare` computes one `Snapshot` per completion — the checked outcome, the carrier coordinates, the graded node table — and `rowModel` is the resulting `WarrantModel` over rows: the profile graph (`profile_graph_exact`), the per-node kind, the concluded claim, the probed set, the attained guarantee and the artifact check. `warranted_iff` relates the executable `warranted` to `Warranted`, `rejected_not_warranted` and `incomplete_not_warranted` pin the two fail-closed cases, `prepare_complete_all_nodes` shows completeness requires every node's grade, and `warranted_source_witness` links an affirmative audit to a genuine source certificate. `audit` quantifies the fixed witness over the guarded product in the frozen order — nonempty family, every coverage assertion accepted, `Warranted` in every row — and `audit_iff` proves it equal to `ProductAuditHolds`, with `no_slots_audit_iff` specialising to the existing `Universe.AuditHolds` when a family has no slots; `Lara.Process.Enumerate.searchFamily_perm` is the proved equality that ties the caller-supplied completion list to `Family.referenceFamily`, so an audit is about the declared family and not about whatever rows were passed. `Lara.Process.Family` supplies the fragments, slots and guarded product (`selectedDecls`, `materialize`, `referenceFamily`) with `FamilyWire` and `InquiryProcessWire` as their contextual codecs.
 
-The boundary is unchanged by any of this: no theorem turns a producer's kind label into an observation. An `observed` grade requires an explicitly reader-admitted `CaptureAssumption` with exact source and process bindings, the audit is conditional on the assumptions a result prints, and an audit over a family containing a rejected source is false (`audit_rejection_fails`). The version-1 `process-input 1` runner still refuses a submitted-witness audit as `unsupported`; the wrapper that consumes this boundary is #22's integration stage.
+The boundary is unchanged by any of this: no theorem turns a producer's kind label into an observation. An `observed` grade requires an explicitly reader-admitted `CaptureAssumption` with exact source and process bindings, the audit is conditional on the assumptions a result prints, and an audit over a family containing a rejected source is false (`audit_rejection_fails`). The standalone version-1 `process-input 1` runner remains Lean-only and refuses a submitted-witness audit as `unsupported`; the native checked-inquiry wrapper consumes this boundary through its own entry point.
 
 ## What do the exact inquiry analyses compute?
 
@@ -378,14 +378,21 @@ The checked-inquiry wrapper is a second, separately versioned entry point; it le
 
 `Lara.Process.InquiryRun` is the reference semantics and the bounded runner. The reference side projects one `checkFamily` per family, so the checker runs once per completion and every request reads the shared projection. The runner threads a single budget through enumeration, observation and each dispatched request and returns a refusal instead of a partial answer; `runBounded_eq_reference` proves a successful bounded result equals the reference result, and every cap has an exact-at-cap and a cap-plus-one lemma (`checkBudgets_at_cap_*` / `checkBudgets_cap_plus_one_*`, `family_at_cap`, `family_histories_cap_plus_one`, `family_steps_cap_plus_one`, `family_sources_cap_plus_one`). Product and powerset bounds are allocation guards only, so a loose declared bound never refuses a guarded family that fits the actual counters. Embedded verdict queries are emitted first in their original order and wrapper requests after them, with labels required to be unique across the two lists, history-verdict results tagged separately from source-family results, and the unguarded history count kept distinct from the guarded source count.
 
-The native Haskell door is `lara inquiry FILE`. Its input, result and error
-consumers are `Lara.Process.Inquiry.Wire`; result decoding takes the embedded
-document's `Names`, while error decoding needs no namespace table. The
-`Lara.Process.Inquiry.Run` library exposes `runBounded`, `runInquiryFile` and
-`exitCodeOf`. It retains one checked family for all family requests and reuses
-observed impact endpoints for pair accounting and dispatch. Unresolved impact
-claim bindings are malformed refusals after budget, label and reference checks;
-the reference's inert query contributes only to private prevalidation accounting.
+The native Haskell door is `lara inquiry FILE`. `Lara.Process.Inquiry.Types`
+defines the typed input, request, result and refusal records.
+`Lara.Process.Inquiry.Wire` exposes `parseInquiryInputBS` / `encodeInquiryInput`,
+`parseInquiryResult` / `encodeInquiryResult`, and
+`parseInquiryError` / `encodeInquiryError`. Result codecs take the embedded
+document's `Names`; error codecs need no namespace table. Public decoders enforce
+exact envelope versions, canonical contextual forms and constructor shapes,
+and distinguish unsupported versions, malformed envelopes and wrong envelope kinds.
+`Lara.Process.Inquiry.Run` exposes
+`runBounded :: InquiryInput -> Natural -> Either RunRefusal [InquiryResult]`,
+`runInquiryFile` and `exitCodeOf`. It retains one checked family for all family
+requests and reuses observed impact endpoints for pair accounting and dispatch.
+Unresolved impact claim bindings are malformed refusals after budget, label and
+reference checks; the reference's inert query contributes only to private
+prevalidation accounting and cannot become an accepted result.
 
 The CLI reads strict bytes and validates the entire file as UTF-8 before parsing,
 including comments and trailing bytes. Read failures and invalid UTF-8 produce
@@ -403,9 +410,10 @@ including an invalid-certificate result, exits 0; unsupported or limit refusals
 exit 1; other refusals exit 2.
 
 `source-bytes` counts the original file's UTF-8 bytes, including whitespace and
-multibyte characters. The executable passes that count to `runBounded`; typed
-callers without a file use `actualOf input .sourceBytes`, the canonical
-encoding's UTF-8 size. `runBounded_sourceBytes_limit` proves an oversize input
+multibyte characters. The executable passes that count to `runBounded`.
+Lean typed callers without a file use `actualOf input .sourceBytes`, the canonical
+encoding's UTF-8 size. Native typed callers supply the byte count explicitly.
+`runBounded_sourceBytes_limit` proves an oversize input
 is refused before source checking (after the embedded event-bound check).
 `scripts/check_inquiry_bytes.py` exercises exact-cap and cap-plus-one inputs
 with ASCII, extra whitespace and multibyte text through the real executable.
@@ -424,20 +432,76 @@ exact-cap boundaries and early/late empty guards, with a timeout on each CLI
 invocation. Logical search-step charges still apply when late guards eliminate
 every final row.
 
+Each declared inquiry limit is clamped to its fixed checker ceiling. Equality
+at the effective cap is accepted. The counters measure the following work:
+
+| Counter | Fixed ceiling | Charged work |
+| --- | ---: | --- |
+| `histories` | 10000 | Distinct unguarded history completions, also clamped by the embedded document's completion limit |
+| `sources` | 10000 | Actual guard-surviving family rows, including rejected sources, plus two endpoints per `impact` or `verify-impact` request |
+| `source-bytes` | 1048576 | Original input UTF-8 bytes, including whitespace and comments |
+| `declarations` | 10000 | Aggregate declarations in materialized family rows, plus both endpoint declaration counts for each impact request |
+| `search-steps` | 200000 | Full history DFS visits plus logical slot extensions, including prefixes whose later guard leaves zero rows |
+| `pairs` | 4096 | Family rows per ordinary wrapper request; sum of surviving rows over all catalog subsets per `minimal-assumptions` request; twice the original query-list length plus the distinct side-tagged read-key count per impact request |
+| `subsets` | 4096 | Sum of `2 ^ length (dedupLast catalog)` over all `minimal-assumptions` requests |
+
+For `verify-impact`, the query list used in pair accounting comes from the
+certificate, but the supplied request endpoints are authoritative. Duplicate
+queries still count in the original list length. The embedded event bound is
+separate: it is the minimum of its declared event limit and 8, and exceeding it
+reports a `histories` refusal with the event count and effective event cap.
+
+After input decoding, refusal priority is fixed:
+
+1. Check the embedded event bound, then the original source-byte count.
+2. Enumerate the family: check full history DFS steps, distinct histories,
+   then guarded products. Product counting saturates at the effective source
+   cap plus one.
+3. Check cheap source and subset allocation counts, in that order.
+4. Check remaining counters in order: source bytes, declarations, pairs,
+   subsets, sources, then combined history-and-slot search steps.
+5. Reject duplicate result labels across embedded queries and wrapper requests,
+   then unresolved or out-of-family sensitivity references, then unresolved
+   impact claim bindings.
+6. Build the shared checked-family projection and dispatch requests.
+
+Budget refusals therefore precede label, reference and binding failures.
+For example, the private accounting placeholder for a missing impact binding
+can yield a `pairs` count of 18 before the binding is reported malformed.
+It is not a public empty-atom fallback.
+
 Compatibility with the old entry point is a theorem, not an assumption: `embeddedVerdicts_eq_p0` and `embedded_verdict_bytes_eq_p0` state that a slotless wrapper document's embedded verdicts and their bytes agree with P0's own `answer`, and `p0_run_answers_preserved` and `p0_run_audit_preserved` pin that the old runner's verdict list and its audit refusal are unchanged. New-runner witnesses carry membership proofs rather than byte equality with P0 witnesses. A `verify-impact` request decodes a typed certificate, reruns the shared observer on both sources and returns the labelled `VerificationResult`; `verifyCertificate_verified_iff` proves its `verified` case equivalent to `verifyImpactBool = true`, a false claim returns `invalid-certificate` with the closed fault, and a malformed wire certificate is an outer refusal. Exit codes are 0 for a result, 1 for `unsupported` and `limit`, and 2 for every other refusal, with empty stderr on the success path.
 
 `lake exe inquiry-run FILE` is the reference runner and `lake exe inquiry-examples` recomputes a built-in suite; `fixtures/process/inquiry/` holds one executable document per acceptance row with its `.expected` golden, and `scripts/check-inquiry-run.sh` compares stdout, stderr and exit codes byte for byte (`UPDATE=1` rewrites the goldens). `make process-theory` runs both the old process gates and this one.
 
-`make inquiry-conformance` builds the native Haskell and Lean inquiry drivers,
-discovers every inquiry fixture, and checks each driver's raw stdout, exit code
-and empty stderr independently against the unchanged golden. It also sends the
-original inputs and actual outputs through the Haskell consumer codecs, including
-the temporary byte/product boundary inputs. Generated cases pin allocation
-guards, shared counters and refusal precedence, full certificate faults and
-read-value validation, empty output, reader depth, UTF-8 and locale-independent
-paths. A missing golden, empty fixture family, nested or unowned process input,
-spawn failure, signal or timeout fails the gate. This target is part of
-`make cross-check`, hence `make local-gates`; it has no golden-update mode.
+`make inquiry-conformance` runs `scripts/check-inquiry-conformance.py`. It builds
+each native Haskell and Lean inquiry driver once, then invokes the binaries
+directly. It discovers every inquiry fixture and checks each driver's raw
+stdout, exit code and empty stderr independently against the unchanged golden.
+Generated cases have independent expected outcomes, so driver agreement alone
+cannot pass the gate. The sole intended CLI usage difference is
+`usage: lara inquiry FILE` versus `usage: inquiry-run FILE`.
+
+The gate sends original inputs and actual captured outputs through the public
+Haskell consumer codecs using `scripts/inquiry-codec-client.hs`, including the
+temporary byte/product boundary inputs. Generated cases pin allocation guards,
+shared counters and refusal precedence, full certificate faults and read-value
+validation, empty output, reader depth, UTF-8 and locale-independent paths.
+A missing fixture/golden partner, empty process fixture family, nested or unowned
+process fixture, spawn failure, signal or timeout fails the gate. Driver and
+product invocations have a 10-second timeout. Boundary scripts retain their
+Lean defaults and accept a complete driver command plus an optional consumer
+observer. Temporary cases are removed when the gate exits; there is no
+golden-update mode.
+
+This target is part of `make cross-check`, hence `make local-gates`.
+`make process-theory` remains the Lean reference gate. Neither required GitHub
+workflow nor the optional Lean workflow runs the inquiry conformance target;
+the guarantee is the local pre-review procedure described in
+[CI and local gates](implementation.md#ci-and-local-gates).
+These finite checks provide conformance evidence. Soundness comes from the
+mechanized theorems; the gate establishes no performance or scientific-discovery
+claim.
 
 ## How is the development checked?
 

@@ -1852,3 +1852,10 @@ entries:
   - "C57's numbers are grounded by re-opening their sources this turn (the coverage script's own output line, the fixture listing, the gate exit code); no value was carried over from a worker report."
   - "Did NOT add a constraint entry for O216: a build-hygiene fact about exe entry modules is not yet a project constraint, and Stage 4 defaults to no change."
   - "Near-miss: the review's residual fault-granularity note (outcomeMismatch grouping three checks) was considered for the logic layer and rejected — the plan's own fault taxonomy is that granularity."
+
+- turn: 2026-10-12_001#1
+  notes:
+  - "Recorded native implementation as N396, observed finite conformance as N397, and review-driven consumer/value/precedence corrections as N398. The evidence log copies completed gate output; no performance or scientific-discovery claim is introduced."
+  - "Revised only C57 Conditions, Sources and Proof to remove the obsolete no-native-wrapper boundary. Exact before/after is in today's session; supported status and ai-suggested provenance remain unchanged."
+  - "Kept prior staged heuristics unpromoted: reuse of frozen accounting definitions does not establish a new general heuristic or researcher affirmation. No historical trace or observation content was rewritten."
+  - "Preserved issue 22's P8/P9 boundary and issues 39/46. The standalone process runner remains Lean-only; the native door is the separately versioned inquiry wrapper."

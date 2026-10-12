@@ -1,0 +1,36 @@
+Observed acceptance run, 2026-10-12, feat/inquiry-p6-p7.
+Selected output lines below are copied from completed tool runs, not benchmark measurements.
+
+Commands completed successfully:
+python3 scripts/check-inquiry-conformance.py
+make inquiry-conformance
+make process-theory
+cabal test lara-test
+make local-gates
+cabal test all
+
+Inquiry conformance output (also emitted by make local-gates):
+inquiry UTF-8 byte limits: 6 boundary cases pass
+inquiry bounded products: 7 cases pass
+inquiry UTF-8 byte limits: 6 boundary cases pass
+inquiry bounded products: 7 cases pass
+inquiry conformance: 49 frozen fixtures, 70 generated cases, both boundary suites and CLI/locale contracts pass independently for both drivers
+
+Selected integrated local-gate output:
+Axiom audit passed.
+presentation parity: PASS (91 rows)
+surface conformance: PASS (28 cases)
+semantics goldens: PASS
+backend deps golden: PASS
+update goldens: PASS
+update differential: PASS (174 decisions)
+evidence differential: PASS 64 typed cases; concrete byte parsers and OS capture are separate checks
+
+Full Haskell suite output:
+Examples: 3  Tried: 3  Errors: 0  Failures: 0
+Test suite lara-doctest: PASS
+Test suite lara-test: PASS
+
+Scope: finite conformance and contract-boundary execution, not a new soundness proof,
+performance measurement, scientific-discovery improvement, or P8/P9 evaluation.
+No fixture, golden, corpus, manifest, version, ceiling or Lean theory was changed.
