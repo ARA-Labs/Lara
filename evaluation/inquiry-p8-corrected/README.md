@@ -103,11 +103,12 @@ A draft candidate, a freeze marker alone or a changed approved candidate fails
 before driver resolution. Replay reads the saved input identity and runs no
 processes. There is no approval bypass flag.
 
-The recorded approval does not yet change those candidate state markers.
-[Issue #53](https://github.com/ARA-Labs/Lara/issues/53) tracks two regression
-tests that assume the real suite is still unapproved. Their test-only fixtures
-must be corrected before the freeze; because the test helper is pinned, its
-reviewed pin change needs an explicit approval amendment.
+The refusal tests construct explicit temporary draft or unapproved suites,
+independent of this candidate's current state. The approval-state test first
+loads a complete synthetic approved fixture, then changes only that state.
+`approval-amendment.json` records the researcher instruction covering this
+test-only correction and its single helper-pin change. The original approval
+and candidate snapshots retain their original bytes.
 
 The runner uses saved-run schema version 2. It publishes `run.json` and its
 embedded `metadata_sha256` in one atomic replacement, without a separate

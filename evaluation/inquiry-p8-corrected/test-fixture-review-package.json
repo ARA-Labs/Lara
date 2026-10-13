@@ -1,0 +1,41 @@
+{
+  "schema": "inquiry-p8-test-fixture-review-package",
+  "schema_version": 1,
+  "scope": "Issue 53 test-only amendment; original review-package.json remains historical and unchanged.",
+  "parent_review_package_sha256": "6a59703b25cfd3790fc254bcc5f125adc027bdec34473b49d1dfa309f4003664",
+  "approval_amendment": {
+    "path": "approval-amendment.json",
+    "sha256": "a4a79cf642c1a3fd0604f63c6dd6e9700f0b6a4de2152f041bc3edd2953061e1"
+  },
+  "protocol_sha256": "663e6c92823bfce9cfa6dd53920e089c7c717e3a1a20e01f0893f353570a8bec",
+  "manifest_sha256": "1aaf2eb1e7758fea800e0046e4b01d5f176823ef44f3fe2f98bc4dedf0a6dd22",
+  "source_hashes": {
+    "test/inquiry_corrected_candidates.py": "0b80b4c991492bd849d8c7004c35b687a675bbca9b0e5d9601543c9a06e5e286",
+    "test/inquiry_approval_receipt.py": "6dfca72201daa2619189dfe48bf06f6e8111671008fdc676b98eb51f1b8a8975",
+    "scripts/inquiry_evaluation_manifest.py": "dac0eeeb981fa161a6b1258c91a4a6a293e5cdf31c9d5fef53d60e59e0d937d6",
+    "scripts/inquiry-evaluate.py": "6e1eb3c930595da46f6940187b20c777e14b631225b3f7c66f9bb83d392d76f9",
+    "plans/inquiry-p8-corrections.md": "10ec5fa5c473cc098ba468494da58cc734daea6a482b7e122b926fb1f32df456"
+  },
+  "reviews": [
+    {
+      "path": "review/test-fixture-spec-initial.json",
+      "sha256": "c7391c4da91b860dd35bd7f26c6309d36c9010db3dba90724e3782cc71328a73"
+    },
+    {
+      "path": "review/test-fixture-quality-final.json",
+      "sha256": "0a08cbdaa404b2568f78bb7cc895507e4ef5394e965a69cb60c35df19ff043ce"
+    },
+    {
+      "path": "review/test-fixture-quality-initial.json",
+      "sha256": "f4df2d7ba2630cd3cd18175d79494367d1a34565866de7f39e4fe7f7fd0edce1"
+    },
+    {
+      "path": "review/test-fixture-validation.json",
+      "sha256": "acf31e0df1fa3a517b0a7f368b6f5955a10532d51df07b7fde94b2b63c89539d"
+    }
+  ],
+  "input_or_oracle_changes": false,
+  "production_code_changes": false,
+  "budget_changes": false,
+  "identity_verification": "Parent computed current-byte hashes and asserted that the candidate protocol differs only at the changed test helper digest. Independent agents reviewed source and specification. Their raw receipts disclose uncomputed hashes; this package supplies current-byte hashes for the amendment and plan as requested."
+}

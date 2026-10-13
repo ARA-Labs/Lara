@@ -354,7 +354,7 @@
       },
       {
         "path": "test/inquiry_corrected_candidates.py",
-        "sha256": "1e7cdf37e68a0ffb77032e034d9d021e768a4b8a5769ea86bdd09612ba5797f8"
+        "sha256": "0b80b4c991492bd849d8c7004c35b687a675bbca9b0e5d9601543c9a06e5e286"
       },
       {
         "path": "test/inquiry_approval_receipt.py",

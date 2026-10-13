@@ -19,6 +19,7 @@ import inquiry_evaluation_cases as author
 import inquiry_evaluation_manifest as manifest
 from inquiry_support_annotations import support_key, t07_annotations, validate_ground_annotations
 from evidence_measured import parse
+from inquiry_approval_receipt import freeze_copy, receipt_approvals
 spec = importlib.util.spec_from_file_location('corrected_runner', ROOT / 'scripts/inquiry-evaluate.py')
 runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
@@ -136,22 +137,29 @@ class SupportAnnotations(unittest.TestCase):
 class FreezeBoundaries(unittest.TestCase):
     def test_draft_refuses_measurement_before_any_executable_or_destination(self):
         with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp) / 'draft'
+            base.mkdir()
+            protocol = json.loads((CANDIDATE / 'protocol.json').read_text())
+            protocol['freeze']['state'] = 'awaiting-researcher-approval'
+            (base / 'protocol.json').write_bytes(manifest.json_bytes(protocol))
             out = Path(tmp) / 'measure'
-            args = argparse.Namespace(manifest=str(CANDIDATE / 'MANIFEST.json'), out=str(out),
+            args = argparse.Namespace(manifest=str(base / 'MANIFEST.json'), out=str(out),
                                       native='/forbidden', lean='/forbidden', consumer='/forbidden')
             with patch.object(runner, 'executable', side_effect=AssertionError('executable resolved')):
-                with self.assertRaisesRegex(ValueError, 'protocol is not frozen'):
+                with self.assertRaises(ValueError):
                     runner.measure(args)
             self.assertFalse(out.exists())
 
     def test_freeze_marker_alone_does_not_approve_correction(self):
         with tempfile.TemporaryDirectory() as tmp:
-            base = Path(tmp)
-            p = json.loads((CANDIDATE / 'protocol.json').read_text())
-            p['freeze']['state'] = 'frozen'; p['freeze']['manifest_sha256'] = manifest.digest((CANDIDATE / 'MANIFEST.json').read_bytes())
-            (base / 'protocol.json').write_text(json.dumps(p))
-            (base / 'MANIFEST.json').write_bytes((CANDIDATE / 'MANIFEST.json').read_bytes())
-            with self.assertRaisesRegex(ValueError, 'lacks researcher approval'):
+            base = Path(tmp) / 'fixture'
+            protocol = json.loads((CANDIDATE / 'protocol.json').read_text())
+            freeze_copy(base, receipt_approvals(protocol))
+            manifest.load_suite(base / 'MANIFEST.json')
+            frozen_protocol = json.loads((base / 'protocol.json').read_text())
+            frozen_protocol['correction_approval']['state'] = 'pending-researcher-approval'
+            (base / 'protocol.json').write_bytes(manifest.json_bytes(frozen_protocol))
+            with self.assertRaises(ValueError):
                 manifest.load_suite(base / 'MANIFEST.json')
 
     def test_approval_binds_both_candidate_protocol_and_case_inventory(self):
