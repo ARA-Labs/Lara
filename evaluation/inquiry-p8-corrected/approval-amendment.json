@@ -1,0 +1,37 @@
+{
+  "schema": "inquiry-p8-approval-amendment",
+  "schema_version": 1,
+  "issue": 53,
+  "provenance": "user",
+  "researcher": "Yifeng He",
+  "recorded_date": "2026-10-13",
+  "approval_text": "checkout a new branch and complete the next, finish and pr directly",
+  "approval_context": "The immediately preceding handoff identified issue #53, its narrow reviewed test-helper approval amendment, the metadata-only input freeze, and the single already-approved P8 attempt as the next steps. This instruction authorizes completing those steps; it does not authorize any additional attempt or P9.",
+  "parent_approval_path": "researcher-approval.json",
+  "parent_approval_sha256": "9be42df1166a4dbce9520108197e2e42d52497c2e7bdbf3c6a7f33d9a5ebfd63",
+  "previous_candidate_protocol_sha256": "181a5363f8778942dbf00971efe63b0659529f486ecba5acef2a1876bf9bcc10",
+  "amended_candidate_protocol_sha256": "663e6c92823bfce9cfa6dd53920e089c7c717e3a1a20e01f0893f353570a8bec",
+  "candidate_manifest_sha256": "1aaf2eb1e7758fea800e0046e4b01d5f176823ef44f3fe2f98bc4dedf0a6dd22",
+  "changed_helper": {
+    "path": "test/inquiry_corrected_candidates.py",
+    "previous_sha256": "1e7cdf37e68a0ffb77032e034d9d021e768a4b8a5769ea86bdd09612ba5797f8",
+    "sha256": "0b80b4c991492bd849d8c7004c35b687a675bbca9b0e5d9601543c9a06e5e286"
+  },
+  "scope": "Construct explicit temporary draft/unapproved fixtures for the two refusal tests. Refresh only that additional-helper digest in the candidate protocol. Preserve production code, inputs, oracles, manifest, independent input reviews, data policy, ceilings and the single-run budget.",
+  "probe_results": [
+    {
+      "source_candidate_state": "awaiting-researcher-approval",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "source_candidate_state": "frozen",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0
+    }
+  ],
+  "production_measurement_executed": false,
+  "p9_approved": false
+}

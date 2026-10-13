@@ -433,11 +433,11 @@
       "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
     ],
     "reviewer_provenance": "ai-executed",
-    "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+    "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
     "quality_reviewer_provenance": "ai-executed",
     "reviewed_input_sha256": "5c8642968f51f4ce1bed1ec979b45ba1cb866d966c7b71cf1da7f5da76548cc8",
     "semantic_content_sha256": "a5e60cf1ea4225bbb95288f35fc92a61276a9dd9b29a0d5e995d513723ae0e97",
     "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-    "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+    "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
   }
 }

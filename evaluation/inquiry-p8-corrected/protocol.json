@@ -354,7 +354,7 @@
       },
       {
         "path": "test/inquiry_corrected_candidates.py",
-        "sha256": "1e7cdf37e68a0ffb77032e034d9d021e768a4b8a5769ea86bdd09612ba5797f8"
+        "sha256": "0b80b4c991492bd849d8c7004c35b687a675bbca9b0e5d9601543c9a06e5e286"
       },
       {
         "path": "test/inquiry_approval_receipt.py",
@@ -434,8 +434,8 @@
   },
   "freeze": {
     "manifest_path": "evaluation/inquiry-p8-corrected/MANIFEST.json",
-    "manifest_sha256": "1aaf2eb1e7758fea800e0046e4b01d5f176823ef44f3fe2f98bc4dedf0a6dd22",
-    "state": "awaiting-researcher-approval",
+    "manifest_sha256": "01dfe6800964d09f4b87028931337d2be93badae63192e5f4aace80de5f7b9da",
+    "state": "frozen",
     "input_commit_location": "run.json input_commit",
     "input_commit_rule": "Commit reviewed candidate first; approval binds that existing commit and exact candidate protocol SHA256. Metadata-only freeze commit follows if authorized. Pass the final committed input identity as --input-commit; never write a commit hash into its own bytes.",
     "manifest_hash_rule": "After independent input review, hash the final MANIFEST.json bytes into protocol.json before measurement. MANIFEST.json must not hash protocol.json.",
@@ -448,11 +448,11 @@
       },
       {
         "path": "quality-review.json",
-        "sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       {
         "path": "authoring-validation.json",
-        "sha256": "7265ae31be548af481e8e9703d881d634206433e7f8b3f244b15ab0e5bd5e474"
+        "sha256": "6cdc44f237121ff00b2887f7227ead4b63878d13f5929c655443df4dfcdf37b9"
       },
       {
         "path": "review/authoring-validation-before-review.json",
@@ -501,6 +501,26 @@
       {
         "path": "review/authoring-validation-after-review-raw.json",
         "sha256": "73db621e95ea65f1eb988d3754e210e16bd8bd6cc7eb33ba8d34fced4735275a"
+      },
+      {
+        "path": "review/quality-review-before-fixture-amendment.json",
+        "sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+      },
+      {
+        "path": "review/authoring-validation-before-fixture-amendment.json",
+        "sha256": "7265ae31be548af481e8e9703d881d634206433e7f8b3f244b15ab0e5bd5e474"
+      },
+      {
+        "path": "review/test-fixture-quality-final.json",
+        "sha256": "0a08cbdaa404b2568f78bb7cc895507e4ef5394e965a69cb60c35df19ff043ce"
+      },
+      {
+        "path": "review/test-fixture-metadata-attachment.json",
+        "sha256": "74ccb0c479c1154753a07fc1650816db3d33c31847784cc0d011af780263ee7f"
+      },
+      {
+        "path": "review/authoring-validation-fixture-provenance-raw.json",
+        "sha256": "aef468b771611bd78668331769199d8f1436734e78935d8401c9ed53ac22a12d"
       }
     ]
   },
@@ -739,9 +759,9 @@
     }
   ],
   "correction_approval": {
-    "state": "pending-researcher-approval",
-    "path": "researcher-approval.json",
-    "sha256": null
+    "state": "approved",
+    "path": "researcher-approval-provenance.json",
+    "sha256": "168a2a702bded094cf0188b2ba14e9b4bfa9bd9ea0ffe3328c29a7b6ee50da33"
   },
   "data_policy": {
     "state": "requires-correction-receipt",

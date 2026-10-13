@@ -32,9 +32,11 @@ by the guard; the repaired `r-s-new` example passes.
 Fresh independent input and quality reviews passed. Their exact immutable
 receipts are attached to all 96 oracle entries. Supplemental reviews of the
 state-only generator change, metadata attachment and proposed data policy
-passed. Researcher correction/protocol approval and the fresh budget are
-recorded in `researcher-approval.json`, binding the merged candidate at
-`71c1cba9da9863440eaa2873bbd223dbe6ba57b1`. The prepared audit tool retains finite graph, history, selection, subset, counter and certificate
+passed. The original and helper-only approval receipts remain immutable.
+`approval-provenance-amendment.json` records the transitive metadata scope
+required by the corrected test helper. The protocol's `correction_approval`
+field selects the effective receipt at freeze.
+The prepared audit tool retains finite graph, history, selection, subset, counter and certificate
 checks and adds direct source checks for the fresh cloned rule and additive
 T07 declarations. Running it without `--reviewer` is an authoring check and
 cannot write an independent review receipt. The real consumer has decoded all
@@ -56,33 +58,31 @@ python3 scripts/inquiry_corrected_validation.py --suite evaluation/inquiry-p8-co
 
 The last command needs the retained real consumer and a fresh receipt path.
 Its expected AST stream is encoded from each authored oracle, never from a
-driver. `authoring-validation.json` records the selected consumer hash, build
-command, exact per-case commands, inputs, oracle hashes and process results.
-The pre-provenance snapshot is retained exactly as
-`review/authoring-validation-before-review.json`. The consumer ran again against
-the final attached oracle bytes; its exact raw receipt is retained as
-`review/authoring-validation-after-review-raw.json`. The canonical receipt
-records that run and names the actual spec and quality reviewers and receipt
-hashes when correcting the helper's fixed PENDING review-status annotation to
-PASS. Every raw command, process result, input/oracle/AST hash and byte field
-is preserved. The researcher receipt records the later approval confirmation.
+driver. `authoring-validation.json` attaches the exact selected consumer hash,
+build command and per-case commands, inputs, oracle hashes and process results
+from `review/authoring-validation-fixture-provenance-raw.json`. That raw receipt
+keeps the helper's unconditional PENDING independent-review marker. The
+attachment claims successful decoding only; it links existing independent
+semantic judgments and the composite quality receipt rather than inventing a
+new semantic review. Earlier authoring receipts remain unchanged under `review/`.
 
-The independent reviewers inspected the actual source bytes and annotations,
-and their retained receipts bind all 96 input and semantic identities.
-`review/metadata-attachment.json` records the canonical attachment, with the
-before/after oracle hashes and unchanged input, semantic, expectation, ancestry
-and counter hashes. The named independent spec reviewer has issued the retained semantic receipt;
-this author has attached its exact bytes and has not issued an independent
-receipt. Any review
-must bind the new input hashes, semantic-content hashes, ancestry and helper
-bytes; the original suite's reviews do not apply to this candidate.
+The retained independent semantic review binds all 96 input and semantic
+identities. `quality-review.json` is an author-attached composite of the
+original independent quality judgment and the final independent test-helper
+review. Its predecessor is preserved byte-for-byte at
+`review/quality-review-before-fixture-amendment.json`.
+`review/test-fixture-metadata-attachment.json` records the resulting oracle
+provenance hashes. `review/test-fixture-scientific-identity.json` records exact
+comparison against committed baseline blobs: inputs, expected ASTs, semantic
+specifications, ancestry and counters are unchanged. Only review metadata moves.
 
-The researcher approved the exact candidate protocol and committed candidate
-identity, including the later metadata-only freeze, through `researcher-approval.json`.
-The candidate protocol and manifest retain their reviewed bytes and pre-approval
-state markers until that freeze is applied. The receipt must name the researcher, carry user
-provenance, bind saved candidate protocol and manifest copies by SHA256, name
-the full reviewed candidate commit, and authorize metadata-only freeze changes.
+`researcher-approval-provenance.json` binds the final reviewed candidate commit
+and exact `candidate-protocol-provenance.json` and
+`candidate-manifest-provenance.json` snapshots, with user provenance and
+metadata-only freeze authorization. Earlier snapshots and approvals remain
+immutable. The helper-only freeze failed preflight before measurement because
+its quality receipt still pinned the old test source; its failed preflight and
+withdrawn readiness clearance remain retained.
 The frozen protocol cannot record its own approval, so the T07 amendment and
 the data policy carry the status `requires-correction-receipt`. The receipt
 approves them. `approved_amendments` holds one entry for `distinct-t07-support`
@@ -103,11 +103,13 @@ A draft candidate, a freeze marker alone or a changed approved candidate fails
 before driver resolution. Replay reads the saved input identity and runs no
 processes. There is no approval bypass flag.
 
-The recorded approval does not yet change those candidate state markers.
-[Issue #53](https://github.com/ARA-Labs/Lara/issues/53) tracks two regression
-tests that assume the real suite is still unapproved. Their test-only fixtures
-must be corrected before the freeze; because the test helper is pinned, its
-reviewed pin change needs an explicit approval amendment.
+The refusal tests construct explicit temporary draft or unapproved suites,
+independent of this candidate's current state. The approval-state test first
+loads a complete synthetic approved fixture, then changes only that state.
+`approval-amendment.json` records the initial helper-only scope.
+`approval-provenance-amendment.json` extends its metadata attachment to every
+dependent quality, oracle, manifest and authoring receipt hash. Production
+code, scientific content, data policy and the single-attempt budget are unchanged.
 
 The runner uses saved-run schema version 2. It publishes `run.json` and its
 embedded `metadata_sha256` in one atomic replacement, without a separate
@@ -123,18 +125,13 @@ independent input or oracle reviews.
 
 The approved measurement budget is 96 documents, 192 driver invocations,
 one invocation per driver per document, a 10-second driver timeout, a 45-minute
-aggregate deadline, one CPU and zero repeats. No measurement has started under
-this receipt. The approved data policy uses repository fixtures and authored synthetic
-inputs only. It permits one fresh local capture directory under
-`ara/evidence/inquiry-p8/<fresh-run-id>`, a local replay directory under
-`ara/evidence/inquiry-p8/<fresh-run-id>-replay` and the setup and gate record
-under `ara/evidence/inquiry-p8/preflight-<fresh-run-id>`. The original failed attempt
-and every new outcome will be retained for the requested implementation PR.
-Measurement will acquire or transfer no data over the network and make no
-paid calls. The capture, replay and preflight directories are committed. The
-failed attempt took about 62 MB per capture or replay directory, but the two
-share identical binaries, so with its 6 MB preflight directory it added about
-68 MB of unique content to Git. A new run should add a similar amount. The repeated-requests levels stay below every declared limit, so no
-case expects a refusal. Apply and commit the metadata-only freeze before supplying
-its full commit identity as `--input-commit`; then complete preflight before the
-single approved attempt. P9, legacy regeneration and freeze-tag changes remain unapproved.
+aggregate deadline, one CPU and zero repeats. The single corrected attempt is
+complete; [its report](../../ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected/report.md)
+links the sealed captures, capture-only replay and preflight evidence.
+The approved data policy uses repository fixtures and authored synthetic
+inputs only. Capture, replay and preflight evidence are retained under
+`ara/evidence/inquiry-p8/`. The original failed attempt is preserved.
+The measurement acquired no network data and made no paid calls.
+The repeated-request levels stay below every declared limit, so no case expects
+a refusal. The consumed budget authorizes no further measurement attempt.
+P9, legacy regeneration and freeze-tag changes remain unapproved.

@@ -1,0 +1,12 @@
+{
+  "schema": "inquiry-p8-result-review-binding",
+  "schema_version": 1,
+  "provenance": "ai-executed",
+  "reviewer": "P8EvidenceReview",
+  "report_sha256": "23366d69fbc3173b31ddc65a6280855b8eff0018fe5259637c274602c01503eb",
+  "report_snapshot": "75B4",
+  "review_sha256": "651b80cd7b0bd0940b1f20db86ba6f719793ba423d9547283aea78e319666e07",
+  "run_sha256": "249a3dc4fca82a2a02c7b8761b85793d01f91c548ce2c9ff8cf30a5cf1ad57f7",
+  "review_scope": "Exact final report and sealed measurement evidence; hashes attached by parent, not claimed reviewer-computed",
+  "researcher_result_approval": false
+}

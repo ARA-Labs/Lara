@@ -1,0 +1,85 @@
+{
+  "schema": "inquiry-p8-preflight",
+  "schema_version": 1,
+  "started_utc": "2026-10-13T06:40:21.901516+00:00",
+  "environment_overrides": {
+    "UPDATE": "",
+    "CABAL_CONFIG": "/tmp/inquiry-p8-cabal.config"
+  },
+  "cabal_config_sha256": "76e5a42c75dbc67855af70284a964cd217b8f89f1c1d6e15ec8ba0642a5ccc75",
+  "commands": [
+    {
+      "command": [
+        "make",
+        "local-gates"
+      ],
+      "cwd": "/home/yfhe/ara/Lara",
+      "started_utc": "2026-10-13T06:40:21.901588+00:00",
+      "finished_utc": "2026-10-13T07:08:44.115289+00:00",
+      "exit_code": 0,
+      "log": "local-gates.log",
+      "log_sha256": "9243bbae80de1285600ec22f8011376558b343ccfe2cfe24302e00acdd11b850"
+    },
+    {
+      "command": [
+        "cabal",
+        "test",
+        "all"
+      ],
+      "cwd": "/home/yfhe/ara/Lara",
+      "started_utc": "2026-10-13T07:08:44.118167+00:00",
+      "finished_utc": "2026-10-13T07:09:40.718539+00:00",
+      "exit_code": 0,
+      "log": "haskell-tests.log",
+      "log_sha256": "461cdf4ea2cf87b3defd51611dea6922f8adec0c2459f589ba0bff228fb142c9"
+    },
+    {
+      "command": [
+        "cabal",
+        "build",
+        "exe:lara"
+      ],
+      "cwd": "/home/yfhe/ara/Lara",
+      "started_utc": "2026-10-13T07:09:40.719160+00:00",
+      "finished_utc": "2026-10-13T07:09:40.985260+00:00",
+      "exit_code": 0,
+      "log": "native-build.log",
+      "log_sha256": "215517150aee2d4e7c37e9a89aed453be29626db56807e943248b5085841cc31"
+    },
+    {
+      "command": [
+        "lake",
+        "build",
+        "inquiry-run"
+      ],
+      "cwd": "/home/yfhe/ara/Lara/lean",
+      "started_utc": "2026-10-13T07:09:40.985700+00:00",
+      "finished_utc": "2026-10-13T07:09:43.444616+00:00",
+      "exit_code": 0,
+      "log": "lean-build.log",
+      "log_sha256": "cc4c7b0a74ddb87e44448999d5de62ef561c87f68b55c3578c815d8ccf81b495"
+    },
+    {
+      "command": [
+        "cabal",
+        "exec",
+        "--",
+        "ghc",
+        "-package",
+        "lara",
+        "-outputdir",
+        "/tmp/p8-consumer-build",
+        "-o",
+        "/tmp/p8-consumer",
+        "scripts/inquiry-codec-client.hs"
+      ],
+      "cwd": "/home/yfhe/ara/Lara",
+      "started_utc": "2026-10-13T07:09:43.445702+00:00",
+      "finished_utc": "2026-10-13T07:09:43.722125+00:00",
+      "exit_code": 0,
+      "log": "consumer-build.log",
+      "log_sha256": "d1e43bbb33176a7a465d561625270dc5f008ce0aaec015920c8ac73da26683a2"
+    }
+  ],
+  "measurement_executed": false
+}

@@ -1,0 +1,45 @@
+{
+  "schema": "inquiry-p8-provenance-approval-amendment",
+  "schema_version": 1,
+  "issue": 53,
+  "researcher": "Yifeng He",
+  "provenance": "user",
+  "recorded_date": "2026-10-13",
+  "approval_text": "checkout a new branch and complete the next, finish and pr directly",
+  "authorization_scope": "Complete issue #53 and the previously identified freeze/preflight/single-attempt sequence. This includes refreshing all review-provenance hashes that depend on the corrected test helper, not just its additional-helper pin. The instruction does not authorize changed scientific inputs or expectations, runtime/checker changes, a second measurement attempt, or P9.",
+  "reason": "Production preflight of d383404 rejected the same changed test helper through quality-review.json. Preserving the original quality receipt and attaching the reviewed helper supplement changes the composite quality hash, oracle review metadata, manifest digests and supporting authoring receipt. The original single-helper-only freeze never started measurement and its failed preflight is retained.",
+  "prior_approval": {
+    "path": "researcher-approval.json",
+    "sha256": "9be42df1166a4dbce9520108197e2e42d52497c2e7bdbf3c6a7f33d9a5ebfd63"
+  },
+  "prior_helper_amendment": {
+    "path": "approval-amendment.json",
+    "sha256": "a4a79cf642c1a3fd0604f63c6dd6e9700f0b6a4de2152f041bc3edd2953061e1"
+  },
+  "superseded_input_commit": "d383404ff3a8c4aa4853fd10760bef0a5166312f",
+  "candidate_protocol_sha256": "19e582eb117fba09102072a4b3e0b29dff76d9201f456663baa83a8131585ee0",
+  "candidate_manifest_sha256": "59225ebd79b1bb6f667f9e73db3fdbce8b2277dbf3499ff31b28c24b6d9c46fd",
+  "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb",
+  "metadata_attachment": {
+    "path": "review/test-fixture-metadata-attachment.json",
+    "sha256": "74ccb0c479c1154753a07fc1650816db3d33c31847784cc0d011af780263ee7f"
+  },
+  "changed_helper": {
+    "path": "test/inquiry_corrected_candidates.py",
+    "sha256": "0b80b4c991492bd849d8c7004c35b687a675bbca9b0e5d9601543c9a06e5e286"
+  },
+  "scope_invariants": [
+    "input bytes",
+    "expected result ASTs",
+    "semantic specifications",
+    "source ancestry",
+    "construction counters",
+    "independent semantic review",
+    "production runtime code",
+    "all resource ceilings",
+    "data policy",
+    "the one-run budget"
+  ],
+  "measurement_attempts_consumed_by_preflight": 0,
+  "p9_approved": false
+}

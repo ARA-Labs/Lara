@@ -1,7 +1,7 @@
 {
   "schema": "inquiry-p8-manifest",
   "schema_version": 1,
-  "state": "awaiting-researcher-approval",
+  "state": "frozen",
   "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
   "recipe_version": "inquiry-p8-recipes@2-candidate",
   "expected_partition": {
@@ -190,7 +190,7 @@
       "input_path": "inputs/source-rejections.sexp",
       "input_sha256": "7855614c13c9a319e1c5f623ce3ce815b70974113e4a743b7893d78a59f8967b",
       "oracle_path": "oracles/source-rejections.json",
-      "oracle_sha256": "9b955759491d9317df5abe6cc54556deaba719e8e6898e008129e3c271a2f8aa",
+      "oracle_sha256": "0d7db6a352878118ade0e9bb94f2b9815db3cc171b149f003b0ecf8f72745a11",
       "query_order": [
         "mix"
       ],
@@ -233,12 +233,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "7855614c13c9a319e1c5f623ce3ce815b70974113e4a743b7893d78a59f8967b",
         "semantic_content_sha256": "146e9efe7130befcf782e361dc61f59fec5d91b928a55f86e9b2a21a7b6e4d3d",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "146e9efe7130befcf782e361dc61f59fec5d91b928a55f86e9b2a21a7b6e4d3d"
     },
@@ -259,7 +259,7 @@
       "input_path": "inputs/mixed-stability.sexp",
       "input_sha256": "3965c657eccfcaf7f48dc6d7f6d8dc6faa90522db42e15f24443e14b1b0837cf",
       "oracle_path": "oracles/mixed-stability.json",
-      "oracle_sha256": "7ba3f307819010ed98ca8d166d5c0c29047858296e9f07956a6eef2c6d0fb781",
+      "oracle_sha256": "1359d52c92879313ee23635d240592e2ff32273150b75c543df5b4320ac9fdec",
       "query_order": [
         "stability"
       ],
@@ -302,12 +302,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "3965c657eccfcaf7f48dc6d7f6d8dc6faa90522db42e15f24443e14b1b0837cf",
         "semantic_content_sha256": "b0570f0ec1633aa976c888d3cdf77e1d51c2ec1991a0e720e5282aef46aa3323",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "b0570f0ec1633aa976c888d3cdf77e1d51c2ec1991a0e720e5282aef46aa3323"
     },
@@ -328,7 +328,7 @@
       "input_path": "inputs/inconsistent.sexp",
       "input_sha256": "b9a0a607dbccdcf4a5cc3df70171128ba7781e6e5609a1fa7661d54848b2c266",
       "oracle_path": "oracles/inconsistent.json",
-      "oracle_sha256": "3a0493f78d0fb6a227a2f2d14577e53a29496d1190fc63bc4ba1a4ba038c3e75",
+      "oracle_sha256": "a8464c4ec2e5e8a461805c906a3c8e2fee9e8ac99ceb2f9a84648343b8647b1a",
       "query_order": [
         "precommitted",
         "stability"
@@ -372,12 +372,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "b9a0a607dbccdcf4a5cc3df70171128ba7781e6e5609a1fa7661d54848b2c266",
         "semantic_content_sha256": "2edd2a432a3ccb00dea395db0f267e1b489b01ccde07cf2ce8608f9fed17117a",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "2edd2a432a3ccb00dea395db0f267e1b489b01ccde07cf2ce8608f9fed17117a"
     },
@@ -398,7 +398,7 @@
       "input_path": "inputs/fixed-witness.sexp",
       "input_sha256": "ba3879cd0d0783d772763867278e005710fe15d529f38e955f999e558063f75e",
       "oracle_path": "oracles/fixed-witness.json",
-      "oracle_sha256": "11cbef6cb55066b7111353fbddb288e489b413a176bfec15c4ea3602edcab1c3",
+      "oracle_sha256": "d347d1400e2fb1d82b4f9f2df1c567ba97d9a10c8e477f9488642917fe2ae44a",
       "query_order": [
         "fixed-witness"
       ],
@@ -441,12 +441,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "ba3879cd0d0783d772763867278e005710fe15d529f38e955f999e558063f75e",
         "semantic_content_sha256": "537301ab3a332419f920774112845c853d6712c868b709d51094beb0706651ea",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "537301ab3a332419f920774112845c853d6712c868b709d51094beb0706651ea"
     },
@@ -467,7 +467,7 @@
       "input_path": "inputs/hypothetical-audit.sexp",
       "input_sha256": "41b86a76b98e8f771040a863f29d750ab593edc16bf444df9b3462f1ded528a2",
       "oracle_path": "oracles/hypothetical-audit.json",
-      "oracle_sha256": "75e5dd8a9ea8b6ec401be61a5721f8572875da358d248de375464a214d1f5c0d",
+      "oracle_sha256": "092018432e9fdbff21930e408ffc3ab1696f1da6beccf5ddc53516b7cb2d290e",
       "query_order": [
         "hypothetical-audit"
       ],
@@ -510,12 +510,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "41b86a76b98e8f771040a863f29d750ab593edc16bf444df9b3462f1ded528a2",
         "semantic_content_sha256": "2b244ecd583cb3f476cd8e29507a0cb1758a354338d2214eef61707b93a4e6a1",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "2b244ecd583cb3f476cd8e29507a0cb1758a354338d2214eef61707b93a4e6a1"
     },
@@ -536,7 +536,7 @@
       "input_path": "inputs/forged-observed.sexp",
       "input_sha256": "5b00e668d37d71fc6b103eb8696b1c6b36f70b3a695378cffef37814fab03d05",
       "oracle_path": "oracles/forged-observed.json",
-      "oracle_sha256": "045701c7d87f176d9a5edd84f03b8562287fa03dfb09cd77a5d0b92f9d7baece",
+      "oracle_sha256": "03fb72a0d90d4fdb54cf374b553b0cf7c14068c43215a13ca34ad4f44f93bcb4",
       "query_order": [
         "forged-observed"
       ],
@@ -579,12 +579,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "5b00e668d37d71fc6b103eb8696b1c6b36f70b3a695378cffef37814fab03d05",
         "semantic_content_sha256": "8f78b0aa0ca74cd5fc7e83906383e42932263514b6123116aecf4f165d0fa2d5",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "8f78b0aa0ca74cd5fc7e83906383e42932263514b6123116aecf4f165d0fa2d5"
     },
@@ -605,7 +605,7 @@
       "input_path": "inputs/reference-sensitivity.sexp",
       "input_sha256": "d1f2cae162bee97ddf7fd23dd15da3a93f7b4b78ff91af085dc5a5992ec899a4",
       "oracle_path": "oracles/reference-sensitivity.json",
-      "oracle_sha256": "18b4f408e7c6ee69eb15f45cb5ead1dd4247b64a1caa542e7b4f3778cba892ad",
+      "oracle_sha256": "4448001eea4e4af746aad30f80f87c01efb2ce11f0ed61b0440f8eb9d5822024",
       "query_order": [
         "sens"
       ],
@@ -681,12 +681,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "d1f2cae162bee97ddf7fd23dd15da3a93f7b4b78ff91af085dc5a5992ec899a4",
         "semantic_content_sha256": "3d21267a6507536662518abbc65af53059b47a0e886e98d70e80fbf629a825c0",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "3d21267a6507536662518abbc65af53059b47a0e886e98d70e80fbf629a825c0"
     },
@@ -707,7 +707,7 @@
       "input_path": "inputs/joint-only.sexp",
       "input_sha256": "158d9a47064e56fd8803a117acbaca8278a5591081cf4964f1420570f478eba4",
       "oracle_path": "oracles/joint-only.json",
-      "oracle_sha256": "7192226781839762e9e8747013e2fc84180274b353dd5a7df9637593231c5435",
+      "oracle_sha256": "2022b781a2c8169521c37043ae993641c02f2c49d489ff5f50ed6490a837e92b",
       "query_order": [
         "slots"
       ],
@@ -783,12 +783,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "158d9a47064e56fd8803a117acbaca8278a5591081cf4964f1420570f478eba4",
         "semantic_content_sha256": "b78bc555111c4ab264b29881170b890fc2b27cf90b42a381a823b7ac664ca967",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "b78bc555111c4ab264b29881170b890fc2b27cf90b42a381a823b7ac664ca967"
     },
@@ -809,7 +809,7 @@
       "input_path": "inputs/minimal-conditions.sexp",
       "input_sha256": "02a77d9b3390ec987ec0c808fa54c09947413bcdc1c9ee7baf8371f08b37bb10",
       "oracle_path": "oracles/minimal-conditions.json",
-      "oracle_sha256": "14faa6a87a236d0bb906a5c8d471969c1e08c87ccb8a98ef5338b91942b93ad8",
+      "oracle_sha256": "2f047fce6e8df3ea73adfb2945f3230b63fce43b79695cf1e4351e79efa5531e",
       "query_order": [
         "assume"
       ],
@@ -895,12 +895,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "02a77d9b3390ec987ec0c808fa54c09947413bcdc1c9ee7baf8371f08b37bb10",
         "semantic_content_sha256": "0c6b0a2584cc4a3f48d2a741aa605aa6eeb983e751702dbe58650250aedfdd33",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "0c6b0a2584cc4a3f48d2a741aa605aa6eeb983e751702dbe58650250aedfdd33"
     },
@@ -921,7 +921,7 @@
       "input_path": "inputs/new-attacker.sexp",
       "input_sha256": "9d9c4d2bc28739d82f5d0b14f80a85a60a3440d3514e27fa3513b03af5edc993",
       "oracle_path": "oracles/new-attacker.json",
-      "oracle_sha256": "869b8c4075421f6ed2d74c60aa1e41c52bdf3ccf8576b1268966cac88b4ace0b",
+      "oracle_sha256": "b9b3437498e358a688ee8abc0421e41c7f42fe24a794506707c89563bf5716d0",
       "query_order": [
         "new-attacker"
       ],
@@ -964,12 +964,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "9d9c4d2bc28739d82f5d0b14f80a85a60a3440d3514e27fa3513b03af5edc993",
         "semantic_content_sha256": "ca8830d8c84067dec91cab0edf5e74dce4ca90e905a4fa5338bdfc47a3493c27",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "ca8830d8c84067dec91cab0edf5e74dce4ca90e905a4fa5338bdfc47a3493c27"
     },
@@ -990,7 +990,7 @@
       "input_path": "inputs/shared-discharge.sexp",
       "input_sha256": "53baca2eb89a4aadca838786319e5aa2ee2f6fb30fd8d7a0b3282e3b8dd15894",
       "oracle_path": "oracles/shared-discharge.json",
-      "oracle_sha256": "4c67a263028f3249ec8bf33e8d8647a24229d363dd50e9715a358876646f907d",
+      "oracle_sha256": "9cacfb113fcbd1ccc9d8d9bd355838c336264e1c630fa53313e2aefa6a27e7e8",
       "query_order": [
         "shared-discharge"
       ],
@@ -1033,12 +1033,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "53baca2eb89a4aadca838786319e5aa2ee2f6fb30fd8d7a0b3282e3b8dd15894",
         "semantic_content_sha256": "64083f5817d7dc56908dc704a0b99b43e5a21e8053b17db503e42667c1925a1e",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "64083f5817d7dc56908dc704a0b99b43e5a21e8053b17db503e42667c1925a1e"
     },
@@ -1059,7 +1059,7 @@
       "input_path": "inputs/unrelated-self-attack.sexp",
       "input_sha256": "1d9df679b20640751c5d8063ac8379a7d24cf520ce965bc4c95700e24990acf1",
       "oracle_path": "oracles/unrelated-self-attack.json",
-      "oracle_sha256": "6d0e644ef105ea35cc9ea9a61a6cb6941f326ede01aab635a29c8218e5ed86fd",
+      "oracle_sha256": "9429538cbdbfe490374e113d6c9b2be07a29d00d9c9218ed0249a79518da3949",
       "query_order": [
         "unrelated-self-attack"
       ],
@@ -1102,12 +1102,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "1d9df679b20640751c5d8063ac8379a7d24cf520ce965bc4c95700e24990acf1",
         "semantic_content_sha256": "1b2acb63354c276806ada3a432016eacaf5636a6154f07919f546379715a942d",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "1b2acb63354c276806ada3a432016eacaf5636a6154f07919f546379715a942d"
     },
@@ -1128,7 +1128,7 @@
       "input_path": "inputs/blocked-conditional.sexp",
       "input_sha256": "468d08bd6be39e80ff2388311f2b0e17f24c3595db1ef328eb0a1f77e91a1a68",
       "oracle_path": "oracles/blocked-conditional.json",
-      "oracle_sha256": "c926ca9c9de4c7e1330fe7188e798d20088d7d08890af4196e45662fb4ca4872",
+      "oracle_sha256": "ae2daaedf3804ce85cb5ee8f57ebc24a4e24d0615674fba88db825cef6497fdc",
       "query_order": [
         "blocked-conditional"
       ],
@@ -1171,12 +1171,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "468d08bd6be39e80ff2388311f2b0e17f24c3595db1ef328eb0a1f77e91a1a68",
         "semantic_content_sha256": "08eba155ff89ac9b09e54c9b4cfa64ce6210da24ebd0ac5a2c45d3e18e51a0d2",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "08eba155ff89ac9b09e54c9b4cfa64ce6210da24ebd0ac5a2c45d3e18e51a0d2"
     },
@@ -1197,7 +1197,7 @@
       "input_path": "inputs/impact-rejected.sexp",
       "input_sha256": "1b4939d0889370a2d9db142cacc2d3d5ac01ad9e6771cc2a5c291cf557d12e2e",
       "oracle_path": "oracles/impact-rejected.json",
-      "oracle_sha256": "e2e1339e66fa4c1994766e87431181f1196a87ade5835dbb46f4b60a3754c40c",
+      "oracle_sha256": "39ef9fd85a9532591cd1ca830f037d086dff0d216ed0a214c29b42ea01bcae60",
       "query_order": [
         "dup-plain",
         "reject-dup"
@@ -1241,12 +1241,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "1b4939d0889370a2d9db142cacc2d3d5ac01ad9e6771cc2a5c291cf557d12e2e",
         "semantic_content_sha256": "2621cae1f1df8e5e125a524f7dc6c1fd6ee0e779525f5d48a24da8ffe0a805c3",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "2621cae1f1df8e5e125a524f7dc6c1fd6ee0e779525f5d48a24da8ffe0a805c3"
     },
@@ -1267,7 +1267,7 @@
       "input_path": "inputs/verified-certificate.sexp",
       "input_sha256": "c383439212c72e264d28f28d005f0b9bfacdb6a0bfef2b30bc376e953222e599",
       "oracle_path": "oracles/verified-certificate.json",
-      "oracle_sha256": "98540504a3295d688b7d9b6c133d83b05ac24ab687d8c78459d314bf0d5e33ac",
+      "oracle_sha256": "c957c913fb5b29e7bd89fdfa73c186276a73441303b3a4f82f249196d0307f68",
       "query_order": [
         "v0",
         "verified-certificate"
@@ -1311,12 +1311,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "c383439212c72e264d28f28d005f0b9bfacdb6a0bfef2b30bc376e953222e599",
         "semantic_content_sha256": "11721df68b379d235532d69fb66fb492f4a06300ccfdb06eb855fdfa5c675145",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "11721df68b379d235532d69fb66fb492f4a06300ccfdb06eb855fdfa5c675145"
     },
@@ -1337,7 +1337,7 @@
       "input_path": "inputs/tampered-certificate.sexp",
       "input_sha256": "398895a18547ebe47432d8a4c4444f59a5af6b99609304a1ea318a9c16927809",
       "oracle_path": "oracles/tampered-certificate.json",
-      "oracle_sha256": "0baf5fb35ea6f1949efbb8c968dac268482c5b8d82c86f084048561ff07296a5",
+      "oracle_sha256": "c175a81c80823f4403885781409335928bba8da80df5d2d1cf77012213055b01",
       "query_order": [
         "v0",
         "tampered-certificate"
@@ -1381,12 +1381,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "398895a18547ebe47432d8a4c4444f59a5af6b99609304a1ea318a9c16927809",
         "semantic_content_sha256": "cca30206762adcc841e71fe82d6e174415db9e5bf00b9acd261f6d3023bd1a9e",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "cca30206762adcc841e71fe82d6e174415db9e5bf00b9acd261f6d3023bd1a9e"
     },
@@ -1404,7 +1404,7 @@
       "input_path": "inputs/T01.sexp",
       "input_sha256": "97f776b13670462aab228d55ce7f6cb37980c8198bf4be0578caea6f09e687f0",
       "oracle_path": "oracles/T01.json",
-      "oracle_sha256": "ed064705d9d9e27e403eae8dbf6e76b7e12d981f2324b9b1beaf8803785ff4fb",
+      "oracle_sha256": "89b40bbaeb5955fd10e7bdb88a68c292291f3a47e51183721e6ce1c0ace7e5d4",
       "query_order": [
         "T01",
         "verify-endpoints"
@@ -1448,12 +1448,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "97f776b13670462aab228d55ce7f6cb37980c8198bf4be0578caea6f09e687f0",
         "semantic_content_sha256": "7b48a3790d201cae94d5c97759609d27ef49c3e622eb0b85566d910654b6cec7",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "7b48a3790d201cae94d5c97759609d27ef49c3e622eb0b85566d910654b6cec7"
     },
@@ -1471,7 +1471,7 @@
       "input_path": "inputs/T02.sexp",
       "input_sha256": "a5004c62d490b0f64f8b4fb8dc333e556390b013de0e940f1df8263c3ef54284",
       "oracle_path": "oracles/T02.json",
-      "oracle_sha256": "e1482565f301302fa64f0849f89f4caece0afca35f842257b2b2f862d07ff3bf",
+      "oracle_sha256": "a13d127ad422841a735a58418cce1a42360b8d07af772102f6c42fbb131cdaee",
       "query_order": [
         "T02",
         "verify-endpoints"
@@ -1515,12 +1515,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "a5004c62d490b0f64f8b4fb8dc333e556390b013de0e940f1df8263c3ef54284",
         "semantic_content_sha256": "0182614b02faf395254e45e18982cae29d537dfbaa21a442b371c4cb57e7c5a8",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "0182614b02faf395254e45e18982cae29d537dfbaa21a442b371c4cb57e7c5a8"
     },
@@ -1538,7 +1538,7 @@
       "input_path": "inputs/T03.sexp",
       "input_sha256": "dc8c8d33c5609e041aa0359d29443e52376f809e578a9b475bbf988bb3360cce",
       "oracle_path": "oracles/T03.json",
-      "oracle_sha256": "a0b6bea22b89f88073f12852a5680dd0b48aea8d69618f3abb144e44d218e65f",
+      "oracle_sha256": "e52253d5fcf37472570fdc1f6fe5dbc666542114b848a41367d33f82bdd55068",
       "query_order": [
         "T03",
         "verify-endpoints"
@@ -1582,12 +1582,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "dc8c8d33c5609e041aa0359d29443e52376f809e578a9b475bbf988bb3360cce",
         "semantic_content_sha256": "f11ed06b95295aa92404f9c2d6eefc97d1c983ec51176e578b68eccc2f7980ab",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "f11ed06b95295aa92404f9c2d6eefc97d1c983ec51176e578b68eccc2f7980ab"
     },
@@ -1605,7 +1605,7 @@
       "input_path": "inputs/T04.sexp",
       "input_sha256": "2d796cd69ea245fe2d1c365971b31848c5346e51fef1bdc434adec6e3115482a",
       "oracle_path": "oracles/T04.json",
-      "oracle_sha256": "d6a601be3c9bc7375b65ca2677f26d581d0df1db97ae9ec8596e2878b5e246fa",
+      "oracle_sha256": "d301e5ffedee38db5509ae0d9ac3c14c08661ff712e5d154cf8fc1f9453c33d8",
       "query_order": [
         "T04",
         "verify-endpoints"
@@ -1649,12 +1649,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "2d796cd69ea245fe2d1c365971b31848c5346e51fef1bdc434adec6e3115482a",
         "semantic_content_sha256": "3e397ecb0563d39e882e4a80e497981688de4316ea70af5cb872eeb45cee32dd",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "3e397ecb0563d39e882e4a80e497981688de4316ea70af5cb872eeb45cee32dd"
     },
@@ -1672,7 +1672,7 @@
       "input_path": "inputs/T05.sexp",
       "input_sha256": "14e8f0c59f4116a2bcdd47d2642c7c105ecf919635d324d92fda59cadbbd92e6",
       "oracle_path": "oracles/T05.json",
-      "oracle_sha256": "032cfa28ca83e66c6b39739aae7b11848db08bf9e43869a48c4b42a9d0aa01b1",
+      "oracle_sha256": "422075bef6c8b25f2aaaa92f3e6b5b0b75b3c207666df0e747f3e6e39ff9b2fd",
       "query_order": [
         "T05"
       ],
@@ -1715,12 +1715,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "14e8f0c59f4116a2bcdd47d2642c7c105ecf919635d324d92fda59cadbbd92e6",
         "semantic_content_sha256": "534de52648fb2aceb00b3575383ed299b39c456a62f2b6e0f5f338f304d3716c",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "534de52648fb2aceb00b3575383ed299b39c456a62f2b6e0f5f338f304d3716c"
     },
@@ -1738,7 +1738,7 @@
       "input_path": "inputs/T06.sexp",
       "input_sha256": "3b553951d0db48e6ef3b9e21a1360c248a101780b77ac176834c8c0e041c608e",
       "oracle_path": "oracles/T06.json",
-      "oracle_sha256": "c97f23fb712b9d7fe2066e7872be3be47e43bbd9d00e8cf7a7fada006fe9b20a",
+      "oracle_sha256": "287b6291d5cd5ee688d57783f8aa752823629464606f176a982b86360c90455b",
       "query_order": [
         "T06"
       ],
@@ -1781,12 +1781,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "3b553951d0db48e6ef3b9e21a1360c248a101780b77ac176834c8c0e041c608e",
         "semantic_content_sha256": "678473a6140b7f3d09b08e4ab5f98afb3f77d779fab9fcee53b64cd8fbb9ef18",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "678473a6140b7f3d09b08e4ab5f98afb3f77d779fab9fcee53b64cd8fbb9ef18"
     },
@@ -1804,7 +1804,7 @@
       "input_path": "inputs/T07.sexp",
       "input_sha256": "55f4c94276527b4cccd7e5e5552f9ddcf36864cdbb66a07bbfb5d3d12a962839",
       "oracle_path": "oracles/T07.json",
-      "oracle_sha256": "370809d7b28114c03c7bba120679fd48c2f7167c9dc79984d0a967a48f219f2c",
+      "oracle_sha256": "03a015ed79f711abf96684e473f08eda1a98c89e4fe0cc53b53c7ff5993f18ba",
       "query_order": [
         "T07"
       ],
@@ -1847,12 +1847,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "55f4c94276527b4cccd7e5e5552f9ddcf36864cdbb66a07bbfb5d3d12a962839",
         "semantic_content_sha256": "ac20cef9103ff5cf0a47538f79f1fa80e6acde4263cd1a9f17ab7a2871a8a846",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "ac20cef9103ff5cf0a47538f79f1fa80e6acde4263cd1a9f17ab7a2871a8a846"
     },
@@ -1870,7 +1870,7 @@
       "input_path": "inputs/T08.sexp",
       "input_sha256": "ab13adde17638abf4167a21bcd7bb78d0ba222587e27f07fe9e97ada7ad1075a",
       "oracle_path": "oracles/T08.json",
-      "oracle_sha256": "86a5290ac9bcfef118969285e62439ee368a4de78c55053238e2df8f8a65ce5c",
+      "oracle_sha256": "ed689e7e359eea7b3b94eaf7086d89e1647cb264ee9b9438c7bc3f040f385807",
       "query_order": [
         "T08",
         "verify-endpoints"
@@ -1914,12 +1914,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "ab13adde17638abf4167a21bcd7bb78d0ba222587e27f07fe9e97ada7ad1075a",
         "semantic_content_sha256": "1f8b190090baf058eb6f51417be299146aa006a5f565ed6936ed902935d4877b",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "1f8b190090baf058eb6f51417be299146aa006a5f565ed6936ed902935d4877b"
     },
@@ -1937,7 +1937,7 @@
       "input_path": "inputs/T09.sexp",
       "input_sha256": "5264b35448e7c7ab883b231a8f928adfe61641e8a68b0ad063eaf98c13cba061",
       "oracle_path": "oracles/T09.json",
-      "oracle_sha256": "419195a63d1917e7d630a4ea0eb86dcfe551250cfec5f46293e977a5a1932058",
+      "oracle_sha256": "634a658dd22168d369cdf2d33b2690e52c17f8a0b35172637902c68357882323",
       "query_order": [
         "status",
         "stable",
@@ -2011,12 +2011,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "5264b35448e7c7ab883b231a8f928adfe61641e8a68b0ad063eaf98c13cba061",
         "semantic_content_sha256": "1e2cc390f738d27ceca4a48fa2a7d56f304aa280429a1ff1e630a0b494e76848",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "1e2cc390f738d27ceca4a48fa2a7d56f304aa280429a1ff1e630a0b494e76848"
     },
@@ -2034,7 +2034,7 @@
       "input_path": "inputs/T10.sexp",
       "input_sha256": "547765c4796dd8af7e5f9d1bf97243a19e98c8b4fb11e188713e797c1b245a9a",
       "oracle_path": "oracles/T10.json",
-      "oracle_sha256": "35fea0d5e3167015e84805c82c93b2d726b2344b3a9f6955e6d051002dc40bd4",
+      "oracle_sha256": "a1ca60917a66eb7784bce9e2c8aeb382af68dbf0290ac14d0a53456cbd49a717",
       "query_order": [
         "status",
         "audit",
@@ -2110,12 +2110,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "547765c4796dd8af7e5f9d1bf97243a19e98c8b4fb11e188713e797c1b245a9a",
         "semantic_content_sha256": "9d747be9b39ba5f8126ae8806997bea603f9370a1a95a0bd247e66010862321f",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "9d747be9b39ba5f8126ae8806997bea603f9370a1a95a0bd247e66010862321f"
     },
@@ -2133,7 +2133,7 @@
       "input_path": "inputs/T11.sexp",
       "input_sha256": "f7a45e216cfd2cb6de3942d2cb917558624bf9f45017151589146a05f42ec7e1",
       "oracle_path": "oracles/T11.json",
-      "oracle_sha256": "41d2862a17fc8c109cf7f767f213802d828baae5f20bb030904a4795786fa031",
+      "oracle_sha256": "30ef83e46c42c849cd05077b34a0513de3b3fd7fb4a2c2cfa14e83f2ac0cd855",
       "query_order": [
         "sensitivity",
         "slots",
@@ -2243,12 +2243,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "f7a45e216cfd2cb6de3942d2cb917558624bf9f45017151589146a05f42ec7e1",
         "semantic_content_sha256": "dd262bd5a9e0d678c1206fdf8a9bdd21a418c497fcab37a2c697b0ae199eec4f",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "dd262bd5a9e0d678c1206fdf8a9bdd21a418c497fcab37a2c697b0ae199eec4f"
     },
@@ -2266,7 +2266,7 @@
       "input_path": "inputs/T12.sexp",
       "input_sha256": "32f6020d88cd26cb1d5dff4bc92269d8ff6804ba65ff2dd223808013c79350f2",
       "oracle_path": "oracles/T12.json",
-      "oracle_sha256": "2eb743682ef20e18c882ea1eafe9c487e505060347c6c2a0565af92ee344018a",
+      "oracle_sha256": "2d18c313f877b2472e2fcd9e87af452b1d38c17ddf7620489a4a5e8e5b743063",
       "query_order": [
         "sensitivity",
         "slots",
@@ -2376,12 +2376,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "32f6020d88cd26cb1d5dff4bc92269d8ff6804ba65ff2dd223808013c79350f2",
         "semantic_content_sha256": "54afed7819c1a0411bd5962d5df794c40bc515ae8864e2bd6d8bf526ad061b25",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "54afed7819c1a0411bd5962d5df794c40bc515ae8864e2bd6d8bf526ad061b25"
     },
@@ -2399,7 +2399,7 @@
       "input_path": "inputs/T13.sexp",
       "input_sha256": "1fb77ef0a9473f6b0130f5367209aafcb8fe0a83dc7d3cb29b14ca2a62b1d84d",
       "oracle_path": "oracles/T13.json",
-      "oracle_sha256": "ddae9b7448d8d0bea0158feaa47d7787e5dc3bf0d504f06b0121e7c90b4afb76",
+      "oracle_sha256": "5436d35d8c4cc600f4832b7e0a930160e249b0516434a3bb3f35001ff23f8cb4",
       "query_order": [
         "status",
         "minimal"
@@ -2472,12 +2472,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "1fb77ef0a9473f6b0130f5367209aafcb8fe0a83dc7d3cb29b14ca2a62b1d84d",
         "semantic_content_sha256": "fff4c9da99c92216ef398c0e1ef2965a071c15100bf819bcf171b4ef426149f7",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "fff4c9da99c92216ef398c0e1ef2965a071c15100bf819bcf171b4ef426149f7"
     },
@@ -2495,7 +2495,7 @@
       "input_path": "inputs/T14.sexp",
       "input_sha256": "a773b8f090c09959f35a41499ee12ba767b9876a9c59d287256367ec2af74bdf",
       "oracle_path": "oracles/T14.json",
-      "oracle_sha256": "4ccbaf01e6f555bbffcbd1bfcbd51a6418b75ae44cbb540a81b1614d93b0fd82",
+      "oracle_sha256": "d56fcb41360e41c3b47d39edade64645e68b716ad9d25b73aae2f02a6f7d2d1e",
       "query_order": [
         "status",
         "minimal"
@@ -2568,12 +2568,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "a773b8f090c09959f35a41499ee12ba767b9876a9c59d287256367ec2af74bdf",
         "semantic_content_sha256": "c12142bcbf380d74ff657b0d9c9b7be60dc1c9525a14731a6292703d9673a438",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "c12142bcbf380d74ff657b0d9c9b7be60dc1c9525a14731a6292703d9673a438"
     },
@@ -2591,7 +2591,7 @@
       "input_path": "inputs/T15.sexp",
       "input_sha256": "6f7e353c1f26e69fe7dbc9f09fe809e4d8bd45029ede981f5c362f0316d6db87",
       "oracle_path": "oracles/T15.json",
-      "oracle_sha256": "c23ea56ece062417b69fed04d8abe080a8de894408147eae5dd2a7bf687ecbb9",
+      "oracle_sha256": "06a97fc25b65f973a5ac0f922a081046e1b261f841113eb6f94ef91d6c71c414",
       "query_order": [
         "status",
         "audit",
@@ -2637,12 +2637,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "6f7e353c1f26e69fe7dbc9f09fe809e4d8bd45029ede981f5c362f0316d6db87",
         "semantic_content_sha256": "dabf36da9292e46b24e370292e2fa6c1831e7debaa041346a851968e3f39e5bb",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "dabf36da9292e46b24e370292e2fa6c1831e7debaa041346a851968e3f39e5bb"
     },
@@ -2660,7 +2660,7 @@
       "input_path": "inputs/T16.sexp",
       "input_sha256": "72b68249ab9814baaa9e5775a3426317fecdb861d2570c9c2dd43c59bdbc37e4",
       "oracle_path": "oracles/T16.json",
-      "oracle_sha256": "f2ec4d25deec3163df95a111ad96b87e0bb19f2024bf977e0096aec18cf2b3d7",
+      "oracle_sha256": "db5beaf06c20099616d6f1045b25bb33ead21c3266a7894136a7358599067301",
       "query_order": [
         "original",
         "tampered"
@@ -2704,12 +2704,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "72b68249ab9814baaa9e5775a3426317fecdb861d2570c9c2dd43c59bdbc37e4",
         "semantic_content_sha256": "dd8c60bbc4189aeccc27bd010e3a7a7f39fd434339016f36bf3ff57060a70dcb",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "dd8c60bbc4189aeccc27bd010e3a7a7f39fd434339016f36bf3ff57060a70dcb"
     },
@@ -2726,7 +2726,7 @@
       "input_path": "inputs/T09-singleton-slots-0.sexp",
       "input_sha256": "5264b35448e7c7ab883b231a8f928adfe61641e8a68b0ad063eaf98c13cba061",
       "oracle_path": "oracles/T09-singleton-slots-0.json",
-      "oracle_sha256": "d66d646c2a54666342953432ffc13eb32176edd50d783b01283710004c1692eb",
+      "oracle_sha256": "8e239945c5a6617a0c51c6f1814de430497362a2142cc85540e5e8802f5da4cb",
       "query_order": [
         "status",
         "stable",
@@ -2800,12 +2800,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "5264b35448e7c7ab883b231a8f928adfe61641e8a68b0ad063eaf98c13cba061",
         "semantic_content_sha256": "08b9921d762da031613a50898dff87840c9b67ff160361ec73a809a8d8c5bd5b",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "08b9921d762da031613a50898dff87840c9b67ff160361ec73a809a8d8c5bd5b"
     },
@@ -2822,7 +2822,7 @@
       "input_path": "inputs/T09-singleton-slots-1.sexp",
       "input_sha256": "d68a70c7c58de0254750dadc82d36a22f3298f081c4dab2931111e7b8e209dbd",
       "oracle_path": "oracles/T09-singleton-slots-1.json",
-      "oracle_sha256": "c4d8cf04d30de1e51e0b310350ead1ceedc2bb42f1c8256b45bd554f853d155b",
+      "oracle_sha256": "a633b602f870d6302db7337f2f840104415305c9792c5cefac841175737f13ec",
       "query_order": [
         "status",
         "stable",
@@ -2896,12 +2896,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "d68a70c7c58de0254750dadc82d36a22f3298f081c4dab2931111e7b8e209dbd",
         "semantic_content_sha256": "55f7bf3b46a8db0a88195bd6b3c506f00d62a9ae7df1c4c558640e168e163ef5",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "55f7bf3b46a8db0a88195bd6b3c506f00d62a9ae7df1c4c558640e168e163ef5"
     },
@@ -2918,7 +2918,7 @@
       "input_path": "inputs/T09-singleton-slots-4.sexp",
       "input_sha256": "10f246e5743b807529db2f2e54184bd2ed8355bb52f32e4c11b718095a9b8ce2",
       "oracle_path": "oracles/T09-singleton-slots-4.json",
-      "oracle_sha256": "5cf6919c5a963a5d7f0ca7a1a7ddfc19e07aac23d75b718fa2262efbe18d854d",
+      "oracle_sha256": "2f112866919f54824c4edb5c2e2cddd151317da44210c6e75e965d6cee22360c",
       "query_order": [
         "status",
         "stable",
@@ -2992,12 +2992,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "10f246e5743b807529db2f2e54184bd2ed8355bb52f32e4c11b718095a9b8ce2",
         "semantic_content_sha256": "aaaf1707121574fd42af83bdb725182747680eb79a46cf9c8e1b12bfb4674553",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "aaaf1707121574fd42af83bdb725182747680eb79a46cf9c8e1b12bfb4674553"
     },
@@ -3014,7 +3014,7 @@
       "input_path": "inputs/T09-singleton-slots-40.sexp",
       "input_sha256": "579695e0547f9a8904dc4efb132b26acca708e3cd1418b0d33a2e2a988fb123a",
       "oracle_path": "oracles/T09-singleton-slots-40.json",
-      "oracle_sha256": "344d437836cfcee1b8e4bf634bffbf3ae3402ce44413893589671c81a4832e24",
+      "oracle_sha256": "142c07c4fab536825c7408b448f4858cba28b7a67c6a89d2a37a429d4fe0ce40",
       "query_order": [
         "status",
         "stable",
@@ -3088,12 +3088,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "579695e0547f9a8904dc4efb132b26acca708e3cd1418b0d33a2e2a988fb123a",
         "semantic_content_sha256": "9166905594726c094663276b509d7accfcb53a328112b7d49d743137971e747e",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "9166905594726c094663276b509d7accfcb53a328112b7d49d743137971e747e"
     },
@@ -3110,7 +3110,7 @@
       "input_path": "inputs/T10-singleton-slots-0.sexp",
       "input_sha256": "547765c4796dd8af7e5f9d1bf97243a19e98c8b4fb11e188713e797c1b245a9a",
       "oracle_path": "oracles/T10-singleton-slots-0.json",
-      "oracle_sha256": "08b34f3741c088ca2b68605e46ddb5d2fd1d150a15dd831d954881326046c216",
+      "oracle_sha256": "2ba93c098aff21753178ab98dd173e8e89626aa18ea4340d03c924ef52986ee3",
       "query_order": [
         "status",
         "audit",
@@ -3186,12 +3186,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "547765c4796dd8af7e5f9d1bf97243a19e98c8b4fb11e188713e797c1b245a9a",
         "semantic_content_sha256": "b005b9ce46d34f5b66ba4a8e2abdadb84ff565d1b73c85deca749e929f4ee75a",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "b005b9ce46d34f5b66ba4a8e2abdadb84ff565d1b73c85deca749e929f4ee75a"
     },
@@ -3208,7 +3208,7 @@
       "input_path": "inputs/T10-singleton-slots-1.sexp",
       "input_sha256": "f42dfa2fee7040e7cd2728d8a4c136832490dd3b8e98440e4bb84d44c2d5e51e",
       "oracle_path": "oracles/T10-singleton-slots-1.json",
-      "oracle_sha256": "963478bb73bcda051305ede94c0b447253cd867a8267eabc9c7a1ed7a499be15",
+      "oracle_sha256": "2ed738db575919aa8ec8e39fef88b0899b11a2bc291758f23e443d30afedffb7",
       "query_order": [
         "status",
         "audit",
@@ -3284,12 +3284,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "f42dfa2fee7040e7cd2728d8a4c136832490dd3b8e98440e4bb84d44c2d5e51e",
         "semantic_content_sha256": "28638ca0d505ade66d2bcd80dfdfedf148c2542784b3753c8933ca57adbb2e43",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "28638ca0d505ade66d2bcd80dfdfedf148c2542784b3753c8933ca57adbb2e43"
     },
@@ -3306,7 +3306,7 @@
       "input_path": "inputs/T10-singleton-slots-4.sexp",
       "input_sha256": "408dba1f83987cddc03ddfbdf2c562e878d68de55cc98def1f99f0b8783b6689",
       "oracle_path": "oracles/T10-singleton-slots-4.json",
-      "oracle_sha256": "3be4b811beef677e3e50d57d51be2128eb2669b2ea497b71a83b059d563744be",
+      "oracle_sha256": "64843d8ebbc9e5aaee2e0f53f58f7aa8fb8499be1668ee5df73ee4019eb87400",
       "query_order": [
         "status",
         "audit",
@@ -3382,12 +3382,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "408dba1f83987cddc03ddfbdf2c562e878d68de55cc98def1f99f0b8783b6689",
         "semantic_content_sha256": "d41ee7c6aadc672cd5706a962070ec5110b84c39423fe479fa78965e8186bfb6",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "d41ee7c6aadc672cd5706a962070ec5110b84c39423fe479fa78965e8186bfb6"
     },
@@ -3404,7 +3404,7 @@
       "input_path": "inputs/T10-singleton-slots-40.sexp",
       "input_sha256": "05b3278acbaf85697a9e281ccf46e43cacef25454b7dfe422aced00abbe4af82",
       "oracle_path": "oracles/T10-singleton-slots-40.json",
-      "oracle_sha256": "73435e7215be3b92962268e039269c45dd397164eaf37df9a361c7f3c5562b3c",
+      "oracle_sha256": "f49f343c0dd1880f6f1b7e6275a2f40573e63890a74b14a820d7f61aec13c41d",
       "query_order": [
         "status",
         "audit",
@@ -3480,12 +3480,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "05b3278acbaf85697a9e281ccf46e43cacef25454b7dfe422aced00abbe4af82",
         "semantic_content_sha256": "4a4671db56b546c4a1d8365af8c3dd1b965ff3c40eab9486c890116034ad7ccd",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "4a4671db56b546c4a1d8365af8c3dd1b965ff3c40eab9486c890116034ad7ccd"
     },
@@ -3502,7 +3502,7 @@
       "input_path": "inputs/T11-singleton-slots-0.sexp",
       "input_sha256": "f7a45e216cfd2cb6de3942d2cb917558624bf9f45017151589146a05f42ec7e1",
       "oracle_path": "oracles/T11-singleton-slots-0.json",
-      "oracle_sha256": "5f5688bbb8ae2655bc3d21b223d16e79c0e63b6460425e0b1473990682148987",
+      "oracle_sha256": "a36de454a780060bad92c3728e7677a91c382c3ae4005a022fa157679c6de8e7",
       "query_order": [
         "sensitivity",
         "slots",
@@ -3612,12 +3612,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "f7a45e216cfd2cb6de3942d2cb917558624bf9f45017151589146a05f42ec7e1",
         "semantic_content_sha256": "5e47920ff941e31417926c0a151ae3c9bcc8e9e7f415e8c4c5f53695308c1371",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "5e47920ff941e31417926c0a151ae3c9bcc8e9e7f415e8c4c5f53695308c1371"
     },
@@ -3634,7 +3634,7 @@
       "input_path": "inputs/T11-singleton-slots-1.sexp",
       "input_sha256": "ba6c1b4f06e4b1dc9256392150cbe97c1569f44cfb36c2df82cc11a557650ff8",
       "oracle_path": "oracles/T11-singleton-slots-1.json",
-      "oracle_sha256": "bfa1dc5c2c69a2954bd6621c99cb5fd369cab728ba70b6dbba3b5ffb66271a8e",
+      "oracle_sha256": "7c0f13378d563c549341b7d904607ac853db9ea6d8d2b9aac7b7a4b9e000ece5",
       "query_order": [
         "sensitivity",
         "slots",
@@ -3764,12 +3764,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "ba6c1b4f06e4b1dc9256392150cbe97c1569f44cfb36c2df82cc11a557650ff8",
         "semantic_content_sha256": "42f33b484823a06890171ea427048794b970c8a119ba5cd4798700e8859cc47f",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "42f33b484823a06890171ea427048794b970c8a119ba5cd4798700e8859cc47f"
     },
@@ -3786,7 +3786,7 @@
       "input_path": "inputs/T11-singleton-slots-4.sexp",
       "input_sha256": "6078e6db387b38b2e83d8119bbb62f760baa3a8826dd43842b39a1cb628410ff",
       "oracle_path": "oracles/T11-singleton-slots-4.json",
-      "oracle_sha256": "06ed6c823b75760f5de9a6c374fac5e6e38a09a1f98928dee285b61b22f6c6c5",
+      "oracle_sha256": "0719d16ce91800fbae727e6299d8f91b39a24663325eceb1b7e003a49228d495",
       "query_order": [
         "sensitivity",
         "slots",
@@ -3976,12 +3976,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "6078e6db387b38b2e83d8119bbb62f760baa3a8826dd43842b39a1cb628410ff",
         "semantic_content_sha256": "b5033dcbbd1fd16a14a04138724611c6cd9c28db058954e21b81cbe00d6edbc8",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "b5033dcbbd1fd16a14a04138724611c6cd9c28db058954e21b81cbe00d6edbc8"
     },
@@ -3998,7 +3998,7 @@
       "input_path": "inputs/T11-singleton-slots-40.sexp",
       "input_sha256": "e9e554c8b7bb1ee8fb2ae9565fd1595475759027b011c4fd664c9d607ce1b576",
       "oracle_path": "oracles/T11-singleton-slots-40.json",
-      "oracle_sha256": "c80460fb4b196231d0a2b1607dd9edf16b2755470c2c532c9d115ab71855b368",
+      "oracle_sha256": "1f3de493d50000edeafc164d456a4cd17e03fec0d17f66b8e28ac96c3b4bd87c",
       "query_order": [
         "sensitivity",
         "slots",
@@ -4908,12 +4908,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "e9e554c8b7bb1ee8fb2ae9565fd1595475759027b011c4fd664c9d607ce1b576",
         "semantic_content_sha256": "6a1468232831151eac915e8ba0e7cf2b386614710e833c589d58bef158cd383a",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "6a1468232831151eac915e8ba0e7cf2b386614710e833c589d58bef158cd383a"
     },
@@ -4930,7 +4930,7 @@
       "input_path": "inputs/T12-singleton-slots-0.sexp",
       "input_sha256": "32f6020d88cd26cb1d5dff4bc92269d8ff6804ba65ff2dd223808013c79350f2",
       "oracle_path": "oracles/T12-singleton-slots-0.json",
-      "oracle_sha256": "3f39a41cc23b21cb6a7c4f9b5a21c5f4dfef76f5e193301c12da90e706c7b043",
+      "oracle_sha256": "74211bc2d1313ce1d3dd73123fffecd79f9fa2a35f87d5aaeb767b227c0764be",
       "query_order": [
         "sensitivity",
         "slots",
@@ -5040,12 +5040,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "32f6020d88cd26cb1d5dff4bc92269d8ff6804ba65ff2dd223808013c79350f2",
         "semantic_content_sha256": "7d1ad9c425ddf46538667c29daf768d39aa6467239e4cb76684854d18d12bb91",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "7d1ad9c425ddf46538667c29daf768d39aa6467239e4cb76684854d18d12bb91"
     },
@@ -5062,7 +5062,7 @@
       "input_path": "inputs/T12-singleton-slots-1.sexp",
       "input_sha256": "fde9a0e928a4490decf21a3447451946db2d707c63f6d4ff56f8b1e46c24df04",
       "oracle_path": "oracles/T12-singleton-slots-1.json",
-      "oracle_sha256": "8ffa5abfd1b367a70fbf7f918d2f7a8348e5343f9002f50089dbbfaaa5dad792",
+      "oracle_sha256": "139dc182027fca1fa12d2c61a6b7f44c340d511561529deb5fd047644e97da79",
       "query_order": [
         "sensitivity",
         "slots",
@@ -5192,12 +5192,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "fde9a0e928a4490decf21a3447451946db2d707c63f6d4ff56f8b1e46c24df04",
         "semantic_content_sha256": "be4cafa10f427bf35c87f23b723fcb6698200a6c1385439ab49d266a6138cd5f",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "be4cafa10f427bf35c87f23b723fcb6698200a6c1385439ab49d266a6138cd5f"
     },
@@ -5214,7 +5214,7 @@
       "input_path": "inputs/T12-singleton-slots-4.sexp",
       "input_sha256": "fd408f1084f7a790e0b7315f66553ce4f048c4a320ae8a30fd5e891441059298",
       "oracle_path": "oracles/T12-singleton-slots-4.json",
-      "oracle_sha256": "7b07e396080743bbd175302c23842911de397f52463d61627a3c1d07434d791c",
+      "oracle_sha256": "ed9eae80590f5ef5408a5f264c26dc4d94c6b68320621e4651b84075f1ad1a5a",
       "query_order": [
         "sensitivity",
         "slots",
@@ -5404,12 +5404,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "fd408f1084f7a790e0b7315f66553ce4f048c4a320ae8a30fd5e891441059298",
         "semantic_content_sha256": "081f5323f954f814599fc222aee787206e70d9065248d8dfcc35856192867f48",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "081f5323f954f814599fc222aee787206e70d9065248d8dfcc35856192867f48"
     },
@@ -5426,7 +5426,7 @@
       "input_path": "inputs/T12-singleton-slots-40.sexp",
       "input_sha256": "b7ab0462607ff2ad641f1cf05b9d4cff51232c12c867846615a9bcb9a6fb25c6",
       "oracle_path": "oracles/T12-singleton-slots-40.json",
-      "oracle_sha256": "e6ae9d197c039b703d83104a763475ef8d5b141b984bc768cc834e4489f71010",
+      "oracle_sha256": "d7d819be0508bf35a9369cee7ed1cbc90c7c1fd5bcc39d29b6d20d01bd335c5c",
       "query_order": [
         "sensitivity",
         "slots",
@@ -6336,12 +6336,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "b7ab0462607ff2ad641f1cf05b9d4cff51232c12c867846615a9bcb9a6fb25c6",
         "semantic_content_sha256": "4a619d90a86429ce4011828b937a546fd5c449db0288f75b5a0e69bbac4ed92a",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "4a619d90a86429ce4011828b937a546fd5c449db0288f75b5a0e69bbac4ed92a"
     },
@@ -6358,7 +6358,7 @@
       "input_path": "inputs/T01-source-declarations-0.sexp",
       "input_sha256": "97f776b13670462aab228d55ce7f6cb37980c8198bf4be0578caea6f09e687f0",
       "oracle_path": "oracles/T01-source-declarations-0.json",
-      "oracle_sha256": "1ce8377806c32deb8009e14fc31f88235f356cc342472c8d75b941e835fa5b43",
+      "oracle_sha256": "08131177affc0c9f24b19c930bcb2aebdd3159a79e1a1d0f0d98adc2458cb6f0",
       "query_order": [
         "T01",
         "verify-endpoints"
@@ -6402,12 +6402,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "97f776b13670462aab228d55ce7f6cb37980c8198bf4be0578caea6f09e687f0",
         "semantic_content_sha256": "d7be7b776e573855ecfe0a3edffed517705f2a21c7b956085fa0db88650b11b0",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "d7be7b776e573855ecfe0a3edffed517705f2a21c7b956085fa0db88650b11b0"
     },
@@ -6424,7 +6424,7 @@
       "input_path": "inputs/T01-source-declarations-1.sexp",
       "input_sha256": "8c56a91097575fad55e486a58fdfffe1cda97c5f31d19d72438689424ab15e0a",
       "oracle_path": "oracles/T01-source-declarations-1.json",
-      "oracle_sha256": "8c296ef7be4b8db37e3076f6ceb7b18c3cc15809c309f2d2018f7e034c8e0d2b",
+      "oracle_sha256": "414acf15c2e0cbd3fa0feda05a45793fd483ee178e474959bdffe481a8c6853f",
       "query_order": [
         "T01",
         "verify-endpoints"
@@ -6468,12 +6468,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "8c56a91097575fad55e486a58fdfffe1cda97c5f31d19d72438689424ab15e0a",
         "semantic_content_sha256": "060a6d1ed6469186eb8f113cb858afd57509ef3884237654a479ffe51f27e89b",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "060a6d1ed6469186eb8f113cb858afd57509ef3884237654a479ffe51f27e89b"
     },
@@ -6490,7 +6490,7 @@
       "input_path": "inputs/T01-source-declarations-4.sexp",
       "input_sha256": "7d066cd3716579a851b6556992588d92ca9b5e664188397df06346c7e27ab11c",
       "oracle_path": "oracles/T01-source-declarations-4.json",
-      "oracle_sha256": "26a39eb45a46d0d4485db9f96b278e454ce77c027c7a6bb890269c44de1baa5a",
+      "oracle_sha256": "afdd0fa5bc319010c4e759b39a831baebb044284de454e3b745857547dd0c6ad",
       "query_order": [
         "T01",
         "verify-endpoints"
@@ -6534,12 +6534,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "7d066cd3716579a851b6556992588d92ca9b5e664188397df06346c7e27ab11c",
         "semantic_content_sha256": "484c2f37b33fece8e5634faa0786a1792e445adb349b91bf9185b514c25304d8",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "484c2f37b33fece8e5634faa0786a1792e445adb349b91bf9185b514c25304d8"
     },
@@ -6556,7 +6556,7 @@
       "input_path": "inputs/T01-source-declarations-16.sexp",
       "input_sha256": "a09ecf5448a6d9186a59edda1a42b294e6ef222e112003d6b9ab376905b47285",
       "oracle_path": "oracles/T01-source-declarations-16.json",
-      "oracle_sha256": "52e820e1d8a03f56404eb2d91f8068ba01be8e1b9e6de9769d64367ec7487146",
+      "oracle_sha256": "e12416d0c7860c14f2be996053e5664dfc2fad6a0fb70ce668e5d39cb4b3e9d4",
       "query_order": [
         "T01",
         "verify-endpoints"
@@ -6600,12 +6600,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "a09ecf5448a6d9186a59edda1a42b294e6ef222e112003d6b9ab376905b47285",
         "semantic_content_sha256": "ee0448f16c23b9d85083f83e1a2c30ed738ac36aca1b8fa82d2ecab7c2763cf9",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "ee0448f16c23b9d85083f83e1a2c30ed738ac36aca1b8fa82d2ecab7c2763cf9"
     },
@@ -6622,7 +6622,7 @@
       "input_path": "inputs/T05-source-declarations-0.sexp",
       "input_sha256": "14e8f0c59f4116a2bcdd47d2642c7c105ecf919635d324d92fda59cadbbd92e6",
       "oracle_path": "oracles/T05-source-declarations-0.json",
-      "oracle_sha256": "2f486d794512b9ce1038caed90d2f09775e4ac024eba5cdefbde241a25b4b7d2",
+      "oracle_sha256": "6a161e6180924d9621e4f1668a5fed162213ab652c8bda3476a1ce6a3166f34f",
       "query_order": [
         "T05"
       ],
@@ -6665,12 +6665,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "14e8f0c59f4116a2bcdd47d2642c7c105ecf919635d324d92fda59cadbbd92e6",
         "semantic_content_sha256": "60466df81ca2e4acf768d1a28e79ffee6b4e5e0cc03f9ee1a0e1603b4130ade5",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "60466df81ca2e4acf768d1a28e79ffee6b4e5e0cc03f9ee1a0e1603b4130ade5"
     },
@@ -6687,7 +6687,7 @@
       "input_path": "inputs/T05-source-declarations-1.sexp",
       "input_sha256": "96610ad06d071b50e30a308f858f969bc0a94094b6141a4432665d8725e5582a",
       "oracle_path": "oracles/T05-source-declarations-1.json",
-      "oracle_sha256": "09bd5ad2049cf58337522c34edd0253193242b0a1f42bd61e48037bbb257a3e2",
+      "oracle_sha256": "a3d87fdc32d93839b3d8c3331022a1a3382f6ecf11e76fe365eecfb7866b5eed",
       "query_order": [
         "T05"
       ],
@@ -6730,12 +6730,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "96610ad06d071b50e30a308f858f969bc0a94094b6141a4432665d8725e5582a",
         "semantic_content_sha256": "9184fabcb8662b5841d9097ee6763c39d89bc16242da724e74b6ff79c28acebb",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "9184fabcb8662b5841d9097ee6763c39d89bc16242da724e74b6ff79c28acebb"
     },
@@ -6752,7 +6752,7 @@
       "input_path": "inputs/T05-source-declarations-4.sexp",
       "input_sha256": "61976ac890ec9ba38af4701b3f1db335f234bfdc79a24375a2ae540ab79f6c0a",
       "oracle_path": "oracles/T05-source-declarations-4.json",
-      "oracle_sha256": "6aade9a779812cf0af34b531741af5dcdef6673c8773449b675174c2c237ac62",
+      "oracle_sha256": "f320dfa9cdb8a7a8105af1a7a28d29d0b96c8ea4976068cd0fa5556a53b289b3",
       "query_order": [
         "T05"
       ],
@@ -6795,12 +6795,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "61976ac890ec9ba38af4701b3f1db335f234bfdc79a24375a2ae540ab79f6c0a",
         "semantic_content_sha256": "5ab3549f2d8b9912a075b641b00ab041b5d50abdfe29371360554cd20e09191e",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "5ab3549f2d8b9912a075b641b00ab041b5d50abdfe29371360554cd20e09191e"
     },
@@ -6817,7 +6817,7 @@
       "input_path": "inputs/T05-source-declarations-16.sexp",
       "input_sha256": "b562efa1c0ebd1c6547ca915acacb35b8bfdaecc7450bae6b967eace865ef35e",
       "oracle_path": "oracles/T05-source-declarations-16.json",
-      "oracle_sha256": "45673e8302c558587279bfa64b5e17b9fdf3ed666ed9fa997a2fe09e921b1ce5",
+      "oracle_sha256": "2eb593d941fa6ffbff8cc0120d0313a7b52cefb48105fcdb0f86b429a045f4a4",
       "query_order": [
         "T05"
       ],
@@ -6860,12 +6860,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "b562efa1c0ebd1c6547ca915acacb35b8bfdaecc7450bae6b967eace865ef35e",
         "semantic_content_sha256": "ae7dea0521639df178c6f077ab82a83d6b1df7da0b919c83eb9cd7ace4d61d49",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "ae7dea0521639df178c6f077ab82a83d6b1df7da0b919c83eb9cd7ace4d61d49"
     },
@@ -6882,7 +6882,7 @@
       "input_path": "inputs/T06-source-declarations-0.sexp",
       "input_sha256": "3b553951d0db48e6ef3b9e21a1360c248a101780b77ac176834c8c0e041c608e",
       "oracle_path": "oracles/T06-source-declarations-0.json",
-      "oracle_sha256": "10e19ad500ff4e32ea00ff9084196499f80b222a057e4822177dd924fa000eca",
+      "oracle_sha256": "f9992027128fa11752d9de1532ee626edcf3322d381920e52808fa1ad1792321",
       "query_order": [
         "T06"
       ],
@@ -6925,12 +6925,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "3b553951d0db48e6ef3b9e21a1360c248a101780b77ac176834c8c0e041c608e",
         "semantic_content_sha256": "1d137766d7ce031a7446a1359899fbae234253e371c20809f6b0963ab1c6ad8d",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "1d137766d7ce031a7446a1359899fbae234253e371c20809f6b0963ab1c6ad8d"
     },
@@ -6947,7 +6947,7 @@
       "input_path": "inputs/T06-source-declarations-1.sexp",
       "input_sha256": "ac1b51728ff683b09d571330f5f2ab551d7456a9d61ce0e478188d0c136826aa",
       "oracle_path": "oracles/T06-source-declarations-1.json",
-      "oracle_sha256": "fb5096ad1e2149f7ccb3751f89de374e298fafe9cda669da98305c0736ae35ce",
+      "oracle_sha256": "df690c1c33d884b9db7412513c9f874eb9eb343c7a0079e80f9b540c11e8b7b7",
       "query_order": [
         "T06"
       ],
@@ -6990,12 +6990,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "ac1b51728ff683b09d571330f5f2ab551d7456a9d61ce0e478188d0c136826aa",
         "semantic_content_sha256": "0754c2d5c9f5e0e30d964915af517ca5877aea4af20b975ddb4ddb11a3590f97",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "0754c2d5c9f5e0e30d964915af517ca5877aea4af20b975ddb4ddb11a3590f97"
     },
@@ -7012,7 +7012,7 @@
       "input_path": "inputs/T06-source-declarations-4.sexp",
       "input_sha256": "722a885f3c14d00fe4ab107c2e975391e750d8aaadb93d68eaa7f77a3d4dd3ae",
       "oracle_path": "oracles/T06-source-declarations-4.json",
-      "oracle_sha256": "9a8d7e9a7489b7723142d882b6710d8a312a916b041e5cbce7f5e9f210533cd8",
+      "oracle_sha256": "ab506756f2a3dcbab5cf306dfaf84abc7ea4da34e32506052a923fdc1b16e55e",
       "query_order": [
         "T06"
       ],
@@ -7055,12 +7055,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "722a885f3c14d00fe4ab107c2e975391e750d8aaadb93d68eaa7f77a3d4dd3ae",
         "semantic_content_sha256": "b311e9d174d46fe3873fd675a909b619a88693c9191ed1f1b25fad11876b346f",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "b311e9d174d46fe3873fd675a909b619a88693c9191ed1f1b25fad11876b346f"
     },
@@ -7077,7 +7077,7 @@
       "input_path": "inputs/T06-source-declarations-16.sexp",
       "input_sha256": "83a38f3ca6bb225089f35303e0aca92a18ce7be83604f682e221bf8fcc609f82",
       "oracle_path": "oracles/T06-source-declarations-16.json",
-      "oracle_sha256": "dc94d3095eba09a1522ace16d98fe5e669531bbcfdb7f7a489987d91a517d0c4",
+      "oracle_sha256": "35e87b953b0e501ee75d68b6632e564928113b9f94f195cbf935518b1d23353a",
       "query_order": [
         "T06"
       ],
@@ -7120,12 +7120,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "83a38f3ca6bb225089f35303e0aca92a18ce7be83604f682e221bf8fcc609f82",
         "semantic_content_sha256": "0ae53ad35729522d61e6d8deb59770fa25c1bd3f9d5eed23bf0d7aa1b9982b14",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "0ae53ad35729522d61e6d8deb59770fa25c1bd3f9d5eed23bf0d7aa1b9982b14"
     },
@@ -7142,7 +7142,7 @@
       "input_path": "inputs/T07-source-declarations-0.sexp",
       "input_sha256": "55f4c94276527b4cccd7e5e5552f9ddcf36864cdbb66a07bbfb5d3d12a962839",
       "oracle_path": "oracles/T07-source-declarations-0.json",
-      "oracle_sha256": "0bb5873d0d551110f921f4b08b680165199759f3688c17c0338640fae7711b9e",
+      "oracle_sha256": "eb07ef2a3a02cdb67e40f17e692a3a32a09771b8ed598ec64ae0802ea0163b84",
       "query_order": [
         "T07"
       ],
@@ -7185,12 +7185,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "55f4c94276527b4cccd7e5e5552f9ddcf36864cdbb66a07bbfb5d3d12a962839",
         "semantic_content_sha256": "873dae58ea8f7cf9dcf33140ebf3f9c6da621f3df4b01c3489e41bd8582bca9f",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "873dae58ea8f7cf9dcf33140ebf3f9c6da621f3df4b01c3489e41bd8582bca9f"
     },
@@ -7207,7 +7207,7 @@
       "input_path": "inputs/T07-source-declarations-1.sexp",
       "input_sha256": "d9336938356b76688abe8b5671b5566cfe053d4d60811183999b9a9f299ebfb8",
       "oracle_path": "oracles/T07-source-declarations-1.json",
-      "oracle_sha256": "6aa683c7ac06acfe21594e9510c26710c6782c24ed6a479cda0056b2292223d7",
+      "oracle_sha256": "28dac90928e5b0109613c25d2626a5b9731a8d49b244ea638fcfaed72b0a5cf9",
       "query_order": [
         "T07"
       ],
@@ -7250,12 +7250,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "d9336938356b76688abe8b5671b5566cfe053d4d60811183999b9a9f299ebfb8",
         "semantic_content_sha256": "a33b2ab3a88c72d354b086541daed1f1dc6ae91a26d3b5ac7ab587be4090cbc7",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "a33b2ab3a88c72d354b086541daed1f1dc6ae91a26d3b5ac7ab587be4090cbc7"
     },
@@ -7272,7 +7272,7 @@
       "input_path": "inputs/T07-source-declarations-4.sexp",
       "input_sha256": "19f2104601db279048d034d6c3aa992dfe2d8d30a599f592484cd2a2f1fa00e0",
       "oracle_path": "oracles/T07-source-declarations-4.json",
-      "oracle_sha256": "709fe1df070791df60106acfc177d5ebe30786a8681422759e90aa2c4ba41f20",
+      "oracle_sha256": "85479eb343b67866a6219f8ab8865a597797cf5445f513f6ff1c14ad8e56d597",
       "query_order": [
         "T07"
       ],
@@ -7315,12 +7315,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "19f2104601db279048d034d6c3aa992dfe2d8d30a599f592484cd2a2f1fa00e0",
         "semantic_content_sha256": "955402e3d4f4b15f736d84f40848e03227d7aca85ab30fed3970f021a690c257",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "955402e3d4f4b15f736d84f40848e03227d7aca85ab30fed3970f021a690c257"
     },
@@ -7337,7 +7337,7 @@
       "input_path": "inputs/T07-source-declarations-16.sexp",
       "input_sha256": "4b0cd0babe3c6c7f00ac355dc6ea48257fd3be54fe76a59e442026966d7fc24b",
       "oracle_path": "oracles/T07-source-declarations-16.json",
-      "oracle_sha256": "1363260e8ba2b9295819762f66295dd83641a0522b485ba9a4d52af08fc42b45",
+      "oracle_sha256": "e09cf739d1643437e678f3f8a785eee28457167e15c8a5ce00dc22ae7df0a109",
       "query_order": [
         "T07"
       ],
@@ -7380,12 +7380,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "4b0cd0babe3c6c7f00ac355dc6ea48257fd3be54fe76a59e442026966d7fc24b",
         "semantic_content_sha256": "2757da407b0bd5741558d00a8d1d716ffdcbf602c07b2a4cace4d34d2c567501",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "2757da407b0bd5741558d00a8d1d716ffdcbf602c07b2a4cace4d34d2c567501"
     },
@@ -7402,7 +7402,7 @@
       "input_path": "inputs/T09-assumption-literals-0.sexp",
       "input_sha256": "5264b35448e7c7ab883b231a8f928adfe61641e8a68b0ad063eaf98c13cba061",
       "oracle_path": "oracles/T09-assumption-literals-0.json",
-      "oracle_sha256": "3d17fb5127e1f54172bf8e6284e8664dfb1c382b3bc1c6955eb32282878f70b7",
+      "oracle_sha256": "ce2224d028221b1222e201b14c7ff42b8bf5e7fc023e0d5c065752f4deaba337",
       "query_order": [
         "status",
         "stable",
@@ -7476,12 +7476,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "5264b35448e7c7ab883b231a8f928adfe61641e8a68b0ad063eaf98c13cba061",
         "semantic_content_sha256": "bda57ce9d7ecb46c2cfe5fbc260f2894325615bc07124bbce80771d74bf1ddf5",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "bda57ce9d7ecb46c2cfe5fbc260f2894325615bc07124bbce80771d74bf1ddf5"
     },
@@ -7498,7 +7498,7 @@
       "input_path": "inputs/T09-assumption-literals-1.sexp",
       "input_sha256": "087fad5fa8409065a5b22c3f840f57d5977006d8ac8e6d2eb775ca83919fc9ab",
       "oracle_path": "oracles/T09-assumption-literals-1.json",
-      "oracle_sha256": "74758455f321bd351ec340632f1c06305db42caf85bc3f9a5dcb8b87a4e57046",
+      "oracle_sha256": "36c1bb81eb28d6bd5b94270f2a3d018bcb704e831d807dbcf19487859fb42f36",
       "query_order": [
         "status",
         "stable",
@@ -7586,12 +7586,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "087fad5fa8409065a5b22c3f840f57d5977006d8ac8e6d2eb775ca83919fc9ab",
         "semantic_content_sha256": "3bdb183fc05d57c7384f75c4239fe19cc5600105982fbf41c9e6ddee977fb50d",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "3bdb183fc05d57c7384f75c4239fe19cc5600105982fbf41c9e6ddee977fb50d"
     },
@@ -7608,7 +7608,7 @@
       "input_path": "inputs/T09-assumption-literals-2.sexp",
       "input_sha256": "5d6360b01f5995e78debc6a6d223f3d4f2a614028dd03873ad3b1f0798e0c486",
       "oracle_path": "oracles/T09-assumption-literals-2.json",
-      "oracle_sha256": "a839a4e25ebb7d82caac150facb0eaeb7a096604f4fdcb13188ecb0ae4835874",
+      "oracle_sha256": "1852b404a90f558eff2b12a647eed0a6504a1b83071cec4d773638906ee45f04",
       "query_order": [
         "status",
         "stable",
@@ -7710,12 +7710,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "5d6360b01f5995e78debc6a6d223f3d4f2a614028dd03873ad3b1f0798e0c486",
         "semantic_content_sha256": "6ce566befc423b02f5f4ccfcfd396222a645d1ab7604b2fa4972bbc35251f512",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "6ce566befc423b02f5f4ccfcfd396222a645d1ab7604b2fa4972bbc35251f512"
     },
@@ -7732,7 +7732,7 @@
       "input_path": "inputs/T09-assumption-literals-4.sexp",
       "input_sha256": "2e650e4321738591e83861bb2b6b45f9fa11501ab29c39633395ed4cdecdc50b",
       "oracle_path": "oracles/T09-assumption-literals-4.json",
-      "oracle_sha256": "bc25185a5e680db7d013309047ea1d7d10b7c4b915a54984d4032dac31a08311",
+      "oracle_sha256": "e116eab976c31c7d12d7c64013d80cc578dd62e38575f828f09cebc69a2386e7",
       "query_order": [
         "status",
         "stable",
@@ -7862,12 +7862,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "2e650e4321738591e83861bb2b6b45f9fa11501ab29c39633395ed4cdecdc50b",
         "semantic_content_sha256": "ce1a3cb6dc62980ac072e9ec74cc095fbef44562f39f3058347891d758f8ff77",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "ce1a3cb6dc62980ac072e9ec74cc095fbef44562f39f3058347891d758f8ff77"
     },
@@ -7884,7 +7884,7 @@
       "input_path": "inputs/T10-assumption-literals-0.sexp",
       "input_sha256": "547765c4796dd8af7e5f9d1bf97243a19e98c8b4fb11e188713e797c1b245a9a",
       "oracle_path": "oracles/T10-assumption-literals-0.json",
-      "oracle_sha256": "dba44edae6ac66e13cf74e176b09795d1f385d3fc1732add771ce3ccdd7a0dff",
+      "oracle_sha256": "f32602c2f087d15d6334afa0f9685781a85134e2c8c48ef302c8bd85129aa8f4",
       "query_order": [
         "status",
         "audit",
@@ -7960,12 +7960,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "547765c4796dd8af7e5f9d1bf97243a19e98c8b4fb11e188713e797c1b245a9a",
         "semantic_content_sha256": "009e5868eb2338a2016a4eebc3d2520caf0b3873307a9be11669878531ad6b63",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "009e5868eb2338a2016a4eebc3d2520caf0b3873307a9be11669878531ad6b63"
     },
@@ -7982,7 +7982,7 @@
       "input_path": "inputs/T10-assumption-literals-1.sexp",
       "input_sha256": "fc56765b734cafb80acc1a39c22dfca53ab244de581cf7ba98ce1b4f59d4d4e3",
       "oracle_path": "oracles/T10-assumption-literals-1.json",
-      "oracle_sha256": "48a57fb9065b4d22659e14d02872c71d847ca856acedc1d479c5ef7185653c3b",
+      "oracle_sha256": "db0adc59e2fce7ad01e70c6e17cd3f5d63998a712f14f48d47296a71d2da0273",
       "query_order": [
         "status",
         "audit",
@@ -8072,12 +8072,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "fc56765b734cafb80acc1a39c22dfca53ab244de581cf7ba98ce1b4f59d4d4e3",
         "semantic_content_sha256": "1abacd4fc9d32f064dd96b019e968c9e3cc100d14b15145df5f54b2068b8fc1c",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "1abacd4fc9d32f064dd96b019e968c9e3cc100d14b15145df5f54b2068b8fc1c"
     },
@@ -8094,7 +8094,7 @@
       "input_path": "inputs/T10-assumption-literals-2.sexp",
       "input_sha256": "908f315e8cbb521cbc0aee50a5c2fff135a55b7f7f388f1ae239210c9873bfaf",
       "oracle_path": "oracles/T10-assumption-literals-2.json",
-      "oracle_sha256": "1cb921fadf9cec4e3dd3dc5de49fd982d0f8178feea805d8f8383585b9af13fe",
+      "oracle_sha256": "90b0f6d6737ff688a4bce01e9ef3b86b3b167a8df8043db26e6fbf6f67dca4fe",
       "query_order": [
         "status",
         "audit",
@@ -8198,12 +8198,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "908f315e8cbb521cbc0aee50a5c2fff135a55b7f7f388f1ae239210c9873bfaf",
         "semantic_content_sha256": "cd94adc601f417c24aad1d254eca0cab3c23cda95235eaaa028492064d6150f7",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "cd94adc601f417c24aad1d254eca0cab3c23cda95235eaaa028492064d6150f7"
     },
@@ -8220,7 +8220,7 @@
       "input_path": "inputs/T10-assumption-literals-4.sexp",
       "input_sha256": "b8bd3041d7ef0c426dbccec4fbc6ae9188bb2f2390c1c97c7a12a7553a335110",
       "oracle_path": "oracles/T10-assumption-literals-4.json",
-      "oracle_sha256": "7fdc1ec606da221d491a715c4165c3011d17a79d49ed4c225056ff11f60be328",
+      "oracle_sha256": "bf88faa2dfa1b78beb8a6e47cfb950472ce392e64f210beebad36a9ad2c80eb5",
       "query_order": [
         "status",
         "audit",
@@ -8352,12 +8352,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "b8bd3041d7ef0c426dbccec4fbc6ae9188bb2f2390c1c97c7a12a7553a335110",
         "semantic_content_sha256": "575b68dda71de2e8ff58dfaa70a7cd1a20d55f007851c256904af183e2f9a6fb",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "575b68dda71de2e8ff58dfaa70a7cd1a20d55f007851c256904af183e2f9a6fb"
     },
@@ -8374,7 +8374,7 @@
       "input_path": "inputs/T13-assumption-literals-0.sexp",
       "input_sha256": "1fb77ef0a9473f6b0130f5367209aafcb8fe0a83dc7d3cb29b14ca2a62b1d84d",
       "oracle_path": "oracles/T13-assumption-literals-0.json",
-      "oracle_sha256": "f73aef17af509868478f5a418e83aeb45d1ba5669c7b159dd7545d894a8a9254",
+      "oracle_sha256": "b03abfad107daf74909df4f6eb4ac98ab0ff8c61fba604ef99e8cbec4792fa6f",
       "query_order": [
         "status",
         "minimal"
@@ -8447,12 +8447,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "1fb77ef0a9473f6b0130f5367209aafcb8fe0a83dc7d3cb29b14ca2a62b1d84d",
         "semantic_content_sha256": "a0fe4b9c89c7b2b40bdb0b683df2e279db0d100c61739645bf761971ae1e1b12",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "a0fe4b9c89c7b2b40bdb0b683df2e279db0d100c61739645bf761971ae1e1b12"
     },
@@ -8469,7 +8469,7 @@
       "input_path": "inputs/T13-assumption-literals-1.sexp",
       "input_sha256": "e789c1d09cfd0cfbed7138dd7047308cd99509bdbbbf4596ad6fc7c61a911af9",
       "oracle_path": "oracles/T13-assumption-literals-1.json",
-      "oracle_sha256": "0b56f2a666dcca78f59c0d72574b35dca554fc69fa8cc762cfa5aeaadd980ab3",
+      "oracle_sha256": "0efde401d1c62457da589392fa618815e47c13d1a4655de1e136e7e97b397d8a",
       "query_order": [
         "status",
         "minimal"
@@ -8556,12 +8556,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "e789c1d09cfd0cfbed7138dd7047308cd99509bdbbbf4596ad6fc7c61a911af9",
         "semantic_content_sha256": "6eadef050872c28db60640e912603260cb70d7293b5ee5b1864e1a604e5cfc39",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "6eadef050872c28db60640e912603260cb70d7293b5ee5b1864e1a604e5cfc39"
     },
@@ -8578,7 +8578,7 @@
       "input_path": "inputs/T13-assumption-literals-2.sexp",
       "input_sha256": "0ee56baa237dc5c7dfcdbc74203ebe68f74873ad7fd18f634f40ed17e70da76a",
       "oracle_path": "oracles/T13-assumption-literals-2.json",
-      "oracle_sha256": "7b4d0709f37b8c7c44df4a5473bbad414a88b12200739c50e199258fe93dfd36",
+      "oracle_sha256": "8feefe50672528e8fea010a5c7257a4d8d3244a6233eb61b03b30725387cf1f3",
       "query_order": [
         "status",
         "minimal"
@@ -8679,12 +8679,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "0ee56baa237dc5c7dfcdbc74203ebe68f74873ad7fd18f634f40ed17e70da76a",
         "semantic_content_sha256": "93f249af7ac6a9f85d420e6b670e22bf9176b6c407ff2afb9918551cfc237fb0",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "93f249af7ac6a9f85d420e6b670e22bf9176b6c407ff2afb9918551cfc237fb0"
     },
@@ -8701,7 +8701,7 @@
       "input_path": "inputs/T13-assumption-literals-4.sexp",
       "input_sha256": "3cdd621e47d75f5f6e81fe849af8ad3d7930914aaf3729c8d10bcb1cf591bd32",
       "oracle_path": "oracles/T13-assumption-literals-4.json",
-      "oracle_sha256": "4251673b0b9f1317179957b76bfa55f9347dae942c1016dabc28231fb786eab9",
+      "oracle_sha256": "c9c77b3b511cf82673be5b061136e73682df22a5b9482aad76371feadc03906a",
       "query_order": [
         "status",
         "minimal"
@@ -8830,12 +8830,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "3cdd621e47d75f5f6e81fe849af8ad3d7930914aaf3729c8d10bcb1cf591bd32",
         "semantic_content_sha256": "e8808403ee432c8a0c6c229c4c52179641aed3acbebf6172bf2a71fe35daaa41",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "e8808403ee432c8a0c6c229c4c52179641aed3acbebf6172bf2a71fe35daaa41"
     },
@@ -8852,7 +8852,7 @@
       "input_path": "inputs/T14-assumption-literals-0.sexp",
       "input_sha256": "a773b8f090c09959f35a41499ee12ba767b9876a9c59d287256367ec2af74bdf",
       "oracle_path": "oracles/T14-assumption-literals-0.json",
-      "oracle_sha256": "693377646d3f70e9a4c17d16aaa4664c6fdd0b895cf8608550182db664582c68",
+      "oracle_sha256": "644e4a612a24cf731e29b47b264f9696fd83618c332547fba80d36e0edfd7c3e",
       "query_order": [
         "status",
         "minimal"
@@ -8925,12 +8925,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "a773b8f090c09959f35a41499ee12ba767b9876a9c59d287256367ec2af74bdf",
         "semantic_content_sha256": "ea1949b412d886f0de61be29a16e597b16634152faa849a5c4c528408ee71654",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "ea1949b412d886f0de61be29a16e597b16634152faa849a5c4c528408ee71654"
     },
@@ -8947,7 +8947,7 @@
       "input_path": "inputs/T14-assumption-literals-1.sexp",
       "input_sha256": "5c8642968f51f4ce1bed1ec979b45ba1cb866d966c7b71cf1da7f5da76548cc8",
       "oracle_path": "oracles/T14-assumption-literals-1.json",
-      "oracle_sha256": "463c48dee0f7306f771200754cea99203285a711b3e0c0f7c5b659b2728ae73f",
+      "oracle_sha256": "6cd95a8538257025a09d0cd10ee94a40efe2d667f4de6eb8899789734dc197e9",
       "query_order": [
         "status",
         "minimal"
@@ -9034,12 +9034,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "5c8642968f51f4ce1bed1ec979b45ba1cb866d966c7b71cf1da7f5da76548cc8",
         "semantic_content_sha256": "a5e60cf1ea4225bbb95288f35fc92a61276a9dd9b29a0d5e995d513723ae0e97",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "a5e60cf1ea4225bbb95288f35fc92a61276a9dd9b29a0d5e995d513723ae0e97"
     },
@@ -9056,7 +9056,7 @@
       "input_path": "inputs/T14-assumption-literals-2.sexp",
       "input_sha256": "a08f7d797600681ac161fc46745d074a3a1f30d25d39050f61e33ac541a752a8",
       "oracle_path": "oracles/T14-assumption-literals-2.json",
-      "oracle_sha256": "7edde58d4ea40ea1e17e13c108035242fb8cdf68778bb93d2fcbe22d1ff3bdac",
+      "oracle_sha256": "472da3f6e8135ddf0d3932598254194be035fc2a7eec03eff784ef9ec03122d0",
       "query_order": [
         "status",
         "minimal"
@@ -9157,12 +9157,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "a08f7d797600681ac161fc46745d074a3a1f30d25d39050f61e33ac541a752a8",
         "semantic_content_sha256": "602c076e305b4d93565f5ee8173c382cb4e74d712036e4481474b955ca11ffb8",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "602c076e305b4d93565f5ee8173c382cb4e74d712036e4481474b955ca11ffb8"
     },
@@ -9179,7 +9179,7 @@
       "input_path": "inputs/T14-assumption-literals-4.sexp",
       "input_sha256": "06be8ab3e0c7c16c33bc0a46f098a4ef0365f26eb115ec119528ba7eb0240b83",
       "oracle_path": "oracles/T14-assumption-literals-4.json",
-      "oracle_sha256": "9257ae7c1fb417738aebc2adc3384b0e1e3113998791909e6d76839d5db8a47c",
+      "oracle_sha256": "94044978f8eea0ad82ad0d9535b5305cd538259c91a0cdae9a85587a1e296bb6",
       "query_order": [
         "status",
         "minimal"
@@ -9308,12 +9308,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "06be8ab3e0c7c16c33bc0a46f098a4ef0365f26eb115ec119528ba7eb0240b83",
         "semantic_content_sha256": "53dd397d6f14f943dc93eb400bed280392e4adebbf1a91e7d977532942d356c6",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "53dd397d6f14f943dc93eb400bed280392e4adebbf1a91e7d977532942d356c6"
     },
@@ -9330,7 +9330,7 @@
       "input_path": "inputs/T01-repeated-requests-1.sexp",
       "input_sha256": "97f776b13670462aab228d55ce7f6cb37980c8198bf4be0578caea6f09e687f0",
       "oracle_path": "oracles/T01-repeated-requests-1.json",
-      "oracle_sha256": "0dc15dc49c523936fc09d48e1ed95ff78b814e778a48502706d691e6c72fc8d7",
+      "oracle_sha256": "af9fcb44ba49122f7be1868627c80f1448b4fcbb87702b057de0dab6307e77ec",
       "query_order": [
         "T01",
         "verify-endpoints"
@@ -9374,12 +9374,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "97f776b13670462aab228d55ce7f6cb37980c8198bf4be0578caea6f09e687f0",
         "semantic_content_sha256": "6e3c8f40fae8bcb53444463b314d0fa6fea5c906615d9210fe80fc3428c9e0b2",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "6e3c8f40fae8bcb53444463b314d0fa6fea5c906615d9210fe80fc3428c9e0b2"
     },
@@ -9396,7 +9396,7 @@
       "input_path": "inputs/T01-repeated-requests-2.sexp",
       "input_sha256": "619e79b6e1d85c8c5f498e12344663849955bbd71d58cf51947ccb10ce2bff92",
       "oracle_path": "oracles/T01-repeated-requests-2.json",
-      "oracle_sha256": "c4f1aefc9a26ba64293546bd58043f901be31e388c66f15f432da45174ebd2a6",
+      "oracle_sha256": "4f1ae3962eda683ad997fb86a09ac51c8b020a5792bce594c02e228faafb7f68",
       "query_order": [
         "T01",
         "verify-endpoints",
@@ -9442,12 +9442,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "619e79b6e1d85c8c5f498e12344663849955bbd71d58cf51947ccb10ce2bff92",
         "semantic_content_sha256": "739360d76a5c98abaee31cc7f5540a7f14d292c3e88966063c582f857aec0a13",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "739360d76a5c98abaee31cc7f5540a7f14d292c3e88966063c582f857aec0a13"
     },
@@ -9464,7 +9464,7 @@
       "input_path": "inputs/T01-repeated-requests-4.sexp",
       "input_sha256": "f99a05fdd125c8d04a24a1ae46f5e96cd5b4e4c858f6e9bc1b18f3e508be7267",
       "oracle_path": "oracles/T01-repeated-requests-4.json",
-      "oracle_sha256": "40f545ed93ccd6f8e25f777bb7ed206878ec5a594bcb4e84dd9dbdbdfb206d42",
+      "oracle_sha256": "173bfda01f1c5d22d58c15dfb24a82c3e483916ae9a7bdd075d725a54b7d8302",
       "query_order": [
         "T01",
         "verify-endpoints",
@@ -9514,12 +9514,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "f99a05fdd125c8d04a24a1ae46f5e96cd5b4e4c858f6e9bc1b18f3e508be7267",
         "semantic_content_sha256": "ec5f1ce83a9d86699a6982abd3641baa0b3328a16af43a81f94a772f62941301",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "ec5f1ce83a9d86699a6982abd3641baa0b3328a16af43a81f94a772f62941301"
     },
@@ -9536,7 +9536,7 @@
       "input_path": "inputs/T01-repeated-requests-8.sexp",
       "input_sha256": "d5bcabe31df5f4338d4302f0de274c9b77ee46718ef6eb42e3f7f4051bb8c9fc",
       "oracle_path": "oracles/T01-repeated-requests-8.json",
-      "oracle_sha256": "be2e5d34d88b75754d58090d72425ce9feec08f9e00871b6f31602c44f50f6fa",
+      "oracle_sha256": "dc253b8dc12e247353885487e39e1d37acd882be3e574e345ef25de92cdcaf49",
       "query_order": [
         "T01",
         "verify-endpoints",
@@ -9594,12 +9594,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "d5bcabe31df5f4338d4302f0de274c9b77ee46718ef6eb42e3f7f4051bb8c9fc",
         "semantic_content_sha256": "7b889c4f62b9ed777dfeb5ee7763a6d8ded1ecad7b6c8f65a6cc50946db71233",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "7b889c4f62b9ed777dfeb5ee7763a6d8ded1ecad7b6c8f65a6cc50946db71233"
     },
@@ -9616,7 +9616,7 @@
       "input_path": "inputs/T05-repeated-requests-1.sexp",
       "input_sha256": "14e8f0c59f4116a2bcdd47d2642c7c105ecf919635d324d92fda59cadbbd92e6",
       "oracle_path": "oracles/T05-repeated-requests-1.json",
-      "oracle_sha256": "3cbc21be7091fb21ca328898f1a13a0c6eb6b26aa3a6bb9fc658689e98dbf556",
+      "oracle_sha256": "67070728716a276eaecd7c4cff18ff0dcc364bb52d6db57b73a5d2f38acd2ffb",
       "query_order": [
         "T05"
       ],
@@ -9659,12 +9659,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "14e8f0c59f4116a2bcdd47d2642c7c105ecf919635d324d92fda59cadbbd92e6",
         "semantic_content_sha256": "bedc1bb3e71f093f2e4308d551bc3a976107c5ed161b59d8703c5e102e2c3a92",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "bedc1bb3e71f093f2e4308d551bc3a976107c5ed161b59d8703c5e102e2c3a92"
     },
@@ -9681,7 +9681,7 @@
       "input_path": "inputs/T05-repeated-requests-2.sexp",
       "input_sha256": "8dc7bdb57671ccad59d62723396b44a0097d2b0546a0b0f14f491e79a8e46634",
       "oracle_path": "oracles/T05-repeated-requests-2.json",
-      "oracle_sha256": "85b0eae2b8361a8bb121952ea07cd25ead0b7563be0547a923614b2be8bd4498",
+      "oracle_sha256": "2f52feddeef04dc4d3b3d195c6c314c8f153b42e971fc80a0055fd31effb0660",
       "query_order": [
         "T05",
         "T05-repeat-2"
@@ -9725,12 +9725,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "8dc7bdb57671ccad59d62723396b44a0097d2b0546a0b0f14f491e79a8e46634",
         "semantic_content_sha256": "1d7b62ab653fb566c1da092429590215b1aace79467c57e107bbefc8f2e623a4",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "1d7b62ab653fb566c1da092429590215b1aace79467c57e107bbefc8f2e623a4"
     },
@@ -9747,7 +9747,7 @@
       "input_path": "inputs/T05-repeated-requests-4.sexp",
       "input_sha256": "466a6a0847749f3e7de5a0ab4fc51ff13d5a57c2dac91c6f5aae2f610391d627",
       "oracle_path": "oracles/T05-repeated-requests-4.json",
-      "oracle_sha256": "24294b1e63d02ccc54f4c5aa794d96b42a65190256eb74e7111238183785113c",
+      "oracle_sha256": "505f797b9ecfff1a4776ca6253d77734c79c0ab5c63bdfb8ad58760812c6522c",
       "query_order": [
         "T05",
         "T05-repeat-2",
@@ -9793,12 +9793,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "466a6a0847749f3e7de5a0ab4fc51ff13d5a57c2dac91c6f5aae2f610391d627",
         "semantic_content_sha256": "16d9b04775943d3b9c10bb58cfa716e1e72f94d2a0cce6bc89f99988ce1f4c24",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "16d9b04775943d3b9c10bb58cfa716e1e72f94d2a0cce6bc89f99988ce1f4c24"
     },
@@ -9815,7 +9815,7 @@
       "input_path": "inputs/T05-repeated-requests-8.sexp",
       "input_sha256": "b83e7d2bd2c18424375b2fe27ab60716ffbde5c572577db18c6693a2e07cf6b8",
       "oracle_path": "oracles/T05-repeated-requests-8.json",
-      "oracle_sha256": "deec4ac2f4ce8de92bc45cdbdba6ad5c24e0faab263335dc45a1d8b2fd4cccd1",
+      "oracle_sha256": "5146cdd54bd6f2e38ea15cdd1e7d90f054808f0a6cbdfbcbebbeab444e6b6e3d",
       "query_order": [
         "T05",
         "T05-repeat-2",
@@ -9865,12 +9865,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "b83e7d2bd2c18424375b2fe27ab60716ffbde5c572577db18c6693a2e07cf6b8",
         "semantic_content_sha256": "4df904059e74fab43147bbb894ace94b9f5471a1beed7b062b565a19afafe54a",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "4df904059e74fab43147bbb894ace94b9f5471a1beed7b062b565a19afafe54a"
     },
@@ -9887,7 +9887,7 @@
       "input_path": "inputs/T11-repeated-requests-1.sexp",
       "input_sha256": "f7a45e216cfd2cb6de3942d2cb917558624bf9f45017151589146a05f42ec7e1",
       "oracle_path": "oracles/T11-repeated-requests-1.json",
-      "oracle_sha256": "3e2fb97fbe8ac624c702d3757c5eaf861cbebe9372f9ed329c7075af896bb0f3",
+      "oracle_sha256": "64d71ba4d3a71f882d4e9202427c210daa9a1ca7b093cbb1d22d7bc11bf15fc5",
       "query_order": [
         "sensitivity",
         "slots",
@@ -9997,12 +9997,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "f7a45e216cfd2cb6de3942d2cb917558624bf9f45017151589146a05f42ec7e1",
         "semantic_content_sha256": "8c87faeecb542b36443a903a503fab66d22e4985526a89c8282663d7a76f0496",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "8c87faeecb542b36443a903a503fab66d22e4985526a89c8282663d7a76f0496"
     },
@@ -10019,7 +10019,7 @@
       "input_path": "inputs/T11-repeated-requests-2.sexp",
       "input_sha256": "0b715245a26206c8fd2d1e2c23923a7fd4aa7afde4046c271f4b5f0cef5e5d90",
       "oracle_path": "oracles/T11-repeated-requests-2.json",
-      "oracle_sha256": "14399bac558ce68a3c346e231ab5f7928d95579ded4f5c96df02b9e0011cec3f",
+      "oracle_sha256": "921d69811bce04282a5d1fb1126745d086882b32b5e9d142f7ff9fa0343ef375",
       "query_order": [
         "sensitivity",
         "slots",
@@ -10196,12 +10196,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "0b715245a26206c8fd2d1e2c23923a7fd4aa7afde4046c271f4b5f0cef5e5d90",
         "semantic_content_sha256": "df1f01ca16f897f6ed47b923ace13e3d8b9cceb0790c7381cc45585e449247bf",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "df1f01ca16f897f6ed47b923ace13e3d8b9cceb0790c7381cc45585e449247bf"
     },
@@ -10218,7 +10218,7 @@
       "input_path": "inputs/T11-repeated-requests-4.sexp",
       "input_sha256": "dfbad6b5997ef441b43b97ae171544f6b85fec9ef762e4369494d0eacca0ad77",
       "oracle_path": "oracles/T11-repeated-requests-4.json",
-      "oracle_sha256": "e51a266dc88d20bfd8b53d1174b7f99e0a16a100608dc47d1f386152720eeffd",
+      "oracle_sha256": "77dc9c0b6235311d672f78f11c98d3f0a653a5219b3093355dbf50bc5ac1cf1a",
       "query_order": [
         "sensitivity",
         "slots",
@@ -10529,12 +10529,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "dfbad6b5997ef441b43b97ae171544f6b85fec9ef762e4369494d0eacca0ad77",
         "semantic_content_sha256": "c0bf64d844ef7c2db1328d3982e16265b53280d8718f11204de5510eceea2463",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "c0bf64d844ef7c2db1328d3982e16265b53280d8718f11204de5510eceea2463"
     },
@@ -10551,7 +10551,7 @@
       "input_path": "inputs/T11-repeated-requests-8.sexp",
       "input_sha256": "233c377021f7d6e5b3204649a0bf9084f64691a64d3ef21b133bf014751ed0a1",
       "oracle_path": "oracles/T11-repeated-requests-8.json",
-      "oracle_sha256": "d19830f10e54e9326f17c7c405067dd2b519b91180dd66ff04b8f475d2599142",
+      "oracle_sha256": "62ac5aa37394c2aa57a4b8e42f465edb1fe444d541a404b1b00ae8c8052a7864",
       "query_order": [
         "sensitivity",
         "slots",
@@ -11130,12 +11130,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "233c377021f7d6e5b3204649a0bf9084f64691a64d3ef21b133bf014751ed0a1",
         "semantic_content_sha256": "1e926fb2ad2b6135215052d36944f16a7577bfc7643aaaf7f889a24b8539ae53",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "1e926fb2ad2b6135215052d36944f16a7577bfc7643aaaf7f889a24b8539ae53"
     },
@@ -11152,7 +11152,7 @@
       "input_path": "inputs/T12-repeated-requests-1.sexp",
       "input_sha256": "32f6020d88cd26cb1d5dff4bc92269d8ff6804ba65ff2dd223808013c79350f2",
       "oracle_path": "oracles/T12-repeated-requests-1.json",
-      "oracle_sha256": "6665e0fbcdd79c7e5d8c91cab00a83d3b6dfbcb73eb9b515f7eec856553b1962",
+      "oracle_sha256": "a7a2440f9ac098a04fb7c8933eb4610ce4e6725c7a7729deba6d824e89430c29",
       "query_order": [
         "sensitivity",
         "slots",
@@ -11262,12 +11262,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "32f6020d88cd26cb1d5dff4bc92269d8ff6804ba65ff2dd223808013c79350f2",
         "semantic_content_sha256": "bc558290f900482d26852a0679fef0504b9f56ed482fd9ad6b21eb4385c39365",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "bc558290f900482d26852a0679fef0504b9f56ed482fd9ad6b21eb4385c39365"
     },
@@ -11284,7 +11284,7 @@
       "input_path": "inputs/T12-repeated-requests-2.sexp",
       "input_sha256": "fdfa227ec921a6d3d8ad67c03d745ca10ba07e5c2719f1a417acd36110a29b71",
       "oracle_path": "oracles/T12-repeated-requests-2.json",
-      "oracle_sha256": "590dd27dbc96172dd6e91ece0edcc7f4e99239b69f64cf34f827060adf44d86d",
+      "oracle_sha256": "929f5dc45a1362f36df2d95a98581c61f27fac9776195f241e3d06e3972af5d9",
       "query_order": [
         "sensitivity",
         "slots",
@@ -11461,12 +11461,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "fdfa227ec921a6d3d8ad67c03d745ca10ba07e5c2719f1a417acd36110a29b71",
         "semantic_content_sha256": "f6ca6301f59b317b117c7b03526bf8196a6f433f6f6fcdf7fd5127d9f05b2f0d",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "f6ca6301f59b317b117c7b03526bf8196a6f433f6f6fcdf7fd5127d9f05b2f0d"
     },
@@ -11483,7 +11483,7 @@
       "input_path": "inputs/T12-repeated-requests-4.sexp",
       "input_sha256": "dcd8ead70b6f02f95a72c200a328aebaf138b0d8b38df31a702c28faee3bd349",
       "oracle_path": "oracles/T12-repeated-requests-4.json",
-      "oracle_sha256": "34c5322d5186d060139e530947c2933ff73ac1e72bf0d95462a18e71b8b1749b",
+      "oracle_sha256": "1ecf86657145703f790d051f38b189304b2c122933217057aa9b216c7dd2d6ca",
       "query_order": [
         "sensitivity",
         "slots",
@@ -11794,12 +11794,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "dcd8ead70b6f02f95a72c200a328aebaf138b0d8b38df31a702c28faee3bd349",
         "semantic_content_sha256": "71040997719832ad1c63c4cfa255c0baffed6a0ef39f361b6369cb1929ff0354",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "71040997719832ad1c63c4cfa255c0baffed6a0ef39f361b6369cb1929ff0354"
     },
@@ -11816,7 +11816,7 @@
       "input_path": "inputs/T12-repeated-requests-8.sexp",
       "input_sha256": "dbd6e5d1b579a1aeffca0cb503d405319edfa0f3230b457123e6e2344b53dadf",
       "oracle_path": "oracles/T12-repeated-requests-8.json",
-      "oracle_sha256": "380cebc1311fbfb9307a7a9cc6e5926074f83143a21347b5f1bfa992b46cb016",
+      "oracle_sha256": "88cdc3d563fb841304a33cf000ebcee4854140a40242ce84f467b20c5dc8d612",
       "query_order": [
         "sensitivity",
         "slots",
@@ -12395,12 +12395,12 @@
           "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
         ],
         "reviewer_provenance": "ai-executed",
-        "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+        "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
         "quality_reviewer_provenance": "ai-executed",
         "reviewed_input_sha256": "dbd6e5d1b579a1aeffca0cb503d405319edfa0f3230b457123e6e2344b53dadf",
         "semantic_content_sha256": "44d46569004f1cef59ed71ccadcff4fbfdd47c7943a4fe2b92ec81f50ea6e028",
         "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-        "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       "authored_semantic_content_sha256": "44d46569004f1cef59ed71ccadcff4fbfdd47c7943a4fe2b92ec81f50ea6e028"
     }
@@ -12510,6 +12510,6 @@
   },
   "quality_review": {
     "path": "quality-review.json",
-    "sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+    "sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
   }
 }

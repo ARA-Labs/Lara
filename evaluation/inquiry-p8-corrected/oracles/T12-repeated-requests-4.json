@@ -7422,11 +7422,11 @@
       "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
     ],
     "reviewer_provenance": "ai-executed",
-    "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+    "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
     "quality_reviewer_provenance": "ai-executed",
     "reviewed_input_sha256": "dcd8ead70b6f02f95a72c200a328aebaf138b0d8b38df31a702c28faee3bd349",
     "semantic_content_sha256": "71040997719832ad1c63c4cfa255c0baffed6a0ef39f361b6369cb1929ff0354",
     "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
-    "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+    "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
   }
 }

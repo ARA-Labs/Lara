@@ -1,0 +1,64 @@
+{
+  "scope": "Reviewed the two FreezeBoundaries changes in test/inquiry_corrected_candidates.py against the 71c1cba version fetched from GitHub, plus test/inquiry_approval_receipt.py, scripts/inquiry_evaluation_manifest.py, and scripts/inquiry-evaluate.py measurement startup. Read CLAUDE.md and AGENTS.md. No files changed and no builds, tests, formatters, drivers, or production preflight were executed.",
+  "verdict": {
+    "behavior": "The explicit draft/unapproved metadata fixes the dependency on the live suite's approval state. With the current loader, both negative tests stop at their intended guards whether the live suite is draft or frozen. The runner still loads the suite before repository preflight, executable selection, or output creation.",
+    "spec": "No production behavior or approval-contract blocker identified in the test-only change. Historical receipts were treated only as historical evidence, not current authorization.",
+    "quality": "One important regression-test isolation finding: the marker-only test can accept an unrelated manifest-state failure. Strengthen that fixture before treating the wording-independent assertion as specific evidence of the approval boundary."
+  },
+  "critical_findings": [],
+  "important_findings": [
+    {
+      "category": "quality / regression coverage",
+      "confidence": 90,
+      "file": "test/inquiry_corrected_candidates.py",
+      "lines": "156-162",
+      "issue": "The marker-only fixture is not otherwise valid, so accepting any ValueError can hide a broader loss of correction-approval validation.",
+      "evidence": [
+        "Line 160 copies the live MANIFEST.json unchanged; its current state is awaiting-researcher-approval.",
+        "Lines 156-158 freeze only the protocol and set correction_approval to pending with a nonexistent receipt and null digest.",
+        "The loader checks correction approval at scripts/inquiry_evaluation_manifest.py:121-143, then independently rejects a draft manifest at line 147.",
+        "[INFERENCE] If corrected-approval handling is bypassed, a draft source manifest can still raise ValueError('manifest is not frozen'), satisfying the new assertion. The original message-specific assertion would reject that wrong failure.",
+        "Once the source manifest is frozen, the fixture still omits the receipt, candidate snapshots, supporting artifacts, reviews, inputs, and oracles. It therefore cannot serve as a stable otherwise-valid approval-boundary control."
+      ],
+      "impact": "This individual negative test can pass for the wrong reason before freezing. This is a test-evidence gap, not a claim that the current loader accepts unapproved production measurements. Other receipt tests cover distinct receipt-content failures.",
+      "fix": "Construct a complete temporary frozen fixture with a valid test-only receipt, confirm load_suite accepts it, then change only correction_approval.state to pending and require ValueError. Reuse the complete freeze-copy approach in test/inquiry_approval_receipt.py:28-52, supplying receipt_approvals(protocol). No production preflight or executable is required. Keep the exception-type assertion rather than restoring wording coupling."
+    }
+  ],
+  "positive_observations": [
+    "The draft test explicitly overwrites freeze.state, so a real suite freeze cannot turn it into an authorized measurement.",
+    "The executable sentinel raises AssertionError, which assertRaises(ValueError) does not swallow. The nonexistent output assertion checks the consumer-visible destination boundary.",
+    "The draft fixture deliberately contains no MANIFEST.json: removing its freeze guard currently produces FileNotFoundError, not a misleading ValueError pass.",
+    "The marker-only fixture explicitly replaces correction_approval instead of inheriting a live approval receipt.",
+    "ReceiptApprovals.freeze_copy creates complete temporary copies and synthetic receipts. Its deferred-amendment/data-policy checks remain applicable after live freezing because approved_protocol_identity ignores only the enumerated freeze and receipt-link fields.",
+    "The unchanged binding tests still exercise candidate protocol and manifest identity before deferred receipt-content checks; their intentionally minimal receipts therefore do not introduce a new freeze-dependent failure.",
+    "No production inquiry execution is necessary: load_suite reads and validates data only; importing the runner does not enter its __main__ block. The two pin tests either patch Git or reject the missing explicit pin before Git."
+  ],
+  "reviewed_file_sha256s": [
+    {
+      "path": "test/inquiry_corrected_candidates.py",
+      "sha256": "a613a59b90ddd5a72ee9c2c6d94720ddc0d1f7e7e211ba11312e10ce9a35a518",
+      "source": "evaluation/inquiry-p8-corrected/approval-amendment.json changed_helper.sha256"
+    },
+    {
+      "path": "test/inquiry_approval_receipt.py",
+      "sha256": "6dfca72201daa2619189dfe48bf06f6e8111671008fdc676b98eb51f1b8a8975",
+      "source": "evaluation/inquiry-p8-corrected/review-package.json source_hashes"
+    },
+    {
+      "path": "scripts/inquiry_evaluation_manifest.py",
+      "sha256": "dac0eeeb981fa161a6b1258c91a4a6a293e5cdf31c9d5fef53d60e59e0d937d6",
+      "source": "evaluation/inquiry-p8-corrected/review-package.json source_hashes"
+    },
+    {
+      "path": "scripts/inquiry-evaluate.py",
+      "sha256": "6e1eb3c930595da46f6940187b20c777e14b631225b3f7c66f9bb83d392d76f9",
+      "source": "evaluation/inquiry-p8-corrected/review-package.json source_hashes"
+    }
+  ],
+  "hash_evidence_limit": "These are exact recorded digest strings, not independently recomputed current-byte hashes. This reviewer has no shell/eval/hash tool mounted. Parent must confirm current-byte hashes before binding this review to a freeze receipt; a request was submitted incrementally. Baseline changed-test SHA256 recorded in approval-amendment.json is 1e7cdf37e68a0ffb77032e034d9d021e768a4b8a5769ea86bdd09612ba5797f8.",
+  "recommended_parent_checks": [
+    "Confirm current-byte SHA256s for the four reviewed files.",
+    "After fixture correction, run the focused candidate and receipt tests against temporary draft and frozen source metadata.",
+    "For the marker-only fixture, demonstrate that the valid control loads and that changing only the approval state is rejected. Exercise no inquiry driver or production measurement for these tests."
+  ]
+}

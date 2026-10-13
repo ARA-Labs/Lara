@@ -1,0 +1,59 @@
+{
+  "schema": "inquiry-p8-test-fixture-validation",
+  "schema_version": 1,
+  "failed_before_evidence": "https://github.com/ARA-Labs/Lara/issues/53",
+  "source_sha256": {
+    "test/inquiry_corrected_candidates.py": "0b80b4c991492bd849d8c7004c35b687a675bbca9b0e5d9601543c9a06e5e286"
+  },
+  "state_independence_probes": [
+    {
+      "source_candidate_state": "awaiting-researcher-approval",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "source_candidate_state": "frozen",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0
+    }
+  ],
+  "authoring_checks": [
+    {
+      "command": [
+        "python3",
+        "scripts/inquiry_evaluation_cases.py",
+        "--suite",
+        "evaluation/inquiry-p8-corrected",
+        "--recipe-version",
+        "inquiry-p8-recipes@2-candidate",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "checked 96 P8 cases; independent review required before freeze\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/inquiry_evaluation_cases.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "checked 96 P8 cases; independent review required before freeze\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "evaluation/inquiry-p8-corrected/review/independent_finite_audit.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"status\": \"AUTHORING-CHECK\",\n  \"exact_checks\": 80,\n  \"cases\": 80,\n  \"findings\": []\n}\n",
+      "stderr": ""
+    }
+  ],
+  "independent_review_claimed": false,
+  "production_measurements": 0
+}

@@ -1,0 +1,101 @@
+{
+  "reviewed_scope": "Read-only specification review of the corrected P8 provenance amendment, composite quality receipt, authoring-validation attachment, protocol/manifest approval identities, original and attempted-freeze snapshots/receipts, and the complete scripts/inquiry_evaluation_manifest.py loader and repository_preflight flow.",
+  "verdict": "PASS for the reviewed metadata-amendment design; no high-confidence specification blockers found. This is not a completed production preflight or permission to bypass the new candidate/effective-receipt/final-freeze sequence.",
+  "critical_findings": [],
+  "important_findings": [],
+  "authorization_assessment": {
+    "conclusion": "The recorded instruction reasonably covers the necessary transitive metadata completion of issue #53, without changing scientific scope or replenishing the measurement budget.",
+    "directly_checked_evidence": [
+      "history://Main:175-190 identifies issue #53, the pinned test-helper amendment, the committed input freeze, and the single approved P8 attempt as the next steps.",
+      "history://Main:208-235 contains the subsequent user instruction, 'checkout a new branch and complete the next, finish and pr directly', and the explicit no-retry/no-P9 interpretation.",
+      "approval-provenance-amendment.json identifies the failed helper-only freeze and explicitly confines the correction to dependent provenance metadata."
+    ],
+    "limits": [
+      "Exactly one already-approved corrected P8 measurement attempt remains; the retained preflight failure records no measurement start and zero attempts consumed.",
+      "The original 96-document/192-invocation budget, 10-second invocation timeout, 2700-second aggregate deadline, one CPU, zero repeats, and original data policy remain applicable.",
+      "A measurement timeout or other incomplete measurement consumes the attempt; another attempt requires separate approval.",
+      "P9, live-loop work, additional agent calls, paid calls, runtime/checker changes, and scientific changes are not authorized."
+    ]
+  },
+  "semantic_provenance_assessment": {
+    "conclusion": "The composite receipt does not present the attachment as a new independent semantic review.",
+    "evidence": [
+      "quality-review.json explicitly identifies itself as author-attached, pins the preserved original quality receipt and the separate final helper-quality review, and retains the original semantic-review identity.",
+      "Manifest provenance distinguishes the original independent candidate quality reviewer from the test-helper supplement. The semantic reviewer and semantic-review hash remain historical identities, not newly asserted judgments.",
+      "The original disclosed-development-control versus independently-reviewed distinction is retained.",
+      "authoring-validation.json identifies consumer decoding as author-executed validation, pins the immutable raw receipt, explains its unchanged PENDING marker, and disclaims new independent semantic judgment."
+    ],
+    "reuse_boundary": "Historical judgments are reusable only for exact unchanged input, expected AST, semantic specification, source ancestry, and construction counters. Parent-supplied scientific-identity evidence reports that boundary holds for all 96 cases; this reviewer did not independently recompute those hashes or repeat the comparison."
+  },
+  "transitive_pin_assessment": {
+    "conclusion": "No remaining changed live-source pin or unauthorized scientific/runtime change was identified in the inspected flow and supplied identity evidence.",
+    "checked_paths": [
+      "load_suite: candidate protocol snapshot identity, effective approval receipt, candidate manifest equality except state, amendment interpretation approval, data-policy approval, fixed budget, partition, supporting-artifact hashes, independent and quality receipt hashes, all per-case input/oracle/provenance/semantic bindings, certificate hashes, and duplicate disclosures.",
+      "repository_preflight: pinned runtime Git objects/current bytes, explicit full input commit, reviewed-candidate ancestry and committed protocol/manifest hashes, every loaded suite artifact against the input commit, recipe generator/audit/certificate-producer hashes, quality-review generator/audit/boundary-test hashes, legacy trees/gitlinks/tags, approval-plan Git identity, and additional-helper hashes."
+    ],
+    "resolved_failure": "The live quality-review boundary_test_sha256 and the protocol additional-helper entry both name 0b80b4c991492bd849d8c7004c35b687a675bbca9b0e5d9601543c9a06e5e286. The composite quality digest propagates through manifest/oracle provenance, oracle digests, authoring attachment, and protocol supporting artifacts.",
+    "historical_pins": "Older helper hashes in preserved historical receipts/snapshots are evidence of what was reviewed then, not live preflight pins to rewrite. Keep those historical bytes and the withdrawn clearance/failure intact.",
+    "evidence_limit": "The temporary load_suite and checked() receipt is parent-executed evidence, not a full repository_preflight result. In particular, it does not establish the final committed candidate/input identities, runtime Git checks, legacy checks, or every other production-preflight condition."
+  },
+  "requirements_before_final_freeze": [
+    {
+      "requirement": "Commit the complete reviewed metadata candidate before creating its effective freeze receipt.",
+      "details": "The candidate commit must contain the reviewed protocol and MANIFEST bytes and all supporting artifacts. Bind the actual full candidate commit, not 71c1cba, bfc6d1e, or d383404. The supplied candidate digests are protocol 19e582eb117fba09102072a4b3e0b29dff76d9201f456663baa83a8131585ee0 and manifest 59225ebd79b1bb6f667f9e73db3fdbce8b2277dbf3499ff31b28c24b6d9c46fd; any further candidate-content change needs its identity updated before binding."
+    },
+    {
+      "requirement": "Create distinct effective protocol and manifest snapshots and a distinct researcher-approval-provenance.json receipt.",
+      "details": "Snapshot bytes must be the new candidate commit's protocol.json and MANIFEST.json. Preserve candidate-protocol.json, candidate-manifest.json, candidate-protocol-test-fixtures.json, researcher-approval.json, researcher-approval-test-fixtures.json, and the earlier amendment as historical records. The new manifest cannot reuse the old candidate-manifest.json identity."
+    },
+    {
+      "requirement": "Carry the original authorization forward explicitly, without representing this review as user approval.",
+      "details": "The effective receipt must include APPROVED status, user provenance, researcher, actual reviewed_candidate_commit, exact candidate snapshot paths/hashes, metadata_only_freeze_authorized=true, the existing distinct-t07-support interpretation approval and data_policy_sha256, unchanged budget/no-P9 limits, and an explicit lineage to the original approval and necessary provenance amendment. Preserve or embed the retained historical receipts and this final review as distinct evidence; do not treat the withdrawn initial spec clearance as current clearance."
+    },
+    {
+      "requirement": "Make only the loader-enumerated freeze changes after committing the candidate.",
+      "details": "Change MANIFEST.state to frozen; update protocol.freeze.state and manifest_sha256; set protocol.correction_approval state/path/hash to the new effective receipt. Do not add or modify supporting-artifact inventory or any other approved protocol fields after the candidate snapshot is committed, because approved_protocol_identity retains those fields."
+    },
+    {
+      "requirement": "Commit the final freeze as a descendant of the candidate and use that complete input commit for production preflight.",
+      "details": "Parent must establish the real load_suite plus complete repository_preflight against the final committed bytes before measurement. Temporary synthetic approval evidence must never become the production receipt. Retain the prior failure rather than rerunning it as a diagnostic, and do not start or repeat measurement to discover metadata problems."
+    }
+  ],
+  "exact_checked_scope": {
+    "guidelines": [
+      "CLAUDE.md",
+      "AGENTS.md"
+    ],
+    "complete_source_flow": [
+      "scripts/inquiry_evaluation_manifest.py:1-311"
+    ],
+    "current_metadata": [
+      "evaluation/inquiry-p8-corrected/approval-provenance-amendment.json: complete",
+      "evaluation/inquiry-p8-corrected/protocol.json: complete",
+      "evaluation/inquiry-p8-corrected/quality-review.json: all non-case metadata plus sampled scientific_case_bindings",
+      "evaluation/inquiry-p8-corrected/authoring-validation.json: attachment metadata and sampled per-case results",
+      "evaluation/inquiry-p8-corrected/MANIFEST.json: non-case metadata and provenance projections; not an independent rereview of 96 semantic annotations",
+      "evaluation/inquiry-p8-corrected/review/test-fixture-metadata-attachment.json: header, sampled case bindings, and concluding invariants"
+    ],
+    "historical_and_supporting_evidence": [
+      "evaluation/inquiry-p8-corrected/researcher-approval.json",
+      "evaluation/inquiry-p8-corrected/approval-amendment.json",
+      "evaluation/inquiry-p8-corrected/candidate-protocol.json: approval/runtime/budget/ceilings/freeze/data-policy/amendment/helper projections",
+      "evaluation/inquiry-p8-corrected/candidate-manifest.json: identity/partition/review/provenance projection",
+      "evaluation/inquiry-p8-corrected/candidate-protocol-test-fixtures.json: freeze/approval/helper/quality-artifact projection",
+      "evaluation/inquiry-p8-corrected/researcher-approval-test-fixtures.json: effective fields and archived-entry identities; long embedded receipt bodies not exhaustively reread",
+      "evaluation/inquiry-p8-corrected/review/quality-review-before-fixture-amendment.json: all non-case metadata",
+      "evaluation/inquiry-p8-corrected/review/authoring-validation-before-fixture-amendment.json: all non-result metadata",
+      "evaluation/inquiry-p8-corrected/review/authoring-validation-fixture-provenance-raw.json: metadata and result-count/exit-code/origin projections",
+      "evaluation/inquiry-p8-corrected/review/test-fixture-quality-final.json",
+      "evaluation/inquiry-p8-corrected/review/test-fixture-spec-withdrawal.json",
+      "evaluation/inquiry-p8-corrected/review/test-fixture-provenance-validation.json",
+      "evaluation/inquiry-p8-corrected/review/test-fixture-scientific-identity.json",
+      "ara/evidence/inquiry-p8/preflight-20261013-corrected/quality-pin-failure.json",
+      "history://Main:175-190 and 208-235"
+    ]
+  },
+  "verification": {
+    "reviewer_executed": "Static reads and JSON projections only. No edits, builds, lint, tests, formatters, drivers, consumers, preflight execution, measurements, or hash computations.",
+    "parent_supplied_evidence": "Current digests, successful temporary load_suite for 96 cases/217 artifacts, real checked() acceptance of quality/additional-helper pins, consumer decoding results, and the all-96 historical Git-blob scientific-identity comparison are attributed to Main and the retained receipts, not claimed as independently executed by this reviewer.",
+    "measurement_authorized_by_this_review": false
+  }
+}

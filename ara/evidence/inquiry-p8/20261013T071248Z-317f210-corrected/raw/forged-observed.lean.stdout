@@ -1,0 +1,1 @@
+(inquiry-result 1 forged-observed (audit-body (family-audit-result ((family-audit-row ((event commit (commit-plan alice plan 0)) (event read (access alice test evaluation)) (event run (run run0 plan 0 (inputs (input test 0)) fam)) (event success (result run0 1))) (((slot-id 0) (choice-id 0))) () (false))) 1 1 0 false)))

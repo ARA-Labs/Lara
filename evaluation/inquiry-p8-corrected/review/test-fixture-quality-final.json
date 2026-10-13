@@ -1,0 +1,50 @@
+{
+  "scope": "Re-reviewed the final import and both FreezeBoundaries tests in test/inquiry_corrected_candidates.py, including their use of the previously reviewed freeze_copy/receipt_approvals helpers and unchanged loader/runner boundaries.",
+  "verdict": "APPROVE: no remaining high-confidence specification or code-quality blockers in this bounded test-only change.",
+  "resolved_findings": [
+    {
+      "file": "test/inquiry_corrected_candidates.py",
+      "lines": "153-164",
+      "previous_finding": "The marker-only test could accept an unrelated manifest-state failure because its fixture was incomplete.",
+      "resolution": "The test now creates a complete temporary frozen suite with a synthetic approval, successfully loads that positive control, then changes only correction_approval.state to pending and requires ValueError. The manifest, receipt, candidate snapshots, review artifacts, inputs, and oracles remain available and valid. Removing the approval-state guard would let this negative load succeed, causing the test to fail rather than accept an unrelated rejection.",
+      "status": "resolved"
+    }
+  ],
+  "behavioral_assessment": [
+    "The draft test still forces draft metadata independently of the live suite state, rejects before executable selection, and asserts that the output directory does not exist.",
+    "The marker-only test now checks the actual approval-state boundary without depending on exception wording or missing fixture content.",
+    "Reusing the existing complete fixture helper avoids a second synthetic approval convention. It creates its own test-only receipt and candidate snapshots, rather than treating historical receipts as current approval.",
+    "Both tests remain valid after the real suite is frozen. The draft test resets its local state; freeze_copy builds fresh synthetic approval metadata and a frozen manifest in a temporary directory.",
+    "No production inquiry execution is required. The marker-only test calls only the data loader; the draft test stops before repository preflight, executable resolution, or destination creation."
+  ],
+  "spec_findings": [],
+  "quality_findings": [],
+  "reviewed_file_sha256s": [
+    {
+      "path": "test/inquiry_corrected_candidates.py",
+      "sha256": "0b80b4c991492bd849d8c7004c35b687a675bbca9b0e5d9601543c9a06e5e286",
+      "provenance": "Current-byte SHA256 independently computed and supplied by Main in the re-review handoff; not computed by this reviewer."
+    },
+    {
+      "path": "test/inquiry_approval_receipt.py",
+      "sha256": "6dfca72201daa2619189dfe48bf06f6e8111671008fdc676b98eb51f1b8a8975",
+      "provenance": "Recorded source hash read from evaluation/inquiry-p8-corrected/review-package.json during the original review; no new edit reported."
+    },
+    {
+      "path": "scripts/inquiry_evaluation_manifest.py",
+      "sha256": "dac0eeeb981fa161a6b1258c91a4a6a293e5cdf31c9d5fef53d60e59e0d937d6",
+      "provenance": "Recorded source hash read from evaluation/inquiry-p8-corrected/review-package.json during the original review; loader unchanged by assignment."
+    },
+    {
+      "path": "scripts/inquiry-evaluate.py",
+      "sha256": "6e1eb3c930595da46f6940187b20c777e14b631225b3f7c66f9bb83d392d76f9",
+      "provenance": "Recorded source hash read from evaluation/inquiry-p8-corrected/review-package.json during the original review; runner unchanged by assignment."
+    }
+  ],
+  "verification": {
+    "reviewer": "Static source review only. No edits, builds, tests, formatters, production preflight, or inquiry drivers executed.",
+    "parent_reported": "Main reported both boundary tests passed against temporary draft source metadata and temporary frozen/approved source metadata: 2/2 for each. This reviewer did not rerun those checks.",
+    "hash_limit": "The changed-test hash is explicitly parent-supplied current-byte evidence. Other hashes above retain their original recorded-pin provenance and were not independently recomputed by this reviewer."
+  },
+  "authorization_limit": "This code-quality approval is not measurement authorization, a completed preflight, or approval of P9. The original review remains historical and this result supersedes its fixture finding only."
+}

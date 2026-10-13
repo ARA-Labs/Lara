@@ -1,0 +1,1 @@
+(inquiry-result 1 T07 (impact-body (impact-result (transition accepted-to-accepted) ((query-impact (atom t) ((published defeated)) ((published defeated)) false false)) () ((atom t)))))

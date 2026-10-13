@@ -11560,3 +11560,54 @@ tree:
   - N411_inquiry_sparse_refinement
   - N412_inquiry_pair_semantic_stop
   - N413_inquiry_reviewed_correction_candidate
+- id: N415_inquiry_provenance_freeze
+  type: decision
+  title: Freeze the authorized test-helper correction with complete provenance closure
+  provenance: ai-executed
+  timestamp: '2026-10-13T07:12:48Z'
+  choice: >-
+    Execute the researcher's instruction to complete the next step after approval.
+    Isolate draft/unapproved test fixtures from the live candidate. Retain the
+    helper-only freeze's pre-measurement quality-pin failure and withdrawn clearance.
+    Independently review and bind the necessary transitive quality/oracle/manifest
+    metadata refresh without changing scientific content, runtime or budget.
+    Commit candidate 7a90fca and metadata-only freeze 1f1f101; full production
+    repository preflight passes before any measurement.
+  alternatives:
+  - Bypass the stale quality source pin or silently rewrite historical review receipts
+  evidence:
+  - evaluation/inquiry-p8-corrected/approval-provenance-amendment.json
+  - evaluation/inquiry-p8-corrected/researcher-approval-provenance.json
+  - evaluation/inquiry-p8-corrected/review/test-fixture-scientific-identity.json
+  - ara/evidence/inquiry-p8/preflight-20261013-corrected/quality-pin-failure.json
+  - ara/evidence/inquiry-p8/preflight-20261013-corrected/repository-preflight.json
+  status: resolved
+  also_depends_on:
+  - N413_inquiry_reviewed_correction_candidate
+  - N414_inquiry_corrective_verification
+- id: N416_inquiry_corrected_measurement
+  type: experiment
+  title: Complete and replay the single approved corrected P8 attempt
+  provenance: ai-executed
+  timestamp: '2026-10-13T07:13:22Z'
+  result: >-
+    COMPLETE PASS on 96 documents and 192 driver invocations. Each driver is
+    oracle-correct and validated on all 80 unique inputs; all duplicate captures,
+    protocol checks and real consumer checks pass. Aggregate interval is
+    39246.769305784255 ms. No missing invocation, refusal or infrastructure failure.
+    Capture-only replay passes and all 1009 retained files match byte-for-byte.
+    Original incomplete evidence remains unchanged. Diagnostic contrasts permit
+    P9 protocol drafting only; researcher result review and separate live approval
+    remain pending. No retries, live agents or paid calls occurred.
+  evidence:
+  - ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected/run.json
+  - ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected/summary.json
+  - ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected/report.md
+  - ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected/replay-validation.json
+  - ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected-replay/
+  - ara/evidence/inquiry-p8/preflight-20261013-corrected/validation.json
+  status: resolved
+  also_depends_on:
+  - N415_inquiry_provenance_freeze
+  - N411_inquiry_sparse_refinement
+  - N412_inquiry_pair_semantic_stop

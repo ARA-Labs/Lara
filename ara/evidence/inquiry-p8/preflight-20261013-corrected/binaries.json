@@ -1,0 +1,26 @@
+{
+  "resolution_command": [
+    "cabal",
+    "list-bin",
+    "exe:lara"
+  ],
+  "binaries": {
+    "native": {
+      "path": "/home/yfhe/ara/Lara/dist-newstyle/build/x86_64-linux/ghc-9.10.3/lara-0.2.0.0/x/lara/build/lara/lara",
+      "sha256": "cfa20be69a3d1737790db828a9437987d5dff3146c55ec95359e5e7aaed9a1f8",
+      "bytes": 12879344
+    },
+    "lean": {
+      "path": "/home/yfhe/ara/Lara/lean/.lake/build/bin/inquiry-run",
+      "sha256": "07b603e59bd5245d1373db6e21315a0dc46b2f7f7365370dac58aabad46a0c27",
+      "bytes": 151613512
+    },
+    "consumer": {
+      "path": "/tmp/p8-consumer",
+      "sha256": "5f75a2310315848077ef8a17cc378f05ef5dcd495bd67e691e7b7fd75158989b",
+      "bytes": 11296920
+    }
+  },
+  "consumer_matches_authoring_capture": true,
+  "executables_invoked": false
+}

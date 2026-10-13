@@ -1,0 +1,2405 @@
+{
+  "schema": "inquiry-p8-quality-review",
+  "schema_version": 1,
+  "status": "PASS",
+  "reviewer": "Codex independent quality reviewer /root/candidate_quality",
+  "provenance": "ai-executed",
+  "scope": "Supplemental implementation quality review of the one-line generator state-preservation fix and proposed data-policy/review-provenance attachment, following supplemental SPEC PASS. Scientific bindings below exclude review provenance so the receipt does not hash its own later attachment. Canonical attachment and refreshed decode receipt still require the final read-only handoff check.",
+  "prior_quality_review": {
+    "path": "review/independent-quality-review.json",
+    "sha256": "ddd09314af4b408e355b2f393b3bcbbb66606e89fb452f9106cd50f0f87011a4"
+  },
+  "prior_semantic_review": {
+    "path": "review/independent-spec-review.json",
+    "sha256": "847a7693bd7419b181fcaa087dbd355ff436113f9551ea75696a0c3b6c7b383b"
+  },
+  "independent_semantic_review_path": "evaluation/inquiry-p8-corrected/review/independent-spec-review-final.json",
+  "independent_semantic_review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
+  "generator_path": "scripts/inquiry_evaluation_cases.py",
+  "generator_sha256": "96a39b4f3719817806d36a5af8ae859d9557651a1b9d58fb0641a55e97878360",
+  "audit_tool_path": "evaluation/inquiry-p8-corrected/review/independent_finite_audit.py",
+  "audit_tool_sha256": "beb73f0b8dfb59229e4e14f8f9a4c1efc8ca84f9cbf0b70baddd9e045aac813c",
+  "boundary_test_path": "test/inquiry_corrected_candidates.py",
+  "boundary_test_sha256": "1e7cdf37e68a0ffb77032e034d9d021e768a4b8a5769ea86bdd09612ba5797f8",
+  "reviewed_runtime_code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+  "reviewed_helper_sources": [
+    {
+      "path": "scripts/inquiry-evaluate.py",
+      "sha256": "501d55903a04b9aabae8cb40f14c4dec9d18d8ce7fbd625087539f8b4c1bc346"
+    },
+    {
+      "path": "scripts/inquiry_evaluation_cases.py",
+      "sha256": "96a39b4f3719817806d36a5af8ae859d9557651a1b9d58fb0641a55e97878360"
+    },
+    {
+      "path": "scripts/inquiry_evaluation_manifest.py",
+      "sha256": "b02308a1f656ed047a0f2ef3df95b36bfcc2b7fbf8e8b0b2d31f3373176e88a2"
+    },
+    {
+      "path": "scripts/inquiry_support_annotations.py",
+      "sha256": "487e6c7e02806727b5904b24b3122426e1c5e664efced3a1fb96499864ecb378"
+    },
+    {
+      "path": "scripts/inquiry_corrected_validation.py",
+      "sha256": "6f8a0699c2a5bce68136bcdaf050bfd9ae9c38bc2ebe51897a91cb442b174827"
+    },
+    {
+      "path": "scripts/inquiry_evaluation_report.py",
+      "sha256": "f292ccc819b6d5e0e429d1812c5fd49453b07be6f620c330ccec88c62b1d2e08"
+    },
+    {
+      "path": "scripts/evidence_measured.py",
+      "sha256": "f1dda07803bf2c35cb562345d54c767eb313e82f48155c2fc135ad751b1b46c6"
+    },
+    {
+      "path": "scripts/inquiry-impact-producer.hs",
+      "sha256": "e0cc0a76c63a540d49e4e9d840acf21a51b5a47168df8678e395261fc30266aa"
+    },
+    {
+      "path": "test/inquiry_evaluation_runner.py",
+      "sha256": "575cb1666c10a7d6a764f5000d849157ccadd3cfdb655f1ce72d0c07160ae5e2"
+    },
+    {
+      "path": "test/inquiry_corrected_candidates.py",
+      "sha256": "1e7cdf37e68a0ffb77032e034d9d021e768a4b8a5769ea86bdd09612ba5797f8"
+    },
+    {
+      "path": "test/inquiry_evaluation_boundaries.py",
+      "sha256": "850bb5f4e93086a020a04f0b7fdb03e43f82080d5a8fa090a421b7813a1f592d"
+    },
+    {
+      "path": "evaluation/inquiry-p8-corrected/review/independent_finite_audit.py",
+      "sha256": "beb73f0b8dfb59229e4e14f8f9a4c1efc8ca84f9cbf0b70baddd9e045aac813c"
+    }
+  ],
+  "inspected_metadata_snapshot": {
+    "protocol_sha256": "c2d1bfbb91985b924951033f6b8c790906a4542ca94ba3650fd7c82074090f92",
+    "manifest_sha256": "a773119ba2aeca931ead32f964636f14786647a488d49fd3a326e9fe7e62da4a",
+    "phase": "first prior-review attachment before supplemental receipt linkage; historical snapshot, not the final candidate identity"
+  },
+  "driver_outputs_used": false,
+  "analysis_implementation_imported": false,
+  "production_driver_invocations": 0,
+  "measurement_or_pilot_runs": 0,
+  "researcher_approval_or_freeze_claimed": false,
+  "findings": [],
+  "checks": [
+    {
+      "method": "source delta review after supplemental SPEC PASS",
+      "result": "PASS",
+      "detail": "Only change since prior quality review is retaining awaiting-researcher-approval alongside frozen in generator manifest-state handling. The exact independently reviewed generator source hash remains mandatory before any prior review provenance is preserved."
+    },
+    {
+      "method": "independent pure-Python generator/state/provenance checks executed",
+      "exit_code": 0,
+      "result": "PASS",
+      "detail": "Read-only materialization retains awaiting-researcher-approval. Because currently attached prior spec receipt names the earlier generator hash, regeneration drops all prior review hashes and keeps pending statuses; all input and authored semantic digests remain exact. This confirms state preservation does not weaken review reuse."
+    },
+    {
+      "method": "independent metadata and source-hash checks executed",
+      "result": "PASS",
+      "detail": "All 96 actual input/oracle hashes, scientific hashes and manifest/oracle provenance pairs match. Inputs and authored semantic hashes match immutable prior quality bindings. Attached prior receipt hashes match retained bytes. Supplemental spec helper hashes match actual final source files. Draft states and pending user approval remain explicit; protocol manifest hash matches."
+    },
+    {
+      "method": "proposed data policy and documentation review",
+      "result": "PASS",
+      "detail": "Policy uses repository fixtures and synthetic inputs, one fresh local capture plus local replay, retains original failure and every new outcome for the requested PR, and permits no network acquisition/transfer or paid calls during measurement. Policy and fresh budget remain proposed and require researcher approval. README accurately separates completed prior reviews from supplemental metadata work."
+    },
+    {
+      "method": "original/runtime immutability checks executed",
+      "result": "PASS",
+      "detail": "No tracked changes or untracked additions under evaluation/inquiry-p8, src, app or lean. No production driver, pilot, measurement, ARA recording, network, paid call or commit performed by this reviewer."
+    }
+  ],
+  "scientific_case_bindings": [
+    {
+      "case_id": "source-rejections",
+      "input_sha256": "7855614c13c9a319e1c5f623ce3ce815b70974113e4a743b7893d78a59f8967b",
+      "authored_semantic_content_sha256": "146e9efe7130befcf782e361dc61f59fec5d91b928a55f86e9b2a21a7b6e4d3d",
+      "source_ancestry": {
+        "case_id": "source-rejections",
+        "input_path": "fixtures/process/inquiry/source-rejections.sexp",
+        "input_sha256": "7855614c13c9a319e1c5f623ce3ce815b70974113e4a743b7893d78a59f8967b",
+        "golden_path": "fixtures/process/inquiry/source-rejections.expected",
+        "golden_sha256": "928b67c93ba4bd26b40a7c04123fbc7c4a3f1bb3f474571e99b5aebe92641050",
+        "classification": "development-control",
+        "oracle_kind": "existing-conformance-golden",
+        "destination_input_path": "inputs/source-rejections.sexp"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 4,
+          "source-bytes": 4198,
+          "declarations": 15,
+          "search-steps": 5,
+          "pairs": 4,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "mixed-stability",
+      "input_sha256": "3965c657eccfcaf7f48dc6d7f6d8dc6faa90522db42e15f24443e14b1b0837cf",
+      "authored_semantic_content_sha256": "b0570f0ec1633aa976c888d3cdf77e1d51c2ec1991a0e720e5282aef46aa3323",
+      "source_ancestry": {
+        "case_id": "mixed-stability",
+        "input_path": "fixtures/process/inquiry/mixed-stability.sexp",
+        "input_sha256": "3965c657eccfcaf7f48dc6d7f6d8dc6faa90522db42e15f24443e14b1b0837cf",
+        "golden_path": "fixtures/process/inquiry/mixed-stability.expected",
+        "golden_sha256": "8de386ade88f49b0ec6e3e8fb821f058db4f5f70ff1afeaab116eb2a09ab02cc",
+        "classification": "development-control",
+        "oracle_kind": "existing-conformance-golden",
+        "destination_input_path": "inputs/mixed-stability.sexp"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 2169,
+          "declarations": 5,
+          "search-steps": 3,
+          "pairs": 2,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "inconsistent",
+      "input_sha256": "b9a0a607dbccdcf4a5cc3df70171128ba7781e6e5609a1fa7661d54848b2c266",
+      "authored_semantic_content_sha256": "2edd2a432a3ccb00dea395db0f267e1b489b01ccde07cf2ce8608f9fed17117a",
+      "source_ancestry": {
+        "case_id": "inconsistent",
+        "input_path": "fixtures/process/inquiry/inconsistent.sexp",
+        "input_sha256": "b9a0a607dbccdcf4a5cc3df70171128ba7781e6e5609a1fa7661d54848b2c266",
+        "golden_path": "fixtures/process/inquiry/inconsistent.expected",
+        "golden_sha256": "61cb54ee53958d784e5e1d7a3d5122b49f0652da9e176d28db595295a4764544",
+        "classification": "development-control",
+        "oracle_kind": "existing-conformance-golden",
+        "destination_input_path": "inputs/inconsistent.sexp"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 0,
+          "sources": 0,
+          "source-bytes": 2665,
+          "declarations": 0,
+          "search-steps": 35,
+          "pairs": 0,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "fixed-witness",
+      "input_sha256": "ba3879cd0d0783d772763867278e005710fe15d529f38e955f999e558063f75e",
+      "authored_semantic_content_sha256": "537301ab3a332419f920774112845c853d6712c868b709d51094beb0706651ea",
+      "source_ancestry": {
+        "case_id": "fixed-witness",
+        "input_path": "fixtures/process/inquiry/fixed-witness.sexp",
+        "input_sha256": "ba3879cd0d0783d772763867278e005710fe15d529f38e955f999e558063f75e",
+        "golden_path": "fixtures/process/inquiry/fixed-witness.expected",
+        "golden_sha256": "34a237d1bf69d32477a0f22bbf8799968d863ff7a727ddf83eb679f7a60dcc0f",
+        "classification": "development-control",
+        "oracle_kind": "existing-conformance-golden",
+        "destination_input_path": "inputs/fixed-witness.sexp"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 22022,
+          "declarations": 8,
+          "search-steps": 16,
+          "pairs": 2,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "hypothetical-audit",
+      "input_sha256": "41b86a76b98e8f771040a863f29d750ab593edc16bf444df9b3462f1ded528a2",
+      "authored_semantic_content_sha256": "2b244ecd583cb3f476cd8e29507a0cb1758a354338d2214eef61707b93a4e6a1",
+      "source_ancestry": {
+        "case_id": "hypothetical-audit",
+        "input_path": "fixtures/process/inquiry/hypothetical-audit.sexp",
+        "input_sha256": "41b86a76b98e8f771040a863f29d750ab593edc16bf444df9b3462f1ded528a2",
+        "golden_path": "fixtures/process/inquiry/hypothetical-audit.expected",
+        "golden_sha256": "6fcb4607c1dfc256b6e55c5166c1241d0f546a6fb25e18efae76a81817437cf8",
+        "classification": "development-control",
+        "oracle_kind": "existing-conformance-golden",
+        "destination_input_path": "inputs/hypothetical-audit.sexp"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 1,
+          "source-bytes": 21761,
+          "declarations": 4,
+          "search-steps": 15,
+          "pairs": 1,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "forged-observed",
+      "input_sha256": "5b00e668d37d71fc6b103eb8696b1c6b36f70b3a695378cffef37814fab03d05",
+      "authored_semantic_content_sha256": "8f78b0aa0ca74cd5fc7e83906383e42932263514b6123116aecf4f165d0fa2d5",
+      "source_ancestry": {
+        "case_id": "forged-observed",
+        "input_path": "fixtures/process/inquiry/forged-observed.sexp",
+        "input_sha256": "5b00e668d37d71fc6b103eb8696b1c6b36f70b3a695378cffef37814fab03d05",
+        "golden_path": "fixtures/process/inquiry/forged-observed.expected",
+        "golden_sha256": "658c76cdfeba7cb8e701094ec2e843b43b4cbcd83b4a7d55533d9163a4d3e217",
+        "classification": "development-control",
+        "oracle_kind": "existing-conformance-golden",
+        "destination_input_path": "inputs/forged-observed.sexp"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 1,
+          "source-bytes": 10958,
+          "declarations": 3,
+          "search-steps": 15,
+          "pairs": 1,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "reference-sensitivity",
+      "input_sha256": "d1f2cae162bee97ddf7fd23dd15da3a93f7b4b78ff91af085dc5a5992ec899a4",
+      "authored_semantic_content_sha256": "3d21267a6507536662518abbc65af53059b47a0e886e98d70e80fbf629a825c0",
+      "source_ancestry": {
+        "case_id": "reference-sensitivity",
+        "input_path": "fixtures/process/inquiry/reference-sensitivity.sexp",
+        "input_sha256": "d1f2cae162bee97ddf7fd23dd15da3a93f7b4b78ff91af085dc5a5992ec899a4",
+        "golden_path": "fixtures/process/inquiry/reference-sensitivity.expected",
+        "golden_sha256": "33e2aa28b0aece3e6bd5aa9255e0d6a8697d2a0962599fd30bcfaef20bbf18aa",
+        "classification": "development-control",
+        "oracle_kind": "existing-conformance-golden",
+        "destination_input_path": "inputs/reference-sensitivity.sexp"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 4,
+          "source-bytes": 6206,
+          "declarations": 36,
+          "search-steps": 7,
+          "pairs": 4,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "joint-only",
+      "input_sha256": "158d9a47064e56fd8803a117acbaca8278a5591081cf4964f1420570f478eba4",
+      "authored_semantic_content_sha256": "b78bc555111c4ab264b29881170b890fc2b27cf90b42a381a823b7ac664ca967",
+      "source_ancestry": {
+        "case_id": "joint-only",
+        "input_path": "fixtures/process/inquiry/joint-only.sexp",
+        "input_sha256": "158d9a47064e56fd8803a117acbaca8278a5591081cf4964f1420570f478eba4",
+        "golden_path": "fixtures/process/inquiry/joint-only.expected",
+        "golden_sha256": "086b3c9a759df659eb9b231b55d3966e0ef79bef2a841ba49e2c1996728e467f",
+        "classification": "development-control",
+        "oracle_kind": "existing-conformance-golden",
+        "destination_input_path": "inputs/joint-only.sexp"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 4,
+          "source-bytes": 6211,
+          "declarations": 36,
+          "search-steps": 7,
+          "pairs": 4,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "minimal-conditions",
+      "input_sha256": "02a77d9b3390ec987ec0c808fa54c09947413bcdc1c9ee7baf8371f08b37bb10",
+      "authored_semantic_content_sha256": "0c6b0a2584cc4a3f48d2a741aa605aa6eeb983e751702dbe58650250aedfdd33",
+      "source_ancestry": {
+        "case_id": "minimal-conditions",
+        "input_path": "fixtures/process/inquiry/minimal-conditions.sexp",
+        "input_sha256": "02a77d9b3390ec987ec0c808fa54c09947413bcdc1c9ee7baf8371f08b37bb10",
+        "golden_path": "fixtures/process/inquiry/minimal-conditions.expected",
+        "golden_sha256": "e3a51bac6d7a47cd05ce8092e0d5d24e03842f89950de559640e7b2f1a415dd3",
+        "classification": "development-control",
+        "oracle_kind": "existing-conformance-golden",
+        "destination_input_path": "inputs/minimal-conditions.sexp"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 8,
+          "source-bytes": 7472,
+          "declarations": 84,
+          "search-steps": 15,
+          "pairs": 27,
+          "subsets": 8
+        }
+      }
+    },
+    {
+      "case_id": "new-attacker",
+      "input_sha256": "9d9c4d2bc28739d82f5d0b14f80a85a60a3440d3514e27fa3513b03af5edc993",
+      "authored_semantic_content_sha256": "ca8830d8c84067dec91cab0edf5e74dce4ca90e905a4fa5338bdfc47a3493c27",
+      "source_ancestry": {
+        "case_id": "new-attacker",
+        "input_path": "fixtures/process/inquiry/new-attacker.sexp",
+        "input_sha256": "9d9c4d2bc28739d82f5d0b14f80a85a60a3440d3514e27fa3513b03af5edc993",
+        "golden_path": "fixtures/process/inquiry/new-attacker.expected",
+        "golden_sha256": "78609d1909eddbc40dc0bf4aadddf58ecef4a017c1ca3ab1c8593fb318739bd7",
+        "classification": "development-control",
+        "oracle_kind": "existing-conformance-golden",
+        "destination_input_path": "inputs/new-attacker.sexp"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 9081,
+          "declarations": 14,
+          "search-steps": 1,
+          "pairs": 28,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "shared-discharge",
+      "input_sha256": "53baca2eb89a4aadca838786319e5aa2ee2f6fb30fd8d7a0b3282e3b8dd15894",
+      "authored_semantic_content_sha256": "64083f5817d7dc56908dc704a0b99b43e5a21e8053b17db503e42667c1925a1e",
+      "source_ancestry": {
+        "case_id": "shared-discharge",
+        "input_path": "fixtures/process/inquiry/shared-discharge.sexp",
+        "input_sha256": "53baca2eb89a4aadca838786319e5aa2ee2f6fb30fd8d7a0b3282e3b8dd15894",
+        "golden_path": "fixtures/process/inquiry/shared-discharge.expected",
+        "golden_sha256": "f6f313ef44fc3c8cb98290d0d7c55bff42d7b3657b1d7bdb17478244f6efc0ba",
+        "classification": "development-control",
+        "oracle_kind": "existing-conformance-golden",
+        "destination_input_path": "inputs/shared-discharge.sexp"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 11781,
+          "declarations": 17,
+          "search-steps": 1,
+          "pairs": 31,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "unrelated-self-attack",
+      "input_sha256": "1d9df679b20640751c5d8063ac8379a7d24cf520ce965bc4c95700e24990acf1",
+      "authored_semantic_content_sha256": "1b2acb63354c276806ada3a432016eacaf5636a6154f07919f546379715a942d",
+      "source_ancestry": {
+        "case_id": "unrelated-self-attack",
+        "input_path": "fixtures/process/inquiry/unrelated-self-attack.sexp",
+        "input_sha256": "1d9df679b20640751c5d8063ac8379a7d24cf520ce965bc4c95700e24990acf1",
+        "golden_path": "fixtures/process/inquiry/unrelated-self-attack.expected",
+        "golden_sha256": "178154614fb02cedefc6ecec07d0d02ef29922f9246bae3026ee4e43dd28cb21",
+        "classification": "development-control",
+        "oracle_kind": "existing-conformance-golden",
+        "destination_input_path": "inputs/unrelated-self-attack.sexp"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 11648,
+          "declarations": 20,
+          "search-steps": 1,
+          "pairs": 34,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "blocked-conditional",
+      "input_sha256": "468d08bd6be39e80ff2388311f2b0e17f24c3595db1ef328eb0a1f77e91a1a68",
+      "authored_semantic_content_sha256": "08eba155ff89ac9b09e54c9b4cfa64ce6210da24ebd0ac5a2c45d3e18e51a0d2",
+      "source_ancestry": {
+        "case_id": "blocked-conditional",
+        "input_path": "fixtures/process/inquiry/blocked-conditional.sexp",
+        "input_sha256": "468d08bd6be39e80ff2388311f2b0e17f24c3595db1ef328eb0a1f77e91a1a68",
+        "golden_path": "fixtures/process/inquiry/blocked-conditional.expected",
+        "golden_sha256": "9e10169c95670a358789642dc5ab1c258af5374a2a888c4872a9cbb731b3ace8",
+        "classification": "development-control",
+        "oracle_kind": "existing-conformance-golden",
+        "destination_input_path": "inputs/blocked-conditional.sexp"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 2,
+          "sources": 4,
+          "source-bytes": 13326,
+          "declarations": 34,
+          "search-steps": 9,
+          "pairs": 33,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "impact-rejected",
+      "input_sha256": "1b4939d0889370a2d9db142cacc2d3d5ac01ad9e6771cc2a5c291cf557d12e2e",
+      "authored_semantic_content_sha256": "2621cae1f1df8e5e125a524f7dc6c1fd6ee0e779525f5d48a24da8ffe0a805c3",
+      "source_ancestry": {
+        "case_id": "impact-rejected",
+        "input_path": "fixtures/process/inquiry/impact-rejected.sexp",
+        "input_sha256": "1b4939d0889370a2d9db142cacc2d3d5ac01ad9e6771cc2a5c291cf557d12e2e",
+        "golden_path": "fixtures/process/inquiry/impact-rejected.expected",
+        "golden_sha256": "7a19c46607c88bbd0915ae4e7a23d7a03408ea686dcd104978783836ebc11cf4",
+        "classification": "development-control",
+        "oracle_kind": "existing-conformance-golden",
+        "destination_input_path": "inputs/impact-rejected.sexp"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 2,
+          "sources": 6,
+          "source-bytes": 11715,
+          "declarations": 22,
+          "search-steps": 9,
+          "pairs": 38,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "verified-certificate",
+      "input_sha256": "c383439212c72e264d28f28d005f0b9bfacdb6a0bfef2b30bc376e953222e599",
+      "authored_semantic_content_sha256": "11721df68b379d235532d69fb66fb492f4a06300ccfdb06eb855fdfa5c675145",
+      "source_ancestry": {
+        "case_id": "verified-certificate",
+        "input_path": "fixtures/process/inquiry/verified-certificate.sexp",
+        "input_sha256": "c383439212c72e264d28f28d005f0b9bfacdb6a0bfef2b30bc376e953222e599",
+        "golden_path": "fixtures/process/inquiry/verified-certificate.expected",
+        "golden_sha256": "ffe51d8130a470a964c622b240ce52c0f45299e11cc3fefed57e0571030d501a",
+        "classification": "development-control",
+        "oracle_kind": "existing-conformance-golden",
+        "destination_input_path": "inputs/verified-certificate.sexp"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 27122,
+          "declarations": 19,
+          "search-steps": 1,
+          "pairs": 33,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "tampered-certificate",
+      "input_sha256": "398895a18547ebe47432d8a4c4444f59a5af6b99609304a1ea318a9c16927809",
+      "authored_semantic_content_sha256": "cca30206762adcc841e71fe82d6e174415db9e5bf00b9acd261f6d3023bd1a9e",
+      "source_ancestry": {
+        "case_id": "tampered-certificate",
+        "input_path": "fixtures/process/inquiry/tampered-certificate.sexp",
+        "input_sha256": "398895a18547ebe47432d8a4c4444f59a5af6b99609304a1ea318a9c16927809",
+        "golden_path": "fixtures/process/inquiry/tampered-certificate.expected",
+        "golden_sha256": "9701e78c645be8e15c4270f7b0b5c095ad6a8e60f1e5fe267bb75fc8ba5ecc78",
+        "classification": "development-control",
+        "oracle_kind": "existing-conformance-golden",
+        "destination_input_path": "inputs/tampered-certificate.sexp"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 27144,
+          "declarations": 19,
+          "search-steps": 1,
+          "pairs": 33,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T01",
+      "input_sha256": "97f776b13670462aab228d55ce7f6cb37980c8198bf4be0578caea6f09e687f0",
+      "authored_semantic_content_sha256": "7b48a3790d201cae94d5c97759609d27ef49c3e622eb0b85566d910654b6cec7",
+      "source_ancestry": {
+        "recipe": "T01",
+        "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+        "vocabulary_source_path": "fixtures/process/inquiry/impact-rejected.sexp",
+        "vocabulary_source_sha256": "1b4939d0889370a2d9db142cacc2d3d5ac01ad9e6771cc2a5c291cf557d12e2e",
+        "construction": "structural extraction and approved authored edits; no final driver outputs"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 5,
+          "source-bytes": 23639,
+          "declarations": 15,
+          "search-steps": 1,
+          "pairs": 44,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T02",
+      "input_sha256": "a5004c62d490b0f64f8b4fb8dc333e556390b013de0e940f1df8263c3ef54284",
+      "authored_semantic_content_sha256": "0182614b02faf395254e45e18982cae29d537dfbaa21a442b371c4cb57e7c5a8",
+      "source_ancestry": {
+        "recipe": "T02",
+        "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+        "vocabulary_source_path": "fixtures/process/inquiry/impact-rejected.sexp",
+        "vocabulary_source_sha256": "1b4939d0889370a2d9db142cacc2d3d5ac01ad9e6771cc2a5c291cf557d12e2e",
+        "construction": "structural extraction and approved authored edits; no final driver outputs"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 5,
+          "source-bytes": 22464,
+          "declarations": 17,
+          "search-steps": 1,
+          "pairs": 40,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T03",
+      "input_sha256": "dc8c8d33c5609e041aa0359d29443e52376f809e578a9b475bbf988bb3360cce",
+      "authored_semantic_content_sha256": "f11ed06b95295aa92404f9c2d6eefc97d1c983ec51176e578b68eccc2f7980ab",
+      "source_ancestry": {
+        "recipe": "T03",
+        "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+        "vocabulary_source_path": "fixtures/process/inquiry/impact-rejected.sexp",
+        "vocabulary_source_sha256": "1b4939d0889370a2d9db142cacc2d3d5ac01ad9e6771cc2a5c291cf557d12e2e",
+        "construction": "structural extraction and approved authored edits; no final driver outputs"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 5,
+          "source-bytes": 22193,
+          "declarations": 18,
+          "search-steps": 1,
+          "pairs": 40,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T04",
+      "input_sha256": "2d796cd69ea245fe2d1c365971b31848c5346e51fef1bdc434adec6e3115482a",
+      "authored_semantic_content_sha256": "3e397ecb0563d39e882e4a80e497981688de4316ea70af5cb872eeb45cee32dd",
+      "source_ancestry": {
+        "recipe": "T04",
+        "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+        "vocabulary_source_path": "fixtures/process/inquiry/impact-rejected.sexp",
+        "vocabulary_source_sha256": "1b4939d0889370a2d9db142cacc2d3d5ac01ad9e6771cc2a5c291cf557d12e2e",
+        "construction": "structural extraction and approved authored edits; no final driver outputs"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 5,
+          "source-bytes": 21003,
+          "declarations": 20,
+          "search-steps": 1,
+          "pairs": 36,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T05",
+      "input_sha256": "14e8f0c59f4116a2bcdd47d2642c7c105ecf919635d324d92fda59cadbbd92e6",
+      "authored_semantic_content_sha256": "534de52648fb2aceb00b3575383ed299b39c456a62f2b6e0f5f338f304d3716c",
+      "source_ancestry": {
+        "recipe": "T05",
+        "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+        "vocabulary_source_path": "fixtures/process/inquiry/blocked-conditional.sexp",
+        "vocabulary_source_sha256": "468d08bd6be39e80ff2388311f2b0e17f24c3595db1ef328eb0a1f77e91a1a68",
+        "construction": "structural extraction and approved authored edits; no final driver outputs"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 12900,
+          "declarations": 26,
+          "search-steps": 1,
+          "pairs": 33,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T06",
+      "input_sha256": "3b553951d0db48e6ef3b9e21a1360c248a101780b77ac176834c8c0e041c608e",
+      "authored_semantic_content_sha256": "678473a6140b7f3d09b08e4ab5f98afb3f77d779fab9fcee53b64cd8fbb9ef18",
+      "source_ancestry": {
+        "recipe": "T06",
+        "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+        "vocabulary_source_path": "fixtures/process/inquiry/unrelated-self-attack.sexp",
+        "vocabulary_source_sha256": "1d9df679b20640751c5d8063ac8379a7d24cf520ce965bc4c95700e24990acf1",
+        "construction": "structural extraction and approved authored edits; no final driver outputs"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 11575,
+          "declarations": 20,
+          "search-steps": 1,
+          "pairs": 34,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T07",
+      "input_sha256": "55f4c94276527b4cccd7e5e5552f9ddcf36864cdbb66a07bbfb5d3d12a962839",
+      "authored_semantic_content_sha256": "ac20cef9103ff5cf0a47538f79f1fa80e6acde4263cd1a9f17ab7a2871a8a846",
+      "source_ancestry": {
+        "recipe": "T07",
+        "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+        "vocabulary_source_path": "fixtures/process/inquiry/unrelated-self-attack.sexp",
+        "vocabulary_source_sha256": "1d9df679b20640751c5d8063ac8379a7d24cf520ce965bc4c95700e24990acf1",
+        "construction": "structural extraction and approved authored edits; no final driver outputs"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 11425,
+          "declarations": 20,
+          "search-steps": 1,
+          "pairs": 38,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T08",
+      "input_sha256": "ab13adde17638abf4167a21bcd7bb78d0ba222587e27f07fe9e97ada7ad1075a",
+      "authored_semantic_content_sha256": "1f8b190090baf058eb6f51417be299146aa006a5f565ed6936ed902935d4877b",
+      "source_ancestry": {
+        "recipe": "T08",
+        "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+        "vocabulary_source_path": "fixtures/process/inquiry/unrelated-self-attack.sexp",
+        "vocabulary_source_sha256": "1d9df679b20640751c5d8063ac8379a7d24cf520ce965bc4c95700e24990acf1",
+        "construction": "structural extraction and approved authored edits; no final driver outputs"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 5,
+          "source-bytes": 33473,
+          "declarations": 30,
+          "search-steps": 1,
+          "pairs": 64,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T09",
+      "input_sha256": "5264b35448e7c7ab883b231a8f928adfe61641e8a68b0ad063eaf98c13cba061",
+      "authored_semantic_content_sha256": "1e2cc390f738d27ceca4a48fa2a7d56f304aa280429a1ff1e630a0b494e76848",
+      "source_ancestry": {
+        "recipe": "T09",
+        "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+        "vocabulary_source_path": "fixtures/process/inquiry/impact-rejected.sexp",
+        "vocabulary_source_sha256": "1b4939d0889370a2d9db142cacc2d3d5ac01ad9e6771cc2a5c291cf557d12e2e",
+        "construction": "structural extraction and approved authored edits; no final driver outputs"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 2987,
+          "declarations": 8,
+          "search-steps": 3,
+          "pairs": 8,
+          "subsets": 4
+        }
+      }
+    },
+    {
+      "case_id": "T10",
+      "input_sha256": "547765c4796dd8af7e5f9d1bf97243a19e98c8b4fb11e188713e797c1b245a9a",
+      "authored_semantic_content_sha256": "9d747be9b39ba5f8126ae8806997bea603f9370a1a95a0bd247e66010862321f",
+      "source_ancestry": {
+        "recipe": "T10",
+        "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+        "vocabulary_source_path": "fixtures/process/inquiry/fixed-witness.sexp",
+        "vocabulary_source_sha256": "ba3879cd0d0783d772763867278e005710fe15d529f38e955f999e558063f75e",
+        "construction": "structural extraction and approved authored edits; no final driver outputs"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 22544,
+          "declarations": 8,
+          "search-steps": 16,
+          "pairs": 13,
+          "subsets": 4
+        }
+      }
+    },
+    {
+      "case_id": "T11",
+      "input_sha256": "f7a45e216cfd2cb6de3942d2cb917558624bf9f45017151589146a05f42ec7e1",
+      "authored_semantic_content_sha256": "dd262bd5a9e0d678c1206fdf8a9bdd21a418c497fcab37a2c697b0ae199eec4f",
+      "source_ancestry": {
+        "recipe": "T11",
+        "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+        "vocabulary_source_path": "fixtures/process/inquiry/reference-sensitivity.sexp",
+        "vocabulary_source_sha256": "d1f2cae162bee97ddf7fd23dd15da3a93f7b4b78ff91af085dc5a5992ec899a4",
+        "construction": "structural extraction and approved authored edits; no final driver outputs"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 6,
+          "source-bytes": 6813,
+          "declarations": 56,
+          "search-steps": 10,
+          "pairs": 18,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T12",
+      "input_sha256": "32f6020d88cd26cb1d5dff4bc92269d8ff6804ba65ff2dd223808013c79350f2",
+      "authored_semantic_content_sha256": "54afed7819c1a0411bd5962d5df794c40bc515ae8864e2bd6d8bf526ad061b25",
+      "source_ancestry": {
+        "recipe": "T12",
+        "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+        "vocabulary_source_path": "fixtures/process/inquiry/joint-only.sexp",
+        "vocabulary_source_sha256": "158d9a47064e56fd8803a117acbaca8278a5591081cf4964f1420570f478eba4",
+        "construction": "structural extraction and approved authored edits; no final driver outputs"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 4,
+          "source-bytes": 6392,
+          "declarations": 36,
+          "search-steps": 7,
+          "pairs": 12,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T13",
+      "input_sha256": "1fb77ef0a9473f6b0130f5367209aafcb8fe0a83dc7d3cb29b14ca2a62b1d84d",
+      "authored_semantic_content_sha256": "fff4c9da99c92216ef398c0e1ef2965a071c15100bf819bcf171b4ef426149f7",
+      "source_ancestry": {
+        "recipe": "T13",
+        "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+        "vocabulary_source_path": "fixtures/process/inquiry/impact-rejected.sexp",
+        "vocabulary_source_sha256": "1b4939d0889370a2d9db142cacc2d3d5ac01ad9e6771cc2a5c291cf557d12e2e",
+        "construction": "structural extraction and approved authored edits; no final driver outputs"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 3210,
+          "declarations": 6,
+          "search-steps": 3,
+          "pairs": 6,
+          "subsets": 4
+        }
+      }
+    },
+    {
+      "case_id": "T14",
+      "input_sha256": "a773b8f090c09959f35a41499ee12ba767b9876a9c59d287256367ec2af74bdf",
+      "authored_semantic_content_sha256": "c12142bcbf380d74ff657b0d9c9b7be60dc1c9525a14731a6292703d9673a438",
+      "source_ancestry": {
+        "recipe": "T14",
+        "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+        "vocabulary_source_path": "fixtures/process/inquiry/impact-rejected.sexp",
+        "vocabulary_source_sha256": "1b4939d0889370a2d9db142cacc2d3d5ac01ad9e6771cc2a5c291cf557d12e2e",
+        "construction": "structural extraction and approved authored edits; no final driver outputs"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 3215,
+          "declarations": 6,
+          "search-steps": 3,
+          "pairs": 10,
+          "subsets": 4
+        }
+      }
+    },
+    {
+      "case_id": "T15",
+      "input_sha256": "6f7e353c1f26e69fe7dbc9f09fe809e4d8bd45029ede981f5c362f0316d6db87",
+      "authored_semantic_content_sha256": "dabf36da9292e46b24e370292e2fa6c1831e7debaa041346a851968e3f39e5bb",
+      "source_ancestry": {
+        "recipe": "T15",
+        "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+        "vocabulary_source_path": "fixtures/process/inquiry/fixed-witness.sexp",
+        "vocabulary_source_sha256": "ba3879cd0d0783d772763867278e005710fe15d529f38e955f999e558063f75e",
+        "construction": "structural extraction and approved authored edits; no final driver outputs"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 9,
+          "sources": 2,
+          "source-bytes": 14184,
+          "declarations": 8,
+          "search-steps": 406,
+          "pairs": 8,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T16",
+      "input_sha256": "72b68249ab9814baaa9e5775a3426317fecdb861d2570c9c2dd43c59bdbc37e4",
+      "authored_semantic_content_sha256": "dd8c60bbc4189aeccc27bd010e3a7a7f39fd434339016f36bf3ff57060a70dcb",
+      "source_ancestry": {
+        "recipe": "T16",
+        "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+        "vocabulary_source_path": "fixtures/process/inquiry/impact-rejected.sexp",
+        "vocabulary_source_sha256": "1b4939d0889370a2d9db142cacc2d3d5ac01ad9e6771cc2a5c291cf557d12e2e",
+        "construction": "structural extraction and approved authored edits; no final driver outputs"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 5,
+          "source-bytes": 34804,
+          "declarations": 15,
+          "search-steps": 1,
+          "pairs": 44,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T09-singleton-slots-0",
+      "input_sha256": "5264b35448e7c7ab883b231a8f928adfe61641e8a68b0ad063eaf98c13cba061",
+      "authored_semantic_content_sha256": "08b9921d762da031613a50898dff87840c9b67ff160361ec73a809a8d8c5bd5b",
+      "source_ancestry": {
+        "seed": "T09",
+        "axis": "singleton-slots",
+        "level": 0,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 2987,
+          "declarations": 8,
+          "search-steps": 3,
+          "pairs": 8,
+          "subsets": 4
+        }
+      }
+    },
+    {
+      "case_id": "T09-singleton-slots-1",
+      "input_sha256": "d68a70c7c58de0254750dadc82d36a22f3298f081c4dab2931111e7b8e209dbd",
+      "authored_semantic_content_sha256": "55f7bf3b46a8db0a88195bd6b3c506f00d62a9ae7df1c4c558640e168e163ef5",
+      "source_ancestry": {
+        "seed": "T09",
+        "axis": "singleton-slots",
+        "level": 1,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 3078,
+          "declarations": 8,
+          "search-steps": 5,
+          "pairs": 8,
+          "subsets": 4
+        }
+      }
+    },
+    {
+      "case_id": "T09-singleton-slots-4",
+      "input_sha256": "10f246e5743b807529db2f2e54184bd2ed8355bb52f32e4c11b718095a9b8ce2",
+      "authored_semantic_content_sha256": "aaaf1707121574fd42af83bdb725182747680eb79a46cf9c8e1b12bfb4674553",
+      "source_ancestry": {
+        "seed": "T09",
+        "axis": "singleton-slots",
+        "level": 4,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 3351,
+          "declarations": 8,
+          "search-steps": 11,
+          "pairs": 8,
+          "subsets": 4
+        }
+      }
+    },
+    {
+      "case_id": "T09-singleton-slots-40",
+      "input_sha256": "579695e0547f9a8904dc4efb132b26acca708e3cd1418b0d33a2e2a988fb123a",
+      "authored_semantic_content_sha256": "9166905594726c094663276b509d7accfcb53a328112b7d49d743137971e747e",
+      "source_ancestry": {
+        "seed": "T09",
+        "axis": "singleton-slots",
+        "level": 40,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 6627,
+          "declarations": 8,
+          "search-steps": 83,
+          "pairs": 8,
+          "subsets": 4
+        }
+      }
+    },
+    {
+      "case_id": "T10-singleton-slots-0",
+      "input_sha256": "547765c4796dd8af7e5f9d1bf97243a19e98c8b4fb11e188713e797c1b245a9a",
+      "authored_semantic_content_sha256": "b005b9ce46d34f5b66ba4a8e2abdadb84ff565d1b73c85deca749e929f4ee75a",
+      "source_ancestry": {
+        "seed": "T10",
+        "axis": "singleton-slots",
+        "level": 0,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 22544,
+          "declarations": 8,
+          "search-steps": 16,
+          "pairs": 13,
+          "subsets": 4
+        }
+      }
+    },
+    {
+      "case_id": "T10-singleton-slots-1",
+      "input_sha256": "f42dfa2fee7040e7cd2728d8a4c136832490dd3b8e98440e4bb84d44c2d5e51e",
+      "authored_semantic_content_sha256": "28638ca0d505ade66d2bcd80dfdfedf148c2542784b3753c8933ca57adbb2e43",
+      "source_ancestry": {
+        "seed": "T10",
+        "axis": "singleton-slots",
+        "level": 1,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 22635,
+          "declarations": 8,
+          "search-steps": 18,
+          "pairs": 13,
+          "subsets": 4
+        }
+      }
+    },
+    {
+      "case_id": "T10-singleton-slots-4",
+      "input_sha256": "408dba1f83987cddc03ddfbdf2c562e878d68de55cc98def1f99f0b8783b6689",
+      "authored_semantic_content_sha256": "d41ee7c6aadc672cd5706a962070ec5110b84c39423fe479fa78965e8186bfb6",
+      "source_ancestry": {
+        "seed": "T10",
+        "axis": "singleton-slots",
+        "level": 4,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 22908,
+          "declarations": 8,
+          "search-steps": 24,
+          "pairs": 13,
+          "subsets": 4
+        }
+      }
+    },
+    {
+      "case_id": "T10-singleton-slots-40",
+      "input_sha256": "05b3278acbaf85697a9e281ccf46e43cacef25454b7dfe422aced00abbe4af82",
+      "authored_semantic_content_sha256": "4a4671db56b546c4a1d8365af8c3dd1b965ff3c40eab9486c890116034ad7ccd",
+      "source_ancestry": {
+        "seed": "T10",
+        "axis": "singleton-slots",
+        "level": 40,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 26184,
+          "declarations": 8,
+          "search-steps": 96,
+          "pairs": 13,
+          "subsets": 4
+        }
+      }
+    },
+    {
+      "case_id": "T11-singleton-slots-0",
+      "input_sha256": "f7a45e216cfd2cb6de3942d2cb917558624bf9f45017151589146a05f42ec7e1",
+      "authored_semantic_content_sha256": "5e47920ff941e31417926c0a151ae3c9bcc8e9e7f415e8c4c5f53695308c1371",
+      "source_ancestry": {
+        "seed": "T11",
+        "axis": "singleton-slots",
+        "level": 0,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 6,
+          "source-bytes": 6813,
+          "declarations": 56,
+          "search-steps": 10,
+          "pairs": 18,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T11-singleton-slots-1",
+      "input_sha256": "ba6c1b4f06e4b1dc9256392150cbe97c1569f44cfb36c2df82cc11a557650ff8",
+      "authored_semantic_content_sha256": "42f33b484823a06890171ea427048794b970c8a119ba5cd4798700e8859cc47f",
+      "source_ancestry": {
+        "seed": "T11",
+        "axis": "singleton-slots",
+        "level": 1,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 6,
+          "source-bytes": 6966,
+          "declarations": 56,
+          "search-steps": 16,
+          "pairs": 18,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T11-singleton-slots-4",
+      "input_sha256": "6078e6db387b38b2e83d8119bbb62f760baa3a8826dd43842b39a1cb628410ff",
+      "authored_semantic_content_sha256": "b5033dcbbd1fd16a14a04138724611c6cd9c28db058954e21b81cbe00d6edbc8",
+      "source_ancestry": {
+        "seed": "T11",
+        "axis": "singleton-slots",
+        "level": 4,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 6,
+          "source-bytes": 7425,
+          "declarations": 56,
+          "search-steps": 34,
+          "pairs": 18,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T11-singleton-slots-40",
+      "input_sha256": "e9e554c8b7bb1ee8fb2ae9565fd1595475759027b011c4fd664c9d607ce1b576",
+      "authored_semantic_content_sha256": "6a1468232831151eac915e8ba0e7cf2b386614710e833c589d58bef158cd383a",
+      "source_ancestry": {
+        "seed": "T11",
+        "axis": "singleton-slots",
+        "level": 40,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 6,
+          "source-bytes": 12933,
+          "declarations": 56,
+          "search-steps": 250,
+          "pairs": 18,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T12-singleton-slots-0",
+      "input_sha256": "32f6020d88cd26cb1d5dff4bc92269d8ff6804ba65ff2dd223808013c79350f2",
+      "authored_semantic_content_sha256": "7d1ad9c425ddf46538667c29daf768d39aa6467239e4cb76684854d18d12bb91",
+      "source_ancestry": {
+        "seed": "T12",
+        "axis": "singleton-slots",
+        "level": 0,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 4,
+          "source-bytes": 6392,
+          "declarations": 36,
+          "search-steps": 7,
+          "pairs": 12,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T12-singleton-slots-1",
+      "input_sha256": "fde9a0e928a4490decf21a3447451946db2d707c63f6d4ff56f8b1e46c24df04",
+      "authored_semantic_content_sha256": "be4cafa10f427bf35c87f23b723fcb6698200a6c1385439ab49d266a6138cd5f",
+      "source_ancestry": {
+        "seed": "T12",
+        "axis": "singleton-slots",
+        "level": 1,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 4,
+          "source-bytes": 6545,
+          "declarations": 36,
+          "search-steps": 11,
+          "pairs": 12,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T12-singleton-slots-4",
+      "input_sha256": "fd408f1084f7a790e0b7315f66553ce4f048c4a320ae8a30fd5e891441059298",
+      "authored_semantic_content_sha256": "081f5323f954f814599fc222aee787206e70d9065248d8dfcc35856192867f48",
+      "source_ancestry": {
+        "seed": "T12",
+        "axis": "singleton-slots",
+        "level": 4,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 4,
+          "source-bytes": 7004,
+          "declarations": 36,
+          "search-steps": 23,
+          "pairs": 12,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T12-singleton-slots-40",
+      "input_sha256": "b7ab0462607ff2ad641f1cf05b9d4cff51232c12c867846615a9bcb9a6fb25c6",
+      "authored_semantic_content_sha256": "4a619d90a86429ce4011828b937a546fd5c449db0288f75b5a0e69bbac4ed92a",
+      "source_ancestry": {
+        "seed": "T12",
+        "axis": "singleton-slots",
+        "level": 40,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 4,
+          "source-bytes": 12512,
+          "declarations": 36,
+          "search-steps": 167,
+          "pairs": 12,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T01-source-declarations-0",
+      "input_sha256": "97f776b13670462aab228d55ce7f6cb37980c8198bf4be0578caea6f09e687f0",
+      "authored_semantic_content_sha256": "d7be7b776e573855ecfe0a3edffed517705f2a21c7b956085fa0db88650b11b0",
+      "source_ancestry": {
+        "seed": "T01",
+        "axis": "source-declarations",
+        "level": 0,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 5,
+          "source-bytes": 23639,
+          "declarations": 15,
+          "search-steps": 1,
+          "pairs": 44,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T01-source-declarations-1",
+      "input_sha256": "8c56a91097575fad55e486a58fdfffe1cda97c5f31d19d72438689424ab15e0a",
+      "authored_semantic_content_sha256": "060a6d1ed6469186eb8f113cb858afd57509ef3884237654a479ffe51f27e89b",
+      "source_ancestry": {
+        "seed": "T01",
+        "axis": "source-declarations",
+        "level": 1,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 5,
+          "source-bytes": 27944,
+          "declarations": 23,
+          "search-steps": 1,
+          "pairs": 48,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T01-source-declarations-4",
+      "input_sha256": "7d066cd3716579a851b6556992588d92ca9b5e664188397df06346c7e27ab11c",
+      "authored_semantic_content_sha256": "484c2f37b33fece8e5634faa0786a1792e445adb349b91bf9185b514c25304d8",
+      "source_ancestry": {
+        "seed": "T01",
+        "axis": "source-declarations",
+        "level": 4,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 5,
+          "source-bytes": 40859,
+          "declarations": 47,
+          "search-steps": 1,
+          "pairs": 60,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T01-source-declarations-16",
+      "input_sha256": "a09ecf5448a6d9186a59edda1a42b294e6ef222e112003d6b9ab376905b47285",
+      "authored_semantic_content_sha256": "ee0448f16c23b9d85083f83e1a2c30ed738ac36aca1b8fa82d2ecab7c2763cf9",
+      "source_ancestry": {
+        "seed": "T01",
+        "axis": "source-declarations",
+        "level": 16,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 5,
+          "source-bytes": 92911,
+          "declarations": 143,
+          "search-steps": 1,
+          "pairs": 108,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T05-source-declarations-0",
+      "input_sha256": "14e8f0c59f4116a2bcdd47d2642c7c105ecf919635d324d92fda59cadbbd92e6",
+      "authored_semantic_content_sha256": "60466df81ca2e4acf768d1a28e79ffee6b4e5e0cc03f9ee1a0e1603b4130ade5",
+      "source_ancestry": {
+        "seed": "T05",
+        "axis": "source-declarations",
+        "level": 0,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 12900,
+          "declarations": 26,
+          "search-steps": 1,
+          "pairs": 33,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T05-source-declarations-1",
+      "input_sha256": "96610ad06d071b50e30a308f858f969bc0a94094b6141a4432665d8725e5582a",
+      "authored_semantic_content_sha256": "9184fabcb8662b5841d9097ee6763c39d89bc16242da724e74b6ff79c28acebb",
+      "source_ancestry": {
+        "seed": "T05",
+        "axis": "source-declarations",
+        "level": 1,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 13938,
+          "declarations": 30,
+          "search-steps": 1,
+          "pairs": 38,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T05-source-declarations-4",
+      "input_sha256": "61976ac890ec9ba38af4701b3f1db335f234bfdc79a24375a2ae540ab79f6c0a",
+      "authored_semantic_content_sha256": "5ab3549f2d8b9912a075b641b00ab041b5d50abdfe29371360554cd20e09191e",
+      "source_ancestry": {
+        "seed": "T05",
+        "axis": "source-declarations",
+        "level": 4,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 17052,
+          "declarations": 42,
+          "search-steps": 1,
+          "pairs": 53,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T05-source-declarations-16",
+      "input_sha256": "b562efa1c0ebd1c6547ca915acacb35b8bfdaecc7450bae6b967eace865ef35e",
+      "authored_semantic_content_sha256": "ae7dea0521639df178c6f077ab82a83d6b1df7da0b919c83eb9cd7ace4d61d49",
+      "source_ancestry": {
+        "seed": "T05",
+        "axis": "source-declarations",
+        "level": 16,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 29580,
+          "declarations": 90,
+          "search-steps": 1,
+          "pairs": 113,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T06-source-declarations-0",
+      "input_sha256": "3b553951d0db48e6ef3b9e21a1360c248a101780b77ac176834c8c0e041c608e",
+      "authored_semantic_content_sha256": "1d137766d7ce031a7446a1359899fbae234253e371c20809f6b0963ab1c6ad8d",
+      "source_ancestry": {
+        "seed": "T06",
+        "axis": "source-declarations",
+        "level": 0,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 11575,
+          "declarations": 20,
+          "search-steps": 1,
+          "pairs": 34,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T06-source-declarations-1",
+      "input_sha256": "ac1b51728ff683b09d571330f5f2ab551d7456a9d61ce0e478188d0c136826aa",
+      "authored_semantic_content_sha256": "0754c2d5c9f5e0e30d964915af517ca5877aea4af20b975ddb4ddb11a3590f97",
+      "source_ancestry": {
+        "seed": "T06",
+        "axis": "source-declarations",
+        "level": 1,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 12613,
+          "declarations": 24,
+          "search-steps": 1,
+          "pairs": 38,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T06-source-declarations-4",
+      "input_sha256": "722a885f3c14d00fe4ab107c2e975391e750d8aaadb93d68eaa7f77a3d4dd3ae",
+      "authored_semantic_content_sha256": "b311e9d174d46fe3873fd675a909b619a88693c9191ed1f1b25fad11876b346f",
+      "source_ancestry": {
+        "seed": "T06",
+        "axis": "source-declarations",
+        "level": 4,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 15727,
+          "declarations": 36,
+          "search-steps": 1,
+          "pairs": 50,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T06-source-declarations-16",
+      "input_sha256": "83a38f3ca6bb225089f35303e0aca92a18ce7be83604f682e221bf8fcc609f82",
+      "authored_semantic_content_sha256": "0ae53ad35729522d61e6d8deb59770fa25c1bd3f9d5eed23bf0d7aa1b9982b14",
+      "source_ancestry": {
+        "seed": "T06",
+        "axis": "source-declarations",
+        "level": 16,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 28255,
+          "declarations": 84,
+          "search-steps": 1,
+          "pairs": 98,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T07-source-declarations-0",
+      "input_sha256": "55f4c94276527b4cccd7e5e5552f9ddcf36864cdbb66a07bbfb5d3d12a962839",
+      "authored_semantic_content_sha256": "873dae58ea8f7cf9dcf33140ebf3f9c6da621f3df4b01c3489e41bd8582bca9f",
+      "source_ancestry": {
+        "seed": "T07",
+        "axis": "source-declarations",
+        "level": 0,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 11425,
+          "declarations": 20,
+          "search-steps": 1,
+          "pairs": 38,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T07-source-declarations-1",
+      "input_sha256": "d9336938356b76688abe8b5671b5566cfe053d4d60811183999b9a9f299ebfb8",
+      "authored_semantic_content_sha256": "a33b2ab3a88c72d354b086541daed1f1dc6ae91a26d3b5ac7ab587be4090cbc7",
+      "source_ancestry": {
+        "seed": "T07",
+        "axis": "source-declarations",
+        "level": 1,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 12463,
+          "declarations": 24,
+          "search-steps": 1,
+          "pairs": 43,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T07-source-declarations-4",
+      "input_sha256": "19f2104601db279048d034d6c3aa992dfe2d8d30a599f592484cd2a2f1fa00e0",
+      "authored_semantic_content_sha256": "955402e3d4f4b15f736d84f40848e03227d7aca85ab30fed3970f021a690c257",
+      "source_ancestry": {
+        "seed": "T07",
+        "axis": "source-declarations",
+        "level": 4,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 15577,
+          "declarations": 36,
+          "search-steps": 1,
+          "pairs": 58,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T07-source-declarations-16",
+      "input_sha256": "4b0cd0babe3c6c7f00ac355dc6ea48257fd3be54fe76a59e442026966d7fc24b",
+      "authored_semantic_content_sha256": "2757da407b0bd5741558d00a8d1d716ffdcbf602c07b2a4cace4d34d2c567501",
+      "source_ancestry": {
+        "seed": "T07",
+        "axis": "source-declarations",
+        "level": 16,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 28105,
+          "declarations": 84,
+          "search-steps": 1,
+          "pairs": 118,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T09-assumption-literals-0",
+      "input_sha256": "5264b35448e7c7ab883b231a8f928adfe61641e8a68b0ad063eaf98c13cba061",
+      "authored_semantic_content_sha256": "bda57ce9d7ecb46c2cfe5fbc260f2894325615bc07124bbce80771d74bf1ddf5",
+      "source_ancestry": {
+        "seed": "T09",
+        "axis": "assumption-literals",
+        "level": 0,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 2987,
+          "declarations": 8,
+          "search-steps": 3,
+          "pairs": 8,
+          "subsets": 4
+        }
+      }
+    },
+    {
+      "case_id": "T09-assumption-literals-1",
+      "input_sha256": "087fad5fa8409065a5b22c3f840f57d5977006d8ac8e6d2eb775ca83919fc9ab",
+      "authored_semantic_content_sha256": "3bdb183fc05d57c7384f75c4239fe19cc5600105982fbf41c9e6ddee977fb50d",
+      "source_ancestry": {
+        "seed": "T09",
+        "axis": "assumption-literals",
+        "level": 1,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 3036,
+          "declarations": 8,
+          "search-steps": 3,
+          "pairs": 12,
+          "subsets": 8
+        }
+      }
+    },
+    {
+      "case_id": "T09-assumption-literals-2",
+      "input_sha256": "5d6360b01f5995e78debc6a6d223f3d4f2a614028dd03873ad3b1f0798e0c486",
+      "authored_semantic_content_sha256": "6ce566befc423b02f5f4ccfcfd396222a645d1ab7604b2fa4972bbc35251f512",
+      "source_ancestry": {
+        "seed": "T09",
+        "axis": "assumption-literals",
+        "level": 2,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 3085,
+          "declarations": 8,
+          "search-steps": 3,
+          "pairs": 20,
+          "subsets": 16
+        }
+      }
+    },
+    {
+      "case_id": "T09-assumption-literals-4",
+      "input_sha256": "2e650e4321738591e83861bb2b6b45f9fa11501ab29c39633395ed4cdecdc50b",
+      "authored_semantic_content_sha256": "ce1a3cb6dc62980ac072e9ec74cc095fbef44562f39f3058347891d758f8ff77",
+      "source_ancestry": {
+        "seed": "T09",
+        "axis": "assumption-literals",
+        "level": 4,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 3183,
+          "declarations": 8,
+          "search-steps": 3,
+          "pairs": 68,
+          "subsets": 64
+        }
+      }
+    },
+    {
+      "case_id": "T10-assumption-literals-0",
+      "input_sha256": "547765c4796dd8af7e5f9d1bf97243a19e98c8b4fb11e188713e797c1b245a9a",
+      "authored_semantic_content_sha256": "009e5868eb2338a2016a4eebc3d2520caf0b3873307a9be11669878531ad6b63",
+      "source_ancestry": {
+        "seed": "T10",
+        "axis": "assumption-literals",
+        "level": 0,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 22544,
+          "declarations": 8,
+          "search-steps": 16,
+          "pairs": 13,
+          "subsets": 4
+        }
+      }
+    },
+    {
+      "case_id": "T10-assumption-literals-1",
+      "input_sha256": "fc56765b734cafb80acc1a39c22dfca53ab244de581cf7ba98ce1b4f59d4d4e3",
+      "authored_semantic_content_sha256": "1abacd4fc9d32f064dd96b019e968c9e3cc100d14b15145df5f54b2068b8fc1c",
+      "source_ancestry": {
+        "seed": "T10",
+        "axis": "assumption-literals",
+        "level": 1,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 22593,
+          "declarations": 8,
+          "search-steps": 16,
+          "pairs": 18,
+          "subsets": 8
+        }
+      }
+    },
+    {
+      "case_id": "T10-assumption-literals-2",
+      "input_sha256": "908f315e8cbb521cbc0aee50a5c2fff135a55b7f7f388f1ae239210c9873bfaf",
+      "authored_semantic_content_sha256": "cd94adc601f417c24aad1d254eca0cab3c23cda95235eaaa028492064d6150f7",
+      "source_ancestry": {
+        "seed": "T10",
+        "axis": "assumption-literals",
+        "level": 2,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 22642,
+          "declarations": 8,
+          "search-steps": 16,
+          "pairs": 28,
+          "subsets": 16
+        }
+      }
+    },
+    {
+      "case_id": "T10-assumption-literals-4",
+      "input_sha256": "b8bd3041d7ef0c426dbccec4fbc6ae9188bb2f2390c1c97c7a12a7553a335110",
+      "authored_semantic_content_sha256": "575b68dda71de2e8ff58dfaa70a7cd1a20d55f007851c256904af183e2f9a6fb",
+      "source_ancestry": {
+        "seed": "T10",
+        "axis": "assumption-literals",
+        "level": 4,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 22740,
+          "declarations": 8,
+          "search-steps": 16,
+          "pairs": 88,
+          "subsets": 64
+        }
+      }
+    },
+    {
+      "case_id": "T13-assumption-literals-0",
+      "input_sha256": "1fb77ef0a9473f6b0130f5367209aafcb8fe0a83dc7d3cb29b14ca2a62b1d84d",
+      "authored_semantic_content_sha256": "a0fe4b9c89c7b2b40bdb0b683df2e279db0d100c61739645bf761971ae1e1b12",
+      "source_ancestry": {
+        "seed": "T13",
+        "axis": "assumption-literals",
+        "level": 0,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 3210,
+          "declarations": 6,
+          "search-steps": 3,
+          "pairs": 6,
+          "subsets": 4
+        }
+      }
+    },
+    {
+      "case_id": "T13-assumption-literals-1",
+      "input_sha256": "e789c1d09cfd0cfbed7138dd7047308cd99509bdbbbf4596ad6fc7c61a911af9",
+      "authored_semantic_content_sha256": "6eadef050872c28db60640e912603260cb70d7293b5ee5b1864e1a604e5cfc39",
+      "source_ancestry": {
+        "seed": "T13",
+        "axis": "assumption-literals",
+        "level": 1,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 3259,
+          "declarations": 6,
+          "search-steps": 3,
+          "pairs": 10,
+          "subsets": 8
+        }
+      }
+    },
+    {
+      "case_id": "T13-assumption-literals-2",
+      "input_sha256": "0ee56baa237dc5c7dfcdbc74203ebe68f74873ad7fd18f634f40ed17e70da76a",
+      "authored_semantic_content_sha256": "93f249af7ac6a9f85d420e6b670e22bf9176b6c407ff2afb9918551cfc237fb0",
+      "source_ancestry": {
+        "seed": "T13",
+        "axis": "assumption-literals",
+        "level": 2,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 3308,
+          "declarations": 6,
+          "search-steps": 3,
+          "pairs": 18,
+          "subsets": 16
+        }
+      }
+    },
+    {
+      "case_id": "T13-assumption-literals-4",
+      "input_sha256": "3cdd621e47d75f5f6e81fe849af8ad3d7930914aaf3729c8d10bcb1cf591bd32",
+      "authored_semantic_content_sha256": "e8808403ee432c8a0c6c229c4c52179641aed3acbebf6172bf2a71fe35daaa41",
+      "source_ancestry": {
+        "seed": "T13",
+        "axis": "assumption-literals",
+        "level": 4,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 3406,
+          "declarations": 6,
+          "search-steps": 3,
+          "pairs": 66,
+          "subsets": 64
+        }
+      }
+    },
+    {
+      "case_id": "T14-assumption-literals-0",
+      "input_sha256": "a773b8f090c09959f35a41499ee12ba767b9876a9c59d287256367ec2af74bdf",
+      "authored_semantic_content_sha256": "ea1949b412d886f0de61be29a16e597b16634152faa849a5c4c528408ee71654",
+      "source_ancestry": {
+        "seed": "T14",
+        "axis": "assumption-literals",
+        "level": 0,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 3215,
+          "declarations": 6,
+          "search-steps": 3,
+          "pairs": 10,
+          "subsets": 4
+        }
+      }
+    },
+    {
+      "case_id": "T14-assumption-literals-1",
+      "input_sha256": "5c8642968f51f4ce1bed1ec979b45ba1cb866d966c7b71cf1da7f5da76548cc8",
+      "authored_semantic_content_sha256": "a5e60cf1ea4225bbb95288f35fc92a61276a9dd9b29a0d5e995d513723ae0e97",
+      "source_ancestry": {
+        "seed": "T14",
+        "axis": "assumption-literals",
+        "level": 1,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 3264,
+          "declarations": 6,
+          "search-steps": 3,
+          "pairs": 18,
+          "subsets": 8
+        }
+      }
+    },
+    {
+      "case_id": "T14-assumption-literals-2",
+      "input_sha256": "a08f7d797600681ac161fc46745d074a3a1f30d25d39050f61e33ac541a752a8",
+      "authored_semantic_content_sha256": "602c076e305b4d93565f5ee8173c382cb4e74d712036e4481474b955ca11ffb8",
+      "source_ancestry": {
+        "seed": "T14",
+        "axis": "assumption-literals",
+        "level": 2,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 3313,
+          "declarations": 6,
+          "search-steps": 3,
+          "pairs": 34,
+          "subsets": 16
+        }
+      }
+    },
+    {
+      "case_id": "T14-assumption-literals-4",
+      "input_sha256": "06be8ab3e0c7c16c33bc0a46f098a4ef0365f26eb115ec119528ba7eb0240b83",
+      "authored_semantic_content_sha256": "53dd397d6f14f943dc93eb400bed280392e4adebbf1a91e7d977532942d356c6",
+      "source_ancestry": {
+        "seed": "T14",
+        "axis": "assumption-literals",
+        "level": 4,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 2,
+          "source-bytes": 3411,
+          "declarations": 6,
+          "search-steps": 3,
+          "pairs": 130,
+          "subsets": 64
+        }
+      }
+    },
+    {
+      "case_id": "T01-repeated-requests-1",
+      "input_sha256": "97f776b13670462aab228d55ce7f6cb37980c8198bf4be0578caea6f09e687f0",
+      "authored_semantic_content_sha256": "6e3c8f40fae8bcb53444463b314d0fa6fea5c906615d9210fe80fc3428c9e0b2",
+      "source_ancestry": {
+        "seed": "T01",
+        "axis": "repeated-requests",
+        "level": 1,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 5,
+          "source-bytes": 23639,
+          "declarations": 15,
+          "search-steps": 1,
+          "pairs": 44,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T01-repeated-requests-2",
+      "input_sha256": "619e79b6e1d85c8c5f498e12344663849955bbd71d58cf51947ccb10ce2bff92",
+      "authored_semantic_content_sha256": "739360d76a5c98abaee31cc7f5540a7f14d292c3e88966063c582f857aec0a13",
+      "source_ancestry": {
+        "seed": "T01",
+        "axis": "repeated-requests",
+        "level": 2,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 9,
+          "source-bytes": 44431,
+          "declarations": 27,
+          "search-steps": 1,
+          "pairs": 88,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T01-repeated-requests-4",
+      "input_sha256": "f99a05fdd125c8d04a24a1ae46f5e96cd5b4e4c858f6e9bc1b18f3e508be7267",
+      "authored_semantic_content_sha256": "ec5f1ce83a9d86699a6982abd3641baa0b3328a16af43a81f94a772f62941301",
+      "source_ancestry": {
+        "seed": "T01",
+        "axis": "repeated-requests",
+        "level": 4,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 17,
+          "source-bytes": 86015,
+          "declarations": 51,
+          "search-steps": 1,
+          "pairs": 176,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T01-repeated-requests-8",
+      "input_sha256": "d5bcabe31df5f4338d4302f0de274c9b77ee46718ef6eb42e3f7f4051bb8c9fc",
+      "authored_semantic_content_sha256": "7b889c4f62b9ed777dfeb5ee7763a6d8ded1ecad7b6c8f65a6cc50946db71233",
+      "source_ancestry": {
+        "seed": "T01",
+        "axis": "repeated-requests",
+        "level": 8,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 33,
+          "source-bytes": 169183,
+          "declarations": 99,
+          "search-steps": 1,
+          "pairs": 352,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T05-repeated-requests-1",
+      "input_sha256": "14e8f0c59f4116a2bcdd47d2642c7c105ecf919635d324d92fda59cadbbd92e6",
+      "authored_semantic_content_sha256": "bedc1bb3e71f093f2e4308d551bc3a976107c5ed161b59d8703c5e102e2c3a92",
+      "source_ancestry": {
+        "seed": "T05",
+        "axis": "repeated-requests",
+        "level": 1,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 3,
+          "source-bytes": 12900,
+          "declarations": 26,
+          "search-steps": 1,
+          "pairs": 33,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T05-repeated-requests-2",
+      "input_sha256": "8dc7bdb57671ccad59d62723396b44a0097d2b0546a0b0f14f491e79a8e46634",
+      "authored_semantic_content_sha256": "1d7b62ab653fb566c1da092429590215b1aace79467c57e107bbefc8f2e623a4",
+      "source_ancestry": {
+        "seed": "T05",
+        "axis": "repeated-requests",
+        "level": 2,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 5,
+          "source-bytes": 21484,
+          "declarations": 44,
+          "search-steps": 1,
+          "pairs": 66,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T05-repeated-requests-4",
+      "input_sha256": "466a6a0847749f3e7de5a0ab4fc51ff13d5a57c2dac91c6f5aae2f610391d627",
+      "authored_semantic_content_sha256": "16d9b04775943d3b9c10bb58cfa716e1e72f94d2a0cce6bc89f99988ce1f4c24",
+      "source_ancestry": {
+        "seed": "T05",
+        "axis": "repeated-requests",
+        "level": 4,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 9,
+          "source-bytes": 38652,
+          "declarations": 80,
+          "search-steps": 1,
+          "pairs": 132,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T05-repeated-requests-8",
+      "input_sha256": "b83e7d2bd2c18424375b2fe27ab60716ffbde5c572577db18c6693a2e07cf6b8",
+      "authored_semantic_content_sha256": "4df904059e74fab43147bbb894ace94b9f5471a1beed7b062b565a19afafe54a",
+      "source_ancestry": {
+        "seed": "T05",
+        "axis": "repeated-requests",
+        "level": 8,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 17,
+          "source-bytes": 72988,
+          "declarations": 152,
+          "search-steps": 1,
+          "pairs": 264,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T11-repeated-requests-1",
+      "input_sha256": "f7a45e216cfd2cb6de3942d2cb917558624bf9f45017151589146a05f42ec7e1",
+      "authored_semantic_content_sha256": "8c87faeecb542b36443a903a503fab66d22e4985526a89c8282663d7a76f0496",
+      "source_ancestry": {
+        "seed": "T11",
+        "axis": "repeated-requests",
+        "level": 1,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 6,
+          "source-bytes": 6813,
+          "declarations": 56,
+          "search-steps": 10,
+          "pairs": 18,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T11-repeated-requests-2",
+      "input_sha256": "0b715245a26206c8fd2d1e2c23923a7fd4aa7afde4046c271f4b5f0cef5e5d90",
+      "authored_semantic_content_sha256": "df1f01ca16f897f6ed47b923ace13e3d8b9cceb0790c7381cc45585e449247bf",
+      "source_ancestry": {
+        "seed": "T11",
+        "axis": "repeated-requests",
+        "level": 2,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 6,
+          "source-bytes": 7178,
+          "declarations": 56,
+          "search-steps": 10,
+          "pairs": 36,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T11-repeated-requests-4",
+      "input_sha256": "dfbad6b5997ef441b43b97ae171544f6b85fec9ef762e4369494d0eacca0ad77",
+      "authored_semantic_content_sha256": "c0bf64d844ef7c2db1328d3982e16265b53280d8718f11204de5510eceea2463",
+      "source_ancestry": {
+        "seed": "T11",
+        "axis": "repeated-requests",
+        "level": 4,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 6,
+          "source-bytes": 7908,
+          "declarations": 56,
+          "search-steps": 10,
+          "pairs": 72,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T11-repeated-requests-8",
+      "input_sha256": "233c377021f7d6e5b3204649a0bf9084f64691a64d3ef21b133bf014751ed0a1",
+      "authored_semantic_content_sha256": "1e926fb2ad2b6135215052d36944f16a7577bfc7643aaaf7f889a24b8539ae53",
+      "source_ancestry": {
+        "seed": "T11",
+        "axis": "repeated-requests",
+        "level": 8,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 6,
+          "source-bytes": 9368,
+          "declarations": 56,
+          "search-steps": 10,
+          "pairs": 144,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T12-repeated-requests-1",
+      "input_sha256": "32f6020d88cd26cb1d5dff4bc92269d8ff6804ba65ff2dd223808013c79350f2",
+      "authored_semantic_content_sha256": "bc558290f900482d26852a0679fef0504b9f56ed482fd9ad6b21eb4385c39365",
+      "source_ancestry": {
+        "seed": "T12",
+        "axis": "repeated-requests",
+        "level": 1,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 4,
+          "source-bytes": 6392,
+          "declarations": 36,
+          "search-steps": 7,
+          "pairs": 12,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T12-repeated-requests-2",
+      "input_sha256": "fdfa227ec921a6d3d8ad67c03d745ca10ba07e5c2719f1a417acd36110a29b71",
+      "authored_semantic_content_sha256": "f6ca6301f59b317b117c7b03526bf8196a6f433f6f6fcdf7fd5127d9f05b2f0d",
+      "source_ancestry": {
+        "seed": "T12",
+        "axis": "repeated-requests",
+        "level": 2,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 4,
+          "source-bytes": 6757,
+          "declarations": 36,
+          "search-steps": 7,
+          "pairs": 24,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T12-repeated-requests-4",
+      "input_sha256": "dcd8ead70b6f02f95a72c200a328aebaf138b0d8b38df31a702c28faee3bd349",
+      "authored_semantic_content_sha256": "71040997719832ad1c63c4cfa255c0baffed6a0ef39f361b6369cb1929ff0354",
+      "source_ancestry": {
+        "seed": "T12",
+        "axis": "repeated-requests",
+        "level": 4,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 4,
+          "source-bytes": 7487,
+          "declarations": 36,
+          "search-steps": 7,
+          "pairs": 48,
+          "subsets": 0
+        }
+      }
+    },
+    {
+      "case_id": "T12-repeated-requests-8",
+      "input_sha256": "dbd6e5d1b579a1aeffca0cb503d405319edfa0f3230b457123e6e2344b53dadf",
+      "authored_semantic_content_sha256": "44d46569004f1cef59ed71ccadcff4fbfdd47c7943a4fe2b92ec81f50ea6e028",
+      "source_ancestry": {
+        "seed": "T12",
+        "axis": "repeated-requests",
+        "level": 8,
+        "recipe_version": "inquiry-p8-recipes@2-candidate"
+      },
+      "expected_counters": {
+        "basis": "expected finite construction, not runtime telemetry",
+        "values": {
+          "histories": 1,
+          "sources": 4,
+          "source-bytes": 8947,
+          "declarations": 36,
+          "search-steps": 7,
+          "pairs": 96,
+          "subsets": 0
+        }
+      }
+    }
+  ],
+  "final_attachment_check_pending": true
+}

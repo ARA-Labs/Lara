@@ -1,0 +1,701 @@
+{
+  "schema": "inquiry-p8-oracle",
+  "schema_version": 1,
+  "case_id": "T07-source-declarations-16",
+  "oracle_kind": "independent-finite-semantic-annotation",
+  "expected": {
+    "result_kind": "results",
+    "exit_code": 0,
+    "results": [
+      [
+        "inquiry-result",
+        "1",
+        "T07",
+        [
+          "impact-body",
+          [
+            "impact-result",
+            [
+              "transition",
+              "accepted-to-accepted"
+            ],
+            [
+              [
+                "query-impact",
+                [
+                  "atom",
+                  "t"
+                ],
+                [
+                  [
+                    "published",
+                    "defeated"
+                  ]
+                ],
+                [
+                  [
+                    "published",
+                    "defeated"
+                  ]
+                ],
+                "false",
+                "false"
+              ]
+            ],
+            [],
+            [
+              [
+                "atom",
+                "t"
+              ]
+            ]
+          ]
+        ]
+      ]
+    ]
+  },
+  "semantic_specification": {
+    "kind": "impact",
+    "statuses": [
+      [
+        "published",
+        "defeated"
+      ],
+      [
+        "published",
+        "defeated"
+      ]
+    ],
+    "rejections": [
+      null,
+      null
+    ],
+    "graphs": [
+      {
+        "names": [
+          "witness",
+          "consumer",
+          "attacker",
+          "p8-inert-0-root",
+          "p8-inert-1-root",
+          "p8-inert-2-root",
+          "p8-inert-3-root",
+          "p8-inert-4-root",
+          "p8-inert-5-root",
+          "p8-inert-6-root",
+          "p8-inert-7-root",
+          "p8-inert-8-root",
+          "p8-inert-9-root",
+          "p8-inert-10-root",
+          "p8-inert-11-root",
+          "p8-inert-12-root",
+          "p8-inert-13-root",
+          "p8-inert-14-root",
+          "p8-inert-15-root"
+        ],
+        "edges": [
+          [
+            "attacker",
+            "witness"
+          ],
+          [
+            "attacker",
+            "consumer"
+          ]
+        ],
+        "query_ancestry": [
+          "witness",
+          "attacker"
+        ],
+        "query_support": [
+          "witness"
+        ],
+        "blocked": false,
+        "grounded_labels": {
+          "witness": "defeated",
+          "consumer": "defeated",
+          "attacker": "justified",
+          "p8-inert-0-root": "justified",
+          "p8-inert-1-root": "justified",
+          "p8-inert-2-root": "justified",
+          "p8-inert-3-root": "justified",
+          "p8-inert-4-root": "justified",
+          "p8-inert-5-root": "justified",
+          "p8-inert-6-root": "justified",
+          "p8-inert-7-root": "justified",
+          "p8-inert-8-root": "justified",
+          "p8-inert-9-root": "justified",
+          "p8-inert-10-root": "justified",
+          "p8-inert-11-root": "justified",
+          "p8-inert-12-root": "justified",
+          "p8-inert-13-root": "justified",
+          "p8-inert-14-root": "justified",
+          "p8-inert-15-root": "justified"
+        }
+      },
+      {
+        "names": [
+          "witness",
+          "consumer",
+          "attacker",
+          "new-attacker",
+          "p8-inert-0-root",
+          "p8-inert-1-root",
+          "p8-inert-2-root",
+          "p8-inert-3-root",
+          "p8-inert-4-root",
+          "p8-inert-5-root",
+          "p8-inert-6-root",
+          "p8-inert-7-root",
+          "p8-inert-8-root",
+          "p8-inert-9-root",
+          "p8-inert-10-root",
+          "p8-inert-11-root",
+          "p8-inert-12-root",
+          "p8-inert-13-root",
+          "p8-inert-14-root",
+          "p8-inert-15-root"
+        ],
+        "edges": [
+          [
+            "attacker",
+            "witness"
+          ],
+          [
+            "attacker",
+            "consumer"
+          ],
+          [
+            "new-attacker",
+            "witness"
+          ],
+          [
+            "new-attacker",
+            "consumer"
+          ]
+        ],
+        "query_ancestry": [
+          "witness",
+          "attacker",
+          "new-attacker"
+        ],
+        "query_support": [
+          "witness"
+        ],
+        "blocked": false,
+        "grounded_labels": {
+          "witness": "defeated",
+          "consumer": "defeated",
+          "attacker": "justified",
+          "new-attacker": "justified",
+          "p8-inert-0-root": "justified",
+          "p8-inert-1-root": "justified",
+          "p8-inert-2-root": "justified",
+          "p8-inert-3-root": "justified",
+          "p8-inert-4-root": "justified",
+          "p8-inert-5-root": "justified",
+          "p8-inert-6-root": "justified",
+          "p8-inert-7-root": "justified",
+          "p8-inert-8-root": "justified",
+          "p8-inert-9-root": "justified",
+          "p8-inert-10-root": "justified",
+          "p8-inert-11-root": "justified",
+          "p8-inert-12-root": "justified",
+          "p8-inert-13-root": "justified",
+          "p8-inert-14-root": "justified",
+          "p8-inert-15-root": "justified"
+        }
+      }
+    ],
+    "transition": "accepted-to-accepted",
+    "expected_body": [
+      "impact-body",
+      [
+        "impact-result",
+        [
+          "transition",
+          "accepted-to-accepted"
+        ],
+        [
+          [
+            "query-impact",
+            [
+              "atom",
+              "t"
+            ],
+            [
+              [
+                "published",
+                "defeated"
+              ]
+            ],
+            [
+              [
+                "published",
+                "defeated"
+              ]
+            ],
+            "false",
+            "false"
+          ]
+        ],
+        [],
+        [
+          [
+            "atom",
+            "t"
+          ]
+        ]
+      ]
+    ],
+    "locality": false,
+    "locality_reason": "relevant ancestry or acceptance differs",
+    "wire_boundary": "impact-result omits endpoint rejection payloads; annotations are not runtime telemetry",
+    "histories": [
+      []
+    ],
+    "history_search_steps": 1,
+    "row_truth_table": [
+      {
+        "endpoint": "before",
+        "accepted": true,
+        "status": [
+          "published",
+          "defeated"
+        ],
+        "rejection": null
+      },
+      {
+        "endpoint": "after",
+        "accepted": true,
+        "status": [
+          "published",
+          "defeated"
+        ],
+        "rejection": null
+      }
+    ],
+    "assumption_truth_table": [],
+    "process_scope": "Empty process history; endpoint analyses do not consume process assurance.",
+    "specification": "Two distinct rule identities r-s and r-s-new share the seed premise and s conclusion. Their complete ground support terms differ. Both unattacked attackers defeat witness and propagate to consumer. Witness stays defeated; ancestry changes and locality fails.",
+    "ground_support_annotations": {
+      "scope": "bounded parameter-free construction; pending independent review",
+      "terms": [
+        {
+          "witness": [
+            "inst",
+            "r-t",
+            [
+              "subst"
+            ],
+            [
+              "premises",
+              [
+                "leaf",
+                "seed"
+              ]
+            ],
+            [
+              "discharges"
+            ],
+            [
+              "holes"
+            ],
+            [
+              "assurance",
+              "none"
+            ]
+          ],
+          "consumer": [
+            "inst",
+            "r-v",
+            [
+              "subst"
+            ],
+            [
+              "premises",
+              [
+                "inst",
+                "r-t",
+                [
+                  "subst"
+                ],
+                [
+                  "premises",
+                  [
+                    "leaf",
+                    "seed"
+                  ]
+                ],
+                [
+                  "discharges"
+                ],
+                [
+                  "holes"
+                ],
+                [
+                  "assurance",
+                  "none"
+                ]
+              ]
+            ],
+            [
+              "discharges"
+            ],
+            [
+              "holes"
+            ],
+            [
+              "assurance",
+              "none"
+            ]
+          ],
+          "attacker": [
+            "inst",
+            "r-s",
+            [
+              "subst"
+            ],
+            [
+              "premises",
+              [
+                "leaf",
+                "seed"
+              ]
+            ],
+            [
+              "discharges"
+            ],
+            [
+              "holes"
+            ],
+            [
+              "assurance",
+              "none"
+            ]
+          ],
+          "p8-inert-0-root": [
+            "leaf",
+            "p8-inert-0"
+          ],
+          "p8-inert-1-root": [
+            "leaf",
+            "p8-inert-1"
+          ],
+          "p8-inert-2-root": [
+            "leaf",
+            "p8-inert-2"
+          ],
+          "p8-inert-3-root": [
+            "leaf",
+            "p8-inert-3"
+          ],
+          "p8-inert-4-root": [
+            "leaf",
+            "p8-inert-4"
+          ],
+          "p8-inert-5-root": [
+            "leaf",
+            "p8-inert-5"
+          ],
+          "p8-inert-6-root": [
+            "leaf",
+            "p8-inert-6"
+          ],
+          "p8-inert-7-root": [
+            "leaf",
+            "p8-inert-7"
+          ],
+          "p8-inert-8-root": [
+            "leaf",
+            "p8-inert-8"
+          ],
+          "p8-inert-9-root": [
+            "leaf",
+            "p8-inert-9"
+          ],
+          "p8-inert-10-root": [
+            "leaf",
+            "p8-inert-10"
+          ],
+          "p8-inert-11-root": [
+            "leaf",
+            "p8-inert-11"
+          ],
+          "p8-inert-12-root": [
+            "leaf",
+            "p8-inert-12"
+          ],
+          "p8-inert-13-root": [
+            "leaf",
+            "p8-inert-13"
+          ],
+          "p8-inert-14-root": [
+            "leaf",
+            "p8-inert-14"
+          ],
+          "p8-inert-15-root": [
+            "leaf",
+            "p8-inert-15"
+          ]
+        },
+        {
+          "witness": [
+            "inst",
+            "r-t",
+            [
+              "subst"
+            ],
+            [
+              "premises",
+              [
+                "leaf",
+                "seed"
+              ]
+            ],
+            [
+              "discharges"
+            ],
+            [
+              "holes"
+            ],
+            [
+              "assurance",
+              "none"
+            ]
+          ],
+          "consumer": [
+            "inst",
+            "r-v",
+            [
+              "subst"
+            ],
+            [
+              "premises",
+              [
+                "inst",
+                "r-t",
+                [
+                  "subst"
+                ],
+                [
+                  "premises",
+                  [
+                    "leaf",
+                    "seed"
+                  ]
+                ],
+                [
+                  "discharges"
+                ],
+                [
+                  "holes"
+                ],
+                [
+                  "assurance",
+                  "none"
+                ]
+              ]
+            ],
+            [
+              "discharges"
+            ],
+            [
+              "holes"
+            ],
+            [
+              "assurance",
+              "none"
+            ]
+          ],
+          "attacker": [
+            "inst",
+            "r-s",
+            [
+              "subst"
+            ],
+            [
+              "premises",
+              [
+                "leaf",
+                "seed"
+              ]
+            ],
+            [
+              "discharges"
+            ],
+            [
+              "holes"
+            ],
+            [
+              "assurance",
+              "none"
+            ]
+          ],
+          "new-attacker": [
+            "inst",
+            "r-s-new",
+            [
+              "subst"
+            ],
+            [
+              "premises",
+              [
+                "leaf",
+                "seed"
+              ]
+            ],
+            [
+              "discharges"
+            ],
+            [
+              "holes"
+            ],
+            [
+              "assurance",
+              "none"
+            ]
+          ],
+          "p8-inert-0-root": [
+            "leaf",
+            "p8-inert-0"
+          ],
+          "p8-inert-1-root": [
+            "leaf",
+            "p8-inert-1"
+          ],
+          "p8-inert-2-root": [
+            "leaf",
+            "p8-inert-2"
+          ],
+          "p8-inert-3-root": [
+            "leaf",
+            "p8-inert-3"
+          ],
+          "p8-inert-4-root": [
+            "leaf",
+            "p8-inert-4"
+          ],
+          "p8-inert-5-root": [
+            "leaf",
+            "p8-inert-5"
+          ],
+          "p8-inert-6-root": [
+            "leaf",
+            "p8-inert-6"
+          ],
+          "p8-inert-7-root": [
+            "leaf",
+            "p8-inert-7"
+          ],
+          "p8-inert-8-root": [
+            "leaf",
+            "p8-inert-8"
+          ],
+          "p8-inert-9-root": [
+            "leaf",
+            "p8-inert-9"
+          ],
+          "p8-inert-10-root": [
+            "leaf",
+            "p8-inert-10"
+          ],
+          "p8-inert-11-root": [
+            "leaf",
+            "p8-inert-11"
+          ],
+          "p8-inert-12-root": [
+            "leaf",
+            "p8-inert-12"
+          ],
+          "p8-inert-13-root": [
+            "leaf",
+            "p8-inert-13"
+          ],
+          "p8-inert-14-root": [
+            "leaf",
+            "p8-inert-14"
+          ],
+          "p8-inert-15-root": [
+            "leaf",
+            "p8-inert-15"
+          ]
+        }
+      ],
+      "keys": [
+        {
+          "witness": "(inst r-t (subst) (premises (leaf seed)) (discharges) (holes) (assurance none))",
+          "consumer": "(inst r-v (subst) (premises (inst r-t (subst) (premises (leaf seed)) (discharges) (holes) (assurance none))) (discharges) (holes) (assurance none))",
+          "attacker": "(inst r-s (subst) (premises (leaf seed)) (discharges) (holes) (assurance none))",
+          "p8-inert-0-root": "(leaf p8-inert-0)",
+          "p8-inert-1-root": "(leaf p8-inert-1)",
+          "p8-inert-2-root": "(leaf p8-inert-2)",
+          "p8-inert-3-root": "(leaf p8-inert-3)",
+          "p8-inert-4-root": "(leaf p8-inert-4)",
+          "p8-inert-5-root": "(leaf p8-inert-5)",
+          "p8-inert-6-root": "(leaf p8-inert-6)",
+          "p8-inert-7-root": "(leaf p8-inert-7)",
+          "p8-inert-8-root": "(leaf p8-inert-8)",
+          "p8-inert-9-root": "(leaf p8-inert-9)",
+          "p8-inert-10-root": "(leaf p8-inert-10)",
+          "p8-inert-11-root": "(leaf p8-inert-11)",
+          "p8-inert-12-root": "(leaf p8-inert-12)",
+          "p8-inert-13-root": "(leaf p8-inert-13)",
+          "p8-inert-14-root": "(leaf p8-inert-14)",
+          "p8-inert-15-root": "(leaf p8-inert-15)"
+        },
+        {
+          "witness": "(inst r-t (subst) (premises (leaf seed)) (discharges) (holes) (assurance none))",
+          "consumer": "(inst r-v (subst) (premises (inst r-t (subst) (premises (leaf seed)) (discharges) (holes) (assurance none))) (discharges) (holes) (assurance none))",
+          "attacker": "(inst r-s (subst) (premises (leaf seed)) (discharges) (holes) (assurance none))",
+          "new-attacker": "(inst r-s-new (subst) (premises (leaf seed)) (discharges) (holes) (assurance none))",
+          "p8-inert-0-root": "(leaf p8-inert-0)",
+          "p8-inert-1-root": "(leaf p8-inert-1)",
+          "p8-inert-2-root": "(leaf p8-inert-2)",
+          "p8-inert-3-root": "(leaf p8-inert-3)",
+          "p8-inert-4-root": "(leaf p8-inert-4)",
+          "p8-inert-5-root": "(leaf p8-inert-5)",
+          "p8-inert-6-root": "(leaf p8-inert-6)",
+          "p8-inert-7-root": "(leaf p8-inert-7)",
+          "p8-inert-8-root": "(leaf p8-inert-8)",
+          "p8-inert-9-root": "(leaf p8-inert-9)",
+          "p8-inert-10-root": "(leaf p8-inert-10)",
+          "p8-inert-11-root": "(leaf p8-inert-11)",
+          "p8-inert-12-root": "(leaf p8-inert-12)",
+          "p8-inert-13-root": "(leaf p8-inert-13)",
+          "p8-inert-14-root": "(leaf p8-inert-14)",
+          "p8-inert-15-root": "(leaf p8-inert-15)"
+        }
+      ]
+    },
+    "variant": {
+      "axis": "source-declarations",
+      "level": 16,
+      "only_designated_axis_changed": true
+    },
+    "added_argument_groups": 16,
+    "added_ast_declarations_per_endpoint": 32,
+    "source_axis_level_unit": "fresh leaf-root groups per endpoint",
+    "source_axis_approval": "protocol.json amendments/source-axis-groups: explicit researcher clarification before freeze; each group is one leaf plus one root argument"
+  },
+  "review_provenance": {
+    "status": "independently-reviewed",
+    "author": "Codex case author",
+    "author_provenance": "ai-executed",
+    "reviewer": "Codex independent spec reviewer /root/candidate_spec",
+    "driver_output_used": false,
+    "analysis_implementation_imported": false,
+    "specification_references": [
+      "docs/theory-process.md#what-do-the-exact-inquiry-analyses-compute",
+      "docs/theory-process.md#how-is-an-edits-impact-certified",
+      "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
+    ],
+    "reviewer_provenance": "ai-executed",
+    "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
+    "quality_reviewer_provenance": "ai-executed",
+    "reviewed_input_sha256": "4b0cd0babe3c6c7f00ac355dc6ea48257fd3be54fe76a59e442026966d7fc24b",
+    "semantic_content_sha256": "2757da407b0bd5741558d00a8d1d716ffdcbf602c07b2a4cace4d34d2c567501",
+    "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
+    "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
+  }
+}

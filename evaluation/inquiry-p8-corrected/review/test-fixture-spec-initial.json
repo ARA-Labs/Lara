@@ -1,0 +1,62 @@
+{
+  "reviewed_scope": "Approval and input identity specification in the six named corrected-suite JSON files, plans/inquiry-p8-corrections.md, and scripts/inquiry_evaluation_manifest.py; final test helper inspected as supporting evidence.",
+  "verdict": "No high-confidence specification blockers. Final source review is clear; exact-byte inventory has the tool limitation stated below.",
+  "spec_findings": [],
+  "quality_findings": [],
+  "authorization_assessment": {
+    "conclusion": "The amendment accurately records the narrowed execution authorization, not additional measurement budget.",
+    "evidence": [
+      "history://Main:181-190 explicitly identifies #53, the reviewed helper amendment, committed freeze, and single approved P8 attempt.",
+      "history://Main:219-227 records approval commit ac7edad followed by the exact instruction quoted in approval-amendment.json:8.",
+      "approval-amendment.json:9-20 restricts the change to the helper pin, preserves input/oracle/code/data-policy/budget identities, and excludes additional attempts and P9."
+    ],
+    "unchanged_limits": "One corrected attempt; 96 documents, at most 192 driver invocations, 10 seconds per driver, 2700 seconds aggregate, one CPU, no repeats. Failure consumes this attempt. P9 remains unapproved."
+  },
+  "identity_assessment": {
+    "protocol_delta": "The reviewed protocol changes only the additional-helper digest for test/inquiry_corrected_candidates.py relative to the original snapshot. The final digest is reflected in protocol.json:356-357 and approval-amendment.json:15-18.",
+    "manifest": "Current and snapshot manifests disclose the same 96 cases, 16/16/64 partition, input/oracle identities, and independent-review identities. Their recorded SHA256 remains 1aaf2eb1e7758fea800e0046e4b01d5f176823ef44f3fe2f98bc4dedf0a6dd22.",
+    "original_approval": "researcher-approval.json still binds commit 71c1cba9da9863440eaa2873bbd223dbe6ba57b1 and the original candidate protocol. It remains historical approval of those bytes, not a directly usable approval for the helper-amended protocol.",
+    "final_helper": "The final marker-only test first loads a complete synthetic approved temporary fixture, then changes only correction_approval.state. The draft test explicitly sets temporary draft state. These changes remain inside the authorized helper-only scope."
+  },
+  "required_freeze_bindings": [
+    {
+      "step": 1,
+      "requirement": "Commit the final corrected helper and still-unfrozen amended protocol.json with unchanged MANIFEST.json as candidate commit C. Keep production code_commit 317f210ab2f4e5ea070dcae75218f056373e142d unchanged."
+    },
+    {
+      "step": 2,
+      "requirement": "Create a separately named exact snapshot of the amended protocol and a new effective approval receipt. Preserve researcher-approval.json, candidate-protocol.json and candidate-manifest.json unchanged."
+    },
+    {
+      "step": 3,
+      "requirement": "The new receipt must bind C, the amended snapshot path/SHA256 and unchanged candidate-manifest path/SHA256; retain metadata_only_freeze_authorized=true, original approved_amendments and data_policy_sha256, unchanged budget and timeout-risk acceptance. Include explicit hashed links to the original receipt and narrow amendment rather than portraying the old approval as approval of new bytes."
+    },
+    {
+      "step": 4,
+      "requirement": "Freeze only MANIFEST.state, protocol.freeze.state/manifest_sha256, and protocol.correction_approval.state/path/sha256. approved_protocol_identity at scripts/inquiry_evaluation_manifest.py:69-75 excludes only these protocol metadata fields; load_suite:139-144 permits only manifest.state to differ."
+    },
+    {
+      "step": 5,
+      "requirement": "Commit the metadata freeze as descendant F. repository_preflight:259-272 requires C to be an ancestor of F, checks protocol.json and MANIFEST.json at C against the new receipt hashes, and checks all loaded suite files against F. Pass F's full 40-character commit ID as --input-commit only after completed preflight and before the single approved measurement."
+    }
+  ],
+  "sha256s": {
+    "parent_computed_current_bytes": {
+      "test/inquiry_corrected_candidates.py": "0b80b4c991492bd849d8c7004c35b687a675bbca9b0e5d9601543c9a06e5e286",
+      "evaluation/inquiry-p8-corrected/protocol.json": "663e6c92823bfce9cfa6dd53920e089c7c717e3a1a20e01f0893f353570a8bec"
+    },
+    "recorded_pins_not_independently_computed": {
+      "evaluation/inquiry-p8-corrected/candidate-protocol.json": "181a5363f8778942dbf00971efe63b0659529f486ecba5acef2a1876bf9bcc10",
+      "evaluation/inquiry-p8-corrected/candidate-manifest.json": "1aaf2eb1e7758fea800e0046e4b01d5f176823ef44f3fe2f98bc4dedf0a6dd22",
+      "evaluation/inquiry-p8-corrected/MANIFEST.json": "1aaf2eb1e7758fea800e0046e4b01d5f176823ef44f3fe2f98bc4dedf0a6dd22",
+      "evaluation/inquiry-p8-corrected/researcher-approval.json": "9be42df1166a4dbce9520108197e2e42d52497c2e7bdbf3c6a7f33d9a5ebfd63",
+      "scripts/inquiry_evaluation_manifest.py": "dac0eeeb981fa161a6b1258c91a4a6a293e5cdf31c9d5fef53d60e59e0d937d6"
+    },
+    "unavailable": {
+      "evaluation/inquiry-p8-corrected/approval-amendment.json": "Requires parent-computed final SHA256; not present in the file or supplied messages.",
+      "plans/inquiry-p8-corrections.md": "Requires parent-computed SHA256."
+    }
+  },
+  "evidence_limit": "This agent has read/grep/glob and memory devices but no shell or hash computation device. I requested the final amendment hash and complete identity inventory in incremental sections; the parent supplied final helper/protocol hashes and confirmed the manifest unchanged. I cannot honestly claim an independently computed full byte inventory or Git immutability comparison. These are evidence limitations, not discovered code/spec defects.",
+  "verification": "Static inspection only. No files edited; no tests, builds, linters, formatters, inquiry drivers, consumers or preflight executed by this reviewer. Parent reported the two refusal tests pass for draft and frozen/approved temporary metadata; I did not rerun them."
+}

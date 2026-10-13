@@ -1,0 +1,19 @@
+{
+  "schema": "inquiry-p8-scientific-identity-check",
+  "schema_version": 1,
+  "baseline_commit": "d383404ff3a8c4aa4853fd10760bef0a5166312f",
+  "case_count": 96,
+  "source": "Actual baseline Git blobs compared to current file bytes, not prior prose or cached hashes",
+  "unchanged": [
+    "all input hashes",
+    "all oracle content except quality-review hash and reviewer attribution",
+    "all manifest case content except oracle hash and matching review provenance",
+    "all manifest fields except freeze state, quality receipt digest and cases metadata",
+    "all original-input and encoded-expected-AST consumer digests",
+    "all protocol fields except freeze receipt metadata and supporting-artifact archive inventory"
+  ],
+  "protocol_sha256": "19e582eb117fba09102072a4b3e0b29dff76d9201f456663baa83a8131585ee0",
+  "manifest_sha256": "59225ebd79b1bb6f667f9e73db3fdbce8b2277dbf3499ff31b28c24b6d9c46fd",
+  "consumer_observations": 96,
+  "inquiry_driver_invocations": 0
+}

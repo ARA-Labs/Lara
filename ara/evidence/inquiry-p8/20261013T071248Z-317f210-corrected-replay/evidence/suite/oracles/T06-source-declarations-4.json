@@ -1,0 +1,257 @@
+{
+  "schema": "inquiry-p8-oracle",
+  "schema_version": 1,
+  "case_id": "T06-source-declarations-4",
+  "oracle_kind": "independent-finite-semantic-annotation",
+  "expected": {
+    "result_kind": "results",
+    "exit_code": 0,
+    "results": [
+      [
+        "inquiry-result",
+        "1",
+        "T06",
+        [
+          "impact-body",
+          [
+            "impact-result",
+            [
+              "transition",
+              "accepted-to-accepted"
+            ],
+            [
+              [
+                "query-impact",
+                [
+                  "atom",
+                  "t"
+                ],
+                [
+                  [
+                    "published",
+                    "defeated"
+                  ]
+                ],
+                [
+                  [
+                    "published",
+                    "defeated"
+                  ]
+                ],
+                "false",
+                "true"
+              ]
+            ],
+            [],
+            [
+              [
+                "atom",
+                "t"
+              ]
+            ]
+          ]
+        ]
+      ]
+    ]
+  },
+  "semantic_specification": {
+    "kind": "impact",
+    "statuses": [
+      [
+        "published",
+        "defeated"
+      ],
+      [
+        "published",
+        "defeated"
+      ]
+    ],
+    "rejections": [
+      null,
+      null
+    ],
+    "graphs": [
+      {
+        "names": [
+          "witness",
+          "consumer",
+          "attacker",
+          "p8-inert-0-root",
+          "p8-inert-1-root",
+          "p8-inert-2-root",
+          "p8-inert-3-root"
+        ],
+        "edges": [
+          [
+            "attacker",
+            "witness"
+          ],
+          [
+            "attacker",
+            "consumer"
+          ]
+        ],
+        "query_ancestry": [
+          "witness",
+          "attacker"
+        ],
+        "query_support": [
+          "witness"
+        ],
+        "blocked": false,
+        "grounded_labels": {
+          "witness": "defeated",
+          "consumer": "defeated",
+          "attacker": "justified",
+          "p8-inert-0-root": "justified",
+          "p8-inert-1-root": "justified",
+          "p8-inert-2-root": "justified",
+          "p8-inert-3-root": "justified"
+        }
+      },
+      {
+        "names": [
+          "witness",
+          "consumer",
+          "attacker",
+          "loop",
+          "p8-inert-0-root",
+          "p8-inert-1-root",
+          "p8-inert-2-root",
+          "p8-inert-3-root"
+        ],
+        "edges": [
+          [
+            "attacker",
+            "witness"
+          ],
+          [
+            "attacker",
+            "consumer"
+          ],
+          [
+            "loop",
+            "loop"
+          ]
+        ],
+        "query_ancestry": [
+          "witness",
+          "attacker"
+        ],
+        "query_support": [
+          "witness"
+        ],
+        "blocked": false,
+        "grounded_labels": {
+          "witness": "defeated",
+          "consumer": "defeated",
+          "attacker": "justified",
+          "loop": "contested",
+          "p8-inert-0-root": "justified",
+          "p8-inert-1-root": "justified",
+          "p8-inert-2-root": "justified",
+          "p8-inert-3-root": "justified"
+        }
+      }
+    ],
+    "transition": "accepted-to-accepted",
+    "expected_body": [
+      "impact-body",
+      [
+        "impact-result",
+        [
+          "transition",
+          "accepted-to-accepted"
+        ],
+        [
+          [
+            "query-impact",
+            [
+              "atom",
+              "t"
+            ],
+            [
+              [
+                "published",
+                "defeated"
+              ]
+            ],
+            [
+              [
+                "published",
+                "defeated"
+              ]
+            ],
+            "false",
+            "true"
+          ]
+        ],
+        [],
+        [
+          [
+            "atom",
+            "t"
+          ]
+        ]
+      ]
+    ],
+    "locality": true,
+    "locality_reason": "stable support identities and equal relevant incoming edges",
+    "wire_boundary": "impact-result omits endpoint rejection payloads; annotations are not runtime telemetry",
+    "histories": [
+      []
+    ],
+    "history_search_steps": 1,
+    "row_truth_table": [
+      {
+        "endpoint": "before",
+        "accepted": true,
+        "status": [
+          "published",
+          "defeated"
+        ],
+        "rejection": null
+      },
+      {
+        "endpoint": "after",
+        "accepted": true,
+        "status": [
+          "published",
+          "defeated"
+        ],
+        "rejection": null
+      }
+    ],
+    "assumption_truth_table": [],
+    "process_scope": "Empty process history; endpoint analyses do not consume process assurance.",
+    "variant": {
+      "axis": "source-declarations",
+      "level": 4,
+      "only_designated_axis_changed": true
+    },
+    "added_argument_groups": 4,
+    "added_ast_declarations_per_endpoint": 8,
+    "source_axis_level_unit": "fresh leaf-root groups per endpoint",
+    "source_axis_approval": "protocol.json amendments/source-axis-groups: explicit researcher clarification before freeze; each group is one leaf plus one root argument"
+  },
+  "review_provenance": {
+    "status": "independently-reviewed",
+    "author": "Codex case author",
+    "author_provenance": "ai-executed",
+    "reviewer": "Codex independent spec reviewer /root/candidate_spec",
+    "driver_output_used": false,
+    "analysis_implementation_imported": false,
+    "specification_references": [
+      "docs/theory-process.md#what-do-the-exact-inquiry-analyses-compute",
+      "docs/theory-process.md#how-is-an-edits-impact-certified",
+      "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
+    ],
+    "reviewer_provenance": "ai-executed",
+    "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
+    "quality_reviewer_provenance": "ai-executed",
+    "reviewed_input_sha256": "722a885f3c14d00fe4ab107c2e975391e750d8aaadb93d68eaa7f77a3d4dd3ae",
+    "semantic_content_sha256": "b311e9d174d46fe3873fd675a909b619a88693c9191ed1f1b25fad11876b346f",
+    "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
+    "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
+  }
+}

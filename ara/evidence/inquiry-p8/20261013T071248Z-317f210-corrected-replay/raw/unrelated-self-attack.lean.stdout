@@ -1,0 +1,1 @@
+(inquiry-result 1 unrelated-self-attack (impact-body (impact-result (transition accepted-to-accepted) ((query-impact (atom t) ((published defeated)) ((published defeated)) false true)) () ((atom t)))))
