@@ -2,8 +2,8 @@ session:
   id: 2026-10-13_001
   date: '2026-10-13'
   started: 2026-10-13T00:00
-  last_turn: '2026-10-13T22:45:00Z'
-  turn_count: 3
+  last_turn: '2026-10-13T23:00:00Z'
+  turn_count: 4
   summary: Corrected P8 completed, replayed and researcher-approved; the approved P9 paired live loop completed (inquiry 8/8 vs status 6/8 primary correct, feasibility only).
 events_logged:
 - turn: 1
@@ -84,6 +84,12 @@ events_logged:
   routing: staged
   provenance: ai-suggested
   summary: Status-only Opus derives most diagnostics from the raw document; diagnostics help on hidden instability and certification.
+- turn: 4
+  type: observation
+  id: O220
+  routing: crystallized
+  provenance: user-revised
+  summary: Researcher framed P9 as design validation for PL, not statistics; O220 crystallizes to C58.
 ai_actions:
 - turn: 1
   action: "Continue the authorized implementation across the UTC day boundary. Complete corrective Tasks\
@@ -135,10 +141,19 @@ ai_actions:
   - docs/evaluation.md
   - docs/implementation.md
   - plans/inquiry-p8-p9.md
+- turn: 4
+  action: Add a design case-study section to the P9 report; crystallize C58; conclude PR #55.
+  provenance: ai-executed
+  files_changed:
+  - ara/evidence/inquiry-p9/report.md
+  - ara/logic/claims.md
 claims_touched:
 - id: C57
   action: revised
   turn: 1
+- id: C58
+  action: crystallized
+  turn: 4
 logic_revisions:
 - turn: 1
   entry: H19
@@ -244,6 +259,14 @@ logic_revisions:
     Status records P8 approval and the completed P9 run; Execution boundary covers the P9 ledger and no-retry rule; Claim boundary bounds P9 to feasibility; Sources add researcher-result-review.json and researcher-approval.json quotes; Evidence adds N419 and the P9 report; Open says issue #22 closes with the P9 report; Last revised 2026-10-13 (2026-10-13_001#3). Exact text: logic/solution/constraints.md, Checked-inquiry evaluation.
   signal: empirical-resolution
   provenance: ai-suggested
+- turn: 4
+  entry: C58
+  field: created
+  before: absent
+  after: 'C58 created (see logic/claims.md); Status supported; Provenance user-revised; Dependencies [C57].'
+  signal: verbal-declaration
+  provenance: user-revised
+  note: 'Empirical resolution (N419) and the researcher comment on it in the same turn: "it don''t have to be statistically, just show our design work is fine. we are doing PL", then "sure".'
 key_context:
 - turn: 1
   excerpt: Latest researcher source-axis reply repeats the already-recorded group clarification in N404;
@@ -256,9 +279,10 @@ key_context:
   excerpt: 'Researcher instruction: "checkout a new branch and complete the next, finish and pr directly". It follows the issue53/freeze/single-attempt handoff and does not authorize P9 or retries.'
 - turn: 3
   excerpt: 'Researcher: "I approved both P8 and P9"; then chose Opus 5.5, 8x2x1, $150/30 min, oracle plus blind AI scorer; "approve it. do not run the harness check yet."; amendment "approve"; "go ahead and finish all. no need to cap the usage" (caps kept as approved).'
+- turn: 4
+  excerpt: 'Researcher: "it don''t have to be statistically, just show our design work is fine. we are doing PL"; "sure. and I think now we can conclude the pr".'
 open_threads:
 - 'Issue #22: closes with the P9 PR; later conditional work needs new designs.'
 - 'Issue #39: infinite-horizon Ville and online FDR over complete ledgers.'
 - 'Issue #46: prove or revise search-step ceiling rationale.'
-- 'O220 awaits researcher comment on the P9 interpretation.'
 ai_suggestions_pending: []

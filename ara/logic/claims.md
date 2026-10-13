@@ -1017,3 +1017,17 @@ the result is stated but not yet proved or mechanized._
 - **Dependencies**: []
 - **Tags**: inquiry, wrapper, checked-source, budget, conformance, grounded-semantics
 - **Last revised**: 2026-10-13 (2026-10-13_001#1)
+
+## C58: Checked-inquiry diagnostics are usable by an unmodified agent, and their value lies in the semantics-dependent distinctions, not in bookkeeping the agent can reconstruct
+
+- **Statement**: An off-the-shelf language agent given the raw checked-inquiry output and a short briefing can reach correct claim dispositions without asserting unsupported guarantees. Without that output, the agent reconstructs the finite bookkeeping facts from the source (fixed-witness audit, capture binding, minimal assumption sets). It fails where a distinction depends on the layer's proved analyses: it reads an accepted-only summary as settled, ignoring rejected completions, and it cannot tell a locality-certified unchanged edit from one whose status is unchanged by coincidence.
+- **Conditions**: Shown once, as a usability case study: one model (claude-opus-5-5), eight small authored documents taken from the P8 suite and chosen for their contrasts, one run per arm, and a same-family arm-blind scorer. No statistical, prevalence or efficacy reading. Whether bookkeeping stays reconstructible on larger documents or with weaker models is untested. Soundness of the diagnostics rests on the Lean proofs behind C57, not on this study.
+- **Sources**: ["8 ← ara/evidence/inquiry-p9/run/summary.json:7 «"primary_correct": 8,» [result] (inquiry arm, opened at line 3)", "6 ← ara/evidence/inquiry-p9/run/summary.json:17 «"primary_correct": 6,» [result] (status arm, opened at line 13)", "P9-06, P9-07 ← ara/evidence/inquiry-p9/run/summary.json:33 «"inquiry_only": [» [result]", "isolation ← ara/evidence/inquiry-p9/run/isolation-audit.json:4 «"isolation_held": true,» [result]"]
+- **Status**: supported
+- **Provenance**: user-revised
+- **Falsification**: An agent given the inquiry output misreads a diagnostic, for example treating a false locality as a status change or accepted-only stability as whole-family stability. Or a status-only agent reliably recovers locality certification or rejection-aware stability from the source on these tasks. Or the inquiry arm makes an unsupported assurance the status arm avoids.
+- **Proof**: [trace/exploration_tree.yaml:N419_inquiry_p9_live_run; evidence/inquiry-p9/report.md (section "What does P9 show about the design?"); evidence/inquiry-p9/run/summary.json; evidence/inquiry-p9/run/isolation-audit.json]
+- **Dependencies**: [C57]
+- **Tags**: inquiry, usability, agent, locality, stability, case-study
+- **Last revised**: 2026-10-13 (2026-10-13_001#4)
+

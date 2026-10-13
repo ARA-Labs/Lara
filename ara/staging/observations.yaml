@@ -4450,7 +4450,7 @@ observations:
   potential_type: claim
   bound_to:
   - N419_inquiry_p9_live_run
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
+  promoted: true
+  promoted_to: logic/claims.md:C58
+  crystallized_via: verbal-affirmation
   stale: false

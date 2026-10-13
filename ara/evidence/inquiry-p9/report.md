@@ -54,6 +54,15 @@ Total spend was $1.758: harness check $0.030, isolation check $0.056, 16 agent r
 
 **P9-06 and P9-05 together** show what the locality certificate adds. Without a certificate, the status-only agent declined to certify either edit. That is correct for T07, where a new attacker enters the claim's ancestry, and wrong for T06, where the added self-attacking argument is unrelated. Its justification for T06 noted that the new argument "does not seem to touch" the claim, but it would not certify on inspection alone. The inquiry arm certified T06 and refused T07. Caution without a certificate is safe but cannot tell the two cases apart; the certificate can.
 
+## What does P9 show about the design?
+
+P9 is a usability case study of the inquiry layer, not a statistical test. Soundness comes from the Lean proofs, and agreement between the native and reference implementations comes from P8. P9 asks whether an agent, given the layer's output, can use it to reach correct claim dispositions. It shows four things.
+
+- **An unmodified agent can use the interface.** Given only a short briefing and the raw `lara inquiry` output, an off-the-shelf agent got all eight tasks right with no unsupported assurance. It never misread a diagnostic, and none of its justifications contradicted the checker's output.
+- **The failures fall on the designed distinctions.** The status-only arm failed only where a concept the layer introduces was missing. Without whole-family stability, which includes rejected completions, the agent turned one accepted completion into a settled status (P9-07). Without the locality certificate, the agent could not separate an edit that is certified harmless (P9-06) from one where the status stayed the same by coincidence (P9-05). Equal endpoint statuses are an observation, not a certificate. That is the property the impact analysis is designed to report.
+- **The layer adds semantic judgments the agent could not recover.** The status-only agent rebuilt fixed-witness audits, capture binding and minimal assumption sets from the source, all of which are finite bookkeeping. It did not rebuild the locality certificate or the rejection-aware stability notion. Those rest on proved analyses.
+- **It costs little.** Adding the diagnostics cost $0.106 more across the eight tasks, and the treatment arm was not slower.
+
 ## What did the status-only agent manage without diagnostics?
 
 For the fixed-witness audit (P9-01), capture binding (P9-02) and minimal assumptions (P9-08), the status-only agent derived the decisive fact from the raw S-expression document. It traced which slot choice introduces the witness argument, and which capture assumption requires `correct-capture`. It also enumerated the attack structure to find both minimal sets. For these small documents, the extra diagnostics were not needed for a strong model to answer correctly. They supplied the answer directly instead of by derivation. This run does not show whether that derivation scales to larger documents or weaker models.
