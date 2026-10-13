@@ -1,0 +1,124 @@
+{
+  "agent": {
+    "allowed_tools": [
+      "Bash(./lara-view show)",
+      "Bash(./lara-view check)"
+    ],
+    "cli": "claude",
+    "cli_version": "2.1.296 (Claude Code)",
+    "environment": "HOME, PATH, LANG, USER, TERM and LARA_P9_VIEW only; workspace outside the repository holds only input.sexp and the lara-view wrapper; user settings, hooks, MCP servers and repository CLAUDE.md are not loaded",
+    "flags": "-p --output-format stream-json --verbose --tools Bash --permission-mode default --setting-sources project --strict-mcp-config --no-session-persistence --max-budget-usd CAP",
+    "lara_binary": "built from the approved commit by `cabal build exe:lara`; its SHA256 is recorded in run.json",
+    "model": "claude-opus-5-5"
+  },
+  "budget": {
+    "accounting": "cost as reported by the CLI's result event; a call without a reported cost is charged at its full cap",
+    "aggregate_deadline_hours": 10,
+    "ceiling_usd": 150.0,
+    "retries": 0,
+    "run_cap_usd": 8.0,
+    "run_timeout_seconds": 1800,
+    "scorer_cap_usd": 0.75,
+    "scorer_timeout_seconds": 300,
+    "smoke": "one harness-validation call on a dummy workspace (evaluation/inquiry-p9/smoke), excluded from results, charged to the ceiling",
+    "smoke_cap_usd": 1.0,
+    "smoke_timeout_seconds": 300,
+    "stop_rules": "before every call the ledger must admit the call's full cap under the ceiling, else the call is recorded as not run and scored incorrect; no budget replenishment; a semantic defect in the harness, views or key stops the evaluation and requires a versioned amendment and a fresh run, without manual repair of outputs",
+    "worst_case_usd": 141.0
+  },
+  "claims": {
+    "not_supported": "agent efficacy in general, statistical significance, scientific discovery, empirical truth, calibration, soundness, real capture fidelity",
+    "supported_if_completed": "whether this harness and model complete the eight tasks under the two feedback conditions within budget, and the observed paired outcomes"
+  },
+  "comparison": {
+    "arms": {
+      "inquiry": "./lara-view check prints the public status view followed by the complete lara inquiry output",
+      "status": "./lara-view check prints the public status view only (P8 snapshot_only projection)"
+    },
+    "held_fixed": "model, CLI version, task inputs, briefing, task text, tool surface, per-run budget and timeout; the prompts differ only in the feedback description file (agent/feedback-ARM.md)",
+    "isolation": "fresh temporary workspace and fresh non-persistent session per run; no outputs shared across runs or arms",
+    "order": "tasks shuffled with seed 20261013; within pairs the first arm alternates by task position with a seeded phase (counterbalanced, each arm first in 4 pairs)",
+    "treatment_cost": "the inquiry arm's extra tool output and tokens are charged to that arm"
+  },
+  "data_policy": {
+    "breach": "a data-policy breach stops the run immediately and is reported to the researcher",
+    "destination": "Anthropic, through the researcher's own Claude Code account",
+    "inputs": "public synthetic documents from the public ARA-Labs/Lara repository; no personal, protected, private or secret data",
+    "retention": "prompts, complete stream-json transcripts, stderr, records, scores and the spend ledger are committed under ara/evidence/inquiry-p9/; temporary workspaces are deleted after each run",
+    "secrets": "the agent environment is scrubbed to the listed variables; no credential is placed in prompts or workspaces"
+  },
+  "design": {
+    "analysis": "per-arm counts with denominators and the paired 2x2 table (both, inquiry only, status only, neither) per task; exact two-sided McNemar p-value reported descriptively only",
+    "arms": 2,
+    "exclusions": "none; every scheduled run is scored, including timeouts, refusals, malformed and missing answers (scored incorrect)",
+    "repetitions": 1,
+    "runs": 16,
+    "scope": "feasibility only: no significance, efficacy, causal, generality or discovery claim; 8 synthetic tasks from one authored suite",
+    "seed": 20261013,
+    "tasks": 8
+  },
+  "frozen_files": {
+    "evaluation/inquiry-p9/agent/briefing.md": "f873a8f41c49d3fe52900cbc744acae7a2ea1e85e6b72ff685aff75c3b73b19d",
+    "evaluation/inquiry-p9/agent/feedback-inquiry.md": "705ff538a02a21d628733c14f90e060e2debc1697fb8ea377b8cb3d07e23195a",
+    "evaluation/inquiry-p9/agent/feedback-status.md": "d402f853a1ebbc0911a606cbe360e5479f8b84ab859df6a0f05020881fec6c3d",
+    "evaluation/inquiry-p9/answer-key.json": "63846c613263551b8fe0a06a162d59259ff43cc4d432f5820330de2330f605b4",
+    "evaluation/inquiry-p9/scorer/prompt.md": "b6e2002d0fcf51b47fac6b3feea7d280e2e9e36d8c108777963f0352245419f6",
+    "evaluation/inquiry-p9/smoke/input.sexp": "0e74c627bb140f758f8ae7227a5c64303db9d8786f8e2038caa4019bb0340401",
+    "evaluation/inquiry-p9/smoke/prompt.md": "2304ef793ca9beea357669ae714228d6532acc3da2442bef135133e5c8eef1dc",
+    "evaluation/inquiry-p9/tasks/P9-01/input.sexp": "547765c4796dd8af7e5f9d1bf97243a19e98c8b4fb11e188713e797c1b245a9a",
+    "evaluation/inquiry-p9/tasks/P9-01/task.md": "eeb0726ef5feafc9a0b2fc165a95794437050bcfb82117fa2088dcabefee2276",
+    "evaluation/inquiry-p9/tasks/P9-02/input.sexp": "6f7e353c1f26e69fe7dbc9f09fe809e4d8bd45029ede981f5c362f0316d6db87",
+    "evaluation/inquiry-p9/tasks/P9-02/task.md": "889b108e25cd6ff947b4dd4ff12fec44547390ad022a8d7bf49d3c60c2609652",
+    "evaluation/inquiry-p9/tasks/P9-03/input.sexp": "14e8f0c59f4116a2bcdd47d2642c7c105ecf919635d324d92fda59cadbbd92e6",
+    "evaluation/inquiry-p9/tasks/P9-03/task.md": "977ae25dee40261de1a14c0fa20bd708c4e8f3eabcc9f4d58abb4a974318380c",
+    "evaluation/inquiry-p9/tasks/P9-04/input.sexp": "9d9c4d2bc28739d82f5d0b14f80a85a60a3440d3514e27fa3513b03af5edc993",
+    "evaluation/inquiry-p9/tasks/P9-04/task.md": "98f209456d7672f1c71cff3a29ddebd89e5ffe67354ccedf3bd4d7099f93104f",
+    "evaluation/inquiry-p9/tasks/P9-05/input.sexp": "55f4c94276527b4cccd7e5e5552f9ddcf36864cdbb66a07bbfb5d3d12a962839",
+    "evaluation/inquiry-p9/tasks/P9-05/task.md": "539b4c0fbc02c9a4e095c00b25da7aee5ac3ddd1653eaac1feb315d6c149eb8d",
+    "evaluation/inquiry-p9/tasks/P9-06/input.sexp": "3b553951d0db48e6ef3b9e21a1360c248a101780b77ac176834c8c0e041c608e",
+    "evaluation/inquiry-p9/tasks/P9-06/task.md": "f01f35ed3ab3575dce992403a6ca329edda3cea1d41f9d11077f75eb08c01f68",
+    "evaluation/inquiry-p9/tasks/P9-07/input.sexp": "7855614c13c9a319e1c5f623ce3ce815b70974113e4a743b7893d78a59f8967b",
+    "evaluation/inquiry-p9/tasks/P9-07/task.md": "9383eb13957795d91af09944cdf30a679e4a77bdf7bd762a59462cb0066bcd67",
+    "evaluation/inquiry-p9/tasks/P9-08/input.sexp": "02a77d9b3390ec987ec0c808fa54c09947413bcdc1c9ee7baf8371f08b37bb10",
+    "evaluation/inquiry-p9/tasks/P9-08/task.md": "359202fbdf12b9be1e660735f19695a8a1a8e0dca69fd48591640959a3786cdc",
+    "scripts/evidence_measured.py": "f1dda07803bf2c35cb562345d54c767eb313e82f48155c2fc135ad751b1b46c6",
+    "scripts/inquiry-p9.py": "241505e1c44a7b897024861feb93d140ca92825bccbddfde0b4a1572910f6f57",
+    "scripts/inquiry_p9_views.py": "5cf1a66ef1db51865000dbd647cf2f7de1a3c344f5305a720706bcf9843b4701"
+  },
+  "issue": 22,
+  "justification": {
+    "p8_decision_row": "Correct and complete results with usable costs and diagnostic contrasts",
+    "p8_report": "ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected/report.md",
+    "p8_report_sha256": "23366d69fbc3173b31ddc65a6280855b8eff0018fe5259637c274602c01503eb",
+    "p8_review_receipt": "evaluation/inquiry-p8-corrected/researcher-result-review.json",
+    "task_basis": "Each task is one P8 case whose measured contrast is named in answer-key.json (p8_contrast). Five tasks (P9-01, P9-02, P9-05, P9-07, P9-08) exercise a diagnostic the public status view omits: a fixed-witness audit, capture binding, locality without a certificate, rejected alternatives, and minimal assumptions. P9-06 is a certified-unchanged control for P9-05. P9-03 and P9-04 are null-contrast controls whose decisive fact is in the status view as well."
+  },
+  "outcome": {
+    "disagreement": "an answer with all fields correct whose scorer verdict is missing, reports unsupported assurance, or reports the justification contradicts the fields is flagged for researcher resolution; the researcher's resolution is reported alongside, never replacing, the scorer verdict",
+    "not_truth_labels": "checker acceptance is not used as an empirical-truth label; the key encodes the checker's own semantics",
+    "primary": "primary_correct: every answer field equals the answer key (normalized as in scripts/inquiry-p9.py) AND the arm-blind AI scorer reports unsupported_assurance = false",
+    "scorer": "claude-opus-5-5 via the same CLI with no tools, fresh session per answer, shuffled order (seed 20261014), arm label withheld and tool names redacted; prompt evaluation/inquiry-p9/scorer/prompt.md",
+    "secondary_separate": [
+      "answer parsed",
+      "per-field correctness",
+      "unsupported assurance",
+      "justification supports answer",
+      "timeouts and refusals",
+      "turns",
+      "elapsed seconds",
+      "reported cost"
+    ]
+  },
+  "process_record": "run.json (protocol hash, commit, binary hash, order), per-run prompt, transcript, record and score, spend.jsonl, summary.json and the report; missing or killed runs are logged as missing, not observed",
+  "research_question": "Does adding checked inquiry diagnostics to ordinary public-status feedback change whether an agent reaches the correct claim disposition without unsupported assurance on bounded claim-review tasks? This is a workflow feasibility question; it cannot establish discovery quality, empirical truth, calibration or soundness.",
+  "schema": "inquiry-p9-protocol",
+  "schema_version": 1,
+  "task_set": {
+    "answer_key": "evaluation/inquiry-p9/answer-key.json, derived from the P8 oracles and checked by `scripts/inquiry-p9.py check-key`",
+    "count": 8,
+    "inclusion": "the eight P8 cases named in answer-key.json, selected before any agent call; no calibration or pilot tasks; none excluded after outcomes",
+    "source": "inputs copied byte-for-byte from the public, independently reviewed P8 corrected suite; hashes in answer-key.json",
+    "tasks": "evaluation/inquiry-p9/tasks/P9-0{1..8}"
+  },
+  "title": "Paired live-loop feasibility pilot of checked-inquiry feedback on claim review"
+}
