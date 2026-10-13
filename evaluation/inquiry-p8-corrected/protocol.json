@@ -434,8 +434,8 @@
   },
   "freeze": {
     "manifest_path": "evaluation/inquiry-p8-corrected/MANIFEST.json",
-    "manifest_sha256": "c854cf7d1bc9cabe4b6651fee9452c8718c1700b1938200f681bb5a2f16a61a6",
-    "state": "frozen",
+    "manifest_sha256": "59225ebd79b1bb6f667f9e73db3fdbce8b2277dbf3499ff31b28c24b6d9c46fd",
+    "state": "awaiting-researcher-approval",
     "input_commit_location": "run.json input_commit",
     "input_commit_rule": "Commit reviewed candidate first; approval binds that existing commit and exact candidate protocol SHA256. Metadata-only freeze commit follows if authorized. Pass the final committed input identity as --input-commit; never write a commit hash into its own bytes.",
     "manifest_hash_rule": "After independent input review, hash the final MANIFEST.json bytes into protocol.json before measurement. MANIFEST.json must not hash protocol.json.",
@@ -448,11 +448,11 @@
       },
       {
         "path": "quality-review.json",
-        "sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+        "sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
       },
       {
         "path": "authoring-validation.json",
-        "sha256": "7265ae31be548af481e8e9703d881d634206433e7f8b3f244b15ab0e5bd5e474"
+        "sha256": "6cdc44f237121ff00b2887f7227ead4b63878d13f5929c655443df4dfcdf37b9"
       },
       {
         "path": "review/authoring-validation-before-review.json",
@@ -501,6 +501,26 @@
       {
         "path": "review/authoring-validation-after-review-raw.json",
         "sha256": "73db621e95ea65f1eb988d3754e210e16bd8bd6cc7eb33ba8d34fced4735275a"
+      },
+      {
+        "path": "review/quality-review-before-fixture-amendment.json",
+        "sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+      },
+      {
+        "path": "review/authoring-validation-before-fixture-amendment.json",
+        "sha256": "7265ae31be548af481e8e9703d881d634206433e7f8b3f244b15ab0e5bd5e474"
+      },
+      {
+        "path": "review/test-fixture-quality-final.json",
+        "sha256": "0a08cbdaa404b2568f78bb7cc895507e4ef5394e965a69cb60c35df19ff043ce"
+      },
+      {
+        "path": "review/test-fixture-metadata-attachment.json",
+        "sha256": "74ccb0c479c1154753a07fc1650816db3d33c31847784cc0d011af780263ee7f"
+      },
+      {
+        "path": "review/authoring-validation-fixture-provenance-raw.json",
+        "sha256": "aef468b771611bd78668331769199d8f1436734e78935d8401c9ed53ac22a12d"
       }
     ]
   },
@@ -739,9 +759,9 @@
     }
   ],
   "correction_approval": {
-    "state": "approved",
-    "path": "researcher-approval-test-fixtures.json",
-    "sha256": "879fe50a2900aadd752934518251d304aabb9410d73db7be004f0388ab6282dc"
+    "state": "pending-researcher-approval",
+    "path": "researcher-approval-provenance.json",
+    "sha256": null
   },
   "data_policy": {
     "state": "requires-correction-receipt",

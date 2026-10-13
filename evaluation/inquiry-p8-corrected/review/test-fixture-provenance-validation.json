@@ -1,0 +1,27 @@
+{
+  "schema": "inquiry-p8-provenance-validation",
+  "schema_version": 1,
+  "scope": "Complete temporary metadata-only freeze, real load_suite and real checked calls for all quality-review and additional helper pins; no repository commit substitution or driver execution",
+  "cases": 96,
+  "suite_artifacts": 217,
+  "current_source_pins": {
+    "scripts/inquiry_evaluation_cases.py": "96a39b4f3719817806d36a5af8ae859d9557651a1b9d58fb0641a55e97878360",
+    "evaluation/inquiry-p8-corrected/review/independent_finite_audit.py": "beb73f0b8dfb59229e4e14f8f9a4c1efc8ca84f9cbf0b70baddd9e045aac813c",
+    "test/inquiry_corrected_candidates.py": "0b80b4c991492bd849d8c7004c35b687a675bbca9b0e5d9601543c9a06e5e286",
+    "scripts/inquiry_support_annotations.py": "487e6c7e02806727b5904b24b3122426e1c5e664efced3a1fb96499864ecb378",
+    "scripts/inquiry_corrected_validation.py": "6f8a0699c2a5bce68136bcdaf050bfd9ae9c38bc2ebe51897a91cb442b174827",
+    "scripts/inquiry-evaluate.py": "6e1eb3c930595da46f6940187b20c777e14b631225b3f7c66f9bb83d392d76f9",
+    "scripts/inquiry_evaluation_manifest.py": "dac0eeeb981fa161a6b1258c91a4a6a293e5cdf31c9d5fef53d60e59e0d937d6",
+    "scripts/inquiry_evaluation_report.py": "f292ccc819b6d5e0e429d1812c5fd49453b07be6f620c330ccec88c62b1d2e08",
+    "scripts/evidence_measured.py": "f1dda07803bf2c35cb562345d54c767eb313e82f48155c2fc135ad751b1b46c6",
+    "test/inquiry_approval_receipt.py": "6dfca72201daa2619189dfe48bf06f6e8111671008fdc676b98eb51f1b8a8975",
+    "test/inquiry_evaluation_runner.py": "a82672e93af4e027aaeaa5fe918860972226fad08e191f1664e7ce6b69b2ea12",
+    "test/inquiry_evaluation_boundaries.py": "850bb5f4e93086a020a04f0b7fdb03e43f82080d5a8fa090a421b7813a1f592d"
+  },
+  "case_metadata_changes": 96,
+  "input_semantic_expected_ancestry_counter_changes": 0,
+  "protocol_sha256": "19e582eb117fba09102072a4b3e0b29dff76d9201f456663baa83a8131585ee0",
+  "manifest_sha256": "59225ebd79b1bb6f667f9e73db3fdbce8b2277dbf3499ff31b28c24b6d9c46fd",
+  "effective_approval": "synthetic test-only receipt confined to removed temporary directory",
+  "production_measurement_executed": false
+}

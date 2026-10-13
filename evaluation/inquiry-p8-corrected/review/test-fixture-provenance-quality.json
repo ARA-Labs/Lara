@@ -1,0 +1,54 @@
+{
+  "scope": "Read-only quality and evidence-integrity review of the current corrected-P8 provenance refresh, including the full manifest-loader/repository-preflight dependency path and measure/capture-only-replay archive handling.",
+  "verdict": "APPROVE_PROVENANCE_REFRESH",
+  "critical_findings": [],
+  "important_findings": [],
+  "confidence": 92,
+  "conclusions": {
+    "quality_source_pins": "The active quality receipt now pins test/inquiry_corrected_candidates.py to 0b80b4c991492bd849d8c7004c35b687a675bbca9b0e5d9601543c9a06e5e286, matching protocol.recipes.additional_helpers and the final independent fixture-quality receipt. The generator and audit-tool paths/digests also agree across the quality receipt, protocol and parent validation evidence. This addresses the separate quality-review source-pin check in repository_preflight, not merely the additional_helpers check.",
+    "review_attribution": "The composite explicitly identifies itself as author-attached, preserves the original independent quality receipt, and limits FreezeQualityReview's approval to the test-helper fixtures. Manifest/oracle examples retain the original independent semantic reviewer and distinguish the quality supplement. I found no fabricated new independent semantic approval.",
+    "authoring_attachment": "The current authoring-validation.json truthfully labels PASS as successful consumer decoding, not independent semantic review. It links the immutable raw receipt at review/authoring-validation-fixture-provenance-raw.json and preserves its unconditional PENDING marker rather than rewriting that marker. The helper source confirms PENDING is emitted unconditionally. Both records contain 96 observations in the same case order, all exit codes zero, empty stdout/stderr, matching command structure and temporary expected-output path, and the same 16 development-control/80 independently annotated expectation-origin partition. Inspected individual observations retain exact commands, input/oracle/encoded-AST digests and results. The consumer identity and build command agree, and both records disclose consumer_build_executed=false.",
+    "scientific_identity": "The 96-entry metadata attachment records before/after oracle hashes and input, semantic-content, expected, ancestry and counter identities. Parent-supplied scientific-identity evidence additionally reports comparison against actual d383404 Git blobs, with no scientific changes and no protocol changes outside freeze/correction metadata and supporting-artifact inventory. This supports reuse of the original semantic judgments without expanding the independent fixture review's scope.",
+    "archive_closure": "No missing active provenance dependency was identified. The protocol includes the current independent/quality/authoring receipts, historical authoring and metadata attachments, eight certificates, preserved pre-amendment quality and authoring receipts, the independent final fixture-quality receipt, the per-case metadata attachment and the new raw consumer receipt. load_suite hashes every supporting_artifact, so measure copies these into evidence/suite before measurement. repository_preflight collects recipe sources, all three active quality source pins and additional helpers into evidence/repository. Replay checks every saved artifact, requires every load_suite inventory entry, validates required helper sources and runner/binary identities, and copies the original evidence without resolving or executing the saved programs.",
+    "runtime_scope": "No runtime change is required by this provenance correction. Unchanged runtime/scientific scope is supported by the supplied parent evidence; this review did not independently execute a Git diff or repository byte comparison."
+  },
+  "freeze_boundary": {
+    "current_state": "The inspected protocol and manifest are intentionally still awaiting-researcher-approval, and correction_approval points to researcher-approval-provenance.json with a null digest. The directory listing did not contain that effective receipt yet.",
+    "meaning": "This approval concerns the reviewed candidate provenance refresh, not a completed frozen input or successful final repository_preflight. The current draft must not be measured as-is.",
+    "required_integration": "The parent must commit the reviewed candidate, preserve its exact protocol/manifest snapshots, attach the effective researcher receipt with the candidate commit/digests and amendment/data-policy approvals, perform only the permitted freeze-field/state changes, and commit all resulting load_suite inventory files. Final repository_preflight must use that full committed input identity and confirm candidate ancestry and committed-byte equality.",
+    "not_a_new_blocker": "These are the already-planned freeze/integration boundaries, not a newly discovered provenance defect. The temporary synthetic receipt reported by the parent is validation evidence only and cannot serve as production authorization."
+  },
+  "checked_scope": {
+    "source": [
+      "CLAUDE.md",
+      "scripts/inquiry_evaluation_manifest.py:1-330 — complete load_suite, approved_protocol_identity, require_receipt_approvals, checked and repository_preflight paths",
+      "scripts/inquiry-evaluate.py:319-380 — preflight, authoring build-command dependency and evidence copying",
+      "scripts/inquiry-evaluate.py:481-595 — validate_saved, replay and CLI selection",
+      "scripts/inquiry-evaluate.py:104-145,196-210,244-257 — binary identity verification and saved-capture scoring entry points",
+      "scripts/inquiry_corrected_validation.py — complete consumer-only receipt construction"
+    ],
+    "metadata": [
+      "evaluation/inquiry-p8-corrected/protocol.json — all current fields, supporting-artifact kinds and helper pins",
+      "evaluation/inquiry-p8-corrected/quality-review.json — complete non-case metadata and representative scientific bindings",
+      "evaluation/inquiry-p8-corrected/MANIFEST.json — review links and representative development-control, authored-control and generated-variant provenance",
+      "evaluation/inquiry-p8-corrected/oracles/T01.json — review provenance",
+      "evaluation/inquiry-p8-corrected/independent-review.json — status, reviewer, independence and scope",
+      "evaluation/inquiry-p8-corrected/authoring-validation.json and review/authoring-validation-fixture-provenance-raw.json — headers, all-case coverage/result/command projections and representative exact observations",
+      "evaluation/inquiry-p8-corrected/review/quality-review-before-fixture-amendment.json and authoring-validation-before-fixture-amendment.json — preserved historical attribution and receipt headers",
+      "evaluation/inquiry-p8-corrected/review/test-fixture-quality-final.json",
+      "evaluation/inquiry-p8-corrected/review/test-fixture-metadata-attachment.json — complete 96-case coverage/field projection and representative before/after bindings",
+      "evaluation/inquiry-p8-corrected/review/test-fixture-provenance-validation.json",
+      "evaluation/inquiry-p8-corrected/review/test-fixture-scientific-identity.json",
+      "evaluation/inquiry-p8-corrected/approval-provenance-amendment.json",
+      "evaluation/inquiry-p8-corrected/README.md",
+      "Directory inventories for the suite, review receipts and certificates"
+    ]
+  },
+  "evidence_limits": {
+    "reviewer_execution": "Only read/glob/grep operations and read-tool JSON projections. No edits, processes, builds, tests, formatters, drivers, consumers, measurements or replay execution.",
+    "digest_provenance": "All SHA256 values cited are recorded or parent-supplied evidence; none were independently recomputed by this reviewer.",
+    "parent_validation": "The recorded parent check reports a complete temporary freeze passing real load_suite for 96 cases and 217 artifacts, plus real checked() calls accepting every active quality and additional-helper source pin. It is not evidence that final committed repository_preflight has already passed.",
+    "comparison_limit": "I inspected all-case coverage and result/command projections plus representative exact observations. The exhaustive baseline-to-current scientific-byte comparison and digest calculations are attributed to the parent, not claimed as independently rerun here."
+  },
+  "authorization_limit": "No authorization for P9, extra attempts, expanded budget or scientific/runtime changes. Parent owns the final committed freeze, final preflight, single approved attempt, capture-only replay/report and PR."
+}

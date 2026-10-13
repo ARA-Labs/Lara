@@ -1,0 +1,7 @@
+{
+  "acknowledged": true,
+  "review_status": "Prior clearance is withdrawn for production readiness: it missed the independent quality-review boundary-test pin. The reported preflight failure is authoritative; I will not rerun it.",
+  "authorization_boundary": "The prior review covered only the single protocol helper-pin amendment. It does not clear changes to transitive review metadata or a new composite quality receipt. Those require review against the final scope and preserved approval chain.",
+  "execution_boundary": "No measurement started, so this preflight failure did not consume the approved measurement attempt. Original receipts, snapshots, and the failed preflight must remain preserved.",
+  "action": "No investigation, edits, or checks restarted. Awaiting the parent's final review scope."
+}

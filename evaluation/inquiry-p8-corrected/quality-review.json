@@ -2,16 +2,16 @@
   "schema": "inquiry-p8-quality-review",
   "schema_version": 1,
   "status": "PASS",
-  "reviewer": "Codex independent quality reviewer /root/candidate_quality",
+  "reviewer": "Composite attachment of the original independent candidate quality review and FreezeQualityReview test-helper review",
   "provenance": "ai-executed",
-  "scope": "Supplemental implementation quality review of the one-line generator state-preservation fix and proposed data-policy/review-provenance attachment, following supplemental SPEC PASS. Scientific bindings below exclude review provenance so the receipt does not hash its own later attachment. Canonical attachment and refreshed decode receipt still require the final read-only handoff check.",
+  "scope": "Author-attached composite; no new semantic review claimed. The exact historical candidate quality judgment remains bound below. FreezeQualityReview independently approved only the changed test-helper fixtures. Input bytes, expected ASTs, semantic specifications, ancestry and counters retain their original independent review.",
   "prior_quality_review": {
-    "path": "review/independent-quality-review.json",
-    "sha256": "ddd09314af4b408e355b2f393b3bcbbb66606e89fb452f9106cd50f0f87011a4"
+    "path": "review/quality-review-before-fixture-amendment.json",
+    "sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
   },
-  "prior_semantic_review": {
-    "path": "review/independent-spec-review.json",
-    "sha256": "847a7693bd7419b181fcaa087dbd355ff436113f9551ea75696a0c3b6c7b383b"
+  "test_helper_quality_review": {
+    "path": "review/test-fixture-quality-final.json",
+    "sha256": "0a08cbdaa404b2568f78bb7cc895507e4ef5394e965a69cb60c35df19ff043ce"
   },
   "independent_semantic_review_path": "evaluation/inquiry-p8-corrected/review/independent-spec-review-final.json",
   "independent_semantic_review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
@@ -20,97 +20,12 @@
   "audit_tool_path": "evaluation/inquiry-p8-corrected/review/independent_finite_audit.py",
   "audit_tool_sha256": "beb73f0b8dfb59229e4e14f8f9a4c1efc8ca84f9cbf0b70baddd9e045aac813c",
   "boundary_test_path": "test/inquiry_corrected_candidates.py",
-  "boundary_test_sha256": "1e7cdf37e68a0ffb77032e034d9d021e768a4b8a5769ea86bdd09612ba5797f8",
   "reviewed_runtime_code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
-  "reviewed_helper_sources": [
-    {
-      "path": "scripts/inquiry-evaluate.py",
-      "sha256": "501d55903a04b9aabae8cb40f14c4dec9d18d8ce7fbd625087539f8b4c1bc346"
-    },
-    {
-      "path": "scripts/inquiry_evaluation_cases.py",
-      "sha256": "96a39b4f3719817806d36a5af8ae859d9557651a1b9d58fb0641a55e97878360"
-    },
-    {
-      "path": "scripts/inquiry_evaluation_manifest.py",
-      "sha256": "b02308a1f656ed047a0f2ef3df95b36bfcc2b7fbf8e8b0b2d31f3373176e88a2"
-    },
-    {
-      "path": "scripts/inquiry_support_annotations.py",
-      "sha256": "487e6c7e02806727b5904b24b3122426e1c5e664efced3a1fb96499864ecb378"
-    },
-    {
-      "path": "scripts/inquiry_corrected_validation.py",
-      "sha256": "6f8a0699c2a5bce68136bcdaf050bfd9ae9c38bc2ebe51897a91cb442b174827"
-    },
-    {
-      "path": "scripts/inquiry_evaluation_report.py",
-      "sha256": "f292ccc819b6d5e0e429d1812c5fd49453b07be6f620c330ccec88c62b1d2e08"
-    },
-    {
-      "path": "scripts/evidence_measured.py",
-      "sha256": "f1dda07803bf2c35cb562345d54c767eb313e82f48155c2fc135ad751b1b46c6"
-    },
-    {
-      "path": "scripts/inquiry-impact-producer.hs",
-      "sha256": "e0cc0a76c63a540d49e4e9d840acf21a51b5a47168df8678e395261fc30266aa"
-    },
-    {
-      "path": "test/inquiry_evaluation_runner.py",
-      "sha256": "575cb1666c10a7d6a764f5000d849157ccadd3cfdb655f1ce72d0c07160ae5e2"
-    },
-    {
-      "path": "test/inquiry_corrected_candidates.py",
-      "sha256": "1e7cdf37e68a0ffb77032e034d9d021e768a4b8a5769ea86bdd09612ba5797f8"
-    },
-    {
-      "path": "test/inquiry_evaluation_boundaries.py",
-      "sha256": "850bb5f4e93086a020a04f0b7fdb03e43f82080d5a8fa090a421b7813a1f592d"
-    },
-    {
-      "path": "evaluation/inquiry-p8-corrected/review/independent_finite_audit.py",
-      "sha256": "beb73f0b8dfb59229e4e14f8f9a4c1efc8ca84f9cbf0b70baddd9e045aac813c"
-    }
-  ],
-  "inspected_metadata_snapshot": {
-    "protocol_sha256": "c2d1bfbb91985b924951033f6b8c790906a4542ca94ba3650fd7c82074090f92",
-    "manifest_sha256": "a773119ba2aeca931ead32f964636f14786647a488d49fd3a326e9fe7e62da4a",
-    "phase": "first prior-review attachment before supplemental receipt linkage; historical snapshot, not the final candidate identity"
-  },
+  "boundary_test_sha256": "0b80b4c991492bd849d8c7004c35b687a675bbca9b0e5d9601543c9a06e5e286",
   "driver_outputs_used": false,
   "analysis_implementation_imported": false,
   "production_driver_invocations": 0,
   "measurement_or_pilot_runs": 0,
-  "researcher_approval_or_freeze_claimed": false,
-  "findings": [],
-  "checks": [
-    {
-      "method": "source delta review after supplemental SPEC PASS",
-      "result": "PASS",
-      "detail": "Only change since prior quality review is retaining awaiting-researcher-approval alongside frozen in generator manifest-state handling. The exact independently reviewed generator source hash remains mandatory before any prior review provenance is preserved."
-    },
-    {
-      "method": "independent pure-Python generator/state/provenance checks executed",
-      "exit_code": 0,
-      "result": "PASS",
-      "detail": "Read-only materialization retains awaiting-researcher-approval. Because currently attached prior spec receipt names the earlier generator hash, regeneration drops all prior review hashes and keeps pending statuses; all input and authored semantic digests remain exact. This confirms state preservation does not weaken review reuse."
-    },
-    {
-      "method": "independent metadata and source-hash checks executed",
-      "result": "PASS",
-      "detail": "All 96 actual input/oracle hashes, scientific hashes and manifest/oracle provenance pairs match. Inputs and authored semantic hashes match immutable prior quality bindings. Attached prior receipt hashes match retained bytes. Supplemental spec helper hashes match actual final source files. Draft states and pending user approval remain explicit; protocol manifest hash matches."
-    },
-    {
-      "method": "proposed data policy and documentation review",
-      "result": "PASS",
-      "detail": "Policy uses repository fixtures and synthetic inputs, one fresh local capture plus local replay, retains original failure and every new outcome for the requested PR, and permits no network acquisition/transfer or paid calls during measurement. Policy and fresh budget remain proposed and require researcher approval. README accurately separates completed prior reviews from supplemental metadata work."
-    },
-    {
-      "method": "original/runtime immutability checks executed",
-      "result": "PASS",
-      "detail": "No tracked changes or untracked additions under evaluation/inquiry-p8, src, app or lean. No production driver, pilot, measurement, ARA recording, network, paid call or commit performed by this reviewer."
-    }
-  ],
   "scientific_case_bindings": [
     {
       "case_id": "source-rejections",
@@ -2401,5 +2316,5 @@
       }
     }
   ],
-  "final_attachment_check_pending": true
+  "findings": []
 }

@@ -32,9 +32,10 @@ by the guard; the repaired `r-s-new` example passes.
 Fresh independent input and quality reviews passed. Their exact immutable
 receipts are attached to all 96 oracle entries. Supplemental reviews of the
 state-only generator change, metadata attachment and proposed data policy
-passed. `researcher-approval-test-fixtures.json` binds the amended candidate at
-`bfc6d1ecc538f3456ab3e98df6f314e0611f91b1`, with the original researcher approval,
-the narrow test-helper amendment and exact review receipts embedded by hash.
+passed. The original and helper-only approval receipts remain immutable.
+`approval-provenance-amendment.json` records the transitive metadata scope
+required by the corrected test helper. The protocol's `correction_approval`
+field selects the effective receipt at freeze.
 The prepared audit tool retains finite graph, history, selection, subset, counter and certificate
 checks and adds direct source checks for the fresh cloned rule and additive
 T07 declarations. Running it without `--reviewer` is an authoring check and
@@ -57,33 +58,30 @@ python3 scripts/inquiry_corrected_validation.py --suite evaluation/inquiry-p8-co
 
 The last command needs the retained real consumer and a fresh receipt path.
 Its expected AST stream is encoded from each authored oracle, never from a
-driver. `authoring-validation.json` records the selected consumer hash, build
-command, exact per-case commands, inputs, oracle hashes and process results.
-The pre-provenance snapshot is retained exactly as
-`review/authoring-validation-before-review.json`. The consumer ran again against
-the final attached oracle bytes; its exact raw receipt is retained as
-`review/authoring-validation-after-review-raw.json`. The canonical receipt
-records that run and names the actual spec and quality reviewers and receipt
-hashes when correcting the helper's fixed PENDING review-status annotation to
-PASS. Every raw command, process result, input/oracle/AST hash and byte field
-is preserved. The researcher receipt records the later approval confirmation.
+driver. `authoring-validation.json` attaches the exact selected consumer hash,
+build command and per-case commands, inputs, oracle hashes and process results
+from `review/authoring-validation-fixture-provenance-raw.json`. That raw receipt
+keeps the helper's unconditional PENDING independent-review marker. The
+attachment claims successful decoding only; it links existing independent
+semantic judgments and the composite quality receipt rather than inventing a
+new semantic review. Earlier authoring receipts remain unchanged under `review/`.
 
-The independent reviewers inspected the actual source bytes and annotations,
-and their retained receipts bind all 96 input and semantic identities.
-`review/metadata-attachment.json` records the canonical attachment, with the
-before/after oracle hashes and unchanged input, semantic, expectation, ancestry
-and counter hashes. The named independent spec reviewer has issued the retained semantic receipt;
-this author has attached its exact bytes and has not issued an independent
-receipt. Any review
-must bind the new input hashes, semantic-content hashes, ancestry and helper
-bytes; the original suite's reviews do not apply to this candidate.
+The retained independent semantic review binds all 96 input and semantic
+identities. `quality-review.json` is an author-attached composite of the
+original independent quality judgment and the final independent test-helper
+review. Its predecessor is preserved byte-for-byte at
+`review/quality-review-before-fixture-amendment.json`.
+`review/test-fixture-metadata-attachment.json` records the resulting oracle
+provenance hashes. `review/test-fixture-scientific-identity.json` records exact
+comparison against committed baseline blobs: inputs, expected ASTs, semantic
+specifications, ancestry and counters are unchanged. Only review metadata moves.
 
-The effective researcher receipt authorizes the metadata-only freeze of that
-committed candidate. `candidate-protocol-test-fixtures.json` and
-`candidate-manifest.json` preserve its approved pre-freeze bytes. The original
-`researcher-approval.json` and `candidate-protocol.json` remain immutable.
-The effective receipt names the researcher, carries user provenance, binds the
-candidate commit and saved snapshots by SHA256, and authorizes the freeze.
+The effective researcher receipt binds the final reviewed candidate commit and
+exact pre-freeze protocol and manifest snapshots, with user provenance and
+metadata-only freeze authorization. Earlier candidate snapshots and approvals
+remain immutable. The helper-only freeze failed preflight before measurement
+because its quality receipt still pinned the old test source; its failed
+preflight and withdrawn readiness clearance remain retained.
 The frozen protocol cannot record its own approval, so the T07 amendment and
 the data policy carry the status `requires-correction-receipt`. The receipt
 approves them. `approved_amendments` holds one entry for `distinct-t07-support`
@@ -107,9 +105,10 @@ processes. There is no approval bypass flag.
 The refusal tests construct explicit temporary draft or unapproved suites,
 independent of this candidate's current state. The approval-state test first
 loads a complete synthetic approved fixture, then changes only that state.
-`approval-amendment.json` records the researcher instruction covering this
-test-only correction and its single helper-pin change. The original approval
-and candidate snapshots retain their original bytes.
+`approval-amendment.json` records the initial helper-only scope.
+`approval-provenance-amendment.json` extends its metadata attachment to every
+dependent quality, oracle, manifest and authoring receipt hash. Production
+code, scientific content, data policy and the single-attempt budget are unchanged.
 
 The runner uses saved-run schema version 2. It publishes `run.json` and its
 embedded `metadata_sha256` in one atomic replacement, without a separate
