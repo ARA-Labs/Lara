@@ -77,6 +77,18 @@ python3 scripts/inquiry-evaluate.py \
 
 A new measurement requires an unspent researcher-approved budget and a committed input freeze; replay does not renew either. Before that attempt, run `make local-gates` and `cabal test all`, build `exe:lara`, `inquiry-run` and `scripts/inquiry-codec-client.hs`, and retain the commands and logs outside measurement. Resolve the native binary with `cabal list-bin exe:lara`, use `lean/.lake/build/bin/inquiry-run` directly, and pass the prebuilt consumer. The capture command requires the corrected manifest, all three executable paths, a fresh output directory and the full frozen input commit through `--input-commit`. It does not build, repair inputs or retry failed processes.
 
+### How are the P9 live-loop results checked?
+
+Three commands make no agent call. `check-key` re-derives the P9 answer key from the P8 oracles. The audit re-derives arm isolation from the retained transcripts. `summarize` rebuilds the per-arm and paired summary from the retained records and scores:
+
+```sh
+python3 scripts/inquiry-p9.py check-key
+python3 scripts/inquiry_p9_audit.py ara/evidence/inquiry-p9/run
+python3 scripts/inquiry-p9.py summarize --out ara/evidence/inquiry-p9/run --ledger ara/evidence/inquiry-p9/spend.jsonl
+```
+
+`smoke`, `run` and `score` make live, billed `claude -p` calls. They refuse to start unless `evaluation/inquiry-p9/researcher-approval.json` binds the exact SHA256 of `protocol.json` and every frozen file still matches its recorded hash. Re-running them is a new measurement under a new approved budget, not a replay.
+
 ## Checker acceptance is one fixed pipeline
 
 `Lara.Check.checkUnit` decides whole-unit acceptance in one fixed stage order, mirrored exactly by `lean/Lara/Check/Unit.lean`:

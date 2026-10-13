@@ -373,7 +373,15 @@ The frozen input commit descends from the exact researcher-approved candidate. A
 
 The [retained corrected-run report](../ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected/report.md) gives the observations, denominators, replay evidence and interpretation limits. It does not replace the original incomplete attempt.
 
-The later live-workflow evaluation, P9, requires separate researcher approval of its task set, comparison, data policy and full budget. A complete, correct P8 run permits protocol drafting only. Human review of the report and approval of a live protocol are separate from implementation review.
+### How is checked-inquiry feedback evaluated in a live agent loop?
+
+The live-workflow evaluation, P9, asks whether adding inquiry diagnostics to ordinary public-status feedback changes an agent's claim disposition on bounded claim-review tasks. It is a workflow question. It cannot establish discovery quality, empirical truth, calibration or soundness. A complete, correct P8 run permits only protocol drafting. A live run needs researcher approval of the exact protocol hash, data policy and full budget, and that approval is separate from implementation review. An amendment made before outcomes are seen gets a new hash and a fresh approval.
+
+The frozen protocol is `evaluation/inquiry-p9/protocol.json`. Each of its eight tasks is one P8 case, chosen for a measured contrast, with its input bytes unchanged. Answer-key fields are derived from the reviewed P8 oracles, and `scripts/inquiry-p9.py check-key` re-derives them. The two arms run the same agent with the same `./lara-view check` command. One arm's wrapper prints only the public status view, P8's snapshot projection. The other prints that view followed by the complete `lara inquiry` output. Each arm's view is fixed inside its own wrapper, so no environment variable or argument can switch it. Every run gets a fresh workspace outside the repository and a fresh session, with no user settings, MCP servers or hooks. Read-only commands inside the workspace are auto-allowed by the CLI; everything else outside the two allowed commands is refused. The pair order is counterbalanced.
+
+A run is primary-correct when every answer field matches the key and an arm-blind scorer reports no unsupported assurance. Field correctness, unsupported assurance, timeouts, turns, time and cost are reported separately, per arm and as a paired table. A spend ledger admits a call only when its full cap fits under the ceiling. A call with no reported cost is charged its full cap. There are no retries and no replenishment. After the runs, `scripts/inquiry_p9_audit.py` checks every transcript to confirm that no status-arm run received diagnostics.
+
+The [P9 report](../ara/evidence/inquiry-p9/report.md) gives the observations, the isolation deviation and the claim limits. Eight synthetic tasks with one repetition support feasibility only.
 
 ## Checker performance
 
