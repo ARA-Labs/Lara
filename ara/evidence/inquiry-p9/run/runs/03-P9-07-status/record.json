@@ -1,0 +1,46 @@
+{
+  "arm": "status",
+  "cost_usd": 0.053986599999999996,
+  "elapsed_seconds": 13.357,
+  "exit_code": 0,
+  "final_text": "The checker accepts one of the four possible completions for slot 0, and the claim may be reported as settled, but only as a gap. It is not justified.\n\n- **Accepted:** only choice 0, the empty fragment. It gives `c0` the status `(published gap)`.\n- **Rejected:** choices 1, 2 and 3. Choice 1 is an assumed leaf, which the policy rejects. Choice 2 is an observed leaf about another predicate. Choice 3 is a certified value of 8 that doesn't match the captured CSV value of 7.00. The checker shows no status for these three, so they say nothing about the claim.\n\nBecause only one completion is accepted, the status is trivially the same across the family. \"Settled\" here means the gap status is fixed, not that the claim holds.\n\n```json\n{\n  \"accepted_completions\": 1,\n  \"total_completions\": 4,\n  \"status_stable_across_family\": true,\n  \"may_report_as_settled\": true,\n  \"justification\": \"Slot 0 has four choices, and the claim depends on no other open slot, so there are four completions. The checker accepts only choice 0, the empty fragment, which gives c0 the status (published gap). Choice 1 adds an assumed leaf, which the policy rejects. Choice 2 adds an observed leaf about a different predicate. Choice 3 adds a certified value of 8 that conflicts with the captured value of 7.00. The checker shows no status for these three, so they do not count. With one accepted completion, every member of the family has the same status, so the status may be reported as settled. The settled status is a published gap: the claim is not justified, and it must not be reported as justified.\"\n}\n```",
+  "num_turns": 2,
+  "order_index": 3,
+  "result_subtype": "success",
+  "task_id": "P9-07",
+  "timed_out": false,
+  "usage": {
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 4028,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "cache_creation_input_tokens": 4028,
+    "cache_read_input_tokens": 9133,
+    "fallback_credit": null,
+    "inference_geo": "global",
+    "input_tokens": 4,
+    "iterations": [
+      {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 2129,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 2129,
+        "cache_read_input_tokens": 5516,
+        "input_tokens": 2,
+        "output_tokens": 883,
+        "type": "message"
+      }
+    ],
+    "output_tokens": 996,
+    "output_tokens_details": {
+      "thinking_tokens": 347
+    },
+    "server_tool_use": {
+      "web_fetch_requests": 0,
+      "web_search_requests": 0
+    },
+    "service_tier": "standard",
+    "speed": "standard"
+  }
+}

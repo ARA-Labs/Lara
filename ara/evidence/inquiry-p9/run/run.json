@@ -1,0 +1,73 @@
+{
+  "binary": "/home/yfhe/ara/Lara/dist-newstyle/build/x86_64-linux/ghc-9.10.3/lara-0.2.0.0/x/lara/build/lara/lara",
+  "binary_sha256": "cfa20be69a3d1737790db828a9437987d5dff3146c55ec95359e5e7aaed9a1f8",
+  "head": "49a8d80f51d80b9c3c12e06149fc42f6e3d051a9",
+  "order": [
+    [
+      "P9-06",
+      "status"
+    ],
+    [
+      "P9-06",
+      "inquiry"
+    ],
+    [
+      "P9-07",
+      "inquiry"
+    ],
+    [
+      "P9-07",
+      "status"
+    ],
+    [
+      "P9-01",
+      "status"
+    ],
+    [
+      "P9-01",
+      "inquiry"
+    ],
+    [
+      "P9-04",
+      "inquiry"
+    ],
+    [
+      "P9-04",
+      "status"
+    ],
+    [
+      "P9-03",
+      "status"
+    ],
+    [
+      "P9-03",
+      "inquiry"
+    ],
+    [
+      "P9-05",
+      "inquiry"
+    ],
+    [
+      "P9-05",
+      "status"
+    ],
+    [
+      "P9-02",
+      "status"
+    ],
+    [
+      "P9-02",
+      "inquiry"
+    ],
+    [
+      "P9-08",
+      "inquiry"
+    ],
+    [
+      "P9-08",
+      "status"
+    ]
+  ],
+  "protocol_sha256": "b1c9e135dffafbb9b47a54b7671820c76e127d86df4331a884342c1602e24b68",
+  "started": "2026-10-13T22:23:07Z"
+}

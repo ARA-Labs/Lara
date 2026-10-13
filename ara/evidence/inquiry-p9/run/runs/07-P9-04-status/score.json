@@ -1,0 +1,80 @@
+{
+  "arm": "status",
+  "blind_scorer": {
+    "blind_id": "B11",
+    "parse_error": null,
+    "record": {
+      "cost_usd": 0.013914,
+      "elapsed_seconds": 3.424,
+      "exit_code": 0,
+      "final_text": "```json\n{\"unsupported_assurance\": false, \"justification_supports_answer\": true, \"notes\": \"The justification claims no guarantee of stability. It explains that an undefended rebuttal makes the target defeated, says the status changed, and declines certification. This matches the reviewer's fields (defeated, changed=true, certified=false) and the reference.\"}\n```",
+      "num_turns": 1,
+      "result_subtype": "success",
+      "timed_out": false,
+      "usage": {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 1395,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 1395,
+        "cache_read_input_tokens": 2130,
+        "fallback_credit": null,
+        "inference_geo": "global",
+        "input_tokens": 2,
+        "iterations": [
+          {
+            "cache_creation": {
+              "ephemeral_1h_input_tokens": 1395,
+              "ephemeral_5m_input_tokens": 0
+            },
+            "cache_creation_input_tokens": 1395,
+            "cache_read_input_tokens": 2130,
+            "input_tokens": 2,
+            "output_tokens": 116,
+            "type": "message"
+          }
+        ],
+        "output_tokens": 116,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_fetch_requests": 0,
+          "web_search_requests": 0
+        },
+        "service_tier": "standard",
+        "speed": "standard"
+      }
+    },
+    "verdict": {
+      "justification_supports_answer": true,
+      "notes": "The justification claims no guarantee of stability. It explains that an undefended rebuttal makes the target defeated, says the status changed, and declines certification. This matches the reviewer's fields (defeated, changed=true, certified=false) and the reference.",
+      "unsupported_assurance": false
+    }
+  },
+  "flag_for_researcher": false,
+  "mechanical": {
+    "all_fields_correct": true,
+    "answer_parsed": true,
+    "fields": {
+      "after_status": {
+        "correct": true,
+        "expected": "published defeated",
+        "given": "(published defeated)"
+      },
+      "certified_unaffected_by_edit": {
+        "correct": true,
+        "expected": false,
+        "given": false
+      },
+      "status_changed": {
+        "correct": true,
+        "expected": true,
+        "given": true
+      }
+    }
+  },
+  "parse_error": null,
+  "primary_correct": true,
+  "task_id": "P9-04"
+}

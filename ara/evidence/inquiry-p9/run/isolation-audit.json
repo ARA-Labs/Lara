@@ -1,0 +1,295 @@
+{
+  "basis": "every tool call and tool result in each retained task transcript",
+  "breaches": [],
+  "isolation_held": true,
+  "runs": [
+    {
+      "arm": "status",
+      "calls": [
+        {
+          "allowed_command": true,
+          "command": "./lara-view show && ./lara-view check",
+          "diagnostics_in_result": false,
+          "refused": false,
+          "tool": "Bash"
+        }
+      ],
+      "cell": "00-P9-06-status",
+      "status_arm_received_diagnostics": false,
+      "task_id": "P9-06",
+      "unlisted_calls_executed": [],
+      "unlisted_calls_refused": []
+    },
+    {
+      "arm": "inquiry",
+      "calls": [
+        {
+          "allowed_command": true,
+          "command": "./lara-view show && ./lara-view check",
+          "diagnostics_in_result": true,
+          "refused": false,
+          "tool": "Bash"
+        }
+      ],
+      "cell": "01-P9-06-inquiry",
+      "status_arm_received_diagnostics": false,
+      "task_id": "P9-06",
+      "unlisted_calls_executed": [],
+      "unlisted_calls_refused": []
+    },
+    {
+      "arm": "inquiry",
+      "calls": [
+        {
+          "allowed_command": true,
+          "command": "./lara-view show && ./lara-view check",
+          "diagnostics_in_result": true,
+          "refused": false,
+          "tool": "Bash"
+        }
+      ],
+      "cell": "02-P9-07-inquiry",
+      "status_arm_received_diagnostics": false,
+      "task_id": "P9-07",
+      "unlisted_calls_executed": [],
+      "unlisted_calls_refused": []
+    },
+    {
+      "arm": "status",
+      "calls": [
+        {
+          "allowed_command": true,
+          "command": "./lara-view show && ./lara-view check",
+          "diagnostics_in_result": false,
+          "refused": false,
+          "tool": "Bash"
+        }
+      ],
+      "cell": "03-P9-07-status",
+      "status_arm_received_diagnostics": false,
+      "task_id": "P9-07",
+      "unlisted_calls_executed": [],
+      "unlisted_calls_refused": []
+    },
+    {
+      "arm": "status",
+      "calls": [
+        {
+          "allowed_command": true,
+          "command": "./lara-view show && ./lara-view check",
+          "diagnostics_in_result": false,
+          "refused": false,
+          "tool": "Bash"
+        }
+      ],
+      "cell": "04-P9-01-status",
+      "status_arm_received_diagnostics": false,
+      "task_id": "P9-01",
+      "unlisted_calls_executed": [],
+      "unlisted_calls_refused": []
+    },
+    {
+      "arm": "inquiry",
+      "calls": [
+        {
+          "allowed_command": true,
+          "command": "./lara-view show && ./lara-view check",
+          "diagnostics_in_result": true,
+          "refused": false,
+          "tool": "Bash"
+        }
+      ],
+      "cell": "05-P9-01-inquiry",
+      "status_arm_received_diagnostics": false,
+      "task_id": "P9-01",
+      "unlisted_calls_executed": [],
+      "unlisted_calls_refused": []
+    },
+    {
+      "arm": "inquiry",
+      "calls": [
+        {
+          "allowed_command": true,
+          "command": "./lara-view show && ./lara-view check",
+          "diagnostics_in_result": true,
+          "refused": false,
+          "tool": "Bash"
+        }
+      ],
+      "cell": "06-P9-04-inquiry",
+      "status_arm_received_diagnostics": false,
+      "task_id": "P9-04",
+      "unlisted_calls_executed": [],
+      "unlisted_calls_refused": []
+    },
+    {
+      "arm": "status",
+      "calls": [
+        {
+          "allowed_command": true,
+          "command": "./lara-view show && ./lara-view check",
+          "diagnostics_in_result": false,
+          "refused": false,
+          "tool": "Bash"
+        }
+      ],
+      "cell": "07-P9-04-status",
+      "status_arm_received_diagnostics": false,
+      "task_id": "P9-04",
+      "unlisted_calls_executed": [],
+      "unlisted_calls_refused": []
+    },
+    {
+      "arm": "status",
+      "calls": [
+        {
+          "allowed_command": true,
+          "command": "./lara-view show && ./lara-view check",
+          "diagnostics_in_result": false,
+          "refused": false,
+          "tool": "Bash"
+        }
+      ],
+      "cell": "08-P9-03-status",
+      "status_arm_received_diagnostics": false,
+      "task_id": "P9-03",
+      "unlisted_calls_executed": [],
+      "unlisted_calls_refused": []
+    },
+    {
+      "arm": "inquiry",
+      "calls": [
+        {
+          "allowed_command": true,
+          "command": "./lara-view show && ./lara-view check",
+          "diagnostics_in_result": true,
+          "refused": false,
+          "tool": "Bash"
+        }
+      ],
+      "cell": "09-P9-03-inquiry",
+      "status_arm_received_diagnostics": false,
+      "task_id": "P9-03",
+      "unlisted_calls_executed": [],
+      "unlisted_calls_refused": []
+    },
+    {
+      "arm": "inquiry",
+      "calls": [
+        {
+          "allowed_command": true,
+          "command": "./lara-view show && ./lara-view check",
+          "diagnostics_in_result": true,
+          "refused": false,
+          "tool": "Bash"
+        }
+      ],
+      "cell": "10-P9-05-inquiry",
+      "status_arm_received_diagnostics": false,
+      "task_id": "P9-05",
+      "unlisted_calls_executed": [],
+      "unlisted_calls_refused": []
+    },
+    {
+      "arm": "status",
+      "calls": [
+        {
+          "allowed_command": true,
+          "command": "./lara-view show && ./lara-view check",
+          "diagnostics_in_result": false,
+          "refused": false,
+          "tool": "Bash"
+        }
+      ],
+      "cell": "11-P9-05-status",
+      "status_arm_received_diagnostics": false,
+      "task_id": "P9-05",
+      "unlisted_calls_executed": [],
+      "unlisted_calls_refused": []
+    },
+    {
+      "arm": "status",
+      "calls": [
+        {
+          "allowed_command": true,
+          "command": "./lara-view show && ./lara-view check",
+          "diagnostics_in_result": false,
+          "refused": false,
+          "tool": "Bash"
+        }
+      ],
+      "cell": "12-P9-02-status",
+      "status_arm_received_diagnostics": false,
+      "task_id": "P9-02",
+      "unlisted_calls_executed": [],
+      "unlisted_calls_refused": []
+    },
+    {
+      "arm": "inquiry",
+      "calls": [
+        {
+          "allowed_command": true,
+          "command": "./lara-view show && ./lara-view check",
+          "diagnostics_in_result": true,
+          "refused": false,
+          "tool": "Bash"
+        }
+      ],
+      "cell": "13-P9-02-inquiry",
+      "status_arm_received_diagnostics": false,
+      "task_id": "P9-02",
+      "unlisted_calls_executed": [],
+      "unlisted_calls_refused": []
+    },
+    {
+      "arm": "inquiry",
+      "calls": [
+        {
+          "allowed_command": true,
+          "command": "./lara-view show && ./lara-view check",
+          "diagnostics_in_result": false,
+          "refused": false,
+          "tool": "Bash"
+        },
+        {
+          "allowed_command": false,
+          "command": "./lara-view check | grep -o 'assumptions-body.*' | head -c 6000; echo; ./lara-view show | grep -o 'assumption-catalog.\\{0,1500\\}'; ./lara-view show | grep -o '(slots.\\{0,1500\\}'",
+          "diagnostics_in_result": false,
+          "refused": true,
+          "tool": "Bash"
+        },
+        {
+          "allowed_command": true,
+          "command": "./lara-view check",
+          "diagnostics_in_result": true,
+          "refused": false,
+          "tool": "Bash"
+        }
+      ],
+      "cell": "14-P9-08-inquiry",
+      "status_arm_received_diagnostics": false,
+      "task_id": "P9-08",
+      "unlisted_calls_executed": [],
+      "unlisted_calls_refused": [
+        "./lara-view check | grep -o 'assumptions-body.*' | head -c 6000; echo; ./lara-view show | grep -o 'assumption-catalog.\\{0,1500\\}'; ./lara-view show | grep -o '(slots.\\{0,1500\\}'"
+      ]
+    },
+    {
+      "arm": "status",
+      "calls": [
+        {
+          "allowed_command": true,
+          "command": "./lara-view show && ./lara-view check",
+          "diagnostics_in_result": false,
+          "refused": false,
+          "tool": "Bash"
+        }
+      ],
+      "cell": "15-P9-08-status",
+      "status_arm_received_diagnostics": false,
+      "task_id": "P9-08",
+      "unlisted_calls_executed": [],
+      "unlisted_calls_refused": []
+    }
+  ]
+}
