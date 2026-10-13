@@ -1,8 +1,8 @@
 # Restore the approved inquiry evaluation
 
-**Status:** Tasks 1–3 are complete; Task 4 remains. Corrective implementation reviewed: engineering review CLEAR by independent agent on 2026-10-12, for code/proof/candidate preparation only. The original P8 run is sealed incomplete. This plan authorizes no new measurement. Researcher approval of the exact corrected protocol, code/input pins and a fresh budget is required before Task 4.
+**Status:** Tasks 1–3 are complete; Task 4's measurement, replay and report remain. PR #52 merged the corrective implementation. The original P8 run is sealed incomplete. Researcher approval of the corrected protocol, code/input pins, data policy and fresh budget is recorded in `evaluation/inquiry-p8-corrected/researcher-approval.json`. The metadata-only freeze must be committed and preflight completed before the single approved attempt; no new measurement has started.
 
-**Tracker:** [Issue #49](https://github.com/ARA-Labs/Lara/issues/49), with P8/P9 remaining in issue #22.
+**Tracker:** [Issue #49](https://github.com/ARA-Labs/Lara/issues/49) is closed by PR #52. P8/P9 remain in [issue #22](https://github.com/ARA-Labs/Lara/issues/22); [issue #53](https://github.com/ARA-Labs/Lara/issues/53) tracks the pinned draft-test assumptions that must be corrected before the approved metadata freeze.
 
 **Goal:** Complete the original 96-document evaluation without dropping the 40-slot workloads, weakening T07's accepted-to-accepted contrast, increasing ceilings or changing frozen inquiry semantics.
 
@@ -40,13 +40,13 @@ Author a new additive candidate suite outside the original frozen input director
 - [x] Parameterize and pin candidate suite/audit paths and the input commit in the manifest loader; retain exact validation of the original suite and process-free replay of its archived helper sources.
 - [x] Prepare exact code/input hashes and reproduction commands for researcher review; preserve original code/input commitments in the old evidence.
 
-The candidate is not an approved freeze until the researcher approves the justified correction and exact protocol hash. No legacy regeneration or existing freeze-tag bump is proposed.
+The researcher receipt binds the approved candidate protocol hash and merged commit; only the permitted freeze metadata changes. No legacy regeneration or existing freeze-tag bump is authorized.
 
 ## Task 4: Review the correction and request a new local budget
 
 Prepare the complete reviewable code, proofs, candidate suite, failure report and protocol amendment before asking for approval. Propose one fresh 96-document, 192-invocation local run with the original 10-second per-driver and 45-minute aggregate ceilings, sequential single-CPU execution and no retries. Pin the approved corrective code and additive input commits before execution. The original failed attempt remains in all reporting; no evidence is replaced.
 
-- [ ] Obtain researcher approval of the exact corrective protocol, code/input pins, data policy and full fresh budget. The candidate protocol marks the `distinct-t07-support` amendment and the data policy `requires-correction-receipt`, so `researcher-approval.json` carries their approval. The loader refuses a receipt that lacks either one:
+- [x] Obtain researcher approval of the exact corrective protocol, code/input pins, data policy and full fresh budget. The candidate protocol marks the `distinct-t07-support` amendment and the data policy `requires-correction-receipt`, so `researcher-approval.json` carries their approval. The loader refuses a receipt that lacks either one:
   - `approved_amendments` names `distinct-t07-support` with the researcher's approval text and the SHA256 of its interpretation.
   - `data_policy_sha256` binds the canonical-JSON data policy, including its stated cost of about 68 MB of unique Git content per run.
 

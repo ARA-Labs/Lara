@@ -32,9 +32,9 @@ by the guard; the repaired `r-s-new` example passes.
 Fresh independent input and quality reviews passed. Their exact immutable
 receipts are attached to all 96 oracle entries. Supplemental reviews of the
 state-only generator change, metadata attachment and proposed data policy
-passed. Researcher correction/protocol approval and a fresh budget remain
-pending. The prepared audit
-tool retains finite graph, history, selection, subset, counter and certificate
+passed. Researcher correction/protocol approval and the fresh budget are
+recorded in `researcher-approval.json`, binding the merged candidate at
+`71c1cba9da9863440eaa2873bbd223dbe6ba57b1`. The prepared audit tool retains finite graph, history, selection, subset, counter and certificate
 checks and adds direct source checks for the fresh cloned rule and additive
 T07 declarations. Running it without `--reviewer` is an authoring check and
 cannot write an independent review receipt. The real consumer has decoded all
@@ -65,7 +65,7 @@ the final attached oracle bytes; its exact raw receipt is retained as
 records that run and names the actual spec and quality reviewers and receipt
 hashes when correcting the helper's fixed PENDING review-status annotation to
 PASS. Every raw command, process result, input/oracle/AST hash and byte field
-is preserved. Researcher approval remains pending.
+is preserved. The researcher receipt records the later approval confirmation.
 
 The independent reviewers inspected the actual source bytes and annotations,
 and their retained receipts bind all 96 input and semantic identities.
@@ -77,9 +77,10 @@ receipt. Any review
 must bind the new input hashes, semantic-content hashes, ancestry and helper
 bytes; the original suite's reviews do not apply to this candidate.
 
-The researcher must approve the exact candidate protocol hash and committed
-candidate identity before measurement. Approval may explicitly authorize the
-later metadata-only freeze. The receipt must name the researcher, carry user
+The researcher approved the exact candidate protocol and committed candidate
+identity, including the later metadata-only freeze, through `researcher-approval.json`.
+The candidate protocol and manifest retain their reviewed bytes and pre-approval
+state markers until that freeze is applied. The receipt must name the researcher, carry user
 provenance, bind saved candidate protocol and manifest copies by SHA256, name
 the full reviewed candidate commit, and authorize metadata-only freeze changes.
 The frozen protocol cannot record its own approval, so the T07 amendment and
@@ -102,6 +103,12 @@ A draft candidate, a freeze marker alone or a changed approved candidate fails
 before driver resolution. Replay reads the saved input identity and runs no
 processes. There is no approval bypass flag.
 
+The recorded approval does not yet change those candidate state markers.
+[Issue #53](https://github.com/ARA-Labs/Lara/issues/53) tracks two regression
+tests that assume the real suite is still unapproved. Their test-only fixtures
+must be corrected before the freeze; because the test helper is pinned, its
+reviewed pin change needs an explicit approval amendment.
+
 The runner uses saved-run schema version 2. It publishes `run.json` and its
 embedded `metadata_sha256` in one atomic replacement, without a separate
 `run.sha256`. Replay still verifies and copies original version-1 evidence
@@ -114,11 +121,11 @@ later review requested a candidate-pin refresh; its CHANGES_REQUESTED verdict
 is retained, not relabeled as approval. Helper-only reviews do not replace the
 independent input or oracle reviews.
 
-The proposed measurement budget remains 96 documents, 192 driver invocations,
+The approved measurement budget is 96 documents, 192 driver invocations,
 one invocation per driver per document, a 10-second driver timeout, a 45-minute
-aggregate deadline, one CPU and zero repeats. No new budget is approved here.
-The proposed data policy uses repository fixtures and authored synthetic
-inputs only. It requests one fresh local capture directory under
+aggregate deadline, one CPU and zero repeats. No measurement has started under
+this receipt. The approved data policy uses repository fixtures and authored synthetic
+inputs only. It permits one fresh local capture directory under
 `ara/evidence/inquiry-p8/<fresh-run-id>`, a local replay directory under
 `ara/evidence/inquiry-p8/<fresh-run-id>-replay` and the setup and gate record
 under `ara/evidence/inquiry-p8/preflight-<fresh-run-id>`. The original failed attempt
@@ -128,5 +135,6 @@ paid calls. The capture, replay and preflight directories are committed. The
 failed attempt took about 62 MB per capture or replay directory, but the two
 share identical binaries, so with its 6 MB preflight directory it added about
 68 MB of unique content to Git. A new run should add a similar amount. The repeated-requests levels stay below every declared limit, so no
-case expects a refusal. The researcher must approve this proposed policy in the fresh
-budget request. P9, legacy regeneration and freeze-tag changes remain unapproved.
+case expects a refusal. Apply and commit the metadata-only freeze before supplying
+its full commit identity as `--input-commit`; then complete preflight before the
+single approved attempt. P9, legacy regeneration and freeze-tag changes remain unapproved.

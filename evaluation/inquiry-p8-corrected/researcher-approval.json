@@ -1,0 +1,63 @@
+{
+  "schema": "inquiry-p8-researcher-approval",
+  "schema_version": 1,
+  "status": "APPROVED",
+  "provenance": "user",
+  "researcher": "Yifeng He",
+  "recorded_date": "2026-10-13",
+  "prior_approval_date": null,
+  "approval_source": "Researcher message in the current conversation following the post-PR-52 corrected P8 approval handoff",
+  "approval_text": "I approved it, forget to mark",
+  "approval_context": "The researcher confirmed approval of the final corrected P8 candidate after the assistant identified its exact protocol, code/input identities, review receipts, data policy and fresh budget as the approval scope. The prior approval date was not supplied; this records the confirmation without backdating it.",
+  "reviewed_candidate_commit": "71c1cba9da9863440eaa2873bbd223dbe6ba57b1",
+  "candidate_protocol_path": "candidate-protocol.json",
+  "candidate_protocol_sha256": "181a5363f8778942dbf00971efe63b0659529f486ecba5acef2a1876bf9bcc10",
+  "candidate_manifest_path": "candidate-manifest.json",
+  "candidate_manifest_sha256": "1aaf2eb1e7758fea800e0046e4b01d5f176823ef44f3fe2f98bc4dedf0a6dd22",
+  "metadata_only_freeze_authorized": true,
+  "approved_amendments": [
+    {
+      "id": "distinct-t07-support",
+      "approval_text": "I approved it, forget to mark",
+      "interpretation_sha256": "74f452ec6280e5ed1fb7f6a37bf8dab813045ea4f98705a0edbf5f56789caf02"
+    }
+  ],
+  "data_policy_sha256": "b12df70659359ad7c6da4acd16d127a6d98693b8385c0c99bcae58897bbfe341",
+  "approved_budget": {
+    "max_documents": 96,
+    "invocations_per_driver_per_document": 1,
+    "max_driver_invocations": 192,
+    "driver_timeout_seconds": 10,
+    "aggregate_deadline_seconds": 2700,
+    "aggregate_includes": [
+      "driver invocations",
+      "consumer checks",
+      "scoring"
+    ],
+    "driver_interval_includes": [
+      "process startup",
+      "input parsing",
+      "checking",
+      "analyses",
+      "output emission"
+    ],
+    "driver_interval_excludes": [
+      "builds",
+      "consumer checks"
+    ],
+    "cpu_allocation": 1,
+    "execution": "sequential fresh direct driver processes",
+    "concurrent_benchmark_or_agent_workload": false,
+    "repeats": 0,
+    "agent_calls": 0,
+    "network_acquisition": false,
+    "remote_compute": false,
+    "paid_api_calls": false,
+    "failure_charges_budget": true,
+    "failure_policy": "Timeout, signal, spawn/consumer failure, resource kill or aggregate deadline exhaustion makes the run incomplete. Retain all partial captures and missing cases, stop, and obtain an approved protocol/budget revision before another final run.",
+    "expected_refusal_policy": "Retain expected limit refusals with exact counter, actual/cap and atomic output; distinguish them from source rejection and infrastructure failure."
+  },
+  "residual_timeout_risk": "The corrected Lean T11-singleton-slots-40 workload has no completed P8 timing result. A timeout consumes this attempt, leaves it incomplete and requires a separately approved protocol/budget revision before another final run.",
+  "p9_approved": false,
+  "measurement_started_by_this_record": false
+}

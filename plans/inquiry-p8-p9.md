@@ -8,7 +8,7 @@
 
 **Tech stack:** Haskell production checker and consumer codecs, Lean reference semantics, Python standard-library evaluation tooling, versioned S-expression inputs and append-only ARA evidence.
 
-**Status:** Approved by Yifeng He on 2026-10-12 for implementation and for the P8 local measurement budget defined below. Tasks 1–3 are complete. Task 4 retained and replayed an incomplete attempt (Lean T11 40-slot timeout and T07 oracle disagreement); a complete P8 run and Task 5 remain. Corrective review, a new additive input freeze and researcher approval of a fresh measurement budget are required before another final run. Approval does not authorize P9: any live-loop pilot or evaluation, agent call or paid compute still needs its own approved protocol.
+**Status:** Approved by Yifeng He on 2026-10-12 for implementation and for the original P8 local measurement budget. Tasks 1–3 are complete. Task 4 retained and replayed an incomplete attempt (Lean T11 40-slot timeout and T07 oracle disagreement); a complete P8 run and Task 5 remain. PR #52 merged the corrective implementation. Approval of the corrected protocol, code/input pins, data policy and fresh budget is recorded in `evaluation/inquiry-p8-corrected/researcher-approval.json`; commit its metadata-only input freeze and complete preflight before the single approved attempt. No corrected measurement has started. Approval does not authorize P9: any live-loop pilot or evaluation, agent call or paid compute still needs its own approved protocol.
 
 **Date:** 2026-10-12
 
