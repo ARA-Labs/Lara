@@ -1,0 +1,23 @@
+{
+  "schema": "inquiry-p9-researcher-approval",
+  "schema_version": 1,
+  "status": "APPROVED",
+  "provenance": "user",
+  "researcher": "Yifeng He",
+  "recorded_date": "2026-10-13",
+  "approval_text": "approve it. do not run the harness check yet.",
+  "approval_source": "Researcher message after the assistant presented the frozen protocol hash, task set, comparison, scoring, data policy and full budget",
+  "protocol_path": "evaluation/inquiry-p9/protocol.json",
+  "protocol_sha256": "ad2c0b233e82163b1cad75fe99f39c5e1409b1a8d14cbbaf45460ee9c93aeac9",
+  "protocol_commit": "0590fe5",
+  "approved_budget": {
+    "ceiling_usd": 150.0,
+    "run_cap_usd": 8.0,
+    "scorer_cap_usd": 0.75,
+    "smoke_cap_usd": 1.0,
+    "retries": 0
+  },
+  "data_policy": "as frozen in protocol.json data_policy",
+  "execution_hold": "The researcher withheld permission to run the harness-validation (smoke) call for now; no smoke, agent or scorer call may start until the researcher releases the hold.",
+  "measurement_started_by_this_record": false
+}
