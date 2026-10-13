@@ -32,9 +32,10 @@ by the guard; the repaired `r-s-new` example passes.
 Fresh independent input and quality reviews passed. Their exact immutable
 receipts are attached to all 96 oracle entries. Supplemental reviews of the
 state-only generator change, metadata attachment and proposed data policy
-passed. Researcher correction/protocol approval and the fresh budget are
-recorded in `researcher-approval.json`, binding the merged candidate at
-`71c1cba9da9863440eaa2873bbd223dbe6ba57b1`. The prepared audit tool retains finite graph, history, selection, subset, counter and certificate
+passed. `researcher-approval-test-fixtures.json` binds the amended candidate at
+`bfc6d1ecc538f3456ab3e98df6f314e0611f91b1`, with the original researcher approval,
+the narrow test-helper amendment and exact review receipts embedded by hash.
+The prepared audit tool retains finite graph, history, selection, subset, counter and certificate
 checks and adds direct source checks for the fresh cloned rule and additive
 T07 declarations. Running it without `--reviewer` is an authoring check and
 cannot write an independent review receipt. The real consumer has decoded all
@@ -77,12 +78,12 @@ receipt. Any review
 must bind the new input hashes, semantic-content hashes, ancestry and helper
 bytes; the original suite's reviews do not apply to this candidate.
 
-The researcher approved the exact candidate protocol and committed candidate
-identity, including the later metadata-only freeze, through `researcher-approval.json`.
-The candidate protocol and manifest retain their reviewed bytes and pre-approval
-state markers until that freeze is applied. The receipt must name the researcher, carry user
-provenance, bind saved candidate protocol and manifest copies by SHA256, name
-the full reviewed candidate commit, and authorize metadata-only freeze changes.
+The effective researcher receipt authorizes the metadata-only freeze of that
+committed candidate. `candidate-protocol-test-fixtures.json` and
+`candidate-manifest.json` preserve its approved pre-freeze bytes. The original
+`researcher-approval.json` and `candidate-protocol.json` remain immutable.
+The effective receipt names the researcher, carries user provenance, binds the
+candidate commit and saved snapshots by SHA256, and authorizes the freeze.
 The frozen protocol cannot record its own approval, so the T07 amendment and
 the data policy carry the status `requires-correction-receipt`. The receipt
 approves them. `approved_amendments` holds one entry for `distinct-t07-support`
@@ -136,6 +137,6 @@ paid calls. The capture, replay and preflight directories are committed. The
 failed attempt took about 62 MB per capture or replay directory, but the two
 share identical binaries, so with its 6 MB preflight directory it added about
 68 MB of unique content to Git. A new run should add a similar amount. The repeated-requests levels stay below every declared limit, so no
-case expects a refusal. Apply and commit the metadata-only freeze before supplying
-its full commit identity as `--input-commit`; then complete preflight before the
-single approved attempt. P9, legacy regeneration and freeze-tag changes remain unapproved.
+case expects a refusal. Supply the committed metadata-only freeze's full
+identity as `--input-commit` and complete preflight before the single approved
+attempt. P9, legacy regeneration and freeze-tag changes remain unapproved.

@@ -1,7 +1,7 @@
 {
   "schema": "inquiry-p8-manifest",
   "schema_version": 1,
-  "state": "awaiting-researcher-approval",
+  "state": "frozen",
   "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
   "recipe_version": "inquiry-p8-recipes@2-candidate",
   "expected_partition": {
