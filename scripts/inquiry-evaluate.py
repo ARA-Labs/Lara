@@ -12,6 +12,7 @@ import datetime as dt
 import gzip
 import hashlib
 import io
+import json
 import locale
 import os
 import platform
@@ -32,7 +33,7 @@ from inquiry_evaluation_manifest import (
 from inquiry_evaluation_report import DRIVERS, report_bytes, score_case, summary
 
 SCHEMA = "inquiry-p8-run"
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 RUNNER_FILES = ("inquiry-evaluate.py", "inquiry_evaluation_manifest.py", "inquiry_evaluation_report.py",
                 "evidence_measured.py")
 MAX_ARCHIVE_BYTES = 100 * 1024 * 1024
@@ -254,9 +255,13 @@ def seal(directory, run, results, report):
 
 
 def publish_status(directory, run):
-    data = json_bytes(run)
-    write_atomic(directory / "run.json", data, replace=True)
-    write_atomic(directory / "run.sha256", (digest(data) + "\n").encode("ascii"), replace=True)
+    require(run["schema"] == SCHEMA and run["schema_version"] == SCHEMA_VERSION,
+            "cannot publish an obsolete saved run schema")
+    # The digest covers the canonical payload without its own field. Publish
+    # both together so an interrupted replacement cannot split their identities.
+    snapshot = {key: value for key, value in run.items() if key != "metadata_sha256"}
+    snapshot["metadata_sha256"] = digest(json_bytes(snapshot))
+    write_atomic(directory / "run.json", json_bytes(snapshot), replace=True)
 
 
 def progress(directory, run, manifest, start):
@@ -272,7 +277,7 @@ def recover_reports(directory, run, manifest, oracles, start, exc):
 
     Existing derived report bytes are retained before replacement. Raw captures
     and frozen evidence are never rewritten. A persistent/full-filesystem error
-    still leaves the last atomically published incomplete checkpoint available.
+    leaves the last published checkpoint consistent, but it may still be unsealed.
     """
     run["completion"] = "INCOMPLETE"
     run["sealed"] = False
@@ -468,9 +473,16 @@ def measure(args):
 def validate_saved(source, manifest_path):
     """Replay trust checks perform file reads only, including binary identities."""
     raw = (source / "run.json").read_bytes()
-    require(digest(raw) == (source / "run.sha256").read_text().strip(), "saved run metadata hash mismatch")
-    run = read_json(source / "run.json")
-    require(run["schema"] == SCHEMA and run["schema_version"] == SCHEMA_VERSION, "unsupported saved run schema")
+    run = json.loads(raw)
+    require(run["schema"] == SCHEMA and run["schema_version"] in (1, SCHEMA_VERSION),
+            "unsupported saved run schema")
+    if run["schema_version"] == 1:
+        # Archived version-1 evidence is verified and copied, never republished.
+        require(digest(raw) == (source / "run.sha256").read_text().strip(), "saved run metadata hash mismatch")
+    else:
+        require(raw == json_bytes(run), "saved run metadata encoding mismatch")
+        expected = run.pop("metadata_sha256", None)
+        require(expected == digest(json_bytes(run)), "saved run metadata hash mismatch")
     require(run.get("sealed") is True, "saved run is an incomplete checkpoint without sealed deterministic reports")
     base, protocol, manifest, oracles, inventory = load_suite(manifest_path)
     require(run["manifest_sha256"] == digest(manifest_path.read_bytes()) and
@@ -552,7 +564,8 @@ def replay(args):
     for relative, expected in run["artifacts"].items():
         artifact(out, relative, checked(source, relative, expected, {}), {})
     write_new(out / "run.json", (source / "run.json").read_bytes())
-    write_new(out / "run.sha256", (source / "run.sha256").read_bytes())
+    if run["schema_version"] == 1:
+        write_new(out / "run.sha256", (source / "run.sha256").read_bytes())
     print(f"REPLAY {run['completion']}: {'PASS' if report['passed'] else 'FAIL'}: {out}")
     return 0 if report["passed"] else 1
 

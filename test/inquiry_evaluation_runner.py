@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import errno
 import importlib.util
 import json
 import os
@@ -78,6 +79,80 @@ def fake_repository_preflight(protocol, suite_base, suite_inventory):
     for path, expected in helpers:
         runner.checked(ROOT, path, expected, inventory)
     return commit, inventory
+
+
+class CheckpointPublication(unittest.TestCase):
+    def test_interruption_after_metadata_replacement_keeps_a_valid_checkpoint(self):
+        for exception in (OSError(errno.ENOSPC, "checkpoint publication"), KeyboardInterrupt()):
+            with self.subTest(exception=type(exception).__name__), tempfile.TemporaryDirectory() as tmp:
+                directory = Path(tmp)
+                old = {"schema": runner.SCHEMA, "schema_version": runner.SCHEMA_VERSION,
+                       "sealed": False, "completion": "INCOMPLETE", "invocations": []}
+                new = {**old, "active_operation": {"case_id": "probe", "stage": "driver"}}
+                runner.publish_status(directory, old)
+                replace = runner.os.replace
+                def interrupt_after_replace(source, destination):
+                    replace(source, destination)
+                    if destination.name == "run.json":
+                        raise exception
+                with patch.object(runner.os, "replace", side_effect=interrupt_after_replace):
+                    with self.assertRaises(type(exception)):
+                        runner.publish_status(directory, new)
+                self.assertEqual(json.loads((directory / "run.json").read_text())["active_operation"],
+                                 new["active_operation"])
+                # Integrity must pass before the reader refuses unsealed reports.
+                with self.assertRaisesRegex(ValueError, "incomplete checkpoint without sealed"):
+                    runner.validate_saved(directory, MANIFEST)
+
+    def test_persistent_failure_before_replacement_preserves_previous_checkpoint(self):
+        for owner, operation in ((runner.tempfile, "NamedTemporaryFile"),
+                                 (runner.os, "fsync"), (runner.os, "replace")):
+            with self.subTest(operation=operation), tempfile.TemporaryDirectory() as tmp:
+                directory = Path(tmp)
+                old = {"schema": runner.SCHEMA, "schema_version": runner.SCHEMA_VERSION,
+                       "sealed": False, "completion": "INCOMPLETE", "invocations": []}
+                runner.publish_status(directory, old)
+                before = (directory / "run.json").read_bytes()
+                with patch.object(owner, operation, side_effect=OSError(errno.ENOSPC, "persistent full disk")):
+                    for _ in range(2):
+                        with self.assertRaises(OSError):
+                            runner.publish_status(directory, {**old, "active_operation": "not committed"})
+                        self.assertEqual((directory / "run.json").read_bytes(), before)
+                        with self.assertRaisesRegex(ValueError, "incomplete checkpoint without sealed"):
+                            runner.validate_saved(directory, MANIFEST)
+
+    def test_embedded_digest_refuses_changed_payload_or_missing_digest(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            run = {"schema": runner.SCHEMA, "schema_version": runner.SCHEMA_VERSION,
+                   "sealed": False, "completion": "INCOMPLETE", "invocations": []}
+            runner.publish_status(directory, run)
+            saved = json.loads((directory / "run.json").read_text())
+            self.assertFalse((directory / "run.sha256").exists())
+            for change in (lambda value: value.update(completion="COMPLETE"),
+                           lambda value: value.pop("metadata_sha256")):
+                with self.subTest(change=change):
+                    changed = copy.deepcopy(saved)
+                    change(changed)
+                    (directory / "run.json").write_bytes(json_bytes(changed))
+                    with self.assertRaisesRegex(ValueError, "saved run metadata hash mismatch"):
+                        runner.validate_saved(directory, MANIFEST)
+
+    def test_archived_metadata_still_requires_its_original_digest(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            raw = json_bytes({"schema": runner.SCHEMA, "schema_version": 1, "sealed": False})
+            (directory / "run.json").write_bytes(raw)
+            checksum = directory / "run.sha256"
+            checksum.write_text(digest(raw) + "\n")
+            with self.assertRaisesRegex(ValueError, "incomplete checkpoint without sealed"):
+                runner.validate_saved(directory, MANIFEST)
+            checksum.write_text("0" * 64 + "\n")
+            with self.assertRaisesRegex(ValueError, "saved run metadata hash mismatch"):
+                runner.validate_saved(directory, MANIFEST)
+            checksum.unlink()
+            with self.assertRaises(FileNotFoundError):
+                runner.validate_saved(directory, MANIFEST)
 
 
 class Boundaries(unittest.TestCase):
@@ -161,7 +236,7 @@ class Boundaries(unittest.TestCase):
              patch.object(runner.subprocess, "Popen", side_effect=AssertionError("replay spawned")):
             code = runner.replay(argparse.Namespace(manifest=str(MANIFEST), replay=str(self.saved), out=str(out)))
         self.assertEqual(code, 1)
-        for relative in ["run.json", "run.sha256", "results.jsonl", "summary.json", "summary.tsv"]:
+        for relative in ["run.json", "results.jsonl", "summary.json", "summary.tsv"]:
             self.assertEqual((out / relative).read_bytes(), (self.saved / relative).read_bytes())
         OBSERVATIONS.append({"probe": "portable partial capture-only replay", "exit_code": code,
                              "subprocesses": 0, "deterministic_hashes": self.saved_run["deterministic_report_hashes"]})
@@ -193,7 +268,7 @@ class Boundaries(unittest.TestCase):
         with patch.object(runner.subprocess, "run", side_effect=AssertionError("replay spawned")), \
              patch.object(runner.subprocess, "Popen", side_effect=AssertionError("replay spawned")):
             self.assertEqual(runner.replay(argparse.Namespace(manifest=str(MANIFEST), replay=str(saved), out=str(replay))), 0)
-        for relative in ["run.json", "run.sha256", "results.jsonl", "summary.json", "summary.tsv"]:
+        for relative in ["run.json", "results.jsonl", "summary.json", "summary.tsv"]:
             self.assertEqual((saved / relative).read_bytes(), (replay / relative).read_bytes())
         OBSERVATIONS.append({"probe": "complete fake-capture replay", "exit_code": code,
             "invocations": len(run["invocations"]), "production_driver_invocations": 0,
@@ -326,7 +401,7 @@ class Boundaries(unittest.TestCase):
         with patch.object(runner.subprocess, "run", side_effect=AssertionError("replay spawned")), \
              patch.object(runner.subprocess, "Popen", side_effect=AssertionError("replay spawned")):
             self.assertEqual(runner.replay(argparse.Namespace(manifest=str(MANIFEST), replay=str(saved), out=str(replay))), 1)
-        for path in ("run.json", "run.sha256", "results.jsonl", "summary.json", "summary.tsv"):
+        for path in ("run.json", "results.jsonl", "summary.json", "summary.tsv"):
             self.assertEqual((saved / path).read_bytes(), (replay / path).read_bytes())
         OBSERVATIONS.append({"probe": saved.name, "exit_code": code, "completion": run["completion"],
             "stop_reason": reason, "semantic_discrepancy": checkpoint, "driver_invocations": 2,
@@ -576,6 +651,49 @@ class Boundaries(unittest.TestCase):
         oracle = self.oracles[case["case_id"]]
         info = diagnostics(oracle["expected"]["results"], parse((self.base / case["input_path"]).read_bytes()), oracle, case)
         self.assertEqual(info["requests"][0]["original_request_ast"][:2], ["verdict", "v0"])
+
+    def test_checkpoint_storage_failure_stops_capture_without_retry(self):
+        for persistent in (False, True):
+            with self.subTest(persistent=persistent):
+                output = self.first_case_output()
+                args, calls = self.pair_programs("checkpoint-storage-" + str(persistent), output, output)
+                saved = Path(args.out)
+                replace = runner.os.replace
+                failures = []
+                def fail_checkpoint(source, destination):
+                    if destination.name == "run.json":
+                        snapshot = json.loads(Path(source).read_text())
+                        if snapshot["invocations"] and (persistent or not failures):
+                            failures.append(True)
+                            if not persistent:
+                                # Simulate interruption just after atomic publication.
+                                replace(source, destination)
+                            raise OSError(errno.ENOSPC, "checkpoint storage failure")
+                    return replace(source, destination)
+                affinity = runner.os.sched_getaffinity(0)
+                with patch.object(runner.os, "replace", side_effect=fail_checkpoint):
+                    if persistent:
+                        with self.assertRaises(OSError):
+                            runner.measure(args)
+                    else:
+                        self.assertEqual(runner.measure(args), 1)
+                self.assertEqual(runner.os.sched_getaffinity(0), affinity)
+                self.assertEqual(len(calls.read_text().splitlines()), 1)
+                self.assertEqual((saved / "raw/source-rejections.native.stdout").read_bytes(), output)
+                run = json.loads((saved / "run.json").read_text())
+                self.assertEqual(run["completion"], "INCOMPLETE")
+                if persistent:
+                    self.assertFalse(run["sealed"])
+                    self.assertEqual(run["active_operation"]["stage"], "driver")
+                    with self.assertRaisesRegex(ValueError, "incomplete checkpoint without sealed"):
+                        runner.validate_saved(saved, MANIFEST)
+                else:
+                    self.assertTrue(run["sealed"])
+                    self.assertEqual(run["stop_reason"], "evidence-io-or-integrity-failure")
+                    replay = self.directory / (saved.name + "-replay")
+                    self.assertEqual(runner.replay(argparse.Namespace(
+                        manifest=str(MANIFEST), replay=str(saved), out=str(replay))), 1)
+                    self.assertEqual((saved / "run.json").read_bytes(), (replay / "run.json").read_bytes())
 
     def test_recoverable_report_write_failure_preserves_raw_and_seals_incomplete(self):
         program = fake(self.directory / "fake-write-failure", "import os,signal\nprint('immutable raw prefix',flush=True)\nos.kill(os.getpid(),signal.SIGTERM)\n")

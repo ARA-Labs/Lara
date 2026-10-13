@@ -42,11 +42,25 @@ can stop the run before the pair finishes. If interruption, an evidence write
 failure, or the aggregate deadline replaces the primary stop reason after a
 pair has been scored, `semantic_discrepancy` retains the failed predicates.
 
-Raw captures remain exclusive-create files. Status publication is atomic;
-recovery archives existing derived report bytes before replacing them. Replay
-starts no processes, preserves the original completion state, and checks pair
-checkpoints against the saved captures when those checkpoints are present.
-Previously sealed runs retain their original report bytes and metadata.
+Raw captures remain exclusive-create files. Saved-run schema version 2 publishes
+`run.json` with an embedded `metadata_sha256`: the SHA256 of the `json_bytes`
+encoding of every other field. The reader requires the exact canonical encoding
+and verifies that digest before trusting the metadata. The writer flushes and
+syncs a same-directory temporary file, then atomically replaces `run.json`.
+A write failure or process interruption leaves either the old checkpoint or the
+new one with its matching digest, not a mixture. No checkpoint exists until the
+first replacement succeeds. This is a process-interruption guarantee, not a
+power-loss durability guarantee.
+
+Recovery archives existing derived report bytes before replacing them. Persistent
+storage failure can leave an unsealed checkpoint for inspection; replay refuses
+it until deterministic reports are sealed. Capture is never automatically resumed.
+Replay starts no processes, preserves the original completion state, and checks
+pair checkpoints against saved captures when present. Version-1 archives still
+require their separate `run.sha256`; replay copies their original metadata,
+checksum and report bytes without upgrading them. New captures write version 2
+only and have no checksum sidecar.
+
 Production capture still requires the frozen repository identities and the
 real consumer. Fake-process runner tests use a fixture adapter for repository
 preflight while retaining suite validation and committed input and helper

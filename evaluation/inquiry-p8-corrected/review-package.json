@@ -6,7 +6,7 @@
   "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
   "candidate_input_commit": null,
   "input_commit_rule": "Root commits reviewed candidate; researcher approval binds that existing commit and these exact protocol+manifest hashes; no self-referential commit pin.",
-  "protocol_sha256": "0434e44a6e424e79c358d43d0b8e828b26511da2ead740a64f8fa3f826ceb207",
+  "protocol_sha256": "95ebc7df820693fa8afe3812a40ff6d3f46cff83101cb5e29a645cd1608a5583",
   "manifest_sha256": "1aaf2eb1e7758fea800e0046e4b01d5f176823ef44f3fe2f98bc4dedf0a6dd22",
   "original_manifest_sha256": "c2784f151de337f2d3af0800ea73ad4c5e1d18183871c70e43fb79ef679dd774",
   "proposed_amendment": {
@@ -96,7 +96,7 @@
     },
     {
       "path": "scripts/inquiry-evaluate.py",
-      "sha256": "501d55903a04b9aabae8cb40f14c4dec9d18d8ce7fbd625087539f8b4c1bc346"
+      "sha256": "c222c1172ec92761f9a4a020d3ed54228e7449f20640e1a90824fa2741c2ed61"
     },
     {
       "path": "scripts/inquiry_evaluation_manifest.py",
@@ -120,7 +120,7 @@
     },
     {
       "path": "test/inquiry_evaluation_runner.py",
-      "sha256": "575cb1666c10a7d6a764f5000d849157ccadd3cfdb655f1ce72d0c07160ae5e2"
+      "sha256": "38f944b5470560c0527fe01b65879fe51b6b867a691d1c9dff5352b146765b0a"
     },
     {
       "path": "test/inquiry_evaluation_boundaries.py",
@@ -221,7 +221,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "1e4988ddb707f18292d4200953b889c12fdc1f6c77cc33403c6d266e9cc6eef5"
+      "sha256": "2b65df7350565e525fc16d38847480a0bb2c78005c1b6878149f6d7759c3886f"
     },
     {
       "path": "authoring-validation.json",
@@ -1033,7 +1033,7 @@
     },
     {
       "path": "protocol.json",
-      "sha256": "0434e44a6e424e79c358d43d0b8e828b26511da2ead740a64f8fa3f826ceb207"
+      "sha256": "95ebc7df820693fa8afe3812a40ff6d3f46cff83101cb5e29a645cd1608a5583"
     },
     {
       "path": "quality-review.json",
@@ -1134,6 +1134,14 @@
     {
       "path": "review/supplemental-receipt-spec-review.json",
       "sha256": "a5d35d820013d05c1671c4895921d9ca279b8891a9d76477309b8fef2e4a2045"
+    },
+    {
+      "path": "review/supplemental-checkpoint-spec-review.json",
+      "sha256": "9d3d7e911a77f64842f6479c2397653ba7239a142ddb3444fd3f596b13579f64"
+    },
+    {
+      "path": "review/supplemental-checkpoint-quality-review.json",
+      "sha256": "950497aaf5316489c66ebce3bcbae113e2c8de7d2a312a40c0af593b7c196d1c"
     }
   ],
   "approved_metadata_only_freeze_scope": {
@@ -1157,7 +1165,7 @@
     "path": "quality-review.json",
     "sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
   },
-  "current_helper_review_status": "PASS; exclusive supplemental SPEC and QUALITY receipts bind current source hashes and unchanged scientific identities. The receipt-approval loader change (issue #50) is covered by the supplemental receipt reviews below, not by independent-review.json or quality-review.json.",
+  "current_helper_review_status": "PASS; supplemental reviews bind the current helper sources. Issue #50 is covered by approval_receipt_review; issue #51 by checkpoint_publication_review. Earlier input and quality receipts remain unchanged and do not claim review of these later helper changes.",
   "data_policy": {
     "state": "proposed-pending-researcher-approval",
     "input_origin": "repository fixtures and authored synthetic inputs only",
@@ -1251,5 +1259,34 @@
       "The loader ignores receipt entries for amendment ids the protocol does not defer; this cannot approve an unapproved item."
     ],
     "note": "The researcher receipt must hash the current data policy, which includes local_preflight_directory."
+  },
+  "checkpoint_publication_review": {
+    "issue": 51,
+    "change": "Saved-run schema 2 embeds metadata_sha256 in canonical run.json and publishes it with one atomic replacement. Schema-1 archives retain their original checksum sidecar and byte-identical replay. No inputs, oracles, manifest, runtime code pins, budgets or approval states change.",
+    "binding": "These supplemental receipts bind the protocol hash; this package and the candidate commit bind the receipts without a hash cycle.",
+    "reviews": [
+      {
+        "role": "spec",
+        "path": "review/supplemental-checkpoint-spec-review.json",
+        "sha256": "9d3d7e911a77f64842f6479c2397653ba7239a142ddb3444fd3f596b13579f64",
+        "status": "PASS"
+      },
+      {
+        "role": "quality",
+        "path": "review/supplemental-checkpoint-quality-review.json",
+        "sha256": "950497aaf5316489c66ebce3bcbae113e2c8de7d2a312a40c0af593b7c196d1c",
+        "status": "PASS"
+      }
+    ],
+    "verification": {
+      "provenance": "parent-executed; independent reviewers performed static review only",
+      "regression_before_fix": "python3 test/inquiry_evaluation_runner.py CheckpointPublication -v: post-replace ENOSPC and KeyboardInterrupt subtests failed with saved run metadata hash mismatch",
+      "regression_after_fix": "python3 -m unittest discover -s test -p 'inquiry_*.py' -v: all 65 tests passed, including persistent storage failure and no-retry recovery",
+      "process_interruption_smoke": "A temporary child process was killed with real SIGKILL immediately after os.replace. The saved schema-2 checkpoint passed integrity validation and was correctly refused for replay because its deterministic reports were unsealed.",
+      "original_replay_smoke": "The real replay CLI retained expected exit 1, INCOMPLETE timeout and all 87 invocation records. All 565 artifacts and run.json, run.sha256, results.jsonl, summary.json and summary.tsv were byte-identical.",
+      "authoring": "Original and corrected generator checks passed for 96 cases each; independent finite authoring audit reported 80 exact checks across 80 cases with no findings.",
+      "ara_gates": "Source spans, session index and observations passed.",
+      "fresh_measurements": 0
+    }
   }
 }

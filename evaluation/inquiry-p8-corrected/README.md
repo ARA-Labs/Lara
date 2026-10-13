@@ -102,6 +102,14 @@ A draft candidate, a freeze marker alone or a changed approved candidate fails
 before driver resolution. Replay reads the saved input identity and runs no
 processes. There is no approval bypass flag.
 
+The runner uses saved-run schema version 2. It publishes `run.json` and its
+embedded `metadata_sha256` in one atomic replacement, without a separate
+`run.sha256`. Replay still verifies and copies original version-1 evidence
+byte-for-byte. An interrupted write leaves a consistent checkpoint, but an
+unsealed checkpoint is not a replayable report. The exact runner and regression
+test hashes are pinned in `protocol.json`; supplemental checkpoint reviews in
+`review-package.json` cover those helper changes, not a new input or oracle review.
+
 The proposed measurement budget remains 96 documents, 192 driver invocations,
 one invocation per driver per document, a 10-second driver timeout, a 45-minute
 aggregate deadline, one CPU and zero repeats. No new budget is approved here.
