@@ -338,7 +338,7 @@
       },
       {
         "path": "scripts/inquiry-evaluate.py",
-        "sha256": "c222c1172ec92761f9a4a020d3ed54228e7449f20640e1a90824fa2741c2ed61"
+        "sha256": "6e1eb3c930595da46f6940187b20c777e14b631225b3f7c66f9bb83d392d76f9"
       },
       {
         "path": "scripts/inquiry_evaluation_manifest.py",
@@ -362,7 +362,7 @@
       },
       {
         "path": "test/inquiry_evaluation_runner.py",
-        "sha256": "38f944b5470560c0527fe01b65879fe51b6b867a691d1c9dff5352b146765b0a"
+        "sha256": "a82672e93af4e027aaeaa5fe918860972226fad08e191f1664e7ce6b69b2ea12"
       },
       {
         "path": "test/inquiry_evaluation_boundaries.py",

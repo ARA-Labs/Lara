@@ -6,7 +6,7 @@
   "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
   "candidate_input_commit": null,
   "input_commit_rule": "Root commits reviewed candidate; researcher approval binds that existing commit and these exact protocol+manifest hashes; no self-referential commit pin.",
-  "protocol_sha256": "95ebc7df820693fa8afe3812a40ff6d3f46cff83101cb5e29a645cd1608a5583",
+  "protocol_sha256": "181a5363f8778942dbf00971efe63b0659529f486ecba5acef2a1876bf9bcc10",
   "manifest_sha256": "1aaf2eb1e7758fea800e0046e4b01d5f176823ef44f3fe2f98bc4dedf0a6dd22",
   "original_manifest_sha256": "c2784f151de337f2d3af0800ea73ad4c5e1d18183871c70e43fb79ef679dd774",
   "proposed_amendment": {
@@ -96,7 +96,7 @@
     },
     {
       "path": "scripts/inquiry-evaluate.py",
-      "sha256": "c222c1172ec92761f9a4a020d3ed54228e7449f20640e1a90824fa2741c2ed61"
+      "sha256": "6e1eb3c930595da46f6940187b20c777e14b631225b3f7c66f9bb83d392d76f9"
     },
     {
       "path": "scripts/inquiry_evaluation_manifest.py",
@@ -120,7 +120,7 @@
     },
     {
       "path": "test/inquiry_evaluation_runner.py",
-      "sha256": "38f944b5470560c0527fe01b65879fe51b6b867a691d1c9dff5352b146765b0a"
+      "sha256": "a82672e93af4e027aaeaa5fe918860972226fad08e191f1664e7ce6b69b2ea12"
     },
     {
       "path": "test/inquiry_evaluation_boundaries.py",
@@ -221,7 +221,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "2b65df7350565e525fc16d38847480a0bb2c78005c1b6878149f6d7759c3886f"
+      "sha256": "f998407795cd8a7853538fa6353579ad839009848fd2dc2210bc90639e611e1a"
     },
     {
       "path": "authoring-validation.json",
@@ -1033,7 +1033,7 @@
     },
     {
       "path": "protocol.json",
-      "sha256": "95ebc7df820693fa8afe3812a40ff6d3f46cff83101cb5e29a645cd1608a5583"
+      "sha256": "181a5363f8778942dbf00971efe63b0659529f486ecba5acef2a1876bf9bcc10"
     },
     {
       "path": "quality-review.json",
@@ -1142,6 +1142,10 @@
     {
       "path": "review/supplemental-checkpoint-quality-review.json",
       "sha256": "950497aaf5316489c66ebce3bcbae113e2c8de7d2a312a40c0af593b7c196d1c"
+    },
+    {
+      "path": "review/supplemental-evidence-sealing-review.json",
+      "sha256": "f8cf2de8d96f8c554cf867338cb541bf7e5bcfe2aa26e471489db1049ba34db3"
     }
   ],
   "approved_metadata_only_freeze_scope": {
@@ -1165,7 +1169,7 @@
     "path": "quality-review.json",
     "sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
   },
-  "current_helper_review_status": "PASS; supplemental reviews bind the current helper sources. Issue #50 is covered by approval_receipt_review; issue #51 by checkpoint_publication_review. Earlier input and quality receipts remain unchanged and do not claim review of these later helper changes.",
+  "current_helper_review_status": "The external evidence_sealing_review confirms the current runner and regression fixes at 32b6be1 and requests a candidate-pin refresh. Its CHANGES_REQUESTED verdict is preserved; the pin refresh awaits PR re-review. approval_receipt_review and checkpoint_publication_review remain historical receipts against their recorded source/protocol hashes, not attestations of the refreshed protocol. Independent input and quality reviews are unchanged.",
   "data_policy": {
     "state": "proposed-pending-researcher-approval",
     "input_origin": "repository fixtures and authored synthetic inputs only",
@@ -1288,5 +1292,36 @@
       "ara_gates": "Source spans, session index and observations passed.",
       "fresh_measurements": 0
     }
+  },
+  "evidence_sealing_review": {
+    "pull_request": 52,
+    "path": "review/supplemental-evidence-sealing-review.json",
+    "sha256": "f8cf2de8d96f8c554cf867338cb541bf7e5bcfe2aa26e471489db1049ba34db3",
+    "review_url": "https://github.com/ARA-Labs/Lara/pull/52#pullrequestreview-5499493380",
+    "reviewed_commit": "32b6be1d7a768913570f1981fcb8421c039728ed",
+    "reviewer": "fenfenai",
+    "status": "CHANGES_REQUESTED",
+    "scope": "The external reviewer confirms all three evidence-sealing code fixes and their regressions; the remaining request is to refresh the candidate helper and package hashes.",
+    "reviewed_files": [
+      {
+        "path": "scripts/inquiry-evaluate.py",
+        "sha256": "6e1eb3c930595da46f6940187b20c777e14b631225b3f7c66f9bb83d392d76f9"
+      },
+      {
+        "path": "test/inquiry_evaluation_runner.py",
+        "sha256": "a82672e93af4e027aaeaa5fe918860972226fad08e191f1664e7ce6b69b2ea12"
+      },
+      {
+        "path": "docs/evaluation.md",
+        "sha256": "d75da4f787e3281feac56dccbcd3a3214ca18f0c714d34aae5e4acd6f850a4cd"
+      }
+    ],
+    "candidate_pin_refresh": {
+      "protocol_sha256": "181a5363f8778942dbf00971efe63b0659529f486ecba5acef2a1876bf9bcc10",
+      "state": "pending-pr-re-review",
+      "change": "Refresh only the runner and regression-test helper pins, bind current candidate metadata and README, and retain the external review without changing earlier receipts, scientific data or approval states."
+    },
+    "researcher_approval_claimed": false,
+    "measurement_or_pilot_runs": 0
   }
 }
