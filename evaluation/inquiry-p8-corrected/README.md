@@ -47,6 +47,7 @@ To reproduce the authoring checks from the repository root:
 python3 scripts/inquiry_evaluation_cases.py --suite evaluation/inquiry-p8-corrected --recipe-version inquiry-p8-recipes@2-candidate --check
 python3 scripts/inquiry_evaluation_cases.py --check
 python3 test/inquiry_corrected_candidates.py
+python3 test/inquiry_approval_receipt.py
 python3 test/inquiry_evaluation_boundaries.py
 python3 test/inquiry_evaluation_runner.py
 python3 evaluation/inquiry-p8-corrected/review/independent_finite_audit.py
@@ -81,6 +82,14 @@ candidate identity before measurement. Approval may explicitly authorize the
 later metadata-only freeze. The receipt must name the researcher, carry user
 provenance, bind saved candidate protocol and manifest copies by SHA256, name
 the full reviewed candidate commit, and authorize metadata-only freeze changes.
+The frozen protocol cannot record its own approval, so the T07 amendment and
+the data policy carry the status `requires-correction-receipt`. The receipt
+approves them. `approved_amendments` holds one entry for `distinct-t07-support`
+with the researcher's non-blank approval text and the SHA256 of its
+interpretation in UTF-8. `data_policy_sha256` is the SHA256 of the data policy
+as `json_bytes` encodes it: sorted keys, compact separators, UTF-8 and one
+trailing newline. The loader refuses a receipt that omits either one, repeats
+an amendment id or binds different text.
 The loader permits only changes to protocol `freeze.state`,
 `freeze.manifest_sha256`, and the `correction_approval` state/path/hash linkage.
 Every other protocol field, including supporting artifacts, the input commit
@@ -102,5 +111,9 @@ inputs only. It requests one fresh local capture directory under
 `ara/evidence/inquiry-p8/<fresh-run-id>-replay`. The original failed attempt
 and every new outcome will be retained for the requested implementation PR.
 Measurement will acquire or transfer no data over the network and make no
-paid calls. The researcher must approve this proposed policy in the fresh
+paid calls. The capture, replay and preflight directories are committed. The
+failed attempt took about 62 MB per capture or replay directory, but the two
+share identical binaries, so with its 6 MB preflight directory it added about
+68 MB of unique content to Git. A new run should add a similar amount. The repeated-requests levels stay below every declared limit, so no
+case expects a refusal. The researcher must approve this proposed policy in the fresh
 budget request. P9, legacy regeneration and freeze-tag changes remain unapproved.

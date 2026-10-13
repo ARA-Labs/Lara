@@ -15,6 +15,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INPUT_COMMIT = "95f63bf"
+# Protocol status for an item whose approval lives only in the correction receipt.
+RECEIPT_APPROVAL = "requires-correction-receipt"
 
 
 def require(condition, detail):
@@ -74,6 +76,36 @@ def approved_protocol_identity(protocol):
     return identity
 
 
+def require_receipt_approvals(protocol, receipt):
+    """Require the receipt to approve every protocol item that defers to it.
+
+    The approved protocol is frozen byte for byte, so an amendment or data
+    policy awaiting the researcher cannot record its own approval. It is
+    marked RECEIPT_APPROVAL instead, and the receipt binds its exact meaning.
+    """
+    entries = receipt.get("approved_amendments", [])
+    require(isinstance(entries, list) and all(isinstance(e, dict) for e in entries),
+            "correction receipt approved_amendments is not a list of objects")
+    ids = [e.get("id") for e in entries]
+    require(len(ids) == len(set(ids)), "correction receipt repeats an amendment id")
+    approved = dict(zip(ids, entries))
+    stated = lambda text: isinstance(text, str) and bool(text.strip())
+    for amendment in protocol.get("amendments", []):
+        if amendment.get("status") == RECEIPT_APPROVAL:
+            entry = approved.get(amendment["id"], {})
+            require(stated(entry.get("approval_text")) and entry.get("interpretation_sha256")
+                    == digest(amendment["interpretation"].encode("utf-8")),
+                    f"correction receipt does not approve amendment: {amendment['id']}")
+        else:
+            require(amendment.get("provenance") == "user" and stated(amendment.get("approval_text")),
+                    f"amendment lacks researcher approval: {amendment.get('id')}")
+    if "data_policy" in protocol:
+        policy = protocol["data_policy"]
+        require(isinstance(policy, dict) and policy.get("state") == RECEIPT_APPROVAL and
+                receipt.get("data_policy_sha256") == digest(json_bytes(policy)),
+                "correction receipt does not approve the data policy")
+
+
 def load_suite(manifest_path):
     """Validate all frozen suite bytes before any driver is selected or spawned."""
     manifest_path = manifest_path.resolve()
@@ -108,6 +140,7 @@ def load_suite(manifest_path):
         stable_manifest = lambda m: {k: v for k, v in m.items() if k != "state"}
         require(stable_manifest(candidate_manifest) == stable_manifest(manifest),
                 "approved candidate inputs, annotations, reviews or construction changed")
+        require_receipt_approvals(protocol, receipt)
     require(manifest["schema"] == "inquiry-p8-manifest" and manifest["schema_version"] == 1,
             "unsupported manifest schema")
     require(manifest["state"] == "frozen", "manifest is not frozen")

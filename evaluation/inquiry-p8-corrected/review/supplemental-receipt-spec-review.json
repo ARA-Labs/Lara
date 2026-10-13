@@ -1,0 +1,106 @@
+{
+  "schema": "inquiry-p8-supplemental-review",
+  "schema_version": 1,
+  "role": "spec",
+  "reviewer": "independent spec reviewer agent receipt-spec-reviewer",
+  "provenance": "ai-executed",
+  "status": "FAIL",
+  "scope": "Spec review of the uncommitted issue #50 change that defers the T07 amendment and data policy approval to the correction receipt, rewrites the repeated-requests construction text, adds a repository-cost statement, and adds loader enforcement plus a test.",
+  "reviewed_protocol_sha256": "5a79bd51b526d8ed185d0c5a29423f93bb4cd50c7686b75c62795f294320fb56",
+  "previous_protocol_sha256": "41a4fa014b1083cbe849588a1f9d49bdff9f6a19d3b1472d5f6e475049810796",
+  "reviewed_files": [
+    {
+      "path": "evaluation/inquiry-p8-corrected/protocol.json",
+      "sha256": "5a79bd51b526d8ed185d0c5a29423f93bb4cd50c7686b75c62795f294320fb56"
+    },
+    {
+      "path": "evaluation/inquiry-p8-corrected/README.md",
+      "sha256": "988292e269768a9adf4689c6afa62b43dc4739a587e8c261ba5b046667432b2c"
+    },
+    {
+      "path": "scripts/inquiry_evaluation_manifest.py",
+      "sha256": "ee99de326d34f32c33248563d7877c473133a9b7495ad9bbd80a8c2ef93cbfe3"
+    },
+    {
+      "path": "test/inquiry_approval_receipt.py",
+      "sha256": "b39977548c9ed74694ec58fcd83b5ab5f21967b12ae569077778c935bbe9d970"
+    }
+  ],
+  "unchanged_bound_files_verified": true,
+  "changed_protocol_paths": [
+    "/amendments[1]/status",
+    "/amendments[1]/approval_location (added)",
+    "/data_policy/state",
+    "/data_policy/approval_location (added)",
+    "/data_policy/repository_cost (added)",
+    "/recipes/axes[3]/construction",
+    "/recipes/additional_helpers[scripts/inquiry_evaluation_manifest.py].sha256 (b02308a1... -> ee99de32...)",
+    "/recipes/additional_helpers (added test/inquiry_approval_receipt.py, b3997754...)"
+  ],
+  "checks": [
+    {
+      "question": "1. Protocol changes confined to the named fields",
+      "result": "PASS",
+      "detail": "Parsed-JSON diff against HEAD shows only the 8 paths in changed_protocol_paths. partition, budget, ceilings, questions, case_matrix, code_commit/code_paths, oracle_policy, legacy_inputs, freeze (incl. supporting_artifacts), correction_approval, p9, claim_limits and every other recipes field are unchanged."
+    },
+    {
+      "question": "2. Bound files byte-identical and listed hashes match",
+      "result": "PASS",
+      "detail": "git diff HEAD is empty for MANIFEST.json, inputs/, oracles/, certificates/, independent-review.json, quality-review.json, authoring-validation.json and all of evaluation/inquiry-p8; no untracked files besides an ignored __pycache__. freeze.manifest_sha256, all 15 supporting_artifacts, generator/independent_audit_tool/certificate_producer sha256 and all 10 additional_helpers match current bytes. New protocol SHA256 is 5a79bd51..., previous 41a4fa01... as stated."
+    },
+    {
+      "question": "3. Repeated-requests wording true",
+      "result": "PASS",
+      "detail": "All 96 cases have expected_result_kind 'results'. Over the 16 repeated-requests cases every expected_counters.values[k] is below effective_declared_limits[k]; max ratio is pairs 352/1000 (T01-repeated-requests-8), next 264/1000 pairs (T05-8), 169183/1000000 source-bytes. The embedded-events limit (8) has no counter value, but expected_embedded_event_count is 0 for all 16 cases, so it is also below its limit."
+    },
+    {
+      "question": "4. repository_cost accurate",
+      "result": "FAIL",
+      "detail": "du: capture 61M (62,499,109 B), replay 61M (62,494,088 B); lean.gz is 41,928,158 B (about 42 MB). Per-directory and binary figures are right. But 'adds about 120 MB to Git history' is false: capture and replay share byte-identical binaries (same blob ids for lean.gz, native.gz, consumer.gz) and Git stores each blob once. Unique blob bytes for the failed capture+replay are 62,157,177 B and on-disk object size is 47,540,287 B. The failed attempt also committed a 6.1 MB preflight-<run-id> directory and a reproduction receipt that the cost statement and data_policy directories omit."
+    },
+    {
+      "question": "5. Self-consistency and loader enforcement of approval_location",
+      "result": "PASS",
+      "detail": "After approval the frozen protocol states the items are approved in the receipt rather than claiming 'proposed'. For status requires-correction-receipt the loader requires receipt approved_amendments[id] with non-empty approval_text and interpretation_sha256 == sha256(interpretation UTF-8); it requires data_policy.state == requires-correction-receipt and receipt.data_policy_sha256 == sha256(json_bytes(data_policy)) (sorted keys, compact separators, ensure_ascii=False, trailing newline). Non-deferred amendments must carry provenance user and approval_text (source-axis-groups does). Runs only on the non-@1 path after candidate snapshot comparison, so the snapshot equality forces the same deferred items. Loader 'binds' approval_text only as non-empty (see low finding)."
+    },
+    {
+      "question": "6. README accuracy",
+      "result": "PASS",
+      "detail": "README matches loader field names (approved_amendments, approval_text, interpretation SHA256, data_policy_sha256) and the refusal behavior. It repeats the 120 MB Git-history claim (see finding) and says 'canonical-JSON' without naming the trailing-newline json_bytes form."
+    },
+    {
+      "question": "7. No weakening of the original suite",
+      "result": "PASS",
+      "detail": "evaluation/inquiry-p8 is byte-identical to HEAD; nothing there pins the loader hash. require_receipt_approvals runs only when recipe version is not inquiry-p8-recipes@1. load_suite(evaluation/inquiry-p8/MANIFEST.json) still succeeds and the @1 generator --check passes. The change adds checks to the corrected path and removes none."
+    },
+    {
+      "question": "Commands run",
+      "result": "PASS",
+      "detail": "test/inquiry_approval_receipt.py: 3 tests OK; test/inquiry_corrected_candidates.py: 16 tests OK; inquiry_evaluation_cases.py corrected --check: 96 cases checked; independent_finite_audit.py: AUTHORING-CHECK, 80 exact checks, no findings; inquiry_evaluation_cases.py --check (original) OK. No driver or consumer run."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "detail": "data_policy.repository_cost (frozen at approval) and README say one new capture plus replay 'adds about 120 MB to Git history'. Git deduplicates identical blobs; the failed attempt's capture and replay share their binaries, so their unique content is about 62 MB (47.5 MB on disk as Git objects). The statement also omits the preflight-<run-id> directory (about 6 MB) and reproduction receipt that the failed attempt committed. Suggested fix: say about 120 MB in the working tree and about 50-62 MB of new Git objects (less if binaries match earlier blobs), and name the preflight directory, or state 120 MB explicitly as an upper bound."
+    },
+    {
+      "severity": "low",
+      "detail": "The amendment approval_location says the receipt binds approval_text, but the loader only checks that approval_text is non-empty; any text passes. Only the interpretation is bound by hash. Reword to 'carries a non-empty approval_text'."
+    },
+    {
+      "severity": "low",
+      "detail": "approval_location and README say 'canonical JSON' for data_policy_sha256. The loader uses json_bytes: sorted keys, ',' and ':' separators, ensure_ascii=False, UTF-8, trailing newline. A researcher hashing without the newline gets a mismatch. Name json_bytes or spell out the encoding."
+    },
+    {
+      "severity": "low",
+      "detail": "The bound independent-review.json and quality-review.json (byte-frozen) attest scripts/inquiry_evaluation_manifest.py at b02308a1..., while recipes.additional_helpers now pins ee99de32.... The protocol does not list any supplemental review covering the new loader in supporting_artifacts, so the frozen protocol does not tie the delta to a review. Consider binding the supplemental spec/quality receipts before approval."
+    },
+    {
+      "severity": "low",
+      "detail": "require_receipt_approvals assumes well-formed receipt entries. A non-object approved_amendments entry raises AttributeError, not ValueError. Duplicate ids silently keep the last entry. Refusal still happens, but the error is not the loader's usual diagnostic."
+    }
+  ],
+  "driver_outputs_used": false,
+  "researcher_approval_claimed": false
+}

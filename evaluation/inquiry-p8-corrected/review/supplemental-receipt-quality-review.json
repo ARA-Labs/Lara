@@ -1,0 +1,122 @@
+{
+  "schema": "inquiry-p8-supplemental-review",
+  "schema_version": 1,
+  "role": "quality",
+  "reviewer": "independent quality reviewer agent receipt-quality-reviewer",
+  "provenance": "ai-executed",
+  "status": "PASS",
+  "scope": "Quality review of the uncommitted require_receipt_approvals change (issue #50) to scripts/inquiry_evaluation_manifest.py, its new tests, and the corrected candidate protocol/README edits, without running any driver or consumer.",
+  "reviewed_protocol_sha256": "5a79bd51b526d8ed185d0c5a29423f93bb4cd50c7686b75c62795f294320fb56",
+  "reviewed_files": [
+    {
+      "path": "scripts/inquiry_evaluation_manifest.py",
+      "sha256": "ee99de326d34f32c33248563d7877c473133a9b7495ad9bbd80a8c2ef93cbfe3"
+    },
+    {
+      "path": "test/inquiry_approval_receipt.py",
+      "sha256": "b39977548c9ed74694ec58fcd83b5ab5f21967b12ae569077778c935bbe9d970"
+    },
+    {
+      "path": "test/inquiry_corrected_candidates.py",
+      "sha256": "1e7cdf37e68a0ffb77032e034d9d021e768a4b8a5769ea86bdd09612ba5797f8"
+    }
+  ],
+  "commands": [
+    {
+      "command": "python3 test/inquiry_approval_receipt.py",
+      "exit_code": 0,
+      "result": "Ran 3 tests, OK"
+    },
+    {
+      "command": "python3 test/inquiry_corrected_candidates.py",
+      "exit_code": 0,
+      "result": "Ran 16 tests, OK"
+    },
+    {
+      "command": "python3 test/inquiry_evaluation_boundaries.py",
+      "exit_code": 0,
+      "result": "Ran 7 tests, OK"
+    },
+    {
+      "command": "python3 test/inquiry_evaluation_runner.py",
+      "exit_code": 0,
+      "result": "Ran 34 tests in 45.0s, OK (expected INCOMPLETE/REPLAY INCOMPLETE lines printed)"
+    },
+    {
+      "command": "python3 scripts/inquiry_evaluation_cases.py --suite evaluation/inquiry-p8-corrected --recipe-version inquiry-p8-recipes@2-candidate --check",
+      "exit_code": 0,
+      "result": "checked 96 P8 cases; independent review required before freeze"
+    },
+    {
+      "command": "sha256sum test/inquiry_corrected_candidates.py",
+      "exit_code": 0,
+      "result": "1e7cdf37e68a0ffb77032e034d9d021e768a4b8a5769ea86bdd09612ba5797f8 (matches pin)"
+    },
+    {
+      "command": "python3 /tmp/claude-1001/probe.py (scratch edge-case probe of require_receipt_approvals)",
+      "exit_code": 0,
+      "result": "duplicate ids: last entry wins; null or absent data_policy passes; malformed shapes fail closed with AttributeError/TypeError/KeyError; non-string truthy approval_text passes; extra approved ids ignored"
+    }
+  ],
+  "checks": [
+    {
+      "question": "Can a receipt pass without approving a deferred item?",
+      "result": "no for any well-formed receipt",
+      "detail": "Each amendment with status requires-correction-receipt needs a receipt entry with that id, non-empty approval_text and the SHA256 of its exact interpretation; the data policy needs state requires-correction-receipt and a matching canonical-JSON SHA256. Edge cases: duplicate ids resolve to the last entry (a receipt carrying an empty entry then a valid one passes); approval_text is checked for truthiness, not type; extra approved ids are ignored; missing interpretation/id or non-list/non-dict values raise KeyError/AttributeError/TypeError, i.e. fail closed. Because approved_protocol_identity pins the frozen protocol to the researcher-approved candidate snapshot, an attacker cannot reshape the protocol side; only receipt-side ambiguity remains, and the receipt is user-authored and hash-bound."
+    },
+    {
+      "question": "Is the call placement sound and is receipt always bound?",
+      "result": "yes",
+      "detail": "The call sits in the second `recipes.version != inquiry-p8-recipes@1` block, which has the same condition as the first block that binds `receipt`, and protocol is not mutated between them. Every corrected suite reaches it before any driver is selected; it runs after the candidate protocol and manifest comparisons, so earlier failures take precedence, which is why the pinned test still sees its expected messages."
+    },
+    {
+      "question": "Is the conditional data-policy rule acceptable?",
+      "result": "acceptable; keep",
+      "detail": "A corrected protocol without data_policy passes, but the frozen protocol must equal the researcher-approved candidate snapshot, so dropping the policy requires the researcher to approve a snapshot without one. The real candidate carries data_policy and test_candidate_defers_t07_amendment_and_data_policy asserts it, so a later removal would be caught at authoring time. Making the rule unconditional would break the pinned fixture in test/inquiry_corrected_candidates.py. Minor gap: `is not None` also treats an explicit `data_policy: null` as absent."
+    },
+    {
+      "question": "Is test/inquiry_corrected_candidates.py unchanged and do its tests still test what they meant to?",
+      "result": "yes",
+      "detail": "SHA256 1e7cdf37e68a0ffb77032e034d9d021e768a4b8a5769ea86bdd09612ba5797f8 matches the pin. test_approval_binds_both_candidate_protocol_and_case_inventory fails at the manifest comparison ('approved candidate inputs') and the protocol comparison, both before require_receipt_approvals, so the new check does not mask them. test_approved_metadata_only_freeze_retains_support_and_review_identities builds from the original suite (no data_policy, only the user-approved source-axis-groups amendment), so it passes the new check legitimately and still reaches all later checks."
+    },
+    {
+      "question": "Does test/inquiry_approval_receipt.py genuinely exercise load_suite on the real candidate and fail for the intended reason?",
+      "result": "yes",
+      "detail": "freeze_copy copies the real evaluation/inquiry-p8-corrected tree, snapshots its protocol and manifest bytes, and applies only the metadata-only freeze, so the positive case runs the full load_suite (hashes, reviews, partition, oracles) over real candidate bytes. The negative case uses an identical freeze with no approvals and asserts 'does not approve amendment', a message only require_receipt_approvals emits, so it fails for the intended reason. The unit subtests cover each field. Missing: an end-to-end case where the amendment is approved but the data policy is not, and a duplicate-id case."
+    },
+    {
+      "question": "Does the code match the module's style?",
+      "result": "yes",
+      "detail": "It uses the `require(cond, detail)` idiom, double-quoted strings, digest/json_bytes helpers and a short docstring like its neighbours. The constant has a one-line comment. One `require` splits `==` awkwardly across lines; computing the expected interpretation digest into a local first would read more clearly. No simplification needed beyond that."
+    },
+    {
+      "question": "Do inquiry-evaluate.py replay or other callers break?",
+      "result": "no",
+      "detail": "measure and validate_saved both call load_suite unchanged; the receipt is already in the suite inventory, so replay evidence coverage is unchanged. The new test file and the new manifest-module hash are listed in recipes.additional_helpers with matching SHA256s. The CLI main catches OSError/ValueError/KeyError/TypeError but not AttributeError, so a malformed receipt shape gives a traceback and a non-zero exit, still before any driver runs."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "detail": "Duplicate ids in receipt approved_amendments resolve silently to the last entry, so a receipt with an empty or contradictory entry followed by a valid one passes. read_json rejects duplicate object keys but not duplicate list entries.",
+      "recommendation": "Require the approved_amendments ids to be unique, for example by comparing len(ids) == len(set(ids)) before building the map."
+    },
+    {
+      "severity": "low",
+      "detail": "`data_policy: null` is treated like an absent policy and passes; approval_text is checked for truthiness only (True or ' ' pass).",
+      "recommendation": "Test `\"data_policy\" in protocol` instead of `is not None`, and require approval_text to be a non-blank string."
+    },
+    {
+      "severity": "low",
+      "detail": "Malformed receipt shapes (approved_amendments as dict/string/null) fail closed with AttributeError or TypeError instead of a require message; inquiry-evaluate.py main does not catch AttributeError, so the user sees a traceback.",
+      "recommendation": "Optionally `require(isinstance(..., list) and all(isinstance(a, dict) ...))` first so the refusal reads like the module's other refusals."
+    },
+    {
+      "severity": "low",
+      "detail": "The end-to-end test has only the all-missing negative case; a receipt that approves the amendment but omits data_policy_sha256 is covered only at unit level.",
+      "recommendation": "Add a second load_suite negative with only the amendment approval, plus a duplicate-id subtest if the uniqueness check is added."
+    }
+  ],
+  "driver_outputs_used": false,
+  "researcher_approval_claimed": false
+}

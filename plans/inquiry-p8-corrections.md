@@ -46,13 +46,12 @@ The candidate is not an approved freeze until the researcher approves the justif
 
 Prepare the complete reviewable code, proofs, candidate suite, failure report and protocol amendment before asking for approval. Propose one fresh 96-document, 192-invocation local run with the original 10-second per-driver and 45-minute aggregate ceilings, sequential single-CPU execution and no retries. Pin the approved corrective code and additive input commits before execution. The original failed attempt remains in all reporting; no evidence is replaced.
 
-- [ ] Obtain researcher approval of the exact corrective protocol, code/input pins, data policy and full fresh budget. The reviewed candidate protocol (`41a4fa01…`) stays byte-exact, and the loader freezes its `amendments` and `data_policy` fields. They will keep reading `proposed` after approval, so `researcher-approval.json` must carry the approval for both. It must do the following:
-  - Name `distinct-t07-support` as approved, with the researcher's own approval text.
-  - Approve `data_policy` and state its repository cost. The failed attempt committed about 61 MB per capture directory, including a 42 MB `lean.gz`, so a new capture plus replay adds about 120 MB to Git history.
-  - Accept the residual timeout risk on Lean `T11-singleton-slots-40`. The sparse procedure in `317f210` has passed a 42-slot elaboration example, but no driver call has been timed on that input. A repeat timeout leaves the run incomplete and needs another approval.
+- [ ] Obtain researcher approval of the exact corrective protocol, code/input pins, data policy and full fresh budget. The candidate protocol marks the `distinct-t07-support` amendment and the data policy `requires-correction-receipt`, so `researcher-approval.json` carries their approval. The loader refuses a receipt that lacks either one:
+  - `approved_amendments` names `distinct-t07-support` with the researcher's approval text and the SHA256 of its interpretation.
+  - `data_policy_sha256` binds the canonical-JSON data policy, including its stated cost of about 68 MB of unique Git content per run.
 
-  The loader does not yet enforce these receipt fields (#50).
-- [ ] In the P8 report, state that every case, including `repeated-requests` level 8, expects `results`; the maximum is 352 of 1000 pairs. The protocol's "until an atomic document refusal" exercises no refusal, so the refusal count is 0 by construction and is not evidence about refusal handling.
+  The receipt should also record that the researcher accepts the residual timeout risk on Lean `T11-singleton-slots-40`. The loader does not check this. The sparse procedure in `317f210` has passed a 42-slot elaboration example, but no driver call has been timed on that input. A repeat timeout leaves the run incomplete and needs another approval.
+- [ ] In the P8 report, state that no case expects a refusal (at most 352 of 1000 pairs), so the refusal count is 0 by construction and is not evidence about refusal handling.
 - [ ] Freeze the approved additive inputs, finish builds/gates outside measurement, then execute the runner once.
 - [ ] Retain every outcome and reproduce deterministic reports from saved captures without driver or consumer calls.
 - [ ] Complete the original P8 report and researcher review, update issue #22 and current subject docs, then open the implementation PR.

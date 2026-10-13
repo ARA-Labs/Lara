@@ -303,7 +303,7 @@
           "T11",
           "T12"
         ],
-        "construction": "Repeat only the wrapper request list with fresh labels; charge cumulative work until an atomic document refusal."
+        "construction": "Repeat only the wrapper request list with fresh labels; charge work cumulatively per document. Every level stays below every declared limit (at most 352 of 1000 pairs), so no case expects a refusal and the refusal count is zero by construction."
       }
     ],
     "variant_count": 64,
@@ -342,7 +342,7 @@
       },
       {
         "path": "scripts/inquiry_evaluation_manifest.py",
-        "sha256": "b02308a1f656ed047a0f2ef3df95b36bfcc2b7fbf8e8b0b2d31f3373176e88a2"
+        "sha256": "6586b5a2e007e4e69fa496f1a84ddb47f2a2b57f41a9f23cc998e328720ac68d"
       },
       {
         "path": "scripts/inquiry_evaluation_report.py",
@@ -355,6 +355,10 @@
       {
         "path": "test/inquiry_corrected_candidates.py",
         "sha256": "1e7cdf37e68a0ffb77032e034d9d021e768a4b8a5769ea86bdd09612ba5797f8"
+      },
+      {
+        "path": "test/inquiry_approval_receipt.py",
+        "sha256": "831317a8a361629014c48d0f3ddd37afceddfff443d00ee78b4ae6f25460f6d1"
       },
       {
         "path": "test/inquiry_evaluation_runner.py",
@@ -724,13 +728,14 @@
     },
     {
       "id": "distinct-t07-support",
-      "status": "proposed",
+      "status": "requires-correction-receipt",
       "provenance": "ai-suggested",
       "approval_text": null,
       "issue": 49,
       "interpretation": "Clone the after policy rule r-s as r-s-new. Only new-attacker references r-s-new. Both rules retain the seed premise and s conclusion. Four distinct support terms yield two unattacked attackers, defeated witness/consumer, unchanged defeated query, failed locality. Repair only T07 and its four source-declaration variants; original freeze and expectations stay byte-identical.",
       "budget_change": false,
-      "legacy_regeneration": false
+      "legacy_regeneration": false,
+      "approval_location": "correction_approval receipt approved_amendments: one entry with this id, a non-blank researcher approval_text string and interpretation_sha256, the SHA256 of this interpretation in UTF-8. The loader refuses a receipt without it."
     }
   ],
   "correction_approval": {
@@ -739,7 +744,7 @@
     "sha256": null
   },
   "data_policy": {
-    "state": "proposed-pending-researcher-approval",
+    "state": "requires-correction-receipt",
     "input_origin": "repository fixtures and authored synthetic inputs only",
     "local_capture_directory": "ara/evidence/inquiry-p8/<fresh-run-id>",
     "local_replay_directory": "ara/evidence/inquiry-p8/<fresh-run-id>-replay",
@@ -747,6 +752,8 @@
     "retention": "retain the original failed attempt and every new outcome; files are retained for the requested implementation PR",
     "network_acquisition_during_measurement": false,
     "network_transfer_during_measurement": false,
-    "paid_calls_during_measurement": false
+    "paid_calls_during_measurement": false,
+    "approval_location": "correction_approval receipt data_policy_sha256: the SHA256 of this object encoded by json_bytes (sorted keys, separators \",\" and \":\", ensure_ascii false, UTF-8, one trailing LF). The loader refuses a receipt without it.",
+    "repository_cost": "Capture, replay and preflight directories are committed. The failed attempt took about 62 MB per capture or replay directory in the working tree, including a 42 MB gzipped Lean binary. The two directories share identical binaries, so with the 6 MB preflight directory they added about 68 MB of unique content to Git. A new run should add a similar amount."
   }
 }

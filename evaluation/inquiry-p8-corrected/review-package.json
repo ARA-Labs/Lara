@@ -6,7 +6,7 @@
   "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
   "candidate_input_commit": null,
   "input_commit_rule": "Root commits reviewed candidate; researcher approval binds that existing commit and these exact protocol+manifest hashes; no self-referential commit pin.",
-  "protocol_sha256": "41a4fa014b1083cbe849588a1f9d49bdff9f6a19d3b1472d5f6e475049810796",
+  "protocol_sha256": "587783d8fccfbbf648c8b8c5ac4febb2c06e4f8fe019450cde7fcec26d9647e2",
   "manifest_sha256": "1aaf2eb1e7758fea800e0046e4b01d5f176823ef44f3fe2f98bc4dedf0a6dd22",
   "original_manifest_sha256": "c2784f151de337f2d3af0800ea73ad4c5e1d18183871c70e43fb79ef679dd774",
   "proposed_amendment": {
@@ -100,7 +100,7 @@
     },
     {
       "path": "scripts/inquiry_evaluation_manifest.py",
-      "sha256": "b02308a1f656ed047a0f2ef3df95b36bfcc2b7fbf8e8b0b2d31f3373176e88a2"
+      "sha256": "6586b5a2e007e4e69fa496f1a84ddb47f2a2b57f41a9f23cc998e328720ac68d"
     },
     {
       "path": "scripts/inquiry_evaluation_report.py",
@@ -113,6 +113,10 @@
     {
       "path": "test/inquiry_corrected_candidates.py",
       "sha256": "1e7cdf37e68a0ffb77032e034d9d021e768a4b8a5769ea86bdd09612ba5797f8"
+    },
+    {
+      "path": "test/inquiry_approval_receipt.py",
+      "sha256": "831317a8a361629014c48d0f3ddd37afceddfff443d00ee78b4ae6f25460f6d1"
     },
     {
       "path": "test/inquiry_evaluation_runner.py",
@@ -196,6 +200,14 @@
       "exit_code": 0,
       "result": "96 final attached inputs and authored ASTs decoded by real consumer; raw receipt preserved, actual review status separately annotated; no inquiry driver",
       "receipt": "authoring-validation.json"
+    },
+    {
+      "command": [
+        "python3",
+        "test/inquiry_approval_receipt.py"
+      ],
+      "exit_code": 0,
+      "result": "3 tests; receipt must approve the deferred T07 amendment and data policy; end-to-end freeze of a temporary candidate copy"
     }
   ],
   "remaining_steps": [
@@ -209,7 +221,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "e63545d21dbeaddae6c95ae57fd6278277c284e24f2fd962b81624850752fc6c"
+      "sha256": "a9b95dc566934d85eb17f6e0f4b461936f66f9bd42aedab9ea82facb28d9fe8a"
     },
     {
       "path": "authoring-validation.json",
@@ -1021,7 +1033,7 @@
     },
     {
       "path": "protocol.json",
-      "sha256": "41a4fa014b1083cbe849588a1f9d49bdff9f6a19d3b1472d5f6e475049810796"
+      "sha256": "587783d8fccfbbf648c8b8c5ac4febb2c06e4f8fe019450cde7fcec26d9647e2"
     },
     {
       "path": "quality-review.json",
@@ -1098,6 +1110,22 @@
     {
       "path": "review/protocol-before-review-attachment.json",
       "sha256": "9a827b52c3dd14edb0b661762e3855b18b03051dc0ecaa10e5a1cc8f08f431d0"
+    },
+    {
+      "path": "review/supplemental-receipt-quality-review-2.json",
+      "sha256": "777a39661f570d2e5bef0d198a88fc1d9e90d4fbacccf25b270ffa4c5130d2cf"
+    },
+    {
+      "path": "review/supplemental-receipt-quality-review.json",
+      "sha256": "52bb1e87902f3103f54b8b65f5c55bcb47a6b5de10803156f316643f6791d473"
+    },
+    {
+      "path": "review/supplemental-receipt-spec-review-2.json",
+      "sha256": "27450d18ce3f06543146d472304fb882e8d47eba177fdb531f6ab152d8fff85f"
+    },
+    {
+      "path": "review/supplemental-receipt-spec-review.json",
+      "sha256": "a5d35d820013d05c1671c4895921d9ca279b8891a9d76477309b8fef2e4a2045"
     }
   ],
   "approved_metadata_only_freeze_scope": {
@@ -1121,7 +1149,7 @@
     "path": "quality-review.json",
     "sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
   },
-  "current_helper_review_status": "PASS; exclusive supplemental SPEC and QUALITY receipts bind current source hashes and unchanged scientific identities",
+  "current_helper_review_status": "PASS; exclusive supplemental SPEC and QUALITY receipts bind current source hashes and unchanged scientific identities. The receipt-approval loader change (issue #50) is covered by the supplemental receipt reviews below, not by independent-review.json or quality-review.json.",
   "data_policy": {
     "state": "proposed-pending-researcher-approval",
     "input_origin": "repository fixtures and authored synthetic inputs only",
@@ -1162,5 +1190,44 @@
     "local_gates": "evaluation/inquiry-correction-validation/lean-sparse/validation.json",
     "haskell_test_all": "evaluation/inquiry-correction-validation/haskell/validation.json",
     "final_original_process_free_replay": "evaluation/inquiry-correction-validation/candidate-final-legacy-replay/validation.json"
+  },
+  "approval_receipt_review": {
+    "issue": 50,
+    "change": "The T07 amendment and data policy carry status requires-correction-receipt; the loader refuses a correction receipt that does not approve each by hash. The repeated-requests wording and data-policy repository cost were corrected. Inputs, oracles, manifest and review receipts are byte-identical.",
+    "binding": "The receipts bind the protocol hash, so the protocol cannot list them; this package and the approved candidate commit bind them.",
+    "rounds": [
+      {
+        "round": 1,
+        "role": "spec",
+        "path": "review/supplemental-receipt-spec-review.json",
+        "sha256": "a5d35d820013d05c1671c4895921d9ca279b8891a9d76477309b8fef2e4a2045",
+        "status": "FAIL"
+      },
+      {
+        "round": 1,
+        "role": "quality",
+        "path": "review/supplemental-receipt-quality-review.json",
+        "sha256": "52bb1e87902f3103f54b8b65f5c55bcb47a6b5de10803156f316643f6791d473",
+        "status": "PASS"
+      },
+      {
+        "round": 2,
+        "role": "spec",
+        "path": "review/supplemental-receipt-spec-review-2.json",
+        "sha256": "27450d18ce3f06543146d472304fb882e8d47eba177fdb531f6ab152d8fff85f",
+        "status": "PASS"
+      },
+      {
+        "round": 2,
+        "role": "quality",
+        "path": "review/supplemental-receipt-quality-review-2.json",
+        "sha256": "777a39661f570d2e5bef0d198a88fc1d9e90d4fbacccf25b270ffa4c5130d2cf",
+        "status": "PASS"
+      }
+    ],
+    "open_low_findings": [
+      "data_policy names capture and replay directories but not preflight-<fresh-run-id>, which repository_cost counts",
+      "a non-string receipt amendment id fails with TypeError rather than the loader refusal message; it still fails closed"
+    ]
   }
 }
