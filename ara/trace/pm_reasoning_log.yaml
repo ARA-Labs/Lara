@@ -1926,3 +1926,8 @@ entries:
   notes:
   - Crystallize O220 to C58 via verbal affirmation plus empirical resolution, since the researcher commented on the N419 result and said "sure" to the design reading. Moving straight to supported is allowed because both signals fired in the same turn. Provenance is user-revised because the researcher affirmed the framing but not the exact wording.
   - C58's Statement is hedged as shown once, and its Conditions exclude statistical and efficacy readings, matching the researcher's PL framing. C57 is unchanged.
+- turn: 2026-10-13_001#5
+  notes:
+  - Record N420 as an experiment (proof plus gates), not a decision. The issue's retire option was not taken, so there is no alternative to log.
+  - No new claim and no staged observation. The bound is a mechanized theorem documented in docs/theory-process.md, not an interpretive research claim. C57 is unchanged because the step ceiling is outside its scope.
+  - Update only the #46 clause of the constraints Open line. The #45 wording is left as it was, since this turn did not check that issue's status.

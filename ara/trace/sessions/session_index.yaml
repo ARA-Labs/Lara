@@ -768,10 +768,10 @@ sessions:
 
 - id: 2026-10-13_001
   date: '2026-10-13'
-  summary: Corrected P8 completed, replayed and researcher-approved; the approved P9 paired live loop completed (inquiry 8/8 vs status 6/8 primary correct, feasibility only).
-  turn_count: 4
-  events_count: 14
+  summary: Corrected P8 completed, replayed and researcher-approved; the approved P9 paired live loop completed (inquiry 8/8 vs status 6/8 primary correct, feasibility only); issue #46 search-step ceiling proved.
+  turn_count: 5
+  events_count: 15
   claims_touched:
   - C57
   - C58
-  open_threads: 3
+  open_threads: 2

@@ -11672,3 +11672,23 @@ tree:
   status: resolved
   also_depends_on:
   - N418_inquiry_p9_arm_isolation_amendment
+- id: N420_search_step_ceiling_proved
+  type: experiment
+  title: Prove the frozen search-step ceiling covers every admissible prefix search
+  provenance: ai-executed
+  timestamp: '2026-10-13T23:40:00Z'
+  result: >-
+    Issue #46 closed by proof rather than by retiring the claim. goSteps_le bounds the prefix-DFS
+    node count by stepsWorst of the remaining pool length for any fuel, state and prefix, with no
+    nodup premise, where stepsWorst (n + 1) = 1 + (n + 1) * stepsWorst n. stepsWorst_eight gives
+    109601, and admissible_searchSteps_le combines this with admissible_pool_length to show that an
+    accepted version-1 document never exceeds maxSearchSteps = 200000. The ceiling value is
+    unchanged. The inquiry search-steps counter's slot-extension share is still not covered. make
+    local-gates exit 0 and the axiom audit passed.
+  evidence:
+  - lean/Lara/Process/Enumerate.lean
+  - lean/AxCheck.lean
+  - docs/theory-process.md
+  status: resolved
+  also_depends_on:
+  - N419_inquiry_p9_live_run
