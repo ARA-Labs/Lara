@@ -1898,3 +1898,14 @@ entries:
   - All failed and missing invocations remain in the ledger; no production retry. Public issue49 payload
     was reduced to public code/work/costs after verifying destination, resolving the automatic approval
     rejection safely.
+- turn: 2026-10-13_001#1
+  notes:
+  - "Record implementation choices N411\u2013N413 and actual correctness/authoring verification N414.\
+    \ No fresh P8 or live experiment occurred; original failure/missingness remains intact."
+  - Promote O218 to H19 via committed bounded guard and independent review. Preserve observation content
+    and prior trace/session entries; update only its forward promotion pointers.
+  - Extend C57 Proof with exact Lean refinement, without changing supported status or claiming universal
+    Haskell equivalence, speedup or discovery. Update evaluation constraint only to reviewed preparation
+    and pending approval.
+  - Do not treat the repeated source-axis clarification as a fresh budget approval. Candidate commits
+    and exact hashes are concrete; the next action is requesting the separately required approval.

@@ -4413,7 +4413,7 @@ observations:
   bound_to:
   - N409_inquiry_t07_duplicate_support
   - N410_inquiry_p8_corrective_design
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
+  promoted: true
+  promoted_to: logic/solution/heuristics.md:H19
+  crystallized_via: artifact-commitment
   stale: false

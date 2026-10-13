@@ -765,3 +765,14 @@ sessions:
   claims_touched:
   - C57
   open_threads: 4
+
+- id: 2026-10-13_001
+  date: '2026-10-13'
+  summary: Corrective proof/runtime, semantic pair stops and independently reviewed candidate committed;
+    full gates and Haskell suites pass, original incomplete replay preserved. Exact fresh protocol/budget
+    approval and P9 remain pending.
+  turn_count: 1
+  events_count: 5
+  claims_touched:
+  - C57
+  open_threads: 4

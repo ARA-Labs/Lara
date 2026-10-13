@@ -11472,3 +11472,91 @@ tree:
   also_depends_on:
   - N408_inquiry_p8_incomplete
   - N409_inquiry_t07_duplicate_support
+- id: N411_inquiry_sparse_refinement
+  type: decision
+  title: Use sparse Lean sensitivity only through exact reference equality
+  provenance: ai-executed
+  timestamp: '2026-10-13T00:47:45Z'
+  choice: Commit ab4fc49 after independent spec and quality review and passing full local gates. Keep
+    the powerset reference unchanged; prove ordered-list equality and complete result equality, then use
+    compiler substitution. Preserve duplicate rows, declaration order, empty-change cases and first realizers.
+    This is a formal refinement and implementation check, not a completed P8 performance result.
+  alternatives:
+  - Increase timeouts or remove inert-slot workloads
+  evidence:
+  - git:ab4fc49
+  - lean/Lara/Process/Analysis.lean:minimalSlotSetsFast_eq_minimalSlotSets
+  - lean/Lara/Process/Analysis.lean:sensitivityResultFast_eq_sensitivityResult
+  - lean/Lara/Process/Analysis.lean:sensitivityResult_eq_fast
+  - evaluation/inquiry-correction-validation/lean-sparse/validation.json
+  status: resolved
+  also_depends_on:
+  - N410_inquiry_p8_corrective_design
+- id: N412_inquiry_pair_semantic_stop
+  type: decision
+  title: Stop on a failed completed pair while retaining process truth
+  provenance: ai-executed
+  timestamp: '2026-10-13T00:47:45Z'
+  choice: Commit 317f210 after independent reviews. Score every completed native/Lean pair before the
+    next case; keep agreement, oracle, protocol, consumer and locality predicates separate. Preserve successful
+    process records and semantic discrepancy details through interruption or report recovery. Retain process-free
+    compatibility with the original incomplete attempt.
+  alternatives:
+  - Discover oracle disagreement only after all captures
+  evidence:
+  - git:317f210
+  - scripts/inquiry-evaluate.py:semantic_checkpoint
+  - evaluation/inquiry-correction-validation/semantic-stop/validation.json
+  status: resolved
+  also_depends_on:
+  - N410_inquiry_p8_corrective_design
+- id: N413_inquiry_reviewed_correction_candidate
+  type: decision
+  title: Commit independently reviewed corrected inputs without approving measurement
+  provenance: ai-executed
+  timestamp: '2026-10-13T00:47:45Z'
+  choice: Commit 5c74e4d outside the original freeze. Clone the after-policy rule as r-s-new so the new
+    attacker has a distinct complete support term; keep intended query results unchanged. Add a bounded
+    fail-closed support annotation guard, explicit input-commit pin and hash-bound approval receipt. Independent
+    review fixes malformed-rule acceptance and narrows metadata-only freeze changes. Final candidate remains
+    awaiting researcher approval and a fresh budget.
+  alternatives:
+  - Weaken the T07 expected result to rejection
+  - Overwrite the original frozen suite
+  evidence:
+  - git:5c74e4d
+  - evaluation/inquiry-p8-corrected/protocol.json
+  - evaluation/inquiry-p8-corrected/MANIFEST.json
+  - evaluation/inquiry-p8-corrected/review/independent-spec-review-final.json
+  - evaluation/inquiry-p8-corrected/review/independent-quality-review-final.json
+  - evaluation/inquiry-p8-corrected/review/independent-quality-handoff.json
+  - scripts/inquiry_support_annotations.py
+  - ara/staging/observations.yaml:O218
+  status: resolved
+  also_depends_on:
+  - N409_inquiry_t07_duplicate_support
+  - N411_inquiry_sparse_refinement
+  - N412_inquiry_pair_semantic_stop
+- id: N414_inquiry_corrective_verification
+  type: experiment
+  title: Verify corrected implementation boundaries and preserve failed evidence
+  provenance: ai-executed
+  timestamp: '2026-10-13T00:47:45Z'
+  result: Full local gates and both Haskell suites pass. Fake-process boundary tests retain semantic stops
+    and recovery diagnoses; final authoring checks, independent source/graph/counter review and real consumer-only
+    decoding pass. Final process-free original replay preserves every sealed artifact and deterministic
+    report, the original incomplete timeout and missingness. These are correctness/authoring checks; no
+    fresh production inquiry measurement, live pilot or paid call occurred.
+  evidence:
+  - evaluation/inquiry-correction-validation/lean-sparse/validation.json
+  - evaluation/inquiry-correction-validation/haskell/validation.json
+  - evaluation/inquiry-correction-validation/semantic-stop/validation.json
+  - evaluation/inquiry-correction-validation/candidate-final-legacy-replay/validation.json
+  - evaluation/inquiry-p8-corrected/review/authoring-checks/
+  - evaluation/inquiry-p8-corrected/authoring-validation.json
+  - evaluation/inquiry-p8-corrected/review/metadata-attachment.json
+  status: resolved
+  also_depends_on:
+  - N411_inquiry_sparse_refinement
+  - N412_inquiry_pair_semantic_stop
+  - N413_inquiry_reviewed_correction_candidate
