@@ -11280,3 +11280,283 @@ tree:
   status: resolved
   also_depends_on:
   - N399_inquiry_sensitive_candidates
+- id: N401_inquiry_evaluation_draft
+  type: decision
+  title: Draft the P8 protocol and a result-dependent P9 follow-on on a new branch
+  provenance: user
+  timestamp: '2026-10-12T20:35:54Z'
+  choice: >-
+    User requested a new branch and a draft covering the P8 protocol and how
+    to follow P9 after its results. Drafting does not authorize implementation,
+    evaluation runs, live compute, commits, pushes or a PR.
+  alternatives:
+  - Begin evaluation without an approved protocol
+  evidence:
+  - plans/inquiry-p8-p9.md
+  - https://github.com/ARA-Labs/Lara/issues/22
+  - https://github.com/ARA-Labs/Lara/pull/48
+  status: resolved
+  also_depends_on:
+  - N397_inquiry_native_conformance
+  - N400_inquiry_sensitive_regression
+- id: N402_inquiry_p8_approved
+  type: decision
+  title: Approve the bounded local inquiry evaluation and keep live work separately gated
+  provenance: user
+  timestamp: '2026-10-12T21:37:24Z'
+  choice: Yifeng He approved the P8 implementation and local measurement protocol in a904130; the active
+    request invokes implement on the approved plan. P9 live calls, paid compute and pilot runs require
+    their own protocol approval.
+  alternatives:
+  - Execute a live evaluation under the synthetic-case budget
+  evidence:
+  - evaluation/inquiry-p8/protocol.json
+  - staging/observations.yaml:O217
+  - git:a904130af7781fd5b308d049be7f4f43bdf9e256:plans/inquiry-p8-p9.md
+  status: resolved
+  also_depends_on:
+  - N401_inquiry_evaluation_draft
+- id: N403_inquiry_p8_boundary
+  type: decision
+  title: Pin the additive inquiry evaluation boundary before authoring the final suite
+  provenance: ai-executed
+  timestamp: '2026-10-12T21:37:24Z'
+  choice: Commit approval/code pointers, frozen budgets and recipes, original control hashes, legacy inventory
+    hashes and local dependency checks as 0818b67. Independent spec and quality review passed. The manifest
+    explicitly remains incomplete until all cases and independent annotations are reviewed; no measurement
+    driver was invoked.
+  alternatives:
+  - Measure an unpinned moving worktree
+  evidence:
+  - evaluation/inquiry-p8/protocol.json
+  - evaluation/inquiry-p8/MANIFEST.json
+  - git:0818b67
+  status: resolved
+  also_depends_on:
+  - N402_inquiry_p8_approved
+- id: N404_inquiry_source_axis_groups
+  type: decision
+  title: Count source-axis levels as leaf-root groups and disclose the AST charge
+  provenance: user
+  timestamp: '2026-10-12T22:05:48Z'
+  choice: The researcher explicitly chose leaf-root groups for the source-declaration levels. Each group
+    consists of a fresh leaf and its root argument; the protocol records both the group level and exact
+    AST declaration count. Execution limits and legacy inputs remain unchanged.
+  alternatives:
+  - Keep literal AST declaration counts and revise the construction
+  evidence:
+  - evaluation/inquiry-p8/protocol.json:amendments/source-axis-groups
+  - plans/inquiry-p8-p9.md
+  status: resolved
+  also_depends_on:
+  - N402_inquiry_p8_approved
+- id: N405_inquiry_p8_input_freeze
+  type: decision
+  title: Freeze the independently annotated inquiry suite before any driver measurement
+  provenance: ai-executed
+  timestamp: '2026-10-12T22:05:48Z'
+  choice: Commit the additive suite as 95f63bf after independent semantic/spec and quality review. Retain
+    exact row, graph, history, guard, sensitivity, assumption, capture and certificate annotations. Revise
+    the observed-capture case to include an actual wrong-run alternative with valid common ledger evidence,
+    rather than absence alone. Keep code, wire, legacy corpus and freeze tags unchanged.
+  alternatives:
+  - Infer expected results from a final driver run
+  - Use capture absence as the sole wrong-binding control
+  evidence:
+  - evaluation/inquiry-p8/MANIFEST.json
+  - evaluation/inquiry-p8/independent-review.json
+  - evaluation/inquiry-p8/oracles/T15.json
+  - evaluation/inquiry-p8/quality-review.json
+  - git:95f63bf
+  status: resolved
+  also_depends_on:
+  - N403_inquiry_p8_boundary
+  - N404_inquiry_source_axis_groups
+- id: N406_inquiry_freeze_verification
+  type: experiment
+  title: Verify independent expectations, consumer decoding and immutable freeze boundaries
+  provenance: ai-executed
+  timestamp: '2026-10-12T22:05:48Z'
+  result: The independent finite audit and source/graph inspection pass for all authored and generated
+    documents; original development input/golden pairs remain unchanged. Real consumer-only checks accept
+    original input and expected ASTs. Focused tests verify input-bound review provenance, non-overwriting
+    frozen generation and read-only audit replay. These are authoring/conformance checks, not P8 latency
+    or live-workflow observations; no production inquiry driver measurement was run.
+  evidence:
+  - evaluation/inquiry-p8/independent-review.json
+  - evaluation/inquiry-p8/authoring-validation.json
+  - evaluation/inquiry-p8/quality-review.json
+  - test/inquiry_evaluation_boundaries.py
+  status: resolved
+  also_depends_on:
+  - N405_inquiry_p8_input_freeze
+- id: N407_inquiry_p8_runner
+  type: decision
+  title: Land a reviewed immutable inquiry capture and replay runner
+  provenance: ai-executed
+  timestamp: '2026-10-12T23:15:47Z'
+  choice: Commit fddf532 after independent spec and quality review. Keep oracle, driver, protocol and
+    consumer judgments separate; enforce fixed process/aggregate budgets; retain atomic incomplete evidence
+    and portable process-free replay. Boundary review corrected rejected-status comparisons, proof-context
+    aggregation, audit declarations, failure counts, interruption recovery and malformed-output handling.
+  alternatives:
+  - Treat matching driver output as independent oracle evidence
+  evidence:
+  - evaluation/inquiry-runner-validation/
+  - scripts/inquiry-evaluate.py
+  - git:fddf532
+  status: resolved
+  also_depends_on:
+  - N405_inquiry_p8_input_freeze
+- id: N408_inquiry_p8_incomplete
+  type: experiment
+  title: Retain the approved incomplete inquiry attempt and its exact replay
+  provenance: ai-executed
+  timestamp: '2026-10-12T23:15:47Z'
+  result: The one approved production attempt is INCOMPLETE. Lean T11-singleton-slots-40 timed out; both
+    completed T07 outputs disagree with the frozen accepted-to-accepted oracle. Completed consumer decoding
+    succeeds; missing invocations remain missing. One capture-only replay retains the incomplete result
+    and matches all sealed artifacts and deterministic reports. No retry or selected-driver diagnosis
+    was executed.
+  evidence:
+  - ara/evidence/inquiry-p8/20261012T225824Z-a904130/run.json
+  - ara/evidence/inquiry-p8/20261012T225824Z-a904130/summary.json
+  - ara/evidence/inquiry-p8/20261012T225824Z-a904130/results.jsonl
+  - ara/evidence/inquiry-p8/20261012T225824Z-a904130/report.md
+  - ara/evidence/inquiry-p8/20261012T225824Z-a904130-reproduction.json
+  - git:664a65f
+  status: resolved
+  also_depends_on:
+  - N407_inquiry_p8_runner
+- id: N409_inquiry_t07_duplicate_support
+  type: dead_end
+  title: Argument renaming does not produce a distinct checked support term
+  provenance: ai-executed
+  timestamp: '2026-10-12T23:15:47Z'
+  hypothesis: Cloning the attacker with a new argument and derived-claim identity yields the annotated
+    accepted after-graph.
+  failure_mode: T07 retains the same rule, seed premise, substitution, discharges, holes and assurance.
+    Lowered SupportTerm excludes the renamed identities; checkProgramDetailed rejects its first duplicate
+    before graph checking. The independent annotation review missed this boundary.
+  lesson: Inspect fully expanded semantic support keys before drawing an accepted graph. Preserve the
+    failed freeze and correct the source rather than weakening the intended accepted-to-accepted contrast.
+  evidence:
+  - ara/evidence/inquiry-p8/20261012T225824Z-a904130/raw/T07.native.stdout
+  - ara/evidence/inquiry-p8/20261012T225824Z-a904130/raw/T07.lean.stdout
+  - src/Lara/AST.hs
+  - src/Lara/Check.hs
+  - plans/inquiry-p8-corrections.md
+  status: resolved
+  also_depends_on:
+  - N408_inquiry_p8_incomplete
+- id: N410_inquiry_p8_corrective_design
+  type: decision
+  title: Prepare semantics-preserving corrections before requesting a fresh measurement budget
+  provenance: ai-executed
+  timestamp: '2026-10-12T23:15:47Z'
+  choice: 'Engineering review clears corrective implementation only: prove a sparse Lean algorithm exactly
+    equal to the immutable slot-sublist reference, retain pair-level semantic stop diagnoses, and independently
+    prepare a distinct-rule T07 candidate outside the old frozen suite. Track work and proof/compute/freeze
+    costs in issue 49. Start Lean proof work; do not refreeze inputs or rerun production measurement until
+    the researcher approves exact corrective pins and a fresh budget.'
+  alternatives:
+  - Drop forty-slot workloads
+  - Increase timeouts to conceal the reference traversal
+  - Replace the T07 expected outcome with source rejection
+  evidence:
+  - plans/inquiry-p8-corrections.md
+  - https://github.com/ARA-Labs/Lara/issues/49
+  - https://github.com/ARA-Labs/Lara/issues/22#issuecomment-6134392748
+  - ara/evidence/inquiry-p8/20261012T225824Z-a904130/report.md
+  status: resolved
+  also_depends_on:
+  - N408_inquiry_p8_incomplete
+  - N409_inquiry_t07_duplicate_support
+- id: N411_inquiry_sparse_refinement
+  type: decision
+  title: Use sparse Lean sensitivity only through exact reference equality
+  provenance: ai-executed
+  timestamp: '2026-10-13T00:47:45Z'
+  choice: Commit ab4fc49 after independent spec and quality review and passing full local gates. Keep
+    the powerset reference unchanged; prove ordered-list equality and complete result equality, then use
+    compiler substitution. Preserve duplicate rows, declaration order, empty-change cases and first realizers.
+    This is a formal refinement and implementation check, not a completed P8 performance result.
+  alternatives:
+  - Increase timeouts or remove inert-slot workloads
+  evidence:
+  - git:ab4fc49
+  - lean/Lara/Process/Analysis.lean:minimalSlotSetsFast_eq_minimalSlotSets
+  - lean/Lara/Process/Analysis.lean:sensitivityResultFast_eq_sensitivityResult
+  - lean/Lara/Process/Analysis.lean:sensitivityResult_eq_fast
+  - evaluation/inquiry-correction-validation/lean-sparse/validation.json
+  status: resolved
+  also_depends_on:
+  - N410_inquiry_p8_corrective_design
+- id: N412_inquiry_pair_semantic_stop
+  type: decision
+  title: Stop on a failed completed pair while retaining process truth
+  provenance: ai-executed
+  timestamp: '2026-10-13T00:47:45Z'
+  choice: Commit 317f210 after independent reviews. Score every completed native/Lean pair before the
+    next case; keep agreement, oracle, protocol, consumer and locality predicates separate. Preserve successful
+    process records and semantic discrepancy details through interruption or report recovery. Retain process-free
+    compatibility with the original incomplete attempt.
+  alternatives:
+  - Discover oracle disagreement only after all captures
+  evidence:
+  - git:317f210
+  - scripts/inquiry-evaluate.py:semantic_checkpoint
+  - evaluation/inquiry-correction-validation/semantic-stop/validation.json
+  status: resolved
+  also_depends_on:
+  - N410_inquiry_p8_corrective_design
+- id: N413_inquiry_reviewed_correction_candidate
+  type: decision
+  title: Commit independently reviewed corrected inputs without approving measurement
+  provenance: ai-executed
+  timestamp: '2026-10-13T00:47:45Z'
+  choice: Commit 5c74e4d outside the original freeze. Clone the after-policy rule as r-s-new so the new
+    attacker has a distinct complete support term; keep intended query results unchanged. Add a bounded
+    fail-closed support annotation guard, explicit input-commit pin and hash-bound approval receipt. Independent
+    review fixes malformed-rule acceptance and narrows metadata-only freeze changes. Final candidate remains
+    awaiting researcher approval and a fresh budget.
+  alternatives:
+  - Weaken the T07 expected result to rejection
+  - Overwrite the original frozen suite
+  evidence:
+  - git:5c74e4d
+  - evaluation/inquiry-p8-corrected/protocol.json
+  - evaluation/inquiry-p8-corrected/MANIFEST.json
+  - evaluation/inquiry-p8-corrected/review/independent-spec-review-final.json
+  - evaluation/inquiry-p8-corrected/review/independent-quality-review-final.json
+  - evaluation/inquiry-p8-corrected/review/independent-quality-handoff.json
+  - scripts/inquiry_support_annotations.py
+  - ara/staging/observations.yaml:O218
+  status: resolved
+  also_depends_on:
+  - N409_inquiry_t07_duplicate_support
+  - N411_inquiry_sparse_refinement
+  - N412_inquiry_pair_semantic_stop
+- id: N414_inquiry_corrective_verification
+  type: experiment
+  title: Verify corrected implementation boundaries and preserve failed evidence
+  provenance: ai-executed
+  timestamp: '2026-10-13T00:47:45Z'
+  result: Full local gates and both Haskell suites pass. Fake-process boundary tests retain semantic stops
+    and recovery diagnoses; final authoring checks, independent source/graph/counter review and real consumer-only
+    decoding pass. Final process-free original replay preserves every sealed artifact and deterministic
+    report, the original incomplete timeout and missingness. These are correctness/authoring checks; no
+    fresh production inquiry measurement, live pilot or paid call occurred.
+  evidence:
+  - evaluation/inquiry-correction-validation/lean-sparse/validation.json
+  - evaluation/inquiry-correction-validation/haskell/validation.json
+  - evaluation/inquiry-correction-validation/semantic-stop/validation.json
+  - evaluation/inquiry-correction-validation/candidate-final-legacy-replay/validation.json
+  - evaluation/inquiry-p8-corrected/review/authoring-checks/
+  - evaluation/inquiry-p8-corrected/authoring-validation.json
+  - evaluation/inquiry-p8-corrected/review/metadata-attachment.json
+  status: resolved
+  also_depends_on:
+  - N411_inquiry_sparse_refinement
+  - N412_inquiry_pair_semantic_stop
+  - N413_inquiry_reviewed_correction_candidate

@@ -1,0 +1,2 @@
+(inquiry-result 1 v0 (history-verdict (history-count 1) (answer v0 certainTrue (completions 1))))
+(inquiry-result 1 tampered-certificate (verification-body (invalid-certificate (mismatched-snapshots))))

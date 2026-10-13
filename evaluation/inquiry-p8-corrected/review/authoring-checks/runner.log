@@ -1,0 +1,38 @@
+..................................
+----------------------------------------------------------------------
+Ran 34 tests in 47.838s
+
+OK
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/saved
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/replay
+COMPLETE: PASS: /tmp/inquiry-runner-boundaries-e2849xew/complete
+REPLAY COMPLETE: PASS: /tmp/inquiry-runner-boundaries-e2849xew/complete-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/consumer-refusal-pair
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/consumer-refusal-pair-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/consumer-stdout-pair
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/consumer-stdout-pair-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/consumer-stderr-pair
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/consumer-stderr-pair-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/consumer-signal
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/deep-output
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/deep-output-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/interrupted-semantic-checkpoint
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/interrupted-semantic-checkpoint-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/locality-counterexample-pair
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/locality-counterexample-pair-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/one-driver-disagreement
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/one-driver-disagreement-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/invalid-protocol-pair
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/invalid-protocol-pair-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/publication-deadline
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/publication-deadline-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/write-failure
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/write-failure-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/semantic-report-recovery-io
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/semantic-report-recovery-io-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/semantic-report-recovery-deadline
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/semantic-report-recovery-deadline-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/same-valid-wrong-first-pair
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/same-valid-wrong-first-pair-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/unattached
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-e2849xew/unattached-replay

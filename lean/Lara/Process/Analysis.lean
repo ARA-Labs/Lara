@@ -2,6 +2,7 @@ import Lara.Process.FamilyAudit
 import Lara.Process.Enumerate
 import Lara.Process.Inquiry
 import Lara.Process.Vocabulary
+import Lara.Process.CanonicalSubsets
 
 /-!
 Exact finite inquiry analyses (issue #22, stage P3).
@@ -1060,6 +1061,147 @@ theorem singleton_minimal_iff {spec : Family.FamilySpec} {cs : List Family.Compl
     · exact hnil rfl
     · exact hne rfl
 
+/-! ### Sparse, reference-equivalent slot sensitivity -/
+
+/-- Normalize and deduplicate changed sets only. The differing rows themselves
+retain every completion in declaration order. -/
+def changedCandidates (spec : Family.FamilySpec) (cs : List Family.Completion)
+    (read : Family.Completion → Except SourceRejection β) (reference : Family.Completion) :
+    List (List SlotId) :=
+  ((differingRows spec cs read reference).map fun row =>
+    CanonicalSubsets.normalize (slotUniverse spec) row.changed).dedup
+
+private theorem candidate_sublist {spec : Family.FamilySpec} {cs : List Family.Completion}
+    {read : Family.Completion → Except SourceRejection β} {reference : Family.Completion}
+    {S : List SlotId} (h : S ∈ changedCandidates spec cs read reference) :
+    S.Sublist (slotUniverse spec) := by
+  obtain ⟨row, _, rfl⟩ := List.mem_map.mp (List.mem_dedup.mp h)
+  exact CanonicalSubsets.normalize_sublist _ _
+
+/-- Admitting a flip depends only on the normalized changed-set candidates. -/
+theorem admitsFlip_iff_candidates {spec : Family.FamilySpec} {cs : List Family.Completion}
+    {read : Family.Completion → Except SourceRejection β} {reference : Family.Completion}
+    {S : List SlotId} :
+    AdmitsFlip spec cs read reference S ↔
+      ∃ C ∈ changedCandidates spec cs read reference, C ⊆ S := by
+  constructor
+  · rintro ⟨c, hc, hist, inside, diff⟩
+    refine ⟨CanonicalSubsets.normalize (slotUniverse spec) (changedSlots spec reference c),
+      List.mem_dedup.mpr (List.mem_map.mpr ⟨⟨c, changedSlots spec reference c⟩,
+        mem_differingRows.mpr ⟨hc, diff, hist, rfl⟩, rfl⟩), ?_⟩
+    intro s hs
+    exact inside s (CanonicalSubsets.mem_normalize.mp hs).2
+  · rintro ⟨C, hc, inside⟩
+    obtain ⟨row, hr, rfl⟩ := List.mem_map.mp (List.mem_dedup.mp hc)
+    obtain ⟨hc, diff, hist, changed⟩ := mem_differingRows.mp hr
+    refine ⟨row.completion, hc, hist, ?_, diff⟩
+    intro s hs
+    exact inside (CanonicalSubsets.mem_normalize.mpr
+      ⟨changedSlots_subset_universe s hs, changed ▸ hs⟩)
+
+/-- With no empty changed set, each minimal flip set is an inclusion-minimal
+retained candidate, including incomparable candidates of different sizes. -/
+theorem slotMinimal_iff_candidate_minimal {spec : Family.FamilySpec}
+    {cs : List Family.Completion} {read : Family.Completion → Except SourceRejection β}
+    {reference : Family.Completion} {S : List SlotId}
+    (sub : S.Sublist (slotUniverse spec))
+    (hne : [] ∉ changedCandidates spec cs read reference) :
+    SlotMinimal spec cs read reference S ↔
+      S ∈ changedCandidates spec cs read reference ∧ S ≠ [] ∧
+      ∀ C ∈ changedCandidates spec cs read reference, C ⊆ S → S ⊆ C := by
+  have hu : (slotUniverse spec).Nodup := List.nodup_dedup _
+  constructor
+  · rintro ⟨nonempty, flip, minimal⟩
+    have chosen : ∀ C ∈ changedCandidates spec cs read reference, C ⊆ S → C = S := by
+      intro C hc inside
+      by_contra ne
+      exact minimal C (CanonicalSubsets.sublist_of_subset hu (candidate_sublist hc) sub inside)
+        ne (fun h => hne (h ▸ hc)) (admitsFlip_iff_candidates.mpr ⟨C, hc, List.Subset.refl _⟩)
+    obtain ⟨C, hc, inside⟩ := admitsFlip_iff_candidates.mp flip
+    exact ⟨chosen C hc inside ▸ hc, nonempty, fun C hc inside =>
+      (chosen C hc inside) ▸ List.Subset.refl _⟩
+  · rintro ⟨hc, nonempty, minimal⟩
+    refine ⟨nonempty, admitsFlip_iff_candidates.mpr ⟨S, hc, List.Subset.refl _⟩, ?_⟩
+    intro T ht ne _ flip
+    obtain ⟨C, hc, inside⟩ := admitsFlip_iff_candidates.mp flip
+    have cover : S ⊆ T := fun _ hs => inside (minimal C hc (fun _ h => ht.subset (inside h)) hs)
+    exact ne (ht.antisymm (CanonicalSubsets.sublist_of_subset hu sub (ht.trans sub) cover))
+
+/-- An empty changed set admits a flip inside every singleton, even when slot
+identities or completion rows repeat. -/
+theorem slotMinimal_iff_singleton_of_empty {spec : Family.FamilySpec}
+    {cs : List Family.Completion} {read : Family.Completion → Except SourceRejection β}
+    {reference : Family.Completion} {S : List SlotId}
+    (sub : S.Sublist (slotUniverse spec))
+    (empty : [] ∈ changedCandidates spec cs read reference) :
+    SlotMinimal spec cs read reference S ↔ ∃ s ∈ slotUniverse spec, S = [s] := by
+  have flip : ∀ T, AdmitsFlip spec cs read reference T := fun T =>
+    admitsFlip_iff_candidates.mpr ⟨[], empty, List.nil_subset T⟩
+  constructor
+  · rintro ⟨nonempty, _, minimal⟩
+    obtain ⟨s, hs⟩ := List.exists_mem_of_ne_nil S nonempty
+    refine ⟨s, sub.subset hs, ?_⟩
+    by_contra ne
+    exact minimal [s] (singleton_sublist hs) (Ne.symm ne) (by simp) (flip [s])
+  · rintro ⟨s, hs, rfl⟩
+    exact (mem_minimalSlotSets.mp ((singleton_minimal_iff hs).mpr (flip [s]))).2
+
+/-- Sparse inclusion-minimal candidates in the frozen reference's exact colex
+order. No universe powerset is constructed. -/
+def minimalSlotSetsFast (spec : Family.FamilySpec) (cs : List Family.Completion)
+    (read : Family.Completion → Except SourceRejection β) (reference : Family.Completion) :
+    List (List SlotId) :=
+  let candidates := changedCandidates spec cs read reference
+  if [] ∈ candidates then (slotUniverse spec).map fun s => [s]
+  else CanonicalSubsets.sort (slotUniverse spec) (candidates.filter fun S =>
+    decide (S ≠ [] ∧ ∀ C ∈ candidates, C ⊆ S → S ⊆ C))
+
+/-- Exact ordered-list equality for every input, including duplicate slot IDs,
+duplicate completions, history mismatches, and rejected observations. -/
+theorem minimalSlotSetsFast_eq_minimalSlotSets (spec : Family.FamilySpec)
+    (cs : List Family.Completion) (read : Family.Completion → Except SourceRejection β)
+    (reference : Family.Completion) :
+    minimalSlotSetsFast spec cs read reference = minimalSlotSets spec cs read reference := by
+  have hu : (slotUniverse spec).Nodup := List.nodup_dedup _
+  unfold minimalSlotSetsFast
+  dsimp only
+  split
+  · rename_i empty
+    have hm : ∀ S, S ∈ (slotUniverse spec).map (fun s => [s]) ↔
+        S ∈ minimalSlotSets spec cs read reference := by
+      intro S
+      constructor
+      · rintro h
+        obtain ⟨s, hs, rfl⟩ := List.mem_map.mp h
+        exact mem_minimalSlotSets.mpr ⟨singleton_sublist hs,
+          (slotMinimal_iff_singleton_of_empty (singleton_sublist hs) empty).mpr ⟨s, hs, rfl⟩⟩
+      · intro h
+        obtain ⟨sub, min⟩ := mem_minimalSlotSets.mp h
+        obtain ⟨s, hs, rfl⟩ := (slotMinimal_iff_singleton_of_empty sub empty).mp min
+        exact List.mem_map.mpr ⟨s, hs, rfl⟩
+    have hsort := CanonicalSubsets.sort_eq_filter hu (slotMinimalB spec cs read reference)
+      ((slotUniverse spec).map fun s => [s]) (hu.map (by intro a b h; simpa using h)) hm
+    unfold minimalSlotSets
+    rw [← hsort]
+    symm
+    apply CanonicalSubsets.sort_eq_self
+    · intro S hS
+      obtain ⟨s, hs, rfl⟩ := List.mem_map.mp hS
+      exact singleton_sublist hs
+    · exact (CanonicalSubsets.sublists_key_pairwise hu).sublist
+        (List.map_pure_sublist_sublists _)
+  · rename_i nonempty
+    apply CanonicalSubsets.sort_eq_filter hu
+    · exact (List.nodup_dedup _).filter _
+    · intro S
+      rw [List.mem_filter, decide_eq_true_eq, ← minimalSlotSets, mem_minimalSlotSets]
+      constructor
+      · rintro ⟨hc, min⟩
+        exact ⟨candidate_sublist hc,
+          (slotMinimal_iff_candidate_minimal (candidate_sublist hc) nonempty).mpr ⟨hc, min⟩⟩
+      · rintro ⟨sub, min⟩
+        exact (slotMinimal_iff_candidate_minimal sub nonempty).mp min
+
 /-! ### Minimal conditional assumptions over a literal catalog -/
 
 section Assumptions
@@ -1414,6 +1556,37 @@ def sensitivityResult {Obs : Type} (obs : Obs)
     differing := differingRows spec cs read reference
     minimalSlotSets := sets
     realizing := sets.filterMap fun S => (realizing spec cs read reference S).map fun c => (S, c) }
+
+/-- Runtime construction from the sparse changed-set procedure. Every other
+field, including duplicate rows and the first realizing completion, uses the
+same frozen construction as `sensitivityResult`. -/
+def sensitivityResultFast {Obs : Type} (obs : Obs)
+    (spec : Family.FamilySpec) {β : Type} [DecidableEq β]
+    (cs : List Family.Completion) (read : Family.Completion → Except SourceRejection β)
+    (reference : Family.Completion) : SensitivityResult Obs :=
+  let sets := minimalSlotSetsFast spec cs read reference
+  { observable := obs
+    reference := reference
+    total := cs.length
+    sensitive := (Sensitivity cs read reference).length
+    differing := differingRows spec cs read reference
+    minimalSlotSets := sets
+    realizing := sets.filterMap fun S => (realizing spec cs read reference S).map fun c => (S, c) }
+
+/-- Whole-record equality preserves every observable field and first realizer,
+not just the membership of the minimal slot sets. -/
+theorem sensitivityResultFast_eq_sensitivityResult {Obs : Type} (obs : Obs)
+    (spec : Family.FamilySpec) {β : Type} [DecidableEq β]
+    (cs : List Family.Completion) (read : Family.Completion → Except SourceRejection β)
+    (reference : Family.Completion) :
+    sensitivityResultFast obs spec cs read reference = sensitivityResult obs spec cs read reference := by
+  simp only [sensitivityResultFast, sensitivityResult, minimalSlotSetsFast_eq_minimalSlotSets]
+
+/-- The compiler substitutes the sparse construction only through the proved
+whole-record equality; kernel reduction keeps the frozen reference definition. -/
+@[csimp] theorem sensitivityResult_eq_fast : @sensitivityResult = @sensitivityResultFast := by
+  funext Obs obs spec β inst cs read reference
+  exact (sensitivityResultFast_eq_sensitivityResult obs spec cs read reference).symm
 
 def deletionOf (cs : List Family.Completion)
     (read : Family.Completion → Except SourceRejection β) (target : β)

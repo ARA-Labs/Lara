@@ -1,0 +1,2 @@
+(inquiry-result 1 precommitted (history-verdict (history-count 0) (answer precommitted inconsistent (completions 0))))
+(inquiry-result 1 stability (stability-body (stability-result (observable (status-obs c0)) 0 0 0 false false)))

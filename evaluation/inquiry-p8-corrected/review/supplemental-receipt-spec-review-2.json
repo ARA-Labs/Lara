@@ -1,0 +1,107 @@
+{
+  "schema": "inquiry-p8-supplemental-review",
+  "schema_version": 1,
+  "role": "spec",
+  "reviewer": "independent spec reviewer agent receipt-spec-reviewer",
+  "provenance": "ai-executed",
+  "status": "PASS",
+  "scope": "Round-2 spec re-review of the issue #50 change after fixes for the round-1 findings: deferred T07 amendment and data-policy approval to the correction receipt, repeated-requests construction text, repository-cost statement, loader enforcement and its test.",
+  "prior_receipt": {
+    "path": "evaluation/inquiry-p8-corrected/review/supplemental-receipt-spec-review.json",
+    "sha256": "a5d35d820013d05c1671c4895921d9ca279b8891a9d76477309b8fef2e4a2045"
+  },
+  "reviewed_protocol_sha256": "587783d8fccfbbf648c8b8c5ac4febb2c06e4f8fe019450cde7fcec26d9647e2",
+  "previous_protocol_sha256": "41a4fa014b1083cbe849588a1f9d49bdff9f6a19d3b1472d5f6e475049810796",
+  "reviewed_files": [
+    {
+      "path": "evaluation/inquiry-p8-corrected/protocol.json",
+      "sha256": "587783d8fccfbbf648c8b8c5ac4febb2c06e4f8fe019450cde7fcec26d9647e2"
+    },
+    {
+      "path": "evaluation/inquiry-p8-corrected/README.md",
+      "sha256": "a9b95dc566934d85eb17f6e0f4b461936f66f9bd42aedab9ea82facb28d9fe8a"
+    },
+    {
+      "path": "scripts/inquiry_evaluation_manifest.py",
+      "sha256": "6586b5a2e007e4e69fa496f1a84ddb47f2a2b57f41a9f23cc998e328720ac68d"
+    },
+    {
+      "path": "test/inquiry_approval_receipt.py",
+      "sha256": "831317a8a361629014c48d0f3ddd37afceddfff443d00ee78b4ae6f25460f6d1"
+    }
+  ],
+  "unchanged_bound_files_verified": true,
+  "changed_protocol_paths": [
+    "/amendments[1]/status",
+    "/amendments[1]/approval_location (added)",
+    "/data_policy/state",
+    "/data_policy/approval_location (added)",
+    "/data_policy/repository_cost (added)",
+    "/recipes/axes[3]/construction",
+    "/recipes/additional_helpers[scripts/inquiry_evaluation_manifest.py].sha256 (b02308a1... -> 6586b5a2...)",
+    "/recipes/additional_helpers (added test/inquiry_approval_receipt.py, 831317a8...)"
+  ],
+  "checks": [
+    {
+      "question": "1. Protocol changes confined to the named fields",
+      "result": "PASS",
+      "detail": "Parsed-JSON diff against HEAD (41a4fa01...) shows only the 8 paths in changed_protocol_paths. partition, budget, ceilings, questions, case_matrix, code pins, oracle_policy, legacy_inputs, freeze (supporting_artifacts unchanged, 15 entries), correction_approval, p9, claim_limits and the other recipes fields are unchanged."
+    },
+    {
+      "question": "2. Bound files byte-identical and listed hashes match",
+      "result": "PASS",
+      "detail": "git diff HEAD is empty for MANIFEST.json, inputs/, oracles/, certificates/, independent-review.json, quality-review.json, authoring-validation.json, review-package.json and evaluation/inquiry-p8. freeze.manifest_sha256, all 15 supporting_artifacts, generator/independent_audit_tool/certificate_producer sha256 and all 10 additional_helpers match current bytes."
+    },
+    {
+      "question": "3. Repeated-requests wording true",
+      "result": "PASS",
+      "detail": "Unchanged since round 1 and the manifest is byte-identical: all 96 cases expect 'results'; max counter/limit ratio over the 16 repeated-requests cases is 352/1000 pairs (T01-repeated-requests-8); expected_embedded_event_count is 0 against limit 8."
+    },
+    {
+      "question": "4. repository_cost accurate",
+      "result": "PASS",
+      "detail": "Independently measured from git ls-files -s blob ids deduplicated and sized with git cat-file --batch-check: unique content of the failed capture, replay and preflight directories is 68,187,944 B (about 68.2 MB), matching the claim; packed on-disk size is 48,149,535 B, and the text correctly says 'unique content', not packed size. Working-tree size per capture/replay directory is 62,499,109 / 62,494,088 B (about 62 MB); lean.gz is 41,928,158 B (about 42 MB); preflight unique content 6,085,959 B (about 6 MB); capture and replay share blob ids for all three binaries. 'A new run should add a similar amount' is a reasonable estimate."
+    },
+    {
+      "question": "5. Self-consistency and loader enforcement of approval_location",
+      "result": "PASS",
+      "detail": "The amendment approval_location now claims one entry with this id, a non-blank approval_text string and interpretation_sha256 of the UTF-8 interpretation; the loader requires a list of objects, unique ids, isinstance str and non-blank after strip, and the interpretation hash. The data_policy approval_location spells out json_bytes exactly (sort_keys, ',' ':' separators, ensure_ascii false, UTF-8, trailing LF), matching json_bytes; the loader requires 'data_policy' in protocol to be a dict with state requires-correction-receipt and a matching data_policy_sha256. Non-deferred amendments still require provenance user and non-blank approval_text. The check runs only on the non-@1 path after the candidate snapshot comparison."
+    },
+    {
+      "question": "6. README accuracy",
+      "result": "PASS",
+      "detail": "README matches the loader on field names, the one-entry-per-id rule, non-blank approval text, UTF-8 interpretation hash, json_bytes encoding with trailing newline, and the refusal behavior. Its cost paragraph matches repository_cost and the measurement."
+    },
+    {
+      "question": "7. No weakening of the original suite",
+      "result": "PASS",
+      "detail": "evaluation/inquiry-p8 is byte-identical to HEAD and pins no loader hash; require_receipt_approvals is reachable only for recipe versions other than inquiry-p8-recipes@1; load_suite(evaluation/inquiry-p8/MANIFEST.json) succeeds and the original generator --check passes."
+    },
+    {
+      "question": "Round-1 finding 4: binding supplemental receipts via review-package.json",
+      "result": "PASS",
+      "detail": "The circularity argument holds: each receipt binds the protocol SHA256, so the protocol cannot list them. Binding them in review-package.json, inside the committed candidate whose full SHA the researcher receipt names, is adequate for spec purposes. Caveats recorded as low findings: review-package.json is still byte-identical to HEAD (binding not yet done), and load_suite checks only the commit's format, not its content."
+    },
+    {
+      "question": "Commands run",
+      "result": "PASS",
+      "detail": "test/inquiry_approval_receipt.py: 3 tests OK; test/inquiry_corrected_candidates.py: 16 tests OK; corrected generator --check: 96 cases checked; independent_finite_audit.py: AUTHORING-CHECK, 80 exact checks, no findings; original generator --check OK. No driver or consumer run."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "detail": "Supplemental receipts are not yet bound anywhere: review-package.json is unchanged from HEAD. The planned binding must land in the commit the researcher approves. load_suite verifies only that reviewed_candidate_commit is 40 hex characters, so this binding rests on the researcher reviewing that commit, not on the loader."
+    },
+    {
+      "severity": "low",
+      "detail": "repository_cost says the preflight directory is committed, but data_policy names only local_capture_directory and local_replay_directory and gives no preflight location. Consider naming ara/evidence/inquiry-p8/preflight-<fresh-run-id> so the policy covers every committed directory."
+    },
+    {
+      "severity": "low",
+      "detail": "require_receipt_approvals accepts receipt entries for ids the protocol does not defer (silently ignored), and an unhashable id (e.g. a list) raises TypeError rather than ValueError. Neither lets an unapproved item through."
+    }
+  ],
+  "driver_outputs_used": false,
+  "researcher_approval_claimed": false
+}

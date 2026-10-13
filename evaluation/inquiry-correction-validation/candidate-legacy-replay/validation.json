@@ -1,0 +1,34 @@
+{
+  "schema": "lara-inquiry-candidate-legacy-replay-validation",
+  "schema_version": 1,
+  "source": "ara/evidence/inquiry-p8/20261012T225824Z-a904130",
+  "archived_replay": "ara/evidence/inquiry-p8/20261012T225824Z-a904130-replay",
+  "replay_exit_code": 1,
+  "completion": "INCOMPLETE",
+  "stop_reason": "timeout",
+  "invocations": 87,
+  "artifacts_byte_identical": 565,
+  "reports_byte_identical": [
+    "run.json",
+    "run.sha256",
+    "results.jsonl",
+    "summary.json",
+    "summary.tsv"
+  ],
+  "reports_sha256": {
+    "run.json": "7820345b004a996d87b4352f520d9b3c942842f14f59618db42f6f4db74ee17e",
+    "run.sha256": "30411abd6ab47379483721e1a53c35a97b6ab27d5dbfeda9a52fee661c3c8bb0",
+    "results.jsonl": "81926d1e43a6505833fda8195bfd9f4e5c6a4e77370b1d9da89dd494db2fe82c",
+    "summary.json": "488c64b539e276070e0d5ee91b64af307e63bd9ee85351b629ad86004a345c11",
+    "summary.tsv": "e393a35449ca6ea529adb0f02ab38f2706d3462f56377063dbab2f9fd3926059"
+  },
+  "subprocesses": 0,
+  "production_driver_invocations": 0,
+  "real_consumer_invocations": 0,
+  "checked_source_sha256": {
+    "inquiry-evaluate.py": "501d55903a04b9aabae8cb40f14c4dec9d18d8ce7fbd625087539f8b4c1bc346",
+    "inquiry_evaluation_manifest.py": "c60b7c77b2ccb23a48e7f556e785da2d589553da5f6b704f78e442ff20535296",
+    "inquiry_evaluation_report.py": "f292ccc819b6d5e0e429d1812c5fd49453b07be6f620c330ccec88c62b1d2e08",
+    "evidence_measured.py": "f1dda07803bf2c35cb562345d54c767eb313e82f48155c2fc135ad751b1b46c6"
+  }
+}

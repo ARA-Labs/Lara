@@ -275,11 +275,18 @@ The Haskell `Lara.Process.Analysis` reads the same retained `CheckedFamily` rows
 Wrapper profiles use bare evidence/coverage/probe lists and retain a zero
 denominator's reference meaning; the embedded process profile codec keeps its
 tagged lists and positive-denominator requirement.
-Native sensitivity derives inclusion-minimal sets from the retained same-history
+Native and compiled Lean sensitivity derive inclusion-minimal sets from the retained same-history
 differing rows rather than enumerating every subset of the declared slots.
 Sets retain the reference's subsequence order and first realizing completion.
 If a differing row has no changed slot identity, the reference's nonempty
 minimality rule yields every universe singleton.
+Lean keeps the powerset definition as its reference. The sparse procedure
+normalizes changed sets against the last-occurrence-deduplicated slot universe
+and sorts the retained minima by reversed declaration positions.
+`minimalSlotSetsFast_eq_minimalSlotSets` proves exact ordered-list equality for
+all inputs. `sensitivityResultFast_eq_sensitivityResult` preserves the complete
+result, including duplicate differing rows and first realizers; the compiler
+uses this equality through `sensitivityResult_eq_fast`.
 
 ## What does graph-difference locality prove?
 

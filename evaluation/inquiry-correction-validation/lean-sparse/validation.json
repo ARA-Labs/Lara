@@ -1,0 +1,130 @@
+{
+  "schema": "lara-inquiry-sparse-correction-validation",
+  "schema_version": 1,
+  "scope": "corrective task 1; proof and implementation verification, no P8 measurement",
+  "source_sha256": {
+    "lean/Lara/Process/CanonicalSubsets.lean": "e2e28efa470d12ae199c3e929479f5da454b3097f5a714b4392d0d817aef4779",
+    "lean/Lara/Process/Analysis.lean": "f0ca2bc27291ee3aa7ddc07d9ff59841b0aaa6c537edaf765e88433d61b2b41f",
+    "lean/Lara/Examples/ProcessSensitivityFast.lean": "6fd7f93ee7b1246f3c0e5f0fe2dc3d82ffa3f0c6588be53f0e3f490ccf4c771b",
+    "lean/Lara.lean": "ef7a9d5bb37a3679eea9ac5eacd60c23ff1db6d99fbf8e35a7e96d4b81a401e2",
+    "lean/AxCheck.lean": "65c08b71c8e24f1b42b652af6bfbde1a91eb4b093ddbaf1346a908525deafa98",
+    "docs/theory-process.md": "cacd54a70e05bd5ef980a10dc3711cda257e76e568f0837fcb782b8ed591cb8e"
+  },
+  "focused_checks": [
+    {
+      "command": [
+        "lake",
+        "build",
+        "Lara"
+      ],
+      "cwd": "lean",
+      "exit_code": 0,
+      "log": "library-build.log"
+    },
+    {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "Lara/Examples/ProcessSensitivityFast.lean"
+      ],
+      "cwd": "lean",
+      "exit_code": 0,
+      "log": "examples.log",
+      "source_scope": "standalone log predates the nonnumeric-singleton fixture; final source examples passed in the final library build"
+    },
+    {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "AxCheck.lean"
+      ],
+      "exit_code": 0,
+      "log": "axiom-audit.log",
+      "new_public_theorems": 22,
+      "allowed_axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "cwd": "lean"
+    },
+    {
+      "command": [
+        "scripts/check-axioms.sh"
+      ],
+      "stdin": "axiom-audit.log",
+      "exit_code": 0,
+      "output": "Axiom audit passed.",
+      "output_record": "implementer tool output"
+    },
+    {
+      "command": "python3 scripts/check-axcheck-coverage.py lean/AxCheck.lean $(rg --files lean/Lara -g '*.lean')",
+      "exit_code": 0,
+      "output": "AxCheck coverage passed (7192 declarations).",
+      "output_record": "implementer tool output"
+    }
+  ],
+  "log_sha256": {
+    "library-build.log": "d600e03e3661799c2496bfe75a1171fed76cef240784b5a983e9df7e60187059",
+    "examples.log": "d57afecbfb9f4a2946dfe92e3b49deca07f4798490f03b392637d073d9586492",
+    "axiom-audit.log": "dd631e095846d900ec9503e976db6c75a195ab75c12575530e34a5a1e1f82cd8",
+    "local-gates.log": "5e4a5c194bc219a0bbacda238fd268558a5b857b6e0fdc01387e0fcf266e1657"
+  },
+  "review": {
+    "spec": {
+      "reviewer": "/root/sparse_spec",
+      "status": "PASS",
+      "method": "independent source, proof, focused log and generated runtime inspection",
+      "documentation_supplement": "PASS"
+    },
+    "quality": {
+      "reviewer": "/root/sparse_quality",
+      "status": "PASS",
+      "method": "independent source, proof, fixture, focused log and generated runtime inspection",
+      "documentation_supplement": "PASS"
+    }
+  },
+  "full_local_gates": {
+    "status": "PASS",
+    "exit_code": 0,
+    "command": "UPDATE= CABAL_CONFIG=/tmp/inquiry-p8-cabal.config make local-gates",
+    "log": "local-gates.log",
+    "cabal_config_overrides": {
+      "logs-dir": "/tmp/inquiry-p8-cabal-logs",
+      "build-summary": "/tmp/inquiry-p8-cabal-logs/build.log"
+    },
+    "semantics_registry_modules": 317,
+    "registry_regression_tests": 10,
+    "checked_inquiry": {
+      "frozen_fixtures": 49,
+      "generated_cases": 70,
+      "both_boundary_suites_and_cli_locale_contracts": "PASS"
+    }
+  },
+  "production_driver_invocations": 0,
+  "large_fixture": {
+    "declared_slots": 42,
+    "completion_rows": 6,
+    "algorithm_executed": "sparse only",
+    "powerset_reference_executed": false
+  },
+  "compiled_runtime": {
+    "generated_file": "lean/.lake/build/ir/Lara/Process/InquiryRun.c",
+    "fast_sensitivity_call_sites": 4,
+    "observables": [
+      "status",
+      "audit"
+    ],
+    "requests": [
+      "sensitivity",
+      "slots-sensitive"
+    ],
+    "generated_source_sha256": "19f304ac0091f614704beb6acb1f2fd2ca50db977f092f74407c7eece9365a6f"
+  },
+  "reference_preservation": {
+    "analysis_without_added_import_and_sections_equals_parent": true,
+    "parent_analysis_sha256": "9d6ab862f237dc3f52333c2e9c4d3bafce5dd9db642c6df134d2292b66010042"
+  }
+}

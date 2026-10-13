@@ -1,0 +1,144 @@
+{
+  "schema": "inquiry-p8-oracle",
+  "schema_version": 1,
+  "case_id": "forged-observed",
+  "oracle_kind": "existing-conformance-golden",
+  "expected": {
+    "result_kind": "results",
+    "exit_code": 0,
+    "results": [
+      [
+        "inquiry-result",
+        "1",
+        "forged-observed",
+        [
+          "audit-body",
+          [
+            "family-audit-result",
+            [
+              [
+                "family-audit-row",
+                [
+                  [
+                    "event",
+                    "commit",
+                    [
+                      "commit-plan",
+                      "alice",
+                      "plan",
+                      "0"
+                    ]
+                  ],
+                  [
+                    "event",
+                    "read",
+                    [
+                      "access",
+                      "alice",
+                      "test",
+                      "evaluation"
+                    ]
+                  ],
+                  [
+                    "event",
+                    "run",
+                    [
+                      "run",
+                      "run0",
+                      "plan",
+                      "0",
+                      [
+                        "inputs",
+                        [
+                          "input",
+                          "test",
+                          "0"
+                        ]
+                      ],
+                      "fam"
+                    ]
+                  ],
+                  [
+                    "event",
+                    "success",
+                    [
+                      "result",
+                      "run0",
+                      "1"
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    [
+                      "slot-id",
+                      "0"
+                    ],
+                    [
+                      "choice-id",
+                      "0"
+                    ]
+                  ]
+                ],
+                [],
+                [
+                  "false"
+                ]
+              ]
+            ],
+            "1",
+            "1",
+            "0",
+            "false"
+          ]
+        ]
+      ]
+    ]
+  },
+  "semantic_specification": {
+    "kind": "development-control",
+    "histories": [
+      []
+    ],
+    "history_search_steps": 14,
+    "rows": [
+      {
+        "choices": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  "review_provenance": {
+    "status": "disclosed-development-control",
+    "author": "Codex case author",
+    "author_provenance": "ai-executed",
+    "reviewer": "Codex independent spec reviewer /root/cases_spec",
+    "driver_output_used": false,
+    "analysis_implementation_imported": false,
+    "specification_references": [
+      "docs/theory-process.md#what-do-the-exact-inquiry-analyses-compute",
+      "docs/theory-process.md#how-is-an-edits-impact-certified",
+      "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
+    ],
+    "reviewed_input_sha256": "5b00e668d37d71fc6b103eb8696b1c6b36f70b3a695378cffef37814fab03d05",
+    "semantic_content_sha256": "8f78b0aa0ca74cd5fc7e83906383e42932263514b6123116aecf4f165d0fa2d5",
+    "review_path": "independent-review.json",
+    "review_sha256": "5adfd9bee4582cb14db6fb7c8a956a21057843af5ce960e69154728fc5d79b70",
+    "quality_review_path": "quality-review.json",
+    "quality_review_sha256": "c8d6ee58c855a326bc6c6ffed2c93c4e70e3ea465ab98d1d770d0fe4e56447e2"
+  },
+  "development_provenance": {
+    "case_id": "forged-observed",
+    "input_path": "fixtures/process/inquiry/forged-observed.sexp",
+    "input_sha256": "5b00e668d37d71fc6b103eb8696b1c6b36f70b3a695378cffef37814fab03d05",
+    "golden_path": "fixtures/process/inquiry/forged-observed.expected",
+    "golden_sha256": "658c76cdfeba7cb8e701094ec2e843b43b4cbcd83b4a7d55533d9163a4d3e217",
+    "classification": "development-control",
+    "oracle_kind": "existing-conformance-golden",
+    "destination_input_path": "inputs/forged-observed.sexp"
+  }
+}

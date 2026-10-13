@@ -1,0 +1,133 @@
+{
+  "schema": "inquiry-p8-oracle",
+  "schema_version": 1,
+  "case_id": "unrelated-self-attack",
+  "oracle_kind": "existing-conformance-golden",
+  "expected": {
+    "result_kind": "results",
+    "exit_code": 0,
+    "results": [
+      [
+        "inquiry-result",
+        "1",
+        "unrelated-self-attack",
+        [
+          "impact-body",
+          [
+            "impact-result",
+            [
+              "transition",
+              "accepted-to-accepted"
+            ],
+            [
+              [
+                "query-impact",
+                [
+                  "atom",
+                  "t"
+                ],
+                [
+                  [
+                    "published",
+                    "defeated"
+                  ]
+                ],
+                [
+                  [
+                    "published",
+                    "defeated"
+                  ]
+                ],
+                "false",
+                "true"
+              ]
+            ],
+            [],
+            [
+              [
+                "atom",
+                "t"
+              ]
+            ]
+          ]
+        ]
+      ]
+    ]
+  },
+  "semantic_specification": {
+    "kind": "development-control",
+    "histories": [
+      []
+    ],
+    "history_search_steps": 1,
+    "rows": [
+      {
+        "choices": []
+      }
+    ],
+    "graphs": [
+      {
+        "names": [
+          "n0",
+          "n1",
+          "n2"
+        ],
+        "edges": [],
+        "query_ancestry": [
+          "n0",
+          "n1"
+        ],
+        "query_support": [
+          "q"
+        ],
+        "blocked": false
+      },
+      {
+        "names": [
+          "n0",
+          "n1",
+          "n2",
+          "n3"
+        ],
+        "edges": [],
+        "query_ancestry": [
+          "n0",
+          "n1"
+        ],
+        "query_support": [
+          "q"
+        ],
+        "blocked": false
+      }
+    ]
+  },
+  "review_provenance": {
+    "status": "disclosed-development-control",
+    "author": "Codex case author",
+    "author_provenance": "ai-executed",
+    "reviewer": "Codex independent spec reviewer /root/cases_spec",
+    "driver_output_used": false,
+    "analysis_implementation_imported": false,
+    "specification_references": [
+      "docs/theory-process.md#what-do-the-exact-inquiry-analyses-compute",
+      "docs/theory-process.md#how-is-an-edits-impact-certified",
+      "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
+    ],
+    "reviewed_input_sha256": "1d9df679b20640751c5d8063ac8379a7d24cf520ce965bc4c95700e24990acf1",
+    "semantic_content_sha256": "1b2acb63354c276806ada3a432016eacaf5636a6154f07919f546379715a942d",
+    "review_path": "independent-review.json",
+    "review_sha256": "5adfd9bee4582cb14db6fb7c8a956a21057843af5ce960e69154728fc5d79b70",
+    "quality_review_path": "quality-review.json",
+    "quality_review_sha256": "c8d6ee58c855a326bc6c6ffed2c93c4e70e3ea465ab98d1d770d0fe4e56447e2"
+  },
+  "development_provenance": {
+    "case_id": "unrelated-self-attack",
+    "input_path": "fixtures/process/inquiry/unrelated-self-attack.sexp",
+    "input_sha256": "1d9df679b20640751c5d8063ac8379a7d24cf520ce965bc4c95700e24990acf1",
+    "golden_path": "fixtures/process/inquiry/unrelated-self-attack.expected",
+    "golden_sha256": "178154614fb02cedefc6ecec07d0d02ef29922f9246bae3026ee4e43dd28cb21",
+    "classification": "development-control",
+    "oracle_kind": "existing-conformance-golden",
+    "destination_input_path": "inputs/unrelated-self-attack.sexp"
+  }
+}

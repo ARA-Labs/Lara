@@ -1,0 +1,118 @@
+{
+  "schema": "inquiry-p8-quality-handoff",
+  "schema_version": 1,
+  "status": "PASS",
+  "reviewer": "Codex independent quality reviewer /root/candidate_quality",
+  "provenance": "ai-executed",
+  "scope": "Final read-only canonical attachment and decode-receipt check after supplemental quality and spec reviews; no source changes, researcher approval, freeze or measurement. This separate attestation does not alter or participate in canonical receipt hashing.",
+  "canonical_quality_receipt": {
+    "path": "quality-review.json",
+    "sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+  },
+  "canonical_spec_receipt": {
+    "path": "independent-review.json",
+    "sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc"
+  },
+  "reviewed_protocol_sha256": "41a4fa014b1083cbe849588a1f9d49bdff9f6a19d3b1472d5f6e475049810796",
+  "reviewed_manifest_sha256": "1aaf2eb1e7758fea800e0046e4b01d5f176823ef44f3fe2f98bc4dedf0a6dd22",
+  "reviewed_readme_sha256": "e63545d21dbeaddae6c95ae57fd6278277c284e24f2fd962b81624850752fc6c",
+  "reviewed_consumer_receipt_sha256": "7265ae31be548af481e8e9703d881d634206433e7f8b3f244b15ab0e5bd5e474",
+  "reviewed_raw_consumer_receipt_sha256": "73db621e95ea65f1eb988d3754e210e16bd8bd6cc7eb33ba8d34fced4735275a",
+  "reviewed_helper_sources": [
+    {
+      "path": "scripts/inquiry-evaluate.py",
+      "sha256": "501d55903a04b9aabae8cb40f14c4dec9d18d8ce7fbd625087539f8b4c1bc346"
+    },
+    {
+      "path": "scripts/inquiry_evaluation_cases.py",
+      "sha256": "96a39b4f3719817806d36a5af8ae859d9557651a1b9d58fb0641a55e97878360"
+    },
+    {
+      "path": "scripts/inquiry_evaluation_manifest.py",
+      "sha256": "b02308a1f656ed047a0f2ef3df95b36bfcc2b7fbf8e8b0b2d31f3373176e88a2"
+    },
+    {
+      "path": "scripts/inquiry_support_annotations.py",
+      "sha256": "487e6c7e02806727b5904b24b3122426e1c5e664efced3a1fb96499864ecb378"
+    },
+    {
+      "path": "scripts/inquiry_corrected_validation.py",
+      "sha256": "6f8a0699c2a5bce68136bcdaf050bfd9ae9c38bc2ebe51897a91cb442b174827"
+    },
+    {
+      "path": "scripts/inquiry_evaluation_report.py",
+      "sha256": "f292ccc819b6d5e0e429d1812c5fd49453b07be6f620c330ccec88c62b1d2e08"
+    },
+    {
+      "path": "scripts/evidence_measured.py",
+      "sha256": "f1dda07803bf2c35cb562345d54c767eb313e82f48155c2fc135ad751b1b46c6"
+    },
+    {
+      "path": "scripts/inquiry-impact-producer.hs",
+      "sha256": "e0cc0a76c63a540d49e4e9d840acf21a51b5a47168df8678e395261fc30266aa"
+    },
+    {
+      "path": "test/inquiry_evaluation_runner.py",
+      "sha256": "575cb1666c10a7d6a764f5000d849157ccadd3cfdb655f1ce72d0c07160ae5e2"
+    },
+    {
+      "path": "test/inquiry_corrected_candidates.py",
+      "sha256": "1e7cdf37e68a0ffb77032e034d9d021e768a4b8a5769ea86bdd09612ba5797f8"
+    },
+    {
+      "path": "test/inquiry_evaluation_boundaries.py",
+      "sha256": "850bb5f4e93086a020a04f0b7fdb03e43f82080d5a8fa090a421b7813a1f592d"
+    },
+    {
+      "path": "evaluation/inquiry-p8-corrected/review/independent_finite_audit.py",
+      "sha256": "beb73f0b8dfb59229e4e14f8f9a4c1efc8ca84f9cbf0b70baddd9e045aac813c"
+    }
+  ],
+  "generator_checks": [
+    {
+      "command": [
+        "python3",
+        "scripts/inquiry_evaluation_cases.py",
+        "--suite",
+        "evaluation/inquiry-p8-corrected",
+        "--recipe-version",
+        "inquiry-p8-recipes@2-candidate",
+        "--check"
+      ],
+      "exit_code": 0,
+      "cases": 96
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/inquiry_evaluation_cases.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "cases": 96
+    }
+  ],
+  "checks": [
+    {
+      "method": "independent pure-Python final package/consumer/provenance checks executed",
+      "exit_code": 0,
+      "result": "PASS",
+      "detail": "Canonical spec/quality bytes equal exclusive supplemental receipts. Prior receipts remain exact. All96 scientific input/meaning/ancestry/counter identities match supplemental quality bindings; manifest/oracle review provenance matches canonical review hashes; every input/oracle/helper/supporting-artifact hash matches. Raw and canonical consumer receipts bind final manifest and every96 input/oracle/encoded-authored-AST, with zero exits; postprocessing changes only declared review-status metadata and retains every raw field."
+    },
+    {
+      "method": "draft preflight refusal probe executed with executable resolution forbidden",
+      "result": "PASS",
+      "detail": "Final awaiting-researcher-approval package raises protocol is not frozen before resolving any executable or creating output."
+    },
+    {
+      "method": "documentation and original/runtime immutability review",
+      "result": "PASS",
+      "detail": "README explains review/decode provenance and proposed policy with researcher correction/protocol/fresh budget pending. Original evaluation/inquiry-p8 and src/app/lean have no tracked changes or untracked additions."
+    }
+  ],
+  "findings": [],
+  "production_driver_invocations": 0,
+  "measurement_or_pilot_runs": 0,
+  "researcher_approval_or_freeze_claimed": false,
+  "case_count": 96
+}

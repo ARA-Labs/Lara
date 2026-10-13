@@ -1,0 +1,67 @@
+{
+  "schema": "lara-inquiry-executable-readiness",
+  "schema_version": 1,
+  "scope": "read-only setup verification; no fresh input freeze, build, benchmark, inquiry driver or consumer execution",
+  "candidate_commit": "5c74e4d606c792dbe2c071fc567b38031d96ebc1",
+  "runtime_code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+  "verified_runtime_paths": [
+    "src",
+    "app",
+    "cbits",
+    "lean",
+    "lara.cabal",
+    "cabal.project",
+    "scripts/inquiry-codec-client.hs"
+  ],
+  "protocol_sha256": "41a4fa014b1083cbe849588a1f9d49bdff9f6a19d3b1472d5f6e475049810796",
+  "manifest_sha256": "1aaf2eb1e7758fea800e0046e4b01d5f176823ef44f3fe2f98bc4dedf0a6dd22",
+  "executables": {
+    "native": {
+      "selected_path": "/home/yfhe/ara/Lara/dist-newstyle/build/x86_64-linux/ghc-9.10.3/lara-0.2.0.0/x/lara/build/lara/lara",
+      "sha256": "cfa20be69a3d1737790db828a9437987d5dff3146c55ec95359e5e7aaed9a1f8",
+      "bytes": 12879344,
+      "executable": true
+    },
+    "lean": {
+      "selected_path": "/home/yfhe/ara/Lara/lean/.lake/build/bin/inquiry-run",
+      "sha256": "07b603e59bd5245d1373db6e21315a0dc46b2f7f7365370dac58aabad46a0c27",
+      "bytes": 151613512,
+      "executable": true
+    },
+    "consumer": {
+      "selected_path": "/tmp/p8-consumer",
+      "sha256": "5f75a2310315848077ef8a17cc378f05ef5dcd495bd67e691e7b7fd75158989b",
+      "bytes": 11296920,
+      "executable": true
+    }
+  },
+  "native_resolution": {
+    "command": [
+      "cabal",
+      "list-bin",
+      "exe:lara"
+    ],
+    "cabal_config": "/tmp/inquiry-p8-cabal.config",
+    "exit_code": 0,
+    "path": "/home/yfhe/ara/Lara/dist-newstyle/build/x86_64-linux/ghc-9.10.3/lara-0.2.0.0/x/lara/build/lara/lara"
+  },
+  "compiled_lean_source": {
+    "path": "lean/.lake/build/ir/Lara/Process/InquiryRun.c",
+    "sha256": "19f304ac0091f614704beb6acb1f2fd2ca50db977f092f74407c7eece9365a6f",
+    "matches_passed_local_gate_receipt": true,
+    "fast_dispatch_sites": [
+      2105,
+      2124,
+      2161,
+      2180
+    ]
+  },
+  "correctness_receipts": [
+    "evaluation/inquiry-correction-validation/lean-sparse/validation.json",
+    "evaluation/inquiry-correction-validation/haskell/validation.json"
+  ],
+  "fresh_measurement_authorized": false,
+  "production_driver_invocations": 0,
+  "consumer_invocations": 0,
+  "remaining_boundary": "Await the pending researcher correction/protocol/data-policy/fresh-budget approval; then perform only approved metadata freeze and record its descendant input commit before capture."
+}

@@ -225,3 +225,12 @@
 - **Sensitivity**: medium
 - **Code ref**: ["lean/Lara/PW/Surface.lean", "lean/Lara/Examples/PWSurface.lean"]
 
+
+## H19: Compare expanded support identities before annotating an accepted graph
+- **Rationale**: Argument names and derived claim names do not distinguish complete support terms. Check expanded identities before drawing an accepted graph. Keep rule and leaf identities, substitutions, nested premises, discharges, holes and assurance in the annotation. A bounded guard must reject unsupported source shapes rather than silently omit fields. Independent typing and attack review remains necessary; the guard does not establish checker acceptance.
+- **Sources**: [scripts/inquiry_support_annotations.py:5 «Argument and derived-claim names identify annotation rows, not support keys.» [input]; scripts/inquiry_support_annotations.py:63 «Shapes outside that recipe fail closed. Other authors must supply a reviewed extension.» [input]; evaluation/inquiry-p8-corrected/review/independent-spec-review-final.json]
+- **Status**: active
+- **Provenance**: ai-suggested
+- **Sensitivity**: unknown
+- **Code ref**: ["scripts/inquiry_support_annotations.py", "test/inquiry_corrected_candidates.py", "evaluation/inquiry-p8-corrected/review/independent_finite_audit.py"]
+- **Last revised**: 2026-10-13 (2026-10-13_001#1)

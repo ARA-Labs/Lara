@@ -1,0 +1,121 @@
+{
+  "schema": "inquiry-p8-supplemental-review",
+  "schema_version": 1,
+  "role": "quality",
+  "reviewer": "independent quality reviewer agent receipt-quality-reviewer",
+  "provenance": "ai-executed",
+  "status": "PASS",
+  "scope": "Round-2 quality re-review of require_receipt_approvals (issue #50) after fixes for the four round-1 low findings, covering the current loader, tests and corrected candidate protocol, without running any driver or consumer.",
+  "prior_receipt": {
+    "path": "evaluation/inquiry-p8-corrected/review/supplemental-receipt-quality-review.json",
+    "sha256": "52bb1e87902f3103f54b8b65f5c55bcb47a6b5de10803156f316643f6791d473"
+  },
+  "reviewed_protocol_sha256": "587783d8fccfbbf648c8b8c5ac4febb2c06e4f8fe019450cde7fcec26d9647e2",
+  "reviewed_files": [
+    {
+      "path": "scripts/inquiry_evaluation_manifest.py",
+      "sha256": "6586b5a2e007e4e69fa496f1a84ddb47f2a2b57f41a9f23cc998e328720ac68d"
+    },
+    {
+      "path": "test/inquiry_approval_receipt.py",
+      "sha256": "831317a8a361629014c48d0f3ddd37afceddfff443d00ee78b4ae6f25460f6d1"
+    },
+    {
+      "path": "test/inquiry_corrected_candidates.py",
+      "sha256": "1e7cdf37e68a0ffb77032e034d9d021e768a4b8a5769ea86bdd09612ba5797f8"
+    }
+  ],
+  "commands": [
+    {
+      "command": "python3 test/inquiry_approval_receipt.py",
+      "exit_code": 0,
+      "result": "Ran 3 tests, OK (unit test now has 13 refusal subtests; end-to-end test has positive, unapproved and amendment-only cases)"
+    },
+    {
+      "command": "python3 test/inquiry_corrected_candidates.py",
+      "exit_code": 0,
+      "result": "Ran 16 tests, OK"
+    },
+    {
+      "command": "python3 test/inquiry_evaluation_boundaries.py",
+      "exit_code": 0,
+      "result": "Ran 7 tests, OK"
+    },
+    {
+      "command": "python3 test/inquiry_evaluation_runner.py",
+      "exit_code": 0,
+      "result": "Ran 34 tests in 45.5s, OK (expected INCOMPLETE/REPLAY INCOMPLETE lines printed)"
+    },
+    {
+      "command": "python3 scripts/inquiry_evaluation_cases.py --suite evaluation/inquiry-p8-corrected --recipe-version inquiry-p8-recipes@2-candidate --check",
+      "exit_code": 0,
+      "result": "checked 96 P8 cases; independent review required before freeze"
+    },
+    {
+      "command": "sha256sum test/inquiry_corrected_candidates.py evaluation/inquiry-p8-corrected/protocol.json",
+      "exit_code": 0,
+      "result": "1e7cdf37e68a0ffb77032e034d9d021e768a4b8a5769ea86bdd09612ba5797f8 (matches pin); 587783d8fccfbbf648c8b8c5ac4febb2c06e4f8fe019450cde7fcec26d9647e2 (matches the stated protocol hash)"
+    },
+    {
+      "command": "python3 /tmp/claude-1001/receipt-probe-r2.py (scratch edge-case probe)",
+      "exit_code": 0,
+      "result": "repeated ids, id-less duplicates, null/dict/non-dict amendments, blank/whitespace/non-string text, null/list data_policy and blank user-amendment text all refused with ValueError; unhashable receipt id raises TypeError; extra approved ids and absent data_policy pass; a protocol repeating a deferred amendment passes with one receipt entry"
+    }
+  ],
+  "checks": [
+    {
+      "question": "Are the four round-1 findings fixed?",
+      "result": "yes",
+      "detail": "1: repeated ids are refused, including two id-less entries; the round-1 bad-then-good receipt is now refused. 2: data_policy presence is tested by key, and null or non-dict policies are refused; approval_text must be a non-blank string in receipt entries and in user-approved amendments. 3: a non-list approved_amendments or a non-dict entry is refused with a require message. 4: the end-to-end test now includes an amendment-only receipt that fails with 'does not approve the data policy'."
+    },
+    {
+      "question": "Can a receipt pass without approving a deferred item?",
+      "result": "no",
+      "detail": "Each deferred amendment needs exactly one receipt entry with its id, a non-blank approval_text string and the SHA256 of its exact interpretation. A present data_policy must be a dict in state requires-correction-receipt with a matching canonical-JSON SHA256. Receipt-side ambiguity found in round 1 is closed. What remains (extra approved ids, an unhashable id type) cannot make an unapproved item pass."
+    },
+    {
+      "question": "Is the call placement sound and is receipt always bound?",
+      "result": "yes",
+      "detail": "Unchanged from round 1. The call runs in the second corrected-recipe block after both candidate comparisons, `receipt` is bound by the same condition in the first block, and every corrected suite reaches it before any driver is selected."
+    },
+    {
+      "question": "Is the conditional data-policy rule acceptable?",
+      "result": "acceptable; keep",
+      "detail": "Only an absent key now passes; null is refused. The frozen protocol must equal the researcher-approved snapshot, the real candidate carries a data_policy, and test_candidate_defers_t07_amendment_and_data_policy asserts it. An unconditional rule would break the pinned fixture."
+    },
+    {
+      "question": "Is the pinned test unchanged and still meaningful?",
+      "result": "yes",
+      "detail": "SHA256 matches the pin. Its expected refusals happen before the new check. Its original-suite fixture has one user-approved amendment with non-blank text and no data_policy, so the stricter `stated` check still passes it legitimately."
+    },
+    {
+      "question": "Do the new tests fail for the intended reasons?",
+      "result": "yes",
+      "detail": "Each subtest asserts a message that only its own branch emits ('repeats an amendment id', 'not a list of objects', 'amendment: distinct-t07-support', 'data policy', 'lacks researcher approval'). The end-to-end cases run full load_suite over a metadata-only freeze of the real candidate bytes; the amendment-only case passes the amendment branch and fails only on the data policy."
+    },
+    {
+      "question": "Does the code match the module's style?",
+      "result": "yes",
+      "detail": "It uses the require idiom, double-quoted strings and a local lambda like stable_manifest in load_suite. The `entry.get(\"interpretation_sha256\")\\n== digest(...)` line split is still slightly awkward but readable."
+    },
+    {
+      "question": "Do inquiry-evaluate.py replay or other callers break?",
+      "result": "no",
+      "detail": "load_suite's signature and return values are unchanged. All recipes.additional_helpers hashes, including the manifest module and the new test, match the current files. The remaining non-ValueError path (TypeError for an unhashable id) is caught by main()."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "detail": "A receipt entry whose id is unhashable (for example a list) raises TypeError from set() instead of a require message. It still fails closed, and inquiry-evaluate.py main() catches TypeError.",
+      "recommendation": "Optional: also require each id to be a string in the list-of-objects check."
+    },
+    {
+      "severity": "low",
+      "detail": "The protocol side is not shape-checked: a protocol that repeats a deferred amendment id is approved by one receipt entry, and malformed amendments raise AttributeError or KeyError. The frozen protocol must equal the researcher-approved snapshot, so this cannot add an unapproved item; it is noted for completeness.",
+      "recommendation": "No change required. Optionally require protocol amendment ids to be unique strings."
+    }
+  ],
+  "driver_outputs_used": false,
+  "researcher_approval_claimed": false
+}

@@ -1,0 +1,123 @@
+{
+  "schema": "inquiry-p8-oracle",
+  "schema_version": 1,
+  "case_id": "tampered-certificate",
+  "oracle_kind": "existing-conformance-golden",
+  "expected": {
+    "result_kind": "results",
+    "exit_code": 0,
+    "results": [
+      [
+        "inquiry-result",
+        "1",
+        "v0",
+        [
+          "history-verdict",
+          [
+            "history-count",
+            "1"
+          ],
+          [
+            "answer",
+            "v0",
+            "certainTrue",
+            [
+              "completions",
+              "1"
+            ]
+          ]
+        ]
+      ],
+      [
+        "inquiry-result",
+        "1",
+        "tampered-certificate",
+        [
+          "verification-body",
+          [
+            "invalid-certificate",
+            [
+              "mismatched-snapshots"
+            ]
+          ]
+        ]
+      ]
+    ]
+  },
+  "semantic_specification": {
+    "kind": "development-control",
+    "histories": [
+      []
+    ],
+    "history_search_steps": 1,
+    "rows": [
+      {
+        "choices": []
+      }
+    ],
+    "graphs": [
+      {
+        "names": [
+          "n0",
+          "n1",
+          "n2"
+        ],
+        "edges": [],
+        "query_ancestry": [
+          "n0",
+          "n1",
+          "n2"
+        ],
+        "query_support": [
+          "q"
+        ],
+        "blocked": false
+      },
+      {
+        "names": [
+          "n0",
+          "n1"
+        ],
+        "edges": [],
+        "query_ancestry": [
+          "n0",
+          "n1"
+        ],
+        "query_support": [
+          "q"
+        ],
+        "blocked": false
+      }
+    ]
+  },
+  "review_provenance": {
+    "status": "disclosed-development-control",
+    "author": "Codex case author",
+    "author_provenance": "ai-executed",
+    "reviewer": "Codex independent spec reviewer /root/candidate_spec",
+    "driver_output_used": false,
+    "analysis_implementation_imported": false,
+    "specification_references": [
+      "docs/theory-process.md#what-do-the-exact-inquiry-analyses-compute",
+      "docs/theory-process.md#how-is-an-edits-impact-certified",
+      "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
+    ],
+    "reviewer_provenance": "ai-executed",
+    "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+    "quality_reviewer_provenance": "ai-executed",
+    "reviewed_input_sha256": "398895a18547ebe47432d8a4c4444f59a5af6b99609304a1ea318a9c16927809",
+    "semantic_content_sha256": "cca30206762adcc841e71fe82d6e174415db9e5bf00b9acd261f6d3023bd1a9e",
+    "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
+    "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+  },
+  "development_provenance": {
+    "case_id": "tampered-certificate",
+    "input_path": "fixtures/process/inquiry/tampered-certificate.sexp",
+    "input_sha256": "398895a18547ebe47432d8a4c4444f59a5af6b99609304a1ea318a9c16927809",
+    "golden_path": "fixtures/process/inquiry/tampered-certificate.expected",
+    "golden_sha256": "9701e78c645be8e15c4270f7b0b5c095ad6a8e60f1e5fe267bb75fc8ba5ecc78",
+    "classification": "development-control",
+    "oracle_kind": "existing-conformance-golden",
+    "destination_input_path": "inputs/tampered-certificate.sexp"
+  }
+}

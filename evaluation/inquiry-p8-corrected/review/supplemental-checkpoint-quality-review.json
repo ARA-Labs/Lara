@@ -1,0 +1,98 @@
+{
+  "schema": "inquiry-p8-supplemental-review",
+  "schema_version": 1,
+  "role": "quality",
+  "reviewer": "agent CheckpointQualityReview",
+  "provenance": "ai-executed",
+  "status": "PASS",
+  "scope": {
+    "issue": 51,
+    "pull_request": 52,
+    "comparison_base": "a1930174a774d44682e8ee2cf987b83379e9c125",
+    "comparison_target": "working tree",
+    "review_type": "read-only static review and SHA256 calculations",
+    "focus": [
+      "Atomic checkpoint metadata/digest publication before and after replacement",
+      "Persistent storage failure, exception propagation, recovery and false completeness",
+      "Canonical metadata integrity, missing digest and archived schema-1 compatibility",
+      "Consumer-visible regression assertions and byte-preserving replay",
+      "Publication documentation and candidate protocol helper pins"
+    ],
+    "limitations": [
+      "No tests, builds, formatters, drivers, consumers, replay commands or experiments executed.",
+      "PASS means no concrete blocker found in the scoped static review, not independently observed runtime success.",
+      "The parent's reported red regression, 65 passing tests, original replay equivalence and SIGKILL probe were not executed or independently reproduced by this reviewer.",
+      "Review-package attachment refresh is outside this receipt's verdict."
+    ]
+  },
+  "reviewed_protocol_sha256": "95ebc7df820693fa8afe3812a40ff6d3f46cff83101cb5e29a645cd1608a5583",
+  "reviewed_files": [
+    {
+      "path": "scripts/inquiry-evaluate.py",
+      "sha256": "c222c1172ec92761f9a4a020d3ed54228e7449f20640e1a90824fa2741c2ed61"
+    },
+    {
+      "path": "test/inquiry_evaluation_runner.py",
+      "sha256": "38f944b5470560c0527fe01b65879fe51b6b867a691d1c9dff5352b146765b0a"
+    },
+    {
+      "path": "docs/evaluation.md",
+      "sha256": "f23cb301a28bfe7b283301ec70735d8988d74d51a4422d7da4eb1ed7d5168f0d"
+    },
+    {
+      "path": "evaluation/inquiry-p8-corrected/README.md",
+      "sha256": "2b65df7350565e525fc16d38847480a0bb2c78005c1b6878149f6d7759c3886f"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Single-file publication boundary",
+      "method": "static inspection",
+      "evidence": "scripts/inquiry-evaluate.py:46-62,257-264: publish_status excludes metadata_sha256 from the canonical payload hash, embeds the digest, and publishes only run.json through one same-directory os.replace. Temporary data is written, flushed and fsynced before replacement. Publication exceptions propagate; no checksum-sidecar publication remains in the writer."
+    },
+    {
+      "name": "Before/after replacement regression assertions",
+      "method": "static inspection of test implementation; not executed",
+      "evidence": "test/inquiry_evaluation_runner.py:84-122: after-replace ENOSPC and KeyboardInterrupt injection performs the real replacement before raising, then inspects persisted metadata and invokes the real validate_saved reader. Pre-replace temporary creation, fsync and replacement failures are injected twice; assertions require unchanged checkpoint bytes and integrity validation reaching the explicit unsealed-report refusal. These assertions inspect filesystem and reader outcomes, not mock return values."
+    },
+    {
+      "name": "Persistent storage failure and recovery",
+      "method": "static inspection",
+      "evidence": "scripts/inquiry-evaluate.py:275-312,428-470 and test/inquiry_evaluation_runner.py:655-696: recovery publishes an unsealed INCOMPLETE state before replacing derived reports. Persistent recovery publication errors propagate through the affinity-restoring finally block. The new end-to-end fake-process test checks one actual fixture invocation, retained stdout, INCOMPLETE state, affinity restoration, and either an unsealed reader refusal or a sealed failing replay. No driver or consumer retry is introduced."
+    },
+    {
+      "name": "Metadata corruption and false completeness",
+      "method": "static inspection",
+      "evidence": "scripts/inquiry-evaluate.py:473-486,519-550 and test/inquiry_evaluation_runner.py:124-139,279-297: schema-2 validation requires exact canonical bytes and a matching embedded digest before checking sealed status. A changed completion field and a missing digest are specifically rejected by regression assertions. Existing invocation-prefix, missing-invocation and semantic-checkpoint completeness checks remain unchanged."
+    },
+    {
+      "name": "Archived schema-1 integrity and byte-preserving replay",
+      "method": "static inspection",
+      "evidence": "scripts/inquiry-evaluate.py:479-481,557-568 and test/inquiry_evaluation_runner.py:141-155: schema-1 metadata still requires its original run.sha256; tests cover correct, incorrect and missing sidecars. Replay copies original metadata bytes and copies the sidecar only for schema 1; it does not republish or upgrade archived metadata. Artifact copying remains hash-checked. The actual archived replay was not executed by this reviewer."
+    },
+    {
+      "name": "Affected schema-2 replay tests",
+      "method": "static inspection of test implementation; not executed",
+      "evidence": "test/inquiry_evaluation_runner.py:233-277,374-410: affected replay assertions retain exact run.json and deterministic-report byte comparisons while removing the obsolete schema-2 sidecar expectation. Existing subprocess guards remain in partial, complete and semantic-stop replay tests. Schema-2 writer-side absence of run.sha256 is explicitly asserted at line 131."
+    },
+    {
+      "name": "Documentation matches the bounded guarantee",
+      "method": "static inspection",
+      "evidence": "docs/evaluation.md:45-62 explicitly states canonical embedded hashing, same-directory atomic replacement, absence of any checkpoint before the first successful replacement, process-interruption rather than power-loss durability, unsealed inspection without replay, no automatic resume and unchanged schema-1 replay bytes. evaluation/inquiry-p8-corrected/README.md:105-115 describes schema 2 and does not authorize a new measurement budget."
+    },
+    {
+      "name": "Exact candidate helper pins",
+      "method": "SHA256 calculation and static diff inspection",
+      "evidence": "Calculated runner and regression-test hashes match evaluation/inquiry-p8-corrected/protocol.json:339-365. The protocol diff against the assigned base changes only those two helper hashes; no protocol inputs, runtime code pin, budgets or approval states change in that diff."
+    }
+  ],
+  "findings": [],
+  "commands_executed": [
+    "git diff a1930174a774d44682e8ee2cf987b83379e9c125 -- scripts/inquiry-evaluate.py test/inquiry_evaluation_runner.py",
+    "git diff a1930174a774d44682e8ee2cf987b83379e9c125 -- docs/evaluation.md evaluation/inquiry-p8-corrected/README.md evaluation/inquiry-p8-corrected/protocol.json",
+    "sha256sum scripts/inquiry-evaluate.py test/inquiry_evaluation_runner.py evaluation/inquiry-p8-corrected/protocol.json docs/evaluation.md evaluation/inquiry-p8-corrected/README.md"
+  ],
+  "production_driver_invocations": 0,
+  "measurement_or_pilot_runs": 0,
+  "researcher_approval_claimed": false
+}

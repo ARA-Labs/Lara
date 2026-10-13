@@ -1,0 +1,110 @@
+{
+  "schema": "inquiry-p8-supplemental-review",
+  "schema_version": 1,
+  "role": "quality",
+  "reviewer": "independent quality reviewer agent receipt-quality-reviewer",
+  "provenance": "ai-executed",
+  "status": "PASS",
+  "scope": "Round-3 quality re-review of the working-tree changes on top of 47045cf: the string-id check on correction receipt approved_amendments, its new subtests, and the added data_policy local_preflight_directory with refreshed helper hashes, without running any driver or consumer.",
+  "prior_receipt": {
+    "path": "evaluation/inquiry-p8-corrected/review/supplemental-receipt-quality-review-2.json",
+    "sha256": "777a39661f570d2e5bef0d198a88fc1d9e90d4fbacccf25b270ffa4c5130d2cf"
+  },
+  "reviewed_protocol_sha256": "0434e44a6e424e79c358d43d0b8e828b26511da2ead740a64f8fa3f826ceb207",
+  "reviewed_files": [
+    {
+      "path": "scripts/inquiry_evaluation_manifest.py",
+      "sha256": "dac0eeeb981fa161a6b1258c91a4a6a293e5cdf31c9d5fef53d60e59e0d937d6"
+    },
+    {
+      "path": "test/inquiry_approval_receipt.py",
+      "sha256": "6dfca72201daa2619189dfe48bf06f6e8111671008fdc676b98eb51f1b8a8975"
+    },
+    {
+      "path": "test/inquiry_corrected_candidates.py",
+      "sha256": "1e7cdf37e68a0ffb77032e034d9d021e768a4b8a5769ea86bdd09612ba5797f8"
+    }
+  ],
+  "commands": [
+    {
+      "command": "python3 test/inquiry_approval_receipt.py",
+      "exit_code": 0,
+      "result": "Ran 3 tests, OK (unit test now includes missing-id and non-string-id subtests)"
+    },
+    {
+      "command": "python3 test/inquiry_corrected_candidates.py",
+      "exit_code": 0,
+      "result": "Ran 16 tests, OK"
+    },
+    {
+      "command": "python3 test/inquiry_evaluation_boundaries.py",
+      "exit_code": 0,
+      "result": "Ran 7 tests, OK"
+    },
+    {
+      "command": "python3 test/inquiry_evaluation_runner.py",
+      "exit_code": 0,
+      "result": "Ran 34 tests in 45.1s, OK (expected INCOMPLETE/REPLAY INCOMPLETE lines printed)"
+    },
+    {
+      "command": "python3 scripts/inquiry_evaluation_cases.py --suite evaluation/inquiry-p8-corrected --recipe-version inquiry-p8-recipes@2-candidate --check",
+      "exit_code": 0,
+      "result": "checked 96 P8 cases; independent review required before freeze"
+    },
+    {
+      "command": "sha256sum test/inquiry_corrected_candidates.py evaluation/inquiry-p8-corrected/protocol.json",
+      "exit_code": 0,
+      "result": "1e7cdf37e68a0ffb77032e034d9d021e768a4b8a5769ea86bdd09612ba5797f8 (matches pin); 0434e44a6e424e79c358d43d0b8e828b26511da2ead740a64f8fa3f826ceb207 (matches the stated protocol hash)"
+    },
+    {
+      "command": "python3 /tmp/claude-1001/receipt-probe-r3.py (scratch id-check probe)",
+      "exit_code": 0,
+      "result": "list, int, null, missing, dict and bool ids refused with the 'string ids' require message; case-variant id refused as not approving the amendment; duplicate refused; empty list refused; an extra entry with an empty-string id passes because extra ids are ignored"
+    }
+  ],
+  "checks": [
+    {
+      "question": "Is round-2 finding 1 fixed?",
+      "result": "yes",
+      "detail": "Every approved_amendments entry must be a dict whose id is a str, so set() can no longer raise TypeError. Every non-string id shape probed (list, int, null, missing, dict, bool) fails with the require message 'correction receipt approved_amendments is not a list of objects with string ids'."
+    },
+    {
+      "question": "Can a receipt pass without approving a deferred item?",
+      "result": "no",
+      "detail": "Unchanged from round 2. Each deferred amendment needs exactly one entry with its exact id, a non-blank approval_text string and the interpretation SHA256. The data policy, now including local_preflight_directory, must match its canonical-JSON SHA256. Adding the field changes that digest, so any receipt prepared against the earlier policy is refused."
+    },
+    {
+      "question": "Is the call placement sound and is receipt always bound?",
+      "result": "yes",
+      "detail": "The call placement in load_suite is unchanged."
+    },
+    {
+      "question": "Is the conditional data-policy rule acceptable?",
+      "result": "acceptable; keep",
+      "detail": "Unchanged from round 2."
+    },
+    {
+      "question": "Is the pinned test unchanged and still meaningful?",
+      "result": "yes",
+      "detail": "SHA256 matches the pin. Its fixture has no approved_amendments key, so the default empty list passes the shape check, and its expected refusals still come first."
+    },
+    {
+      "question": "Do the new subtests fail for the intended reason?",
+      "result": "yes",
+      "detail": "The missing-id and non-string-id subtests assert 'string ids', which only the shape check emits. The existing 'not a list of objects' subtests still match the extended message."
+    },
+    {
+      "question": "Does the code match the module's style?",
+      "result": "yes",
+      "detail": "The require condition is extended in place with the same idiom. The message stays accurate for every refused shape."
+    },
+    {
+      "question": "Do callers or helper pins break?",
+      "result": "no",
+      "detail": "load_suite's interface is unchanged. Every recipes.additional_helpers hash matches the current files, including the manifest module and the receipt test. The README and the protocol both name the new preflight directory consistently."
+    }
+  ],
+  "findings": [],
+  "driver_outputs_used": false,
+  "researcher_approval_claimed": false
+}

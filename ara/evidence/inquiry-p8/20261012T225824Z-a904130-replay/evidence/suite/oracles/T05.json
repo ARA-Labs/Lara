@@ -1,0 +1,220 @@
+{
+  "schema": "inquiry-p8-oracle",
+  "schema_version": 1,
+  "case_id": "T05",
+  "oracle_kind": "independent-finite-semantic-annotation",
+  "expected": {
+    "result_kind": "results",
+    "exit_code": 0,
+    "results": [
+      [
+        "inquiry-result",
+        "1",
+        "T05",
+        [
+          "impact-body",
+          [
+            "impact-result",
+            [
+              "transition",
+              "accepted-to-accepted"
+            ],
+            [
+              [
+                "query-impact",
+                [
+                  "atom",
+                  "t"
+                ],
+                [
+                  [
+                    "evidence-blocked",
+                    "defeated"
+                  ]
+                ],
+                [
+                  [
+                    "evidence-blocked",
+                    "justified"
+                  ]
+                ],
+                "true",
+                "false"
+              ]
+            ],
+            [
+              [
+                "atom",
+                "t"
+              ]
+            ],
+            []
+          ]
+        ]
+      ]
+    ]
+  },
+  "semantic_specification": {
+    "kind": "impact",
+    "statuses": [
+      [
+        "evidence-blocked",
+        "defeated"
+      ],
+      [
+        "evidence-blocked",
+        "justified"
+      ]
+    ],
+    "rejections": [
+      null,
+      null
+    ],
+    "graphs": [
+      {
+        "names": [
+          "witness",
+          "attacker"
+        ],
+        "edges": [
+          [
+            "attacker",
+            "witness"
+          ]
+        ],
+        "query_ancestry": [
+          "witness",
+          "attacker"
+        ],
+        "query_support": [
+          "witness"
+        ],
+        "blocked": true,
+        "grounded_labels": {
+          "witness": "defeated",
+          "attacker": "justified"
+        }
+      },
+      {
+        "names": [
+          "witness",
+          "attacker",
+          "defender"
+        ],
+        "edges": [
+          [
+            "attacker",
+            "witness"
+          ],
+          [
+            "defender",
+            "attacker"
+          ]
+        ],
+        "query_ancestry": [
+          "witness",
+          "attacker",
+          "defender"
+        ],
+        "query_support": [
+          "witness"
+        ],
+        "blocked": true,
+        "grounded_labels": {
+          "witness": "justified",
+          "attacker": "defeated",
+          "defender": "justified"
+        }
+      }
+    ],
+    "transition": "accepted-to-accepted",
+    "expected_body": [
+      "impact-body",
+      [
+        "impact-result",
+        [
+          "transition",
+          "accepted-to-accepted"
+        ],
+        [
+          [
+            "query-impact",
+            [
+              "atom",
+              "t"
+            ],
+            [
+              [
+                "evidence-blocked",
+                "defeated"
+              ]
+            ],
+            [
+              [
+                "evidence-blocked",
+                "justified"
+              ]
+            ],
+            "true",
+            "false"
+          ]
+        ],
+        [
+          [
+            "atom",
+            "t"
+          ]
+        ],
+        []
+      ]
+    ],
+    "locality": false,
+    "locality_reason": "relevant ancestry or acceptance differs",
+    "wire_boundary": "impact-result omits endpoint rejection payloads; annotations are not runtime telemetry",
+    "histories": [
+      []
+    ],
+    "history_search_steps": 1,
+    "row_truth_table": [
+      {
+        "endpoint": "before",
+        "accepted": true,
+        "status": [
+          "evidence-blocked",
+          "defeated"
+        ],
+        "rejection": null
+      },
+      {
+        "endpoint": "after",
+        "accepted": true,
+        "status": [
+          "evidence-blocked",
+          "justified"
+        ],
+        "rejection": null
+      }
+    ],
+    "assumption_truth_table": [],
+    "process_scope": "Empty process history; endpoint analyses do not consume process assurance."
+  },
+  "review_provenance": {
+    "status": "independently-reviewed",
+    "author": "Codex case author",
+    "author_provenance": "ai-executed",
+    "reviewer": "Codex independent spec reviewer /root/cases_spec",
+    "driver_output_used": false,
+    "analysis_implementation_imported": false,
+    "specification_references": [
+      "docs/theory-process.md#what-do-the-exact-inquiry-analyses-compute",
+      "docs/theory-process.md#how-is-an-edits-impact-certified",
+      "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
+    ],
+    "reviewed_input_sha256": "14e8f0c59f4116a2bcdd47d2642c7c105ecf919635d324d92fda59cadbbd92e6",
+    "semantic_content_sha256": "534de52648fb2aceb00b3575383ed299b39c456a62f2b6e0f5f338f304d3716c",
+    "review_path": "independent-review.json",
+    "review_sha256": "5adfd9bee4582cb14db6fb7c8a956a21057843af5ce960e69154728fc5d79b70",
+    "quality_review_path": "quality-review.json",
+    "quality_review_sha256": "c8d6ee58c855a326bc6c6ffed2c93c4e70e3ea465ab98d1d770d0fe4e56447e2"
+  }
+}

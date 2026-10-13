@@ -1,0 +1,136 @@
+{
+  "schema": "inquiry-p8-oracle",
+  "schema_version": 1,
+  "case_id": "blocked-conditional",
+  "oracle_kind": "existing-conformance-golden",
+  "expected": {
+    "result_kind": "results",
+    "exit_code": 0,
+    "results": [
+      [
+        "inquiry-result",
+        "1",
+        "blocked-conditional",
+        [
+          "impact-body",
+          [
+            "impact-result",
+            [
+              "transition",
+              "accepted-to-accepted"
+            ],
+            [
+              [
+                "query-impact",
+                [
+                  "atom",
+                  "t"
+                ],
+                [
+                  [
+                    "evidence-blocked",
+                    "defeated"
+                  ]
+                ],
+                [
+                  [
+                    "evidence-blocked",
+                    "justified"
+                  ]
+                ],
+                "true",
+                "false"
+              ]
+            ],
+            [
+              [
+                "atom",
+                "t"
+              ]
+            ],
+            []
+          ]
+        ]
+      ]
+    ]
+  },
+  "semantic_specification": {
+    "kind": "development-control",
+    "histories": [
+      [],
+      []
+    ],
+    "history_search_steps": 9,
+    "rows": [
+      {
+        "choices": []
+      },
+      {
+        "choices": []
+      }
+    ],
+    "graphs": [
+      {
+        "names": [
+          "n0",
+          "n1"
+        ],
+        "edges": [],
+        "query_ancestry": [
+          "n0",
+          "n1"
+        ],
+        "query_support": [
+          "q"
+        ],
+        "blocked": false
+      },
+      {
+        "names": [
+          "n0",
+          "n1",
+          "n2"
+        ],
+        "edges": [],
+        "query_ancestry": [
+          "n0",
+          "n1",
+          "n2"
+        ],
+        "query_support": [
+          "q"
+        ],
+        "blocked": false
+      }
+    ]
+  },
+  "review_provenance": {
+    "status": "disclosed-development-control",
+    "author": "Codex case author",
+    "author_provenance": "ai-executed",
+    "reviewer": "Codex independent spec reviewer /root/cases_spec",
+    "driver_output_used": false,
+    "analysis_implementation_imported": false,
+    "specification_references": [
+      "docs/theory-process.md#what-do-the-exact-inquiry-analyses-compute",
+      "docs/theory-process.md#how-is-an-edits-impact-certified",
+      "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
+    ],
+    "reviewed_input_sha256": "468d08bd6be39e80ff2388311f2b0e17f24c3595db1ef328eb0a1f77e91a1a68",
+    "semantic_content_sha256": "08eba155ff89ac9b09e54c9b4cfa64ce6210da24ebd0ac5a2c45d3e18e51a0d2",
+    "review_path": "independent-review.json",
+    "review_sha256": "5adfd9bee4582cb14db6fb7c8a956a21057843af5ce960e69154728fc5d79b70",
+    "quality_review_path": "quality-review.json",
+    "quality_review_sha256": "c8d6ee58c855a326bc6c6ffed2c93c4e70e3ea465ab98d1d770d0fe4e56447e2"
+  },
+  "development_provenance": {
+    "case_id": "blocked-conditional",
+    "input_path": "fixtures/process/inquiry/blocked-conditional.sexp",
+    "input_sha256": "468d08bd6be39e80ff2388311f2b0e17f24c3595db1ef328eb0a1f77e91a1a68",
+    "golden_path": "fixtures/process/inquiry/blocked-conditional.expected",
+    "golden_sha256": "9e10169c95670a358789642dc5ab1c258af5374a2a888c4872a9cbb731b3ace8",
+    "classification": "development-control",
+    "oracle_kind": "existing-conformance-golden",
+    "destination_input_path": "inputs/blocked-conditional.sexp"
+  }
+}

@@ -1,0 +1,144 @@
+session:
+  id: 2026-10-13_001
+  date: '2026-10-13'
+  started: 2026-10-13T00:00
+  last_turn: '2026-10-13T00:47:45Z'
+  turn_count: 1
+  summary: Corrective proof/runtime, semantic pair stops and independently reviewed candidate committed;
+    full gates and Haskell suites pass, original incomplete replay preserved. Exact fresh protocol/budget
+    approval and P9 remain pending.
+events_logged:
+- turn: 1
+  type: decision
+  id: N411_inquiry_sparse_refinement
+  routing: direct
+  provenance: ai-executed
+  summary: Use sparse Lean sensitivity only through exact reference equality
+- turn: 1
+  type: decision
+  id: N412_inquiry_pair_semantic_stop
+  routing: direct
+  provenance: ai-executed
+  summary: Stop on a failed completed pair while retaining process truth
+- turn: 1
+  type: decision
+  id: N413_inquiry_reviewed_correction_candidate
+  routing: direct
+  provenance: ai-executed
+  summary: Commit independently reviewed corrected inputs without approving measurement
+- turn: 1
+  type: experiment
+  id: N414_inquiry_corrective_verification
+  routing: direct
+  provenance: ai-executed
+  summary: Verify corrected implementation boundaries and preserve failed evidence
+- turn: 1
+  type: observation
+  id: O218
+  routing: crystallized
+  provenance: ai-suggested
+  summary: Implemented and independently reviewed ground support prerequisite promotes to H19.
+ai_actions:
+- turn: 1
+  action: "Continue the authorized implementation across the UTC day boundary. Complete corrective Tasks\
+    \ 1\u20133 through sequential implement/spec/quality loops and commits ab4fc49, 317f210 and 5c74e4d.\
+    \ Preserve prior review receipts; fix source guard and approval projection findings before final independent\
+    \ handoff. Run required correctness and process-free replay checks, without a new production measurement.\
+    \ Prepare exact candidate commit/protocol/manifest/code pins for the required fresh approval."
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/Process/Analysis.lean
+  - lean/Lara/Process/CanonicalSubsets.lean
+  - lean/Lara/Examples/ProcessSensitivityFast.lean
+  - lean/AxCheck.lean
+  - lean/Lara.lean
+  - scripts/inquiry-evaluate.py
+  - scripts/inquiry_evaluation_cases.py
+  - scripts/inquiry_evaluation_manifest.py
+  - scripts/inquiry_support_annotations.py
+  - scripts/inquiry_corrected_validation.py
+  - test/inquiry_evaluation_runner.py
+  - test/inquiry_corrected_candidates.py
+  - evaluation/inquiry-p8-corrected/
+  - evaluation/inquiry-correction-validation/
+  - docs/theory-process.md
+  - docs/evaluation.md
+  - plans/inquiry-p8-corrections.md
+claims_touched:
+- id: C57
+  action: revised
+  turn: 1
+logic_revisions:
+- turn: 1
+  entry: H19
+  field: created
+  before: absent
+  after: "## H19: Compare expanded support identities before annotating an accepted graph\n- **Rationale**:\
+    \ Argument names and derived claim names do not distinguish complete support terms. Check expanded\
+    \ identities before drawing an accepted graph. Keep rule and leaf identities, substitutions, nested\
+    \ premises, discharges, holes and assurance in the annotation. A bounded guard must reject unsupported\
+    \ source shapes rather than silently omit fields. Independent typing and attack review remains necessary;\
+    \ the guard does not establish checker acceptance.\n- **Sources**: [scripts/inquiry_support_annotations.py:5\
+    \ \xABArgument and derived-claim names identify annotation rows, not support keys.\xBB [input]; scripts/inquiry_support_annotations.py:63\
+    \ \xABShapes outside that recipe fail closed. Other authors must supply a reviewed extension.\xBB\
+    \ [input]; evaluation/inquiry-p8-corrected/review/independent-spec-review-final.json]\n- **Status**:\
+    \ active\n- **Provenance**: ai-suggested\n- **Sensitivity**: unknown\n- **Code ref**: [\"scripts/inquiry_support_annotations.py\"\
+    , \"test/inquiry_corrected_candidates.py\", \"evaluation/inquiry-p8-corrected/review/independent_finite_audit.py\"\
+    ]\n- **Last revised**: 2026-10-13 (2026-10-13_001#1)\n"
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: N413 explicitly depends on staged O218; bounded guard and independent review committed.
+- turn: 1
+  entry: checked-inquiry-evaluation
+  field: Status
+  before: The reviewed runner and additive suite have produced one sealed incomplete attempt. A Lean timeout
+    and a source-annotation disagreement prevent P8 completion. Corrective proof/code and independently
+    reviewed candidate inputs are being prepared; no fresh input freeze or measurement is authorized without
+    researcher approval of exact pins and a new budget.
+  after: The original sealed attempt remains incomplete. The proved sparse Lean implementation, pair-level
+    semantic stops and independently reviewed corrected candidate are committed. The candidate is awaiting
+    researcher approval; no fresh input freeze or production measurement is authorized until the exact
+    protocol, code/input identities, data policy and full fresh budget are approved. P8 and the separately
+    approved P9 evaluation remain unfinished.
+  signal: artifact-commitment
+  provenance: ai-suggested
+- turn: 1
+  entry: C57
+  field: Proof
+  before: "[trace/exploration_tree.yaml:N390_inquiry_p1_p5_implemented \u2014 the checked-source stages\
+    \ and wrapper; lean/Lara/Process/InquiryRun.lean:embeddedVerdicts_eq_p0 and embedded_verdict_bytes_eq_p0\
+    \ and p0_run_answers_preserved and p0_run_audit_preserved \u2014 preservation of the old runner; lean/Lara/Process/InquiryRun.lean:analyzeWith_eq_perRequest\
+    \ \u2014 shared projection correspondence; lean/Lara/Process/InquiryRun.lean:runBounded_eq_reference\
+    \ \u2014 bounded/reference correspondence; trace/exploration_tree.yaml:N396_inquiry_native_port and\
+    \ N397_inquiry_native_conformance; ara/evidence/inquiry-p6-p7-gates.log \u2014 independently exercised\
+    \ native/Lean fixture, generated-boundary and actual-consumer agreement with integrated gates; scripts/check-inquiry-conformance.py]"
+  after: "[trace/exploration_tree.yaml:N390_inquiry_p1_p5_implemented \u2014 the checked-source stages\
+    \ and wrapper; lean/Lara/Process/InquiryRun.lean:embeddedVerdicts_eq_p0 and embedded_verdict_bytes_eq_p0\
+    \ and p0_run_answers_preserved and p0_run_audit_preserved \u2014 preservation of the old runner; lean/Lara/Process/InquiryRun.lean:analyzeWith_eq_perRequest\
+    \ \u2014 shared projection correspondence; lean/Lara/Process/InquiryRun.lean:runBounded_eq_reference\
+    \ \u2014 bounded/reference correspondence; trace/exploration_tree.yaml:N396_inquiry_native_port and\
+    \ N397_inquiry_native_conformance; ara/evidence/inquiry-p6-p7-gates.log \u2014 independently exercised\
+    \ native/Lean fixture, generated-boundary and actual-consumer agreement with integrated gates; scripts/check-inquiry-conformance.py;\
+    \ lean/Lara/Process/Analysis.lean:minimalSlotSetsFast_eq_minimalSlotSets and sensitivityResultFast_eq_sensitivityResult\
+    \ and sensitivityResult_eq_fast \u2014 exact sparse ordered-list and complete-record refinement with\
+    \ proof-backed compiler substitution; trace/exploration_tree.yaml:N411_inquiry_sparse_refinement;\
+    \ evaluation/inquiry-correction-validation/lean-sparse/validation.json]"
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: Add formal reference-preserving refinement evidence; statement, conditions, supported status and
+    empirical claim scope stay unchanged.
+key_context:
+- turn: 1
+  excerpt: Latest researcher source-axis reply repeats the already-recorded group clarification in N404;
+    it does not approve a fresh corrective run.
+- turn: 1
+  excerpt: Reviewed candidate commit 5c74e4d606c792dbe2c071fc567b38031d96ebc1; runtime code 317f210ab2f4e5ea070dcae75218f056373e142d;
+    protocol SHA256 41a4fa014b1083cbe849588a1f9d49bdff9f6a19d3b1472d5f6e475049810796; manifest SHA256
+    1aaf2eb1e7758fea800e0046e4b01d5f176823ef44f3fe2f98bc4dedf0a6dd22. Fresh budget approval remains required.
+open_threads:
+- 'Issue #22: complete P8 after exact fresh approval; choose and separately approve/run P9 after its report.'
+- 'Issue #49: corrective code and candidate reviewed; obtain fresh approval, freeze metadata and retain
+  one bounded production run/replay.'
+- 'Issue #39: infinite-horizon Ville and online FDR over complete ledgers.'
+- 'Issue #46: prove or revise search-step ceiling rationale.'
+ai_suggestions_pending: []

@@ -1,0 +1,1970 @@
+Build profile: -w ghc-9.10.3 -O1
+In order, the following will be built (use -v for more details):
+ - lara-0.2.0.0 (test:lara-doctest) (configuration changed)
+ - lara-0.2.0.0 (exe:surface-conformance) (additional components to build)
+ - lara-0.2.0.0 (test:lara-test) (configuration changed)
+Configuring test suite 'lara-doctest' for lara-0.2.0.0...
+Preprocessing executable 'surface-conformance' for lara-0.2.0.0...
+Building executable 'surface-conformance' for lara-0.2.0.0...
+Configuring test suite 'lara-test' for lara-0.2.0.0...
+Preprocessing test suite 'lara-doctest' for lara-0.2.0.0...
+Building test suite 'lara-doctest' for lara-0.2.0.0...
+Preprocessing test suite 'lara-test' for lara-0.2.0.0...
+Building test suite 'lara-test' for lara-0.2.0.0...
+Running 1 test suites...
+Test suite lara-doctest: RUNNING...
+Warning: The package list for 'hackage.haskell.org' is 30 days old.
+Run 'cabal update' to get the latest list of available packages.
+Resolving dependencies...
+Running 1 test suites...
+Test suite lara-test: RUNNING...
+== valid derivations check
++++ OK, passed 100 tests.
+== sum monotonicity
++++ OK, passed 100 tests.
+== check introspection
++++ OK, passed 100 tests.
+== unknown constant rejected
++++ OK, passed 100 tests.
+== apply non-implication rejected
++++ OK, passed 100 tests.
+== apply mismatch rejected
++++ OK, passed 100 tests.
+Build profile: -w ghc-9.10.3 -O1
+In order, the following will be built (use -v for more details):
+ - lara-0.2.0.0 (interactive) (lib) (first run)
+== prop ≡ reflexive
++++ OK, passed 100 tests.
+== prop ≡ symmetric
++++ OK, passed 100 tests.
+Configuring library for lara-0.2.0.0...
+== prop ≡ transitive
++++ OK, passed 100 tests.
+== prop ≡ is nf-equality
++++ OK, passed 100 tests.
+== prop nf idempotent
++++ OK, passed 100 tests.
+== prop no argument reordering
++++ OK, passed 100 tests.
+== canonNum variants collapse
++++ OK, passed 100 tests.
+== canonNum idempotent
++++ OK, passed 100 tests.
+== ND replay + dependency exactness
++++ OK, passed 100 tests.
+== ND certificate soundness (Thm 4)
++++ OK, passed 100 tests.
+== ND out-of-range index rejected
++++ OK, passed 100 tests.
+== ND local is not a dependency
++++ OK, passed 100 tests.
+== encodeND normalization fidelity
++++ OK, passed 100 tests.
+== atom-key exact golden vectors
++++ OK, passed 100 tests.
+== atom-key malformed inputs rejected
++++ OK, passed 100 tests.
+== atom-key generated round-trip
++++ OK, passed 100 tests.
+== ND wire tag round-trip
++++ OK, passed 100 tests.
+== ND literal wire keyword vectors
++++ OK, passed 100 tests.
+== ND unknown tags universally rejected
++++ OK, passed 100 tests.
+== ND malformed indices universally rejected
++++ OK, passed 100 tests.
+== ND unbounded canonical index reaches replay
++++ OK, passed 100 tests.
+== ND closed decoder/infer matrix
++++ OK, passed 100 tests.
+== strict unregistered backend rejected
++++ OK, passed 100 tests.
+== strictCheck seals a judgment
++++ OK, passed 100 tests.
+== mixed nd@1/ord@1 term accepted by the checker
++++ OK, passed 100 tests.
+== mixed nd@1/ord@1 certDeps unions both steps' reports
++++ OK, passed 100 tests.
+== certDeps collects a discharge-position certificate
++++ OK, passed 100 tests.
+== certDeps of leaf and trusted instance is empty
++++ OK, passed 100 tests.
+== a rejected step does not hide the deps beneath it
++++ OK, passed 100 tests.
+== repeated-slot nd@1/ord@1 term accepted by the checker
++++ OK, passed 100 tests.
+== repeated-slot certDeps collapses to a set in Haskell
++++ OK, passed 100 tests.
+== mixed nd@1/ord@1 certDeps matches the Lean-emitted golden
++++ OK, passed 1 test.
+== RA replay + dependency exactness
++++ OK, passed 100 tests.
+== RA wrong witness rejected (R13)
++++ OK, passed 100 tests.
+== RA swapped cells rejected
++++ OK, passed 100 tests; 3 discarded.
+== RA slot out of range rejected
++++ OK, passed 100 tests.
+== RA theory-entry slot rejected
++++ OK, passed 100 tests; 101 discarded.
+== RA unknown digest rejected
++++ OK, passed 100 tests.
+== RA strictCheck seals a judgment
++++ OK, passed 100 tests.
+== RA rejection strings preserved by the Cell extraction
++++ OK, passed 100 tests.
+== RA wire tag round-trip
++++ OK, passed 100 tests.
+== RA literal wire golden vectors
++++ OK, passed 100 tests.
+== RA closed decoder rejection matrix
++++ OK, passed 100 tests.
+== RA huge slot rejected at decode
++++ OK, passed 100 tests.
+== RA decimal golden vectors
++++ OK, passed 100 tests.
+== RA non-canonical decimals rejected
++++ OK, passed 100 tests.
+== RA rendered decimal round-trip
++++ OK, passed 100 tests.
+== Cell renderDecimal inverts parseDecimal
++++ OK, passed 100 tests.
+== Cell renderDecimal golden vectors
++++ OK, passed 100 tests.
+== RA premise-cell convention
++++ OK, passed 100 tests.
+== RA checkDrop identity matrix
++++ OK, passed 100 tests.
+== ord replay + dependency exactness
++++ OK, passed 100 tests.
+== ord swapped cells rejected
++++ OK, passed 100 tests.
+== ord goal numeral mutations rejected
++++ OK, passed 100 tests.
+== ord slot out of range rejected
++++ OK, passed 100 tests.
+== ord theory-entry slot rejected (premise-only)
++++ OK, passed 100 tests.
+== ord unknown digest rejected
++++ OK, passed 100 tests.
+== ord strictCheck seals a judgment
++++ OK, passed 100 tests.
+== ord accept matrix (both arms, signs, scales)
++++ OK, passed 100 tests.
+== ord boundary arms + same-slot dedup
++++ OK, passed 100 tests.
+== ord replay rejection matrix
++++ OK, passed 100 tests.
+== ord closed predicate family
++++ OK, passed 100 tests.
+== ord goal grammar matrix
++++ OK, passed 100 tests.
+== ord exact rational comparison
++++ OK, passed 100 tests.
+== ord relation trichotomy
++++ OK, passed 100 tests.
+== ord wire tag round-trip
++++ OK, passed 100 tests.
+== ord literal wire golden vectors
++++ OK, passed 100 tests.
+== ord closed decoder rejection matrix
++++ OK, passed 100 tests.
+== ord huge slot rejected at decode
++++ OK, passed 100 tests.
+== insp replay + dependency exactness
++++ OK, passed 100 tests.
+== insp source-unit mismatch rejected
++++ OK, passed 100 tests.
+== insp feature mutation rejected
++++ OK, passed 100 tests; 16 discarded.
+== insp slot out of range rejected
++++ OK, passed 100 tests.
+== insp theory-entry slot rejected (premise-only)
++++ OK, passed 100 tests.
+== insp unknown digest rejected
++++ OK, passed 100 tests.
+== insp certificate/goal arity mismatch rejected
++++ OK, passed 100 tests.
+== insp strictCheck seals a judgment
++++ OK, passed 100 tests.
+== insp accept matrix (all four members)
++++ OK, passed 100 tests.
+== insp contrary pair is co-acceptable
++++ OK, passed 100 tests.
+== insp same-slot diff rejected
++++ OK, passed 100 tests.
+== insp replay rejection matrix
++++ OK, passed 100 tests.
+== insp closed predicate family
++++ OK, passed 100 tests.
+== insp reserved constructor table
++++ OK, passed 100 tests.
+== insp goal grammar matrix
++++ OK, passed 100 tests.
+== insp inventory convention matrix
++++ OK, passed 100 tests.
+== insp structural decision matrix
++++ OK, passed 100 tests.
+== insp relation laws
++++ OK, passed 100 tests.
+== insp wire tag round-trip
++++ OK, passed 100 tests.
+== insp flat schemas distinct
++++ OK, passed 100 tests.
+== insp literal wire golden vectors
++++ OK, passed 100 tests.
+== insp closed decoder rejection matrix
++++ OK, passed 100 tests.
+== insp huge slot rejected at decode
++++ OK, passed 100 tests.
+== replay source construction freezes identity
++++ OK, passed 100 tests.
+== replay input preserves the Unit theory table
++++ OK, passed 100 tests.
+== replay construction requires canonical theory digests
++++ OK, passed 100 tests.
+== replay source construction rejects policy mismatch
++++ OK, passed 100 tests.
+== replay input rejects duplicate Unit theory
++++ OK, passed 100 tests.
+== replay input rejects theory identity mismatch
++++ OK, passed 100 tests.
+== replay theory order is Unicode-scalar lexicographic
++++ OK, passed 100 tests.
+== replay wire golden: quoted non-ASCII theories in code-point order
++++ OK, passed 100 tests.
+== replay preflight accepts supported selection
++++ OK, passed 100 tests.
+== replay preflight duplicate selection has first precedence
++++ OK, passed 100 tests.
+== replay preflight unknown selection precedes certificate
++++ OK, passed 100 tests.
+== replay preflight locates nested premise certificate
++++ OK, passed 100 tests.
+== replay preflight certificate traversal is depth-first
++++ OK, passed 100 tests.
+== wire text golden vectors
++++ OK, passed 100 tests.
+== wire text malformed rejected
++++ OK, passed 100 tests.
+== wire S-expr text round-trip
++++ OK, passed 100 tests.
+== wire print∘parse∘print idempotent
++++ OK, passed 100 tests.
+Preprocessing library for lara-0.2.0.0...
+== wire ByteString parser matches the reference reader on committed inputs
++++ OK, passed 1 test.
+== wire ByteString parser matches the reference reader on printed trees
++++ OK, passed 100 tests.
+== wire ByteString parser matches the reference reader on corrupted input
++++ OK, passed 100 tests.
+== wire parse error positions
++++ OK, passed 100 tests.
+== wire depth bound is a located codec error
++++ OK, passed 1 test.
+== wire depth bound counts depth, not forms
++++ OK, passed 1 test.
+== wire invalid UTF-8 rejected closed
++++ OK, passed 100 tests.
+== wire unit golden vector
++++ OK, passed 100 tests.
+== wire unit golden layout variants
++++ OK, passed 100 tests.
+== wire unit round-trip
++++ OK, passed 100 tests.
+== wire check-input round-trip
++++ OK, passed 100 tests.
+== wire tag round-trip
++++ OK, passed 100 tests.
+== wire tag table total
++++ OK, passed 100 tests.
+== wire replay/envelope golden vectors
++++ OK, passed 100 tests.
+== wire replay/envelope malformed matrix
++++ OK, passed 100 tests.
+== wire verdict golden vectors
++++ OK, passed 100 tests.
+/home/yfhe/ara/Lara/src/Lara/Evidence/Decimal.hs:20:3: warning: [GHC-63397] [-Wname-shadowing]
+    This binding for ‘exponent’ shadows the existing binding
+      imported from ‘Prelude’ at /home/yfhe/ara/Lara/src/Lara/Evidence/Decimal.hs:1:8-28
+      (and originally defined in ‘ghc-internal-9.1003.0:GHC.Internal.Float’)
+
+Examples: 3  Tried: 3  Errors: 0  Failures: 0
+Test suite lara-doctest: PASS
+Test suite logged to:
+/home/yfhe/ara/Lara/./dist-newstyle/build/x86_64-linux/ghc-9.10.3/lara-0.2.0.0/t/lara-doctest/test/lara-0.2.0.0-lara-doctest.log
+1 of 1 test suites (1 of 1 test cases) passed.
+== wire verdict round-trip
++++ OK, passed 100 tests.
+== wire unit malformed matrix
++++ OK, passed 100 tests.
+== wire verdict malformed matrix
++++ OK, passed 100 tests.
+== wire file malformed rejected
++++ OK, passed 100 tests.
+== wire codec error is located
++++ OK, passed 100 tests.
+== wire Lean-driver accept golden
++++ OK, passed 100 tests.
+== wire Lean-driver reject golden
++++ OK, passed 100 tests.
+== process empty universe preserves precommitment
++++ OK, passed 1 test.
+== process omitted evaluation read introduces ordered unknown witnesses
++++ OK, passed 1 test.
+== process omitted selection read defeats read separation
++++ OK, passed 1 test.
+== process only admitted coverage removes completions
++++ OK, passed 1 test.
+== process contradictory coverage is inconsistent
++++ OK, passed 1 test.
+== process contradictory order is inconsistent
++++ OK, passed 1 test.
+== process renamed identifiers preserve semantics
++++ OK, passed 1 test.
+== process data update invalidates old run input
++++ OK, passed 1 test.
+== process all event bodies roundtrip
++++ OK, passed 100 tests.
+== process formulas roundtrip
++++ OK, passed 100 tests.
+== process profiles preserve authored fields
++++ OK, passed 100 tests.
+== process scoped coverage roundtrip
++++ OK, passed 100 tests.
+== process names and canonical naturals refuse aliases
++++ OK, passed 100 tests.
+== process codec enforces arity and clause order
++++ OK, passed 100 tests.
+== process decoded fixtures roundtrip
++++ OK, passed 100 tests.
+== process every state transition enforces prerequisites
++++ OK, passed 100 tests.
+== process scopes and all four verdicts expose exact semantics
++++ OK, passed 1 test.
+== process namespaces isolate identities without forbidding shared text
++++ OK, passed 100 tests.
+== process every event body has exact arity
++++ OK, passed 100 tests.
+== process profiles refuse zero denominators and unknown vocabulary
++++ OK, passed 100 tests.
+== process duplicate universe entries preserve answer witnesses
++++ OK, passed 1 test.
+== process recorded universe overlap preserves reference completion order
++++ OK, passed 1 test.
+== process eight recorded events ignore impossible overlapping permutations
++++ OK, passed 1 test.
+== process closed vocabulary spellings are unique
++++ OK, passed 100 tests.
+== process profile interpretation matches authored requirements
++++ OK, passed 100 tests.
+== process typed zero denominator has total reference meaning
++++ OK, passed 100 tests.
+== process extraction preserves complete ordered records
++++ OK, passed 100 tests.
+== process varied namespaces preserve nonzero record identities
++++ OK, passed 100 tests.
+== process claim and submitted witness quantifiers remain distinct
++++ OK, passed 100 tests.
+== process fixture reencoding is canonical without losing fields
++++ OK, passed 1 test.
+== process boundary records enforce exact arity
++++ OK, passed 100 tests.
+== inquiry unresolved impact charges its exact budget before malformed binding
++++ OK, passed 1 test.
+== inquiry complete consumers match every frozen result body
++++ OK, passed 1 test.
+== inquiry errors roundtrip optional labels and unbounded structured counters
++++ OK, passed 100 tests.
+== inquiry consumers distinguish wrong versions malformed bodies and missing envelopes
++++ OK, passed 1 test.
+== inquiry parser renders portable unicode details without changing legacy
++++ OK, passed 100 tests.
+== inquiry exact caps and cap plus one match frozen whole document outcomes
++++ OK, passed 1 test.
+== inquiry huge deduplicated catalogs refuse allocation before pair work and labels
++++ OK, passed 1 test.
+== inquiry pairs precede cross-list labels which precede unresolved bindings
++++ OK, passed 1 test.
+== inquiry embedded event limit precedes even a zero byte cap
++++ OK, passed 1 test.
+== inquiry references resolve before missing impact bindings after budgets
++++ OK, passed 1 test.
+== inquiry endpoint allocation precedes subset declaration and pair gates
++++ OK, passed 1 test.
+== family guards retain exact stamped occurrences and fixed-history semantics
++++ OK, passed 100 tests.
+== family resolution retains exact choices and validates slot identity
++++ OK, passed 100 tests.
+== family fixed claims bind only exact base declarations
++++ OK, passed 100 tests.
+== family DFS includes root and preserves prefix order without changing P0
++++ OK, passed 100 tests.
+== family compatibility filters output without pruning executable prefixes
++++ OK, passed 100 tests.
+== family DFS executes native run version retraction and event-identity gates
++++ OK, passed 100 tests.
+== family refusals report full steps and histories before saturated products
++++ OK, passed 1 test.
+== family late empty guards retain logical prefixes without allocating products
++++ OK, passed 1 test.
+== family products retain history outer and choice outer order
++++ OK, passed 100 tests.
+== family materialization preserves metadata coordinates duplicates and hypothetical comparisons
++++ OK, passed 100 tests.
+== source wire: source-rejections
++++ OK, passed 1 test.
+== source wire: admission-evidence-fail
++++ OK, passed 1 test.
+== source wire: blocked-conditional
++++ OK, passed 1 test.
+== source wire: forged-observed
++++ OK, passed 1 test.
+== source wire: normalized-support
++++ OK, passed 1 test.
+== source wire: shared-discharge
++++ OK, passed 1 test.
+== source wire: reindex-hole
++++ OK, passed 1 test.
+== source wire: verified-certificate
++++ OK, passed 1 test.
+== source wire: tampered-certificate
++++ OK, passed 1 test.
+== source wire: unknown-attacker-kind
++++ OK, passed 1 test.
+== source exact admission failure
++++ OK, passed 1 test.
+== source replay precedes admission
++++ OK, passed 1 test.
+== source absent capture reaches binding before final missing gate
++++ OK, passed 1 test.
+== source arbitrary queries preserve blocked conditional status and multiplicity
++++ OK, passed 1 test.
+== source support uses normalized conclusions and fresh node names
++++ OK, passed 1 test.
+== source shared discharge retains inherited authored identity
++++ OK, passed 1 test.
+== source holes retain declaration coordinates separately from AF
++++ OK, passed 1 test.
+== source forged observed labels remain hypothetical and unknown stays explicit
++++ OK, passed 1 test.
+== source modeled metadata is not package metadata
++++ OK, passed 1 test.
+== source capture keeps first failure and structural metadata mismatch
++++ OK, passed 1 test.
+== source model selectors do not inherit package ceiling
++++ OK, passed 1 test.
+== source JSON duplicates survive wire but fail whole-object extraction
++++ OK, passed 1 test.
+== source huge positions cannot wrap to valid support
++++ OK, passed 100 tests.
+== source signed constructors and opaque integer payload roundtrip
++++ OK, passed 1 test.
+== source negative indices fail authored attack reconstruction
++++ OK, passed 1 test.
+== source rejection rows never receive a public status
++++ OK, passed 1 test.
+== source missing conflict keeps AF coordinates after an earlier hole
++++ OK, passed 1 test.
+== source selection scans pruned roots and nested certificates
++++ OK, passed 1 test.
+== source typed core failure precedes unselected pruned certificate
++++ OK, passed 1 test.
+== source group conflict precedes capture failure
++++ OK, passed 1 test.
+== source capture order follows manifest before leaf extraction
++++ OK, passed 1 test.
+== source modeled interpolation retains exact authored directive grammar
++++ OK, passed 1 test.
+== source modeled JSON depth uses exact nonempty-container bound
++++ OK, passed 1 test.
+== source ordered duplicate metadata and JSON numeric lexemes are retained
++++ OK, passed 1 test.
+== source replay errors preserve exact compatibility ordering
++++ OK, passed 1 test.
+== source binding failures retain object-bearing modeled payloads
++++ OK, passed 1 test.
+== source modeled Unicode/control/nested term interpolation is exact
++++ OK, passed 1 test.
+== source actual live attacker without kind metadata stays explicitly unknown
++++ OK, passed 1 test.
+== source non-leaf explicit discharge is rejected at reconstruction
++++ OK, passed 1 test.
+== source missing reconstructed conclusion rejects before core
++++ OK, passed 1 test.
+== source typed variable constructors are not reparsed as constants
++++ OK, passed 1 test.
+== source negative certificate versions reject even pruned nested arguments
++++ OK, passed 1 test.
+== source unknown inferred discharge question rejects during reconstruction
++++ OK, passed 1 test.
+== source complete reconstruction precedes nested certificate lowering
++++ OK, passed 1 test.
+== source original authored inference guards survive let substitution
++++ OK, passed 1 test.
+== source original cell directive guard uses authored leaves
++++ OK, passed 1 test.
+== source inferred out-of-scope parameters remain core-owned
++++ OK, passed 1 test.
+== source out-of-range attack positions reject before evidence and core
++++ OK, passed 1 test.
+== source duplicate scan preserves earliest declaration with a later duplicate
++++ OK, passed 1 test.
+== source diagnostics cover every closed constructor with canonical codecs
++++ OK, passed 1 test.
+== source evidence factoring preserves legacy typed missing-dependency payload
++++ OK, passed 1 test.
+== finite analysis uses cached accepted rows and missing binding
++++ OK, passed 1 test.
+== finite stability compares full nonempty rejection outcomes
++++ OK, passed 1 test.
+== analysis codecs cover literals and zero-denominator wrapper profiles
++++ OK, passed 1 test.
+== locality preserves ordered incoming lists and mutual support membership
++++ OK, passed 1 test.
+== impact honest certificates preserve query multiplicity and set-valued reads
++++ OK, passed 1 test.
+== impact verification recomputes fields and ordered first fault
++++ OK, passed 1 test.
+== impact hole completion uses stable identity and empty complete holes
++++ OK, passed 1 test.
+== impact rejected endpoints preserve reasons and neither partition
++++ OK, passed 1 test.
+== impact whole-input reads distinguish equal-status authored changes
++++ OK, passed 1 test.
+== finite analyses enumerate every inclusion-minimal slot and literal set
++++ OK, passed 1 test.
+== finite sensitivity counts different histories but restricts slot flips to reference history
++++ OK, passed 1 test.
+== finite sensitivity avoids irrelevant slot powersets and preserves empty-change minima
++++ OK, passed 1 test.
+== finite sensitivity deduplicates identical flip sets across multi-choice slots and pairs first completion
++++ OK, passed 1 test.
+== impact codecs roundtrip all read keys and independent value shapes
++++ OK, passed 1 test.
+== audit ledger counts failed/no-result siblings and keeps unclamped exact levels
++++ OK, passed 100 tests.
+== audit ledger preserves failure precedence
++++ OK, passed 100 tests.
+== audit conditional levels have exact closed interval
++++ OK, passed 100 tests.
+== audit different valid witness cannot rescue submitted identity
++++ OK, passed 1 test.
+== audit unrelated missing kinds and duplicate metadata fail completeness
++++ OK, passed 1 test.
+== audit hypothetical fragment cannot infer observed capture
++++ OK, passed 1 test.
+== audit added attacker defeats previously warranted submitted argument
++++ OK, passed 1 test.
+== audit surviving same-query alternative cannot rescue defeated submitted node across transition
++++ OK, passed 1 test.
+== audit source pin and selected support failures precede guarantee
++++ OK, passed 1 test.
+== audit rejected source completion remains visible
++++ OK, passed 1 test.
+== audit checked methods distinguish conditional interpretation from actual applicability
++++ OK, passed 1 test.
+== audit authored claim association is not inferred from matching conclusion
++++ OK, passed 1 test.
+== audit fragment-only claim cannot alter base-fixed binding
++++ OK, passed 1 test.
+== audit profile enforces coverage, guarantee class and level, and probes
++++ OK, passed 1 test.
+== audit duplicate conflicting witness IDs fail closed with Left AmbiguousMetadata
++++ OK, passed 1 test.
+== impact exact reads distinguish equal grounded status with changed entitlement provenance
++++ OK, passed 1 test.
+== impact all transitions preserve independent rejection payloads and no mixed graph
++++ OK, passed 1 test.
+== impact compares full blocked statuses with duplicate requested blocked rows
++++ OK, passed 1 test.
+== impact actual frozen verified certificate recomputes successfully
++++ OK, passed 1 test.
+== impact actual frozen tampered certificate is a verification result
++++ OK, passed 1 test.
+== impact read footprint includes compiled discharge dependencies
++++ OK, passed 1 test.
+== finite conditional stability retains full rejected rows without vacuity
++++ OK, passed 1 test.
+== finite changed slots compare full first choices and literals compare full stamped events
++++ OK, passed 1 test.
+== locality lifts cached compact ancestry in carrier order: normalized-support
++++ OK, passed 1 test.
+== locality lifts cached compact ancestry in carrier order: shared-discharge
++++ OK, passed 1 test.
+== locality lifts cached compact ancestry in carrier order: reindex-hole
++++ OK, passed 1 test.
+== audit wire unbounded signed primitives
++++ OK, passed 100 tests.
+== audit wire frozen constructor spellings and first name lookup
++++ OK, passed 100 tests.
+== audit wire all method constructors and unconstrained inputs
++++ OK, passed 100 tests.
+== audit wire all fault constructors
++++ OK, passed 100 tests.
+== audit wire semantic duplicates and invalid levels remain metadata
++++ OK, passed 1 test.
+== family wire all constructors and ordered duplicate assignments
++++ OK, passed 100 tests.
+== audit wire strict framing and left-to-right error precedence
++++ OK, passed 100 tests.
+== audit wire actual inquiry subtrees fixed-witness
++++ OK, passed 1 test.
+== audit wire actual inquiry subtrees forged-observed
++++ OK, passed 1 test.
+== audit wire actual inquiry subtrees hypothetical-audit
++++ OK, passed 1 test.
+== audit wire actual inquiry subtrees ledger-sibling
++++ OK, passed 1 test.
+== audit wire actual inquiry subtrees fixed-query
++++ OK, passed 1 test.
+== audit wire actual inquiry subtrees profile-reinstatement
++++ OK, passed 1 test.
+== audit wire actual inquiry subtrees shared-discharge
++++ OK, passed 1 test.
+== audit wire actual inquiry subtrees reference-sensitivity
++++ OK, passed 1 test.
+== audit wire actual inquiry subtrees verified-certificate
++++ OK, passed 1 test.
+== audit wire actual inquiry subtrees p0-guard
++++ OK, passed 1 test.
+== audit wire actual inquiry subtrees normalized-support
++++ OK, passed 1 test.
+== audit wire actual inquiry subtrees minimal-conditions
++++ OK, passed 1 test.
+== checked methods parameter and Boolean domain
++++ OK, passed 100 tests.
+== checked methods canonical distinct bindings
++++ OK, passed 100 tests.
+== checked methods exact binding fault precedence
++++ OK, passed 100 tests.
+== checked methods finite outcomes and occurrences
++++ OK, passed 100 tests.
+== checked methods conditional derivations independent of applicability
++++ OK, passed 100 tests.
+== checked methods unbounded integers
++++ OK, passed 100 tests.
+== checked methods scheduled replay
++++ OK, passed 100 tests.
+== source original comparison priors do not alias certified semantic terms
++++ OK, passed 1 test.
+== source original comparison guards require targets and first-comparison blame
++++ OK, passed 1 test.
+== map manifest golden vectors
++++ OK, passed 1 test.
+== map verdict golden vector
++++ OK, passed 1 test.
+== map backend spelling is the wire pair
++++ OK, passed 1 test.
+== map and solo verdict scopes do not cross
++++ OK, passed 1 test.
+== map manifest round-trip
++++ OK, passed 100 tests.
+== map verdict round-trip
++++ OK, passed 100 tests.
+== map encoding is stable for equal values
++++ OK, passed 100 tests.
+== map order is carried, not sorted
++++ OK, passed 1 test.
+== map manifest matrix positive controls
++++ OK, passed 1 test.
+== map manifest malformed matrix
++++ OK, passed 1 test.
+== map verdict malformed matrix
++++ OK, passed 1 test.
+== map codec error is located
++++ OK, passed 1 test.
+== map tag round-trip
++++ OK, passed 100 tests.
+== map tag table total
++++ OK, passed 100 tests.
+== map alias syntax
++++ OK, passed 1 test.
+== map qualification golden
++++ OK, passed 1 test.
+== map qualified key round-trip
++++ OK, passed 100 tests.
+== map qualified key malformed rejected
++++ OK, passed 1 test.
+== map index smart constructors
++++ OK, passed 1 test.
+== map error exit codes and diagnostics
++++ OK, passed 1 test.
+== map contract field spellings distinct
++++ OK, passed 1 test.
+== map error lines are distinct
++++ OK, passed 1 test.
+== map rejection spellings distinct
++++ OK, passed 1 test.
+== map singleton loads
++++ OK, passed 1 test.
+== map members in manifest order
++++ OK, passed 1 test.
+== map path spellings resolve against the manifest
++++ OK, passed 1 test.
+== map missing member file
++++ OK, passed 1 test.
+== map missing manifest
++++ OK, passed 1 test.
+== map decoder-owned failures stay codec errors
++++ OK, passed 1 test.
+== map manifest policy id mismatch
++++ OK, passed 1 test.
+== map duplicate member paths
++++ OK, passed 1 test.
+== map accepts formatting-only policy differences
++++ OK, passed 1 test.
+== map rejects a policy redefinition
++++ OK, passed 1 test.
+== map contract outranks a quarantine
++++ OK, passed 1 test.
+== map manifest policy boundaries
++++ OK, passed 1 test.
+== map member policy is member-attributed
++++ OK, passed 1 test.
+== map member source invalid
++++ OK, passed 1 test.
+== source cache reads once per invocation
++++ OK, passed 1 test.
+== map rejects a theory payload change
++++ OK, passed 1 test.
+== map rejects a policy id mismatch
++++ OK, passed 1 test.
+== map backend selection is a set
++++ OK, passed 1 test.
+== map rejects a backend selection mismatch
++++ OK, passed 1 test.
+== map rejects an unknown backend
++++ OK, passed 1 test.
+== map rejects a member that rejects solo
++++ OK, passed 1 test.
+== map rejects a quarantined member
++++ OK, passed 1 test.
+== map rejects a group-pruned member
++++ OK, passed 1 test.
+== map attributes a member source boundary
++++ OK, passed 1 test.
+== map rereads an edit with an unchanged mtime
++++ OK, passed 1 test.
+== source-load seam matches the CLI
++++ OK, passed 1 test.
+== map holes split the index spaces
++++ OK, passed 1 test.
+== map unqualified members collide
++++ OK, passed 1 test.
+== map structural tripwires
++++ OK, passed 1 test.
+== map qualified identities are disjoint
++++ OK, passed 1 test.
+== map colliding members link once qualified
++++ OK, passed 1 test.
+== map qualification preserves support typing
++++ OK, passed 1 test.
+== map local attacks are transported
++++ OK, passed 1 test.
+== map solo-justified claims become contested
++++ OK, passed 1 test.
+== map different settings do not attack
++++ OK, passed 1 test.
+== map leaf-target undermine propagates
++++ OK, passed 1 test.
+== map saturation is cross-member only
++++ OK, passed 1 test.
+== map nodes are total provenance
++++ OK, passed 1 test.
+== map merge folds identical terms
++++ OK, passed 1 test.
+== map merge re-points attack endpoints
++++ OK, passed 1 test.
+== map merge fires through a real map
++++ OK, passed 1 test.
+== map linked argument ids are qualified
++++ OK, passed 1 test.
+== map linking is deterministic
++++ OK, passed 1 test.
+== map labels and edges are well-formed
++++ OK, passed 1 test.
+== map agreement anchor accepts
++++ OK, passed 1 test.
+== map verdict ordering is canonical
++++ OK, passed 1 test.
+== map run is deterministic
++++ OK, passed 1 test.
+== map verdict golden is fresh
++++ OK, passed 1 test.
+== map hole map reports holes
++++ OK, passed 1 test.
+== map merged hole is reported per handle
++++ OK, passed 1 test.
+== map parity envelope is fresh
++++ OK, passed 1 test.
+== map envelope mirrors loaded members
++++ OK, passed 1 test.
+== map envelope codec round-trips
++++ OK, passed 1 test.
+== map verdict codec round-trips
++++ OK, passed 1 test.
+== map malformed envelopes are refused
++++ OK, passed 1 test.
+== map envelope single-defect matrix
++++ OK, passed 1 test.
+== map envelope generator round trip
++++ OK, passed 100 tests.
+== map envelope tag table is total
++++ OK, passed 1 test.
+== map envelope reader nesting bound
++++ OK, passed 1 test.
+== map member permutation permutes the report
++++ OK, passed 1 test.
+== map alias renaming preserves statuses
++++ OK, passed 1 test.
+== map singleton matches solo statuses
++++ OK, passed 1 test.
+== map singleton and pair disagree
++++ OK, passed 1 test.
+== map true alignments hold
++++ OK, passed 1 test.
+== map false same alignment rejected
++++ OK, passed 1 test.
+== map false different alignment rejected
++++ OK, passed 1 test.
+== map first false alignment is reported
++++ OK, passed 1 test.
+== map unknown alias refused
++++ OK, passed 1 test.
+== map unknown claim refused
++++ OK, passed 1 test.
+== map coordinate out of range refused
++++ OK, passed 1 test.
+== map mixed selector in a question refused
++++ OK, passed 1 test.
+== map question claim resolved before selector
++++ OK, passed 1 test.
+== map resolution runs without linking
++++ OK, passed 1 test.
+== map contract backends disagreement rejected
++++ OK, passed 1 test.
+== map contract policy structure rejected
++++ OK, passed 1 test.
+== map member rejection rejected
++++ OK, passed 1 test.
+== map duplicate member alias refused
++++ OK, passed 1 test.
+== map duplicate claim name refused
++++ OK, passed 1 test.
+== map cli accepts and prints the golden
++++ OK, passed 1 test.
+== map cli map-input prints the envelope
++++ OK, passed 1 test.
+== map cli rejection exits 1
++++ OK, passed 1 test.
+== map cli boundary exits 2
++++ OK, passed 1 test.
+== map cli contract mismatch exits 1
++++ OK, passed 1 test.
+== map cli deps on a manifest is refused
++++ OK, passed 1 test.
+== map cli solo doors unchanged
++++ OK, passed 1 test.
+== D3 members are solo justified
++++ OK, passed 1 test.
+== D3 composite matches the legacy oracle
++++ OK, passed 1 test.
+== D3 committed map verdict is fresh
++++ OK, passed 1 test.
+== D3 manifest's expected-verdict comment is current
++++ OK, passed 1 test.
+== D3 committed map envelope is fresh
++++ OK, passed 1 test.
+== D3 cli accepts and prints the golden
++++ OK, passed 1 test.
+== D3 relocated tree gives identical bytes
++++ OK, passed 1 test.
+== D3 resolution is manifest-relative
++++ OK, passed 1 test.
+== D3 edited member is rechecked
++++ OK, passed 1 test.
+== D3 invalid member edit is rejected
++++ OK, passed 1 test.
+== check --out writes the accepted verdict
++++ OK, passed 1 test.
+== check --out contract effects
++++ OK, passed 1 test.
+== check --out preserves the previous file on a refusal
++++ OK, passed 1 test.
+== check --out cleans up a failed write
++++ OK, passed 1 test.
+== pw committed run goldens
++++ OK, passed 1 test.
+== pw derivation preserves every fixture's run
++++ OK, passed 1 test.
+== pw consistent groups are inert, conflicting groups refused
++++ OK, passed 1 test.
+== pw-run structured round trip
++++ OK, passed 100 tests.
+== pw-run text round trip
++++ OK, passed 100 tests.
+== pw malformed matrix names Lean's constructs
++++ OK, passed 100 tests.
+== pw posing splits the two sigma faults
++++ OK, passed 100 tests.
+== pw vocabulary scan is the translation domain
++++ OK, passed 100 tests.
+== pw symbol maps are first-match
++++ OK, passed 100 tests.
+== pw comparison profile and reasons
++++ OK, passed 100 tests.
+== pw posing faults consult no world
++++ OK, passed 100 tests.
+== pw clause scan order
++++ OK, passed 100 tests.
+== pw rule clause is the rule's translation
++++ OK, passed 100 tests.
+== pw result keywords spelled once
++++ OK, passed 100 tests.
+== pw error exit codes
++++ OK, passed 100 tests.
+== value bindings: parser contract
++++ OK, passed 1 test.
+== value bindings: six dedicated diagnostics
++++ OK, passed 1 test.
+== value bindings: semantic Program, Unit, and byte parity
++++ OK, passed 1 test.
+== value bindings: bound selected leaf inference matches explicit source
++++ OK, passed 1 test.
+== value bindings: nested support substitution and Cert opacity
++++ OK, passed 1 test.
+== value bindings: comparison fields and one-pass NL
++++ OK, passed 1 test.
+== value bindings: authored and canonical NL renderings
++++ OK, passed 1 test.
+== value bindings: fail-closed validation matrix
++++ OK, passed 1 test.
+== value bindings: surviving wrong-sort use reaches R2
++++ OK, passed 1 test.
+== value bindings: no-binding legacy bytes
++++ OK, passed 1 test.
+== syntax program round-trip (result 12)
++++ OK, passed 2000 tests.
+== syntax empty value-binding table preserves legacy bytes
++++ OK, passed 1 test.
+== syntax non-empty value-binding table round-trip
++++ OK, passed 1 test.
+== syntax spaced value reference round-trip
++++ OK, passed 1 test.
+== syntax open hole lines round-trip (#127)
++++ OK, passed 1 test.
+== syntax open hole single spelling (#133)
++++ OK, passed 1 test.
+== syntax 'as' is an ordinary identifier (#133)
++++ OK, passed 1 test.
+== syntax arg assurance round-trip
++++ OK, passed 100 tests.
+== syntax policy round-trip (result 12)
++++ OK, passed 2000 tests.
+== syntax @0.3/@0.4 program forms are covered
++++ OK, passed 800 tests:
+75.5% value binding table
+21.4% comparison block
+13.2% nl string with value/{cell …}/{{}}
+ 8.4% argument with an open hole
+ 7.1% attack path: StepIndex
+ 6.6% attack path: StepName
+== syntax @0.3 policy forms are covered
++++ OK, passed 100 tests:
+89% comparison-scheme
+79% measurand table
+78% con declarations
+77% pred declarations
+75% sort block
+63% declared sort in a signature
+63% labelled rule premises
+36% nullary constructor
+== syntax policy theory table round-trip
++++ OK, passed 100 tests.
+== syntax source round-trip
++++ OK, passed 2000 tests.
+== syntax golden programs (A, B) parse + idempotent
++++ OK, passed 1 test.
+== syntax golden policy parse + idempotent
++++ OK, passed 1 test.
+== syntax golden source dispatch
++++ OK, passed 1 test.
+== syntax question necessity-suffix disambiguation (pin)
++++ OK, passed 100 tests.
+== syntax program negatives are located Left
++++ OK, passed 100 tests.
+== syntax policy negatives are located Left
++++ OK, passed 100 tests.
+== syntax parse errors are located
++++ OK, passed 100 tests.
+== elaborate strict nd@1 cert presentation path accepts
++++ OK, passed 100 tests.
+== elaborate strict cert missing theory rejects R13
++++ OK, passed 100 tests.
+== elaborate A reproduces the frozen A0 golden (vertical slice)
++++ OK, passed 1 test.
+== prepareSource A default-admit preserves frozen golden
++++ OK, passed 1 test.
+== elaborate B reproduces the frozen A0 golden (byte-exact)
++++ OK, passed 1 test.
+== elaborate negatives are located Left ElabError
++++ OK, passed 1 test.
+== #129 discharge collision matrix (payload x namespace)
++++ OK, passed 1 test.
+== #129 duplicate leaf discharge is ambiguous
++++ OK, passed 1 test.
+== #129 discharge reports the first faulty line in declaration order
++++ OK, passed 1 test.
+== comparison expansion reproduces the hand-written S2 Unit
++++ OK, passed 1 test.
+== comparison expansion replays through ord@1 to accept
++++ OK, passed 1 test.
+== comparison binds the exact named evidence leaves
++++ OK, passed 1 test.
+== nl {cell …} and {{}} expand in the elaborator
++++ OK, passed 1 test.
+== lower-is-better generates the flipped goal
++++ OK, passed 1 test.
+== attack-path label and index spellings agree (0-based)
++++ OK, passed 1 test.
+== lara-syntax@0.3 negatives are located Left ElabError
++++ OK, passed 1 test.
+== comparison keeps recheck and bridge parameter namespaces independent
++++ OK, passed 1 test.
+== comparison scheme lookup uses relation and polarity
++++ OK, passed 1 test.
+== E1 justified-clean → accept, arg in, claim justified
++++ OK, passed 1 test.
+== P1 non-empirical debate: contested positions and fictionalist reinstatement
++++ OK, passed 1 test.
+== P1 removing the defense defeats the fictionalist argument
++++ OK, passed 1 test.
+== axiom admission: ND source justified, target gap, PW refuses before bridges
++++ OK, passed 1 test.
+== E2 open-gap → accept, claim gap
++++ OK, passed 1 test.
+== E3 defeat-suite → accept, justified+defeated+contested, all attack kinds
++++ OK, passed 1 test.
+== E4 reinstatement → accept, justified UNDER rebut/undermine/undercut
++++ OK, passed 1 test.
+== E5 contested via undermine+undercut cycles, gap amid attacks
++++ OK, passed 1 test.
+== S1 strict nd@1 cert → accept, arg in, claim justified
++++ OK, passed 1 test.
+== S2 strict ord@1 cert + defeasible bridge → accept, both args in, comparative claim justified
++++ OK, passed 1 test.
+== S3 ord@1 num_le tie → accept, at_least_as_good justified (num_lt would reject)
++++ OK, passed 1 test.
+== S4 undermined binding → bridge out, comparative claim defeated, comparison still justified
++++ OK, passed 1 test.
+== S5 lower-is-better → flipped goal num_lt(28.4, 31.6), accepted by ord@1, better justified
++++ OK, passed 1 test.
+== S6 named cert slots → lowered (prem 0)/(prem 1) replayed by ord@1, num_lt justified
++++ OK, passed 1 test.
+== S7 premise-label cert slots → the same lowered payload, incl. one leaf filling both slots
++++ OK, passed 1 test.
+== S8 named nd@1 binder/premises → numeric redex, slot 0 dependency, justified
++++ OK, passed 1 test.
+== agreement-map (D3): P1 contested×2 (same atoms), P2 justified×2 (setting mismatch)
++++ OK, passed 1 test.
+== D1 round0 submission → accept, two justified, one gap
++++ OK, passed 1 test.
+== D1 round1 reviews → accept, undermine+rebut+undercut, two defeated, gap
++++ OK, passed 1 test.
+== D1 round2 rebuttal → accept, reinstate + concede + gap discharge
++++ OK, passed 1 test.
+== R1 undeclared-leaf → reject R1
++++ OK, passed 1 test.
+== R2 strict-contrary → reject R12
++++ OK, passed 1 test.
+== R3 bad-attack-target → reject R10
++++ OK, passed 1 test.
+== expected JSON reports every replay preflight reason
++++ OK, passed 1 test.
+== expected JSON reports the escalated group-conflict (R9)
++++ OK, passed 1 test.
+== source accepted JSON retains ordinary golden reports and AF names
++++ OK, passed 1 test.
+== source replay preflight retains declared identity across group prune
++++ OK, passed 1 test.
+== worked-example .core.sexp anchors are fresh (parse+elaborate+encode == committed)
++++ OK, passed 1 test.
+== worked-example expected.json goldens are fresh (elaborate+render == committed)
++++ OK, passed 1 test.
+== coverage matrix: every status, attack kind, kind×label cell, and R1/R12/R10/R11 witnessed
++++ OK, passed 1 test.
+== S2 @0.3 comparison elaborates to the identical @0.2 Unit
++++ OK, passed 1 test.
+== S3 at-least-as-good elaborates to the identical @0.2 num_le Unit
++++ OK, passed 1 test.
+== S4 @0.3 comparison + labelled attack elaborate to the identical @0.2 Unit
++++ OK, passed 1 test.
+== relation selects the family member and the policy's own rules
++++ OK, passed 1 test.
+== polarity flips the generated goal and ord@1 accepts the flipped one
++++ OK, passed 1 test.
+== a2.binding.leaf == a2.1.leaf, each round-tripping in its own spelling
++++ OK, passed 1 test.
+== S4 still defeats the generated bridge while the comparison stays justified
++++ OK, passed 1 test.
+== corpus-unit manifest and committed unit directories agree exactly
++++ OK, passed 1 test.
+== corpus-unit anchors and goldens are fresh (re-derive == committed)
++++ OK, passed 1 test.
+== corpus-unit manifest expected_status equals the computed claim status
++++ OK, passed 1 test.
+== corpus-unit status distribution is exactly 9 justified / 48 gap / 3 defeated
++++ OK, passed 1 test.
+== corpus-unit stratum counts equal the adjudicated quotas
++++ OK, passed 1 test.
+== check golden covered-self-edge
++++ OK, passed 1 test.
+== check golden missing-self-edge
++++ OK, passed 1 test.
+== check golden rebut program
++++ OK, passed 1 test.
+== check rejection-class negatives
++++ OK, passed 1 test.
+== check open mandatory question is an accepted hole
++++ OK, passed 1 test.
+== check hole-sourced attack is checked but inert
++++ OK, passed 1 test.
+== check hole obligation sites are exactly the open occurrences (D12)
++++ OK, passed 1 test.
+== check holes under quarantine (D6/D7)
++++ OK, passed 1 test.
+== check Sigma well-formedness fault matrix
++++ OK, passed 1 test.
+== check duplicate-report-group quarantine/gap
++++ OK, passed 1 test.
+== check duplicate-report-group R9 stderr message
++++ OK, passed 1 test.
+== check duplicate-report-group R13-over-R9 precedence
++++ OK, passed 1 test.
+== check duplicate-report-group quarantine drops arg+attack
++++ OK, passed 1 test.
+== check quarantined attacker cannot promote its target
++++ OK, passed 1 test.
+== check golden evidence-blocked verdict
++++ OK, passed 1 test.
+== check production driver preserves multi-blocked query positions
++++ OK, passed 1 test.
+== check quarantine cannot promote by deleting an attack edge
++++ OK, passed 1 test.
+== check duplicate-report-group multi-member and multi-group
++++ OK, passed 1 test.
+== check mutation base accepts
++++ OK, passed 1 test.
+== check multi-violation stage priority
++++ OK, passed 1 test.
+== check verdicts carry exactly one replay-id
++++ OK, passed 1 test.
+== check fixpoint termination bound
++++ OK, passed 100 tests.
+== blocked unblocked labels agree (Lean labelC_agree)
++++ OK, passed 100 tests.
+== blocked moved labels are blocked
++++ OK, passed 200 tests (21.5% a deletion moved some label).
+== blocked closure contains seed and is edge-closed
++++ OK, passed 100 tests.
+== blocked closure is tight directed reachability
++++ OK, passed 3200 tests (12.22% reverse-only node must remain published).
+== blocked seed obligations on real units
++++ OK, passed 1 test.
+== blocked unquarantined units block nothing
++++ OK, passed 1 test.
+== blocked queries are support-driven
++++ OK, passed 1 test.
+== blocked prune accepts an explicit policy seed
++++ OK, passed 1 test.
+== blocked retained attack indices project the checked attack list
++++ OK, passed 1 test.
+== blocked retained leaf indices project the checked leaf list
++++ OK, passed 1 test.
+== differential corpus verdict goldens
++++ OK, passed 1 test.
+== every committed anchor is pinned by a golden
++++ OK, passed 1 test.
+== quarantine expected.json keeps public status and checked label indices
++++ OK, passed 1 test.
+== differential corpus fixtures canonical
++++ OK, passed 1 test.
+== differential numeric canonicalization anchor retains surface variants
++++ OK, passed 1 test.
+== differential 120-arg stress accept
++++ OK, passed 1 test.
+== source admission fixtures match their committed oracles
++++ OK, passed 1 test.
+== mutation suite: every mutant produces its specified outcome
++++ OK, passed 1 test.
+== mutation suite: seeded regeneration reproduces committed bytes
++++ OK, passed 1 test.
+== mutation suite: opFamily is surjective and familyText injective
++++ OK, passed 1 test.
+== mutation suite: every rejection class, codec negatives, and cycles witnessed
++++ OK, passed 1 test.
+== mutation suite: Sigma well-formedness and codec clauses have dedicated fixtures
++++ OK, passed 1 test.
+== mutation suite: every rejection class witnessed by a corpus-based mutant
++++ OK, passed 1 test.
+== mutation suite: corpus sweep budget honoured with no silent caps
++++ OK, passed 1 test.
+== mutation suite: every status and attack kind witnessed by a corpus mutant
++++ OK, passed 1 test.
+== mutation suite: accept family verified structurally (status + label shape)
++++ OK, passed 1 test.
+== mutation suite: runCheck == fst . runCheckLocated over every mutant
++++ OK, passed 1 test.
+== mutation suite: expected-location column round-trips and is present on reject rows
++++ OK, passed 1 test.
+== mutation suite: every proposed site is the constituent the checker reports
++++ OK, passed 1 test.
+== mutation suite: site enumerators map sites through the quarantine prune
++++ OK, passed 1 test.
+== mutation suite: published index is checked, rewritten index is declared
++++ OK, passed 1 test.
+== mutation suite: localization lists decompose to components and the mutant
++++ OK, passed 1 test.
+== mutation suite: drop-covering-attack site is the pair the checker reports
++++ OK, passed 1 test.
+== mutation suite: drop-covering-attack maps sites through the quarantine prune
++++ OK, passed 1 test.
+== mutation suite: cert-wrong-fraction decodes cleanly and is refused on value
++++ OK, passed 1 test.
+== mutation suite: ord/insp certificate rejection coverage
++++ OK, passed 1 test.
+== measure: manifest parsers account for every data row
++++ OK, passed 1 test.
+== measure: family column round-trips and rejects unknown spellings
++++ OK, passed 1 test.
+== measure: manifest column gates reject unknown spellings
++++ OK, passed 1 test.
+== measure: seeded-row count matches the raw expected-location column
++++ OK, passed 1 test.
+== measure: runCheck == fst . runCheckLocated over both manifests
++++ OK, passed 1 test.
+== measure: class_match holds for every mutant and corpus unit
++++ OK, passed 1 test.
+== measure: replay_ok on corpus units, - on mutants
++++ OK, passed 1 test.
+== measure: report.json parses (aeson) and report.tsv is well-formed
++++ OK, passed 1 test.
+== measure: tsvHeader is pinned and the two location cells render apart
++++ OK, passed 1 test.
+== measure: lean_agree comparators (both regimes, with mismatches)
++++ OK, passed 1 test.
+== measure: median-of-samples helper
++++ OK, passed 1 test.
+== measure: Constituent render/parse table round-trips
++++ OK, passed 1 test.
+== measure: expected-location list spelling round-trips
++++ OK, passed 1 test.
+== measure: a comma-bearing group id fails generation loudly
++++ OK, passed 1 test.
+== measure: location metrics share a domain and singletons coincide
++++ OK, passed 1 test.
+== measure: membership and head-equality are distinguishable metrics
++++ OK, passed 1 test.
+== claim-support: paper-anchor ref classifier
++++ OK, passed 1 test.
+== claim-support: value bindings preserve semantic consumer parity
++++ OK, passed 1 test.
+== claim-support: frozen corpus numbers (status/leaves/attacks/strict)
++++ OK, passed 1 test.
+== claim-support: binding-audit rows preserve the frozen 38-leaf denominator
++++ OK, passed 1 test.
+== claim-support: inferred attack audit uses complete term and authored refs
++++ OK, passed 1 test.
+== claim-support: dead-end detection uses complete attack term
++++ OK, passed 1 test.
+== claim-support: explicit attack audit widens refs but keeps positional rendering
++++ OK, passed 1 test.
+== claim-support: binding-audit attack subjects retain raw endpoints
++++ OK, passed 1 test.
+== claim-support: every attack constructor has an exact persisted subject id
++++ OK, passed 1 test.
+== claim-support: binding-audit rows carry role-aware claim context
++++ OK, passed 1 test.
+== claim-support: binding-audit context drift fails loudly
++++ OK, passed 1 test.
+== claim-support: binding-audit attack projections cover every constructor
++++ OK, passed 1 test.
+== claim-support: attack identifiers use canonical checked spellings
++++ OK, passed 1 test.
+== claim-support: binding-audit TSV is canonical and rectangular
++++ OK, passed 1 test.
+== claim-support: binding-audit worklist is fresh
++++ OK, passed 1 test.
+== claim-support: atomic worklist writes preserve complete destinations
++++ OK, passed 1 test.
+== claim-support: recomputed json/tsv re-diff the committed frozen deliverable
++++ OK, passed 1 test.
+== claim-support: JSON provenance uses git revision only
++++ OK, passed 1 test.
+== binding-audit: TSV escaping round-trips
++++ OK, passed 100 tests.
+== binding-audit: malformed TSV is rejected
++++ OK, passed 1 test.
+== binding-audit: leaf template preserves worklist key order
++++ OK, passed 1 test.
+== binding-audit: object template preserves subject order
++++ OK, passed 1 test.
+== binding-audit: classifications parse
++++ OK, passed 1 test.
+== binding-audit: invalid classifications are rejected
++++ OK, passed 1 test.
+== binding-audit: key sequence drift is rejected
++++ OK, passed 1 test.
+== binding-audit: blank judgment keys have exact diagnostics
++++ OK, passed 1 test.
+== binding-audit: blank justifications are rejected
++++ OK, passed 1 test.
+== binding-audit: divergence invariants are enforced
++++ OK, passed 1 test.
+== binding-audit: exact result headers are required
++++ OK, passed 1 test.
+== binding-audit: result documents use one final LF
++++ OK, passed 1 test.
+== binding-audit: whitespace-only human fields are rejected
++++ OK, passed 1 test.
+== binding-audit: refs cells share one typed codec
++++ OK, passed 1 test.
+== binding-audit: unknown object subject types are rejected
++++ OK, passed 1 test.
+== binding-audit: every object generated field is sealed
++++ OK, passed 1 test.
+== binding-audit: worklist validation is exact
++++ OK, passed 1 test.
+== binding-audit: invalid UTF-8 is rejected at the boundary
++++ OK, passed 1 test.
+== binding-audit: errors carry context without the CLI prefix
++++ OK, passed 1 test.
+== binding-audit: object denominator is exactly one strict plus three attacks
++++ OK, passed 1 test.
+== binding-audit: summary aggregation is closed and exact
++++ OK, passed 1 test.
+== binding-audit: summary rejects non-singleton statuses and duplicate units
++++ OK, passed 1 test.
+== binding-audit: summary JSON is canonical
++++ OK, passed 1 test.
+== binding-audit: prepare creates one exact detached packet
++++ OK, passed 1 test.
+== binding-audit: prepare rejects stale worklists before creation
++++ OK, passed 1 test.
+== binding-audit: packet read failures name operation and path
++++ OK, passed 1 test.
+== binding-audit: production AuditIO preserves strict bytes and Git results
++++ OK, passed 1 test.
+== binding-audit: packet templates are status-free and complete
++++ OK, passed 1 test.
+== binding-audit: prepare accepts trailing destination separators
++++ OK, passed 1 test.
+== binding-audit: prepare never clobbers an existing destination
++++ OK, passed 1 test.
+== binding-audit: committed-storage aliases are forbidden
++++ OK, passed 1 test.
+== binding-audit: rendering failures precede destination creation
++++ OK, passed 1 test.
+== binding-audit: every write failure removes only the partial packet
++++ OK, passed 1 test.
+== binding-audit: validate is read-only and status-blind
++++ OK, passed 1 test.
+== binding-audit: validate rejects every malformed packet class
++++ OK, passed 1 test.
+== binding-audit: validate rejects duplicate units before reads
++++ OK, passed 1 test.
+== binding-audit: validate rejects a stale committed denominator
++++ OK, passed 1 test.
+== binding-audit: validate rejects invalid UTF-8 without writes
++++ OK, passed 1 test.
+== binding-audit: object denominator failures preserve packet and summary boundaries
++++ OK, passed 1 test.
+== binding-audit: summarize replaces only after complete validation
++++ OK, passed 1 test.
+== binding-audit: summarize atomic failure preserves the prior file
++++ OK, passed 1 test.
+== binding-audit: summarize identities hash exact raw bytes
++++ OK, passed 1 test.
+== binding-audit: summarize accepts a complete SHA-256 identity
++++ OK, passed 1 test.
+== binding-audit: summarize rejects malformed Git object format output
++++ OK, passed 1 test.
+== binding-audit: summarize rejects every named hash failure
++++ OK, passed 1 test.
+== binding-audit: summarize rejects invalid UTF-8 before Git
++++ OK, passed 1 test.
+== binding-audit: CLI channels, prefix, and usage are exact
++++ OK, passed 1 test.
+== mech-review: rendered corpus reviews re-diff the committed frozen golden
++++ OK, passed 1 test.
+== mech-review: value bindings preserve semantic consumer parity
++++ OK, passed 1 test.
+== mech-review: one comment per non-justified claim, each naming its diagnostic
++++ OK, passed 1 test.
+== mech-review: gap obligation-naming and contested arms render their diagnostic
++++ OK, passed 1 test.
+== mech-review: evidence-blocked renders as a nonempty quarantine finding
++++ OK, passed 1 test.
+== mech-review: blocked text binds the conditional-status payload
++++ OK, passed 1 test.
+== mech-review: summary merges hidden conditional labels
++++ OK, passed 1 test.
+== running-example: rendered reports re-diff the committed frozen golden
++++ OK, passed 1 test.
+== running-example: run 1 is gap beside the justified strict step, run 2 is defeated via the undercut
++++ OK, passed 1 test.
+== running-example: c2's value-reference nl interpolates to the bound scores in both runs
++++ OK, passed 1 test.
+== running-example: the README's quoted verdict block is run 2's verdict bytes
++++ OK, passed 1 test.
+== ablation: runCheckLocatedWith fullConfig == runCheckLocated over both manifests
++++ OK, passed 1 test.
+== ablation: accept-set monotonicity (full accepts are byte-identical)
++++ OK, passed 1 test.
+== ablation: no-cq is identity wherever the full verdict has no hole
++++ OK, passed 1 test.
+== ablation: no-cq changes exactly accept-located-hole (surgical)
++++ OK, passed 1 test.
+== ablation: no-typed flips exactly reject-R10/R11 + reject-MissingConflict (surgical)
++++ OK, passed 1 test.
+== ablation: no-conflict-scan flips exactly reject-MissingConflict (surgical)
++++ OK, passed 1 test.
+== ablation: codec rows unchanged under every config
++++ OK, passed 1 test.
+== ablation: report counts match the manifest partition (non-trivial)
++++ OK, passed 1 test.
+== ablation: partition totality over both manifests
++++ OK, passed 1 test.
+== ablation: ablation.{json,tsv} renderer shape
++++ OK, passed 1 test.
+== ablation: hole mutant records its status shift
++++ OK, passed 1 test.
+== ablation: hand-written hole unit (full reports gap, no-cq justified)
++++ OK, passed 1 test.
+== ablation: conflict scan is switched by its own flag, not by no-cq
++++ OK, passed 1 test.
+== admission omitted/unmatched rows default to admit
++++ OK, passed 100 tests.
+== admission explicit admit preserves dependent graph
++++ OK, passed 100 tests.
+== admission all-admit source verdict equals raw checker bytes
++++ OK, passed 100 tests.
+== admission all-admit group-only core export equals raw checker bytes
++++ OK, passed 100 tests.
+== admission duplicate key precedes leaf decisions
++++ OK, passed 100 tests.
+== admission duplicate LeafId precedes replay alignment
++++ OK, passed 100 tests.
+== admission canonical first-leaf R8 negative
++++ OK, passed 100 tests.
+== admission quarantine prunes direct/premise/discharge dependencies
++++ OK, passed 100 tests.
+== admission quarantine filters attacks by raw endpoints
++++ OK, passed 100 tests.
+== admission policy+group union has canonical audit
++++ OK, passed 100 tests.
+== admission groups inspect declared leaves
++++ OK, passed 100 tests.
+== admission quarantine applies blocked overlay
++++ OK, passed 100 tests.
+== admission pruned rejection keeps its located stage/constituent
++++ OK, passed 100 tests.
+== admission group-pruned checker rejection keeps retained argument identity
++++ OK, passed 100 tests.
+== evidence: exact bounded decimal normalization
++++ OK, passed 1 test.
+== evidence: strict CSV full-table and unique-row selection
++++ OK, passed 1 test.
+== evidence: JSON duplicates/scalar/index/decimal-line boundaries
++++ OK, passed 1 test.
+== evidence: request and source codecs preserve concrete syntax
++++ OK, passed 1 test.
+== evidence: immutable capture rejects tampering, aliases, symlinks, FIFO and directories
++++ OK, passed 1 test.
+== evidence: manifest canonical bytes and path boundaries
++++ OK, passed 1 test.
+== evidence: public preparation rejects unused and quarantined cert declarations
++++ OK, passed 1 test.
+== evidence: policy then bindings then capture then extraction first-error precedence
++++ OK, passed 1 test.
+== evidence: a captured object is only usable under its own manifest entry
++++ OK, passed 1 test.
+== evidence: successful replay covers quarantined declarations and ignores unrequested bytes
++++ OK, passed 1 test.
+== evidence: exact partitions and policy origin bind report identity
++++ OK, passed 1 test.
+== evidence: immutable output publication rejects existing and racing destinations
++++ OK, passed 1 test.
+== evidence: public projections are readable but cannot update sealed carriers
++++ OK, passed 1 test.
+== runtime cached ≡ naive (random AFs)
++++ OK, passed 100 tests.
+== runtime adjacency consistency
++++ OK, passed 100 tests.
+== runtime fixture differential
++++ OK, passed 1 test.
+== runtime fixture golden bytes
++++ OK, passed 1 test.
+== runtime perf guard (120 args, ≤30s)
++++ OK, passed 1 test.
+== reporting (a) gap + incompleteAlternative on empty support
++++ OK, passed 100 tests.
+== reporting (b) multiple unresolved alternatives located
++++ OK, passed 100 tests.
+== reporting (c) complete winning argument not suppressed
++++ OK, passed 100 tests.
+== reporting (c) holes do not change status
++++ OK, passed 100 tests.
+== reporting contested support with coexisting hole
++++ OK, passed 100 tests.
+== reporting defeated support with coexisting hole
++++ OK, passed 100 tests.
+== reporting completeClaimFor vs reportClaimFor distinct
++++ OK, passed 100 tests.
+== reporting cache partitions complete/incomplete
++++ OK, passed 100 tests.
+== reporting names AF nodes past a preceding hole
++++ OK, passed 100 tests.
+== parser accepts plain-argument theta inference
++++ OK, passed 1 test.
+== explicit and inferred forms preserve Unit, wire, checked JSON, core, and exit
++++ OK, passed 1 test.
+== spelling divergence preserves checker outcome but changes core bytes
++++ OK, passed 1 test.
+== prior-argument inference embeds the complete earlier SRule
++++ OK, passed 1 test.
+== repeated parameters normalize consistently and reject conflicts
++++ OK, passed 1 test.
+== conclusion-only parameters are rejected when unbound
++++ OK, passed 1 test.
+== plain-argument empty and comma-separated lists round-trip
++++ OK, passed 1 test.
+== contextual from rule and leaf names round-trip
++++ OK, passed 1 test.
+== direct theta diagnostics render stably
++++ OK, passed 1 test.
+== theta inference failure matrix is fail-closed and ordered
++++ OK, passed 100 tests.
+== predicate, constructor, literal, and arity shape failures are explicit
++++ OK, passed 100 tests.
+== inferred payload retains rule refs, discharges, holes, and assurance
++++ OK, passed 1 test.
+== inference precedes discharge and conclusion validation
++++ OK, passed 1 test.
+== duplicate references retain selected premises
++++ OK, passed 1 test.
+== zero-premise inference has explicit semantic parity
++++ OK, passed 1 test.
+== normalized numeric references use sameTerm
++++ OK, passed 1 test.
+== bound selected leaf expands before theta inference
++++ OK, passed 1 test.
+== ord@1 schema matches the ordcmp wire grammar
++++ OK, passed 100 tests.
+== ra@1 schema matches the radrop wire grammar
++++ OK, passed 100 tests.
+== every declared reference slot is inside the payload arity
++++ OK, passed 100 tests.
+== schema keys are pairwise distinct
++++ OK, passed 100 tests.
+== lowers symbolic ord refs to numeric slots
++++ OK, passed 100 tests.
+== accepts mixed symbolic/numeric positions
++++ OK, passed 100 tests.
+== lowers a non-ASCII source identifier through the resolver
++++ OK, passed 100 tests.
+== leaves numeric payloads untouched
++++ OK, passed 100 tests.
+== rejects non-canonical numerals with the dedicated error
++++ OK, passed 100 tests.
+== reports each resolver failure with the offending name
++++ OK, passed 100 tests.
+== passes ra@1 witness fractions through while lowering its two refs
++++ OK, passed 100 tests.
+== passes schema-less and symbolic-free mismatched payloads through byte-identical
++++ OK, passed 100 tests.
+== rejects symbolic names inside schema-mismatched payloads of a schema'd backend
++++ OK, passed 100 tests.
+== leaves a non-(prem ...) node at a reference position for the backend
++++ OK, passed 100 tests.
+== is the identity on any payload containing no symbolic (prem s) anywhere
++++ OK, passed 100 tests; 3 discarded.
+== a symbolic certificate elaborates to the numeric twin's Unit
++++ OK, passed 1 test.
+== the inferred spelling lowers to the same Unit as the explicit one
++++ OK, passed 1 test.
+== mixed symbolic/numeric positions lower position-wise
++++ OK, passed 1 test.
+== a prior-argument citation lowers in both spellings
++++ OK, passed 1 test.
+== a premise-label citation elaborates to the numeric twin's Unit
++++ OK, passed 1 test.
+== labels cite the two slots one leaf fills, where the leaf name cannot
++++ OK, passed 1 test.
+== partial premise labels do not advertise an unavailable multi-slot repair
++++ OK, passed 1 test.
+== all matching slots need labels before multi-slot label repair is advertised
++++ OK, passed 1 test.
+== shadowed premise labels do not advertise an unavailable repair
++++ OK, passed 1 test.
+== a label colliding with a declared leaf is a hard error
++++ OK, passed 1 test.
+== a label colliding with a prior argument is a hard error
++++ OK, passed 1 test.
+== a label whose slot the authored premise list lacks is refused
++++ OK, passed 1 test.
+== the unresolved verdict names the rule and all three name classes
++++ OK, passed 1 test.
+== an unlabelled rule resolves exactly as it did at @0.6
++++ OK, passed 1 test.
+== certificate slot failures are fail-closed and located
++++ OK, passed 100 tests.
+== the inferred spelling rejects an unresolved slot name
++++ OK, passed 1 test.
+== a marker-free nd@1 payload is untouched
++++ OK, passed 1 test.
+== a nested instance's certificate lowers against its own premises
++++ OK, passed 1 test.
+== premise labels are scoped to the citing instance's own rule
++++ OK, passed 1 test.
+== both prior-argument premise representations resolve
++++ OK, passed 1 test.
+== certificate slot diagnostics carry their exact wording
++++ OK, passed 1 test.
+== ord@1 twins encode to byte-identical wire units
++++ OK, passed 1 test.
+== ra@1 twins encode to byte-identical wire units
++++ OK, passed 1 test.
+== ord@1 end-to-end twins produce byte-identical accept verdicts
++++ OK, passed 1 test.
+== ra@1 end-to-end twins produce byte-identical accept verdicts
++++ OK, passed 1 test.
+== the lowered unit replays; a tampered payload byte rejects R13
++++ OK, passed 1 test.
+== nd@1 end-to-end: the (hyp 0) certificate still accepts
++++ OK, passed 1 test.
+== nd@1 marker-free adversarial payload reaches the wire untouched and rejects R13
++++ OK, passed 1 test.
+== the authored symbolic spelling survives the printer round-trip
++++ OK, passed 1 test.
+== #130 authored slots name the declared leaves
++++ OK, passed 1 test.
+== #130 authored slots carry aligned premise labels
++++ OK, passed 1 test.
+== #130 a prior-argument premise prints its authored id
++++ OK, passed 1 test.
+== #130 the structural reading keeps the concluding rule
++++ OK, passed 1 test.
+== #130 the authored map covers every checked argument
++++ OK, passed 1 test.
+== #130 duplicate arguments print no slot block
++++ OK, passed 1 test.
+== #130 the ambiguous slot names neither duplicate
++++ OK, passed 1 test.
+== #130 mixed labels pad only the labelled slots
++++ OK, passed 1 test.
+== #130 mixed labels leave no trailing whitespace
++++ OK, passed 1 test.
+== #130 the slot mapping falls back to the structural reading
++++ OK, passed 1 test.
+== #130 structural rendering covers both arms
++++ OK, passed 1 test.
+== #130 an empty mapping renders nothing
++++ OK, passed 1 test.
+== #130 unlabelled authored slots drop the label column
++++ OK, passed 1 test.
+== #130 an accepting artifact prints no slot block
++++ OK, passed 1 test.
+== #148 both sides of a mismatch are spelled
++++ OK, passed 1 test.
+== #148 the block follows the reason's order
++++ OK, passed 1 test.
+== #148 an accepting artifact prints no formula block
++++ OK, passed 1 test.
+== #148 the map covers annotations and leaves
++++ OK, passed 1 test.
+== #148 a shared key reports the annotation once
++++ OK, passed 1 test.
+== #148 unmentioned keys are silent
++++ OK, passed 1 test.
+== #148 the renderer's empty cases
++++ OK, passed 1 test.
+== #148 the collector finds nested annotations
++++ OK, passed 1 test.
+== #148 the collector skips unparsable annotations
++++ OK, passed 1 test.
+== named ND: kernel proof remains unchanged
++++ OK, passed 100 tests.
+== named ND: numeric premise lowers at depth zero
++++ OK, passed 100 tests.
+== named ND: anonymous binder shifts premise
++++ OK, passed 100 tests.
+== named ND: named binder resolves to innermost hypothesis
++++ OK, passed 100 tests.
+== named ND: outer named binder shifts under nested binder
++++ OK, passed 100 tests.
+== named ND: theory index shifts beyond premises
++++ OK, passed 100 tests.
+== named ND: noncanonical theory numeral
++++ OK, passed 100 tests.
+== named ND: nonnumeric theory index
++++ OK, passed 100 tests.
+== named ND: out of range numeric premise
++++ OK, passed 100 tests.
+== named ND: unbound named hypothesis
++++ OK, passed 100 tests.
+== named ND: duplicate named binder
++++ OK, passed 100 tests.
+== named ND: malformed named binder
++++ OK, passed 100 tests.
+== named ND: structured named binder
++++ OK, passed 100 tests.
+== named ND: standalone noncanonical kernel index stays opaque
++++ OK, passed 100 tests.
+== named ND: noncanonical premise numeral
++++ OK, passed 100 tests.
+== named ND: marker in formula position is residual
++++ OK, passed 100 tests.
+== named ND: residual formula marker precedes body failure
++++ OK, passed 100 tests.
+== named ND: marker under unknown constructor is residual
++++ OK, passed 100 tests.
+== named ND: junk without a marker remains unchanged
++++ OK, passed 100 tests.
+== named ND: unresolved named premise
++++ OK, passed 100 tests.
+== named ND: kernel index is rejected in named mode
++++ OK, passed 100 tests.
+== named ND: numeric premise shifts under named binder
++++ OK, passed 100 tests.
+== named ND: unicode binder with punctuation suffix is an identifier
++++ OK, passed 100 tests.
+== named ND: binder cannot shadow premise
++++ OK, passed 100 tests.
+== named ND: noncanonical index is rejected in named mode
++++ OK, passed 100 tests.
+== named ND: source formula lowers in an anonymous binder
++++ OK, passed 100 tests.
+== named ND: source formula lowers in a named binder
++++ OK, passed 100 tests.
+== named ND: source formula lowers under abort
++++ OK, passed 100 tests.
+== named ND: source formula normalizes its numeric literals
++++ OK, passed 100 tests.
+== named ND: imp recursion reaches a nested source formula
++++ OK, passed 100 tests.
+== named ND: source formula alone selects named mode
++++ OK, passed 100 tests.
+== named ND: malformed source formula
++++ OK, passed 100 tests.
+== named ND: trailing input after a source formula is malformed
++++ OK, passed 100 tests.
+== named ND: hash comment after a source formula is malformed
++++ OK, passed 100 tests.
+== named ND: hash comment cannot truncate a source formula
++++ OK, passed 100 tests.
+== named ND: surrounding whitespace in a source formula is tolerated
++++ OK, passed 100 tests.
+== named ND: empty source formula is malformed
++++ OK, passed 100 tests.
+== named ND: unicode source formula uses UTF-8 key lengths
++++ OK, passed 100 tests.
+== named ND: source formula in certificate position is residual
++++ OK, passed 100 tests.
+== named ND: source formula under unknown constructor is residual
++++ OK, passed 100 tests.
+== named ND: marker inside a non-atom prop payload is residual
++++ OK, passed 100 tests.
+== named ND: three-field prop head is inert formula junk
++++ OK, passed 100 tests.
+== named ND: parse/elaborate lowers S1 premise spelling
++++ OK, passed 1 test.
+== named ND: parse/elaborate lowers program-level binder vector
++++ OK, passed 1 test.
+== named ND: source formula spelling round-trips the surface prop grammar
++++ OK, passed 100 tests.
+== named ND: source formulas lower to the backend encoder's bytes
++++ OK, passed 100 tests.
+== named ND: parse/elaborate lowers a source-formula binder to numeric bytes
++++ OK, passed 1 test.
+== named ND: malformed source formula is located and exact
++++ OK, passed 1 test.
+== named ND: theory references match the kernel free-context layout
++++ OK, passed 1 test.
+== named ND: kernel payloads are marker-free and byte-identical
++++ OK, passed 100 tests.
+== named ND: lowering agrees with an independent de Bruijn oracle
++++ OK, passed 100 tests.
+== named ND: oracle rejects unbound and shadowed binders
++++ OK, passed 100 tests.
+== named ND: canonical kernel hypotheses are forbidden in named mode
++++ OK, passed 100 tests.
+== named ND: premise-name binder collision is forbidden
++++ OK, passed 100 tests.
+== named ND: named errors are located and exact
++++ OK, passed 1 test.
+== named ND: named premise failures reuse certificate-slot errors
++++ OK, passed 1 test.
+== named ND: R13 boundary and named residual behavior
++++ OK, passed 1 test.
+== named ND: printer preserves named certificate atoms
++++ OK, passed 1 test.
+== cli accept exit 0 + bytes
++++ OK, passed 1 test.
+== cli reject exit 1 + bytes
++++ OK, passed 1 test.
+== cli backend rejection reason on stderr
++++ OK, passed 1 test.
+== cli backend rejection names the values
++++ OK, passed 1 test.
+== cli .lara backend rejection reason on stderr
++++ OK, passed 1 test.
+== cli .lara comparison surface context above the kernel line
++++ OK, passed 1 test.
+== cli codec error exit 2
++++ OK, passed 1 test.
+== cli unreadable file exit 2
++++ OK, passed 1 test.
+== cli usage exit 2
++++ OK, passed 1 test.
+== cli inquiry mandatory real analyses and certificate smokes match frozen bytes
++++ OK, passed 1 test.
+== cli inquiry usage IO whole UTF8 and parser boundary have atomic stdout
++++ OK, passed 1 test.
+== cli .lara accept A exit 0 + bytes
++++ OK, passed 1 test.
+== cli .lara accept B exit 0 + bytes
++++ OK, passed 1 test.
+== cli .lara accept S1 strict cert exit 0 + bytes
++++ OK, passed 1 test.
+== cli .lara nd@1 named diagnostics are exact
++++ OK, passed 1 test.
+== cli .lara accept S2 comparison form exit 0 + bytes
++++ OK, passed 1 test.
+== cli .lara parse error exit 2
++++ OK, passed 1 test.
+== cli .lara discharge on bare leaf exit 2 (#135)
++++ OK, passed 1 test.
+== cli .lara open on bare leaf exit 2 (#135)
++++ OK, passed 1 test.
+== cli .lara legacy 'open q as o' exit 2 (#133)
++++ OK, passed 1 test.
+== cli .lara ambiguous discharge exit 2 (#129)
++++ OK, passed 1 test.
+== cli .lara premise-label diagnostics exit 2 (#131)
++++ OK, passed 1 test.
+== cli .lara missing policy exit 2
++++ OK, passed 1 test.
+== cli .lara duplicate argument id exit 2
++++ OK, passed 1 test.
+== cli .lara dangling attack endpoint exit 2
++++ OK, passed 1 test.
+== cli .lara duplicate admission key exact source invalid
++++ OK, passed 1 test.
+== cli .lara duplicate LeafId exact source invalid
++++ OK, passed 1 test.
+== cli .lara R8 exact first-leaf diagnostic
++++ OK, passed 1 test.
+== cli .lara accepted quarantine verdict+audit
++++ OK, passed 1 test.
+== cli .lara admission precedence invalid>R8>R13>R9>core
++++ OK, passed 1 test.
+== cli deps S5 ord@1 report bytes (#204)
++++ OK, passed 1 test.
+== cli deps both doors agree on S8 (#204)
++++ OK, passed 1 test.
+== cli deps lists an argument citing nothing (#204)
++++ OK, passed 1 test.
+== cli deps rejection exit 1, no report (#204)
++++ OK, passed 1 test.
+== cli deps codec error exit 2 (#204)
++++ OK, passed 1 test.
+== cli .lara accept is locale-independent (#334)
++++ OK, passed 1 test.
+== cli .lara rejection diagnostics are locale-independent (#334)
++++ OK, passed 1 test.
+== cli deps report is locale-independent (#334)
++++ OK, passed 1 test.
+== cli .lara non-UTF-8 program text exit 2 (#334)
++++ OK, passed 1 test.
+== cli .lara non-UTF-8 path argument exit 2 (#334)
++++ OK, passed 1 test.
+== semantics enumerations match the Lean goldens
++++ OK, passed 1 test.
+== semantics goldens cover the framework x semantics product
++++ OK, passed 1 test.
+== grounded enumeration is the grounded singleton
++++ OK, passed 800 tests (26.6% 5+ arguments).
+== carrier-bound deciders reject outsiders
++++ OK, passed 100 tests.
+== candidates is a full powerset scan
++++ OK, passed 100 tests.
+== update dischargeOpen decides the declared open site
++++ OK, passed 100 tests.
+== update dischargeAt appends the discharge and closes the question
++++ OK, passed 100 tests.
+== update dischargeAt keeps every old position
++++ OK, passed 100 tests.
+== update dischargeRows keeps argument names and positions
++++ OK, passed 100 tests.
+== update atomic batch checks endpoints against the intermediate state
++++ OK, passed 100 tests.
+== update atomic batch reports its first failing edit
++++ OK, passed 100 tests.
+== update atomic batch keeps raw identities
++++ OK, passed 100 tests.
+== update atomic batch rejects at the first failure
++++ OK, passed 100 tests.
+== update addLeaf checks leaves, metadata, and group members
++++ OK, passed 100 tests.
+== update tighten requires admit at the key
++++ OK, passed 100 tests.
+== update admittedAtB uses the first duplicate admit row
++++ OK, passed 100 tests.
+== update admittedAtB uses the first duplicate quarantine row
++++ OK, passed 100 tests.
+== update addAttack requires both declared endpoints
++++ OK, passed 100 tests.
+== update addInstance requires fresh name and support term
++++ OK, passed 100 tests.
+== update precondition maps addLeaf failures
++++ OK, passed 100 tests.
+== update precondition maps tighten failures
++++ OK, passed 100 tests.
+== update precondition maps addAttack failures
++++ OK, passed 100 tests.
+== update precondition maps addInstance failures
++++ OK, passed 100 tests.
+== surface emitter matches the committed production-path golden
++++ OK, passed 1 test.
+== surface UTF-8 framing, escaping, and fingerprint vector
++++ OK, passed 1 test.
+== surface emitter is locale-independent under locale C
++++ OK, passed 1 test.
+== surface emitter rejects invalid UTF-8 with stable context
++++ OK, passed 1 test.
+== surface golden case IDs are exact and ordered
++++ OK, passed 1 test.
+== surface alpha pairs change AST bytes but preserve core bytes
++++ OK, passed 1 test.
+== surface negatives retain stable structural outcomes
++++ OK, passed 1 test.
+== surface located-gap rows classify holes by core obligations
++++ OK, passed 1 test.
+== surface: a no-context admission-pruned certified case is rejected, publishing no obligation
++++ OK, passed 1 test.
+== surface observation branches have exact attack and semantic cells
++++ OK, passed 1 test.
+== surface fixtures cover every M5 constructor family
++++ OK, passed 400 tests:
+100.0% comparison
+100.0% labelled premise + named discharge
+100.0% named certificate + formula
+100.0% surface attacks
+100.0% value + cell interpolation
+Test suite lara-test: PASS
+Test suite logged to:
+/home/yfhe/ara/Lara/./dist-newstyle/build/x86_64-linux/ghc-9.10.3/lara-0.2.0.0/t/lara-test/test/lara-0.2.0.0-lara-test.log
+1 of 1 test suites (1 of 1 test cases) passed.

@@ -24,6 +24,59 @@ It emits `measurements/{report,ablation}.{json,tsv}` over the measured inputs; `
 
 The header order of `report.tsv` is executable contract, not prose: `test/MeasureSpec.hs`'s `prop_reportColumnOrder` pins the header verbatim and pins `location_match` and `location_primary` apart on a synthetic record, so a silent column swap would keep the arity identical while mislabelling every `cut -f` consumer.
 
+## How inquiry captures stop and replay
+
+`scripts/inquiry-evaluate.py` captures each manifest case with both drivers and
+the separate consumer executable. Before starting the next case, it scores that
+pair against the independently frozen oracle. Each pair checkpoint records
+driver agreement, protocol validity for each driver, oracle agreement for each
+driver, consumer acceptance for each capture, and locality soundness as separate
+requirements. A failed requirement stops the run with an `INCOMPLETE`
+`semantic-discrepancy` checkpoint. Agreement between the drivers alone cannot
+advance a case whose answers disagree with the oracle.
+
+A completed consumer can refuse an answer or emit unexpected output without
+changing the driver's successful process record. That refusal fails consumer
+acceptance at the pair checkpoint. A consumer timeout, signal, or spawn failure
+can stop the run before the pair finishes. If interruption, an evidence write
+failure, or the aggregate deadline replaces the primary stop reason after a
+pair has been scored, `semantic_discrepancy` retains the failed predicates.
+
+Raw captures remain exclusive-create files. Saved-run schema version 2 publishes
+`run.json` with an embedded `metadata_sha256`: the SHA256 of the `json_bytes`
+encoding of every other field. The reader requires the exact canonical encoding
+and verifies that digest before trusting the metadata. The writer flushes and
+syncs a same-directory temporary file, then atomically replaces `run.json`.
+A write failure or process interruption leaves either the old checkpoint or the
+new one with its matching digest, not a mixture. No checkpoint exists until the
+first replacement succeeds. This is a process-interruption guarantee, not a
+power-loss durability guarantee.
+
+The terminal deadline check runs after report writes and metadata flush/fsync,
+immediately before replacing `run.json`. Until that check succeeds, the saved
+checkpoint remains `INCOMPLETE` and unsealed. A late publication cannot expose
+replayable PASS evidence even if every later recovery write fails. The check
+does not bound the duration of the atomic replacement itself.
+
+Recovery archives existing derived report bytes before replacing them. Persistent
+storage failure can leave an unsealed checkpoint for inspection; replay refuses
+it until deterministic reports are sealed. A failed raw-capture inventory scan
+records the failing path and leaves the checkpoint unsealed, even when report
+writes remain possible. Capture restores CPU affinity and propagates that error
+without retrying measured processes. Capture is never automatically resumed.
+Replay starts no processes, preserves the original completion state, and checks
+pair checkpoints against saved captures when present. Each deterministic report
+must appear in the artifact inventory with the regenerated digest, and its saved
+bytes must match that digest. Version-1 archives still require their separate
+`run.sha256`; replay copies their original metadata, checksum and report bytes
+without upgrading them. New captures write version 2 only and have no checksum
+sidecar.
+
+Production capture still requires the frozen repository identities and the
+real consumer. Fake-process runner tests use a fixture adapter for repository
+preflight while retaining suite validation and committed input and helper
+identities; they separately test production rejection of a changed runtime pin.
+
 ## Ablation configurations
 
 Three ablation configurations come from `Lara.Check.CheckConfig` in `src/Lara/Check.hs`: `noCQConfig`, `noTypedConfig`, and `noConflictScanConfig`. `fullConfig` is the frozen semantics and the reference against which the ablations are read.

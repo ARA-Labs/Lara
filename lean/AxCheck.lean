@@ -271,6 +271,7 @@ import Lara.Examples.ProcessEnumerate
 import Lara.Process.Analysis
 import Lara.Process.AnalysisWire
 import Lara.Examples.ProcessAnalysis
+import Lara.Examples.ProcessSensitivityFast
 import Lara.Process.Locality
 import Lara.Examples.ProcessLocality
 import Lara.Process.Impact
@@ -8786,3 +8787,27 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.InquiryRun.actualFor_reference
 #print axioms Lara.Process.InquiryRun.checkBudgets_allocation_bounds
 #print axioms Lara.Process.InquiryRun.checkAllocationBudgets_of_fits
+
+-- Sparse sensitivity: canonical order, exact reference equivalence, and fixtures.
+#print axioms Lara.Process.CanonicalSubsets.mem_normalize
+#print axioms Lara.Process.CanonicalSubsets.normalize_sublist
+#print axioms Lara.Process.CanonicalSubsets.normalize_eq
+#print axioms Lara.Process.CanonicalSubsets.sublist_of_subset
+#print axioms Lara.Process.CanonicalSubsets.key_injective
+#print axioms Lara.Process.CanonicalSubsets.sublists_key_pairwise
+#print axioms Lara.Process.CanonicalSubsets.sort_eq_self
+#print axioms Lara.Process.CanonicalSubsets.sort_eq_filter
+#print axioms Lara.Examples.ProcessSensitivityFast.no_flips
+#print axioms Lara.Examples.ProcessSensitivityFast.history_mismatch
+#print axioms Lara.Examples.ProcessSensitivityFast.incomparable_sizes_and_declaration_order
+#print axioms Lara.Examples.ProcessSensitivityFast.nonnumeric_singleton_order
+#print axioms Lara.Examples.ProcessSensitivityFast.first_realizer_and_duplicate_rows
+#print axioms Lara.Examples.ProcessSensitivityFast.empty_changed_nonempty_universe
+#print axioms Lara.Examples.ProcessSensitivityFast.empty_changed_empty_universe
+#print axioms Lara.Examples.ProcessSensitivityFast.same_choice_id_changed_fragment
+#print axioms Lara.Process.Analysis.admitsFlip_iff_candidates
+#print axioms Lara.Process.Analysis.slotMinimal_iff_candidate_minimal
+#print axioms Lara.Process.Analysis.slotMinimal_iff_singleton_of_empty
+#print axioms Lara.Process.Analysis.minimalSlotSetsFast_eq_minimalSlotSets
+#print axioms Lara.Process.Analysis.sensitivityResultFast_eq_sensitivityResult
+#print axioms Lara.Process.Analysis.sensitivityResult_eq_fast

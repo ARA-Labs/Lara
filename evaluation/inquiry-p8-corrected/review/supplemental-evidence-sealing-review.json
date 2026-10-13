@@ -1,0 +1,40 @@
+{
+  "_links": {
+    "html": {
+      "href": "https://github.com/ARA-Labs/Lara/pull/52#pullrequestreview-5499493380"
+    },
+    "pull_request": {
+      "href": "https://api.github.com/repos/ARA-Labs/Lara/pulls/52"
+    }
+  },
+  "author_association": "NONE",
+  "body": "## Re-Review: Comment Resolution\nAll three previous concerns are fixed in the current source and exercised by the new regressions:\n- Terminal deadline checks now run after metadata flush/fsync and before committing COMPLETE/sealed status.\n- A failed raw-capture inventory scan leaves unsealed evidence, propagates the error, and restores affinity.\n- Replay binds each regenerated report digest to its artifact entry and saved bytes.\n\nI attempted to resolve the three addressed threads, but GitHub denied ResolveReviewThread permission for this reviewer account. Please resolve them; they are not remaining code blockers.\n\n## Review Summary\nReviewed the three-file follow-up (168 additions, 42 deletions) across bug detection, error handling, test coverage, comment accuracy, and guideline/approval-contract compliance. One introduced handoff blocker remains, described inline: the candidate protocol and review package still bind the old runner and regression-test hashes. The actual pinned-helper checks reject both current files, and approval permits no later helper-pin change.\n\n## Verification\n- All 68 inquiry Python tests passed, including complete-run deadline expiration with persistent recovery failure, persistent stdout EIO, and all report-inventory mutation/schema cases.\n- Real wall-clock deadline probe delayed metadata fsync past its deadline; publication raised AggregateDeadline, left the previous checkpoint byte-identical, and replay refused the unsealed checkpoint.\n- Real legacy replay CLI preserved all 567 retained files byte-for-byte and the expected INCOMPLETE result.\n- Real CLI rejected a checksum-valid archive with summary.json omitted from its inventory before creating the destination.\n- Both 96-case authoring checks, the 80-case finite audit, and ARA source-span/session-index/observation gates passed.\n- Direct execution of the same checked() calls used by repository_preflight rejected the current runner and test against the candidate’s stale hashes.\n\nThe earlier full local-gates run passed at 26ba9c4. This follow-up changes only Python, tests, and documentation, so Lean/Haskell gates were not repeated. No production inquiry drivers or fresh P8 measurement were invoked.\n\n## Positive Observations\nThe fixes fail closed at persisted-evidence boundaries, and the new tests assert retained state, affinity restoration, and refusal before destination creation rather than implementation wiring. Original evidence and pending measurement approval remain untouched.\n",
+  "commit_id": "32b6be1d7a768913570f1981fcb8421c039728ed",
+  "html_url": "https://github.com/ARA-Labs/Lara/pull/52#pullrequestreview-5499493380",
+  "id": 5499493380,
+  "node_id": "PRR_kwDOUmgw5c8AAAABR8ucBA",
+  "pull_request_url": "https://api.github.com/repos/ARA-Labs/Lara/pulls/52",
+  "state": "CHANGES_REQUESTED",
+  "submitted_at": "2026-10-13T06:13:27Z",
+  "user": {
+    "avatar_url": "https://avatars.githubusercontent.com/u/263050463?v=4",
+    "events_url": "https://api.github.com/users/fenfenai/events{/privacy}",
+    "followers_url": "https://api.github.com/users/fenfenai/followers",
+    "following_url": "https://api.github.com/users/fenfenai/following{/other_user}",
+    "gists_url": "https://api.github.com/users/fenfenai/gists{/gist_id}",
+    "gravatar_id": "",
+    "html_url": "https://github.com/fenfenai",
+    "id": 263050463,
+    "login": "fenfenai",
+    "node_id": "U_kgDOD63U3w",
+    "organizations_url": "https://api.github.com/users/fenfenai/orgs",
+    "received_events_url": "https://api.github.com/users/fenfenai/received_events",
+    "repos_url": "https://api.github.com/users/fenfenai/repos",
+    "site_admin": false,
+    "starred_url": "https://api.github.com/users/fenfenai/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/fenfenai/subscriptions",
+    "type": "User",
+    "url": "https://api.github.com/users/fenfenai",
+    "user_view_type": "public"
+  }
+}

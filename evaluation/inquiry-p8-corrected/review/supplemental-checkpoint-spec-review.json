@@ -1,0 +1,109 @@
+{
+  "schema": "inquiry-p8-supplemental-review",
+  "schema_version": 1,
+  "role": "spec",
+  "reviewer": "agent CheckpointSpecReview",
+  "provenance": "ai-executed",
+  "status": "PASS",
+  "scope": {
+    "issue": 51,
+    "pull_request": 52,
+    "comparison_base": "a1930174a774d44682e8ee2cf987b83379e9c125",
+    "comparison_target": "working tree",
+    "review_type": "Independent read-only static specification review",
+    "assigned_files": [
+      "scripts/inquiry-evaluate.py",
+      "docs/evaluation.md:27-67",
+      "evaluation/inquiry-p8-corrected/README.md",
+      "evaluation/inquiry-p8-corrected/protocol.json"
+    ],
+    "supporting_inspection": [
+      "scripts/inquiry_evaluation_manifest.py:1-311",
+      "test/inquiry_evaluation_runner.py checkpoint-publication regressions and migrated replay assertions",
+      "CLAUDE.md and AGENTS.md",
+      "Original archived run metadata"
+    ],
+    "limitations": [
+      "PASS means no blocking issue found in the scoped static review; it is not a claim of independently executed runtime verification.",
+      "This reviewer executed no shell commands, hash calculations, tests, builds, formatters, drivers, consumers, replay commands or experiments.",
+      "Baseline diffs were independently inspected from shared tool-output artifacts artifact://37 and artifact://39, produced by CheckpointQualityReview against the specified base.",
+      "File hashes below are the SHA256 calculations reported by CheckpointQualityReview, not calculations executed by this reviewer. Runner, test, protocol and candidate README bindings were also compared with the current protocol/review-package records.",
+      "Repository-wide absence of scientific-data changes was not independently established with a full-tree diff. The inspected protocol diff changes only the runner and regression-test helper hashes; the assigned source/documentation diffs contain no scientific-data or approval changes.",
+      "The parent's reported red regression, 65 passing tests, 565-artifact/five-file exact original replay and real SIGKILL probe were not executed or independently reproduced by this reviewer.",
+      "Review-package attachment refresh remains the parent's responsibility and is not treated as a defect."
+    ]
+  },
+  "reviewed_protocol_sha256": "95ebc7df820693fa8afe3812a40ff6d3f46cff83101cb5e29a645cd1608a5583",
+  "reviewed_files": [
+    {
+      "path": "scripts/inquiry-evaluate.py",
+      "sha256": "c222c1172ec92761f9a4a020d3ed54228e7449f20640e1a90824fa2741c2ed61"
+    },
+    {
+      "path": "docs/evaluation.md",
+      "sha256": "f23cb301a28bfe7b283301ec70735d8988d74d51a4422d7da4eb1ed7d5168f0d"
+    },
+    {
+      "path": "evaluation/inquiry-p8-corrected/README.md",
+      "sha256": "2b65df7350565e525fc16d38847480a0bb2c78005c1b6878149f6d7759c3886f"
+    },
+    {
+      "path": "evaluation/inquiry-p8-corrected/protocol.json",
+      "sha256": "95ebc7df820693fa8afe3812a40ff6d3f46cff83101cb5e29a645cd1608a5583"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Atomic metadata/digest publication",
+      "method": "Static source and baseline-diff inspection",
+      "evidence": "scripts/inquiry-evaluate.py:46-62,257-264 publishes one run.json containing both metadata and its digest. write_atomic creates the temporary file in the destination directory, writes and flushes it, fsyncs it, then performs one os.replace. No second authoritative sidecar write remains. Before replacement, publication failure preserves the previous checkpoint; after replacement, the new checkpoint already contains its corresponding digest. This reasoning concerns metadata publication and process interruption, not power-loss durability."
+    },
+    {
+      "name": "Exact schema-2 canonical digest contract",
+      "method": "Static source inspection",
+      "evidence": "scripts/inquiry_evaluation_manifest.py:27-33 defines SHA256 and json_bytes as sorted keys, compact comma/colon separators, ensure_ascii=False, UTF-8 and one trailing newline. scripts/inquiry-evaluate.py:257-264 excludes only metadata_sha256 before hashing every other field and includes the resulting digest in the published canonical snapshot. validate_saved:473-486 first requires raw bytes to equal json_bytes(parsed_metadata), then removes metadata_sha256 and checks the digest over the remaining canonical payload before accepting sealed status. Noncanonical encoding cannot pass by relying only on equivalent parsed JSON."
+    },
+    {
+      "name": "Archived version-1 evidence remains read-only and byte-preserving",
+      "method": "Static source inspection and archived metadata read; no replay executed",
+      "evidence": "validate_saved:479-481 retains SHA256 verification of the original raw run.json against run.sha256 for schema 1. replay:557-568 copies original artifact bytes, run.json and the version-1 sidecar; it does not call publish_status or upgrade old evidence. publish_status:258-259 refuses obsolete saved-run schemas. The inspected original archived metadata identifies schema version 1, sealed=true, completion=INCOMPLETE and 565 inventoried artifacts. The parent's exact replay result remains separately attributed runtime evidence."
+    },
+    {
+      "name": "Unsealed checkpoint and recovery semantics",
+      "method": "Static source inspection",
+      "evidence": "validate_saved:486 rejects unsealed metadata before loading or replaying deterministic reports. recover_reports:275-312 marks recovery INCOMPLETE and unsealed, publishes that status, archives existing report bytes, replaces only derived reports and publishes sealed status after their identities are recorded. Persistent publication failures propagate; no automatic capture resume, driver retry or consumer retry is introduced. Existing raw captures retain exclusive-create behavior."
+    },
+    {
+      "name": "Caller migration and regression coverage",
+      "method": "Callsite search and static test inspection; tests not executed",
+      "evidence": "Search across scripts, tests and documentation finds production status publication through seal, progress and recover_reports, all using the migrated publish_status. Remaining production run.sha256 accesses are confined to schema-1 reading/copying. Shared diff artifact://37 retains exact metadata/report comparisons in affected schema-2 replay tests while removing obsolete sidecar expectations. New CheckpointPublication tests exercise post-replace ENOSPC/KeyboardInterrupt, repeated pre-replace temporary-file/fsync/replace failures, changed or missing embedded digest, and correct/incorrect/missing v1 sidecars. The storage-failure test checks preserved raw output, one fixture invocation, INCOMPLETE state and either an unsealed refusal or sealed failing replay."
+    },
+    {
+      "name": "Changed comments and subject documentation accurately bound the guarantee",
+      "method": "Static source/documentation and baseline-diff inspection",
+      "evidence": "The changed publish_status comment describes hashing the payload without its own digest field and publishing both identities together. The recovery docstring explicitly allows the last consistent checkpoint to remain unsealed. docs/evaluation.md:45-62 states exact canonical encoding, one same-directory replacement, no checkpoint before the first successful replacement, no power-loss guarantee, inspection without replay for unsealed checkpoints, no automatic resume and unchanged v1 bytes. Candidate README:105-111 describes the format change and distinguishes supplemental helper reviews from new input/oracle review."
+    },
+    {
+      "name": "Helper pins, scientific scope and approval boundaries",
+      "method": "Static protocol diff, pin-consumer inspection and comparison with independently reported sibling hashes",
+      "evidence": "Shared diff artifact://39 changes only recipes.additional_helpers hashes for scripts/inquiry-evaluate.py and test/inquiry_evaluation_runner.py. Those pins equal CheckpointQualityReview's calculated hashes c222c1172ec92761f9a4a020d3ed54228e7449f20640e1a90824fa2741c2ed61 and 38f944b5470560c0527fe01b65879fe51b6b867a691d1c9dff5352b146765b0a. repository_preflight:309-310 checks additional helper bytes, measure archives them, and validate_saved:502-512 requires their saved identities. The protocol diff does not change manifest identity, inputs/oracles, runtime code pins, ceilings, budgets or approval states. Current freeze state remains awaiting-researcher-approval, correction approval remains pending, and P9 remains unapproved. Candidate README retains the explicit requirement for fresh researcher approval and budget."
+    }
+  ],
+  "findings": [],
+  "commands_executed": [],
+  "evidence_sources": {
+    "baseline_diffs": [
+      "artifact://37",
+      "artifact://39"
+    ],
+    "hash_calculation_receipt": "agent://CheckpointQualityReview",
+    "issue_acceptance": "local://inquiry-checkpoint-issue.md",
+    "current_hash_bindings": [
+      "evaluation/inquiry-p8-corrected/protocol.json:339-365",
+      "evaluation/inquiry-p8-corrected/review-package.json:9,223-224,1035-1036"
+    ]
+  },
+  "production_driver_invocations": 0,
+  "measurement_or_pilot_runs": 0,
+  "researcher_approval_claimed": false
+}
