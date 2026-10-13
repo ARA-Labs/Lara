@@ -457,6 +457,14 @@ at the effective cap is accepted. The counters measure the following work:
 | `pairs` | 4096 | Family rows per ordinary wrapper request; sum of surviving rows over all catalog subsets per `minimal-assumptions` request; twice the original query-list length plus the distinct side-tagged read-key count per impact or verify-impact request |
 | `subsets` | 4096 | Sum of `2 ^ length (dedupLast catalog)` over all `minimal-assumptions` requests |
 
+The history-DFS share of `search-steps` is bounded by a theorem. A pool of `n`
+events visits at most `stepsWorst n` nodes, where `stepsWorst (n + 1) = 1 +
+(n + 1) * stepsWorst n`. That count is 109601 at the 8-event ceiling
+(`Enumerate.searchSteps_le`, `Enumerate.stepsWorst_eight`), so the history search
+of an accepted embedded document never reaches the 200000 ceiling
+(`Enumerate.admissible_searchSteps_le`). Slot extensions are charged on top and
+are bounded only by the declared limit.
+
 For `verify-impact`, the query list used in pair accounting comes from the
 certificate, but the supplied request endpoints are authoritative. Duplicate
 queries still count in the original list length. The embedded event bound is

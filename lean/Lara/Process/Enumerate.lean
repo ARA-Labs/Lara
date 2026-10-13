@@ -60,15 +60,16 @@ this module:
   outcome and not a filter.
 
 The frozen ceilings are `maxSearchHistories` (10000), `maxSearchSteps` (200000)
-and `maxSearchProducts` (10000). `maxSearchSteps` is an **unproved policy
-convention**: it is not derived from a theorem, and no theorem in this module
-bounds `searchSteps p` by a function of the pool length. The constant was chosen
-by hand above the computed (not formally proved) 109601-node worst case of the
-prefix search at the P0 event ceiling of eight events. `admissible_pool_length`
-does prove the admissibility half — an accepted version-1 document has at most
-`Wire.maxProcessEvents` pool events — but the search-step bound itself remains a
-convention. The event ceiling is reused, never raised
-(`maxProcessEvents_unchanged`, `document_event_ceiling`).
+and `maxSearchProducts` (10000). `maxSearchSteps` covers every admissible
+search. `searchSteps_le` bounds `searchSteps p` by `stepsWorst` of the pool
+length, the partial-permutation count `stepsWorst (n + 1) = 1 + (n + 1) *
+stepsWorst n`, which is monotone (`stepsWorst_mono`) and equals 109601 at the P0
+event ceiling of eight events (`stepsWorst_eight`). With `admissible_pool_length`
+(an accepted version-1 document has at most `Wire.maxProcessEvents` pool events),
+`admissible_searchSteps_le` shows that such a document's search never exceeds
+the step ceiling, and `admissible_searchSteps_le_clamped` that clamping never
+turns a sufficient declared step limit into a refusal. The event ceiling is
+reused, never raised (`maxProcessEvents_unchanged`, `document_event_ceiling`).
 
 `enumerateProblem` and `enumerateFamily` clamp the caller's limit with
 `Limits.clamped` on entry, so the ceilings are enforced and not merely stated:
@@ -571,8 +572,8 @@ structure Limits where
 /-- Frozen checker ceiling for distinct generated histories. -/
 def maxSearchHistories : Nat := 10000
 
-/-- Frozen checker ceiling for prefix-DFS nodes. This covers the whole search
-tree at the P0 event ceiling of eight events. -/
+/-- Frozen checker ceiling for prefix-DFS nodes. It covers the whole search
+tree at the P0 event ceiling of eight events (`admissible_searchSteps_le`). -/
 def maxSearchSteps : Nat := 200000
 
 /-- Frozen checker ceiling for generated family completions (source rows). -/
@@ -602,6 +603,93 @@ theorem admissible_pool_length {d : Wire.Document} {r : Wire.Result}
     (h : Wire.run d = .ok r) : (pool d.problem).length ≤ Wire.maxProcessEvents := by
   rw [pool_length]
   exact document_event_ceiling d h
+
+/-! ## The search-step bound -/
+
+/-- Worst-case prefix-DFS node count over a pool of `n` events: every step
+succeeds, so the tree holds every partial permutation of the pool. -/
+def stepsWorst : Nat → Nat
+  | 0 => 1
+  | n + 1 => 1 + (n + 1) * stepsWorst n
+
+theorem stepsWorst_pos (n : Nat) : 0 < stepsWorst n := by
+  cases n <;> simp [stepsWorst]
+
+theorem stepsWorst_succ_ge (n : Nat) : stepsWorst n ≤ stepsWorst (n + 1) := by
+  simp only [stepsWorst]
+  nlinarith [stepsWorst_pos n]
+
+theorem stepsWorst_mono {m n : Nat} (h : m ≤ n) : stepsWorst m ≤ stepsWorst n := by
+  induction h with
+  | refl => exact le_refl _
+  | step _ ih => exact le_trans ih (stepsWorst_succ_ge _)
+
+theorem stepsWorst_eight : stepsWorst 8 = 109601 := by decide
+
+/-- A sum of `filterMap` values, each at most `b`, is at most `l.length * b`. -/
+theorem filterMap_sum_le {α : Type} (l : List α) (g : α → Option Nat) (b : Nat)
+    (hg : ∀ a ∈ l, ∀ v, g a = some v → v ≤ b) :
+    (l.filterMap g).foldr (· + ·) 0 ≤ l.length * b := by
+  induction l with
+  | nil => simp
+  | cons a l ih =>
+    have ih' := ih (fun x hx => hg x (List.mem_cons_of_mem a hx))
+    rw [List.length_cons, Nat.succ_mul]
+    cases ha : g a with
+    | none => rw [List.filterMap_cons_none ha]; omega
+    | some v =>
+      rw [List.filterMap_cons_some ha, List.foldr_cons]
+      have := hg a List.mem_cons_self v ha
+      omega
+
+/-- The prefix DFS visits at most `stepsWorst` of the remaining pool length
+nodes, whatever its fuel, state and prefix. -/
+theorem goSteps_le (p : Problem) : ∀ (fuel : Nat) (s : ProcessState) (h : ProcessHistory)
+    (rem : List Stamped), goSteps p fuel s h rem ≤ stepsWorst rem.length := by
+  intro fuel
+  induction fuel with
+  | zero => intro s h rem; exact stepsWorst_pos _
+  | succ fuel ih =>
+    intro s h rem
+    simp only [goSteps]
+    cases rem with
+    | nil => simp [stepsWorst]
+    | cons a l =>
+      have hsum := filterMap_sum_le (a :: l)
+        (fun e => (s.step e).map fun s' => goSteps p fuel s' (h ++ [e]) ((a :: l).erase e))
+        (stepsWorst l.length) (by
+          intro e he v hv
+          cases hs : s.step e with
+          | none => simp [hs] at hv
+          | some s' =>
+            simp only [hs, Option.map_some, Option.some.injEq] at hv
+            rw [← hv]
+            have hlen := List.length_erase_of_mem he
+            simp only [List.length_cons, Nat.add_sub_cancel] at hlen
+            simpa [hlen] using ih s' (h ++ [e]) ((a :: l).erase e))
+      simp only [List.length_cons, stepsWorst] at hsum ⊢
+      omega
+
+/-- The whole search visits at most `stepsWorst` of the pool length nodes. -/
+theorem searchSteps_le (p : Problem) : searchSteps p ≤ stepsWorst (pool p).length :=
+  goSteps_le p _ _ _ _
+
+/-- The frozen step ceiling covers the worst case at the P0 event ceiling. -/
+theorem stepsWorst_maxProcessEvents_le :
+    stepsWorst Wire.maxProcessEvents ≤ maxSearchSteps := by decide
+
+/-- An accepted version-1 document never reaches the frozen step ceiling. -/
+theorem admissible_searchSteps_le {d : Wire.Document} {r : Wire.Result}
+    (h : Wire.run d = .ok r) : searchSteps d.problem ≤ maxSearchSteps :=
+  le_trans (searchSteps_le _)
+    (le_trans (stepsWorst_mono (admissible_pool_length h)) stepsWorst_maxProcessEvents_le)
+
+/-- For an accepted version-1 document, clamping never turns a sufficient
+declared step limit into a refusal: the clamped cap still covers the search. -/
+theorem admissible_searchSteps_le_clamped {d : Wire.Document} {r : Wire.Result}
+    (h : Wire.run d = .ok r) (lim : Limits) (hl : searchSteps d.problem ≤ lim.steps) :
+    searchSteps d.problem ≤ lim.clamped.steps :=
+  Nat.le_min.mpr ⟨hl, admissible_searchSteps_le h⟩
 
 /-- Bounded history enumeration. The caller's limit is clamped with
 `Limits.clamped` on entry, so the checker ceilings are enforced. Over any cap the
