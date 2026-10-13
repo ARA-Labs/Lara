@@ -504,11 +504,11 @@ class Boundaries(unittest.TestCase):
         args, calls = self.pair_programs("interrupted-semantic-checkpoint", output, output)
         original_publish = runner.publish_status
         interrupted = []
-        def interrupt_checkpoint(directory, run):
+        def interrupt_checkpoint(directory, run, **kwargs):
             if not interrupted and (run.get("active_operation") or {}).get("stage") == "pair-checkpoint":
                 interrupted.append(True)
                 raise KeyboardInterrupt("test-only interrupt before semantic checkpoint publication")
-            return original_publish(directory, run)
+            return original_publish(directory, run, **kwargs)
         with patch.object(runner, "publish_status", side_effect=interrupt_checkpoint):
             code = runner.measure(args)
         run = self.assert_pair_stop(args, calls, code, reason="interrupted")
@@ -797,6 +797,108 @@ class Boundaries(unittest.TestCase):
             "completion": run["completion"], "failed_operation": run["failed_or_interrupted_operation"],
             "unattached_paths": run["unattached_capture_paths"], "production_driver_invocations": 0,
             "stdout_sha256": run["artifacts"]["raw/source-rejections.native.stdout"]})
+
+    def test_complete_publication_deadline_with_failed_recovery_refuses_replay(self):
+        program = fake(self.directory / "fake-late-complete", "import json,sys\nfrom pathlib import Path\n"
+            + "sys.path.insert(0," + repr(str(ROOT / "scripts")) + ")\n"
+            + "from evidence_measured import canonical\n"
+            + "source=Path(sys.argv[-1])\n"
+            + "oracle=json.loads((source.parent.parent/'oracles'/(source.stem+'.json')).read_text())\n"
+            + "sys.stdout.buffer.write(b''.join(canonical(f) for f in oracle['expected']['results']))\n")
+        consumer = fake(self.directory / "fake-late-consumer", "raise SystemExit(0)\n")
+        for boundary in ("report", "metadata"):
+            with self.subTest(boundary=boundary):
+                saved = self.directory / ("late-complete-" + boundary)
+                expired = []
+                original_fsync = runner.os.fsync
+                original_clock = time.monotonic
+                affinity = os.sched_getaffinity(0)
+                def delayed_fsync(fd):
+                    if expired:
+                        raise OSError(errno.ENOSPC, "persistent recovery publication failure")
+                    original_fsync(fd)
+                    path = Path(os.readlink(f"/proc/self/fd/{fd}"))
+                    target = ".summary.tsv." if boundary == "report" else ".run.json."
+                    if path.name.startswith(target):
+                        if boundary == "metadata":
+                            pending = json.loads(path.read_bytes())
+                            if not pending.get("sealed"):
+                                return
+                            self.assertEqual(pending["completion"], "COMPLETE")
+                            self.assertEqual(len(pending["invocations"]), 192)
+                        self.assertTrue(json.loads((saved / "summary.json").read_text())["passed"])
+                        expired.append(True)
+                def clock():
+                    return original_clock() + (10000 if expired else 0)
+                with patch.object(runner.os, "fsync", side_effect=delayed_fsync), \
+                     patch.object(runner.time, "monotonic", side_effect=clock):
+                    with self.assertRaises(OSError):
+                        runner.measure(argparse.Namespace(manifest=str(MANIFEST), native=str(program),
+                            lean=str(program), consumer=str(consumer), out=str(saved)))
+                self.assertEqual(expired, [True])
+                self.assertEqual(os.sched_getaffinity(0), affinity)
+                run = json.loads((saved / "run.json").read_text())
+                self.assertEqual(run["completion"], "INCOMPLETE")
+                self.assertFalse(run["sealed"])
+                replay = self.directory / ("late-complete-replay-" + boundary)
+                with self.assertRaisesRegex(ValueError, "incomplete checkpoint without sealed"):
+                    runner.replay(argparse.Namespace(manifest=str(MANIFEST), replay=str(saved), out=str(replay)))
+                self.assertFalse(replay.exists())
+
+    def test_persistent_raw_read_failure_leaves_unsealed_checkpoint(self):
+        args, calls = self.pair_programs("raw-inventory-eio", b"retained partial capture\n",
+                                       b"retained partial capture\n")
+        saved = Path(args.out)
+        raw = saved / "raw/source-rejections.native.stdout"
+        original_read = Path.read_bytes
+        affinity = os.sched_getaffinity(0)
+        def failing_read(path):
+            if path == raw:
+                raise OSError(errno.EIO, "persistent raw read failure", str(path))
+            return original_read(path)
+        with patch.object(Path, "read_bytes", failing_read):
+            with self.assertRaises(OSError):
+                runner.measure(args)
+        self.assertEqual(os.sched_getaffinity(0), affinity)
+        run = json.loads((saved / "run.json").read_text())
+        self.assertFalse(run["sealed"])
+        self.assertEqual(run["completion"], "INCOMPLETE")
+        self.assertEqual(run["failed_raw_inventory_path"], raw.relative_to(saved).as_posix())
+        self.assertEqual(raw.read_bytes(), b"retained partial capture\n")
+        self.assertEqual(len(calls.read_text().splitlines()), 1)
+        replay = self.directory / "raw-inventory-eio-replay"
+        with self.assertRaisesRegex(ValueError, "incomplete checkpoint without sealed"):
+            runner.replay(argparse.Namespace(manifest=str(MANIFEST), replay=str(saved), out=str(replay)))
+        self.assertFalse(replay.exists())
+
+    def test_replay_requires_regenerated_reports_in_artifact_inventory(self):
+        for version in (1, runner.SCHEMA_VERSION):
+            for name in ("results.jsonl", "summary.json", "summary.tsv"):
+                for mutation in ("omitted", "divergent"):
+                    with self.subTest(version=version, name=name, mutation=mutation):
+                        stem = f"report-binding-{version}-{name}-{mutation}"
+                        saved = self.directory / stem
+                        shutil.copytree(self.saved, saved)
+                        run = copy.deepcopy(self.saved_run)
+                        run["schema_version"] = version
+                        run.pop("metadata_sha256", None)
+                        if mutation == "omitted":
+                            run["artifacts"].pop(name)
+                            (saved / name).unlink()
+                        else:
+                            data = (saved / name).read_bytes() + b"\n"
+                            (saved / name).write_bytes(data)
+                            run["artifacts"][name] = digest(data)
+                        if version == 1:
+                            data = json_bytes(run)
+                            (saved / "run.json").write_bytes(data)
+                            (saved / "run.sha256").write_text(digest(data) + "\n")
+                        else:
+                            runner.publish_status(saved, run)
+                        replay = self.directory / (stem + "-replay")
+                        with self.assertRaisesRegex(ValueError, "report artifact"):
+                            runner.replay(argparse.Namespace(manifest=str(MANIFEST), replay=str(saved), out=str(replay)))
+                        self.assertFalse(replay.exists())
 
     def test_publication_deadline_cannot_rescue_incomplete_status(self):
         program = fake(self.directory / "fake-publication-deadline", "import os,signal\nprint('deadline prefix',flush=True)\nos.kill(os.getpid(),signal.SIGTERM)\n")

@@ -52,14 +52,25 @@ new one with its matching digest, not a mixture. No checkpoint exists until the
 first replacement succeeds. This is a process-interruption guarantee, not a
 power-loss durability guarantee.
 
+The terminal deadline check runs after report writes and metadata flush/fsync,
+immediately before replacing `run.json`. Until that check succeeds, the saved
+checkpoint remains `INCOMPLETE` and unsealed. A late publication cannot expose
+replayable PASS evidence even if every later recovery write fails. The check
+does not bound the duration of the atomic replacement itself.
+
 Recovery archives existing derived report bytes before replacing them. Persistent
 storage failure can leave an unsealed checkpoint for inspection; replay refuses
-it until deterministic reports are sealed. Capture is never automatically resumed.
+it until deterministic reports are sealed. A failed raw-capture inventory scan
+records the failing path and leaves the checkpoint unsealed, even when report
+writes remain possible. Capture restores CPU affinity and propagates that error
+without retrying measured processes. Capture is never automatically resumed.
 Replay starts no processes, preserves the original completion state, and checks
-pair checkpoints against saved captures when present. Version-1 archives still
-require their separate `run.sha256`; replay copies their original metadata,
-checksum and report bytes without upgrading them. New captures write version 2
-only and have no checksum sidecar.
+pair checkpoints against saved captures when present. Each deterministic report
+must appear in the artifact inventory with the regenerated digest, and its saved
+bytes must match that digest. Version-1 archives still require their separate
+`run.sha256`; replay copies their original metadata, checksum and report bytes
+without upgrading them. New captures write version 2 only and have no checksum
+sidecar.
 
 Production capture still requires the frozen repository identities and the
 real consumer. Fake-process runner tests use a fixture adapter for repository

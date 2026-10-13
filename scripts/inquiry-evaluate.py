@@ -43,7 +43,7 @@ class AggregateDeadline(OSError):
     """Evidence publication also cannot turn a late run into completion."""
 
 
-def write_atomic(path, data, *, replace=False):
+def write_atomic(path, data, *, replace=False, deadline=None):
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = None
     try:
@@ -52,6 +52,10 @@ def write_atomic(path, data, *, replace=False):
             stream.write(data)
             stream.flush()
             os.fsync(stream.fileno())
+        # Decide after all slow preparation, before making terminal status
+        # visible. A late run must not rely on a second write to retract PASS.
+        if deadline is not None and time.monotonic() >= deadline:
+            raise AggregateDeadline("aggregate deadline exhausted during evidence publication")
         if replace:
             os.replace(temporary, path)
         else:
@@ -243,7 +247,7 @@ def score(directory, run, manifest, oracles):
     return results, summary(results, manifest, run)
 
 
-def seal(directory, run, results, report):
+def seal(directory, run, results, report, deadline):
     for relative, data in report_bytes(results, report).items():
         artifact(directory, relative, data, run["artifacts"])
     # Captures are exclusive-create files. Only derived reports and status
@@ -251,17 +255,17 @@ def seal(directory, run, results, report):
     run["deterministic_report_hashes"] = {p: run["artifacts"][p] for p in ("results.jsonl", "summary.json", "summary.tsv")}
     run["sealed"] = True
     run["active_operation"] = None
-    publish_status(directory, run)
+    publish_status(directory, run, deadline=deadline)
 
 
-def publish_status(directory, run):
+def publish_status(directory, run, *, deadline=None):
     require(run["schema"] == SCHEMA and run["schema_version"] == SCHEMA_VERSION,
             "cannot publish an obsolete saved run schema")
     # The digest covers the canonical payload without its own field. Publish
     # both together so an interrupted replacement cannot split their identities.
     snapshot = {key: value for key, value in run.items() if key != "metadata_sha256"}
     snapshot["metadata_sha256"] = digest(json_bytes(snapshot))
-    write_atomic(directory / "run.json", json_bytes(snapshot), replace=True)
+    write_atomic(directory / "run.json", json_bytes(snapshot), replace=True, deadline=deadline)
 
 
 def progress(directory, run, manifest, start):
@@ -433,37 +437,41 @@ def measure(args):
     invoked = {(r["case_id"], r["driver"]) for r in run["invocations"]}
     run["missing_invocations"] = [{"case_id": c["case_id"], "driver": d}
                                   for c, d in order(manifest) if (c["case_id"], d) not in invoked]
-    # An IO failure between process capture and record attachment may leave
-    # streams without a complete invocation record. Preserve those too, and
-    # disclose them instead of silently dropping bytes from the evidence set.
-    run["unattached_capture_paths"] = []
     try:
-        for path in sorted((out / "raw").iterdir()):
-            relative = path.relative_to(out).as_posix()
-            if relative not in run["artifacts"]:
-                run["artifacts"][relative] = digest(path.read_bytes())
-                run["unattached_capture_paths"].append(relative)
-    except (OSError, KeyboardInterrupt) as exc:
-        run["completion"] = "INCOMPLETE"
-        run["stop_reason"] = "interrupted" if isinstance(exc, KeyboardInterrupt) else "evidence-io-failure"
-        run["stop_detail"] = str(exc)
-    # Scoring is part of the aggregate budget. A deadline may not be rescued by
-    # fast replay later; the original completion state is retained verbatim.
-    try:
-        results, report = score(out, run, manifest, oracles)
-        # Include report computation and encoding, before adding final elapsed
-        # metadata. The saved elapsed value is reused verbatim during replay.
-        report_bytes(results, report)
-        run["aggregate_elapsed_ms"] = (time.monotonic() - start) * 1000
-        if time.monotonic() >= deadline:
+        # An IO failure between process capture and record attachment may leave
+        # streams without a complete invocation record. Inventory must finish
+        # before report recovery is allowed to seal the retained evidence.
+        run["unattached_capture_paths"] = []
+        relative = "raw"
+        try:
+            for path in sorted((out / "raw").iterdir()):
+                relative = path.relative_to(out).as_posix()
+                if relative not in run["artifacts"]:
+                    run["artifacts"][relative] = digest(path.read_bytes())
+                    run["unattached_capture_paths"].append(relative)
+        except (OSError, KeyboardInterrupt) as exc:
             run["completion"] = "INCOMPLETE"
-            run["stop_reason"] = "aggregate-deadline"
-        report = summary(results, manifest, run)
-        seal(out, run, results, report)
-        if time.monotonic() >= deadline:
-            raise AggregateDeadline("aggregate deadline exhausted during evidence publication")
-    except (OSError, KeyboardInterrupt) as exc:
-        report = recover_reports(out, run, manifest, oracles, start, exc)
+            run["sealed"] = False
+            run["stop_reason"] = "interrupted" if isinstance(exc, KeyboardInterrupt) else "evidence-io-failure"
+            run["stop_detail"] = str(exc)
+            run["failed_raw_inventory_path"] = relative
+            progress(out, run, manifest, start)
+            raise
+        # Scoring is part of the aggregate budget. A deadline may not be rescued
+        # by fast replay later; the original completion state is retained verbatim.
+        try:
+            results, report = score(out, run, manifest, oracles)
+            # Include report computation and encoding, before adding final elapsed
+            # metadata. The saved elapsed value is reused verbatim during replay.
+            report_bytes(results, report)
+            run["aggregate_elapsed_ms"] = (time.monotonic() - start) * 1000
+            if time.monotonic() >= deadline:
+                run["completion"] = "INCOMPLETE"
+                run["stop_reason"] = "aggregate-deadline"
+            report = summary(results, manifest, run)
+            seal(out, run, results, report, deadline)
+        except (OSError, KeyboardInterrupt) as exc:
+            report = recover_reports(out, run, manifest, oracles, start, exc)
     finally:
         os.sched_setaffinity(0, affinity)
     print(f"{run['completion']}: {'PASS' if report['passed'] else 'FAIL'}: {out}")
@@ -549,8 +557,13 @@ def validate_saved(source, manifest_path):
         require(run["completion"] != "COMPLETE" or (len(checkpoints) == len(results) and not failed),
                 "complete run missing successful semantic checkpoints")
     outputs = report_bytes(results, report)
-    require({p: digest(data) for p, data in outputs.items()} == run["deterministic_report_hashes"],
+    output_hashes = {p: digest(data) for p, data in outputs.items()}
+    require(output_hashes == run["deterministic_report_hashes"],
             "deterministic replay report mismatch")
+    for relative, expected in output_hashes.items():
+        require(run["artifacts"].get(relative) == expected,
+                f"deterministic report artifact mismatch: {relative}")
+        checked(source, relative, expected, {})
     return run, report
 
 
