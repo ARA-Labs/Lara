@@ -179,16 +179,20 @@ def approved_protocol() -> dict:
     return protocol
 
 
-def workspace(base: Path, task_dir: Path, binary: str) -> Path:
+def workspace(base: Path, task_dir: Path, binary: str, arm: str) -> Path:
     base.mkdir(parents=True)
     shutil.copyfile(task_dir / "input.sexp", base / "input.sexp")
     script = base / "lara-view"
+    # Amendment 1: the arm's view is written into its own wrapper. No
+    # environment variable or argument selects it, so a status-arm workspace
+    # has no route to the inquiry diagnostics.
     script.write_text(
         "#!/bin/sh\n"
+        "unset LARA_P9_VIEW\n"
         f"export LARA_P9_BINARY={binary}\n"
         "case \"$1\" in\n"
         "  show) exec cat \"$(dirname \"$0\")/input.sexp\" ;;\n"
-        f"  check) exec python3 -I {VIEWS} \"$LARA_P9_VIEW\" \"$(dirname \"$0\")/input.sexp\" ;;\n"
+        f"  check) exec python3 -I {VIEWS} {arm} \"$(dirname \"$0\")/input.sexp\" ;;\n"
         "  *) echo 'usage: ./lara-view (show|check)' >&2; exit 2 ;;\n"
         "esac\n")
     script.chmod(0o555)
@@ -235,10 +239,8 @@ def invoke(command: list[str], cwd: Path, env: dict, timeout: int, out: Path) ->
             "usage": (result or {}).get("usage")}
 
 
-def agent_env(arm: str) -> dict:
-    env = {k: v for k, v in os.environ.items() if k in ("HOME", "PATH", "LANG", "USER", "TERM")}
-    env["LARA_P9_VIEW"] = arm
-    return env
+def agent_env() -> dict:
+    return {k: v for k, v in os.environ.items() if k in ("HOME", "PATH", "LANG", "USER", "TERM")}
 
 
 class Ledger:
@@ -303,11 +305,12 @@ def smoke(args) -> int:
     cap = protocol["budget"]["smoke_cap_usd"]
     binary = build_binary()
     with tempfile.TemporaryDirectory(prefix="lara-p9-smoke-") as tmp:
-        ws = workspace(Path(tmp) / "ws", P9 / "smoke", binary)
-        prompt = (P9 / "smoke" / "prompt.md").read_text()
+        smoke_dir = P9 / "smoke" / args.variant
+        ws = workspace(Path(tmp) / "ws", smoke_dir, binary, "status")
+        prompt = (smoke_dir / "prompt.md").read_text()
         record = invoke(claude_command(protocol, prompt, cap, "Bash", protocol["agent"]["allowed_tools"]),
-                        ws, agent_env("status"), protocol["budget"]["smoke_timeout_seconds"], out)
-    ledger.charge("smoke", record, cap)
+                        ws, agent_env(), protocol["budget"]["smoke_timeout_seconds"], out)
+    ledger.charge(f"smoke-{args.variant}", record, cap)
     dump(out / "smoke.json", {"record": record, "binary": binary, "head": git_head()})
     print(json.dumps(record, indent=2))
     return 0
@@ -336,10 +339,10 @@ def run(args) -> int:
         prompt = prompt_for(arm, task)
         (cell / "prompt.md").write_text(prompt)
         with tempfile.TemporaryDirectory(prefix="lara-p9-") as tmp:
-            ws = workspace(Path(tmp) / "ws", P9 / "tasks" / task, binary)
+            ws = workspace(Path(tmp) / "ws", P9 / "tasks" / task, binary, arm)
             record = invoke(claude_command(protocol, prompt, budget["run_cap_usd"], "Bash",
                                            protocol["agent"]["allowed_tools"]),
-                            ws, agent_env(arm), budget["run_timeout_seconds"], cell)
+                            ws, agent_env(), budget["run_timeout_seconds"], cell)
         ledger.charge(label, record, budget["run_cap_usd"])
         record.update(task_id=task, arm=arm, order_index=index)
         dump(cell / "record.json", record)
@@ -388,7 +391,7 @@ def score(args) -> int:
             (scorer_dir / "prompt.md").write_text(prompt)
             with tempfile.TemporaryDirectory(prefix="lara-p9-score-") as tmp:
                 rec = invoke(claude_command(protocol, prompt, cap, "", []), Path(tmp),
-                             agent_env("status"), protocol["budget"]["scorer_timeout_seconds"], scorer_dir)
+                             agent_env(), protocol["budget"]["scorer_timeout_seconds"], scorer_dir)
             ledger.charge(f"score-{cell.name}", rec, cap)
             verdict, error = final_answer(rec.get("final_text"))
             blind.update(record=rec, verdict=verdict, parse_error=error)
@@ -461,6 +464,8 @@ def main() -> int:
         p = sub.add_parser(name)
         p.add_argument("--out", required=True)
         p.add_argument("--ledger", required=True)
+        if name == "smoke":
+            p.add_argument("--variant", required=True, choices=("harness", "isolation"))
         p.set_defaults(func=func)
     args = parser.parse_args()
     return args.func(args)

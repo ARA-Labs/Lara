@@ -6,11 +6,26 @@
     ],
     "cli": "claude",
     "cli_version": "2.1.296 (Claude Code)",
-    "environment": "HOME, PATH, LANG, USER, TERM and LARA_P9_VIEW only; workspace outside the repository holds only input.sexp and the lara-view wrapper; user settings, hooks, MCP servers and repository CLAUDE.md are not loaded",
+    "environment": "HOME, PATH, LANG, USER and TERM only; workspace outside the repository holds only input.sexp and the arm's lara-view wrapper, whose view is fixed at creation; user settings, hooks, MCP servers and repository CLAUDE.md are not loaded. Besides the two allowed commands, the CLI auto-allows read-only commands confined to the workspace, so both arms can also read input.sexp and their own wrapper; nothing outside the workspace is readable",
     "flags": "-p --output-format stream-json --verbose --tools Bash --permission-mode default --setting-sources project --strict-mcp-config --no-session-persistence --max-budget-usd CAP",
     "lara_binary": "built from the approved commit by `cabal build exe:lara`; its SHA256 is recorded in run.json",
     "model": "claude-opus-5-5"
   },
+  "amendments": [
+    {
+      "changes": [
+        "each arm's view is written into its own wrapper; no environment variable or argument selects it, and the wrapper unsets LARA_P9_VIEW",
+        "the agent environment no longer carries LARA_P9_VIEW",
+        "the tool-surface description states that read-only commands inside the workspace are auto-allowed by the CLI",
+        "one additional isolation-check call (smoke/isolation, capped at $1, excluded from results) runs in a status-arm workspace before any task run; the original harness check is retained as smoke/harness"
+      ],
+      "id": "amendment-1-arm-isolation",
+      "outcome_inspected": false,
+      "reason": "The approved harness-validation call (commit 22e44fe, $0.03) showed `cat /etc/hostname` refused for lying outside the working directory, not for being unlisted: read-only commands inside the workspace are auto-allowed. The original wrapper selected its view from LARA_P9_VIEW, so a status-arm agent could read the wrapper and possibly request the inquiry view.",
+      "supersedes_protocol_sha256": "ad2c0b233e82163b1cad75fe99f39c5e1409b1a8d14cbbaf45460ee9c93aeac9",
+      "tasks_answer_key_scoring_budget_ceiling_unchanged": true
+    }
+  ],
   "budget": {
     "accounting": "cost as reported by the CLI's result event; a call without a reported cost is charged at its full cap",
     "aggregate_deadline_hours": 10,
@@ -20,11 +35,11 @@
     "run_timeout_seconds": 1800,
     "scorer_cap_usd": 0.75,
     "scorer_timeout_seconds": 300,
-    "smoke": "one harness-validation call on a dummy workspace (evaluation/inquiry-p9/smoke), excluded from results, charged to the ceiling",
+    "smoke": "two harness calls, each capped at smoke_cap_usd and excluded from results: smoke/harness (run before amendment 1) and smoke/isolation, which must show the status-arm wrapper cannot yield inquiry diagnostics; if it can, no task run starts",
     "smoke_cap_usd": 1.0,
     "smoke_timeout_seconds": 300,
     "stop_rules": "before every call the ledger must admit the call's full cap under the ceiling, else the call is recorded as not run and scored incorrect; no budget replenishment; a semantic defect in the harness, views or key stops the evaluation and requires a versioned amendment and a fresh run, without manual repair of outputs",
-    "worst_case_usd": 141.0
+    "worst_case_usd": 142.0
   },
   "claims": {
     "not_supported": "agent efficacy in general, statistical significance, scientific discovery, empirical truth, calibration, soundness, real capture fidelity",
@@ -63,8 +78,10 @@
     "evaluation/inquiry-p9/agent/feedback-status.md": "d402f853a1ebbc0911a606cbe360e5479f8b84ab859df6a0f05020881fec6c3d",
     "evaluation/inquiry-p9/answer-key.json": "63846c613263551b8fe0a06a162d59259ff43cc4d432f5820330de2330f605b4",
     "evaluation/inquiry-p9/scorer/prompt.md": "b6e2002d0fcf51b47fac6b3feea7d280e2e9e36d8c108777963f0352245419f6",
-    "evaluation/inquiry-p9/smoke/input.sexp": "0e74c627bb140f758f8ae7227a5c64303db9d8786f8e2038caa4019bb0340401",
-    "evaluation/inquiry-p9/smoke/prompt.md": "2304ef793ca9beea357669ae714228d6532acc3da2442bef135133e5c8eef1dc",
+    "evaluation/inquiry-p9/smoke/harness/input.sexp": "0e74c627bb140f758f8ae7227a5c64303db9d8786f8e2038caa4019bb0340401",
+    "evaluation/inquiry-p9/smoke/harness/prompt.md": "2304ef793ca9beea357669ae714228d6532acc3da2442bef135133e5c8eef1dc",
+    "evaluation/inquiry-p9/smoke/isolation/input.sexp": "3965c657eccfcaf7f48dc6d7f6d8dc6faa90522db42e15f24443e14b1b0837cf",
+    "evaluation/inquiry-p9/smoke/isolation/prompt.md": "e5aa0a81b725e98dce49348be60b499d5ea4e9746b9c340070ac7607848b260e",
     "evaluation/inquiry-p9/tasks/P9-01/input.sexp": "547765c4796dd8af7e5f9d1bf97243a19e98c8b4fb11e188713e797c1b245a9a",
     "evaluation/inquiry-p9/tasks/P9-01/task.md": "eeb0726ef5feafc9a0b2fc165a95794437050bcfb82117fa2088dcabefee2276",
     "evaluation/inquiry-p9/tasks/P9-02/input.sexp": "6f7e353c1f26e69fe7dbc9f09fe809e4d8bd45029ede981f5c362f0316d6db87",
@@ -82,7 +99,7 @@
     "evaluation/inquiry-p9/tasks/P9-08/input.sexp": "02a77d9b3390ec987ec0c808fa54c09947413bcdc1c9ee7baf8371f08b37bb10",
     "evaluation/inquiry-p9/tasks/P9-08/task.md": "359202fbdf12b9be1e660735f19695a8a1a8e0dca69fd48591640959a3786cdc",
     "scripts/evidence_measured.py": "f1dda07803bf2c35cb562345d54c767eb313e82f48155c2fc135ad751b1b46c6",
-    "scripts/inquiry-p9.py": "241505e1c44a7b897024861feb93d140ca92825bccbddfde0b4a1572910f6f57",
+    "scripts/inquiry-p9.py": "b0f72c986c341c20341d50ffc70cf95811d436c1250fbd371c61aeb9697bd398",
     "scripts/inquiry_p9_views.py": "5cf1a66ef1db51865000dbd647cf2f7de1a3c344f5305a720706bcf9843b4701"
   },
   "issue": 22,
