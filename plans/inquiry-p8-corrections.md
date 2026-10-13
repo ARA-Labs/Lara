@@ -1,6 +1,6 @@
 # Restore the approved inquiry evaluation
 
-**Status:** Task 1 is complete; Tasks 2–4 remain. Corrective implementation reviewed: engineering review CLEAR by independent agent on 2026-10-12, for code/proof/candidate preparation only. The original P8 run is sealed incomplete. This plan authorizes no new measurement. Researcher approval of the exact corrected protocol, code/input pins and a fresh budget is required before Task 4.
+**Status:** Tasks 1–2 are complete; Tasks 3–4 remain. Corrective implementation reviewed: engineering review CLEAR by independent agent on 2026-10-12, for code/proof/candidate preparation only. The original P8 run is sealed incomplete. This plan authorizes no new measurement. Researcher approval of the exact corrected protocol, code/input pins and a fresh budget is required before Task 4.
 
 **Tracker:** [Issue #49](https://github.com/ARA-Labs/Lara/issues/49), with P8/P9 remaining in issue #22.
 
@@ -25,10 +25,10 @@ No wire, ceiling, legacy golden, corpus, mutation-seed or freeze-tag change is n
 
 After both driver captures and consumer records for a case are attached, call the existing pure scorer before advancing. Keep driver agreement, oracle agreement, protocol validity, consumer acceptance and locality soundness separate. Any failed required predicate seals an incomplete semantic-discrepancy checkpoint and stops before the next case. Preserve successful process records; semantic disagreement is not an infrastructure failure.
 
-- [ ] Implement pair-level semantic checkpoints while retaining all current atomic IO/replay guarantees.
-- [ ] Test two fake drivers returning the same valid but wrong first-case result: exactly two driver and two consumer calls, both captures retained, next-case calls missing, byte-identical nonzero process-free replay.
-- [ ] Cover one-driver disagreement, protocol/locality failures and interruption between pair scoring and checkpoint publication. Retain semantic-discrepancy details separately if recovery changes the primary stop reason.
-- [ ] Pass independent spec and quality review; commit without production inquiry calls.
+- [x] Implement pair-level semantic checkpoints while retaining all current atomic IO/replay guarantees.
+- [x] Test two fake drivers returning the same valid but wrong first-case result: exactly two driver and two consumer calls, both captures retained, next-case calls missing, byte-identical nonzero process-free replay.
+- [x] Cover one-driver disagreement, protocol/locality failures and interruption between pair scoring and checkpoint publication. Retain semantic-discrepancy details separately if recovery changes the primary stop reason.
+- [x] Pass independent spec and quality review; commit without production inquiry calls.
 
 ## Task 3: Prepare and independently review corrected inputs
 

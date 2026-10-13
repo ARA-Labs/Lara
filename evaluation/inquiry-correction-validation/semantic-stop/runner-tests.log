@@ -1,0 +1,72 @@
+test_atomic_limit_refusal_enforced (__main__.Boundaries.test_atomic_limit_refusal_enforced) ... ok
+test_both_drivers_same_wrong_answer_fail_independent_oracle (__main__.Boundaries.test_both_drivers_same_wrong_answer_fail_independent_oracle) ... ok
+test_capture_only_replay_after_original_binaries_removed (__main__.Boundaries.test_capture_only_replay_after_original_binaries_removed) ... ok
+test_catalog_original_and_retain_last_projection_are_distinct (__main__.Boundaries.test_catalog_original_and_retain_last_projection_are_distinct) ... ok
+test_complete_fake_capture_and_replay_keep_all_reports_identical (__main__.Boundaries.test_complete_fake_capture_and_replay_keep_all_reports_identical) ... ok
+test_completed_consumer_refusal_or_noise_is_semantic_not_driver_failure (__main__.Boundaries.test_completed_consumer_refusal_or_noise_is_semantic_not_driver_failure) ... ok
+test_consumer_failure_keeps_driver_oracle_field_independent (__main__.Boundaries.test_consumer_failure_keeps_driver_oracle_field_independent) ... ok
+test_consumer_signal_still_stops_early_as_infrastructure_failure (__main__.Boundaries.test_consumer_signal_still_stops_early_as_infrastructure_failure) ... ok
+test_deadline_and_spawn_failure (__main__.Boundaries.test_deadline_and_spawn_failure) ... ok
+test_declared_development_audit_profiles_and_embedded_queries_preserved (__main__.Boundaries.test_declared_development_audit_profiles_and_embedded_queries_preserved) ... ok
+test_deep_malformed_fake_process_seals_incomplete_and_replays (__main__.Boundaries.test_deep_malformed_fake_process_seals_incomplete_and_replays) ... ok
+test_excessive_output_nesting_is_a_retained_decode_failure (__main__.Boundaries.test_excessive_output_nesting_is_a_retained_decode_failure) ... ok
+test_grounded_locality_needs_equal_blocking_for_full_status (__main__.Boundaries.test_grounded_locality_needs_equal_blocking_for_full_status) ... ok
+test_interruption_between_pair_scoring_and_checkpoint_publication_keeps_discrepancy (__main__.Boundaries.test_interruption_between_pair_scoring_and_checkpoint_publication_keeps_discrepancy) ... ok
+test_locality_counterexample_is_a_separate_failed_requirement (__main__.Boundaries.test_locality_counterexample_is_a_separate_failed_requirement) ... ok
+test_malformed_key_and_natural_shapes_are_decode_failures (__main__.Boundaries.test_malformed_key_and_natural_shapes_are_decode_failures) ... ok
+test_missing_and_hash_mismatch_preflight_before_driver (__main__.Boundaries.test_missing_and_hash_mismatch_preflight_before_driver) ... ok
+test_nullable_accepted_status_and_consumer_validation_have_explicit_scopes (__main__.Boundaries.test_nullable_accepted_status_and_consumer_validation_have_explicit_scopes) ... ok
+test_one_driver_disagreement_stops_with_independent_predicates (__main__.Boundaries.test_one_driver_disagreement_stops_with_independent_predicates) ... ok
+test_original_production_pin_rejects_changed_runtime_before_driver (__main__.Boundaries.test_original_production_pin_rejects_changed_runtime_before_driver) ... ok
+test_output_reuse_refused_without_writes (__main__.Boundaries.test_output_reuse_refused_without_writes) ... ok
+test_process_flag_counts_do_not_hide_timeout_kills (__main__.Boundaries.test_process_flag_counts_do_not_hide_timeout_kills) ... ok
+test_protocol_failure_stops_after_both_completed_consumers (__main__.Boundaries.test_protocol_failure_stops_after_both_completed_consumers) ... ok
+test_public_status_absence_is_an_accepted_value (__main__.Boundaries.test_public_status_absence_is_an_accepted_value) ... ok
+test_publication_deadline_cannot_rescue_incomplete_status (__main__.Boundaries.test_publication_deadline_cannot_rescue_incomplete_status) ... ok
+test_real_signal_retained (__main__.Boundaries.test_real_signal_retained) ... ok
+test_recoverable_report_write_failure_preserves_raw_and_seals_incomplete (__main__.Boundaries.test_recoverable_report_write_failure_preserves_raw_and_seals_incomplete) ... ok
+test_rejected_comparison_summary_keeps_certificate_context (__main__.Boundaries.test_rejected_comparison_summary_keeps_certificate_context) ... ok
+test_rejected_pair_compares_exact_bound_payloads_not_null_statuses (__main__.Boundaries.test_rejected_pair_compares_exact_bound_payloads_not_null_statuses) ... ok
+test_report_recovery_keeps_semantic_discrepancy_separate (__main__.Boundaries.test_report_recovery_keeps_semantic_discrepancy_separate) ... ok
+test_same_valid_wrong_first_pair_stops_before_next_case (__main__.Boundaries.test_same_valid_wrong_first_pair_stops_before_next_case) ... ok
+test_tampering_and_missing_captures_refused (__main__.Boundaries.test_tampering_and_missing_captures_refused) ... ok
+test_timeout_retains_partial_streams_and_stops (__main__.Boundaries.test_timeout_retains_partial_streams_and_stops) ... ok
+test_unattached_capture_retains_original_operation_and_checkpoint (__main__.Boundaries.test_unattached_capture_retains_original_operation_and_checkpoint) ... ok
+
+----------------------------------------------------------------------
+Ran 34 tests in 46.838s
+
+OK
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/saved
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/replay
+COMPLETE: PASS: /tmp/inquiry-runner-boundaries-2r_n75fu/complete
+REPLAY COMPLETE: PASS: /tmp/inquiry-runner-boundaries-2r_n75fu/complete-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/consumer-refusal-pair
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/consumer-refusal-pair-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/consumer-stdout-pair
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/consumer-stdout-pair-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/consumer-stderr-pair
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/consumer-stderr-pair-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/consumer-signal
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/deep-output
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/deep-output-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/interrupted-semantic-checkpoint
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/interrupted-semantic-checkpoint-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/locality-counterexample-pair
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/locality-counterexample-pair-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/one-driver-disagreement
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/one-driver-disagreement-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/invalid-protocol-pair
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/invalid-protocol-pair-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/publication-deadline
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/publication-deadline-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/write-failure
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/write-failure-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/semantic-report-recovery-io
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/semantic-report-recovery-io-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/semantic-report-recovery-deadline
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/semantic-report-recovery-deadline-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/same-valid-wrong-first-pair
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/same-valid-wrong-first-pair-replay
+INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/unattached
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-runner-boundaries-2r_n75fu/unattached-replay

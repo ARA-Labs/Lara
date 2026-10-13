@@ -195,18 +195,49 @@ def order(manifest):
             yield case, driver
 
 
+def score_pair(directory, records, case, oracle):
+    captures = {}
+    for driver in DRIVERS:
+        record = records.get((case["case_id"], driver))
+        if record:
+            captures[driver] = (record, (directory / record["stdout_path"]).read_bytes(),
+                                (directory / record["stderr_path"]).read_bytes())
+    data = (directory / "evidence" / "suite" / case["input_path"]).read_bytes()
+    return score_case(case, oracle, data, captures)
+
+
+def semantic_checkpoint(result):
+    """Keep independent requirements separate from process exit records."""
+    predicates = {"driver_agreement": result["driver_agreement"],
+                  "locality_sound": result["locality_sound"]}
+    for driver in DRIVERS:
+        for name in ("protocol_valid", "oracle_agreement", "consumer_accepted"):
+            predicates[f"{driver}.{name}"] = result["drivers"][driver].get(name, False)
+    failed = [name for name, passed in predicates.items() if not passed]
+    return {"case_id": result["case_id"], "required_predicates": predicates,
+            "failed_predicates": failed, "passed": not failed}
+
+
+def checkpoint_pair(directory, run, case, oracle, manifest, start):
+    run["active_operation"] = {"case_id": case["case_id"], "stage": "pair-scoring"}
+    records = {(r["case_id"], r["driver"]): r for r in run["invocations"]}
+    checkpoint = semantic_checkpoint(score_pair(directory, records, case, oracle))
+    run["pair_checkpoints"].append(checkpoint)
+    if not checkpoint["passed"]:
+        run["semantic_discrepancy"] = checkpoint
+        run["stop_reason"] = "semantic-discrepancy"
+    # Attach the discrepancy before publication: recovery may replace the
+    # primary stop reason, but must retain the scored semantic failure.
+    run["active_operation"] = {"case_id": case["case_id"], "stage": "pair-checkpoint"}
+    progress(directory, run, manifest, start)
+    run["active_operation"] = None
+    return checkpoint["passed"]
+
+
 def score(directory, run, manifest, oracles):
     records = {(r["case_id"], r["driver"]): r for r in run["invocations"]}
-    results = []
-    for case in manifest["cases"]:
-        captures = {}
-        for driver in DRIVERS:
-            record = records.get((case["case_id"], driver))
-            if record:
-                captures[driver] = (record, (directory / record["stdout_path"]).read_bytes(),
-                                    (directory / record["stderr_path"]).read_bytes())
-        data = (directory / "evidence" / "suite" / case["input_path"]).read_bytes()
-        results.append(score_case(case, oracles[case["case_id"]], data, captures))
+    results = [score_pair(directory, records, case, oracles[case["case_id"]])
+               for case in manifest["cases"]]
     return results, summary(results, manifest, run)
 
 
@@ -314,7 +345,8 @@ def measure(args):
            "completion": "INCOMPLETE", "stop_reason": None, "aggregate_elapsed_ms": 0,
            "missing_invocations": [], "sealed": False, "active_operation": None,
            "failed_or_interrupted_operation": None,
-           "deterministic_report_hashes": {}, "recovery": None}
+           "deterministic_report_hashes": {}, "recovery": None,
+           "pair_checkpoints": [], "semantic_discrepancy": None}
     # Complete all evidence copies before starting the aggregate measurement.
     for relative, expected in suite_inventory.items():
         data = checked(base, relative, expected, {})
@@ -377,10 +409,14 @@ def measure(args):
             capture_inventory(run, consumer)
             run["active_operation"] = None
             progress(out, run, manifest, start)
-            if not consumer["accepted"]:
-                record["failure"] = consumer["failure"] or "consumer-failure"
-                run["stop_reason"] = record["failure"]
+            if consumer["failure"]:
+                run["stop_reason"] = consumer["failure"]
                 break
+            records = {(r["case_id"], r["driver"]): r for r in run["invocations"]}
+            if all((case["case_id"], name) in records and "consumer" in records[(case["case_id"], name)]
+                   for name in DRIVERS):
+                if not checkpoint_pair(out, run, case, oracles[case["case_id"]], manifest, start):
+                    break
         else:
             run["completion"] = "COMPLETE"
     except (OSError, ValueError, KeyboardInterrupt) as exc:
@@ -481,6 +517,21 @@ def validate_saved(source, manifest_path):
                         run["artifacts"].get(entry[f"{stream}_path"]) == entry[f"{stream}_sha256"],
                         "capture metadata mismatch")
     results, report = score(source, run, manifest, oracles)
+    if "pair_checkpoints" in run:
+        checkpoints = run["pair_checkpoints"]
+        require(len(checkpoints) <= len(results), "too many semantic checkpoints")
+        for checkpoint, result in zip(checkpoints, results):
+            require(all("consumer" in result["drivers"][driver].get("invocation", {})
+                        for driver in DRIVERS), "semantic checkpoint before both consumers attached")
+            require(checkpoint == semantic_checkpoint(result), "semantic checkpoint replay mismatch")
+        failed = [checkpoint for checkpoint in checkpoints if not checkpoint["passed"]]
+        require(not failed or (len(failed) == 1 and failed[0] == checkpoints[-1] and
+                               len(observed) == 2 * len(checkpoints)),
+                "invocation after semantic discrepancy")
+        require(run.get("semantic_discrepancy") == (failed[0] if failed else None),
+                "semantic discrepancy detail mismatch")
+        require(run["completion"] != "COMPLETE" or (len(checkpoints) == len(results) and not failed),
+                "complete run missing successful semantic checkpoints")
     outputs = report_bytes(results, report)
     require({p: digest(data) for p, data in outputs.items()} == run["deterministic_report_hashes"],
             "deterministic replay report mismatch")

@@ -1,0 +1,121 @@
+{
+  "schema": "lara-inquiry-semantic-stop-correction-validation",
+  "schema_version": 1,
+  "scope": "corrective task 2; runner orchestration and fake OS process tests, no P8 production measurement",
+  "source_sha256": {
+    "scripts/inquiry-evaluate.py": "af153398fd052b47cc5623d0e065719db90a62d6a10e11eef651a96f06e86435",
+    "test/inquiry_evaluation_runner.py": "874f1b58b06f5ce077543df64fc94112b0c8149dd4109edc527fd05cff51c6d5",
+    "docs/evaluation.md": "2c49a95251f63c3fcb7cd80e23b0b6dbfd371905e1706ca72ced76077a0d1977"
+  },
+  "checks": [
+    {
+      "command": "python3 test/inquiry_evaluation_runner.py --evidence evaluation/inquiry-correction-validation/semantic-stop/runner-probes.json -v > evaluation/inquiry-correction-validation/semantic-stop/runner-tests.log 2>&1",
+      "cwd": ".",
+      "exit_code": 0,
+      "tests_run": 34,
+      "elapsed_seconds": 46.838,
+      "log": "runner-tests.log",
+      "receipt": "runner-probes.json"
+    },
+    {
+      "command": "python3 test/inquiry_evaluation_boundaries.py -v > evaluation/inquiry-correction-validation/semantic-stop/frozen-boundaries.log 2>&1",
+      "cwd": ".",
+      "exit_code": 0,
+      "tests_run": 7,
+      "elapsed_seconds": 3.867,
+      "log": "frozen-boundaries.log"
+    },
+    {
+      "command": "python3 - <<'PY' > evaluation/inquiry-correction-validation/semantic-stop/original-replay.log 2>&1\nimport argparse\nimport hashlib\nimport importlib.util\nimport json\nimport sys\nimport tempfile\nfrom pathlib import Path\nfrom unittest.mock import patch\n\nroot = Path.cwd()\nsys.path.insert(0, str(root / 'scripts'))\nspec = importlib.util.spec_from_file_location('inquiry_evaluate', root / 'scripts/inquiry-evaluate.py')\nrunner = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(runner)\nsource = root / 'ara/evidence/inquiry-p8/20261012T225824Z-a904130'\narchived_replay = source.with_name(source.name + '-replay')\npaths = ['run.json', 'run.sha256', 'results.jsonl', 'summary.json', 'summary.tsv']\nbefore = {path: hashlib.sha256((source / path).read_bytes()).hexdigest() for path in paths}\nwith tempfile.TemporaryDirectory(prefix='inquiry-original-semantic-replay-') as temporary:\n    out = Path(temporary) / 'replay'\n    with patch.object(runner.subprocess, 'run', side_effect=AssertionError('replay spawned')), \\\n         patch.object(runner.subprocess, 'Popen', side_effect=AssertionError('replay spawned')):\n        code = runner.replay(argparse.Namespace(manifest=str(root / 'evaluation/inquiry-p8/MANIFEST.json'),\n                                                replay=str(source), out=str(out)))\n        assert code == 1\n        original_run, report = runner.validate_saved(source, root / 'evaluation/inquiry-p8/MANIFEST.json')\n        runner.validate_saved(archived_replay, root / 'evaluation/inquiry-p8/MANIFEST.json')\n    for path in paths:\n        assert (out / path).read_bytes() == (source / path).read_bytes() == (archived_replay / path).read_bytes()\n    for path, expected in original_run['artifacts'].items():\n        assert hashlib.sha256((source / path).read_bytes()).hexdigest() == expected\n        assert (out / path).read_bytes() == (source / path).read_bytes() == (archived_replay / path).read_bytes()\nafter = {path: hashlib.sha256((source / path).read_bytes()).hexdigest() for path in paths}\nassert before == after\nreceipt = {'schema': 'inquiry-original-process-free-replay-validation', 'schema_version': 1,\n           'source': str(source.relative_to(root)), 'archived_replay': str(archived_replay.relative_to(root)),\n           'exit_code': code, 'completion': original_run['completion'], 'stop_reason': original_run['stop_reason'],\n           'original_artifacts_checked': len(original_run['artifacts']), 'original_invocations': len(original_run['invocations']),\n           'subprocesses': 0, 'production_driver_invocations': 0, 'real_consumer_invocations': 0,\n           'metadata_and_reports_byte_identical': True, 'all_original_and_archived_replay_artifacts_byte_identical': True,\n           'original_metadata_and_report_sha256': before, 'deterministic_report_hashes': original_run['deterministic_report_hashes']}\n(root / 'evaluation/inquiry-correction-validation/semantic-stop/original-replay.json').write_text(json.dumps(receipt, indent=2) + '\\n')\nprint(json.dumps(receipt, indent=2))\nPY",
+      "cwd": ".",
+      "exit_code": 0,
+      "replay_exit_code": 1,
+      "log": "original-replay.log",
+      "receipt": "original-replay.json",
+      "subprocesses": 0,
+      "production_driver_invocations": 0,
+      "real_consumer_invocations": 0
+    },
+    {
+      "command": "git diff --check",
+      "cwd": ".",
+      "exit_code": 0,
+      "output_record": "implementer tool output; no output"
+    }
+  ],
+  "artifact_sha256": {
+    "frozen-boundaries.log": "bf9a74f86f7e7d16cf23bbea8dc148b39e4aabffe463f64dade91b2d62bee0d6",
+    "original-replay.json": "58185262f9f2134357f7e20c6f42fdc0f8ae05dfbaac503cc9da0eb42e827d99",
+    "original-replay.log": "29b7926c5ac78a0c55aa5ecb0a42f383f6d61914c4eb5c64dbc853b4f65e73f2",
+    "runner-probes.json": "a71f0bf8081fb51a58200080190647a67ec0f9142fe5a68c445062bb522718ff",
+    "runner-tests.log": "c3a58663d2343604959a4694ea568a089dbe3c87bc5d4f08101ffaa16d00b2d8"
+  },
+  "production_driver_invocations": 0,
+  "real_consumer_invocations": 0,
+  "paid_calls": 0,
+  "fake_process_fixture": {
+    "repository_preflight": "test-only monkeypatch; runtime/legacy/approval repository checks skipped for temporary fake executable fixtures",
+    "retained_validation": [
+      "unmodified load_suite",
+      "frozen production budgets and partitions",
+      "suite hashes",
+      "committed original input bytes",
+      "original helper byte hashes"
+    ],
+    "real_production_preflight_test": "unmodified original-pin function rejects corrected Lean runtime before executable resolution or driver invocation",
+    "complete_fake_run": "192 fake driver and 192 fake consumer invocations printing frozen ASTs as test data; no production capture, oracle population or measurement",
+    "future_candidate_dependency": "If Task3 changes helper sources, the original fake fixture adapter needs an explicit original helper origin; original suite and evidence must remain unchanged"
+  },
+  "semantic_stop_probe": {
+    "same_valid_wrong_first_pair": "two fake driver calls and two fake consumer calls; both captures retained; 190 planned driver calls missing; no next case; byte-identical nonzero process-free replay",
+    "coverage": [
+      "driver agreement independent of oracle agreement",
+      "one-driver disagreement",
+      "protocol failure",
+      "locality counterexample",
+      "completed consumer refusal and stdout/stderr noise",
+      "early consumer signal failure",
+      "interruption after pair scoring before checkpoint publication",
+      "report IO and deadline recovery retaining semantic discrepancy",
+      "rehash of wrong semantic checkpoint rejected",
+      "complete successful pairs"
+    ]
+  },
+  "original_replay": {
+    "original_artifacts_checked": 565,
+    "metadata_and_reports_byte_identical": true,
+    "all_original_and_archived_replay_artifacts_byte_identical": true,
+    "completion": "INCOMPLETE",
+    "stop_reason": "timeout",
+    "deterministic_report_hashes": {
+      "results.jsonl": "81926d1e43a6505833fda8195bfd9f4e5c6a4e77370b1d9da89dd494db2fe82c",
+      "summary.json": "488c64b539e276070e0d5ee91b64af307e63bd9ee85351b629ad86004a345c11",
+      "summary.tsv": "e393a35449ca6ea529adb0f02ab38f2706d3462f56377063dbab2f9fd3926059"
+    }
+  },
+  "lean_changes": false,
+  "new_lean_definitions": false,
+  "local_gates": "not repeated; this step changes no Lean, wire contract, or golden output",
+  "review": {
+    "spec": {
+      "reviewer": "/root/semantic_spec",
+      "status": "PASS",
+      "independent_checks": [
+        "34 runner tests",
+        "7 frozen boundary tests",
+        "source and receipt hashes",
+        "565 legacy artifacts and byte-identical process-free replay",
+        "git diff --check"
+      ]
+    },
+    "quality": {
+      "reviewer": "/root/semantic_quality",
+      "status": "PASS",
+      "independent_checks": [
+        "runner, tests, docs, scoring and recovery source inspection",
+        "source and receipt hashes",
+        "git diff --check"
+      ]
+    }
+  }
+}

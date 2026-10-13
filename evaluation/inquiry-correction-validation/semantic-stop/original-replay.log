@@ -1,0 +1,29 @@
+REPLAY INCOMPLETE: FAIL: /tmp/inquiry-original-semantic-replay-wfnpcvcs/replay
+{
+  "schema": "inquiry-original-process-free-replay-validation",
+  "schema_version": 1,
+  "source": "ara/evidence/inquiry-p8/20261012T225824Z-a904130",
+  "archived_replay": "ara/evidence/inquiry-p8/20261012T225824Z-a904130-replay",
+  "exit_code": 1,
+  "completion": "INCOMPLETE",
+  "stop_reason": "timeout",
+  "original_artifacts_checked": 565,
+  "original_invocations": 87,
+  "subprocesses": 0,
+  "production_driver_invocations": 0,
+  "real_consumer_invocations": 0,
+  "metadata_and_reports_byte_identical": true,
+  "all_original_and_archived_replay_artifacts_byte_identical": true,
+  "original_metadata_and_report_sha256": {
+    "run.json": "7820345b004a996d87b4352f520d9b3c942842f14f59618db42f6f4db74ee17e",
+    "run.sha256": "30411abd6ab47379483721e1a53c35a97b6ab27d5dbfeda9a52fee661c3c8bb0",
+    "results.jsonl": "81926d1e43a6505833fda8195bfd9f4e5c6a4e77370b1d9da89dd494db2fe82c",
+    "summary.json": "488c64b539e276070e0d5ee91b64af307e63bd9ee85351b629ad86004a345c11",
+    "summary.tsv": "e393a35449ca6ea529adb0f02ab38f2706d3462f56377063dbab2f9fd3926059"
+  },
+  "deterministic_report_hashes": {
+    "results.jsonl": "81926d1e43a6505833fda8195bfd9f4e5c6a4e77370b1d9da89dd494db2fe82c",
+    "summary.json": "488c64b539e276070e0d5ee91b64af307e63bd9ee85351b629ad86004a345c11",
+    "summary.tsv": "e393a35449ca6ea529adb0f02ab38f2706d3462f56377063dbab2f9fd3926059"
+  }
+}

@@ -2,8 +2,11 @@
 """OS process and immutable-evidence boundaries for inquiry measurement.
 
 All executables in these tests are temporary fake OS programs. No production
-inquiry driver is invoked. The frozen production budget and review gates remain
-enabled in the CLI integration probe; its first fake driver times out and stops.
+inquiry driver or real consumer is invoked. The fake-process fixture replaces
+repository preflight because the corrected runtime differs from the original
+pin. Frozen suite validation, committed input bytes, helper hashes and the
+production budget remain checked. A separate test uses real repository
+preflight and proves that it rejects the changed runtime before any driver call.
 """
 from __future__ import annotations
 
@@ -23,7 +26,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from evidence_measured import canonical
-from inquiry_evaluation_manifest import digest, json_bytes, load_suite
+from inquiry_evaluation_manifest import INPUT_COMMIT, digest, json_bytes, load_suite
 from inquiry_evaluation_report import diagnostics, process_counts, protocol, score_case, summary
 
 spec = importlib.util.spec_from_file_location("inquiry_evaluate", ROOT / "scripts/inquiry-evaluate.py")
@@ -39,23 +42,54 @@ def fake(path, body):
     return path
 
 
+def fake_repository_preflight(protocol, suite_base, suite_inventory):
+    """Only fake OS fixtures skip runtime/legacy/approval repository checks.
+
+    load_suite remains unchanged, including budgets, partitions and hashes.
+    Retain committed suite identity and all original helper byte identities.
+    There is no production CLI option that enables this fixture adapter.
+    """
+    commit = runner.git("rev-parse", INPUT_COMMIT).decode().strip()
+    for path in suite_inventory:
+        relative = (suite_base.relative_to(ROOT) / path).as_posix()
+        runner.require(runner.git("show", f"{commit}:{relative}") == (suite_base / path).read_bytes(),
+                       f"fake fixture input freeze mismatch: {relative}")
+    recipe = protocol["recipes"]
+    quality = runner.read_json(suite_base / "quality-review.json")
+    inventory = {}
+    helpers = [(recipe["generator_path"], recipe["generator_sha256"]),
+               ("evaluation/inquiry-p8/review/independent_finite_audit.py", recipe["independent_audit_tool_sha256"]),
+               (recipe["certificate_producer_path"], recipe["certificate_producer_sha256"])]
+    helpers.extend((quality[path_key], quality[hash_key]) for path_key, hash_key in (
+        ("generator_path", "generator_sha256"), ("audit_tool_path", "audit_tool_sha256"),
+        ("boundary_test_path", "boundary_test_sha256")))
+    for path, expected in helpers:
+        runner.checked(ROOT, path, expected, inventory)
+    return commit, inventory
+
+
 class Boundaries(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.temporary = tempfile.TemporaryDirectory(prefix="inquiry-runner-boundaries-")
         cls.directory = Path(cls.temporary.name)
         cls.base, cls.protocol, cls.manifest, cls.oracles, cls.inventory = load_suite(MANIFEST)
+        cls.real_repository_preflight = staticmethod(runner.repository_preflight)
+        adapter = patch.object(runner, "repository_preflight", side_effect=fake_repository_preflight)
+        adapter.start()
+        cls.addClassCleanup(adapter.stop)
         timeout = fake(cls.directory / "fake-timeout", "import sys,time\nprint('partial stdout',flush=True)\nprint('partial stderr',file=sys.stderr,flush=True)\ntime.sleep(60)\n")
         consumer = fake(cls.directory / "fake-consumer", "raise SystemExit(0)\n")
         cls.saved = cls.directory / "saved"
         args = argparse.Namespace(manifest=str(MANIFEST), native=str(timeout), lean=str(timeout),
                                   consumer=str(consumer), out=str(cls.saved))
-        # Uses the unmodified production preflight and ten-second timeout.
+        # Uses the disclosed fake fixture adapter and production ten-second timeout.
         cls.exit = runner.measure(args)
         cls.saved_run = json.loads((cls.saved / "run.json").read_text())
         timeout.unlink()
         consumer.unlink()
         OBSERVATIONS.append({"probe": "production-budget runner with first fake OS driver timeout",
+            "repository_preflight": "fake-process fixture adapter; original runtime pin deliberately skipped",
             "exit_code": cls.exit, "completion": cls.saved_run["completion"],
             "invocations": len(cls.saved_run["invocations"]),
             "missing_invocations": len(cls.saved_run["missing_invocations"]),
@@ -129,6 +163,9 @@ class Boundaries(unittest.TestCase):
         run = json.loads((saved / "run.json").read_text())
         self.assertEqual(len(run["invocations"]), 192)
         self.assertEqual(run["missing_invocations"], [])
+        self.assertEqual(len(run["pair_checkpoints"]), 96)
+        self.assertTrue(all(checkpoint["passed"] for checkpoint in run["pair_checkpoints"]))
+        self.assertIsNone(run["semantic_discrepancy"])
         self.assertEqual(run["allocated_cpus"], [min(run["affinity_before"])])
         program.unlink()
         consumer.unlink()
@@ -197,6 +234,19 @@ class Boundaries(unittest.TestCase):
                              "output_created": False, "hash_refusal": str(hash_error.exception),
                              "missing_executable_refusal": str(missing_error.exception)})
 
+    def test_original_production_pin_rejects_changed_runtime_before_driver(self):
+        output = self.directory / "original-pin-rejected"
+        with patch.object(runner, "repository_preflight", side_effect=self.real_repository_preflight), \
+             patch.object(runner, "executable", side_effect=AssertionError("resolved executable after runtime mismatch")), \
+             patch.object(runner, "invoke", side_effect=AssertionError("preflight spawned driver")):
+            with self.assertRaisesRegex(ValueError, "runtime code changed|runtime path differs") as error:
+                runner.measure(argparse.Namespace(manifest=str(MANIFEST), native="/missing-probe",
+                    lean="/missing-probe", consumer="/missing-probe", out=str(output)))
+        self.assertFalse(output.exists())
+        OBSERVATIONS.append({"probe": "real original-pin production preflight rejection",
+            "driver_invocations": 0, "output_created": False, "refusal": str(error.exception),
+            "repository_preflight": "unmodified production function"})
+
     def test_both_drivers_same_wrong_answer_fail_independent_oracle(self):
         case = self.manifest["cases"][0]
         oracle = copy.deepcopy(self.oracles[case["case_id"]])
@@ -212,6 +262,179 @@ class Boundaries(unittest.TestCase):
         OBSERVATIONS.append({"probe": "intentionally wrong oracle despite driver agreement", "driver_agreement": True,
                              "native_oracle_agreement": False, "lean_oracle_agreement": False,
                              "basis": "frozen AST used as explicit fake-capture test data, not oracle population"})
+
+    def pair_programs(self, name, native_output, lean_output, consumer_body="raise SystemExit(0)\n"):
+        calls = self.directory / (name + "-calls.jsonl")
+        prefix = ("import json,sys\nfrom pathlib import Path\n"
+                  + "with Path(" + repr(str(calls)) + ").open('a') as log:\n"
+                  + " log.write(json.dumps(sys.argv)+'\\n')\n")
+        native = fake(self.directory / (name + "-native"), prefix + "sys.stdout.buffer.write(" + repr(native_output) + ")\n")
+        lean = fake(self.directory / (name + "-lean"), prefix + "sys.stdout.buffer.write(" + repr(lean_output) + ")\n")
+        consumer = fake(self.directory / (name + "-consumer"), prefix + consumer_body)
+        args = argparse.Namespace(manifest=str(MANIFEST), native=str(native), lean=str(lean),
+                                  consumer=str(consumer), out=str(self.directory / name))
+        return args, calls
+
+    def assert_pair_stop(self, args, calls, code, *, reason="semantic-discrepancy"):
+        saved = Path(args.out)
+        run = json.loads((saved / "run.json").read_text())
+        self.assertEqual(code, 1)
+        self.assertTrue(run["sealed"])
+        self.assertEqual(run["completion"], "INCOMPLETE")
+        self.assertEqual(run["stop_reason"], reason)
+        self.assertEqual(len(run["invocations"]), 2)
+        self.assertEqual(len(run["missing_invocations"]), 190)
+        logged = [json.loads(line) for line in calls.read_text().splitlines()]
+        self.assertEqual(len(logged), 4)
+        self.assertEqual(sum(command[1:3] == ["consume", "accepted"] for command in logged), 2)
+        self.assertEqual([Path(command[-1]).name for command in logged if command[1:3] != ["consume", "accepted"]],
+                         ["source-rejections.sexp"] * 2)
+        for record in run["invocations"]:
+            self.assertEqual(record["exit_code"], 0)
+            self.assertIsNone(record["failure"])
+            self.assertIsNone(record["driver_failure"])
+            for entry in (record, record["consumer"]):
+                for stream in ("stdout", "stderr"):
+                    data = (saved / entry[stream + "_path"]).read_bytes()
+                    self.assertEqual(digest(data), run["artifacts"][entry[stream + "_path"]])
+        checkpoint = run["semantic_discrepancy"]
+        self.assertEqual(run["pair_checkpoints"], [checkpoint])
+        self.assertFalse(checkpoint["passed"])
+        self.assertEqual(checkpoint["case_id"], "source-rejections")
+        replay = self.directory / (saved.name + "-replay")
+        with patch.object(runner.subprocess, "run", side_effect=AssertionError("replay spawned")), \
+             patch.object(runner.subprocess, "Popen", side_effect=AssertionError("replay spawned")):
+            self.assertEqual(runner.replay(argparse.Namespace(manifest=str(MANIFEST), replay=str(saved), out=str(replay))), 1)
+        for path in ("run.json", "run.sha256", "results.jsonl", "summary.json", "summary.tsv"):
+            self.assertEqual((saved / path).read_bytes(), (replay / path).read_bytes())
+        OBSERVATIONS.append({"probe": saved.name, "exit_code": code, "completion": run["completion"],
+            "stop_reason": reason, "semantic_discrepancy": checkpoint, "driver_invocations": 2,
+            "consumer_invocations": 2, "missing_invocations": 190, "next_case_invoked": False,
+            "production_driver_invocations": 0, "real_consumer_invocations": 0, "replay_subprocesses": 0,
+            "raw_captures_preserved": True, "byte_identical_replay": True,
+            "repository_preflight": "fake-process fixture adapter"})
+        return run
+
+    def first_case_output(self, *, wrong=False):
+        forms = copy.deepcopy(self.oracles[self.manifest["cases"][0]["case_id"]]["expected"]["results"])
+        if wrong:
+            forms[0][2] = "intentionally-wrong-driver-label"
+        return b"".join(canonical(f) for f in forms)
+
+    def test_same_valid_wrong_first_pair_stops_before_next_case(self):
+        output = self.first_case_output(wrong=True)
+        args, calls = self.pair_programs("same-valid-wrong-first-pair", output, output)
+        run = self.assert_pair_stop(args, calls, runner.measure(args))
+        predicates = run["semantic_discrepancy"]["required_predicates"]
+        self.assertTrue(predicates["driver_agreement"])
+        self.assertTrue(predicates["locality_sound"])
+        for driver in ("native", "lean"):
+            self.assertTrue(predicates[driver + ".protocol_valid"])
+            self.assertTrue(predicates[driver + ".consumer_accepted"])
+            self.assertFalse(predicates[driver + ".oracle_agreement"])
+        # Rehashing metadata cannot substitute an ungrounded semantic verdict.
+        tampered = self.directory / "tampered-semantic-checkpoint"
+        shutil.copytree(Path(args.out), tampered)
+        run["pair_checkpoints"][0]["required_predicates"]["driver_agreement"] = False
+        runner.publish_status(tampered, run)
+        with self.assertRaisesRegex(ValueError, "semantic checkpoint replay mismatch"):
+            runner.validate_saved(tampered, MANIFEST)
+
+    def test_one_driver_disagreement_stops_with_independent_predicates(self):
+        args, calls = self.pair_programs("one-driver-disagreement", self.first_case_output(), self.first_case_output(wrong=True))
+        run = self.assert_pair_stop(args, calls, runner.measure(args))
+        predicates = run["semantic_discrepancy"]["required_predicates"]
+        self.assertFalse(predicates["driver_agreement"])
+        self.assertTrue(predicates["native.oracle_agreement"])
+        self.assertFalse(predicates["lean.oracle_agreement"])
+        for driver in ("native", "lean"):
+            self.assertTrue(predicates[driver + ".protocol_valid"])
+            self.assertTrue(predicates[driver + ".consumer_accepted"])
+
+    def test_protocol_failure_stops_after_both_completed_consumers(self):
+        args, calls = self.pair_programs("invalid-protocol-pair", b"invalid protocol\n", b"invalid protocol\n")
+        run = self.assert_pair_stop(args, calls, runner.measure(args))
+        predicates = run["semantic_discrepancy"]["required_predicates"]
+        for driver in ("native", "lean"):
+            self.assertFalse(predicates[driver + ".protocol_valid"])
+            self.assertTrue(predicates[driver + ".consumer_accepted"])
+
+    def test_locality_counterexample_is_a_separate_failed_requirement(self):
+        body = ["impact-body", ["impact-result", ["transition", "accepted-to-accepted"],
+            [["query-impact", ["atom", "t"], [["evidence-blocked", "defeated"]],
+              [["evidence-blocked", "justified"]], "true", "true"]], [["atom", "t"]], []]]
+        output = canonical(["inquiry-result", "1", "fake-locality-counterexample", body])
+        args, calls = self.pair_programs("locality-counterexample-pair", output, output)
+        run = self.assert_pair_stop(args, calls, runner.measure(args))
+        predicates = run["semantic_discrepancy"]["required_predicates"]
+        self.assertFalse(predicates["locality_sound"])
+        self.assertTrue(predicates["driver_agreement"])
+        for driver in ("native", "lean"):
+            self.assertTrue(predicates[driver + ".protocol_valid"])
+            self.assertTrue(predicates[driver + ".consumer_accepted"])
+
+    def test_completed_consumer_refusal_or_noise_is_semantic_not_driver_failure(self):
+        for name, body in (("refusal", "raise SystemExit(1)\n"), ("stdout", "print('unexpected noise')\n"),
+                           ("stderr", "print('unexpected noise',file=sys.stderr)\n")):
+            with self.subTest(name=name):
+                args, calls = self.pair_programs("consumer-" + name + "-pair", self.first_case_output(), self.first_case_output(), body)
+                run = self.assert_pair_stop(args, calls, runner.measure(args))
+                predicates = run["semantic_discrepancy"]["required_predicates"]
+                self.assertTrue(predicates["driver_agreement"])
+                for driver in ("native", "lean"):
+                    self.assertTrue(predicates[driver + ".oracle_agreement"])
+                    self.assertTrue(predicates[driver + ".protocol_valid"])
+                    self.assertFalse(predicates[driver + ".consumer_accepted"])
+                    self.assertIsNone(run["invocations"][0]["consumer"]["failure"])
+
+    def test_consumer_signal_still_stops_early_as_infrastructure_failure(self):
+        args, calls = self.pair_programs("consumer-signal", self.first_case_output(), self.first_case_output(),
+                                       "import os,signal\nos.kill(os.getpid(),signal.SIGTERM)\n")
+        self.assertEqual(runner.measure(args), 1)
+        run = json.loads((Path(args.out) / "run.json").read_text())
+        self.assertEqual(run["stop_reason"], "signal")
+        self.assertTrue(run["sealed"])
+        self.assertEqual(len(run["invocations"]), 1)
+        self.assertEqual(len(run["missing_invocations"]), 191)
+        self.assertEqual(len(calls.read_text().splitlines()), 2)
+        self.assertIsNone(run["invocations"][0]["failure"])
+        self.assertIsNone(run["invocations"][0]["driver_failure"])
+        self.assertEqual(run["invocations"][0]["consumer"]["signal"], 15)
+        self.assertEqual(run["pair_checkpoints"], [])
+        self.assertIsNone(run["semantic_discrepancy"])
+
+    def test_interruption_between_pair_scoring_and_checkpoint_publication_keeps_discrepancy(self):
+        output = self.first_case_output(wrong=True)
+        args, calls = self.pair_programs("interrupted-semantic-checkpoint", output, output)
+        original_publish = runner.publish_status
+        interrupted = []
+        def interrupt_checkpoint(directory, run):
+            if not interrupted and (run.get("active_operation") or {}).get("stage") == "pair-checkpoint":
+                interrupted.append(True)
+                raise KeyboardInterrupt("test-only interrupt before semantic checkpoint publication")
+            return original_publish(directory, run)
+        with patch.object(runner, "publish_status", side_effect=interrupt_checkpoint):
+            code = runner.measure(args)
+        run = self.assert_pair_stop(args, calls, code, reason="interrupted")
+        self.assertEqual(interrupted, [True])
+        self.assertEqual(run["failed_or_interrupted_operation"], {"case_id": "source-rejections", "stage": "pair-checkpoint"})
+
+    def test_report_recovery_keeps_semantic_discrepancy_separate(self):
+        output = self.first_case_output(wrong=True)
+        for name, exception, reason in (("io", OSError("test-only semantic report IO failure"), "evidence-io-failure"),
+                                        ("deadline", runner.AggregateDeadline("test-only semantic publication deadline"), "aggregate-deadline")):
+            with self.subTest(name=name):
+                args, calls = self.pair_programs("semantic-report-recovery-" + name, output, output)
+                original_seal = runner.seal
+                def fail_after_seal(*values):
+                    original_seal(*values)
+                    raise exception
+                with patch.object(runner, "seal", side_effect=fail_after_seal):
+                    code = runner.measure(args)
+                run = self.assert_pair_stop(args, calls, code, reason=reason)
+                self.assertEqual(run["recovery"]["driver_retries"], 0)
+                self.assertEqual(run["recovery"]["consumer_retries"], 0)
+                self.assertEqual(len(run["recovery"]["prior_report_artifacts"]), 3)
 
     def test_consumer_failure_keeps_driver_oracle_field_independent(self):
         case = self.manifest["cases"][0]
@@ -504,9 +727,9 @@ class Boundaries(unittest.TestCase):
         run = json.loads((saved / "run.json").read_text())
         self.assertTrue(run["sealed"])
         self.assertEqual(run["completion"], "INCOMPLETE")
-        self.assertEqual(run["stop_reason"], "consumer-failure")
-        self.assertEqual(len(run["invocations"]), 1)
-        self.assertEqual(len(run["missing_invocations"]), 191)
+        self.assertEqual(run["stop_reason"], "semantic-discrepancy")
+        self.assertEqual(len(run["invocations"]), 2)
+        self.assertEqual(len(run["missing_invocations"]), 190)
         output = b"(" * 1100 + b"x" + b")" * 1100 + b"\n"
         self.assertEqual((saved / run["invocations"][0]["stdout_path"]).read_bytes(), output)
         result = json.loads((saved / "results.jsonl").read_text().splitlines()[0])
@@ -521,8 +744,8 @@ class Boundaries(unittest.TestCase):
             self.assertEqual((replay / path).read_bytes(), (saved / path).read_bytes())
         OBSERVATIONS.append({"probe": "excessively nested malformed fake process output", "exit_code": code,
             "completion": run["completion"], "sealed": run["sealed"], "decode_error_kind": "RecursionError",
-            "oracle_agreement": False, "protocol_valid": False, "driver_invocations": 1,
-            "missing_invocations": 191, "production_driver_invocations": 0, "replay_subprocesses": 0,
+            "oracle_agreement": False, "protocol_valid": False, "driver_invocations": 2,
+            "missing_invocations": 190, "production_driver_invocations": 0, "replay_subprocesses": 0,
             "stdout_bytes": len(output), "stdout_sha256": digest(output), "raw_output_preserved": True})
 
 
@@ -533,6 +756,9 @@ if __name__ == "__main__":
     program = unittest.main(argv=[sys.argv[0], *rest], exit=False)
     if args.evidence:
         args.evidence.write_bytes(json_bytes({"schema": "inquiry-p8-runner-probes", "schema_version": 1,
-            "production_driver_invocations": 0, "tests_run": program.result.testsRun,
+            "production_driver_invocations": 0, "real_consumer_invocations": 0,
+            "fake_process_repository_preflight": "fixture adapter; committed suite/helper bytes and unchanged load_suite validation",
+            "production_repository_preflight": "unmodified rejection test only; changed runtime rejected before driver",
+            "tests_run": program.result.testsRun,
             "passed": program.result.wasSuccessful(), "observations": OBSERVATIONS}))
     raise SystemExit(0 if program.result.wasSuccessful() else 1)

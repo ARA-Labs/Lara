@@ -1,0 +1,12 @@
+test_changed_frozen_artifacts_refuse_before_any_write (__main__.AuthoringBoundaries.test_changed_frozen_artifacts_refuse_before_any_write) ... ok
+test_frozen_producer_refuses_before_launch_or_cache_write (__main__.AuthoringBoundaries.test_frozen_producer_refuses_before_launch_or_cache_write) ... ok
+test_limit_edit_cannot_inherit_review_with_unchanged_semantics (__main__.AuthoringBoundaries.test_limit_edit_cannot_inherit_review_with_unchanged_semantics) ... ok
+test_review_requires_ancestry_and_optional_receipt_digests (__main__.AuthoringBoundaries.test_review_requires_ancestry_and_optional_receipt_digests) ... ok
+test_unchanged_frozen_check_and_default_are_read_only (__main__.AuthoringBoundaries.test_unchanged_frozen_check_and_default_are_read_only) ... ok
+test_default_audit_does_not_change_original_receipt (__main__.IndependentReceiptBoundary.test_default_audit_does_not_change_original_receipt) ... ok
+test_existing_output_refuses_before_reading_suite (__main__.IndependentReceiptBoundary.test_existing_output_refuses_before_reading_suite) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 3.867s
+
+OK
