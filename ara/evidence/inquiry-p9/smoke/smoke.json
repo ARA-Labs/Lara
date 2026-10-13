@@ -1,0 +1,47 @@
+{
+  "binary": "/home/yfhe/ara/Lara/dist-newstyle/build/x86_64-linux/ghc-9.10.3/lara-0.2.0.0/x/lara/build/lara/lara",
+  "head": "e656e2468e3005b2b59c0af45bed720fd2b35a08",
+  "record": {
+    "cost_usd": 0.030094800000000005,
+    "elapsed_seconds": 8.837,
+    "exit_code": 0,
+    "final_text": "Both steps ran as expected. `./lara-view show` printed `(smoke-input 1)`, and `cat /etc/hostname` was blocked because it's outside the allowed working directory.\n\n```json\n{\"show_output\": \"(smoke-input 1)\", \"cat_refused\": true}\n```",
+    "num_turns": 3,
+    "result_subtype": "success",
+    "timed_out": false,
+    "usage": {
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 2961,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "cache_creation_input_tokens": 2961,
+      "cache_read_input_tokens": 6654,
+      "fallback_credit": null,
+      "inference_geo": "global",
+      "input_tokens": 4,
+      "iterations": [
+        {
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 349,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "cache_creation_input_tokens": 349,
+          "cache_read_input_tokens": 4633,
+          "input_tokens": 2,
+          "output_tokens": 95,
+          "type": "message"
+        }
+      ],
+      "output_tokens": 253,
+      "output_tokens_details": {
+        "thinking_tokens": 0
+      },
+      "server_tool_use": {
+        "web_fetch_requests": 0,
+        "web_search_requests": 0
+      },
+      "service_tier": "standard",
+      "speed": "standard"
+    }
+  }
+}
