@@ -84,8 +84,9 @@ def require_receipt_approvals(protocol, receipt):
     marked RECEIPT_APPROVAL instead, and the receipt binds its exact meaning.
     """
     entries = receipt.get("approved_amendments", [])
-    require(isinstance(entries, list) and all(isinstance(e, dict) for e in entries),
-            "correction receipt approved_amendments is not a list of objects")
+    require(isinstance(entries, list) and
+            all(isinstance(e, dict) and isinstance(e.get("id"), str) for e in entries),
+            "correction receipt approved_amendments is not a list of objects with string ids")
     ids = [e.get("id") for e in entries]
     require(len(ids) == len(set(ids)), "correction receipt repeats an amendment id")
     approved = dict(zip(ids, entries))

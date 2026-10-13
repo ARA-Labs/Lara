@@ -342,7 +342,7 @@
       },
       {
         "path": "scripts/inquiry_evaluation_manifest.py",
-        "sha256": "6586b5a2e007e4e69fa496f1a84ddb47f2a2b57f41a9f23cc998e328720ac68d"
+        "sha256": "dac0eeeb981fa161a6b1258c91a4a6a293e5cdf31c9d5fef53d60e59e0d937d6"
       },
       {
         "path": "scripts/inquiry_evaluation_report.py",
@@ -358,7 +358,7 @@
       },
       {
         "path": "test/inquiry_approval_receipt.py",
-        "sha256": "831317a8a361629014c48d0f3ddd37afceddfff443d00ee78b4ae6f25460f6d1"
+        "sha256": "6dfca72201daa2619189dfe48bf06f6e8111671008fdc676b98eb51f1b8a8975"
       },
       {
         "path": "test/inquiry_evaluation_runner.py",
@@ -748,6 +748,7 @@
     "input_origin": "repository fixtures and authored synthetic inputs only",
     "local_capture_directory": "ara/evidence/inquiry-p8/<fresh-run-id>",
     "local_replay_directory": "ara/evidence/inquiry-p8/<fresh-run-id>-replay",
+    "local_preflight_directory": "ara/evidence/inquiry-p8/preflight-<fresh-run-id>",
     "fresh_measurement_runs": 1,
     "retention": "retain the original failed attempt and every new outcome; files are retained for the requested implementation PR",
     "network_acquisition_during_measurement": false,

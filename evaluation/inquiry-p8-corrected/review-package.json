@@ -6,7 +6,7 @@
   "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
   "candidate_input_commit": null,
   "input_commit_rule": "Root commits reviewed candidate; researcher approval binds that existing commit and these exact protocol+manifest hashes; no self-referential commit pin.",
-  "protocol_sha256": "587783d8fccfbbf648c8b8c5ac4febb2c06e4f8fe019450cde7fcec26d9647e2",
+  "protocol_sha256": "0434e44a6e424e79c358d43d0b8e828b26511da2ead740a64f8fa3f826ceb207",
   "manifest_sha256": "1aaf2eb1e7758fea800e0046e4b01d5f176823ef44f3fe2f98bc4dedf0a6dd22",
   "original_manifest_sha256": "c2784f151de337f2d3af0800ea73ad4c5e1d18183871c70e43fb79ef679dd774",
   "proposed_amendment": {
@@ -100,7 +100,7 @@
     },
     {
       "path": "scripts/inquiry_evaluation_manifest.py",
-      "sha256": "6586b5a2e007e4e69fa496f1a84ddb47f2a2b57f41a9f23cc998e328720ac68d"
+      "sha256": "dac0eeeb981fa161a6b1258c91a4a6a293e5cdf31c9d5fef53d60e59e0d937d6"
     },
     {
       "path": "scripts/inquiry_evaluation_report.py",
@@ -116,7 +116,7 @@
     },
     {
       "path": "test/inquiry_approval_receipt.py",
-      "sha256": "831317a8a361629014c48d0f3ddd37afceddfff443d00ee78b4ae6f25460f6d1"
+      "sha256": "6dfca72201daa2619189dfe48bf06f6e8111671008fdc676b98eb51f1b8a8975"
     },
     {
       "path": "test/inquiry_evaluation_runner.py",
@@ -221,7 +221,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "a9b95dc566934d85eb17f6e0f4b461936f66f9bd42aedab9ea82facb28d9fe8a"
+      "sha256": "1e4988ddb707f18292d4200953b889c12fdc1f6c77cc33403c6d266e9cc6eef5"
     },
     {
       "path": "authoring-validation.json",
@@ -1033,7 +1033,7 @@
     },
     {
       "path": "protocol.json",
-      "sha256": "587783d8fccfbbf648c8b8c5ac4febb2c06e4f8fe019450cde7fcec26d9647e2"
+      "sha256": "0434e44a6e424e79c358d43d0b8e828b26511da2ead740a64f8fa3f826ceb207"
     },
     {
       "path": "quality-review.json",
@@ -1116,12 +1116,20 @@
       "sha256": "777a39661f570d2e5bef0d198a88fc1d9e90d4fbacccf25b270ffa4c5130d2cf"
     },
     {
+      "path": "review/supplemental-receipt-quality-review-3.json",
+      "sha256": "bb369f7190ecf14103776d44f120b00c56d1f685dca5c3d4a60f99406086ce19"
+    },
+    {
       "path": "review/supplemental-receipt-quality-review.json",
       "sha256": "52bb1e87902f3103f54b8b65f5c55bcb47a6b5de10803156f316643f6791d473"
     },
     {
       "path": "review/supplemental-receipt-spec-review-2.json",
       "sha256": "27450d18ce3f06543146d472304fb882e8d47eba177fdb531f6ab152d8fff85f"
+    },
+    {
+      "path": "review/supplemental-receipt-spec-review-3.json",
+      "sha256": "3383059d6ff2637194de5f2ee7510f8634d3b7d3eef466367863573703526b10"
     },
     {
       "path": "review/supplemental-receipt-spec-review.json",
@@ -1223,11 +1231,25 @@
         "path": "review/supplemental-receipt-quality-review-2.json",
         "sha256": "777a39661f570d2e5bef0d198a88fc1d9e90d4fbacccf25b270ffa4c5130d2cf",
         "status": "PASS"
+      },
+      {
+        "round": 3,
+        "role": "spec",
+        "path": "review/supplemental-receipt-spec-review-3.json",
+        "sha256": "3383059d6ff2637194de5f2ee7510f8634d3b7d3eef466367863573703526b10",
+        "status": "PASS"
+      },
+      {
+        "round": 3,
+        "role": "quality",
+        "path": "review/supplemental-receipt-quality-review-3.json",
+        "sha256": "bb369f7190ecf14103776d44f120b00c56d1f685dca5c3d4a60f99406086ce19",
+        "status": "PASS"
       }
     ],
     "open_low_findings": [
-      "data_policy names capture and replay directories but not preflight-<fresh-run-id>, which repository_cost counts",
-      "a non-string receipt amendment id fails with TypeError rather than the loader refusal message; it still fails closed"
-    ]
+      "The loader ignores receipt entries for amendment ids the protocol does not defer; this cannot approve an unapproved item."
+    ],
+    "note": "The researcher receipt must hash the current data policy, which includes local_preflight_directory."
   }
 }

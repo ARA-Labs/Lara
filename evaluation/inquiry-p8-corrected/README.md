@@ -89,7 +89,7 @@ with the researcher's non-blank approval text and the SHA256 of its
 interpretation in UTF-8. `data_policy_sha256` is the SHA256 of the data policy
 as `json_bytes` encodes it: sorted keys, compact separators, UTF-8 and one
 trailing newline. The loader refuses a receipt that omits either one, repeats
-an amendment id or binds different text.
+an amendment id, gives a non-string id or binds different text.
 The loader permits only changes to protocol `freeze.state`,
 `freeze.manifest_sha256`, and the `correction_approval` state/path/hash linkage.
 Every other protocol field, including supporting artifacts, the input commit
@@ -107,8 +107,9 @@ one invocation per driver per document, a 10-second driver timeout, a 45-minute
 aggregate deadline, one CPU and zero repeats. No new budget is approved here.
 The proposed data policy uses repository fixtures and authored synthetic
 inputs only. It requests one fresh local capture directory under
-`ara/evidence/inquiry-p8/<fresh-run-id>` and a local replay directory under
-`ara/evidence/inquiry-p8/<fresh-run-id>-replay`. The original failed attempt
+`ara/evidence/inquiry-p8/<fresh-run-id>`, a local replay directory under
+`ara/evidence/inquiry-p8/<fresh-run-id>-replay` and the setup and gate record
+under `ara/evidence/inquiry-p8/preflight-<fresh-run-id>`. The original failed attempt
 and every new outcome will be retained for the requested implementation PR.
 Measurement will acquire or transfer no data over the network and make no
 paid calls. The capture, replay and preflight directories are committed. The

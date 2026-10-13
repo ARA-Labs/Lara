@@ -68,6 +68,8 @@ class ReceiptApprovals(unittest.TestCase):
                 ('blank approval text', lambda r, p: r['approved_amendments'][0].update(approval_text=' '), 'amendment: distinct-t07-support'),
                 ('non-string approval text', lambda r, p: r['approved_amendments'][0].update(approval_text=True), 'amendment: distinct-t07-support'),
                 ('repeated amendment id', lambda r, p: r['approved_amendments'].insert(0, {'id': 'distinct-t07-support'}), 'repeats an amendment id'),
+                ('missing amendment id', lambda r, p: r['approved_amendments'][0].pop('id'), 'string ids'),
+                ('non-string amendment id', lambda r, p: r['approved_amendments'][0].update(id=['distinct-t07-support']), 'string ids'),
                 ('amendments not a list', lambda r, p: r.update(approved_amendments={}), 'not a list of objects'),
                 ('amendment entry not an object', lambda r, p: r.update(approved_amendments=['distinct-t07-support']), 'not a list of objects'),
                 ('other interpretation', lambda r, p: p['amendments'][1].update(interpretation='changed'), 'amendment: distinct-t07-support'),
