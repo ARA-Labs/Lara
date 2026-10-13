@@ -1,0 +1,41 @@
+python3 - <<'PY'
+from pathlib import Path
+import argparse,hashlib,importlib.util,json,sys,tempfile
+from unittest.mock import patch
+root=Path.cwd()
+sys.path.insert(0,str(root/'scripts'))
+spec=importlib.util.spec_from_file_location('inquiry_evaluate',root/'scripts/inquiry-evaluate.py')
+runner=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+source=root/'ara/evidence/inquiry-p8/20261012T225824Z-a904130'
+archived=source.with_name(source.name+'-replay')
+manifest=root/'evaluation/inquiry-p8/MANIFEST.json'
+reports=['run.json','run.sha256','results.jsonl','summary.json','summary.tsv']
+before={name:hashlib.sha256((source/name).read_bytes()).hexdigest() for name in reports}
+with tempfile.TemporaryDirectory(prefix='inquiry-candidate-final-legacy-replay-') as temporary:
+ out=Path(temporary)/'replay'
+ with patch.object(runner.subprocess,'run',side_effect=AssertionError('replay spawned')),patch.object(runner.subprocess,'Popen',side_effect=AssertionError('replay spawned')):
+  code=runner.replay(argparse.Namespace(manifest=str(manifest),replay=str(source),out=str(out),input_commit=None))
+  run,summary=runner.validate_saved(source,manifest)
+  runner.validate_saved(archived,manifest)
+ assert code==1
+ for name in reports:
+  assert (source/name).read_bytes()==(out/name).read_bytes()==(archived/name).read_bytes(),name
+ for name,expected in run['artifacts'].items():
+  data=(source/name).read_bytes()
+  assert hashlib.sha256(data).hexdigest()==expected,name
+  assert data==(out/name).read_bytes()==(archived/name).read_bytes(),name
+ assert run['completion']=='INCOMPLETE' and run['stop_reason']=='timeout' and len(run['invocations'])==87
+assert before=={name:hashlib.sha256((source/name).read_bytes()).hexdigest() for name in reports}
+dest=root/'evaluation/inquiry-correction-validation/candidate-final-legacy-replay'
+dest.mkdir(parents=True,exist_ok=False)
+r={'schema':'lara-inquiry-candidate-legacy-replay-validation','schema_version':1,
+ 'source':str(source.relative_to(root)),'archived_replay':str(archived.relative_to(root)),
+ 'replay_exit_code':code,'completion':run['completion'],'stop_reason':run['stop_reason'],
+ 'invocations':len(run['invocations']),'artifacts_byte_identical':len(run['artifacts']),
+ 'reports_byte_identical':reports,'reports_sha256':before,'subprocesses':0,
+ 'production_driver_invocations':0,'real_consumer_invocations':0,
+ 'checked_source_sha256':{name:hashlib.sha256((root/'scripts'/name).read_bytes()).hexdigest() for name in runner.RUNNER_FILES}}
+(dest/'validation.json').write_text(json.dumps(r,indent=2)+'\n')
+print('Final legacy replay PASS: 565 artifacts and original reports preserved; expected exit 1; zero subprocesses.')
+PY

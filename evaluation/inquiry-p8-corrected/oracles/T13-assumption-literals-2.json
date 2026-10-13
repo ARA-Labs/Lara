@@ -1,0 +1,455 @@
+{
+  "schema": "inquiry-p8-oracle",
+  "schema_version": 1,
+  "case_id": "T13-assumption-literals-2",
+  "oracle_kind": "independent-finite-semantic-annotation",
+  "expected": {
+    "result_kind": "results",
+    "exit_code": 0,
+    "results": [
+      [
+        "inquiry-result",
+        "1",
+        "status",
+        [
+          "status-body",
+          [
+            "family-status-result",
+            [
+              [
+                "family-row",
+                [],
+                [
+                  [
+                    [
+                      "slot-id",
+                      "0"
+                    ],
+                    [
+                      "choice-id",
+                      "0"
+                    ]
+                  ]
+                ],
+                [],
+                [
+                  [
+                    "published",
+                    "justified"
+                  ]
+                ]
+              ],
+              [
+                "family-row",
+                [],
+                [
+                  [
+                    [
+                      "slot-id",
+                      "0"
+                    ],
+                    [
+                      "choice-id",
+                      "1"
+                    ]
+                  ]
+                ],
+                [],
+                [
+                  [
+                    "published",
+                    "justified"
+                  ]
+                ]
+              ]
+            ],
+            "2",
+            "2",
+            "0",
+            "true"
+          ]
+        ]
+      ],
+      [
+        "inquiry-result",
+        "1",
+        "minimal",
+        [
+          "assumptions-body",
+          [
+            "assumption-result",
+            [
+              "target",
+              [
+                "status-target",
+                "c0",
+                [
+                  "published",
+                  "defeated"
+                ]
+              ]
+            ],
+            [
+              [
+                "literal",
+                [
+                  "slot-eq",
+                  [
+                    "slot-id",
+                    "0"
+                  ],
+                  [
+                    "choice-id",
+                    "0"
+                  ]
+                ]
+              ],
+              [
+                "literal",
+                [
+                  "slot-ne",
+                  [
+                    "slot-id",
+                    "0"
+                  ],
+                  [
+                    "choice-id",
+                    "0"
+                  ]
+                ]
+              ],
+              [
+                "literal",
+                [
+                  "slot-ne",
+                  [
+                    "slot-id",
+                    "2000"
+                  ],
+                  [
+                    "choice-id",
+                    "0"
+                  ]
+                ]
+              ],
+              [
+                "literal",
+                [
+                  "slot-ne",
+                  [
+                    "slot-id",
+                    "2001"
+                  ],
+                  [
+                    "choice-id",
+                    "0"
+                  ]
+                ]
+              ]
+            ],
+            "2",
+            []
+          ]
+        ]
+      ]
+    ]
+  },
+  "semantic_specification": {
+    "kind": "family",
+    "rows": [
+      {
+        "history": [],
+        "choices": [
+          [
+            0,
+            0
+          ]
+        ],
+        "status": [
+          "published",
+          "justified"
+        ],
+        "rejection": null,
+        "audit": null
+      },
+      {
+        "history": [],
+        "choices": [
+          [
+            0,
+            1
+          ]
+        ],
+        "status": [
+          "published",
+          "justified"
+        ],
+        "rejection": null,
+        "audit": null
+      }
+    ],
+    "histories": [
+      []
+    ],
+    "history_search_steps": 1,
+    "graphs": [
+      {
+        "names": [
+          "witness"
+        ],
+        "edges": [],
+        "query_ancestry": [
+          "witness"
+        ],
+        "query_support": [
+          "witness"
+        ],
+        "blocked": false,
+        "grounded_labels": {
+          "witness": "justified"
+        }
+      },
+      {
+        "names": [
+          "witness"
+        ],
+        "edges": [],
+        "query_ancestry": [
+          "witness"
+        ],
+        "query_support": [
+          "witness"
+        ],
+        "blocked": false,
+        "grounded_labels": {
+          "witness": "justified"
+        }
+      }
+    ],
+    "bindings": [
+      "bindings",
+      [
+        [
+          "claim-binding",
+          "c0",
+          "claim",
+          [
+            "atom",
+            "t"
+          ]
+        ]
+      ],
+      []
+    ],
+    "kind_metadata": [
+      "kind-metadata"
+    ],
+    "admitted_assumptions": [
+      "admitted-assumptions"
+    ],
+    "assumption_truth_table": [
+      {
+        "row": 0,
+        "values": [
+          true,
+          false,
+          true,
+          true
+        ]
+      },
+      {
+        "row": 1,
+        "values": [
+          false,
+          true,
+          true,
+          true
+        ]
+      }
+    ],
+    "specification": "Unattacked witness justified in every row. Defeated target unreachable; contradictory catalog full set has empty restriction and fails.",
+    "catalog_subsets": [
+      {
+        "indices": [],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          2
+        ],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          3
+        ],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          2
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          3
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1,
+          2
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1,
+          3
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          2,
+          3
+        ],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1,
+          2
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1,
+          3
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          2,
+          3
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1,
+          2,
+          3
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      }
+    ],
+    "variant": {
+      "axis": "assumption-literals",
+      "level": 2,
+      "only_designated_axis_changed": true
+    },
+    "unused_slot_rule": "All added fresh undeclared inequalities evaluate true, because selectionFor has no choice. These are table predicates, not evidence."
+  },
+  "review_provenance": {
+    "status": "independently-reviewed",
+    "author": "Codex case author",
+    "author_provenance": "ai-executed",
+    "reviewer": "Codex independent spec reviewer /root/candidate_spec",
+    "driver_output_used": false,
+    "analysis_implementation_imported": false,
+    "specification_references": [
+      "docs/theory-process.md#what-do-the-exact-inquiry-analyses-compute",
+      "docs/theory-process.md#how-is-an-edits-impact-certified",
+      "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
+    ],
+    "reviewer_provenance": "ai-executed",
+    "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+    "quality_reviewer_provenance": "ai-executed",
+    "reviewed_input_sha256": "0ee56baa237dc5c7dfcdbc74203ebe68f74873ad7fd18f634f40ed17e70da76a",
+    "semantic_content_sha256": "93f249af7ac6a9f85d420e6b670e22bf9176b6c407ff2afb9918551cfc237fb0",
+    "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
+    "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+  }
+}

@@ -1,6 +1,6 @@
 # Restore the approved inquiry evaluation
 
-**Status:** Tasks 1–2 are complete; Tasks 3–4 remain. Corrective implementation reviewed: engineering review CLEAR by independent agent on 2026-10-12, for code/proof/candidate preparation only. The original P8 run is sealed incomplete. This plan authorizes no new measurement. Researcher approval of the exact corrected protocol, code/input pins and a fresh budget is required before Task 4.
+**Status:** Tasks 1–3 are complete; Task 4 remains. Corrective implementation reviewed: engineering review CLEAR by independent agent on 2026-10-12, for code/proof/candidate preparation only. The original P8 run is sealed incomplete. This plan authorizes no new measurement. Researcher approval of the exact corrected protocol, code/input pins and a fresh budget is required before Task 4.
 
 **Tracker:** [Issue #49](https://github.com/ARA-Labs/Lara/issues/49), with P8/P9 remaining in issue #22.
 
@@ -34,11 +34,11 @@ After both driver captures and consumer records for a case are attached, call th
 
 Author a new additive candidate suite outside the original frozen input directory. Keep the 16/16/64 partition, levels, query meanings, control bytes and T07 expectations. In T07's after-policy clone rule `r-s` under fresh `RuleId r-s-new`; only new-attacker uses that rule. Its premise and conclusion stay `seed` and `s`. Existing support terms remain unchanged and the new term is genuinely distinct. Redraw and verify the four-node graph, propagated attacks, defeated status and failed locality before encoding. Apply the corresponding repair to its four source-declaration variants.
 
-- [ ] Add an authoring guard for these explicitly ground, annotated support keys; include rule/leaf identifiers, substitutions, nested premises, discharges, holes and assurance, excluding argument/derived claim names. Do not create another source checker.
-- [ ] Include the old cloned term as a negative guard example and the distinct-rule term as a positive one.
-- [ ] Author every corrected input/oracle/counter and obtain independent source/graph/row/history/certificate review without production driver outputs as expectations.
-- [ ] Parameterize and pin candidate suite/audit paths and the input commit in the manifest loader; retain exact validation of the original suite and process-free replay of its archived helper sources.
-- [ ] Prepare exact code/input hashes and reproduction commands for researcher review; preserve original code/input commitments in the old evidence.
+- [x] Add an authoring guard for these explicitly ground, annotated support keys; include rule/leaf identifiers, substitutions, nested premises, discharges, holes and assurance, excluding argument/derived claim names. Do not create another source checker.
+- [x] Include the old cloned term as a negative guard example and the distinct-rule term as a positive one.
+- [x] Author every corrected input/oracle/counter and obtain independent source/graph/row/history/certificate review without production driver outputs as expectations.
+- [x] Parameterize and pin candidate suite/audit paths and the input commit in the manifest loader; retain exact validation of the original suite and process-free replay of its archived helper sources.
+- [x] Prepare exact code/input hashes and reproduction commands for researcher review; preserve original code/input commitments in the old evidence.
 
 The candidate is not an approved freeze until the researcher approves the justified correction and exact protocol hash. No legacy regeneration or existing freeze-tag bump is proposed.
 

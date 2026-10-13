@@ -1,0 +1,20 @@
+{
+  "schema": "lara-inquiry-corrective-haskell-validation",
+  "schema_version": 1,
+  "scope": "correctness precondition on unchanged Haskell sources after Lean refinement; no P8 measurement",
+  "command": "CABAL_CONFIG=/tmp/inquiry-p8-cabal.config cabal test all",
+  "exit_code": 0,
+  "suites": [
+    "lara-test",
+    "lara-doctest"
+  ],
+  "log": "test-all.log",
+  "log_sha256": "d4373c2454641b59607c0ca8bdf7dcf320ed0da1972fc18c8b40d0285e7cc294",
+  "runtime_code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+  "production_p8_driver_invocations": 0,
+  "runtime_code_paths": {
+    "src": "5e0e15f8ad0cb4ee184f655b8e162b76e655dc19",
+    "app": "f0e492d7e78a08893e94b9352aae708892d2f3ff",
+    "lean": "2571161507e3e3afa240cc988ae96e8bd0fbf065"
+  }
+}

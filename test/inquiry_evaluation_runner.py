@@ -34,6 +34,18 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 MANIFEST = ROOT / "evaluation/inquiry-p8/MANIFEST.json"
 OBSERVATIONS = []
+ORIGINAL_HELPERS = {}
+REAL_CHECKED = runner.checked
+
+
+def original_fixture_checked(root, relative, expected, inventory):
+    """Fake process fixtures read hash-checked original archived author sources."""
+    if root == ROOT and relative in ORIGINAL_HELPERS:
+        data = ORIGINAL_HELPERS[relative]
+        runner.require(digest(data) == expected, 'original helper fixture hash mismatch: ' + relative)
+        inventory[relative] = expected
+        return data
+    return REAL_CHECKED(root, relative, expected, inventory)
 
 
 def fake(path, body):
@@ -74,6 +86,15 @@ class Boundaries(unittest.TestCase):
         cls.temporary = tempfile.TemporaryDirectory(prefix="inquiry-runner-boundaries-")
         cls.directory = Path(cls.temporary.name)
         cls.base, cls.protocol, cls.manifest, cls.oracles, cls.inventory = load_suite(MANIFEST)
+        recipe = cls.protocol["recipes"]
+        quality = runner.read_json(cls.base / "quality-review.json")
+        for path in (recipe["generator_path"], quality["generator_path"],
+                     quality["audit_tool_path"], quality["boundary_test_path"],
+                     recipe["certificate_producer_path"]):
+            ORIGINAL_HELPERS[path] = runner.git("show", f"{INPUT_COMMIT}:{path}")
+        helper_adapter = patch.object(runner, "checked", side_effect=original_fixture_checked)
+        helper_adapter.start()
+        cls.addClassCleanup(helper_adapter.stop)
         cls.real_repository_preflight = staticmethod(runner.repository_preflight)
         adapter = patch.object(runner, "repository_preflight", side_effect=fake_repository_preflight)
         adapter.start()

@@ -15,6 +15,8 @@ from pathlib import Path
 from evidence_measured import canonical, parse, wire
 ROOT = Path(__file__).resolve().parents[1]
 SUITE = ROOT / 'evaluation/inquiry-p8'
+RECIPE_VERSION = 'inquiry-p8-recipes@1'
+CORRECTED_RECIPE = 'inquiry-p8-recipes@2-candidate'
 FIXTURES = ROOT / 'fixtures/process/inquiry'
 
 def block(tree, name):
@@ -209,6 +211,9 @@ def authored():
         block(tree,'bindings')[1]=deepcopy(block(fixture(control),'bindings')[1]);result[name]=(tree,spec)
     before=deepcopy(result['T06'][0][-1][1][2]);after=deepcopy(before);p=program(after)
     original=next(x for x in p[6][1:] if x[0]=='da' and x[1][1]=='attacker');extra=deepcopy(original);extra[1][1]='new-attacker';extra[1][2]=['sd','new-attack-claim']
+    if RECIPE_VERSION == CORRECTED_RECIPE:
+        pol=policy(after);fresh=deepcopy(next(r for r in pol[3][1:] if r[1]=='r-s'));fresh[1]='r-s-new';pol[3].append(fresh);put_policy(after,pol)
+        extra[1][3][1]='r-s-new'
     p[6].extend([extra,['dk',['sreb','new-attacker','witness']]]);put_program(after,p)
     gafter=graph(['witness','consumer','attacker','new-attacker'],[['attacker','witness'],['attacker','consumer'],['new-attacker','witness'],['new-attacker','consumer']],['witness','attacker','new-attacker'],['witness'])
     result['T07']=impact_case('T07',before,after,impact_spec(before,after,DEFEATED,DEFEATED,False,[deepcopy(G_UNRELATED),gafter]))
@@ -467,16 +472,37 @@ def differences(outputs):
 def materialize(producer=None):
     manifest=json.loads((SUITE/'MANIFEST.json').read_text());outputs={};entries=[]
     frozen=manifest.get('state')=='frozen'
+    if manifest['recipe_version'] != RECIPE_VERSION:raise SystemExit('recipe version does not match manifest')
     if frozen and producer is not None:raise SystemExit('frozen suite refuses certificate producer; no artifacts changed')
+    candidate_review=False
+    if RECIPE_VERSION == CORRECTED_RECIPE:
+        item=manifest.get('independent_review',{});receipt_path=SUITE/item.get('path','independent-review.json')
+        if receipt_path.is_file() and item.get('sha256')==sha(receipt_path.read_bytes()):
+            receipt=json.loads(receipt_path.read_text())
+            candidate_review=(receipt.get('status')=='PASS' and
+                receipt.get('reviewed_author_generator_sha256')==sha(Path(__file__).read_bytes()) and
+                receipt.get('driver_outputs_used') is False and receipt.get('analysis_implementation_imported') is False)
     prior_entries={e['case_id']:e for e in manifest.get('cases',[])}
     def add(name,data,tree,spec,stratum,ancestry,expected=None):
+        if RECIPE_VERSION == CORRECTED_RECIPE and (name=='T07' or name.startswith('T07-source-declarations-')):
+            from inquiry_support_annotations import t07_annotations, validate_ground_annotations
+            groups=spec.get('added_argument_groups',0)
+            terms=[t07_annotations(groups,False),t07_annotations(groups,True)]
+            req=block(tree,'requests')[1]
+            keys=[validate_ground_annotations(program(source),policy(source),annotation) for source,annotation in zip(req[2:4],terms)]
+            spec['ground_support_annotations']={'scope':'bounded parameter-free construction; pending independent review','terms':terms,'keys':keys}
+            spec['specification']='Two distinct rule identities r-s and r-s-new share the seed premise and s conclusion. Their complete ground support terms differ. Both unattacked attackers defeat witness and propagate to consumer. Witness stays defeated; ancestry changes and locality fails.'
         expected=results_for(tree,spec) if expected is None else expected
         oracle={'schema':'inquiry-p8-oracle','schema_version':1,'case_id':name,'oracle_kind':'existing-conformance-golden' if stratum=='development_controls' else 'independent-finite-semantic-annotation','expected':{'result_kind':'results','exit_code':0,'results':expected},'semantic_specification':spec,'review_provenance':deepcopy(REVIEW)}
         if stratum=='development_controls':oracle['review_provenance']['status']='disclosed-development-control';oracle['development_provenance']=ancestry
         prior_path=SUITE/'oracles'/(name+'.json')
         if prior_path.exists():
             prior=json.loads(prior_path.read_text())
-            if review_matches(prior,prior_entries.get(name),oracle,data,ancestry):
+            # Preserve only a review bound to this corrected author source, then
+            # require exact input/ancestry/meaning correspondence as before.
+            # The frozen manifest loader also validates every review receipt.
+            fresh_review=(candidate_review and prior.get('review_provenance',{}).get('review_sha256')==manifest['independent_review']['sha256'])
+            if (RECIPE_VERSION != CORRECTED_RECIPE or fresh_review) and review_matches(prior,prior_entries.get(name),oracle,data,ancestry):
                 oracle['review_provenance']=prior['review_provenance']
         ipath='inputs/'+name+'.sexp';opath='oracles/'+name+'.json';odata=js(oracle);outputs[SUITE/ipath]=data;outputs[SUITE/opath]=odata
         reqs=block(tree,'requests')[1:];query_order=[r[1] for r in block(tree[2],'queries')[1:]]+[r[1] for r in reqs];limits={x[0]:min(int(x[1]),{'histories':10000,'sources':10000,'source-bytes':1048576,'declarations':10000,'search-steps':200000,'pairs':4096,'subsets':4096}[x[0]]) for x in block(tree,'inquiry-limits')[1:]};limits['histories']=min(limits['histories'],int(block(block(tree[2],'limits'),'completions')[1]))
@@ -485,6 +511,7 @@ def materialize(producer=None):
         embedded_event_count=len({wire(x) for x in event_inventory})
         counters=counters_for(tree,spec,data)
         entries.append({'case_id':name,'stratum':stratum,'classification':'development-control' if stratum=='development_controls' else 'authored-control' if stratum=='authored_controls' else 'generated-size-variant','source_ancestry':ancestry,'input_path':ipath,'input_sha256':sha(data),'oracle_path':opath,'oracle_sha256':sha(odata),'query_order':query_order,'expected_embedded_event_count':embedded_event_count,'reference':[r[2] for r in reqs if r[0] in ['sensitivity','slots-sensitive']] or None,'catalog':block(tree,'assumption-catalog')[1:],'effective_declared_limits':limits,'expected_counters':{'basis':'expected finite construction, not runtime telemetry','values':counters},'expected_result_kind':'results','review_provenance':oracle['review_provenance']})
+        if RECIPE_VERSION == CORRECTED_RECIPE:entries[-1]['authored_semantic_content_sha256']=semantic_digest(oracle)
     for item in manifest['legacy_controls']:
         name=item['case_id'];data=(ROOT/item['input_path']).read_bytes();tree=parse(data);assert sha(data)==item['input_sha256'];assert sha((ROOT/item['golden_path']).read_bytes())==item['golden_sha256']
         spec=control_spec(name,tree)
@@ -514,7 +541,7 @@ def materialize(producer=None):
     groups={}
     for entry in entries:groups.setdefault(entry['input_sha256'],[]).append(entry['case_id'])
     manifest['cases']=entries;manifest['duplicate_content_groups']=[{'input_sha256':h,'case_ids':ids} for h,ids in groups.items() if len(ids)>1];manifest['unique_input_count']=len(groups)
-    if manifest['state']!='frozen':manifest['state']='awaiting-independent-review'
+    if manifest['state'] not in ('frozen','awaiting-researcher-approval'):manifest['state']='awaiting-independent-review'
     assert len(entries)==96
     assert [sum(e['stratum']==s for e in entries) for s in ['development_controls','authored_controls','generated_variants']]==[16,16,64]
     for e in entries:
@@ -525,10 +552,15 @@ def materialize(producer=None):
     return outputs
 
 def main(argv=None):
+    global SUITE, RECIPE_VERSION
     parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--suite',type=Path,default=SUITE,help='explicit additive suite path; original frozen suite stays read-only')
+    parser.add_argument('--recipe-version',choices=['inquiry-p8-recipes@1',CORRECTED_RECIPE],default=RECIPE_VERSION)
     parser.add_argument('--check',action='store_true')
     parser.add_argument('--producer',type=Path,help='explicit sanctioned helper for producing/updating certificate syntax; never an inquiry driver')
     args=parser.parse_args(argv)
+    SUITE=args.suite.resolve();RECIPE_VERSION=args.recipe_version
+    if RECIPE_VERSION == CORRECTED_RECIPE and SUITE == (ROOT/'evaluation/inquiry-p8').resolve():parser.error('corrected recipe cannot target original suite')
     if args.check and args.producer:parser.error('--check is read-only; do not pass --producer')
     frozen=json.loads((SUITE/'MANIFEST.json').read_text()).get('state')=='frozen'
     outputs=materialize(args.producer)

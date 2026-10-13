@@ -64,6 +64,16 @@ def semantic_digest(oracle):
                               "semantic_specification": oracle["semantic_specification"]}))
 
 
+def approved_protocol_identity(protocol):
+    """Retain all approved fields except the enumerated freeze receipt metadata."""
+    identity = {k: v for k, v in protocol.items() if k not in ('freeze', 'correction_approval')}
+    identity['freeze'] = {k: v for k, v in protocol['freeze'].items()
+                          if k not in ('state', 'manifest_sha256')}
+    identity['correction_approval'] = {k: v for k, v in protocol.get('correction_approval', {}).items()
+                                      if k not in ('state', 'path', 'sha256')}
+    return identity
+
+
 def load_suite(manifest_path):
     """Validate all frozen suite bytes before any driver is selected or spawned."""
     manifest_path = manifest_path.resolve()
@@ -71,10 +81,33 @@ def load_suite(manifest_path):
     protocol = read_json(base / "protocol.json")
     require(protocol["schema"] == "inquiry-p8-protocol" and protocol["schema_version"] == 1,
             "unsupported protocol schema")
+    require(protocol["recipes"]["version"] in ("inquiry-p8-recipes@1", "inquiry-p8-recipes@2-candidate"), "unsupported recipe version")
     require(protocol["freeze"]["state"] == "frozen", "protocol is not frozen")
     inventory = {"protocol.json": digest((base / "protocol.json").read_bytes())}
     checked(base, manifest_path.name, protocol["freeze"]["manifest_sha256"], inventory)
+    if protocol["recipes"]["version"] != "inquiry-p8-recipes@1":
+        approval = protocol.get("correction_approval", {})
+        require(approval.get("state") == "approved", "corrected protocol lacks researcher approval")
+        receipt = read_json(safe_path(base, approval["path"]))
+        checked(base, approval["path"], approval["sha256"], inventory)
+        require(receipt.get("status") == "APPROVED" and receipt.get("provenance") == "user"
+                and bool(receipt.get("researcher")), "correction receipt lacks researcher approval")
+        snapshot = read_json(safe_path(base, receipt["candidate_protocol_path"]))
+        checked(base, receipt["candidate_protocol_path"], receipt["candidate_protocol_sha256"], inventory)
+        # Reviews and authoring bindings are complete before approval. Only the
+        # freeze state/hash and researcher receipt linkage may change afterward.
+        require(approved_protocol_identity(snapshot) == approved_protocol_identity(protocol),
+                "approved candidate protocol changed")
+        require(receipt.get("metadata_only_freeze_authorized") is True and
+                re.fullmatch(r"[0-9a-f]{40}", receipt.get("reviewed_candidate_commit", "")),
+                "correction approval does not bind committed candidate/freeze scope")
     manifest = read_json(manifest_path)
+    if protocol["recipes"]["version"] != "inquiry-p8-recipes@1":
+        candidate_manifest = read_json(safe_path(base, receipt["candidate_manifest_path"]))
+        checked(base, receipt["candidate_manifest_path"], receipt["candidate_manifest_sha256"], inventory)
+        stable_manifest = lambda m: {k: v for k, v in m.items() if k != "state"}
+        require(stable_manifest(candidate_manifest) == stable_manifest(manifest),
+                "approved candidate inputs, annotations, reviews or construction changed")
     require(manifest["schema"] == "inquiry-p8-manifest" and manifest["schema_version"] == 1,
             "unsupported manifest schema")
     require(manifest["state"] == "frozen", "manifest is not frozen")
@@ -127,6 +160,9 @@ def load_suite(manifest_path):
                 f"review receipt mismatch: {name}")
         require(not provenance["driver_output_used"] and not provenance["analysis_implementation_imported"],
                 f"oracle independence mismatch: {name}")
+        if protocol["recipes"]["version"] != "inquiry-p8-recipes@1":
+            require(case["authored_semantic_content_sha256"] == semantic_digest(oracle),
+                    f"approved candidate meaning mismatch: {name}")
         require(oracle["expected"]["result_kind"] == case["expected_result_kind"],
                 f"expected kind mismatch: {name}")
         cert = oracle["semantic_specification"].get("certificate_provenance")
@@ -165,7 +201,7 @@ def current_blob(mode, path):
     return p.read_bytes()
 
 
-def repository_preflight(protocol, suite_base, suite_inventory):
+def repository_preflight(protocol, suite_base, suite_inventory, input_commit_pin=None):
     """Check committed identities and current bytes, ignoring unrelated work."""
     commit = protocol["code_commit"]
     for path, object_id in protocol["code_paths"].items():
@@ -179,7 +215,22 @@ def repository_preflight(protocol, suite_base, suite_inventory):
                 f"untracked runtime code in {path}")
         require(not git("diff", "--name-only", commit, "--", path).strip(),
                 f"runtime path differs from pinned commit: {path}")
-    input_commit = git("rev-parse", INPUT_COMMIT).decode().strip()
+    corrected = protocol["recipes"]["version"] != "inquiry-p8-recipes@1"
+    require(not corrected or input_commit_pin is not None, "corrected suite requires explicit --input-commit")
+    require(not corrected or re.fullmatch(r"[0-9a-f]{40}", input_commit_pin), "corrected suite requires a full committed input identity")
+    require(corrected or input_commit_pin in (None, INPUT_COMMIT) or
+            git("rev-parse", input_commit_pin) == git("rev-parse", INPUT_COMMIT),
+            "original suite input pin cannot change")
+    input_commit = git("rev-parse", input_commit_pin or INPUT_COMMIT).decode().strip()
+    if corrected:
+        approval = read_json(suite_base / protocol["correction_approval"]["path"])
+        candidate_commit = approval["reviewed_candidate_commit"]
+        git("merge-base", "--is-ancestor", candidate_commit, input_commit)
+        relative = suite_base.relative_to(ROOT).as_posix()
+        for name, key in (("protocol.json", "candidate_protocol_sha256"),
+                          ("MANIFEST.json", "candidate_manifest_sha256")):
+            require(digest(git("show", f"{candidate_commit}:{relative}/{name}")) == approval[key],
+                    "approved candidate commit/hash mismatch: " + name)
     relative_base = suite_base.relative_to(ROOT)
     for path in suite_inventory:
         relative = (relative_base / path).as_posix()
@@ -188,7 +239,7 @@ def repository_preflight(protocol, suite_base, suite_inventory):
     recipe = protocol["recipes"]
     helper_inventory = {}
     for path, expected in [(recipe["generator_path"], recipe["generator_sha256"]),
-                           ("evaluation/inquiry-p8/review/independent_finite_audit.py",
+                           (recipe.get("independent_audit_tool_path", "evaluation/inquiry-p8/review/independent_finite_audit.py"),
                             recipe["independent_audit_tool_sha256"]),
                            (recipe["certificate_producer_path"], recipe["certificate_producer_sha256"])]:
         checked(ROOT, path, expected, helper_inventory)
@@ -221,4 +272,6 @@ def repository_preflight(protocol, suite_base, suite_inventory):
     approval = protocol["approval"]
     require(git("rev-parse", f"{approval['approval_commit']}:{approval['plan_path']}").decode().strip()
             == approval["plan_git_blob"], "approval plan identity changed")
+    for item in recipe.get("additional_helpers", []):
+        checked(ROOT, item["path"], item["sha256"], helper_inventory)
     return input_commit, helper_inventory

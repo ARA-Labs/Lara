@@ -16,6 +16,7 @@ import locale
 import os
 import platform
 import resource
+import re
 import shutil
 import signal
 import subprocess
@@ -310,7 +311,7 @@ def measure(args):
     out = Path(args.out).absolute()
     require(not out.exists() and not out.is_symlink(), f"output already exists: {out}")
     base, protocol, manifest, oracles, suite_inventory = load_suite(Path(args.manifest))
-    input_commit, helper_inventory = repository_preflight(protocol, base, suite_inventory)
+    input_commit, helper_inventory = repository_preflight(protocol, base, suite_inventory, **({"input_commit_pin": args.input_commit} if getattr(args, "input_commit", None) else {}))
     binaries = {name: executable(getattr(args, name)) for name in (*DRIVERS, "consumer")}
     # Lossless binary compression is setup, outside all measurement intervals.
     # mtime=0 and no embedded filename make archives deterministic and portable.
@@ -481,10 +482,13 @@ def validate_saved(source, manifest_path):
     for relative, expected in inventory.items():
         require(run["artifacts"].get("evidence/suite/" + relative) == expected,
                 f"missing frozen evidence: {relative}")
+    if protocol["recipes"]["version"] != "inquiry-p8-recipes@1":
+        require(re.fullmatch(r"[0-9a-f]{40}", run.get("input_commit", "")), "saved corrected input identity missing")
     recipe = protocol["recipes"]
     helpers = [(recipe["generator_path"], recipe["generator_sha256"]),
-               ("evaluation/inquiry-p8/review/independent_finite_audit.py", recipe["independent_audit_tool_sha256"]),
+               (recipe.get("independent_audit_tool_path", "evaluation/inquiry-p8/review/independent_finite_audit.py"), recipe["independent_audit_tool_sha256"]),
                (recipe["certificate_producer_path"], recipe["certificate_producer_sha256"])]
+    helpers.extend((item["path"], item["sha256"]) for item in recipe.get("additional_helpers", []))
     quality = read_json(base / "quality-review.json")
     helpers.append((quality["boundary_test_path"], quality["boundary_test_sha256"]))
     for path, expected in helpers:
@@ -556,6 +560,7 @@ def replay(args):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", required=True, type=str)
+    parser.add_argument("--input-commit", help="committed corrected suite identity; required for corrected measurement; replay uses saved identity")
     parser.add_argument("--native")
     parser.add_argument("--lean")
     parser.add_argument("--consumer")
@@ -563,7 +568,7 @@ def main(argv=None):
     parser.add_argument("--out", required=True)
     args = parser.parse_args(argv)
     if args.replay:
-        require(not any((args.native, args.lean, args.consumer)), "replay replaces all executable arguments")
+        require(not any((args.native, args.lean, args.consumer, args.input_commit)), "replay replaces all executable arguments")
         return replay(args)
     require(all((args.native, args.lean, args.consumer)), "measurement requires --native, --lean and --consumer")
     return measure(args)

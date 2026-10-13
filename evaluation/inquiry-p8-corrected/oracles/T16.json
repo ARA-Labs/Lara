@@ -1,0 +1,208 @@
+{
+  "schema": "inquiry-p8-oracle",
+  "schema_version": 1,
+  "case_id": "T16",
+  "oracle_kind": "independent-finite-semantic-annotation",
+  "expected": {
+    "result_kind": "results",
+    "exit_code": 0,
+    "results": [
+      [
+        "inquiry-result",
+        "1",
+        "original",
+        [
+          "verification-body",
+          [
+            "verified"
+          ]
+        ]
+      ],
+      [
+        "inquiry-result",
+        "1",
+        "tampered",
+        [
+          "verification-body",
+          [
+            "invalid-certificate",
+            [
+              "false-read-evidence"
+            ]
+          ]
+        ]
+      ]
+    ]
+  },
+  "semantic_specification": {
+    "kind": "impact",
+    "statuses": [
+      [
+        "published",
+        "justified"
+      ],
+      [
+        "published",
+        "justified"
+      ]
+    ],
+    "rejections": [
+      null,
+      null
+    ],
+    "graphs": [
+      {
+        "names": [
+          "witness"
+        ],
+        "edges": [],
+        "query_ancestry": [
+          "witness"
+        ],
+        "query_support": [
+          "witness"
+        ],
+        "blocked": false,
+        "grounded_labels": {
+          "witness": "justified"
+        }
+      },
+      {
+        "names": [
+          "witness"
+        ],
+        "edges": [],
+        "query_ancestry": [
+          "witness"
+        ],
+        "query_support": [
+          "witness"
+        ],
+        "blocked": false,
+        "grounded_labels": {
+          "witness": "justified"
+        }
+      }
+    ],
+    "transition": "accepted-to-accepted",
+    "expected_body": [
+      "impact-body",
+      [
+        "impact-result",
+        [
+          "transition",
+          "accepted-to-accepted"
+        ],
+        [
+          [
+            "query-impact",
+            [
+              "atom",
+              "t"
+            ],
+            [
+              [
+                "published",
+                "justified"
+              ]
+            ],
+            [
+              [
+                "published",
+                "justified"
+              ]
+            ],
+            "false",
+            "true"
+          ]
+        ],
+        [],
+        [
+          [
+            "atom",
+            "t"
+          ]
+        ]
+      ]
+    ],
+    "locality": true,
+    "locality_reason": "stable support identities and equal relevant incoming edges",
+    "wire_boundary": "impact-result omits endpoint rejection payloads; annotations are not runtime telemetry",
+    "histories": [
+      []
+    ],
+    "history_search_steps": 1,
+    "row_truth_table": [
+      {
+        "endpoint": "before",
+        "accepted": true,
+        "status": [
+          "published",
+          "justified"
+        ],
+        "rejection": null
+      },
+      {
+        "endpoint": "after",
+        "accepted": true,
+        "status": [
+          "published",
+          "justified"
+        ],
+        "rejection": null
+      }
+    ],
+    "assumption_truth_table": [],
+    "process_scope": "Empty process history; endpoint analyses do not consume process assurance.",
+    "certificate_provenance": {
+      "purpose": "sanctioned API syntax producer; independently annotated report and query expectations",
+      "helper": "scripts/inquiry-impact-producer.hs",
+      "helper_sha256": "e0cc0a76c63a540d49e4e9d840acf21a51b5a47168df8678e395261fc30266aa",
+      "artifact_path": "certificates/T01.sexp",
+      "artifact_sha256": "b9d9e052d2ee46f663a6f7c5f8011dcc2d51669404ee2b6c44d7397ace54950c",
+      "api": "Lara.Process.Impact.impactCertificate . compareEndpoints . observeEndpoint",
+      "used_as_semantic_oracle": false
+    },
+    "exact_rejection_runtime_evidence": "Successful verify-impact checks supplied endpoint-report rejection against the exact endpoints; impact-result itself has no rejection field.",
+    "tamper": {
+      "key": [
+        "k-blocked-query",
+        [
+          "atom",
+          "t"
+        ]
+      ],
+      "old_value": [
+        "v-bool",
+        "false"
+      ],
+      "new_value": [
+        "v-bool",
+        "true"
+      ],
+      "same_ReadKey_Val_type": true,
+      "expected_fault": "false-read-evidence"
+    },
+    "specification": "Identity accepted endpoints: original certificate verifies. Alter only recorded BlockedQuery boolean value at same key, keeping all other certificate fields; exact fault false-read-evidence."
+  },
+  "review_provenance": {
+    "status": "independently-reviewed",
+    "author": "Codex case author",
+    "author_provenance": "ai-executed",
+    "reviewer": "Codex independent spec reviewer /root/candidate_spec",
+    "driver_output_used": false,
+    "analysis_implementation_imported": false,
+    "specification_references": [
+      "docs/theory-process.md#what-do-the-exact-inquiry-analyses-compute",
+      "docs/theory-process.md#how-is-an-edits-impact-certified",
+      "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
+    ],
+    "reviewer_provenance": "ai-executed",
+    "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+    "quality_reviewer_provenance": "ai-executed",
+    "reviewed_input_sha256": "72b68249ab9814baaa9e5775a3426317fecdb861d2570c9c2dd43c59bdbc37e4",
+    "semantic_content_sha256": "dd8c60bbc4189aeccc27bd010e3a7a7f39fd434339016f36bf3ff57060a70dcb",
+    "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
+    "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+  }
+}

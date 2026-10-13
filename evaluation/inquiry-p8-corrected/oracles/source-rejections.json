@@ -1,0 +1,222 @@
+{
+  "schema": "inquiry-p8-oracle",
+  "schema_version": 1,
+  "case_id": "source-rejections",
+  "oracle_kind": "existing-conformance-golden",
+  "expected": {
+    "result_kind": "results",
+    "exit_code": 0,
+    "results": [
+      [
+        "inquiry-result",
+        "1",
+        "mix",
+        [
+          "status-body",
+          [
+            "family-status-result",
+            [
+              [
+                "family-row",
+                [],
+                [
+                  [
+                    [
+                      "slot-id",
+                      "0"
+                    ],
+                    [
+                      "choice-id",
+                      "0"
+                    ]
+                  ]
+                ],
+                [],
+                [
+                  [
+                    "published",
+                    "gap"
+                  ]
+                ]
+              ],
+              [
+                "family-row",
+                [],
+                [
+                  [
+                    [
+                      "slot-id",
+                      "0"
+                    ],
+                    [
+                      "choice-id",
+                      "1"
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "source",
+                    [
+                      "source",
+                      [
+                        "structural",
+                        [
+                          "admission-rejected",
+                          "bad"
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                []
+              ],
+              [
+                "family-row",
+                [],
+                [
+                  [
+                    [
+                      "slot-id",
+                      "0"
+                    ],
+                    [
+                      "choice-id",
+                      "2"
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "source",
+                    [
+                      "core",
+                      [
+                        "signature",
+                        [
+                          "ground-ill-sorted"
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                []
+              ],
+              [
+                "family-row",
+                [],
+                [
+                  [
+                    [
+                      "slot-id",
+                      "0"
+                    ],
+                    [
+                      "choice-id",
+                      "3"
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "source",
+                    [
+                      "evidence",
+                      [
+                        "admission-error",
+                        [
+                          "extraction"
+                        ],
+                        "mismatched",
+                        [
+                          "absent"
+                        ],
+                        "mismatch"
+                      ]
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ],
+            "4",
+            "1",
+            "3",
+            "false"
+          ]
+        ]
+      ]
+    ]
+  },
+  "semantic_specification": {
+    "kind": "development-control",
+    "histories": [
+      []
+    ],
+    "history_search_steps": 1,
+    "rows": [
+      {
+        "choices": [
+          [
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "choices": [
+          [
+            0,
+            1
+          ]
+        ]
+      },
+      {
+        "choices": [
+          [
+            0,
+            2
+          ]
+        ]
+      },
+      {
+        "choices": [
+          [
+            0,
+            3
+          ]
+        ]
+      }
+    ]
+  },
+  "review_provenance": {
+    "status": "disclosed-development-control",
+    "author": "Codex case author",
+    "author_provenance": "ai-executed",
+    "reviewer": "Codex independent spec reviewer /root/candidate_spec",
+    "driver_output_used": false,
+    "analysis_implementation_imported": false,
+    "specification_references": [
+      "docs/theory-process.md#what-do-the-exact-inquiry-analyses-compute",
+      "docs/theory-process.md#how-is-an-edits-impact-certified",
+      "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
+    ],
+    "reviewer_provenance": "ai-executed",
+    "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+    "quality_reviewer_provenance": "ai-executed",
+    "reviewed_input_sha256": "7855614c13c9a319e1c5f623ce3ce815b70974113e4a743b7893d78a59f8967b",
+    "semantic_content_sha256": "146e9efe7130befcf782e361dc61f59fec5d91b928a55f86e9b2a21a7b6e4d3d",
+    "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
+    "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+  },
+  "development_provenance": {
+    "case_id": "source-rejections",
+    "input_path": "fixtures/process/inquiry/source-rejections.sexp",
+    "input_sha256": "7855614c13c9a319e1c5f623ce3ce815b70974113e4a743b7893d78a59f8967b",
+    "golden_path": "fixtures/process/inquiry/source-rejections.expected",
+    "golden_sha256": "928b67c93ba4bd26b40a7c04123fbc7c4a3f1bb3f474571e99b5aebe92641050",
+    "classification": "development-control",
+    "oracle_kind": "existing-conformance-golden",
+    "destination_input_path": "inputs/source-rejections.sexp"
+  }
+}

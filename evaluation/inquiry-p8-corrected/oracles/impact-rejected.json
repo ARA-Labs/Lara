@@ -1,0 +1,190 @@
+{
+  "schema": "inquiry-p8-oracle",
+  "schema_version": 1,
+  "case_id": "impact-rejected",
+  "oracle_kind": "existing-conformance-golden",
+  "expected": {
+    "result_kind": "results",
+    "exit_code": 0,
+    "results": [
+      [
+        "inquiry-result",
+        "1",
+        "dup-plain",
+        [
+          "impact-body",
+          [
+            "impact-result",
+            [
+              "transition",
+              "rejected-to-accepted"
+            ],
+            [
+              [
+                "query-impact",
+                [
+                  "atom",
+                  "t"
+                ],
+                [],
+                [
+                  [
+                    "published",
+                    "justified"
+                  ]
+                ],
+                "true",
+                "false"
+              ]
+            ],
+            [
+              [
+                "atom",
+                "t"
+              ]
+            ],
+            []
+          ]
+        ]
+      ],
+      [
+        "inquiry-result",
+        "1",
+        "reject-dup",
+        [
+          "impact-body",
+          [
+            "impact-result",
+            [
+              "transition",
+              "rejected-to-rejected"
+            ],
+            [
+              [
+                "query-impact",
+                [
+                  "atom",
+                  "t"
+                ],
+                [],
+                [],
+                "false",
+                "false"
+              ]
+            ],
+            [],
+            []
+          ]
+        ]
+      ]
+    ]
+  },
+  "semantic_specification": {
+    "kind": "development-control",
+    "histories": [
+      [],
+      []
+    ],
+    "history_search_steps": 9,
+    "rows": [
+      {
+        "choices": []
+      },
+      {
+        "choices": []
+      }
+    ],
+    "graphs": [
+      {
+        "names": [],
+        "edges": [],
+        "query_ancestry": [],
+        "query_support": [],
+        "blocked": false
+      },
+      {
+        "names": [
+          "witness"
+        ],
+        "edges": [],
+        "query_ancestry": [
+          "witness"
+        ],
+        "query_support": [
+          "witness"
+        ],
+        "blocked": false
+      }
+    ],
+    "request_graphs": {
+      "dup-plain": [
+        {
+          "names": [],
+          "edges": [],
+          "query_ancestry": [],
+          "query_support": [],
+          "blocked": false
+        },
+        {
+          "names": [
+            "witness"
+          ],
+          "edges": [],
+          "query_ancestry": [
+            "witness"
+          ],
+          "query_support": [
+            "witness"
+          ],
+          "blocked": false
+        }
+      ],
+      "reject-dup": [
+        {
+          "names": [],
+          "edges": [],
+          "query_ancestry": [],
+          "query_support": [],
+          "blocked": false
+        },
+        {
+          "names": [],
+          "edges": [],
+          "query_ancestry": [],
+          "query_support": [],
+          "blocked": false
+        }
+      ]
+    }
+  },
+  "review_provenance": {
+    "status": "disclosed-development-control",
+    "author": "Codex case author",
+    "author_provenance": "ai-executed",
+    "reviewer": "Codex independent spec reviewer /root/candidate_spec",
+    "driver_output_used": false,
+    "analysis_implementation_imported": false,
+    "specification_references": [
+      "docs/theory-process.md#what-do-the-exact-inquiry-analyses-compute",
+      "docs/theory-process.md#how-is-an-edits-impact-certified",
+      "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
+    ],
+    "reviewer_provenance": "ai-executed",
+    "quality_reviewer": "Codex independent quality reviewer /root/candidate_quality",
+    "quality_reviewer_provenance": "ai-executed",
+    "reviewed_input_sha256": "1b4939d0889370a2d9db142cacc2d3d5ac01ad9e6771cc2a5c291cf557d12e2e",
+    "semantic_content_sha256": "2621cae1f1df8e5e125a524f7dc6c1fd6ee0e779525f5d48a24da8ffe0a805c3",
+    "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
+    "quality_review_sha256": "f057d917db045a331b527d5886c006dad79ba56ab5982c1e9ac8fa9b13001e9b"
+  },
+  "development_provenance": {
+    "case_id": "impact-rejected",
+    "input_path": "fixtures/process/inquiry/impact-rejected.sexp",
+    "input_sha256": "1b4939d0889370a2d9db142cacc2d3d5ac01ad9e6771cc2a5c291cf557d12e2e",
+    "golden_path": "fixtures/process/inquiry/impact-rejected.expected",
+    "golden_sha256": "7a19c46607c88bbd0915ae4e7a23d7a03408ea686dcd104978783836ebc11cf4",
+    "classification": "development-control",
+    "oracle_kind": "existing-conformance-golden",
+    "destination_input_path": "inputs/impact-rejected.sexp"
+  }
+}
