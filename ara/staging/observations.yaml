@@ -4417,3 +4417,21 @@ observations:
   promoted_to: logic/solution/heuristics.md:H19
   crystallized_via: artifact-commitment
   stale: false
+- id: O219
+  timestamp: '2026-10-13T07:13:22Z'
+  provenance: ai-suggested
+  content: >-
+    The corrected finite evaluation exposes fixed-witness and locality distinctions
+    that public-status snapshots alone omit. It supports designing a bounded paired
+    workflow protocol, not asserting workflow benefit or scientific-discovery improvement.
+  context: >-
+    One approved corrected P8 attempt completed and replayed exactly. Inputs are
+    authored and correlated, and one-shot costs are descriptive. The researcher
+    has not yet reviewed these results or approved a P9 protocol.
+  potential_type: claim
+  bound_to:
+  - N416_inquiry_corrected_measurement
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

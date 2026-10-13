@@ -1909,3 +1909,9 @@ entries:
     and pending approval.
   - Do not treat the repeated source-axis clarification as a fresh budget approval. Candidate commits
     and exact hashes are concrete; the next action is requesting the separately required approval.
+- turn: 2026-10-13_001#2
+  notes:
+  - Record N415 for the authorized provenance closure and N416 for the actual single corrected run and process-free replay. Preserve the failed preflight and original incomplete measurement.
+  - "Reconcile only the current evaluation constraint: measured completion and consumed budget replace pending approval. No new definition or Lean theorem is introduced."
+  - Stage O219 without promotion. A complete authored finite run and independent AI review are not researcher affirmation of workflow benefit. C57 soundness scope and status remain unchanged.
+  - Move settled protocol/replay contracts to subject docs; delete the executed correction plan and retain only human result review and P9 work in the combined living plan and issue22.

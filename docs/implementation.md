@@ -54,6 +54,29 @@ The file runner validates strict UTF-8 and supplies that count. The
 defines output ordering, atomic refusals, exit codes, fixed resource counters
 and refusal priority. The standalone process runner's semantics are unchanged.
 
+## How are bounded inquiry results reproduced?
+
+The [bounded inquiry protocol](evaluation.md#how-is-bounded-checked-inquiry-evaluated) separates correctness preflight from measurement. Its read-only authoring checks and Python regression suite do not execute a production P8 attempt:
+
+```sh
+python3 scripts/inquiry_evaluation_cases.py --suite evaluation/inquiry-p8-corrected --recipe-version inquiry-p8-recipes@2-candidate --check
+python3 evaluation/inquiry-p8-corrected/review/independent_finite_audit.py
+python3 -m unittest discover -s test -p 'inquiry_*.py' -v
+```
+
+To reproduce a retained run, set `P8_RUN` to its capture directory under `ara/evidence/inquiry-p8/`. Replay reads the archived manifest and verifies inputs, binaries, raw streams and deterministic reports without spawning drivers or consumers. It preserves the original timings and incomplete status; an incomplete run exits nonzero even when replay reproduces it exactly.
+
+```sh
+: "${P8_RUN:?set P8_RUN to a retained inquiry capture directory}"
+REPLAY_ROOT=$(mktemp -d)
+python3 scripts/inquiry-evaluate.py \
+  --manifest "$P8_RUN/evidence/suite/MANIFEST.json" \
+  --replay "$P8_RUN" \
+  --out "$REPLAY_ROOT/replay"
+```
+
+A new measurement requires an unspent researcher-approved budget and a committed input freeze; replay does not renew either. Before that attempt, run `make local-gates` and `cabal test all`, build `exe:lara`, `inquiry-run` and `scripts/inquiry-codec-client.hs`, and retain the commands and logs outside measurement. Resolve the native binary with `cabal list-bin exe:lara`, use `lean/.lake/build/bin/inquiry-run` directly, and pass the prebuilt consumer. The capture command requires the corrected manifest, all three executable paths, a fresh output directory and the full frozen input commit through `--input-commit`. It does not build, repair inputs or retry failed processes.
+
 ## Checker acceptance is one fixed pipeline
 
 `Lara.Check.checkUnit` decides whole-unit acceptance in one fixed stage order, mirrored exactly by `lean/Lara/Check/Unit.lean`:

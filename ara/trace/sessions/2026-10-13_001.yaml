@@ -2,11 +2,9 @@ session:
   id: 2026-10-13_001
   date: '2026-10-13'
   started: 2026-10-13T00:00
-  last_turn: '2026-10-13T00:47:45Z'
-  turn_count: 1
-  summary: Corrective proof/runtime, semantic pair stops and independently reviewed candidate committed;
-    full gates and Haskell suites pass, original incomplete replay preserved. Exact fresh protocol/budget
-    approval and P9 remain pending.
+  last_turn: '2026-10-13T07:30:33Z'
+  turn_count: 2
+  summary: Corrected P8 completed and replayed after authorized provenance closure; original failed evidence retained. Researcher result review and separate P9 approval remain open.
 events_logged:
 - turn: 1
   type: decision
@@ -38,6 +36,24 @@ events_logged:
   routing: crystallized
   provenance: ai-suggested
   summary: Implemented and independently reviewed ground support prerequisite promotes to H19.
+- turn: 2
+  type: decision
+  id: N415_inquiry_provenance_freeze
+  routing: direct
+  provenance: ai-executed
+  summary: Commit fully reviewed provenance candidate and metadata-only freeze after retaining preflight failure.
+- turn: 2
+  type: experiment
+  id: N416_inquiry_corrected_measurement
+  routing: direct
+  provenance: ai-executed
+  summary: Single corrected P8 measurement and byte-identical capture-only replay pass.
+- turn: 2
+  type: observation
+  id: O219
+  routing: staged
+  provenance: ai-suggested
+  summary: Diagnostic contrasts support bounded workflow protocol design, not an efficacy claim.
 ai_actions:
 - turn: 1
   action: "Continue the authorized implementation across the UTC day boundary. Complete corrective Tasks\
@@ -64,6 +80,18 @@ ai_actions:
   - docs/theory-process.md
   - docs/evaluation.md
   - plans/inquiry-p8-corrections.md
+- turn: 2
+  action: Fix issue53 fixtures; refresh dependent review metadata under explicit authorization; retain independent reviews, gates, complete measurement, replay and report. Move settled contracts to docs and leave researcher result review and P9 in the living plan.
+  provenance: ai-executed
+  files_changed:
+  - test/inquiry_corrected_candidates.py
+  - evaluation/inquiry-p8-corrected/
+  - ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected/
+  - ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected-replay/
+  - ara/evidence/inquiry-p8/preflight-20261013-corrected/
+  - docs/evaluation.md
+  - docs/implementation.md
+  - plans/inquiry-p8-p9.md
 claims_touched:
 - id: C57
   action: revised
@@ -127,6 +155,37 @@ logic_revisions:
   provenance: ai-suggested
   note: Add formal reference-preserving refinement evidence; statement, conditions, supported status and
     empirical claim scope stay unchanged.
+- turn: 2
+  entry: checked-inquiry-evaluation
+  field: Status
+  before: The original sealed attempt remains incomplete. The proved sparse Lean implementation, pair-level semantic stops and independently reviewed corrected candidate are committed. The candidate is awaiting researcher approval; no fresh input freeze or production measurement is authorized until the exact protocol, code/input identities, data policy and full fresh budget are approved. P8 and the separately approved P9 evaluation remain unfinished.
+  after: The researcher-approved corrected P8 attempt completed and its capture-only replay is byte-identical. The original sealed incomplete attempt remains retained. Researcher review of the corrected report remains open; P9 has no approved live protocol or budget.
+  signal: user-directive
+  provenance: ai-suggested
+- turn: 2
+  entry: checked-inquiry-evaluation
+  field: Execution boundary
+  before: The approved budget permits one invocation per driver and document with fixed timeouts and an aggregate deadline. Retain refusals and partial evidence; infrastructure failure requires a reviewed protocol revision before another final run. No legacy corpus, golden, version, ceiling or freeze changes are authorized.
+  after: The approved single-attempt budget is consumed. No additional measurement is authorized. Retain the frozen inputs, failures and complete corrected captures; any further attempt needs a separately approved protocol/budget revision. No legacy corpus, golden, version, ceiling or freeze changes are authorized.
+  signal: user-directive
+  provenance: ai-suggested
+- turn: 2
+  entry: checked-inquiry-evaluation
+  field: Sources, Provenance, Evidence, Open, Last revised
+  before: |
+    - **Sources:** evaluation/inquiry-p8/protocol.json «"p9_approved": false» [input]; evaluation/inquiry-p8/protocol.json «"driver_outputs_as_expectations": false» [input]; evaluation/inquiry-p8/protocol.json «"repeats": 0» [input]; staging/observations.yaml:O217.
+    - **Provenance:** user-revised approved protocol.
+    - **Evidence:** trace/exploration_tree.yaml:N402_inquiry_p8_approved; trace/exploration_tree.yaml:N403_inquiry_p8_boundary; evaluation/inquiry-p8/protocol.json.
+    - **Open:** Issue #22 tracks the unfinished bounded evaluation and separately approved live evaluation.
+    - **Last revised:** 2026-10-13 (2026-10-13_001#1)
+  after: |
+    - **Sources:** evaluation/inquiry-p8-corrected/researcher-approval-provenance.json; evaluation/inquiry-p8-corrected/protocol.json «"p9_approved": false» [input]; evaluation/inquiry-p8-corrected/protocol.json «"driver_outputs_as_expectations": false» [input]; evaluation/inquiry-p8-corrected/protocol.json «"repeats": 0» [input]; staging/observations.yaml:O217.
+    - **Provenance:** user-revised approved protocol; ai-suggested state reconciliation from retained measurement and replay.
+    - **Evidence:** trace/exploration_tree.yaml:N415_inquiry_provenance_freeze; trace/exploration_tree.yaml:N416_inquiry_corrected_measurement; evidence/inquiry-p8/20261013T071248Z-317f210-corrected/report.md; evidence/inquiry-p8/20261013T071248Z-317f210-corrected/replay-validation.json.
+    - **Open:** Issue #22 tracks researcher result review and the separately approved live evaluation.
+    - **Last revised:** 2026-10-13 (2026-10-13_001#2)
+  signal: user-directive
+  provenance: ai-suggested
 key_context:
 - turn: 1
   excerpt: Latest researcher source-axis reply repeats the already-recorded group clarification in N404;
@@ -135,10 +194,10 @@ key_context:
   excerpt: Reviewed candidate commit 5c74e4d606c792dbe2c071fc567b38031d96ebc1; runtime code 317f210ab2f4e5ea070dcae75218f056373e142d;
     protocol SHA256 41a4fa014b1083cbe849588a1f9d49bdff9f6a19d3b1472d5f6e475049810796; manifest SHA256
     1aaf2eb1e7758fea800e0046e4b01d5f176823ef44f3fe2f98bc4dedf0a6dd22. Fresh budget approval remains required.
+- turn: 2
+  excerpt: 'Researcher instruction: "checkout a new branch and complete the next, finish and pr directly". It follows the issue53/freeze/single-attempt handoff and does not authorize P9 or retries.'
 open_threads:
-- 'Issue #22: complete P8 after exact fresh approval; choose and separately approve/run P9 after its report.'
-- 'Issue #49: corrective code and candidate reviewed; obtain fresh approval, freeze metadata and retain
-  one bounded production run/replay.'
+- 'Issue #22: researcher review of completed corrected P8 report, then separately approve and run P9.'
 - 'Issue #39: infinite-horizon Ville and online FDR over complete ledgers.'
 - 'Issue #46: prove or revise search-step ceiling rationale.'
 ai_suggestions_pending: []

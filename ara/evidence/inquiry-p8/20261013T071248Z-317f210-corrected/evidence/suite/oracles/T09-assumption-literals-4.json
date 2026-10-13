@@ -1,0 +1,1049 @@
+{
+  "schema": "inquiry-p8-oracle",
+  "schema_version": 1,
+  "case_id": "T09-assumption-literals-4",
+  "oracle_kind": "independent-finite-semantic-annotation",
+  "expected": {
+    "result_kind": "results",
+    "exit_code": 0,
+    "results": [
+      [
+        "inquiry-result",
+        "1",
+        "status",
+        [
+          "status-body",
+          [
+            "family-status-result",
+            [
+              [
+                "family-row",
+                [],
+                [
+                  [
+                    [
+                      "slot-id",
+                      "0"
+                    ],
+                    [
+                      "choice-id",
+                      "0"
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "source",
+                    [
+                      "source",
+                      [
+                        "structural",
+                        [
+                          "duplicate-leaf-id",
+                          "seed"
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                []
+              ],
+              [
+                "family-row",
+                [],
+                [
+                  [
+                    [
+                      "slot-id",
+                      "0"
+                    ],
+                    [
+                      "choice-id",
+                      "1"
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "source",
+                    [
+                      "source",
+                      [
+                        "structural",
+                        [
+                          "duplicate-leaf-id",
+                          "seed"
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ],
+            "2",
+            "0",
+            "2",
+            "true"
+          ]
+        ]
+      ],
+      [
+        "inquiry-result",
+        "1",
+        "stable",
+        [
+          "stability-body",
+          [
+            "stability-result",
+            [
+              "observable",
+              [
+                "status-obs",
+                "c0"
+              ]
+            ],
+            "2",
+            "0",
+            "2",
+            "true",
+            "false"
+          ]
+        ]
+      ],
+      [
+        "inquiry-result",
+        "1",
+        "minimal",
+        [
+          "assumptions-body",
+          [
+            "assumption-result",
+            [
+              "target",
+              [
+                "status-target",
+                "c0",
+                [
+                  "published",
+                  "justified"
+                ]
+              ]
+            ],
+            [
+              [
+                "literal",
+                [
+                  "slot-eq",
+                  [
+                    "slot-id",
+                    "0"
+                  ],
+                  [
+                    "choice-id",
+                    "0"
+                  ]
+                ]
+              ],
+              [
+                "literal",
+                [
+                  "slot-ne",
+                  [
+                    "slot-id",
+                    "0"
+                  ],
+                  [
+                    "choice-id",
+                    "0"
+                  ]
+                ]
+              ],
+              [
+                "literal",
+                [
+                  "slot-ne",
+                  [
+                    "slot-id",
+                    "2000"
+                  ],
+                  [
+                    "choice-id",
+                    "0"
+                  ]
+                ]
+              ],
+              [
+                "literal",
+                [
+                  "slot-ne",
+                  [
+                    "slot-id",
+                    "2001"
+                  ],
+                  [
+                    "choice-id",
+                    "0"
+                  ]
+                ]
+              ],
+              [
+                "literal",
+                [
+                  "slot-ne",
+                  [
+                    "slot-id",
+                    "2002"
+                  ],
+                  [
+                    "choice-id",
+                    "0"
+                  ]
+                ]
+              ],
+              [
+                "literal",
+                [
+                  "slot-ne",
+                  [
+                    "slot-id",
+                    "2003"
+                  ],
+                  [
+                    "choice-id",
+                    "0"
+                  ]
+                ]
+              ]
+            ],
+            "2",
+            []
+          ]
+        ]
+      ]
+    ]
+  },
+  "semantic_specification": {
+    "kind": "family",
+    "rows": [
+      {
+        "history": [],
+        "choices": [
+          [
+            0,
+            0
+          ]
+        ],
+        "status": null,
+        "rejection": [
+          "source",
+          [
+            "source",
+            [
+              "structural",
+              [
+                "duplicate-leaf-id",
+                "seed"
+              ]
+            ]
+          ]
+        ],
+        "audit": null
+      },
+      {
+        "history": [],
+        "choices": [
+          [
+            0,
+            1
+          ]
+        ],
+        "status": null,
+        "rejection": [
+          "source",
+          [
+            "source",
+            [
+              "structural",
+              [
+                "duplicate-leaf-id",
+                "seed"
+              ]
+            ]
+          ]
+        ],
+        "audit": null
+      }
+    ],
+    "histories": [
+      []
+    ],
+    "history_search_steps": 1,
+    "graphs": [
+      {
+        "outcome": "duplicate leaf seed before graph construction"
+      }
+    ],
+    "bindings": [
+      "bindings",
+      [
+        [
+          "claim-binding",
+          "c0",
+          "claim",
+          [
+            "atom",
+            "t"
+          ]
+        ]
+      ],
+      []
+    ],
+    "kind_metadata": [
+      "kind-metadata"
+    ],
+    "admitted_assumptions": [
+      "admitted-assumptions"
+    ],
+    "assumption_truth_table": [
+      {
+        "row": 0,
+        "values": [
+          true,
+          false,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "row": 1,
+        "values": [
+          false,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      }
+    ],
+    "specification": "Both truth-guarded empty choices materialize the same duplicate-leaf source. Whole rejection equality true; accepted-only domain empty and unstable.",
+    "catalog_subsets": [
+      {
+        "indices": [],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          2
+        ],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          3
+        ],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          4
+        ],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          5
+        ],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          2
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          3
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          4
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          5
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1,
+          2
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1,
+          3
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1,
+          4
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1,
+          5
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          2,
+          3
+        ],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          2,
+          4
+        ],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          2,
+          5
+        ],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          3,
+          4
+        ],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          3,
+          5
+        ],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          4,
+          5
+        ],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1,
+          2
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1,
+          3
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1,
+          4
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1,
+          5
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          2,
+          3
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          2,
+          4
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          2,
+          5
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          3,
+          4
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          3,
+          5
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          4,
+          5
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1,
+          2,
+          3
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1,
+          2,
+          4
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1,
+          2,
+          5
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1,
+          3,
+          4
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1,
+          3,
+          5
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1,
+          4,
+          5
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          2,
+          3,
+          4
+        ],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          2,
+          3,
+          5
+        ],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          2,
+          4,
+          5
+        ],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          3,
+          4,
+          5
+        ],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1,
+          2,
+          4
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1,
+          2,
+          5
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1,
+          3,
+          4
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1,
+          3,
+          5
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1,
+          4,
+          5
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          2,
+          3,
+          4
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          2,
+          3,
+          5
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          2,
+          4,
+          5
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          3,
+          4,
+          5
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1,
+          2,
+          3,
+          5
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1,
+          2,
+          4,
+          5
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1,
+          3,
+          4,
+          5
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          2,
+          3,
+          4,
+          5
+        ],
+        "surviving_rows": [
+          0,
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1,
+          2,
+          3,
+          5
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1,
+          2,
+          4,
+          5
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1,
+          3,
+          4,
+          5
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          2,
+          3,
+          4,
+          5
+        ],
+        "surviving_rows": [
+          0
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "surviving_rows": [
+          1
+        ],
+        "satisfies": false
+      },
+      {
+        "indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "surviving_rows": [],
+        "satisfies": false
+      }
+    ],
+    "variant": {
+      "axis": "assumption-literals",
+      "level": 4,
+      "only_designated_axis_changed": true
+    },
+    "unused_slot_rule": "All added fresh undeclared inequalities evaluate true, because selectionFor has no choice. These are table predicates, not evidence."
+  },
+  "review_provenance": {
+    "status": "independently-reviewed",
+    "author": "Codex case author",
+    "author_provenance": "ai-executed",
+    "reviewer": "Codex independent spec reviewer /root/candidate_spec",
+    "driver_output_used": false,
+    "analysis_implementation_imported": false,
+    "specification_references": [
+      "docs/theory-process.md#what-do-the-exact-inquiry-analyses-compute",
+      "docs/theory-process.md#how-is-an-edits-impact-certified",
+      "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
+    ],
+    "reviewer_provenance": "ai-executed",
+    "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
+    "quality_reviewer_provenance": "ai-executed",
+    "reviewed_input_sha256": "2e650e4321738591e83861bb2b6b45f9fa11501ab29c39633395ed4cdecdc50b",
+    "semantic_content_sha256": "ce1a3cb6dc62980ac072e9ec74cc095fbef44562f39f3058347891d758f8ff77",
+    "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
+    "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
+  }
+}

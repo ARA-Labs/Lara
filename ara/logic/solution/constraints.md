@@ -342,12 +342,12 @@ deferred.
 
 ## Checked-inquiry evaluation (approved protocol)
 
-- **Status:** The original sealed attempt remains incomplete. The proved sparse Lean implementation, pair-level semantic stops and independently reviewed corrected candidate are committed. The candidate is awaiting researcher approval; no fresh input freeze or production measurement is authorized until the exact protocol, code/input identities, data policy and full fresh budget are approved. P8 and the separately approved P9 evaluation remain unfinished.
+- **Status:** The researcher-approved corrected P8 attempt completed and its capture-only replay is byte-identical. The original sealed incomplete attempt remains retained. Researcher review of the corrected report remains open; P9 has no approved live protocol or budget.
 - **Constraint:** Evaluate the existing native and Lean inquiry drivers on additive authored inputs. Score exact decoded meanings against independent finite annotations. Keep development controls, new inputs, correlated size variants and duplicate hashes separate in the denominators.
-- **Execution boundary:** The approved budget permits one invocation per driver and document with fixed timeouts and an aggregate deadline. Retain refusals and partial evidence; infrastructure failure requires a reviewed protocol revision before another final run. No legacy corpus, golden, version, ceiling or freeze changes are authorized.
+- **Execution boundary:** The approved single-attempt budget is consumed. No additional measurement is authorized. Retain the frozen inputs, failures and complete corrected captures; any further attempt needs a separately approved protocol/budget revision. No legacy corpus, golden, version, ceiling or freeze changes are authorized.
 - **Claim boundary:** Modeled capture admissions do not establish physical capture, and descriptive finite costs or diagnostic contrasts do not establish agent success or scientific discovery. A live workflow needs its own researcher-approved task, comparison, data policy and budget.
-- **Sources:** evaluation/inquiry-p8/protocol.json «"p9_approved": false» [input]; evaluation/inquiry-p8/protocol.json «"driver_outputs_as_expectations": false» [input]; evaluation/inquiry-p8/protocol.json «"repeats": 0» [input]; staging/observations.yaml:O217.
-- **Provenance:** user-revised approved protocol.
-- **Evidence:** trace/exploration_tree.yaml:N402_inquiry_p8_approved; trace/exploration_tree.yaml:N403_inquiry_p8_boundary; evaluation/inquiry-p8/protocol.json.
-- **Open:** Issue #22 tracks the unfinished bounded evaluation and separately approved live evaluation.
-- **Last revised:** 2026-10-13 (2026-10-13_001#1)
+- **Sources:** evaluation/inquiry-p8-corrected/researcher-approval-provenance.json; evaluation/inquiry-p8-corrected/protocol.json «"p9_approved": false» [input]; evaluation/inquiry-p8-corrected/protocol.json «"driver_outputs_as_expectations": false» [input]; evaluation/inquiry-p8-corrected/protocol.json «"repeats": 0» [input]; staging/observations.yaml:O217.
+- **Provenance:** user-revised approved protocol; ai-suggested state reconciliation from retained measurement and replay.
+- **Evidence:** trace/exploration_tree.yaml:N415_inquiry_provenance_freeze; trace/exploration_tree.yaml:N416_inquiry_corrected_measurement; evidence/inquiry-p8/20261013T071248Z-317f210-corrected/report.md; evidence/inquiry-p8/20261013T071248Z-317f210-corrected/replay-validation.json.
+- **Open:** Issue #22 tracks researcher result review and the separately approved live evaluation.
+- **Last revised:** 2026-10-13 (2026-10-13_001#2)

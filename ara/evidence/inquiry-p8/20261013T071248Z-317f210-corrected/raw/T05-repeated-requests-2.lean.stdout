@@ -1,0 +1,2 @@
+(inquiry-result 1 T05 (impact-body (impact-result (transition accepted-to-accepted) ((query-impact (atom t) ((evidence-blocked defeated)) ((evidence-blocked justified)) true false)) ((atom t)) ())))
+(inquiry-result 1 T05-repeat-2 (impact-body (impact-result (transition accepted-to-accepted) ((query-impact (atom t) ((evidence-blocked defeated)) ((evidence-blocked justified)) true false)) ((atom t)) ())))

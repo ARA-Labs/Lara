@@ -1,0 +1,226 @@
+{
+  "schema": "inquiry-p8-independent-result-review",
+  "schema_version": 1,
+  "reviewer": "P8EvidenceReview",
+  "provenance": "ai-independent-review",
+  "status": "PASS",
+  "summary": "The sealed corrected measurement and final report agree within the reviewed scope. All high-confidence draft corrections were applied. No outstanding reporting-contract omission, misleading causal claim, or agent-success claim was found.",
+  "review_target": {
+    "run_directory": "ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected",
+    "internal_run_id": "20261013T071322.162373Z-317f210ab2f4",
+    "report_path": "ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected/report.md",
+    "final_report_checked": "All 193 lines, after P8Report applied the corrections identified below and completed its prose pass; author identified that version as edit snapshot 75B4.",
+    "report_sha256_computed_by_reviewer": false,
+    "code_commit": "317f210ab2f4e5ea070dcae75218f056373e142d",
+    "input_commit": "1f1f101bc9df6c3e527b93dc911376b3ec57f916",
+    "approved_candidate_commit": "7a90fca1d679013815f6a31f241af5181f4cbeec"
+  },
+  "checked_scope": {
+    "primary_evidence": [
+      "run.json: completion, sealing, stop reason, active/interrupted operations, missingness, all 96 pair checkpoints, all 192 invocation records, consumer records, capture-inventory references, budgets, ordering, timings, environment, binary identities and recorded report hashes",
+      "summary.json: complete summary, correctness strata, duplicates, diagnostic denominators, transitions, locality, rejected-endpoint comparisons and excluded claims",
+      "results.jsonl: all 96 records checked for native/Lean decoded-result equality to retained expected ASTs, exit/result-kind agreement, validation flags, cross-driver diagnostic equality and required diagnostic field presence; detailed projections examined for development controls and T01–T16",
+      "summary.tsv: schema and representative operational rows; aggregate report arithmetic checked independently against run.json and archived MANIFEST.json",
+      "replay-validation.json: original receipt and updated retained-copy receipt"
+    ],
+    "archived_prerequisites": [
+      "evidence/suite/protocol.json",
+      "evidence/suite/MANIFEST.json",
+      "evidence/suite/researcher-approval-provenance.json, including relevant approval-lineage content",
+      "evidence/suite/independent-review.json: review method, scope, provenance and verdict",
+      "evidence/suite/quality-review.json: composite review scope, provenance and verdict",
+      "evidence/suite/oracles/T07.json: corrected graph, support terms, status and locality annotation",
+      "evidence/runner/inquiry_evaluation_report.py: oracle comparison, diagnostic body-hash definition, correctness denominators and context-sensitive rejected-endpoint aggregation"
+    ],
+    "raw_output_samples": {
+      "native": [
+        "T02: transition and endpoint verification",
+        "T05: blocked conditional status change",
+        "T07: unchanged status with failed locality",
+        "T09: all-rejected family and stability",
+        "T10: family status, audit and stability",
+        "T11: sensitivity and first realizers",
+        "T13: unreachable target and no minimum",
+        "T14: empty sufficient minimum",
+        "T15: modeled capture-binding contrast",
+        "T16: original and same-type-tampered certificate"
+      ],
+      "lean": [
+        "T04: rejected-to-rejected partition and endpoint verification",
+        "T05: blocked conditional status change",
+        "T07: unchanged status with failed locality",
+        "T08: declaration permutation and endpoint verification",
+        "T10: fixed-witness contrast",
+        "T15: modeled capture-binding contrast"
+      ]
+    },
+    "reporting_and_historical_context": [
+      "plans/inquiry-p8-p9.md: original reporting contract, acceptance criteria, budgets and P9 decision table read before replacement; remaining researcher-review/P9 plan read afterward",
+      "AGENTS.md",
+      "docs/evaluation.md: settled bounded-inquiry reporting and approval contract",
+      "preflight-20261013-corrected/validation.json, repository-preflight.json, inquiry-python-provenance.json, quality-pin-failure.json and selected retained log observations",
+      "20261012T225824Z-a904130/summary.json and report.md: original incomplete attempt remains distinct from the corrected result"
+    ]
+  },
+  "checks": {
+    "completion_and_missingness": {
+      "completion": "COMPLETE",
+      "sealed": true,
+      "stop_reason": null,
+      "semantic_discrepancy": null,
+      "active_operation": null,
+      "failed_or_interrupted_operation": null,
+      "passed_pair_checkpoints": 96,
+      "failed_pair_checkpoints": 0,
+      "missing_invocations": 0,
+      "unattached_capture_paths": 0,
+      "raw_capture_paths_in_inventory": 768,
+      "recorded_capture_paths_missing_inventory": 0,
+      "recorded_capture_digest_links_inconsistent_with_inventory": 0
+    },
+    "budget_and_process_outcomes": {
+      "documents": 96,
+      "authorized_document_cap": 96,
+      "driver_invocations": 192,
+      "authorized_driver_invocation_cap": 192,
+      "unique_case_driver_pairs": 192,
+      "consumer_invocations": 192,
+      "driver_order_alternation_violations": 0,
+      "driver_and_consumer_failure_records": 0,
+      "aggregate_elapsed_ms": 39246.769305784255,
+      "aggregate_deadline_seconds": 2700,
+      "per_driver_timeout_seconds": 10,
+      "maximum_native_elapsed_ms": 33.054467,
+      "maximum_lean_elapsed_ms": 366.435305,
+      "declared_counter_cap_exceedances": 0,
+      "expected_pair_maximum": 352,
+      "declared_pair_cap": 1000,
+      "expected_embedded_event_maximum": 7,
+      "embedded_event_cap": 8,
+      "expected_refusals": 0,
+      "observed_refusals_per_driver": 0,
+      "interpretation": "Zero refusals follow from below-cap constructions and do not establish positive refusal-handling coverage. CPU allocation and the absence of concurrent workloads are recorded conditions, not independently monitored by this reviewer."
+    },
+    "correctness_and_denominators": {
+      "recorded_decoded_ast_mismatches_against_retained_oracles": 0,
+      "native_unique_input_oracle_agreement": "80/80",
+      "lean_unique_input_oracle_agreement": "80/80",
+      "native_unique_input_validated_correctness": "80/80",
+      "lean_unique_input_validated_correctness": "80/80",
+      "driver_agreement_documents": "96/96",
+      "consumer_accepted_per_driver": "96/96",
+      "development_documents_and_unique_hashes": "16 / 16",
+      "authored_documents_and_unique_hashes": "16 / 16",
+      "generated_documents_and_unique_hashes": "64 / 58",
+      "new_documents_and_unique_hashes": "80 / 64",
+      "duplicate_content_groups": 10,
+      "documents_beyond_unique_hash_count": 16,
+      "captured_requests_per_driver": 316,
+      "distinct_captured_result_body_projections_per_driver": 80,
+      "interpretation": "Correctness deduplicates input hashes while requiring every duplicate capture to agree. Diagnostic totals deduplicate captured result bodies, not submitted requests or input identities. Their equal totals of 80 are incidental. Development goldens remain disclosed controls; correlated generated variants are not independent research tasks."
+    },
+    "semantic_contrasts": {
+      "acceptance_classes": {
+        "accepted-to-accepted": 5,
+        "accepted-to-rejected": 1,
+        "rejected-to-accepted": 1,
+        "rejected-to-rejected": 1,
+        "denominator": 8
+      },
+      "accepted_to_accepted_query_rows": 5,
+      "actually_unchanged": "3/5",
+      "changed_full_status": "2/5",
+      "certified_unchanged": "2/5 eligible queries; 2/3 actually unchanged queries",
+      "grounded_locality": "2/5",
+      "equal_blocking_when_grounded_local": "2/2",
+      "certified_full_status_counterexamples": "0/2 certified queries",
+      "blocked_conditional_changes": "1/5 eligible queries",
+      "rejected_endpoint_comparison": {
+        "equal": 1,
+        "unknown": 1,
+        "different": 0,
+        "denominator": 2,
+        "basis": "Distinct input/body/verification-and-annotation contexts, rather than body-only deduplication."
+      },
+      "family_audit_sensitivity_and_conditions": "Checked empty/rejected-family stability, fixed-witness and modeled-capture contrasts, declared profiles and construction-only component annotations, reference membership and its unavailable control fields, complete reported flip/minimum/first-realizer contrasts, catalog sizes, derived subset counts, surviving rows and deletion countercompletions. T07 retains unchanged status despite failed locality. T04 has neither changed nor unchanged status queries.",
+      "snapshot_comparison": "Uses the same captured full public-status rows. The final report correctly preserves T05's blocked conditional change in that view and does not claim that visibility contrasts measure agent benefit."
+    },
+    "final_report": {
+      "reporting_contract_coverage": "All required metric categories are reported directly or mapped to exact retained fields, with request-kind limitations stated.",
+      "operational_arithmetic": "Checked stratum and overall input sizes, timing minima/medians/maxima and sums, stdout totals, T11 40-slot timing, expected-counter ranges and caps against retained artifacts.",
+      "scope_calibration": "Descriptive finite-suite findings only. No speedup, efficacy, causal, calibration, physical-capture, empirical-truth, human-faithfulness or scientific-discovery claim is supported or asserted.",
+      "p9_decision": "The report applies the predeclared complete/correct/diagnostic-contrast row as protocol-drafting eligibility only and leaves researcher result review pending."
+    }
+  },
+  "findings": [],
+  "resolved_draft_findings": [
+    {
+      "id": "R1",
+      "severity": "important",
+      "confidence": 100,
+      "file": "ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected/report.md",
+      "section": "What changed across source endpoints?",
+      "issue": "The draft labeled T04's rejected-to-rejected unchanged-query partition as [t], although the captured impact result contains empty changed and unchanged lists.",
+      "correction": "The final table reports [] / [] and retains inapplicable full-status comparison.",
+      "resolution_verified": true
+    },
+    {
+      "id": "R2",
+      "severity": "important",
+      "confidence": 100,
+      "file": "ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected/report.md",
+      "section": "Which family outcomes and witness audits were observed?",
+      "issue": "The draft claimed mixed-stability's decoded stability result retained an exact rejection payload and broadly implied every request exposed full row and payload details. That result contains only the observable, counts and stability booleans.",
+      "correction": "The final report explicitly states that mixed-stability's rejection payload is not emitted and qualifies retained details by request kind.",
+      "resolution_verified": true
+    },
+    {
+      "id": "R3",
+      "severity": "important",
+      "confidence": 100,
+      "file": "ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected/report.md",
+      "section": "What changed across source endpoints?",
+      "issue": "The draft omitted an outer source wrapper from the quoted endpoint rejection and directed readers to comparison flags rather than the field containing submitted exact payloads.",
+      "correction": "The final report quotes the complete nested rejection and points to rejection_annotations.bound_certificate_evidence[].submitted_endpoint_rejections.",
+      "resolution_verified": true
+    }
+  ],
+  "replay_evidence": {
+    "reviewer_executed_replay": false,
+    "reviewer_executed_byte_comparison": false,
+    "attribution": "Parent-executed replay and comparisons, evidenced by replay-validation.json and the parent's retention notice.",
+    "reported_files_compared": 1009,
+    "reported_byte_identical": true,
+    "reported_driver_invocations": 0,
+    "retained_replay_path": "ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected-replay",
+    "reported_retained_copy_byte_identical": true
+  },
+  "limitations_and_authority": {
+    "independent_semantic_reenumeration": "This review compared saved decoded outputs with retained reviewed expectations and inspected representative raw outputs and annotations. It did not independently reconstruct every input graph or rerun the prior finite-input audit.",
+    "hash_verification": "Checked recorded digest relationships and identities; did not independently hash every sealed file or decompress archived binaries.",
+    "gate_attribution": "Build, test, axiom-audit and preflight outcomes are retained prior evidence, not checks executed by this reviewer.",
+    "researcher_result_approval": "Not recorded. This AI review is not researcher approval of the findings or their interpretation.",
+    "p9_authorized": false,
+    "additional_measurement_authorized": false
+  },
+  "reviewer_execution": {
+    "methods": [
+      "Static file reads",
+      "Static JSON selection, equality comparisons and arithmetic",
+      "Read-only inspection of archived reporting logic",
+      "Coordination with P8Report and parent"
+    ],
+    "repository_files_modified": [],
+    "immutable_evidence_modified": false,
+    "builds_tests_linters_formatters_executed": false,
+    "driver_consumer_measurement_replay_or_p9_invocations": 0
+  },
+  "handoff": {
+    "report_author_notified": "Final PASS sent to P8Report after reading the complete corrected report; author stated no further prose edits were planned.",
+    "parent_actions": [
+      "Retain this review JSON exactly and bind it to the final reviewed report bytes, including the report SHA256 in the integration record.",
+      "Complete parent-owned final static integration checks and preserve the distinction between this AI review and pending researcher result approval.",
+      "Do not run further drivers, consumers, measurements or P9 work under this handoff."
+    ]
+  }
+}

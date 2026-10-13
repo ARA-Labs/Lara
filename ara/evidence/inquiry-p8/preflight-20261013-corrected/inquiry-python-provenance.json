@@ -1,0 +1,17 @@
+{
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "test",
+    "-p",
+    "inquiry_*.py",
+    "-v"
+  ],
+  "exit_code": 0,
+  "log": "inquiry-python-provenance.log",
+  "log_sha256": "85ed3eedc1601c90781202b11bd3e9373117d5dcf6bd40090b6dbda7cc9d365c",
+  "scope": "All inquiry Python regressions against the corrected suite after transitive metadata refresh; fake-process tests only, no production measurement"
+}

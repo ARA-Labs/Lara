@@ -76,12 +76,13 @@ provenance hashes. `review/test-fixture-scientific-identity.json` records exact
 comparison against committed baseline blobs: inputs, expected ASTs, semantic
 specifications, ancestry and counters are unchanged. Only review metadata moves.
 
-The effective researcher receipt binds the final reviewed candidate commit and
-exact pre-freeze protocol and manifest snapshots, with user provenance and
-metadata-only freeze authorization. Earlier candidate snapshots and approvals
-remain immutable. The helper-only freeze failed preflight before measurement
-because its quality receipt still pinned the old test source; its failed
-preflight and withdrawn readiness clearance remain retained.
+`researcher-approval-provenance.json` binds the final reviewed candidate commit
+and exact `candidate-protocol-provenance.json` and
+`candidate-manifest-provenance.json` snapshots, with user provenance and
+metadata-only freeze authorization. Earlier snapshots and approvals remain
+immutable. The helper-only freeze failed preflight before measurement because
+its quality receipt still pinned the old test source; its failed preflight and
+withdrawn readiness clearance remain retained.
 The frozen protocol cannot record its own approval, so the T07 amendment and
 the data policy carry the status `requires-correction-receipt`. The receipt
 approves them. `approved_amendments` holds one entry for `distinct-t07-support`
@@ -124,18 +125,13 @@ independent input or oracle reviews.
 
 The approved measurement budget is 96 documents, 192 driver invocations,
 one invocation per driver per document, a 10-second driver timeout, a 45-minute
-aggregate deadline, one CPU and zero repeats. No measurement has started under
-this receipt. The approved data policy uses repository fixtures and authored synthetic
-inputs only. It permits one fresh local capture directory under
-`ara/evidence/inquiry-p8/<fresh-run-id>`, a local replay directory under
-`ara/evidence/inquiry-p8/<fresh-run-id>-replay` and the setup and gate record
-under `ara/evidence/inquiry-p8/preflight-<fresh-run-id>`. The original failed attempt
-and every new outcome will be retained for the requested implementation PR.
-Measurement will acquire or transfer no data over the network and make no
-paid calls. The capture, replay and preflight directories are committed. The
-failed attempt took about 62 MB per capture or replay directory, but the two
-share identical binaries, so with its 6 MB preflight directory it added about
-68 MB of unique content to Git. A new run should add a similar amount. The repeated-requests levels stay below every declared limit, so no
-case expects a refusal. Supply the committed metadata-only freeze's full
-identity as `--input-commit` and complete preflight before the single approved
-attempt. P9, legacy regeneration and freeze-tag changes remain unapproved.
+aggregate deadline, one CPU and zero repeats. The single corrected attempt is
+complete; [its report](../../ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected/report.md)
+links the sealed captures, capture-only replay and preflight evidence.
+The approved data policy uses repository fixtures and authored synthetic
+inputs only. Capture, replay and preflight evidence are retained under
+`ara/evidence/inquiry-p8/`. The original failed attempt is preserved.
+The measurement acquired no network data and made no paid calls.
+The repeated-request levels stay below every declared limit, so no case expects
+a refusal. The consumed budget authorizes no further measurement attempt.
+P9, legacy regeneration and freeze-tag changes remain unapproved.

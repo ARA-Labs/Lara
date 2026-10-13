@@ -1,0 +1,2 @@
+(inquiry-result 1 T04 (impact-body (impact-result (transition rejected-to-rejected) ((query-impact (atom t) () () false false)) () ())))
+(inquiry-result 1 verify-endpoints (verification-body (verified)))

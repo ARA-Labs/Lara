@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "sealed_artifacts_per_directory": 1008,
+  "run_metadata_equal": true,
+  "reviewed_report_sha256": "23366d69fbc3173b31ddc65a6280855b8eff0018fe5259637c274602c01503eb",
+  "ara_gates": [
+    "make ara-source-spans ara-session-index ara-observations"
+  ],
+  "ara_gates_exit_code": 0,
+  "local_markdown_links": "PASS",
+  "yaml_parse": "PASS",
+  "measurement_repeated": false
+}

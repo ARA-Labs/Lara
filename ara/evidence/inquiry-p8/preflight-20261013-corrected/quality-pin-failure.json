@@ -1,0 +1,13 @@
+{
+  "schema": "inquiry-p8-preflight-failure",
+  "schema_version": 1,
+  "input_commit": "d383404ff3a8c4aa4853fd10760bef0a5166312f",
+  "candidate_commit": "bfc6d1ecc538f3456ab3e98df6f314e0611f91b1",
+  "operation": "inquiry_evaluation_manifest.repository_preflight(protocol, suite_base, suite_inventory, input_commit_pin)",
+  "exception_type": "ValueError",
+  "message": "hash mismatch: /home/yfhe/ara/Lara/test/inquiry_corrected_candidates.py",
+  "source": "scripts/inquiry_evaluation_manifest.py:284; quality-review.json boundary_test_path/boundary_test_sha256",
+  "observed_during": "parent production preflight before resolving binaries or creating a capture directory",
+  "production_measurement_started": false,
+  "measurement_attempts_consumed": 0
+}

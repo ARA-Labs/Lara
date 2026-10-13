@@ -1,0 +1,2 @@
+(inquiry-result 1 original (verification-body (verified)))
+(inquiry-result 1 tampered (verification-body (invalid-certificate (false-read-evidence))))

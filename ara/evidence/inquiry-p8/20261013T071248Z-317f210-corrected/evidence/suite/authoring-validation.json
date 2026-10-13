@@ -1,0 +1,1679 @@
+{
+  "schema": "inquiry-p8-authoring-validation-attachment",
+  "schema_version": 1,
+  "status": "PASS",
+  "scope": "Author-attached record of successful consumer decoding after quality-provenance attachment; no new independent semantic judgment is claimed",
+  "provenance": "ai-executed",
+  "inquiry_driver_invocations": 0,
+  "consumer_sha256": "5f75a2310315848077ef8a17cc378f05ef5dcd495bd67e691e7b7fd75158989b",
+  "consumer_build_command": [
+    "cabal",
+    "exec",
+    "--",
+    "ghc",
+    "-package",
+    "lara",
+    "-outputdir",
+    "/tmp/p8-consumer-build",
+    "-o",
+    "/tmp/p8-consumer",
+    "scripts/inquiry-codec-client.hs"
+  ],
+  "consumer_build_executed": false,
+  "manifest_sha256": "59225ebd79b1bb6f667f9e73db3fdbce8b2277dbf3499ff31b28c24b6d9c46fd",
+  "raw_validation": {
+    "path": "review/authoring-validation-fixture-provenance-raw.json",
+    "sha256": "aef468b771611bd78668331769199d8f1436734e78935d8401c9ed53ac22a12d"
+  },
+  "prior_validation": {
+    "path": "review/authoring-validation-before-fixture-amendment.json",
+    "sha256": "7265ae31be548af481e8e9703d881d634206433e7f8b3f244b15ab0e5bd5e474"
+  },
+  "semantic_review": {
+    "path": "independent-review.json",
+    "sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc"
+  },
+  "quality_review": {
+    "path": "quality-review.json",
+    "sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
+  },
+  "semantic_reuse_evidence": {
+    "path": "review/test-fixture-metadata-attachment.json",
+    "sha256": "74ccb0c479c1154753a07fc1650816db3d33c31847784cc0d011af780263ee7f"
+  },
+  "raw_pending_marker_scope": "The raw helper emits PENDING unconditionally for independent review; that unmodified field is not this attachment's approval state. Existing independent semantic judgments are reused only through exact per-case input/meaning/counter identity.",
+  "results": [
+    {
+      "case_id": "source-rejections",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/source-rejections.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "7855614c13c9a319e1c5f623ce3ce815b70974113e4a743b7893d78a59f8967b",
+      "oracle_sha256": "0d7db6a352878118ade0e9bb94f2b9815db3cc171b149f003b0ecf8f72745a11",
+      "encoded_authored_expected_ast_sha256": "928b67c93ba4bd26b40a7c04123fbc7c4a3f1bb3f474571e99b5aebe92641050",
+      "expectation_origin": "existing-conformance-golden"
+    },
+    {
+      "case_id": "mixed-stability",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/mixed-stability.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "3965c657eccfcaf7f48dc6d7f6d8dc6faa90522db42e15f24443e14b1b0837cf",
+      "oracle_sha256": "1359d52c92879313ee23635d240592e2ff32273150b75c543df5b4320ac9fdec",
+      "encoded_authored_expected_ast_sha256": "8de386ade88f49b0ec6e3e8fb821f058db4f5f70ff1afeaab116eb2a09ab02cc",
+      "expectation_origin": "existing-conformance-golden"
+    },
+    {
+      "case_id": "inconsistent",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/inconsistent.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "b9a0a607dbccdcf4a5cc3df70171128ba7781e6e5609a1fa7661d54848b2c266",
+      "oracle_sha256": "a8464c4ec2e5e8a461805c906a3c8e2fee9e8ac99ceb2f9a84648343b8647b1a",
+      "encoded_authored_expected_ast_sha256": "61cb54ee53958d784e5e1d7a3d5122b49f0652da9e176d28db595295a4764544",
+      "expectation_origin": "existing-conformance-golden"
+    },
+    {
+      "case_id": "fixed-witness",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/fixed-witness.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "ba3879cd0d0783d772763867278e005710fe15d529f38e955f999e558063f75e",
+      "oracle_sha256": "d347d1400e2fb1d82b4f9f2df1c567ba97d9a10c8e477f9488642917fe2ae44a",
+      "encoded_authored_expected_ast_sha256": "34a237d1bf69d32477a0f22bbf8799968d863ff7a727ddf83eb679f7a60dcc0f",
+      "expectation_origin": "existing-conformance-golden"
+    },
+    {
+      "case_id": "hypothetical-audit",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/hypothetical-audit.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "41b86a76b98e8f771040a863f29d750ab593edc16bf444df9b3462f1ded528a2",
+      "oracle_sha256": "092018432e9fdbff21930e408ffc3ab1696f1da6beccf5ddc53516b7cb2d290e",
+      "encoded_authored_expected_ast_sha256": "6fcb4607c1dfc256b6e55c5166c1241d0f546a6fb25e18efae76a81817437cf8",
+      "expectation_origin": "existing-conformance-golden"
+    },
+    {
+      "case_id": "forged-observed",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/forged-observed.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "5b00e668d37d71fc6b103eb8696b1c6b36f70b3a695378cffef37814fab03d05",
+      "oracle_sha256": "03fb72a0d90d4fdb54cf374b553b0cf7c14068c43215a13ca34ad4f44f93bcb4",
+      "encoded_authored_expected_ast_sha256": "658c76cdfeba7cb8e701094ec2e843b43b4cbcd83b4a7d55533d9163a4d3e217",
+      "expectation_origin": "existing-conformance-golden"
+    },
+    {
+      "case_id": "reference-sensitivity",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/reference-sensitivity.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "d1f2cae162bee97ddf7fd23dd15da3a93f7b4b78ff91af085dc5a5992ec899a4",
+      "oracle_sha256": "4448001eea4e4af746aad30f80f87c01efb2ce11f0ed61b0440f8eb9d5822024",
+      "encoded_authored_expected_ast_sha256": "33e2aa28b0aece3e6bd5aa9255e0d6a8697d2a0962599fd30bcfaef20bbf18aa",
+      "expectation_origin": "existing-conformance-golden"
+    },
+    {
+      "case_id": "joint-only",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/joint-only.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "158d9a47064e56fd8803a117acbaca8278a5591081cf4964f1420570f478eba4",
+      "oracle_sha256": "2022b781a2c8169521c37043ae993641c02f2c49d489ff5f50ed6490a837e92b",
+      "encoded_authored_expected_ast_sha256": "086b3c9a759df659eb9b231b55d3966e0ef79bef2a841ba49e2c1996728e467f",
+      "expectation_origin": "existing-conformance-golden"
+    },
+    {
+      "case_id": "minimal-conditions",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/minimal-conditions.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "02a77d9b3390ec987ec0c808fa54c09947413bcdc1c9ee7baf8371f08b37bb10",
+      "oracle_sha256": "2f047fce6e8df3ea73adfb2945f3230b63fce43b79695cf1e4351e79efa5531e",
+      "encoded_authored_expected_ast_sha256": "e3a51bac6d7a47cd05ce8092e0d5d24e03842f89950de559640e7b2f1a415dd3",
+      "expectation_origin": "existing-conformance-golden"
+    },
+    {
+      "case_id": "new-attacker",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/new-attacker.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "9d9c4d2bc28739d82f5d0b14f80a85a60a3440d3514e27fa3513b03af5edc993",
+      "oracle_sha256": "b9b3437498e358a688ee8abc0421e41c7f42fe24a794506707c89563bf5716d0",
+      "encoded_authored_expected_ast_sha256": "78609d1909eddbc40dc0bf4aadddf58ecef4a017c1ca3ab1c8593fb318739bd7",
+      "expectation_origin": "existing-conformance-golden"
+    },
+    {
+      "case_id": "shared-discharge",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/shared-discharge.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "53baca2eb89a4aadca838786319e5aa2ee2f6fb30fd8d7a0b3282e3b8dd15894",
+      "oracle_sha256": "9cacfb113fcbd1ccc9d8d9bd355838c336264e1c630fa53313e2aefa6a27e7e8",
+      "encoded_authored_expected_ast_sha256": "f6f313ef44fc3c8cb98290d0d7c55bff42d7b3657b1d7bdb17478244f6efc0ba",
+      "expectation_origin": "existing-conformance-golden"
+    },
+    {
+      "case_id": "unrelated-self-attack",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/unrelated-self-attack.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "1d9df679b20640751c5d8063ac8379a7d24cf520ce965bc4c95700e24990acf1",
+      "oracle_sha256": "9429538cbdbfe490374e113d6c9b2be07a29d00d9c9218ed0249a79518da3949",
+      "encoded_authored_expected_ast_sha256": "178154614fb02cedefc6ecec07d0d02ef29922f9246bae3026ee4e43dd28cb21",
+      "expectation_origin": "existing-conformance-golden"
+    },
+    {
+      "case_id": "blocked-conditional",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/blocked-conditional.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "468d08bd6be39e80ff2388311f2b0e17f24c3595db1ef328eb0a1f77e91a1a68",
+      "oracle_sha256": "ae2daaedf3804ce85cb5ee8f57ebc24a4e24d0615674fba88db825cef6497fdc",
+      "encoded_authored_expected_ast_sha256": "9e10169c95670a358789642dc5ab1c258af5374a2a888c4872a9cbb731b3ace8",
+      "expectation_origin": "existing-conformance-golden"
+    },
+    {
+      "case_id": "impact-rejected",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/impact-rejected.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "1b4939d0889370a2d9db142cacc2d3d5ac01ad9e6771cc2a5c291cf557d12e2e",
+      "oracle_sha256": "39ef9fd85a9532591cd1ca830f037d086dff0d216ed0a214c29b42ea01bcae60",
+      "encoded_authored_expected_ast_sha256": "7a19c46607c88bbd0915ae4e7a23d7a03408ea686dcd104978783836ebc11cf4",
+      "expectation_origin": "existing-conformance-golden"
+    },
+    {
+      "case_id": "verified-certificate",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/verified-certificate.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "c383439212c72e264d28f28d005f0b9bfacdb6a0bfef2b30bc376e953222e599",
+      "oracle_sha256": "c957c913fb5b29e7bd89fdfa73c186276a73441303b3a4f82f249196d0307f68",
+      "encoded_authored_expected_ast_sha256": "ffe51d8130a470a964c622b240ce52c0f45299e11cc3fefed57e0571030d501a",
+      "expectation_origin": "existing-conformance-golden"
+    },
+    {
+      "case_id": "tampered-certificate",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/tampered-certificate.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "398895a18547ebe47432d8a4c4444f59a5af6b99609304a1ea318a9c16927809",
+      "oracle_sha256": "c175a81c80823f4403885781409335928bba8da80df5d2d1cf77012213055b01",
+      "encoded_authored_expected_ast_sha256": "9701e78c645be8e15c4270f7b0b5c095ad6a8e60f1e5fe267bb75fc8ba5ecc78",
+      "expectation_origin": "existing-conformance-golden"
+    },
+    {
+      "case_id": "T01",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T01.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "97f776b13670462aab228d55ce7f6cb37980c8198bf4be0578caea6f09e687f0",
+      "oracle_sha256": "89b40bbaeb5955fd10e7bdb88a68c292291f3a47e51183721e6ce1c0ace7e5d4",
+      "encoded_authored_expected_ast_sha256": "0bfa976a33857b4194c4c04313c59ad0491d7c3dc439d4f4e6622fe4cd98540b",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T02",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T02.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "a5004c62d490b0f64f8b4fb8dc333e556390b013de0e940f1df8263c3ef54284",
+      "oracle_sha256": "a13d127ad422841a735a58418cce1a42360b8d07af772102f6c42fbb131cdaee",
+      "encoded_authored_expected_ast_sha256": "d37b32443bdbc831f93a4d5bded790690ed9ffc96f2bc35d743597bd6d078e8d",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T03",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T03.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "dc8c8d33c5609e041aa0359d29443e52376f809e578a9b475bbf988bb3360cce",
+      "oracle_sha256": "e52253d5fcf37472570fdc1f6fe5dbc666542114b848a41367d33f82bdd55068",
+      "encoded_authored_expected_ast_sha256": "524ea7722669af206519a8dd26d96f3976c2015e3279312ee4519e32ff58d2ee",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T04",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T04.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "2d796cd69ea245fe2d1c365971b31848c5346e51fef1bdc434adec6e3115482a",
+      "oracle_sha256": "d301e5ffedee38db5509ae0d9ac3c14c08661ff712e5d154cf8fc1f9453c33d8",
+      "encoded_authored_expected_ast_sha256": "f696df011a79e6e18d462d663365a285c7f7ad1b0baf97e2887edd71daafea59",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T05",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T05.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "14e8f0c59f4116a2bcdd47d2642c7c105ecf919635d324d92fda59cadbbd92e6",
+      "oracle_sha256": "422075bef6c8b25f2aaaa92f3e6b5b0b75b3c207666df0e747f3e6e39ff9b2fd",
+      "encoded_authored_expected_ast_sha256": "e81630ca0598c6431b743fa7e160673364345b55679be51d3b107874f9f2dc4e",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T06",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T06.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "3b553951d0db48e6ef3b9e21a1360c248a101780b77ac176834c8c0e041c608e",
+      "oracle_sha256": "287b6291d5cd5ee688d57783f8aa752823629464606f176a982b86360c90455b",
+      "encoded_authored_expected_ast_sha256": "bc01fbebddfab54bb4efab206ce1582cb129d2269c3b48c8afc29f46cc7e27dd",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T07",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T07.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "55f4c94276527b4cccd7e5e5552f9ddcf36864cdbb66a07bbfb5d3d12a962839",
+      "oracle_sha256": "03a015ed79f711abf96684e473f08eda1a98c89e4fe0cc53b53c7ff5993f18ba",
+      "encoded_authored_expected_ast_sha256": "91567ea9cde6577c4c83c2c163337647adfc9c6fe9ec1ad4e90dcc5f32914bcb",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T08",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T08.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "ab13adde17638abf4167a21bcd7bb78d0ba222587e27f07fe9e97ada7ad1075a",
+      "oracle_sha256": "ed689e7e359eea7b3b94eaf7086d89e1647cb264ee9b9438c7bc3f040f385807",
+      "encoded_authored_expected_ast_sha256": "7fc727e5e31cd98fe79a21a5fb0d1c5b9045968553d103132adf6040f55f5ae1",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T09",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T09.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "5264b35448e7c7ab883b231a8f928adfe61641e8a68b0ad063eaf98c13cba061",
+      "oracle_sha256": "634a658dd22168d369cdf2d33b2690e52c17f8a0b35172637902c68357882323",
+      "encoded_authored_expected_ast_sha256": "d4c4fde48d907109a4fd51c0ac1b4d98297c98ed677e9cc483c39325a48463f5",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T10",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T10.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "547765c4796dd8af7e5f9d1bf97243a19e98c8b4fb11e188713e797c1b245a9a",
+      "oracle_sha256": "a1ca60917a66eb7784bce9e2c8aeb382af68dbf0290ac14d0a53456cbd49a717",
+      "encoded_authored_expected_ast_sha256": "30a337ca4114fccc9928dc1525a4a4b95b91ff99b9c5036dc8dd773b15e4c8b2",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T11",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T11.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "f7a45e216cfd2cb6de3942d2cb917558624bf9f45017151589146a05f42ec7e1",
+      "oracle_sha256": "30ef83e46c42c849cd05077b34a0513de3b3fd7fb4a2c2cfa14e83f2ac0cd855",
+      "encoded_authored_expected_ast_sha256": "641f1ce1f6c62dc38f392282e61fce6a28ad4aca2a5646989c156b24bc4cafc1",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T12",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T12.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "32f6020d88cd26cb1d5dff4bc92269d8ff6804ba65ff2dd223808013c79350f2",
+      "oracle_sha256": "2d18c313f877b2472e2fcd9e87af452b1d38c17ddf7620489a4a5e8e5b743063",
+      "encoded_authored_expected_ast_sha256": "c7bcfda3c5dcc046545536ad53bc5ca1ab67bbffa45c60325d96e63498e1a82c",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T13",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T13.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "1fb77ef0a9473f6b0130f5367209aafcb8fe0a83dc7d3cb29b14ca2a62b1d84d",
+      "oracle_sha256": "5436d35d8c4cc600f4832b7e0a930160e249b0516434a3bb3f35001ff23f8cb4",
+      "encoded_authored_expected_ast_sha256": "63bd44a54e0c9968384b31dbdb7f3f43705dfbf50722d308ee6b9505bf4d9d10",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T14",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T14.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "a773b8f090c09959f35a41499ee12ba767b9876a9c59d287256367ec2af74bdf",
+      "oracle_sha256": "d56fcb41360e41c3b47d39edade64645e68b716ad9d25b73aae2f02a6f7d2d1e",
+      "encoded_authored_expected_ast_sha256": "60c2d16a1c050453955f3496dceee4f93c82547a0a0a406ae2ebcfc9e3805c21",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T15",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T15.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "6f7e353c1f26e69fe7dbc9f09fe809e4d8bd45029ede981f5c362f0316d6db87",
+      "oracle_sha256": "06a97fc25b65f973a5ac0f922a081046e1b261f841113eb6f94ef91d6c71c414",
+      "encoded_authored_expected_ast_sha256": "c62d3d52e2f18843239d8a30c2b1c19de6479e2d88289615c3a89d807a45ea3d",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T16",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T16.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "72b68249ab9814baaa9e5775a3426317fecdb861d2570c9c2dd43c59bdbc37e4",
+      "oracle_sha256": "db5beaf06c20099616d6f1045b25bb33ead21c3266a7894136a7358599067301",
+      "encoded_authored_expected_ast_sha256": "3601c2535d738d15b9f4de6b792dc3e65cae64839d80097c87a932407cff5f6d",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T09-singleton-slots-0",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T09-singleton-slots-0.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "5264b35448e7c7ab883b231a8f928adfe61641e8a68b0ad063eaf98c13cba061",
+      "oracle_sha256": "8e239945c5a6617a0c51c6f1814de430497362a2142cc85540e5e8802f5da4cb",
+      "encoded_authored_expected_ast_sha256": "d4c4fde48d907109a4fd51c0ac1b4d98297c98ed677e9cc483c39325a48463f5",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T09-singleton-slots-1",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T09-singleton-slots-1.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "d68a70c7c58de0254750dadc82d36a22f3298f081c4dab2931111e7b8e209dbd",
+      "oracle_sha256": "a633b602f870d6302db7337f2f840104415305c9792c5cefac841175737f13ec",
+      "encoded_authored_expected_ast_sha256": "9d0adedcfdcfcd54fe46b87e65487b677552875edbbfd06c521250f537428645",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T09-singleton-slots-4",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T09-singleton-slots-4.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "10f246e5743b807529db2f2e54184bd2ed8355bb52f32e4c11b718095a9b8ce2",
+      "oracle_sha256": "2f112866919f54824c4edb5c2e2cddd151317da44210c6e75e965d6cee22360c",
+      "encoded_authored_expected_ast_sha256": "4db1858d8f9359898ecf49f0b8441de42d5fe474d9cb34e4e6519e00e9b47346",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T09-singleton-slots-40",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T09-singleton-slots-40.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "579695e0547f9a8904dc4efb132b26acca708e3cd1418b0d33a2e2a988fb123a",
+      "oracle_sha256": "142c07c4fab536825c7408b448f4858cba28b7a67c6a89d2a37a429d4fe0ce40",
+      "encoded_authored_expected_ast_sha256": "0820fe1bccddc9b09c48831e7b19dfd0081817e2e0f2fa8e72ce5d898e669a2c",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T10-singleton-slots-0",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T10-singleton-slots-0.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "547765c4796dd8af7e5f9d1bf97243a19e98c8b4fb11e188713e797c1b245a9a",
+      "oracle_sha256": "2ba93c098aff21753178ab98dd173e8e89626aa18ea4340d03c924ef52986ee3",
+      "encoded_authored_expected_ast_sha256": "30a337ca4114fccc9928dc1525a4a4b95b91ff99b9c5036dc8dd773b15e4c8b2",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T10-singleton-slots-1",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T10-singleton-slots-1.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "f42dfa2fee7040e7cd2728d8a4c136832490dd3b8e98440e4bb84d44c2d5e51e",
+      "oracle_sha256": "2ed738db575919aa8ec8e39fef88b0899b11a2bc291758f23e443d30afedffb7",
+      "encoded_authored_expected_ast_sha256": "e3e33180617c5ec13cf5bab2f6b306eb55853b5553d9110cd5b80d1dea9a7bf4",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T10-singleton-slots-4",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T10-singleton-slots-4.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "408dba1f83987cddc03ddfbdf2c562e878d68de55cc98def1f99f0b8783b6689",
+      "oracle_sha256": "64843d8ebbc9e5aaee2e0f53f58f7aa8fb8499be1668ee5df73ee4019eb87400",
+      "encoded_authored_expected_ast_sha256": "9665a759a06f01e26786e65da3fafa27bd89de78e32e407bab4d60e08441b1a2",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T10-singleton-slots-40",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T10-singleton-slots-40.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "05b3278acbaf85697a9e281ccf46e43cacef25454b7dfe422aced00abbe4af82",
+      "oracle_sha256": "f49f343c0dd1880f6f1b7e6275a2f40573e63890a74b14a820d7f61aec13c41d",
+      "encoded_authored_expected_ast_sha256": "7ea3a46e383641a83daac0f1b1f050383953c6c519b76038595ea2c7d29705d6",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T11-singleton-slots-0",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T11-singleton-slots-0.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "f7a45e216cfd2cb6de3942d2cb917558624bf9f45017151589146a05f42ec7e1",
+      "oracle_sha256": "a36de454a780060bad92c3728e7677a91c382c3ae4005a022fa157679c6de8e7",
+      "encoded_authored_expected_ast_sha256": "641f1ce1f6c62dc38f392282e61fce6a28ad4aca2a5646989c156b24bc4cafc1",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T11-singleton-slots-1",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T11-singleton-slots-1.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "ba6c1b4f06e4b1dc9256392150cbe97c1569f44cfb36c2df82cc11a557650ff8",
+      "oracle_sha256": "7c0f13378d563c549341b7d904607ac853db9ea6d8d2b9aac7b7a4b9e000ece5",
+      "encoded_authored_expected_ast_sha256": "9b24730a2f3c851cc65cfee9128db9076023d33eb8ae156eaaf3cedde553865e",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T11-singleton-slots-4",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T11-singleton-slots-4.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "6078e6db387b38b2e83d8119bbb62f760baa3a8826dd43842b39a1cb628410ff",
+      "oracle_sha256": "0719d16ce91800fbae727e6299d8f91b39a24663325eceb1b7e003a49228d495",
+      "encoded_authored_expected_ast_sha256": "629c869edf868197cad5d7b75481e0022f9bbf32094a5208accdf2305c6f71c3",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T11-singleton-slots-40",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T11-singleton-slots-40.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "e9e554c8b7bb1ee8fb2ae9565fd1595475759027b011c4fd664c9d607ce1b576",
+      "oracle_sha256": "1f3de493d50000edeafc164d456a4cd17e03fec0d17f66b8e28ac96c3b4bd87c",
+      "encoded_authored_expected_ast_sha256": "86cd935dfc816c5b8ff5dc985b59b46a707e8f0bfa278d710da0c247b7d4edff",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T12-singleton-slots-0",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T12-singleton-slots-0.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "32f6020d88cd26cb1d5dff4bc92269d8ff6804ba65ff2dd223808013c79350f2",
+      "oracle_sha256": "74211bc2d1313ce1d3dd73123fffecd79f9fa2a35f87d5aaeb767b227c0764be",
+      "encoded_authored_expected_ast_sha256": "c7bcfda3c5dcc046545536ad53bc5ca1ab67bbffa45c60325d96e63498e1a82c",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T12-singleton-slots-1",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T12-singleton-slots-1.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "fde9a0e928a4490decf21a3447451946db2d707c63f6d4ff56f8b1e46c24df04",
+      "oracle_sha256": "139dc182027fca1fa12d2c61a6b7f44c340d511561529deb5fd047644e97da79",
+      "encoded_authored_expected_ast_sha256": "613dbc1124bd4663b63a9844c59ffad685053771e82cf5fd52b82423f46c02db",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T12-singleton-slots-4",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T12-singleton-slots-4.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "fd408f1084f7a790e0b7315f66553ce4f048c4a320ae8a30fd5e891441059298",
+      "oracle_sha256": "ed9eae80590f5ef5408a5f264c26dc4d94c6b68320621e4651b84075f1ad1a5a",
+      "encoded_authored_expected_ast_sha256": "9b9fb02f337b2b7dde35c49138f7ab40eb513e9df9c9f5db986a388c54ab73a8",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T12-singleton-slots-40",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T12-singleton-slots-40.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "b7ab0462607ff2ad641f1cf05b9d4cff51232c12c867846615a9bcb9a6fb25c6",
+      "oracle_sha256": "d7d819be0508bf35a9369cee7ed1cbc90c7c1fd5bcc39d29b6d20d01bd335c5c",
+      "encoded_authored_expected_ast_sha256": "f37635b46fce4a27eea7c619e1f7f125ae378b02b1a5fd55ddac9a32c84c597e",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T01-source-declarations-0",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T01-source-declarations-0.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "97f776b13670462aab228d55ce7f6cb37980c8198bf4be0578caea6f09e687f0",
+      "oracle_sha256": "08131177affc0c9f24b19c930bcb2aebdd3159a79e1a1d0f0d98adc2458cb6f0",
+      "encoded_authored_expected_ast_sha256": "0bfa976a33857b4194c4c04313c59ad0491d7c3dc439d4f4e6622fe4cd98540b",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T01-source-declarations-1",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T01-source-declarations-1.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "8c56a91097575fad55e486a58fdfffe1cda97c5f31d19d72438689424ab15e0a",
+      "oracle_sha256": "414acf15c2e0cbd3fa0feda05a45793fd483ee178e474959bdffe481a8c6853f",
+      "encoded_authored_expected_ast_sha256": "0bfa976a33857b4194c4c04313c59ad0491d7c3dc439d4f4e6622fe4cd98540b",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T01-source-declarations-4",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T01-source-declarations-4.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "7d066cd3716579a851b6556992588d92ca9b5e664188397df06346c7e27ab11c",
+      "oracle_sha256": "afdd0fa5bc319010c4e759b39a831baebb044284de454e3b745857547dd0c6ad",
+      "encoded_authored_expected_ast_sha256": "0bfa976a33857b4194c4c04313c59ad0491d7c3dc439d4f4e6622fe4cd98540b",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T01-source-declarations-16",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T01-source-declarations-16.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "a09ecf5448a6d9186a59edda1a42b294e6ef222e112003d6b9ab376905b47285",
+      "oracle_sha256": "e12416d0c7860c14f2be996053e5664dfc2fad6a0fb70ce668e5d39cb4b3e9d4",
+      "encoded_authored_expected_ast_sha256": "0bfa976a33857b4194c4c04313c59ad0491d7c3dc439d4f4e6622fe4cd98540b",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T05-source-declarations-0",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T05-source-declarations-0.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "14e8f0c59f4116a2bcdd47d2642c7c105ecf919635d324d92fda59cadbbd92e6",
+      "oracle_sha256": "6a161e6180924d9621e4f1668a5fed162213ab652c8bda3476a1ce6a3166f34f",
+      "encoded_authored_expected_ast_sha256": "e81630ca0598c6431b743fa7e160673364345b55679be51d3b107874f9f2dc4e",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T05-source-declarations-1",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T05-source-declarations-1.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "96610ad06d071b50e30a308f858f969bc0a94094b6141a4432665d8725e5582a",
+      "oracle_sha256": "a3d87fdc32d93839b3d8c3331022a1a3382f6ecf11e76fe365eecfb7866b5eed",
+      "encoded_authored_expected_ast_sha256": "e81630ca0598c6431b743fa7e160673364345b55679be51d3b107874f9f2dc4e",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T05-source-declarations-4",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T05-source-declarations-4.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "61976ac890ec9ba38af4701b3f1db335f234bfdc79a24375a2ae540ab79f6c0a",
+      "oracle_sha256": "f320dfa9cdb8a7a8105af1a7a28d29d0b96c8ea4976068cd0fa5556a53b289b3",
+      "encoded_authored_expected_ast_sha256": "e81630ca0598c6431b743fa7e160673364345b55679be51d3b107874f9f2dc4e",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T05-source-declarations-16",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T05-source-declarations-16.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "b562efa1c0ebd1c6547ca915acacb35b8bfdaecc7450bae6b967eace865ef35e",
+      "oracle_sha256": "2eb593d941fa6ffbff8cc0120d0313a7b52cefb48105fcdb0f86b429a045f4a4",
+      "encoded_authored_expected_ast_sha256": "e81630ca0598c6431b743fa7e160673364345b55679be51d3b107874f9f2dc4e",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T06-source-declarations-0",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T06-source-declarations-0.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "3b553951d0db48e6ef3b9e21a1360c248a101780b77ac176834c8c0e041c608e",
+      "oracle_sha256": "f9992027128fa11752d9de1532ee626edcf3322d381920e52808fa1ad1792321",
+      "encoded_authored_expected_ast_sha256": "bc01fbebddfab54bb4efab206ce1582cb129d2269c3b48c8afc29f46cc7e27dd",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T06-source-declarations-1",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T06-source-declarations-1.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "ac1b51728ff683b09d571330f5f2ab551d7456a9d61ce0e478188d0c136826aa",
+      "oracle_sha256": "df690c1c33d884b9db7412513c9f874eb9eb343c7a0079e80f9b540c11e8b7b7",
+      "encoded_authored_expected_ast_sha256": "bc01fbebddfab54bb4efab206ce1582cb129d2269c3b48c8afc29f46cc7e27dd",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T06-source-declarations-4",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T06-source-declarations-4.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "722a885f3c14d00fe4ab107c2e975391e750d8aaadb93d68eaa7f77a3d4dd3ae",
+      "oracle_sha256": "ab506756f2a3dcbab5cf306dfaf84abc7ea4da34e32506052a923fdc1b16e55e",
+      "encoded_authored_expected_ast_sha256": "bc01fbebddfab54bb4efab206ce1582cb129d2269c3b48c8afc29f46cc7e27dd",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T06-source-declarations-16",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T06-source-declarations-16.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "83a38f3ca6bb225089f35303e0aca92a18ce7be83604f682e221bf8fcc609f82",
+      "oracle_sha256": "35e87b953b0e501ee75d68b6632e564928113b9f94f195cbf935518b1d23353a",
+      "encoded_authored_expected_ast_sha256": "bc01fbebddfab54bb4efab206ce1582cb129d2269c3b48c8afc29f46cc7e27dd",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T07-source-declarations-0",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T07-source-declarations-0.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "55f4c94276527b4cccd7e5e5552f9ddcf36864cdbb66a07bbfb5d3d12a962839",
+      "oracle_sha256": "eb07ef2a3a02cdb67e40f17e692a3a32a09771b8ed598ec64ae0802ea0163b84",
+      "encoded_authored_expected_ast_sha256": "91567ea9cde6577c4c83c2c163337647adfc9c6fe9ec1ad4e90dcc5f32914bcb",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T07-source-declarations-1",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T07-source-declarations-1.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "d9336938356b76688abe8b5671b5566cfe053d4d60811183999b9a9f299ebfb8",
+      "oracle_sha256": "28dac90928e5b0109613c25d2626a5b9731a8d49b244ea638fcfaed72b0a5cf9",
+      "encoded_authored_expected_ast_sha256": "91567ea9cde6577c4c83c2c163337647adfc9c6fe9ec1ad4e90dcc5f32914bcb",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T07-source-declarations-4",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T07-source-declarations-4.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "19f2104601db279048d034d6c3aa992dfe2d8d30a599f592484cd2a2f1fa00e0",
+      "oracle_sha256": "85479eb343b67866a6219f8ab8865a597797cf5445f513f6ff1c14ad8e56d597",
+      "encoded_authored_expected_ast_sha256": "91567ea9cde6577c4c83c2c163337647adfc9c6fe9ec1ad4e90dcc5f32914bcb",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T07-source-declarations-16",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T07-source-declarations-16.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "4b0cd0babe3c6c7f00ac355dc6ea48257fd3be54fe76a59e442026966d7fc24b",
+      "oracle_sha256": "e09cf739d1643437e678f3f8a785eee28457167e15c8a5ce00dc22ae7df0a109",
+      "encoded_authored_expected_ast_sha256": "91567ea9cde6577c4c83c2c163337647adfc9c6fe9ec1ad4e90dcc5f32914bcb",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T09-assumption-literals-0",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T09-assumption-literals-0.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "5264b35448e7c7ab883b231a8f928adfe61641e8a68b0ad063eaf98c13cba061",
+      "oracle_sha256": "ce2224d028221b1222e201b14c7ff42b8bf5e7fc023e0d5c065752f4deaba337",
+      "encoded_authored_expected_ast_sha256": "d4c4fde48d907109a4fd51c0ac1b4d98297c98ed677e9cc483c39325a48463f5",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T09-assumption-literals-1",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T09-assumption-literals-1.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "087fad5fa8409065a5b22c3f840f57d5977006d8ac8e6d2eb775ca83919fc9ab",
+      "oracle_sha256": "36c1bb81eb28d6bd5b94270f2a3d018bcb704e831d807dbcf19487859fb42f36",
+      "encoded_authored_expected_ast_sha256": "1ade777559ff264864787cc9763900a9615d84776f91b27cd4bbca3e68b95b1f",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T09-assumption-literals-2",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T09-assumption-literals-2.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "5d6360b01f5995e78debc6a6d223f3d4f2a614028dd03873ad3b1f0798e0c486",
+      "oracle_sha256": "1852b404a90f558eff2b12a647eed0a6504a1b83071cec4d773638906ee45f04",
+      "encoded_authored_expected_ast_sha256": "214e2e9faa91d4a31bc57a79aa4e4f707de6c9f2af97b495b8cd7450fbf2c450",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T09-assumption-literals-4",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T09-assumption-literals-4.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "2e650e4321738591e83861bb2b6b45f9fa11501ab29c39633395ed4cdecdc50b",
+      "oracle_sha256": "e116eab976c31c7d12d7c64013d80cc578dd62e38575f828f09cebc69a2386e7",
+      "encoded_authored_expected_ast_sha256": "4d0956838e11a6def376bdb79f23a9764bc9df81677e6f857d1f20638faefea1",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T10-assumption-literals-0",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T10-assumption-literals-0.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "547765c4796dd8af7e5f9d1bf97243a19e98c8b4fb11e188713e797c1b245a9a",
+      "oracle_sha256": "f32602c2f087d15d6334afa0f9685781a85134e2c8c48ef302c8bd85129aa8f4",
+      "encoded_authored_expected_ast_sha256": "30a337ca4114fccc9928dc1525a4a4b95b91ff99b9c5036dc8dd773b15e4c8b2",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T10-assumption-literals-1",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T10-assumption-literals-1.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "fc56765b734cafb80acc1a39c22dfca53ab244de581cf7ba98ce1b4f59d4d4e3",
+      "oracle_sha256": "db0adc59e2fce7ad01e70c6e17cd3f5d63998a712f14f48d47296a71d2da0273",
+      "encoded_authored_expected_ast_sha256": "7c4b5e5a938d1fa7ae89def11bba846d100548c7185826476c6eef7e54a7c21d",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T10-assumption-literals-2",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T10-assumption-literals-2.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "908f315e8cbb521cbc0aee50a5c2fff135a55b7f7f388f1ae239210c9873bfaf",
+      "oracle_sha256": "90b0f6d6737ff688a4bce01e9ef3b86b3b167a8df8043db26e6fbf6f67dca4fe",
+      "encoded_authored_expected_ast_sha256": "e7f4292ede52356cfef787ebed16c4b1024060aa4dfe9758abff2c8cf9ebaa78",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T10-assumption-literals-4",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T10-assumption-literals-4.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "b8bd3041d7ef0c426dbccec4fbc6ae9188bb2f2390c1c97c7a12a7553a335110",
+      "oracle_sha256": "bf88faa2dfa1b78beb8a6e47cfb950472ce392e64f210beebad36a9ad2c80eb5",
+      "encoded_authored_expected_ast_sha256": "065249d56fb34b92262950c3272e6ef3cd9cf07373cf43a60f8dea697f0e94aa",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T13-assumption-literals-0",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T13-assumption-literals-0.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "1fb77ef0a9473f6b0130f5367209aafcb8fe0a83dc7d3cb29b14ca2a62b1d84d",
+      "oracle_sha256": "b03abfad107daf74909df4f6eb4ac98ab0ff8c61fba604ef99e8cbec4792fa6f",
+      "encoded_authored_expected_ast_sha256": "63bd44a54e0c9968384b31dbdb7f3f43705dfbf50722d308ee6b9505bf4d9d10",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T13-assumption-literals-1",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T13-assumption-literals-1.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "e789c1d09cfd0cfbed7138dd7047308cd99509bdbbbf4596ad6fc7c61a911af9",
+      "oracle_sha256": "0efde401d1c62457da589392fa618815e47c13d1a4655de1e136e7e97b397d8a",
+      "encoded_authored_expected_ast_sha256": "f1dc483072065524e84296f7dc98c288745e4d350dcbba9cb8f60e9f708032de",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T13-assumption-literals-2",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T13-assumption-literals-2.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "0ee56baa237dc5c7dfcdbc74203ebe68f74873ad7fd18f634f40ed17e70da76a",
+      "oracle_sha256": "8feefe50672528e8fea010a5c7257a4d8d3244a6233eb61b03b30725387cf1f3",
+      "encoded_authored_expected_ast_sha256": "f4de312440e7fb5748ae2f3424962fb2e1cf4636cefb7bb4c1a3970bca085ea8",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T13-assumption-literals-4",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T13-assumption-literals-4.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "3cdd621e47d75f5f6e81fe849af8ad3d7930914aaf3729c8d10bcb1cf591bd32",
+      "oracle_sha256": "c9c77b3b511cf82673be5b061136e73682df22a5b9482aad76371feadc03906a",
+      "encoded_authored_expected_ast_sha256": "7509ef298db7068c779fab92babf6853d7a6db733437b5e3c3737d9ca7b9c376",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T14-assumption-literals-0",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T14-assumption-literals-0.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "a773b8f090c09959f35a41499ee12ba767b9876a9c59d287256367ec2af74bdf",
+      "oracle_sha256": "644e4a612a24cf731e29b47b264f9696fd83618c332547fba80d36e0edfd7c3e",
+      "encoded_authored_expected_ast_sha256": "60c2d16a1c050453955f3496dceee4f93c82547a0a0a406ae2ebcfc9e3805c21",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T14-assumption-literals-1",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T14-assumption-literals-1.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "5c8642968f51f4ce1bed1ec979b45ba1cb866d966c7b71cf1da7f5da76548cc8",
+      "oracle_sha256": "6cd95a8538257025a09d0cd10ee94a40efe2d667f4de6eb8899789734dc197e9",
+      "encoded_authored_expected_ast_sha256": "f260f7ab6226ac1168d7be91b16d6fa17025bec72bd330eacf494ce807296acd",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T14-assumption-literals-2",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T14-assumption-literals-2.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "a08f7d797600681ac161fc46745d074a3a1f30d25d39050f61e33ac541a752a8",
+      "oracle_sha256": "472da3f6e8135ddf0d3932598254194be035fc2a7eec03eff784ef9ec03122d0",
+      "encoded_authored_expected_ast_sha256": "b779c97b6fb922fb290f5b1177360b13077cd27365df62f125a02ec2114df182",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T14-assumption-literals-4",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T14-assumption-literals-4.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "06be8ab3e0c7c16c33bc0a46f098a4ef0365f26eb115ec119528ba7eb0240b83",
+      "oracle_sha256": "94044978f8eea0ad82ad0d9535b5305cd538259c91a0cdae9a85587a1e296bb6",
+      "encoded_authored_expected_ast_sha256": "fe337241d2c71ae4473ee54e6d12e675bc446f73e138e4b785e80596be09921e",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T01-repeated-requests-1",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T01-repeated-requests-1.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "97f776b13670462aab228d55ce7f6cb37980c8198bf4be0578caea6f09e687f0",
+      "oracle_sha256": "af9fcb44ba49122f7be1868627c80f1448b4fcbb87702b057de0dab6307e77ec",
+      "encoded_authored_expected_ast_sha256": "0bfa976a33857b4194c4c04313c59ad0491d7c3dc439d4f4e6622fe4cd98540b",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T01-repeated-requests-2",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T01-repeated-requests-2.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "619e79b6e1d85c8c5f498e12344663849955bbd71d58cf51947ccb10ce2bff92",
+      "oracle_sha256": "4f1ae3962eda683ad997fb86a09ac51c8b020a5792bce594c02e228faafb7f68",
+      "encoded_authored_expected_ast_sha256": "60c463634935fcaefd1df0e992cc7a77d5581dd2368eaf5d919f78e9e785decf",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T01-repeated-requests-4",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T01-repeated-requests-4.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "f99a05fdd125c8d04a24a1ae46f5e96cd5b4e4c858f6e9bc1b18f3e508be7267",
+      "oracle_sha256": "173bfda01f1c5d22d58c15dfb24a82c3e483916ae9a7bdd075d725a54b7d8302",
+      "encoded_authored_expected_ast_sha256": "4ed611b78cbde1b0e4ed8e21342fe11891937f749a4d0dfce236c49d173798bd",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T01-repeated-requests-8",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T01-repeated-requests-8.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "d5bcabe31df5f4338d4302f0de274c9b77ee46718ef6eb42e3f7f4051bb8c9fc",
+      "oracle_sha256": "dc253b8dc12e247353885487e39e1d37acd882be3e574e345ef25de92cdcaf49",
+      "encoded_authored_expected_ast_sha256": "621586375557703b98d6cf4a40cf5cf2ac00f6097cd5b7caef879419048705da",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T05-repeated-requests-1",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T05-repeated-requests-1.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "14e8f0c59f4116a2bcdd47d2642c7c105ecf919635d324d92fda59cadbbd92e6",
+      "oracle_sha256": "67070728716a276eaecd7c4cff18ff0dcc364bb52d6db57b73a5d2f38acd2ffb",
+      "encoded_authored_expected_ast_sha256": "e81630ca0598c6431b743fa7e160673364345b55679be51d3b107874f9f2dc4e",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T05-repeated-requests-2",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T05-repeated-requests-2.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "8dc7bdb57671ccad59d62723396b44a0097d2b0546a0b0f14f491e79a8e46634",
+      "oracle_sha256": "2f52feddeef04dc4d3b3d195c6c314c8f153b42e971fc80a0055fd31effb0660",
+      "encoded_authored_expected_ast_sha256": "46972d83c69205f126db513830c54d0fb85d8de14dc42fb482baa1577a1a356e",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T05-repeated-requests-4",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T05-repeated-requests-4.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "466a6a0847749f3e7de5a0ab4fc51ff13d5a57c2dac91c6f5aae2f610391d627",
+      "oracle_sha256": "505f797b9ecfff1a4776ca6253d77734c79c0ab5c63bdfb8ad58760812c6522c",
+      "encoded_authored_expected_ast_sha256": "7418c0d5502b3c5aca92d59bdbfae85e2e5970378f3befa240662e14504873da",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T05-repeated-requests-8",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T05-repeated-requests-8.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "b83e7d2bd2c18424375b2fe27ab60716ffbde5c572577db18c6693a2e07cf6b8",
+      "oracle_sha256": "5146cdd54bd6f2e38ea15cdd1e7d90f054808f0a6cbdfbcbebbeab444e6b6e3d",
+      "encoded_authored_expected_ast_sha256": "6e4e75e2cbc8077884a85bee045eebd7a79db25978fe3c31c83c93c131a680e2",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T11-repeated-requests-1",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T11-repeated-requests-1.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "f7a45e216cfd2cb6de3942d2cb917558624bf9f45017151589146a05f42ec7e1",
+      "oracle_sha256": "64d71ba4d3a71f882d4e9202427c210daa9a1ca7b093cbb1d22d7bc11bf15fc5",
+      "encoded_authored_expected_ast_sha256": "641f1ce1f6c62dc38f392282e61fce6a28ad4aca2a5646989c156b24bc4cafc1",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T11-repeated-requests-2",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T11-repeated-requests-2.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "0b715245a26206c8fd2d1e2c23923a7fd4aa7afde4046c271f4b5f0cef5e5d90",
+      "oracle_sha256": "921d69811bce04282a5d1fb1126745d086882b32b5e9d142f7ff9fa0343ef375",
+      "encoded_authored_expected_ast_sha256": "2366b1353c06e36684dd41d44aa3aed74e8e1626d6c05b1152facab5f9cecf8c",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T11-repeated-requests-4",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T11-repeated-requests-4.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "dfbad6b5997ef441b43b97ae171544f6b85fec9ef762e4369494d0eacca0ad77",
+      "oracle_sha256": "77dc9c0b6235311d672f78f11c98d3f0a653a5219b3093355dbf50bc5ac1cf1a",
+      "encoded_authored_expected_ast_sha256": "c8c081d200bd7a794545690685dd66f483f7eaca61e6f75fc28001cc4bfb7b38",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T11-repeated-requests-8",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T11-repeated-requests-8.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "233c377021f7d6e5b3204649a0bf9084f64691a64d3ef21b133bf014751ed0a1",
+      "oracle_sha256": "62ac5aa37394c2aa57a4b8e42f465edb1fe444d541a404b1b00ae8c8052a7864",
+      "encoded_authored_expected_ast_sha256": "8df2061d5e66ab1d22c79772ea816e922e2a05bc087af24ccb325023c8ccd8db",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T12-repeated-requests-1",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T12-repeated-requests-1.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "32f6020d88cd26cb1d5dff4bc92269d8ff6804ba65ff2dd223808013c79350f2",
+      "oracle_sha256": "a7a2440f9ac098a04fb7c8933eb4610ce4e6725c7a7729deba6d824e89430c29",
+      "encoded_authored_expected_ast_sha256": "c7bcfda3c5dcc046545536ad53bc5ca1ab67bbffa45c60325d96e63498e1a82c",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T12-repeated-requests-2",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T12-repeated-requests-2.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "fdfa227ec921a6d3d8ad67c03d745ca10ba07e5c2719f1a417acd36110a29b71",
+      "oracle_sha256": "929f5dc45a1362f36df2d95a98581c61f27fac9776195f241e3d06e3972af5d9",
+      "encoded_authored_expected_ast_sha256": "cb9c9c33e10bf5de9249c7e62e61085ee3dad0d64af7addcc950dda7c167ba64",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T12-repeated-requests-4",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T12-repeated-requests-4.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "dcd8ead70b6f02f95a72c200a328aebaf138b0d8b38df31a702c28faee3bd349",
+      "oracle_sha256": "1ecf86657145703f790d051f38b189304b2c122933217057aa9b216c7dd2d6ca",
+      "encoded_authored_expected_ast_sha256": "5b5405458173af7fd89b2f1b1dfb2c3b32e0cc5ad905091ae1915510a3b4d0f0",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    },
+    {
+      "case_id": "T12-repeated-requests-8",
+      "command": [
+        "/tmp/p8-consumer",
+        "consume",
+        "accepted",
+        "/home/yfhe/ara/Lara/evaluation/inquiry-p8-corrected/inputs/T12-repeated-requests-8.sexp",
+        "/tmp/p8-corrected-consumer-m3vn73oo/authored-expectation.stdout"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "input_sha256": "dbd6e5d1b579a1aeffca0cb503d405319edfa0f3230b457123e6e2344b53dadf",
+      "oracle_sha256": "88cdc3d563fb841304a33cf000ebcee4854140a40242ce84f467b20c5dc8d612",
+      "encoded_authored_expected_ast_sha256": "3e14ce1e02c6a3c30a9e6e23645d86c56e7dd249bf186506edf535ee7f32dd7a",
+      "expectation_origin": "independent-finite-semantic-annotation"
+    }
+  ]
+}

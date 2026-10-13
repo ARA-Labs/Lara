@@ -1,0 +1,4 @@
+(inquiry-result 1 T01 (impact-body (impact-result (transition accepted-to-accepted) ((query-impact (atom t) ((published justified)) ((published justified)) false true)) () ((atom t)))))
+(inquiry-result 1 verify-endpoints (verification-body (verified)))
+(inquiry-result 1 T01-repeat-2 (impact-body (impact-result (transition accepted-to-accepted) ((query-impact (atom t) ((published justified)) ((published justified)) false true)) () ((atom t)))))
+(inquiry-result 1 verify-endpoints-repeat-2 (verification-body (verified)))

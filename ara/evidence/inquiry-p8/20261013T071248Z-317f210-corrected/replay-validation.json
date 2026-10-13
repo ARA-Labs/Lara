@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "source": "ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected",
+  "destination": "/tmp/lara-p8-corrected-final-replay",
+  "files_compared": 1009,
+  "byte_identical": true,
+  "driver_invocations": 0,
+  "command": [
+    "python3",
+    "scripts/inquiry-evaluate.py",
+    "--manifest",
+    "ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected/evidence/suite/MANIFEST.json",
+    "--replay",
+    "ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected",
+    "--out",
+    "/tmp/lara-p8-corrected-final-replay"
+  ],
+  "source_run_sha256": "249a3dc4fca82a2a02c7b8761b85793d01f91c548ce2c9ff8cf30a5cf1ad57f7",
+  "retained_replay_path": "ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected-replay",
+  "retention_command": [
+    "cp",
+    "-a",
+    "/tmp/lara-p8-corrected-final-replay",
+    "ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected-replay"
+  ],
+  "retained_copy_byte_identical": true
+}

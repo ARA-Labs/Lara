@@ -1,0 +1,209 @@
+{
+  "schema": "inquiry-p8-oracle",
+  "schema_version": 1,
+  "case_id": "T04",
+  "oracle_kind": "independent-finite-semantic-annotation",
+  "expected": {
+    "result_kind": "results",
+    "exit_code": 0,
+    "results": [
+      [
+        "inquiry-result",
+        "1",
+        "T04",
+        [
+          "impact-body",
+          [
+            "impact-result",
+            [
+              "transition",
+              "rejected-to-rejected"
+            ],
+            [
+              [
+                "query-impact",
+                [
+                  "atom",
+                  "t"
+                ],
+                [],
+                [],
+                "false",
+                "false"
+              ]
+            ],
+            [],
+            []
+          ]
+        ]
+      ],
+      [
+        "inquiry-result",
+        "1",
+        "verify-endpoints",
+        [
+          "verification-body",
+          [
+            "verified"
+          ]
+        ]
+      ]
+    ]
+  },
+  "semantic_specification": {
+    "kind": "impact",
+    "statuses": [
+      null,
+      null
+    ],
+    "rejections": [
+      [
+        "source",
+        [
+          "source",
+          [
+            "structural",
+            [
+              "duplicate-leaf-id",
+              "seed"
+            ]
+          ]
+        ]
+      ],
+      [
+        "source",
+        [
+          "source",
+          [
+            "structural",
+            [
+              "duplicate-leaf-id",
+              "seed"
+            ]
+          ]
+        ]
+      ]
+    ],
+    "graphs": [
+      {
+        "names": [],
+        "edges": [],
+        "query_ancestry": [],
+        "query_support": [],
+        "blocked": false,
+        "grounded_labels": {}
+      },
+      {
+        "names": [],
+        "edges": [],
+        "query_ancestry": [],
+        "query_support": [],
+        "blocked": false,
+        "grounded_labels": {}
+      }
+    ],
+    "transition": "rejected-to-rejected",
+    "expected_body": [
+      "impact-body",
+      [
+        "impact-result",
+        [
+          "transition",
+          "rejected-to-rejected"
+        ],
+        [
+          [
+            "query-impact",
+            [
+              "atom",
+              "t"
+            ],
+            [],
+            [],
+            "false",
+            "false"
+          ]
+        ],
+        [],
+        []
+      ]
+    ],
+    "locality": false,
+    "locality_reason": "relevant ancestry or acceptance differs",
+    "wire_boundary": "impact-result omits endpoint rejection payloads; annotations are not runtime telemetry",
+    "histories": [
+      []
+    ],
+    "history_search_steps": 1,
+    "row_truth_table": [
+      {
+        "endpoint": "before",
+        "accepted": false,
+        "status": null,
+        "rejection": [
+          "source",
+          [
+            "source",
+            [
+              "structural",
+              [
+                "duplicate-leaf-id",
+                "seed"
+              ]
+            ]
+          ]
+        ]
+      },
+      {
+        "endpoint": "after",
+        "accepted": false,
+        "status": null,
+        "rejection": [
+          "source",
+          [
+            "source",
+            [
+              "structural",
+              [
+                "duplicate-leaf-id",
+                "seed"
+              ]
+            ]
+          ]
+        ]
+      }
+    ],
+    "assumption_truth_table": [],
+    "process_scope": "Empty process history; endpoint analyses do not consume process assurance.",
+    "certificate_provenance": {
+      "purpose": "sanctioned API syntax producer; independently annotated report and query expectations",
+      "helper": "scripts/inquiry-impact-producer.hs",
+      "helper_sha256": "e0cc0a76c63a540d49e4e9d840acf21a51b5a47168df8678e395261fc30266aa",
+      "artifact_path": "certificates/T04.sexp",
+      "artifact_sha256": "0f9e16e50060024675ec53da0482641b0dec7eadb31cc06b77f8b0da50bd667e",
+      "api": "Lara.Process.Impact.impactCertificate . compareEndpoints . observeEndpoint",
+      "used_as_semantic_oracle": false
+    },
+    "exact_rejection_runtime_evidence": "Successful verify-impact checks supplied endpoint-report rejection against the exact endpoints; impact-result itself has no rejection field."
+  },
+  "review_provenance": {
+    "status": "independently-reviewed",
+    "author": "Codex case author",
+    "author_provenance": "ai-executed",
+    "reviewer": "Codex independent spec reviewer /root/candidate_spec",
+    "driver_output_used": false,
+    "analysis_implementation_imported": false,
+    "specification_references": [
+      "docs/theory-process.md#what-do-the-exact-inquiry-analyses-compute",
+      "docs/theory-process.md#how-is-an-edits-impact-certified",
+      "docs/theory-process.md#what-does-the-inquiry-wrapper-add"
+    ],
+    "reviewer_provenance": "ai-executed",
+    "quality_reviewer": "Original independent candidate quality reviewer; test-helper supplement by FreezeQualityReview",
+    "quality_reviewer_provenance": "ai-executed",
+    "reviewed_input_sha256": "2d796cd69ea245fe2d1c365971b31848c5346e51fef1bdc434adec6e3115482a",
+    "semantic_content_sha256": "3e397ecb0563d39e882e4a80e497981688de4316ea70af5cb872eeb45cee32dd",
+    "review_sha256": "cffb27a5625df9f5fa579b636efbd6ad101b4bfa2f66ed9fa708caa07fb752bc",
+    "quality_review_sha256": "9e580fddf92ac66ae530b6ce4e15e09dc2ea6ad841d50c7c6f42f382ab565bcb"
+  }
+}
