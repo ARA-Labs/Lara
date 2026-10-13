@@ -434,8 +434,8 @@
   },
   "freeze": {
     "manifest_path": "evaluation/inquiry-p8-corrected/MANIFEST.json",
-    "manifest_sha256": "59225ebd79b1bb6f667f9e73db3fdbce8b2277dbf3499ff31b28c24b6d9c46fd",
-    "state": "awaiting-researcher-approval",
+    "manifest_sha256": "01dfe6800964d09f4b87028931337d2be93badae63192e5f4aace80de5f7b9da",
+    "state": "frozen",
     "input_commit_location": "run.json input_commit",
     "input_commit_rule": "Commit reviewed candidate first; approval binds that existing commit and exact candidate protocol SHA256. Metadata-only freeze commit follows if authorized. Pass the final committed input identity as --input-commit; never write a commit hash into its own bytes.",
     "manifest_hash_rule": "After independent input review, hash the final MANIFEST.json bytes into protocol.json before measurement. MANIFEST.json must not hash protocol.json.",
@@ -759,9 +759,9 @@
     }
   ],
   "correction_approval": {
-    "state": "pending-researcher-approval",
+    "state": "approved",
     "path": "researcher-approval-provenance.json",
-    "sha256": null
+    "sha256": "168a2a702bded094cf0188b2ba14e9b4bfa9bd9ea0ffe3328c29a7b6ee50da33"
   },
   "data_policy": {
     "state": "requires-correction-receipt",
