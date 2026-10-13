@@ -1,0 +1,27 @@
+{
+  "schema": "inquiry-p9-researcher-approval",
+  "schema_version": 1,
+  "status": "APPROVED",
+  "provenance": "user",
+  "researcher": "Yifeng He",
+  "recorded_date": "2026-10-13",
+  "approval_text": "approve",
+  "approval_source": "Researcher message after the assistant presented amendment 1 (arm isolation) and its protocol hash",
+  "protocol_path": "evaluation/inquiry-p9/protocol.json",
+  "protocol_sha256": "b1c9e135dffafbb9b47a54b7671820c76e127d86df4331a884342c1602e24b68",
+  "protocol_commit": "181812f",
+  "approved_amendments": ["amendment-1-arm-isolation"],
+  "supersedes_approval": "researcher-approval-original.json (protocol ad2c0b233e82163b1cad75fe99f39c5e1409b1a8d14cbbaf45460ee9c93aeac9)",
+  "approved_budget": {
+    "ceiling_usd": 150.0,
+    "run_cap_usd": 8.0,
+    "scorer_cap_usd": 0.75,
+    "smoke_cap_usd": 1.0,
+    "worst_case_usd": 142.0,
+    "retries": 0,
+    "spent_before_this_record_usd": 0.0300948
+  },
+  "data_policy": "as frozen in protocol.json data_policy",
+  "execution_hold": "Pending the researcher's release: the isolation check runs only when released, and no task run starts before the isolation check passes.",
+  "measurement_started_by_this_record": false
+}

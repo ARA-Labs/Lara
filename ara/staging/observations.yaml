@@ -4431,7 +4431,26 @@ observations:
   potential_type: claim
   bound_to:
   - N416_inquiry_corrected_measurement
-  promoted: false
-  promoted_to: null
-  crystallized_via: null
+  promoted: true
+  promoted_to: logic/solution/constraints.md:checked-inquiry-evaluation
+  crystallized_via: artifact-commitment
+  stale: false
+- id: O220
+  timestamp: '2026-10-13T22:40:00Z'
+  provenance: ai-suggested
+  content: >-
+    On small authored inquiry documents, a strong agent given only public statuses can derive
+    fixed-witness, capture-binding and minimal-assumption facts from the raw source. The diagnostics
+    added value where the status view invites a wrong summary: whole-family instability hidden
+    behind one accepted row, and certified versus uncertified unchanged edits. Without a
+    certificate the agent stays conservative and cannot separate those two edits.
+  context: >-
+    P9 feasibility run, 8 tasks x 2 arms, one model, one repetition. The researcher has not yet
+    commented on these results.
+  potential_type: claim
+  bound_to:
+  - N419_inquiry_p9_live_run
+  promoted: true
+  promoted_to: logic/claims.md:C58
+  crystallized_via: verbal-affirmation
   stale: false

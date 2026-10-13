@@ -1,0 +1,17 @@
+00-P9-06-status: exit=0 timeout=False cost=0.0764984 turns=2 spent=0.16
+01-P9-06-inquiry: exit=0 timeout=False cost=0.0763324 turns=2 spent=0.24
+02-P9-07-inquiry: exit=0 timeout=False cost=0.0533524 turns=2 spent=0.29
+03-P9-07-status: exit=0 timeout=False cost=0.053986599999999996 turns=2 spent=0.35
+04-P9-01-status: exit=0 timeout=False cost=0.1275788 turns=2 spent=0.47
+05-P9-01-inquiry: exit=0 timeout=False cost=0.1457206 turns=2 spent=0.62
+06-P9-04-inquiry: exit=0 timeout=False cost=0.0638176 turns=2 spent=0.68
+07-P9-04-status: exit=0 timeout=False cost=0.06002020000000001 turns=2 spent=0.74
+08-P9-03-status: exit=0 timeout=False cost=0.0788896 turns=2 spent=0.82
+09-P9-03-inquiry: exit=0 timeout=False cost=0.08342000000000001 turns=2 spent=0.91
+10-P9-05-inquiry: exit=0 timeout=False cost=0.0817042 turns=2 spent=0.99
+11-P9-05-status: exit=0 timeout=False cost=0.0776466 turns=2 spent=1.07
+12-P9-02-status: exit=0 timeout=False cost=0.0876884 turns=2 spent=1.15
+13-P9-02-inquiry: exit=0 timeout=False cost=0.0929504 turns=2 spent=1.25
+14-P9-08-inquiry: exit=0 timeout=False cost=0.1566634 turns=4 spent=1.40
+15-P9-08-status: exit=0 timeout=False cost=0.0852862 turns=2 spent=1.49
+run exit=0

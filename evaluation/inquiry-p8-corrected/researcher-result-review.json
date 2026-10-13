@@ -1,0 +1,17 @@
+{
+  "schema": "inquiry-p8-researcher-result-review",
+  "schema_version": 1,
+  "status": "APPROVED",
+  "provenance": "user",
+  "researcher": "Yifeng He",
+  "recorded_date": "2026-10-13",
+  "approval_text": "I approved both P8 and P9",
+  "approval_source": "Researcher message in the conversation that started the P9 branch, after the assistant summarized the corrected P8 report and its pending researcher review",
+  "report_path": "ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected/report.md",
+  "report_sha256": "23366d69fbc3173b31ddc65a6280855b8eff0018fe5259637c274602c01503eb",
+  "report_commit": "cc5ca82225abed598993fea69223262ce03ed80e",
+  "disposition": "accepts the report and its claim limits; no scope objection recorded",
+  "p9_decision_row": "Correct and complete results with usable costs and diagnostic contrasts: protocol drafting only",
+  "p9_protocol_approval": "not this record; see evaluation/inquiry-p9/researcher-approval.json",
+  "additional_p8_measurement_authorized": false
+}

@@ -1915,3 +1915,14 @@ entries:
   - "Reconcile only the current evaluation constraint: measured completion and consumed budget replace pending approval. No new definition or Lean theorem is introduced."
   - Stage O219 without promotion. A complete authored finite run and independent AI review are not researcher affirmation of workflow benefit. C57 soundness scope and status remain unchanged.
   - Move settled protocol/replay contracts to subject docs; delete the executed correction plan and retain only human result review and P9 work in the combined living plan and issue22.
+- turn: 2026-10-13_001#3
+  notes:
+  - Record N417 (P8 approval and P9 freeze, user-revised choices) and N418 (pre-outcome amendment) as decisions, and N419 as the experiment. The inconclusive isolation check is folded into N419, not a separate dead_end, because no approach was abandoned.
+  - Promote O219 via artifact-commitment, since protocol.json cites the P8 decision row as its justification. The researcher's P8 approval is affirmation of the report, not a first-person endorsement of O219's wording, so its provenance stays ai-suggested.
+  - Stage O220 without promotion. The researcher has not commented on P9 results, and 8 tasks with one model cannot support a generalized claim yet.
+  - No change to C57. P9 measures workflow feasibility, not the wrapper's soundness or conformance.
+  - '"No need to cap the usage" is recorded in key_context but was not applied, because changing the caps would need a new hash and approval.'
+- turn: 2026-10-13_001#4
+  notes:
+  - Crystallize O220 to C58 via verbal affirmation plus empirical resolution, since the researcher commented on the N419 result and said "sure" to the design reading. Moving straight to supported is allowed because both signals fired in the same turn. Provenance is user-revised because the researcher affirmed the framing but not the exact wording.
+  - C58's Statement is hedged as shown once, and its Conditions exclude statistical and efficacy readings, matching the researcher's PL framing. C57 is unchanged.

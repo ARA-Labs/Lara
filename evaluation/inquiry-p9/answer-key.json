@@ -1,0 +1,117 @@
+{
+  "schema": "inquiry-p9-answer-key",
+  "schema_version": 1,
+  "basis": "Derived from the independently reviewed P8 corrected oracles; checked mechanically by scripts/inquiry-p9.py check-key against those oracles' expected results.",
+  "tasks": [
+    {
+      "task_id": "P9-01",
+      "p8_case": "T10",
+      "p8_contrast": "fixed-witness audit",
+      "input_sha256": "547765c4796dd8af7e5f9d1bf97243a19e98c8b4fb11e188713e797c1b245a9a",
+      "p8_oracle_sha256": "a1ca60917a66eb7784bce9e2c8aeb382af68dbf0290ac14d0a53456cbd49a717",
+      "expected": {
+        "witness_passes_every_completion": false,
+        "minimal_assumption_sets": [
+          [
+            "s0=0"
+          ],
+          [
+            "s0!=1"
+          ]
+        ]
+      }
+    },
+    {
+      "task_id": "P9-02",
+      "p8_case": "T15",
+      "p8_contrast": "capture binding",
+      "input_sha256": "6f7e353c1f26e69fe7dbc9f09fe809e4d8bd45029ede981f5c362f0316d6db87",
+      "p8_oracle_sha256": "06a97fc25b65f973a5ac0f922a081046e1b261f841113eb6f94ef91d6c71c414",
+      "expected": {
+        "witness_passes_every_completion": false,
+        "failing_completion_events": [
+          "wrong-capture"
+        ]
+      }
+    },
+    {
+      "task_id": "P9-03",
+      "p8_case": "T05",
+      "p8_contrast": "blocked conditional",
+      "input_sha256": "14e8f0c59f4116a2bcdd47d2642c7c105ecf919635d324d92fda59cadbbd92e6",
+      "p8_oracle_sha256": "422075bef6c8b25f2aaaa92f3e6b5b0b75b3c207666df0e747f3e6e39ff9b2fd",
+      "expected": {
+        "after_status": "evidence-blocked justified",
+        "status_changed": true,
+        "publishable_as_observed_evidence": false
+      }
+    },
+    {
+      "task_id": "P9-04",
+      "p8_case": "new-attacker",
+      "p8_contrast": "status-changing edit",
+      "input_sha256": "9d9c4d2bc28739d82f5d0b14f80a85a60a3440d3514e27fa3513b03af5edc993",
+      "p8_oracle_sha256": "b9b3437498e358a688ee8abc0421e41c7f42fe24a794506707c89563bf5716d0",
+      "expected": {
+        "after_status": "published defeated",
+        "status_changed": true,
+        "certified_unaffected_by_edit": false
+      }
+    },
+    {
+      "task_id": "P9-05",
+      "p8_case": "T07",
+      "p8_contrast": "unchanged without certificate",
+      "input_sha256": "55f4c94276527b4cccd7e5e5552f9ddcf36864cdbb66a07bbfb5d3d12a962839",
+      "p8_oracle_sha256": "03a015ed79f711abf96684e473f08eda1a98c89e4fe0cc53b53c7ff5993f18ba",
+      "expected": {
+        "status_changed": false,
+        "certified_unaffected_by_edit": false,
+        "rereview_may_be_skipped": false
+      }
+    },
+    {
+      "task_id": "P9-06",
+      "p8_case": "T06",
+      "p8_contrast": "certified unchanged",
+      "input_sha256": "3b553951d0db48e6ef3b9e21a1360c248a101780b77ac176834c8c0e041c608e",
+      "p8_oracle_sha256": "287b6291d5cd5ee688d57783f8aa752823629464606f176a982b86360c90455b",
+      "expected": {
+        "status_changed": false,
+        "certified_unaffected_by_edit": true,
+        "rereview_may_be_skipped": true
+      }
+    },
+    {
+      "task_id": "P9-07",
+      "p8_case": "source-rejections",
+      "p8_contrast": "rejected alternatives",
+      "input_sha256": "7855614c13c9a319e1c5f623ce3ce815b70974113e4a743b7893d78a59f8967b",
+      "p8_oracle_sha256": "0d7db6a352878118ade0e9bb94f2b9815db3cc171b149f003b0ecf8f72745a11",
+      "expected": {
+        "accepted_completions": 1,
+        "total_completions": 4,
+        "status_stable_across_family": false,
+        "may_report_as_settled": false
+      }
+    },
+    {
+      "task_id": "P9-08",
+      "p8_case": "minimal-conditions",
+      "p8_contrast": "minimal assumptions",
+      "input_sha256": "02a77d9b3390ec987ec0c808fa54c09947413bcdc1c9ee7baf8371f08b37bb10",
+      "p8_oracle_sha256": "2f047fce6e8df3ea73adfb2945f3230b63fce43b79695cf1e4351e79efa5531e",
+      "expected": {
+        "minimal_assumption_sets": [
+          [
+            "s0=1"
+          ],
+          [
+            "s1=1",
+            "s2=1"
+          ]
+        ]
+      }
+    }
+  ]
+}
