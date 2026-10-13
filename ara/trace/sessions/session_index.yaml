@@ -768,9 +768,9 @@ sessions:
 
 - id: 2026-10-13_001
   date: '2026-10-13'
-  summary: Corrected P8 completed and replayed after authorized provenance closure; original failed evidence retained. Researcher result review and separate P9 approval remain open.
-  turn_count: 2
-  events_count: 8
+  summary: Corrected P8 completed, replayed and researcher-approved; the approved P9 paired live loop completed (inquiry 8/8 vs status 6/8 primary correct, feasibility only).
+  turn_count: 3
+  events_count: 13
   claims_touched:
   - C57
-  open_threads: 3
+  open_threads: 4

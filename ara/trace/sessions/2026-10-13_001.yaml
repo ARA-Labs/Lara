@@ -2,9 +2,9 @@ session:
   id: 2026-10-13_001
   date: '2026-10-13'
   started: 2026-10-13T00:00
-  last_turn: '2026-10-13T07:30:33Z'
-  turn_count: 2
-  summary: Corrected P8 completed and replayed after authorized provenance closure; original failed evidence retained. Researcher result review and separate P9 approval remain open.
+  last_turn: '2026-10-13T22:45:00Z'
+  turn_count: 3
+  summary: Corrected P8 completed, replayed and researcher-approved; the approved P9 paired live loop completed (inquiry 8/8 vs status 6/8 primary correct, feasibility only).
 events_logged:
 - turn: 1
   type: decision
@@ -54,6 +54,36 @@ events_logged:
   routing: staged
   provenance: ai-suggested
   summary: Diagnostic contrasts support bounded workflow protocol design, not an efficacy claim.
+- turn: 3
+  type: decision
+  id: N417_inquiry_p9_protocol_frozen
+  routing: direct
+  provenance: user-revised
+  summary: P8 report approved; P9 protocol frozen with researcher-chosen model, size, budget and scoring.
+- turn: 3
+  type: decision
+  id: N418_inquiry_p9_arm_isolation_amendment
+  routing: direct
+  provenance: user-revised
+  summary: Pre-outcome amendment 1 fixes each arm's view in its wrapper after the harness check.
+- turn: 3
+  type: experiment
+  id: N419_inquiry_p9_live_run
+  routing: direct
+  provenance: ai-executed
+  summary: P9 16/16 runs; primary correct inquiry 8/8 vs status 6/8; isolation held; $1.758 spent.
+- turn: 3
+  type: observation
+  id: O219
+  routing: crystallized
+  provenance: ai-suggested
+  summary: P8 contrasts justify protocol design only; committed as the P9 protocol's justification.
+- turn: 3
+  type: observation
+  id: O220
+  routing: staged
+  provenance: ai-suggested
+  summary: Status-only Opus derives most diagnostics from the raw document; diagnostics help on hidden instability and certification.
 ai_actions:
 - turn: 1
   action: "Continue the authorized implementation across the UTC day boundary. Complete corrective Tasks\
@@ -89,6 +119,19 @@ ai_actions:
   - ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected/
   - ara/evidence/inquiry-p8/20261013T071248Z-317f210-corrected-replay/
   - ara/evidence/inquiry-p8/preflight-20261013-corrected/
+  - docs/evaluation.md
+  - docs/implementation.md
+  - plans/inquiry-p8-p9.md
+- turn: 3
+  action: Record P8 result approval; freeze P9 protocol, tasks, answer key and harness; apply approved amendment 1; run the harness and isolation checks, the 16 runs, the transcript audit and blind scoring; write the report; fold the contract into docs and delete the executed plan.
+  provenance: ai-executed
+  files_changed:
+  - evaluation/inquiry-p8-corrected/researcher-result-review.json
+  - evaluation/inquiry-p9/
+  - scripts/inquiry-p9.py
+  - scripts/inquiry_p9_views.py
+  - scripts/inquiry_p9_audit.py
+  - ara/evidence/inquiry-p9/
   - docs/evaluation.md
   - docs/implementation.md
   - plans/inquiry-p8-p9.md
@@ -186,6 +229,21 @@ logic_revisions:
     - **Last revised:** 2026-10-13 (2026-10-13_001#2)
   signal: user-directive
   provenance: ai-suggested
+- turn: 3
+  entry: checked-inquiry-evaluation
+  field: Status, Execution boundary, Claim boundary, Sources, Evidence, Open, Last revised
+  before: |
+    - **Status:** The researcher-approved corrected P8 attempt completed and its capture-only replay is byte-identical. The original sealed incomplete attempt remains retained. Researcher review of the corrected report remains open; P9 has no approved live protocol or budget.
+    - **Execution boundary:** The approved single-attempt budget is consumed. No additional measurement is authorized. Retain the frozen inputs, failures and complete corrected captures; any further attempt needs a separately approved protocol/budget revision. No legacy corpus, golden, version, ceiling or freeze changes are authorized.
+    - **Claim boundary:** Modeled capture admissions do not establish physical capture, and descriptive finite costs or diagnostic contrasts do not establish agent success or scientific discovery. A live workflow needs its own researcher-approved task, comparison, data policy and budget.
+    - **Sources:** evaluation/inquiry-p8-corrected/researcher-approval-provenance.json; (rest unchanged)
+    - **Evidence:** trace/exploration_tree.yaml:N415_inquiry_provenance_freeze; trace/exploration_tree.yaml:N416_inquiry_corrected_measurement; (rest unchanged)
+    - **Open:** Issue #22 tracks researcher result review and the separately approved live evaluation.
+    - **Last revised:** 2026-10-13 (2026-10-13_001#2)
+  after: |
+    Status records P8 approval and the completed P9 run; Execution boundary covers the P9 ledger and no-retry rule; Claim boundary bounds P9 to feasibility; Sources add researcher-result-review.json and researcher-approval.json quotes; Evidence adds N419 and the P9 report; Open says issue #22 closes with the P9 report; Last revised 2026-10-13 (2026-10-13_001#3). Exact text: logic/solution/constraints.md, Checked-inquiry evaluation.
+  signal: empirical-resolution
+  provenance: ai-suggested
 key_context:
 - turn: 1
   excerpt: Latest researcher source-axis reply repeats the already-recorded group clarification in N404;
@@ -196,8 +254,11 @@ key_context:
     1aaf2eb1e7758fea800e0046e4b01d5f176823ef44f3fe2f98bc4dedf0a6dd22. Fresh budget approval remains required.
 - turn: 2
   excerpt: 'Researcher instruction: "checkout a new branch and complete the next, finish and pr directly". It follows the issue53/freeze/single-attempt handoff and does not authorize P9 or retries.'
+- turn: 3
+  excerpt: 'Researcher: "I approved both P8 and P9"; then chose Opus 5.5, 8x2x1, $150/30 min, oracle plus blind AI scorer; "approve it. do not run the harness check yet."; amendment "approve"; "go ahead and finish all. no need to cap the usage" (caps kept as approved).'
 open_threads:
-- 'Issue #22: researcher review of completed corrected P8 report, then separately approve and run P9.'
+- 'Issue #22: closes with the P9 PR; later conditional work needs new designs.'
 - 'Issue #39: infinite-horizon Ville and online FDR over complete ledgers.'
 - 'Issue #46: prove or revise search-step ceiling rationale.'
+- 'O220 awaits researcher comment on the P9 interpretation.'
 ai_suggestions_pending: []

@@ -11611,3 +11611,64 @@ tree:
   - N415_inquiry_provenance_freeze
   - N411_inquiry_sparse_refinement
   - N412_inquiry_pair_semantic_stop
+- id: N417_inquiry_p9_protocol_frozen
+  type: decision
+  title: Record P8 result approval and freeze the paired P9 feasibility protocol
+  provenance: user-revised
+  timestamp: '2026-10-13T22:00:00Z'
+  choice: >-
+    Researcher approved the corrected P8 report. The researcher chose claude-opus-5-5 via claude -p,
+    8 tasks x 2 arms x 1 repetition, a $150 ceiling with 30 min/task, and oracle key plus
+    arm-blind AI scorer. Tasks are eight P8 cases chosen for measured contrasts; the answer key
+    is derived from the P8 oracles. The arms differ only in feedback: status view vs status view
+    plus full lara inquiry output. Protocol SHA256 ad2c0b23 was approved with an execution hold.
+  alternatives:
+  - 'Sonnet 5.5 or Haiku 5.5 agent (rejected by researcher)'
+  - '12 tasks x 2 x 3 repetitions or pilot+evaluation split (rejected by researcher)'
+  - 'Researcher-blind or oracle-only scoring (rejected by researcher)'
+  evidence:
+  - evaluation/inquiry-p8-corrected/researcher-result-review.json
+  - evaluation/inquiry-p9/protocol.json
+  - evaluation/inquiry-p9/researcher-approval-original.json
+  status: resolved
+  also_depends_on:
+  - N416_inquiry_corrected_measurement
+- id: N418_inquiry_p9_arm_isolation_amendment
+  type: decision
+  title: Amend P9 before outcomes so each arm's view is fixed in its own wrapper
+  provenance: user-revised
+  timestamp: '2026-10-13T22:12:00Z'
+  choice: >-
+    The first harness call showed that the CLI auto-allows read-only commands inside the workspace.
+    The env-var-selected view therefore risked arm leakage. Amendment 1 hardcodes the view per
+    wrapper and adds one isolation check. Protocol b1c9e135 was approved by the researcher. The
+    researcher's later "no need to cap" was not applied, because changing the caps would have
+    required a further amendment.
+  alternatives:
+  - 'Run as frozen and report the gap as a limitation (rejected: a leak would void the comparison)'
+  evidence:
+  - ara/evidence/inquiry-p9/smoke/
+  - evaluation/inquiry-p9/researcher-approval.json
+  status: resolved
+  also_depends_on:
+  - N417_inquiry_p9_protocol_frozen
+- id: N419_inquiry_p9_live_run
+  type: experiment
+  title: Run, audit and blind-score the approved P9 live loop
+  provenance: ai-executed
+  timestamp: '2026-10-13T22:26:33Z'
+  result: >-
+    16/16 agent runs completed with no timeout or missing answer. Primary correct: inquiry arm 8/8,
+    status arm 6/8. Discordant pairs: P9-06 (status-arm under-claim, no locality certificate) and
+    P9-07 (status-arm unsupported assurance, dropped rejected completions). Exact McNemar p = 0.5
+    (descriptive). The isolation check was inconclusive because its agent declined the probes; the
+    post-hoc transcript audit found isolation held, and one unlisted piped command was refused by
+    the CLI. Total spend $1.758 of the $150 ceiling.
+  evidence:
+  - ara/evidence/inquiry-p9/run/summary.json
+  - ara/evidence/inquiry-p9/run/isolation-audit.json
+  - ara/evidence/inquiry-p9/spend.jsonl
+  - ara/evidence/inquiry-p9/report.md
+  status: resolved
+  also_depends_on:
+  - N418_inquiry_p9_arm_isolation_amendment
