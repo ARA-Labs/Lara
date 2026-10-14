@@ -222,8 +222,9 @@ reading, the demo write-ups reconstruct checked artifacts as a
 [mechanical review comments](docs/demos/d2-mechanical-reviewer.md),
 [cross-paper abstract excerpts](docs/demos/d3-agreement-map.md), a
 [philosophy-of-mathematics debate](docs/demos/d4-philmath.md),
-[withdrawing an assumed axiom](docs/demos/d5-axiom-withdrawal.md), and
-[a checked statistical method and its limits](docs/demos/d6-bhl-method-support.md).
+[withdrawing an assumed axiom](docs/demos/d5-axiom-withdrawal.md),
+[a checked statistical method and its limits](docs/demos/d6-bhl-method-support.md), and
+[a research record that omits part of what happened](docs/demos/d7-process-precommitment.md).
 
 ## Checking evidence files in a package
 
@@ -337,6 +338,8 @@ all of them agree. The Haskell library and `lara inquiry FILE` evaluate the
 separately versioned `inquiry-input 1` wrapper over finite source choices.
 Lean supplies the independent reference semantics and proofs. The standalone
 `process-input 1` runner remains Lean-only; neither entry point adds `.lara` syntax.
+[The D7 demo](docs/demos/d7-process-precommitment.md) runs one preregistration
+record three ways through `lara inquiry`.
 
 ## Quick start
 

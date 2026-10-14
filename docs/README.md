@@ -28,7 +28,7 @@ These layers do not establish empirical truth. A grounded support status, an acc
 
 ## Where are examples and evidence?
 
-The [worked-example catalogue](../examples/README.md) lists executable artifacts. The prose walkthroughs cover [rebuttal replay](demos/d1-rebuttal-replay.md), [mechanical review](demos/d2-mechanical-reviewer.md), [cross-paper agreement](demos/d3-agreement-map.md), [philosophical argument](demos/d4-philmath.md), [axiom withdrawal](demos/d5-axiom-withdrawal.md), and [statistical-method support and its limits](demos/d6-bhl-method-support.md).
+The [worked-example catalogue](../examples/README.md) lists executable artifacts. The prose walkthroughs cover [rebuttal replay](demos/d1-rebuttal-replay.md), [mechanical review](demos/d2-mechanical-reviewer.md), [cross-paper agreement](demos/d3-agreement-map.md), [philosophical argument](demos/d4-philmath.md), [axiom withdrawal](demos/d5-axiom-withdrawal.md), [statistical-method support and its limits](demos/d6-bhl-method-support.md), and [entitlement from an incomplete research record](demos/d7-process-precommitment.md).
 
 | Reference | Contents |
 | --- | --- |

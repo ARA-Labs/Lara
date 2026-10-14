@@ -105,6 +105,16 @@ test histories. Its witnesses live in the Lean examples
 [`BHLPartialRecord.lean`](../lean/Lara/Examples/BHLPartialRecord.lean)), not in
 `.lara` sources, because BHL adds no surface syntax.
 
+The research-process side has one too:
+[D7](../docs/demos/d7-process-precommitment.md) writes a small preregistration
+record three ways in
+[`process-precommitment/`](process-precommitment/): no completeness
+statement, the author's own, and an admitted server log. `lara inquiry` answers
+`unknown`, `unknown` and `certainTrue`. The documents are `inquiry-input 1`
+files with committed `.expected` goldens, checked by
+`CliSpec.prop_cliProcessPrecommitmentDemo`; the process layer adds no `.lara`
+syntax either.
+
 ## Relationship to the planned E-series (`docs/implementation.md#worked-examples`)
 
 The plan's E1–E3 / R1–R3 are the paper's coverage-matrix set. These two are complementary teaching
