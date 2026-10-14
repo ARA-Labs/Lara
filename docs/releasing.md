@@ -88,6 +88,7 @@ metatheory (search-step ceiling, Ville's inequality, online FDR).
 | 0.3.10 | `6397e69` | #58 theory(process): prove e-lond and lord++ fdr over complete ordered ledgers |
 | 0.3.11 | `d177bbb` | #59 theory(process): weaken lord++ fdr to null independence |
 
-These merges predate the per-PR bump, so the version files at those commits
-still read `0.2.0`; the `lara.cabal`/`CITATION.cff` bump to `0.3.11` landed
-afterwards. `ac7edad` (pushed without a PR) does not bump.
+Merges up to `0.3.11` predate the per-PR bump, so the version files at those
+commits still read `0.2.0`; `0.3.12`, the PR that adopts the rule, is the first
+to carry its own version. `ac7edad` (pushed without a PR) does not bump. Tags
+mark minor versions and the current release (`v0.3.0`, `v0.3.12`).
