@@ -1,0 +1,2 @@
+(inquiry-result 1 at-most-6 (history-verdict (history-count 1) (answer at-most-6 certainTrue (completions 1))))
+(inquiry-result 1 at-most-5 (history-verdict (history-count 1) (answer at-most-5 certainFalse (completions 1))))

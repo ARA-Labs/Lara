@@ -1,0 +1,2 @@
+(inquiry-result 1 at-most-6 (history-verdict (history-count 8) (answer at-most-6 unknown (completions 8) (holds (history task-spec eN250 eN251 eN252 eN253 eN254 eN255)) (fails (history task-spec eN250 eN251 eN252 eN253 eN254 eN255 unrecorded)))))
+(inquiry-result 1 at-most-5 (history-verdict (history-count 8) (answer at-most-5 certainFalse (completions 8))))

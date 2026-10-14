@@ -1573,6 +1573,20 @@ prop_cliProcessPrecommitmentDemo = once $ ioProperty $ do
       actual <- runLaraIn [] ["inquiry",dir ++ name ++ ".sexp"]
       pure (counterexample name (actual === (ExitSuccess,expected,"")))
 
+-- | The process-corpus pilot (evaluation/process-corpus-pilot/, #63): one
+-- hand-decoded corpus run under two readers, plus the unordered document the
+-- declarations ceiling refuses.
+prop_cliProcessCorpusPilot :: Property
+prop_cliProcessCorpusPilot = once $ ioProperty $ do
+  checks <- traverse check [("strict",ExitSuccess),("lax",ExitSuccess),("unordered",ExitFailure 1)]
+  pure (conjoin checks)
+  where
+    dir = "evaluation/process-corpus-pilot/"
+    check (name,code) = do
+      expected <- readFile (dir ++ name ++ ".expected")
+      actual <- runLaraIn [] ["inquiry",dir ++ name ++ ".sexp"]
+      pure (counterexample name (actual === (code,expected,"")))
+
 prop_cliInquiryBoundary :: Property
 prop_cliInquiryBoundary = once $ ioProperty $ do
   usageCases <- traverse (runLaraIn [] . ("inquiry":)) [[],["file","extra"],["file","--help"]]
@@ -1617,6 +1631,7 @@ cliSpecProps =
   , ("cli usage exit 2", quickCheckResult prop_cliUsage)
   , ("cli inquiry mandatory real analyses and certificate smokes match frozen bytes", quickCheckResult prop_cliInquirySmokes)
   , ("cli inquiry D7 precommitment demo matches its goldens", quickCheckResult prop_cliProcessPrecommitmentDemo)
+  , ("cli inquiry process-corpus pilot matches its goldens", quickCheckResult prop_cliProcessCorpusPilot)
   , ("cli inquiry usage IO whole UTF8 and parser boundary have atomic stdout", quickCheckResult prop_cliInquiryBoundary)
   , ("cli .lara accept A exit 0 + bytes", quickCheckResult prop_cliLaraAcceptA)
   , ("cli .lara accept B exit 0 + bytes", quickCheckResult prop_cliLaraAcceptB)
