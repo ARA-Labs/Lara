@@ -157,11 +157,12 @@ A partial-order record (`OrderRecord`) lists reported events and explicit preced
 | `mem_onlineRun`, `onlineRun_filter`, `onlineRun_subset_range` | a test is rejected exactly when its test accepts the level set by the earlier rejections; the run's rejections below `n` are the run of the first `n` tests |
 | `elond_fdp_le`, `elond_fdr` | e-LOND rejects test `n` when `e n ≥ 1 / (α γ n (D + 1))`, where `D` counts the rejections before `n`; its FDP is pathwise at most `Σ_{null} α γ n e n`, so FDR is at most `α` under arbitrary dependence when null e-values have expectation at most one |
 | `onlineRun_congr`, `onlineRun_mono`, `onlineRun_couple` | the run before `n` reads only earlier p-values; with a level monotone in past rejections, smaller p-values reject at least as much; setting a rejected test's p-value to zero changes no rejection |
-| `coordinate_bound` | under a product law, integrating out one coordinate whose p-value is calibrated bounds the weighted mass of `p ≤ F` by `𝔼[F G]` when `F` and `G` read only the other coordinates |
-| `monotone_online_fdr` | a p-value rule whose level is nonnegative and monotone in past rejections, and whose levels sum to at most `α · max(R, 1)` on every path (GAI++'s `FDP̂ ≤ α`), controls FDR at `α` when p-values are independent and nonnegative and null p-values are calibrated |
-| `lord_nonneg`, `lord_mono`, `lord_fdpHat`, `lord_fdr` | LORD++ with `0 ≤ W₀ ≤ α` meets those three conditions, so it controls FDR at `α` under independence |
+| `splitsAt_of_product` | a product law splits at every coordinate (`SplitsAt`): the joint mass is that coordinate's law times a law of the others |
+| `coordinate_bound` | when the law splits at a coordinate whose p-value is calibrated, integrating it out bounds the weighted mass of `p ≤ F` by `𝔼[F G]` when `F` and `G` read only the other coordinates |
+| `monotone_online_fdr` | a p-value rule whose level is nonnegative and monotone in past rejections, and whose levels sum to at most `α · max(R, 1)` on every path (GAI++'s `FDP̂ ≤ α`), controls FDR at `α` when p-values are nonnegative and every null p-value is calibrated and independent of the other tests (`IndependentNull`); non-null p-values may depend on each other arbitrarily |
+| `lord_nonneg`, `lord_mono`, `lord_fdpHat`, `lord_fdr` | LORD++ with `0 ≤ W₀ ≤ α` meets those three conditions, so it controls FDR at `α` under that null independence, the condition of Ramdas et al. (2017) |
 
-`geomWeight_premises` shows that geometric weights `γ k = 1/2^(k+1)` meet the weight premises. `lord_replay_anticonservative` replays LORD++ at `α = 1/10`, `W₀ = 1/20` after a first rejection. The complete ledger gives the next test level `3/160`; omitting the intervening non-rejection gives `3/80`.
+`geomWeight_premises` shows that geometric weights `γ k = 1/2^(k+1)` meet the weight premises. `lord_replay_anticonservative` replays LORD++ at `α = 1/10`, `W₀ = 1/20` after a first rejection. The complete ledger gives the next test level `3/160`; omitting the intervening non-rejection gives `3/80`. `coupled_lord_fdr` applies `lord_fdr` to a null independent of two non-nulls that always agree; `coupled_not_product` shows that law is not a product of any marginals.
 
 ## How does entitlement survive revision?
 

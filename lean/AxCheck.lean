@@ -6900,7 +6900,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.contradictory_constraints_inconsistent
 #print axioms Lara.Process.orderCompatible_mono
 
--- lean/Lara/Examples/ProcessStatistics.lean: 21 public theorems.
+-- lean/Lara/Examples/ProcessStatistics.lean: 24 public theorems.
 #print axioms Lara.Examples.ProcessStatistics.evalue_calibrated
 #print axioms Lara.Examples.ProcessStatistics.countBounded_determinate
 #print axioms Lara.Examples.ProcessStatistics.countBounded_rejection_valid
@@ -6922,6 +6922,9 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Examples.ProcessStatistics.geomWeight_sum
 #print axioms Lara.Examples.ProcessStatistics.geomWeight_premises
 #print axioms Lara.Examples.ProcessStatistics.lord_replay_anticonservative
+#print axioms Lara.Examples.ProcessStatistics.coupled_independentNull
+#print axioms Lara.Examples.ProcessStatistics.coupled_not_product
+#print axioms Lara.Examples.ProcessStatistics.coupled_lord_fdr
 
 -- lean/Lara/Process/Statistics.lean: 16 public theorems.
 #print axioms Lara.Process.Statistics.markov
@@ -6947,7 +6950,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.Statistics.ville_anytime
 #print axioms Lara.Process.Statistics.ville_stopped
 
--- lean/Lara/Process/OnlineFDR.lean: 19 public theorems.
+-- lean/Lara/Process/OnlineFDR.lean: 20 public theorems.
 #print axioms Lara.Process.Statistics.mem_onlineRun
 #print axioms Lara.Process.Statistics.onlineRun_filter
 #print axioms Lara.Process.Statistics.onlineRun_subset_range
@@ -6959,6 +6962,7 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.Statistics.onlineRun_congr
 #print axioms Lara.Process.Statistics.onlineRun_mono
 #print axioms Lara.Process.Statistics.onlineRun_couple
+#print axioms Lara.Process.Statistics.splitsAt_of_product
 #print axioms Lara.Process.Statistics.coordinate_bound
 #print axioms Lara.Process.Statistics.pvecZero_eq
 #print axioms Lara.Process.Statistics.monotone_online_fdr

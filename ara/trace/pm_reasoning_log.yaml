@@ -1941,3 +1941,7 @@ entries:
   - Record N423 as an experiment (proof plus gates). No claim or staged observation, because e-LOND and LORD++ FDR control are standard results now mechanized, not interpretive research claims.
   - Record the product-law premise as stronger than the literature in N423 so the gap stays visible. No issue is opened for weakening it, because the researcher did not ask for that generality.
   - Drop #39 from the constraints Open line, since both halves have landed on their branches.
+- turn: 2026-10-14_001#3
+  notes:
+  - Record N424 as an experiment (proof plus gates) depending on N423. It closes the product-law gap N423 recorded; N423 itself is left as written because the trace is append-only.
+  - No claim, staged observation or constraints edit. The weaker premise is a mechanized standard result documented in docs/theory-process.md, and the constraints Open line never mentioned the premise.

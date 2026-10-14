@@ -778,8 +778,8 @@ sessions:
 
 - id: 2026-10-14_001
   date: '2026-10-14'
-  summary: Issue #39 resolved in two stacked PRs; infinite-horizon Ville and e-LOND/LORD++ FDR over complete ordered ledgers proved with local gates passing.
-  turn_count: 2
-  events_count: 3
+  summary: Issue #39 resolved in two PRs; infinite-horizon Ville and e-LOND/LORD++ FDR over complete ordered ledgers proved with local gates passing; LORD++ premise weakened to null independence.
+  turn_count: 3
+  events_count: 4
   claims_touched: []
   open_threads: 1
