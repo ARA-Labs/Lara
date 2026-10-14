@@ -33,6 +33,46 @@ commit on `main` verbatim — a non-semantic PR title lands as a non-semantic
 merge commit. Every commit follows the format above, including the pre-squash
 commits inside a PR; both rules apply all the time.
 
+## Versioning
+
+The project follows [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`).
+The version is stored in `lara.cabal` (`version`, with a fourth `.0`) and in
+`CITATION.cff` (`version` and `date-released`); keep the two in step.
+
+- **Patch version** (`0.3.x` → `0.3.x+1`): bump for every PR that changes
+  functional code. Each such PR is squash-merged into `main`.
+- **Minor version** (`0.x` → `0.x+1`): bump for a PR that adds a new semantics
+  on a new logical framework, and reset the patch to `0` — e.g. the Belief Hoare
+  Logic (`0.2.0`) and the research-process semantics (`0.3.0`). A framework
+  developed in stages on a feature branch is integrated with a merge commit.
+- **Major version**: reserved for breaking changes to public interfaces.
+
+### Rules
+
+- Every PR **that changes functional code** must bump the patch version in
+  `lara.cabal` and `CITATION.cff` before merging.
+- Every PR **that changes functional code** must add an entry to `CHANGELOG.md`
+  under the `## [Unreleased]` section.
+- Non-functional PRs (docs, comments, formatting, CI/tooling with no behavior
+  change) do **not** require a version bump or changelog entry.
+  - "Functional code" means what Lara ships changes: the behavior of the `lara`
+    binary, a versioned wire or process/inquiry contract, or the definitions and
+    theorems of the Lean development (`lean/`). A change under those paths is
+    *not* automatically functional: comment or doc-link edits in `src/` or
+    `lean/`, `ara/` captures, `docs/`, evaluation evidence and harnesses
+    (`evaluation/`, `scripts/`), and CI (`.github/`) all ship identical
+    behavior and need **no** bump.
+  - Bump only when a user-observable behavior, a contract, or a proved result
+    actually changes. When unsure, ask rather than bumping.
+- When tagging a release (`docs/releasing.md`), move the `[Unreleased]` entries
+  under a heading for the version being tagged. Tag every minor version.
+- The current release track is `0.3.x`.
+
+### CHANGELOG format
+
+Follow [Keep a Changelog](https://keepachangelog.com/). Group entries under:
+`Added`, `Changed`, `Fixed`, `Removed`.
+
 ## Mechanization discipline
 
 After each stage of work, mechanize everything that is provable now. As soon as a
