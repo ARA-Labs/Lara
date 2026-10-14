@@ -11,7 +11,7 @@ program.
 | Repo | Role for Lara |
 | --- | --- |
 | [`ARA-Labs/Agent-Native-Research-Artifact`](https://github.com/ARA-Labs/Agent-Native-Research-Artifact) | The ARA **format definition + tooling**. Defines the four-layer anatomy; ships worked examples (`resnet-ara-example`, `the-ara-of-ara`); contains the `rigor-reviewer` skill. |
-| [`AmberLJC/ara-paperbench`](https://github.com/AmberLJC/ara-paperbench) | The **corpus**. 32 ARAs, schema-uniform, each `artifacts/<benchmark>/<name>/`. |
+| [`ARA-Labs/ara-paperbench`](https://github.com/ARA-Labs/ara-paperbench) | The **corpus**. 32 ARAs, schema-uniform, each `artifacts/<benchmark>/<name>/`. A fork of [`AmberLJC/ara-paperbench`](https://github.com/AmberLJC/ara-paperbench), which remains the authors' original. |
 
 Each corpus artifact lowers to a Lara program: its claims become claim roots,
 its experiments and evidence become leaves and inference-scheme instances, and
@@ -108,8 +108,10 @@ header comment records the annotation it was lowered from.
 
 ## 5. Local corpus checkout
 
-The corpus is vendored as a git submodule at `corpus/ara-paperbench`, pinned to commit
-`62e9b54b2d4efe45b97f25676a16784530dd552a` (upstream `main`). The
+The corpus is vendored as a git submodule at `corpus/ara-paperbench`, tracking the
+`ARA-Labs/ara-paperbench` fork and pinned to commit
+`62e9b54b2d4efe45b97f25676a16784530dd552a`, which is also upstream `main`.
+Corpus changes land on a branch of the fork, never upstream. The
 `corpus-units/` lowerings reference artifacts at this pin,
 so changing the pin requires re-checking them. Fetch it with:
 
