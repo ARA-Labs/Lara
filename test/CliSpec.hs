@@ -1559,6 +1559,20 @@ prop_cliInquirySmokes = once $ ioProperty $ do
       let code = if name == "unresolved-claim-impact" then ExitFailure 2 else ExitSuccess
       pure (counterexample name (actual === (code,expected,"")))
 
+-- | The D7 demo (docs/demos/d7-process-precommitment.md): three versions of
+-- one research record through the shipped door. Precommitment stays
+-- @unknown@ until an admitted coverage attestation makes it @certainTrue@.
+prop_cliProcessPrecommitmentDemo :: Property
+prop_cliProcessPrecommitmentDemo = once $ ioProperty $ do
+  checks <- traverse check ["omitted","declared","instrumented"]
+  pure (conjoin checks)
+  where
+    dir = "examples/process-precommitment/"
+    check name = do
+      expected <- readFile (dir ++ name ++ ".expected")
+      actual <- runLaraIn [] ["inquiry",dir ++ name ++ ".sexp"]
+      pure (counterexample name (actual === (ExitSuccess,expected,"")))
+
 prop_cliInquiryBoundary :: Property
 prop_cliInquiryBoundary = once $ ioProperty $ do
   usageCases <- traverse (runLaraIn [] . ("inquiry":)) [[],["file","extra"],["file","--help"]]
@@ -1602,6 +1616,7 @@ cliSpecProps =
   , ("cli unreadable file exit 2", quickCheckResult prop_cliUnreadable)
   , ("cli usage exit 2", quickCheckResult prop_cliUsage)
   , ("cli inquiry mandatory real analyses and certificate smokes match frozen bytes", quickCheckResult prop_cliInquirySmokes)
+  , ("cli inquiry D7 precommitment demo matches its goldens", quickCheckResult prop_cliProcessPrecommitmentDemo)
   , ("cli inquiry usage IO whole UTF8 and parser boundary have atomic stdout", quickCheckResult prop_cliInquiryBoundary)
   , ("cli .lara accept A exit 0 + bytes", quickCheckResult prop_cliLaraAcceptA)
   , ("cli .lara accept B exit 0 + bytes", quickCheckResult prop_cliLaraAcceptB)
