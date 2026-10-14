@@ -141,7 +141,16 @@ A partial-order record (`OrderRecord`) lists reported events and explicit preced
 - `eBH_reported_count_unsound`: e-BH run with the reported count one instead of the bound two rejects a null with probability `3/4` at `α = 1/2`.
 - `warrantedLevel_fixtures`: the e-value `60` under bound two is warranted at `1/30` and the p-value `1/40` at `1/20`; a missing bound, a zero bound, an FDR guarantee or a missing kind gives `⊤`.
 
-Infinite-horizon Ville and online FDR procedures over complete ledgers (LORD, e-LOND) are not part of this layer.
+`Lara.Process.Ville` states Ville's inequality without a horizon, over an arbitrary measure space with a filtration indexed by `ℕ` and real-valued processes. It uses Mathlib's optional stopping theorem rather than finite sums:
+
+| Theorem | Statement |
+| --- | --- |
+| `ville_horizon` | on a finite measure, `ε` times the mass on which a nonnegative supermartingale reaches `ε` by time `n` is at most `𝔼[f 0]`; optional stopping for `-f` at the first crossing before `n`, then Markov's inequality |
+| `ville_supermartingale` | the same bound for reaching `ε` at any time; the crossing events grow with `n`, so continuity from below passes the bound to their union |
+| `ville_anytime` | under a probability measure, a nonnegative supermartingale with `𝔼[f 0] ≤ 1` ever reaches `1/α` with probability at most `α` |
+| `ville_stopped` | for any random time `τ : Ω → ℕ∞`, which need not be a stopping time or measurable, the value at `τ` is at least `1/α` with probability at most `α` on the event that `τ` is finite |
+
+Online FDR procedures over complete ledgers (LORD, e-LOND) are not part of this layer.
 
 ## How does entitlement survive revision?
 

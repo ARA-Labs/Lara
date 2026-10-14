@@ -775,3 +775,11 @@ sessions:
   - C57
   - C58
   open_threads: 2
+
+- id: 2026-10-14_001
+  date: '2026-10-14'
+  summary: Issue #39 split into two PRs; infinite-horizon Ville proved over Mathlib measure theory with local gates passing; online FDR remains open.
+  turn_count: 1
+  events_count: 2
+  claims_touched: []
+  open_threads: 1

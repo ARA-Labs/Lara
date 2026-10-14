@@ -582,6 +582,7 @@ import Lara.Process.Order
 import Lara.Process.WorldView
 import Lara.Examples.ProcessOrder
 import Lara.Process.Statistics
+import Lara.Process.Ville
 import Lara.Process.Ledger
 import Lara.Examples.ProcessStatistics
 import Lara.Process.Revision

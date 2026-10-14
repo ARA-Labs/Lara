@@ -1931,3 +1931,8 @@ entries:
   - Record N420 as an experiment (proof plus gates), not a decision. The issue's retire option was not taken, so there is no alternative to log.
   - No new claim and no staged observation. The bound is a mechanized theorem documented in docs/theory-process.md, not an interpretive research claim. C57 is unchanged because the step ceiling is outside its scope.
   - Update only the #46 clause of the constraints Open line. The #45 wording is left as it was, since this turn did not check that issue's status.
+- turn: 2026-10-14_001#1
+  notes:
+  - Record N421 as a user-revised decision. The AI proposed the two-PR split and the researcher affirmed it in the first person.
+  - Record N422 as an experiment (proof plus gates), following N420. No claim or staged observation, because Ville's inequality is a mechanized standard theorem documented in docs/theory-process.md, not an interpretive research claim.
+  - Narrow only the #39 clause of the constraints Open line, and leave the Last revised date of the research-process entry unchanged apart from this edit's pointer. C57 and C58 are unchanged.
