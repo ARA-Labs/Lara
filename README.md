@@ -340,13 +340,29 @@ Lean supplies the independent reference semantics and proofs. The standalone
 
 ## Quick start
 
+### Install with Homebrew
+
 To use the checker without building it, install the prebuilt `lara` binary
-(macOS Apple Silicon, Linux x86_64):
+from the [ARA-Labs tap](https://github.com/ARA-Labs/homebrew-tap):
 
 ```sh
-brew install ARA-Labs/tap/lara
+brew install ARA-Labs/tap/lara   # or: brew tap ARA-Labs/tap && brew install lara
 lara check <file.lara>
+brew upgrade lara                # after a new release
 ```
+
+Prebuilt binaries cover macOS Apple Silicon and Linux x86_64. The Linux binary
+needs glibc 2.35 or newer and a system GMP (`libgmp.so.10`), which any
+distribution with GCC has. The formula also installs the E1 example, which
+`brew test lara` checks; to try it yourself:
+
+```sh
+cd "$(brew --prefix lara)/share/lara/examples/E1" && lara check example.lara
+```
+
+On other platforms, build from source.
+
+### Build from source
 
 To build from source, install GHC and cabal via
 [ghcup](https://www.haskell.org/ghcup/) (developed on GHC 9.14.1 / cabal 3.16; CI and the release binaries use GHC 9.6):
