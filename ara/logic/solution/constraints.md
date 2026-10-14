@@ -337,8 +337,8 @@ deferred.
 - **Delivery boundary:** The core, wire, corpus and freeze tag are unchanged. There is no physical capture, arbitrary-prose ARA importer or empirical protocol; the empirical-design gate opens only by researcher decision.
 - **Evidence:** `docs/theory-process.md`; `docs/corpus-map.md`; `lean/Lara/Process/ExampleMain.lean`; `ara/trace/exploration_tree.yaml:N382_process_semantics_implemented`.
 - **Provenance:** user-revised approved contract; ai-suggested reconciliation grounded by the landed proofs and runner.
-- **Open:** [Issue #39](https://github.com/ARA-Labs/Lara/issues/39) (infinite-horizon Ville and online FDR, outside the plan's scope). [Issue #22](https://github.com/ARA-Labs/Lara/issues/22) builds on the inquiry interface.
-- **Last revised:** 2026-10-10 (2026-10-10_001#8)
+- **Open:** [Issue #39](https://github.com/ARA-Labs/Lara/issues/39) (online FDR over complete ledgers, outside the plan's scope; infinite-horizon Ville is proved in `lean/Lara/Process/Ville.lean`). [Issue #22](https://github.com/ARA-Labs/Lara/issues/22) builds on the inquiry interface.
+- **Last revised:** 2026-10-14 (2026-10-14_001#1)
 
 ## Checked-inquiry evaluation (approved protocol)
 

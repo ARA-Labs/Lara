@@ -11692,3 +11692,42 @@ tree:
   status: resolved
   also_depends_on:
   - N419_inquiry_p9_live_run
+- id: N421_ville_split_issue39
+  type: decision
+  title: Split issue #39 into an infinite-horizon Ville PR and a later online-FDR PR
+  provenance: user-revised
+  timestamp: '2026-10-14T00:00:00Z'
+  choice: >-
+    Resolve issue #39 in two PRs. Infinite-horizon Ville comes first, in a new module
+    (lean/Lara/Process/Ville.lean) over Mathlib measure theory, so the exact-rational
+    Statistics.lean keeps its finite style and imports. Online FDR over complete ordered ledgers
+    follows separately, e-LOND first and then LORD. The AI proposed the split and the researcher
+    said "I agree with the design".
+  alternatives:
+  - Land both halves in one PR.
+  - Add measure-theoretic Ville to Lara/Process/Statistics.lean.
+  evidence:
+  - https://github.com/ARA-Labs/Lara/issues/39
+  status: resolved
+  also_depends_on:
+  - N420_search_step_ceiling_proved
+- id: N422_infinite_ville_proved
+  type: experiment
+  title: Prove infinite-horizon Ville for nonnegative supermartingales
+  provenance: ai-executed
+  timestamp: '2026-10-14T00:30:00Z'
+  result: >-
+    lean/Lara/Process/Ville.lean proves ville_horizon, ville_supermartingale, ville_anytime and
+    ville_stopped over an arbitrary measure space with a filtration indexed by ℕ. The proof applies
+    Mathlib optional stopping (Submartingale.expected_stoppedValue_mono) to -f at the first
+    crossing before n, then Markov's inequality, then continuity from below over the growing
+    crossing events. ville_stopped needs no stopping-time premise on τ. All four use only the
+    standard axiom trio. make local-gates exit 0. Committed as 3aa8acb on
+    theory/infinite-ville-online-fdr. Online FDR (LORD, e-LOND) remains open under #39.
+  evidence:
+  - lean/Lara/Process/Ville.lean
+  - lean/AxCheck.lean
+  - docs/theory-process.md
+  status: resolved
+  also_depends_on:
+  - N421_ville_split_issue39

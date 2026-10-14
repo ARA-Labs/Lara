@@ -1,0 +1,45 @@
+session:
+  id: 2026-10-14_001
+  date: '2026-10-14'
+  started: 2026-10-14T00:00
+  last_turn: '2026-10-14T00:30:00Z'
+  turn_count: 1
+  summary: Issue #39 split into two PRs; infinite-horizon Ville proved over Mathlib measure theory (ville_horizon, ville_supermartingale, ville_anytime, ville_stopped), local gates pass; online FDR remains open.
+events_logged:
+- turn: 1
+  type: decision
+  id: N421_ville_split_issue39
+  routing: direct
+  provenance: user-revised
+  summary: Ville first in a new measure-theoretic module, online FDR in a later PR
+- turn: 1
+  type: experiment
+  id: N422_infinite_ville_proved
+  routing: direct
+  provenance: ai-executed
+  summary: Four infinite-horizon Ville theorems proved; axiom audit and local gates pass
+ai_actions:
+- turn: 1
+  action: Added the Ville module, registered it in Lara.lean and AxCheck.lean, documented it in docs/theory-process.md, ran make local-gates, and committed 3aa8acb
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/Process/Ville.lean
+  - lean/Lara.lean
+  - lean/AxCheck.lean
+  - docs/theory-process.md
+claims_touched: []
+logic_revisions:
+- turn: 1
+  entry: constraints.md#research-process-semantics
+  field: Open
+  before: '[Issue #39](https://github.com/ARA-Labs/Lara/issues/39) (infinite-horizon Ville and online FDR, outside the plan''s scope). [Issue #22](https://github.com/ARA-Labs/Lara/issues/22) builds on the inquiry interface.'
+  after: '[Issue #39](https://github.com/ARA-Labs/Lara/issues/39) (online FDR over complete ledgers, outside the plan''s scope; infinite-horizon Ville is proved in `lean/Lara/Process/Ville.lean`). [Issue #22](https://github.com/ARA-Labs/Lara/issues/22) builds on the inquiry interface.'
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: The Ville half of #39 landed on the branch; online FDR is still open.
+key_context:
+- turn: 1
+  excerpt: 'Researcher, after the two-PR proposal (Ville first, then online FDR): "I see, I agree with the design".'
+open_threads:
+- 'Issue #39: open the Ville PR, then online FDR over complete ordered ledgers (e-LOND, then LORD).'
+ai_suggestions_pending: []
