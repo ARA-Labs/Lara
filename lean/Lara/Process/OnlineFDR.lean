@@ -17,13 +17,17 @@ supply.
   one and `Σ γ ≤ 1`.
 * `monotone_online_fdr`: a p-value rule whose level is nonnegative, monotone in
   the past rejection set, and whose levels sum to at most `α · max(R, 1)` on
-  every path (the GAI++ condition `FDP̂ ≤ α`) controls FDR at `α` when the
-  p-values are independent and the null p-values are calibrated. A null test's
-  rejection is coupled to the run with its p-value set to zero, which has the
-  same rejections when the test is rejected and at least as many otherwise.
+  every path (the GAI++ condition `FDP̂ ≤ α`) controls FDR at `α` when every
+  null p-value is calibrated and independent of the other tests
+  (`IndependentNull`). The non-null p-values may depend on each other
+  arbitrarily; a product law meets the premise (`splitsAt_of_product`). A null
+  test's rejection is coupled to the run with its p-value set to zero, which
+  has the same rejections when the test is rejected and at least as many
+  otherwise.
 * `lord_nonneg`, `lord_mono`, `lord_fdpHat`, `lord_fdr`: LORD++ (Ramdas et al.
-  2017) meets the three conditions, so it controls FDR at `α` under
-  independence.
+  2017) meets the three conditions, so it controls FDR at `α` under the
+  paper's independence condition: nulls independent of each other and of the
+  non-nulls.
 -/
 
 namespace Lara.Process.Statistics
@@ -241,39 +245,58 @@ section Independence
 
 variable {T : ℕ} {V : Type} [Fintype V]
 
+/-- The joint law splits at test `t` into the law `μ` of its coordinate and a
+law of the other coordinates: coordinate `t` is independent of the rest. -/
+def SplitsAt (law : Law (Fin T → V)) (μ : Law V) (t : Fin T) : Prop :=
+  ∃ rest : Law ({j // j ≠ t} → V), ∀ ω, law.mass ω = μ.mass (ω t) * rest.mass (fun j => ω j)
+
+/-- Null `t` is calibrated and independent of every other test: the law splits
+at `t` into a law under which `pval t` is a p-value and a law of the rest. The
+other coordinates may depend on each other arbitrarily. -/
+def IndependentNull (law : Law (Fin T → V)) (pval : Fin T → V → ℚ) (t : Fin T) : Prop :=
+  ∃ μ : Law V, SplitsAt law μ t ∧ IsPValue μ (pval t)
+
+/-- A product law splits at every coordinate. -/
+theorem splitsAt_of_product (law : Law (Fin T → V)) (marg : Fin T → Law V)
+    (product : ∀ ω, law.mass ω = ∏ j, (marg j).mass (ω j)) (t : Fin T) :
+    SplitsAt law (marg t) t := by
+  refine ⟨⟨fun w => ∏ j : {j // j ≠ t}, (marg j).mass (w j),
+    fun w => Finset.prod_nonneg fun j _ => (marg j).nonnegative _, ?_⟩, fun ω => ?_⟩
+  · rw [← Fintype.prod_sum]
+    exact Finset.prod_eq_one fun j _ => (marg j).normalized
+  · rw [product, Fintype.prod_eq_mul_prod_subtype_ne _ t]
+
 /-- Integrating out one independent coordinate: if `F` and `G` read only the
 other coordinates and the coordinate's p-value is calibrated, the mass on which
 it is at most `F`, weighted by `G`, is at most `𝔼[F G]`. -/
-theorem coordinate_bound (law : Law (Fin T → V)) (marg : Fin T → Law V)
-    (product : ∀ ω, law.mass ω = ∏ j, (marg j).mass (ω j)) (pval : Fin T → V → ℚ)
-    (t : Fin T) (hp : IsPValue (marg t) (pval t)) (F G : ({j // j ≠ t} → V) → ℚ)
+theorem coordinate_bound (law : Law (Fin T → V)) (μ : Law V) (t : Fin T)
+    (hsplit : SplitsAt law μ t) (p : V → ℚ) (hp : IsPValue μ p) (F G : ({j // j ≠ t} → V) → ℚ)
     (hF : ∀ w, 0 ≤ F w) (hG : ∀ w, 0 ≤ G w) :
-    ∑ ω, law.mass ω * (if pval t (ω t) ≤ F (fun j => ω j) then G (fun j => ω j) else 0) ≤
+    ∑ ω, law.mass ω * (if p (ω t) ≤ F (fun j => ω j) then G (fun j => ω j) else 0) ≤
       ∑ ω, law.mass ω * (F (fun j => ω j) * G (fun j => ω j)) := by
-  set M : ({j // j ≠ t} → V) → ℚ := fun w => ∏ j : {j // j ≠ t}, (marg j).mass (w j)
-  have hM : ∀ w, 0 ≤ M w := fun w => Finset.prod_nonneg fun j _ => (marg j).nonnegative _
+  obtain ⟨rest, hrest⟩ := hsplit
   have split : ∀ H : V → ({j // j ≠ t} → V) → ℚ,
       ∑ ω, law.mass ω * H (ω t) (fun j => ω j) =
-        ∑ w, ∑ v, (marg t).mass v * M w * H v w := by
+        ∑ w, ∑ v, μ.mass v * rest.mass w * H v w := by
     intro H
     rw [Finset.sum_comm, ← Fintype.sum_prod_type']
     refine Fintype.sum_equiv (Equiv.funSplitAt t V) _ _ fun ω => ?_
-    simp only [Equiv.funSplitAt_apply, product, M]
-    rw [Fintype.prod_eq_mul_prod_subtype_ne _ t]
-  rw [split (fun v w => if pval t v ≤ F w then G w else 0), split (fun _ w => F w * G w)]
+    simp only [Equiv.funSplitAt_apply, hrest]
+  rw [split (fun v w => if p v ≤ F w then G w else 0), split (fun _ w => F w * G w)]
   apply Finset.sum_le_sum
   intro w _
-  calc ∑ v, (marg t).mass v * M w * (if pval t v ≤ F w then G w else 0)
-      = M w * G w * eventMass (marg t) (fun v => decide (pval t v ≤ F w)) := by
+  calc ∑ v, μ.mass v * rest.mass w * (if p v ≤ F w then G w else 0)
+      = rest.mass w * G w * eventMass μ (fun v => decide (p v ≤ F w)) := by
         unfold eventMass
         rw [Finset.mul_sum]
         refine Finset.sum_congr rfl fun v _ => ?_
-        by_cases h : pval t v ≤ F w
+        by_cases h : p v ≤ F w
         · simp only [h, if_true, decide_true]; ring
         · simp [h]
-    _ ≤ M w * G w * F w := mul_le_mul_of_nonneg_left (hp _ (hF w)) (mul_nonneg (hM w) (hG w))
-    _ = ∑ v, (marg t).mass v * M w * (F w * G w) := by
-        rw [← Finset.sum_mul, ← Finset.sum_mul, (marg t).normalized]
+    _ ≤ rest.mass w * G w * F w :=
+        mul_le_mul_of_nonneg_left (hp _ (hF w)) (mul_nonneg (rest.nonnegative w) (hG w))
+    _ = ∑ v, μ.mass v * rest.mass w * (F w * G w) := by
+        rw [← Finset.sum_mul, ← Finset.sum_mul, μ.normalized]
         ring
 
 /-- The p-values of an outcome as a sequence; positions from `T` on are inert. -/
@@ -295,18 +318,19 @@ theorem pvecZero_eq (pval : Fin T → V → ℚ) (t : Fin T) (ω : Fin T → V) 
   · rw [Function.update_of_ne hn]
     simp [pvecZero, pvec, hn]
 
-/-- A monotone online p-value rule controls FDR at `α` under independence. The
-level is nonnegative and monotone in the past rejections, and on every path its
-levels sum to at most `α · max(R, 1)` (GAI++'s `FDP̂ ≤ α`). The p-values are
-independent (`product`), nonnegative, and calibrated for every null. -/
+/-- A monotone online p-value rule controls FDR at `α` when every null is
+independent of the other tests. The level is nonnegative and monotone in the
+past rejections, and on every path its levels sum to at most `α · max(R, 1)`
+(GAI++'s `FDP̂ ≤ α`). The p-values are nonnegative, and every null p-value is
+calibrated and independent of the rest (`IndependentNull`); the non-null
+p-values may depend on each other arbitrarily. -/
 theorem monotone_online_fdr {level : ℕ → Finset ℕ → ℚ} {α : ℚ}
     (hnonneg : ∀ n S, 0 ≤ level n S) (hmono : ∀ n S S', S ⊆ S' → level n S ≤ level n S')
     (hfdp : ∀ S ⊆ Finset.range T,
       ∑ n ∈ Finset.range T, level n (S.filter (· < n)) ≤ α * max (S.card : ℚ) 1)
-    (law : Law (Fin T → V)) (marg : Fin T → Law V)
-    (product : ∀ ω, law.mass ω = ∏ j, (marg j).mass (ω j)) (pval : Fin T → V → ℚ)
-    (pnonneg : ∀ t v, 0 ≤ pval t v) (N : Finset ℕ) (hN : N ⊆ Finset.range T)
-    (hnull : ∀ t : Fin T, (t : ℕ) ∈ N → IsPValue (marg t) (pval t)) :
+    (law : Law (Fin T → V)) (pval : Fin T → V → ℚ) (pnonneg : ∀ t v, 0 ≤ pval t v)
+    (N : Finset ℕ) (hN : N ⊆ Finset.range T)
+    (hnull : ∀ t : Fin T, (t : ℕ) ∈ N → IndependentNull law pval t) :
     expect law (fun ω => onlineFdp (onlineRun level (pTest (pvec pval ω)) T) N) ≤ α := by
   set R : (Fin T → V) → Finset ℕ := fun ω => onlineRun level (pTest (pvec pval ω)) T
   set L : (Fin T → V) → ℕ → ℚ := fun ω n => level n (onlineRun level (pTest (pvec pval ω)) n)
@@ -345,8 +369,9 @@ theorem monotone_online_fdr {level : ℕ → Finset ℕ → ℚ} {α : ℚ}
     calc ∑ ω, law.mass ω * (if t ∈ R ω then 1 / max ((R ω).card : ℚ) 1 else 0)
         = ∑ ω, law.mass ω * (if pval tt (ω tt) ≤ F (fun j => ω j) then G (fun j => ω j) else 0) :=
           Finset.sum_congr rfl fun ω _ => by rw [hpoint]
-      _ ≤ ∑ ω, law.mass ω * (F (fun j => ω j) * G (fun j => ω j)) :=
-          coordinate_bound law marg product pval tt (hnull tt htN) F G
+      _ ≤ ∑ ω, law.mass ω * (F (fun j => ω j) * G (fun j => ω j)) := by
+          obtain ⟨μ, hsplit, hp⟩ := hnull tt htN
+          exact coordinate_bound law μ tt hsplit (pval tt) hp F G
             (fun _ => hnonneg _ _) (fun _ => hinv _)
       _ ≤ ∑ ω, law.mass ω * (L ω t * (1 / max ((R ω).card : ℚ) 1)) := by
           refine Finset.sum_le_sum fun ω _ => mul_le_mul_of_nonneg_left ?_ (law.nonnegative ω)
@@ -526,18 +551,18 @@ theorem lord_fdpHat (hW₀ : 0 ≤ W₀) (hW₀α : W₀ ≤ α) (hγ : ∀ n, 0
       _ ≤ α := hW₀α
       _ = α * max (0 : ℚ) 1 := by norm_num
 
-/-- LORD++ controls FDR at `α` when the p-values are independent and nonnegative,
-every null p-value is calibrated, `0 ≤ W₀ ≤ α`, and the weights are nonnegative
-with every partial sum at most one. -/
+/-- LORD++ controls FDR at `α` when the p-values are nonnegative, every null
+p-value is calibrated and independent of the other tests, `0 ≤ W₀ ≤ α`, and the
+weights are nonnegative with every partial sum at most one. The non-null
+p-values may depend on each other arbitrarily, as in Ramdas et al. (2017). -/
 theorem lord_fdr {T : ℕ} {V : Type} [Fintype V] (hW₀ : 0 ≤ W₀) (hW₀α : W₀ ≤ α)
     (hγ : ∀ n, 0 ≤ γ n) (hγsum : ∀ m, ∑ k ∈ Finset.range m, γ k ≤ 1)
-    (law : Law (Fin T → V)) (marg : Fin T → Law V)
-    (product : ∀ ω, law.mass ω = ∏ j, (marg j).mass (ω j)) (pval : Fin T → V → ℚ)
-    (pnonneg : ∀ t v, 0 ≤ pval t v) (N : Finset ℕ) (hN : N ⊆ Finset.range T)
-    (hnull : ∀ t : Fin T, (t : ℕ) ∈ N → IsPValue (marg t) (pval t)) :
+    (law : Law (Fin T → V)) (pval : Fin T → V → ℚ) (pnonneg : ∀ t v, 0 ≤ pval t v)
+    (N : Finset ℕ) (hN : N ⊆ Finset.range T)
+    (hnull : ∀ t : Fin T, (t : ℕ) ∈ N → IndependentNull law pval t) :
     expect law (fun ω => onlineFdp (lord α W₀ γ (pvec pval ω) T) N) ≤ α :=
   monotone_online_fdr (lord_nonneg hW₀ hW₀α hγ) (lord_mono hW₀ hW₀α hγ)
-    (fun S _ => lord_fdpHat hW₀ hW₀α hγ hγsum T S) law marg product pval pnonneg N hN hnull
+    (fun S _ => lord_fdpHat hW₀ hW₀α hγ hγsum T S) law pval pnonneg N hN hnull
 
 end Lord
 

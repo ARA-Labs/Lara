@@ -32,6 +32,10 @@ twin of every positive statistical result.
   the premises of `elond_fdr` and `lord_fdr`, and replaying LORD++ over a
   ledger missing a non-rejection doubles the next level, so its guarantee needs
   the complete ordered ledger.
+* `coupled_independentNull`, `coupled_not_product`, `coupled_lord_fdr`: a
+  null independent of two non-nulls that always agree. The law is not a
+  product, and LORD++ still keeps FDR within `α`, since `lord_fdr` asks only
+  that each null be independent of the other tests.
 * `mfdr_not_fdr`, `alpha_investing_mfdr_not_fdr`: an outcome law, and an actual
   alpha-investing run with independent calibrated p-values, each with mFDR
   within `α` and FDR above it, so the guarantee class must be stated.
@@ -315,6 +319,51 @@ theorem lord_replay_anticonservative :
     lordLevel (1 / 10) (1 / 20) geomWeight 2 {0} = 3 / 160 ∧
       lordLevel (1 / 10) (1 / 20) geomWeight 1 {0} = 3 / 80 := by
   constructor <;> simp [lordLevel, geomWeight] <;> norm_num
+
+/-- Three tests whose first is a fair null and whose other two always agree:
+the null is independent of the rest, but the non-nulls depend on each other. -/
+def coupledLaw : Law (Fin 3 → Bool) where
+  mass ω := if ω 1 = ω 2 then 1 / 4 else 0
+  nonnegative ω := by split_ifs <;> norm_num
+  normalized := by decide +kernel
+
+/-- The law of the two coupled tests. -/
+def coupledRest : Law ({j : Fin 3 // j ≠ 0} → Bool) where
+  mass w := if w ⟨1, by decide⟩ = w ⟨2, by decide⟩ then 1 / 2 else 0
+  nonnegative w := by split_ifs <;> norm_num
+  normalized := by decide +kernel
+
+/-- Every test reports p-value `1/2` on `true` and `1` otherwise. -/
+def coupledPval : Fin 3 → Bool → ℚ := fun _ b => if b then 1 / 2 else 1
+
+/-- Test `0` is a calibrated null independent of the coupled pair. -/
+theorem coupled_independentNull : IndependentNull coupledLaw coupledPval 0 := by
+  refine ⟨fair, ⟨coupledRest, fun ω => ?_⟩, fair_pvalue⟩
+  simp only [coupledLaw, coupledRest, fair]
+  split_ifs <;> norm_num
+
+/-- No choice of marginals makes `coupledLaw` a product: `(1, 1, 1)` and
+`(1, 0, 0)` have positive mass, so every factor of `(1, 1, 0)` would too. -/
+theorem coupled_not_product :
+    ¬ ∃ marg : Fin 3 → Law Bool, ∀ ω, coupledLaw.mass ω = ∏ j, (marg j).mass (ω j) := by
+  rintro ⟨marg, h⟩
+  have h1 := h ![true, true, true]
+  have h2 := h ![true, false, false]
+  have h3 := h ![true, true, false]
+  simp [coupledLaw, Fin.prod_univ_three] at h1 h2 h3
+  rcases h3 with (h | h) | h <;> simp [h] at h1 h2
+
+/-- LORD++ keeps FDR within `α` over `coupledLaw`, which `coupled_not_product`
+shows is outside a product-law premise. -/
+theorem coupled_lord_fdr :
+    expect coupledLaw
+        (fun ω => onlineFdp (lord (1 / 10) (1 / 20) geomWeight (pvec coupledPval ω) 3) {0}) ≤
+      1 / 10 :=
+  lord_fdr (by norm_num) (by norm_num) geomWeight_premises.1 geomWeight_premises.2 coupledLaw
+    coupledPval (fun _ b => by unfold coupledPval; split_ifs <;> norm_num) {0} (by decide)
+    fun t ht => by
+      obtain rfl : t = 0 := Fin.ext (Finset.mem_singleton.mp ht)
+      exact coupled_independentNull
 
 /-- Marginal FDR with smoothing `η`, and FDR, of an outcome law over
 (false discoveries, discoveries). -/
