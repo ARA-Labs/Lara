@@ -1,4 +1,5 @@
 import Lara.Process.Ledger
+import Lara.Process.OnlineFDR
 import Lara.Process.Coverage
 import Lara.Process.Order
 import Lara.Examples.ProcessCore
@@ -27,6 +28,10 @@ twin of every positive statistical result.
 * `online_replay_anticonservative`: replaying an online rule over a ledger
   missing a non-rejection grants a larger level, although both ledgers satisfy
   the same count bound.
+* `geomWeight_premises`, `lord_replay_anticonservative`: geometric weights meet
+  the premises of `elond_fdr` and `lord_fdr`, and replaying LORD++ over a
+  ledger missing a non-rejection doubles the next level, so its guarantee needs
+  the complete ordered ledger.
 * `mfdr_not_fdr`, `alpha_investing_mfdr_not_fdr`: an outcome law, and an actual
   alpha-investing run with independent calibrated p-values, each with mFDR
   within `α` and FDR above it, so the guarantee class must be stated.
@@ -281,6 +286,35 @@ theorem online_replay_anticonservative :
     onlineLevel (1 / 20) (1 / 20) [false] = 1 / 80 ∧ onlineLevel (1 / 20) (1 / 20) [] = 1 / 40 ∧
       [false].length ≤ 1 ∧ ([] : List Bool).length ≤ 1 := by
   refine ⟨?_, ?_, by decide, by decide⟩ <;> norm_num [onlineLevel]
+
+/-- Geometric online weights `γ k = 1 / 2^(k+1)`. -/
+def geomWeight (k : ℕ) : ℚ := 1 / 2 ^ (k + 1)
+
+theorem geomWeight_sum (m : ℕ) : ∑ k ∈ Finset.range m, geomWeight k = 1 - 1 / 2 ^ m := by
+  induction m with
+  | zero => simp
+  | succ m ih =>
+      rw [Finset.sum_range_succ, ih, geomWeight]
+      field_simp
+      ring
+
+/-- Geometric weights are nonnegative with every partial sum at most one, the
+weight premises of `elond_fdr` and `lord_fdr`. -/
+theorem geomWeight_premises :
+    (∀ n, 0 ≤ geomWeight n) ∧ ∀ m, ∑ k ∈ Finset.range m, geomWeight k ≤ 1 := by
+  refine ⟨fun n => by unfold geomWeight; positivity, fun m => ?_⟩
+  rw [geomWeight_sum]
+  have : (0 : ℚ) ≤ 1 / 2 ^ m := by positivity
+  linarith
+
+/-- LORD++ at `α = 1/10`, `W₀ = 1/20` with geometric weights, after test `0` is
+rejected: the complete ledger, where test `1` was not rejected, sets test `2`'s
+level to `3/160`. Omitting that non-rejection replays the next test as test `1`
+with level `3/80`. -/
+theorem lord_replay_anticonservative :
+    lordLevel (1 / 10) (1 / 20) geomWeight 2 {0} = 3 / 160 ∧
+      lordLevel (1 / 10) (1 / 20) geomWeight 1 {0} = 3 / 80 := by
+  constructor <;> simp [lordLevel, geomWeight] <;> norm_num
 
 /-- Marginal FDR with smoothing `η`, and FDR, of an outcome law over
 (false discoveries, discoveries). -/
