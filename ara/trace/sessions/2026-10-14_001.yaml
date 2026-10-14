@@ -2,9 +2,10 @@ session:
   id: 2026-10-14_001
   date: '2026-10-14'
   started: 2026-10-14T00:00
-  last_turn: '2026-10-14T00:30:00Z'
-  turn_count: 1
-  summary: Issue #39 split into two PRs; infinite-horizon Ville proved over Mathlib measure theory (ville_horizon, ville_supermartingale, ville_anytime, ville_stopped), local gates pass; online FDR remains open.
+  last_turn: '2026-10-14T02:00:00Z'
+  turn_count: 2
+  summary: 'Issue #39 resolved in two stacked PRs: infinite-horizon Ville (PR #57) and e-LOND/LORD++ FDR
+    over complete ordered ledgers, all mechanized with local gates passing.'
 events_logged:
 - turn: 1
   type: decision
@@ -18,12 +19,30 @@ events_logged:
   routing: direct
   provenance: ai-executed
   summary: Four infinite-horizon Ville theorems proved; axiom audit and local gates pass
+- turn: 2
+  type: experiment
+  id: N423_online_fdr_proved
+  routing: direct
+  provenance: ai-executed
+  summary: e-LOND (arbitrary dependence) and LORD++ (independence) FDR proved; gates pass
 ai_actions:
 - turn: 1
-  action: Added the Ville module, registered it in Lara.lean and AxCheck.lean, documented it in docs/theory-process.md, ran make local-gates, and committed 3aa8acb
+  action: Added the Ville module, registered it in Lara.lean and AxCheck.lean, documented it in docs/theory-process.md,
+    ran make local-gates, and committed 3aa8acb
   provenance: ai-executed
   files_changed:
   - lean/Lara/Process/Ville.lean
+  - lean/Lara.lean
+  - lean/AxCheck.lean
+  - docs/theory-process.md
+- turn: 2
+  action: 'Opened PR #57 for Ville; added OnlineFDR module, fixtures, AxCheck rows and docs; ran make
+    local-gates'
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/Process/OnlineFDR.lean
+  - lean/Lara/Examples/ProcessStatistics.lean
+  - lean/Lara/Process/Ledger.lean
   - lean/Lara.lean
   - lean/AxCheck.lean
   - docs/theory-process.md
@@ -32,14 +51,33 @@ logic_revisions:
 - turn: 1
   entry: constraints.md#research-process-semantics
   field: Open
-  before: '[Issue #39](https://github.com/ARA-Labs/Lara/issues/39) (infinite-horizon Ville and online FDR, outside the plan''s scope). [Issue #22](https://github.com/ARA-Labs/Lara/issues/22) builds on the inquiry interface.'
-  after: '[Issue #39](https://github.com/ARA-Labs/Lara/issues/39) (online FDR over complete ledgers, outside the plan''s scope; infinite-horizon Ville is proved in `lean/Lara/Process/Ville.lean`). [Issue #22](https://github.com/ARA-Labs/Lara/issues/22) builds on the inquiry interface.'
+  before: '[Issue #39](https://github.com/ARA-Labs/Lara/issues/39) (infinite-horizon Ville and online
+    FDR, outside the plan''s scope). [Issue #22](https://github.com/ARA-Labs/Lara/issues/22) builds on
+    the inquiry interface.'
+  after: '[Issue #39](https://github.com/ARA-Labs/Lara/issues/39) (online FDR over complete ledgers, outside
+    the plan''s scope; infinite-horizon Ville is proved in `lean/Lara/Process/Ville.lean`). [Issue #22](https://github.com/ARA-Labs/Lara/issues/22)
+    builds on the inquiry interface.'
   signal: artifact-commitment
   provenance: ai-suggested
-  note: The Ville half of #39 landed on the branch; online FDR is still open.
+  note: The Ville half of
+- turn: 2
+  entry: constraints.md#research-process-semantics
+  field: Open
+  before: '[Issue #39](https://github.com/ARA-Labs/Lara/issues/39) (online FDR over complete ledgers,
+    outside the plan''s scope; infinite-horizon Ville is proved in `lean/Lara/Process/Ville.lean`). [Issue
+    #22](https://github.com/ARA-Labs/Lara/issues/22) builds on the inquiry interface.'
+  after: '[Issue #22](https://github.com/ARA-Labs/Lara/issues/22) builds on the inquiry interface. Issue
+    #39 is resolved: infinite-horizon Ville in `lean/Lara/Process/Ville.lean`, e-LOND and LORD++ FDR in
+    `lean/Lara/Process/OnlineFDR.lean`.'
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: 'Online FDR half of #39 landed; nothing in #39 remains.'
 key_context:
 - turn: 1
-  excerpt: 'Researcher, after the two-PR proposal (Ville first, then online FDR): "I see, I agree with the design".'
+  excerpt: 'Researcher, after the two-PR proposal (Ville first, then online FDR): "I see, I agree with
+    the design".'
+- turn: 2
+  excerpt: 'Researcher: "yes. and then finish all" (open the Ville PR, then complete online FDR).'
 open_threads:
-- 'Issue #39: open the Ville PR, then online FDR over complete ordered ledgers (e-LOND, then LORD).'
+- 'Merge PR #57, then the stacked online-FDR PR (which closes #39).'
 ai_suggestions_pending: []

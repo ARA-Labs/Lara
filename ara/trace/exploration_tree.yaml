@@ -11731,3 +11731,28 @@ tree:
   status: resolved
   also_depends_on:
   - N421_ville_split_issue39
+- id: N423_online_fdr_proved
+  type: experiment
+  title: Prove e-LOND and LORD++ FDR control over complete ordered ledgers
+  provenance: ai-executed
+  timestamp: '2026-10-14T02:00:00Z'
+  result: >-
+    lean/Lara/Process/OnlineFDR.lean replays an online procedure over the complete ordered ledger
+    (onlineRun). elond_fdr gives e-LOND FDR at most α under arbitrary dependence, from the pathwise
+    bound elond_fdp_le. monotone_online_fdr gives FDR at most α for any p-value rule whose level is
+    nonnegative, monotone in past rejections and satisfies GAI++'s FDP-hat ≤ α, under a product
+    law with calibrated nulls. The proof couples each null to the run with its p-value set to zero
+    (onlineRun_couple, onlineRun_mono) and integrates that coordinate out (coordinate_bound).
+    lord_nonneg, lord_mono and lord_fdpHat show LORD++ meets the conditions, giving lord_fdr. The
+    independence premise is a full product law, stronger than the literature's null-only
+    independence. Fixtures geomWeight_premises and lord_replay_anticonservative (3/160 vs 3/80). All
+    theorems use only the standard axiom trio. make local-gates exit 0.
+  evidence:
+  - lean/Lara/Process/OnlineFDR.lean
+  - lean/Lara/Examples/ProcessStatistics.lean
+  - lean/AxCheck.lean
+  - docs/theory-process.md
+  status: resolved
+  also_depends_on:
+  - N421_ville_split_issue39
+  - N422_infinite_ville_proved

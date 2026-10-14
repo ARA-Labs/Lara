@@ -778,8 +778,8 @@ sessions:
 
 - id: 2026-10-14_001
   date: '2026-10-14'
-  summary: Issue #39 split into two PRs; infinite-horizon Ville proved over Mathlib measure theory with local gates passing; online FDR remains open.
-  turn_count: 1
-  events_count: 2
+  summary: Issue #39 resolved in two stacked PRs; infinite-horizon Ville and e-LOND/LORD++ FDR over complete ordered ledgers proved with local gates passing.
+  turn_count: 2
+  events_count: 3
   claims_touched: []
   open_threads: 1

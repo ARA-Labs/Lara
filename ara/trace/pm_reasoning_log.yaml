@@ -1936,3 +1936,8 @@ entries:
   - Record N421 as a user-revised decision. The AI proposed the two-PR split and the researcher affirmed it in the first person.
   - Record N422 as an experiment (proof plus gates), following N420. No claim or staged observation, because Ville's inequality is a mechanized standard theorem documented in docs/theory-process.md, not an interpretive research claim.
   - Narrow only the #39 clause of the constraints Open line, and leave the Last revised date of the research-process entry unchanged apart from this edit's pointer. C57 and C58 are unchanged.
+- turn: 2026-10-14_001#2
+  notes:
+  - Record N423 as an experiment (proof plus gates). No claim or staged observation, because e-LOND and LORD++ FDR control are standard results now mechanized, not interpretive research claims.
+  - Record the product-law premise as stronger than the literature in N423 so the gap stays visible. No issue is opened for weakening it, because the researcher did not ask for that generality.
+  - Drop #39 from the constraints Open line, since both halves have landed on their branches.
