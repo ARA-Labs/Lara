@@ -150,7 +150,18 @@ A partial-order record (`OrderRecord`) lists reported events and explicit preced
 | `ville_anytime` | under a probability measure, a nonnegative supermartingale with `𝔼[f 0] ≤ 1` ever reaches `1/α` with probability at most `α` |
 | `ville_stopped` | for any random time `τ : Ω → ℕ∞`, which need not be a stopping time or measurable, the value at `τ` is at least `1/α` with probability at most `α` on the event that `τ` is finite |
 
-Online FDR procedures over complete ledgers (LORD, e-LOND) are not part of this layer.
+`Lara.Process.OnlineFDR` proves FDR control for online procedures replayed over a complete ordered ledger. `onlineRun` tests hypotheses `0, 1, 2, …` in order and sets each level from the rejection set before it. Every test occupies its position whether it was rejected or not, which is the premise a count bound cannot supply (`online_replay_anticonservative`). The style is exact-rational, like `Lara.Process.Statistics`. `onlineFdp R N` is `|R ∩ N| / max(|R|, 1)`, and the weights `γ` are nonnegative with every partial sum at most one.
+
+| Theorem | Statement |
+| --- | --- |
+| `mem_onlineRun`, `onlineRun_filter`, `onlineRun_subset_range` | a test is rejected exactly when its test accepts the level set by the earlier rejections; the run's rejections below `n` are the run of the first `n` tests |
+| `elond_fdp_le`, `elond_fdr` | e-LOND rejects test `n` when `e n ≥ 1 / (α γ n (D + 1))`, where `D` counts the rejections before `n`; its FDP is pathwise at most `Σ_{null} α γ n e n`, so FDR is at most `α` under arbitrary dependence when null e-values have expectation at most one |
+| `onlineRun_congr`, `onlineRun_mono`, `onlineRun_couple` | the run before `n` reads only earlier p-values; with a level monotone in past rejections, smaller p-values reject at least as much; setting a rejected test's p-value to zero changes no rejection |
+| `coordinate_bound` | under a product law, integrating out one coordinate whose p-value is calibrated bounds the weighted mass of `p ≤ F` by `𝔼[F G]` when `F` and `G` read only the other coordinates |
+| `monotone_online_fdr` | a p-value rule whose level is nonnegative and monotone in past rejections, and whose levels sum to at most `α · max(R, 1)` on every path (GAI++'s `FDP̂ ≤ α`), controls FDR at `α` when p-values are independent and nonnegative and null p-values are calibrated |
+| `lord_nonneg`, `lord_mono`, `lord_fdpHat`, `lord_fdr` | LORD++ with `0 ≤ W₀ ≤ α` meets those three conditions, so it controls FDR at `α` under independence |
+
+`geomWeight_premises` shows that geometric weights `γ k = 1/2^(k+1)` meet the weight premises. `lord_replay_anticonservative` replays LORD++ at `α = 1/10`, `W₀ = 1/20` after a first rejection. The complete ledger gives the next test level `3/160`; omitting the intervening non-rejection gives `3/80`.
 
 ## How does entitlement survive revision?
 

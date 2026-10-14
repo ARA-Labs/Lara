@@ -17,7 +17,8 @@ Online procedures replay their levels from the full ordered ledger.
 each test and earns `reward` on a rejection. Replaying it over a ledger with an
 omitted non-rejection overstates the wealth (`Lara.Examples.ProcessStatistics.
 online_replay_anticonservative`), so online replay needs a complete ledger,
-not a count bound.
+not a count bound. `Lara.Process.OnlineFDR` proves FDR control for e-LOND and
+LORD++ replayed over the complete ordered ledger.
 -/
 
 namespace Lara.Process.Statistics
