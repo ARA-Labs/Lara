@@ -11756,3 +11756,24 @@ tree:
   also_depends_on:
   - N421_ville_split_issue39
   - N422_infinite_ville_proved
+- id: N424_lord_null_independence
+  type: experiment
+  title: Weaken the LORD++ FDR premise from a product law to null independence
+  provenance: ai-executed
+  timestamp: '2026-10-14T03:00:00Z'
+  result: >-
+    monotone_online_fdr and lord_fdr now assume IndependentNull for each null: the joint law splits at
+    that coordinate (SplitsAt) into a law under which its p-value is calibrated and a law of the other
+    coordinates. Non-null p-values may depend on each other arbitrarily, which is the null independence
+    of Ramdas et al. (2017) and closes the gap recorded in N423. coordinate_bound takes the split instead
+    of a product; splitsAt_of_product shows a product law meets it. Fixtures coupled_independentNull,
+    coupled_not_product and coupled_lord_fdr apply lord_fdr to a fair null with two non-nulls that always
+    agree, a law that is no product of marginals. All theorems use only the standard axiom trio.
+  evidence:
+  - lean/Lara/Process/OnlineFDR.lean
+  - lean/Lara/Examples/ProcessStatistics.lean
+  - lean/AxCheck.lean
+  - docs/theory-process.md
+  status: resolved
+  also_depends_on:
+  - N423_online_fdr_proved

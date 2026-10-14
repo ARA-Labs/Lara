@@ -2,10 +2,11 @@ session:
   id: 2026-10-14_001
   date: '2026-10-14'
   started: 2026-10-14T00:00
-  last_turn: '2026-10-14T02:00:00Z'
-  turn_count: 2
-  summary: 'Issue #39 resolved in two stacked PRs: infinite-horizon Ville (PR #57) and e-LOND/LORD++ FDR
-    over complete ordered ledgers, all mechanized with local gates passing.'
+  last_turn: '2026-10-14T03:00:00Z'
+  turn_count: 3
+  summary: 'Issue #39 resolved in two PRs: infinite-horizon Ville (PR #57) and e-LOND/LORD++ FDR over
+    complete ordered ledgers (PR #58), all mechanized with local gates passing; the LORD++ premise was
+    then weakened from a product law to null independence.'
 events_logged:
 - turn: 1
   type: decision
@@ -25,6 +26,12 @@ events_logged:
   routing: direct
   provenance: ai-executed
   summary: e-LOND (arbitrary dependence) and LORD++ (independence) FDR proved; gates pass
+- turn: 3
+  type: experiment
+  id: N424_lord_null_independence
+  routing: direct
+  provenance: ai-executed
+  summary: LORD++ FDR premise weakened to per-null independence; dependent non-null fixture
 ai_actions:
 - turn: 1
   action: Added the Ville module, registered it in Lara.lean and AxCheck.lean, documented it in docs/theory-process.md,
@@ -44,6 +51,15 @@ ai_actions:
   - lean/Lara/Examples/ProcessStatistics.lean
   - lean/Lara/Process/Ledger.lean
   - lean/Lara.lean
+  - lean/AxCheck.lean
+  - docs/theory-process.md
+- turn: 3
+  action: Replaced the product-law premise of monotone_online_fdr and lord_fdr with IndependentNull,
+    added SplitsAt and splitsAt_of_product, the coupled fixtures, AxCheck rows and docs; ran make local-gates
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/Process/OnlineFDR.lean
+  - lean/Lara/Examples/ProcessStatistics.lean
   - lean/AxCheck.lean
   - docs/theory-process.md
 claims_touched: []
@@ -78,6 +94,9 @@ key_context:
     the design".'
 - turn: 2
   excerpt: 'Researcher: "yes. and then finish all" (open the Ville PR, then complete online FDR).'
+- turn: 3
+  excerpt: 'Researcher, on the LORD++ product-law premise being stronger than the literature: "let''s
+    just fix this on a new branch and pr".'
 open_threads:
-- 'Merge PR #57, then the stacked online-FDR PR (which closes #39).'
+- Merge the PR that weakens the LORD++ premise to null independence.
 ai_suggestions_pending: []
