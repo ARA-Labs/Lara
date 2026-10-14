@@ -7953,6 +7953,16 @@ context's own arguments make unavailable. -/
 -- lean/Lara/Process/Enumerate.lean: 4 public declarations.
 #print axioms Lara.Process.Enumerate.clamped_le_self
 #print axioms Lara.Process.Enumerate.admissible_pool_length
+#print axioms Lara.Process.Enumerate.stepsWorst_pos
+#print axioms Lara.Process.Enumerate.stepsWorst_succ_ge
+#print axioms Lara.Process.Enumerate.stepsWorst_mono
+#print axioms Lara.Process.Enumerate.stepsWorst_eight
+#print axioms Lara.Process.Enumerate.filterMap_sum_le
+#print axioms Lara.Process.Enumerate.goSteps_le
+#print axioms Lara.Process.Enumerate.searchSteps_le
+#print axioms Lara.Process.Enumerate.stepsWorst_maxProcessEvents_le
+#print axioms Lara.Process.Enumerate.admissible_searchSteps_le
+#print axioms Lara.Process.Enumerate.admissible_searchSteps_le_clamped
 #print axioms Lara.Process.Enumerate.enumerateProblem_within_ceilings
 #print axioms Lara.Process.Enumerate.enumerateFamily_within_ceilings
 

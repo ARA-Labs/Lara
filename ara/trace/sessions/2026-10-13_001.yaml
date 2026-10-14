@@ -2,9 +2,9 @@ session:
   id: 2026-10-13_001
   date: '2026-10-13'
   started: 2026-10-13T00:00
-  last_turn: '2026-10-13T23:00:00Z'
-  turn_count: 4
-  summary: Corrected P8 completed, replayed and researcher-approved; the approved P9 paired live loop completed (inquiry 8/8 vs status 6/8 primary correct, feasibility only).
+  last_turn: '2026-10-13T23:40:00Z'
+  turn_count: 5
+  summary: Corrected P8 completed, replayed and researcher-approved; the approved P9 paired live loop completed (inquiry 8/8 vs status 6/8 primary correct, feasibility only); issue #46 closed by proving the search-step ceiling covers every admissible search.
 events_logged:
 - turn: 1
   type: decision
@@ -90,6 +90,12 @@ events_logged:
   routing: crystallized
   provenance: user-revised
   summary: Researcher framed P9 as design validation for PL, not statistics; O220 crystallizes to C58.
+- turn: 5
+  type: experiment
+  id: N420_search_step_ceiling_proved
+  routing: direct
+  provenance: ai-executed
+  summary: stepsWorst bound proved (W(8)=109601 <= 200000); admissible document never refused by the step ceiling
 ai_actions:
 - turn: 1
   action: "Continue the authorized implementation across the UTC day boundary. Complete corrective Tasks\
@@ -147,6 +153,14 @@ ai_actions:
   files_changed:
   - ara/evidence/inquiry-p9/report.md
   - ara/logic/claims.md
+- turn: 5
+  action: Prove goSteps_le, searchSteps_le and admissible_searchSteps_le{,_clamped}; extend AxCheck; document the bound; run make local-gates; open the #46 PR.
+  provenance: ai-executed
+  files_changed:
+  - lean/Lara/Process/Enumerate.lean
+  - lean/AxCheck.lean
+  - docs/theory-process.md
+  - ara/logic/solution/constraints.md
 claims_touched:
 - id: C57
   action: revised
@@ -267,6 +281,14 @@ logic_revisions:
   signal: verbal-declaration
   provenance: user-revised
   note: 'Empirical resolution (N419) and the researcher comment on it in the same turn: "it don''t have to be statistically, just show our design work is fine. we are doing PL", then "sure".'
+- turn: 5
+  entry: constraints.md (checked-inquiry Open line)
+  field: Open
+  before: 'Two pieces of #22 remain deferred: the Haskell door and cross-language conformance ([issue #45](https://github.com/ARA-Labs/Lara/issues/45)) and the unproved search-step ceiling convention ([issue #46](https://github.com/ARA-Labs/Lara/issues/46)).'
+  after: 'The Haskell door and cross-language conformance were deferred to [issue #45](https://github.com/ARA-Labs/Lara/issues/45). The search-step ceiling is proved to cover every admissible prefix search (`admissible_searchSteps_le`, [issue #46](https://github.com/ARA-Labs/Lara/issues/46)).'
+  signal: artifact-commitment
+  provenance: ai-suggested
+  note: The proof commit removes the unproved-convention caveat.
 key_context:
 - turn: 1
   excerpt: Latest researcher source-axis reply repeats the already-recorded group clarification in N404;
@@ -281,8 +303,9 @@ key_context:
   excerpt: 'Researcher: "I approved both P8 and P9"; then chose Opus 5.5, 8x2x1, $150/30 min, oracle plus blind AI scorer; "approve it. do not run the harness check yet."; amendment "approve"; "go ahead and finish all. no need to cap the usage" (caps kept as approved).'
 - turn: 4
   excerpt: 'Researcher: "it don''t have to be statistically, just show our design work is fine. we are doing PL"; "sure. and I think now we can conclude the pr".'
+- turn: 5
+  excerpt: 'Researcher: "small and self-contained, directly finish it and pr" (issue #46).'
 open_threads:
 - 'Issue #22: closes with the P9 PR; later conditional work needs new designs.'
 - 'Issue #39: infinite-horizon Ville and online FDR over complete ledgers.'
-- 'Issue #46: prove or revise search-step ceiling rationale.'
 ai_suggestions_pending: []
