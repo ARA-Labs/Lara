@@ -214,6 +214,7 @@ import Lara.Process.Order
 import Lara.Process.WorldView
 import Lara.Examples.ProcessOrder
 import Lara.Process.Statistics
+import Lara.Process.Ville
 import Lara.Process.Ledger
 import Lara.Examples.ProcessStatistics
 import Lara.Process.Revision
@@ -6935,6 +6936,12 @@ context's own arguments make unavailable. -/
 #print axioms Lara.Process.Statistics.eventMass_anyOf_empty
 #print axioms Lara.Process.Statistics.card_le_bound
 #print axioms Lara.Process.Statistics.eq_empty_of_bound_zero
+
+-- lean/Lara/Process/Ville.lean: 4 public theorems.
+#print axioms Lara.Process.Statistics.ville_horizon
+#print axioms Lara.Process.Statistics.ville_supermartingale
+#print axioms Lara.Process.Statistics.ville_anytime
+#print axioms Lara.Process.Statistics.ville_stopped
 
 -- lean/Lara/Process/Ledger.lean: 4 public theorems.
 #print axioms Lara.Process.Statistics.warrantedLevel_failClosed
