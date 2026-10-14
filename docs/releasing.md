@@ -26,7 +26,11 @@ platform, build from source (`cabal install exe:lara`).
 
 ## Cutting a release
 
-1. Bump `version` in `lara.cabal`, merge to `main`.
+Version numbers and the changelog follow [AGENTS.md](../AGENTS.md#versioning);
+[`CHANGELOG.md`](../CHANGELOG.md) lists what each version contains.
+
+1. On a branch, move the `[Unreleased]` entries in `CHANGELOG.md` under a
+   heading for the version in `lara.cabal`, and merge to `main`.
 2. Tag and push: `git tag vX.Y.Z && git push origin vX.Y.Z`. The workflow
    builds both targets, runs the smoke test (`lara check
    examples/E1/example.lara` must accept), and uploads the assets. It creates
