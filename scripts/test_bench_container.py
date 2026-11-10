@@ -3,17 +3,20 @@
 
 from __future__ import annotations
 
+import hashlib
 import io
 import json
 import os
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
 from contextlib import ExitStack, redirect_stderr
 from pathlib import Path
 from unittest.mock import patch
 
+from scripts.bench_compare import CompareError, compare
 from scripts.bench_container import (
     BenchError,
     compact_docker_metadata,
@@ -21,7 +24,10 @@ from scripts.bench_container import (
     image_metadata,
     main,
     parse_args,
+    parse_cpu_list,
+    require_isolated_cpus,
     run_publication,
+    run_with_load_samples,
     select_ci_run,
     validate_outputs,
     wait_for_quiet,
@@ -248,6 +254,170 @@ class BenchCliContractTests(unittest.TestCase):
         self.assertIn("bench-container: interrupted", stderr.getvalue())
         self.assertNotIn("Traceback", stderr.getvalue())
 
+    def test_batch_records_every_run_with_load_during_the_run(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_dir:
+            with ExitStack() as stack:
+                self.stub_publication_dependencies(stack)
+                stack.enter_context(
+                    patch("scripts.bench_container.validate_outputs", return_value={})
+                )
+                stack.enter_context(
+                    patch(
+                        "scripts.bench_container.os.getloadavg",
+                        return_value=(1.25, 1.0, 1.0),
+                    )
+                )
+                run_dirs = run_publication(
+                    parse_args(
+                        [
+                            "--skip-ci",
+                            "--no-build",
+                            "--image",
+                            "lara-bench:test",
+                            "--quiet-seconds",
+                            "0",
+                            "--runs",
+                            "3",
+                            "--batch-note",
+                            "spotlight paused",
+                            "--output-root",
+                            raw_dir,
+                        ]
+                    )
+                )
+            provenances = [
+                json.loads((run_dir / "provenance.json").read_text(encoding="utf-8"))
+                for run_dir in run_dirs
+            ]
+        self.assertEqual(len(run_dirs), 3)
+        self.assertEqual(len({run_dir.name for run_dir in run_dirs}), 3)
+        self.assertEqual([p["batch"]["index"] for p in provenances], [1, 2, 3])
+        self.assertEqual(len({p["batch"]["id"] for p in provenances}), 1)
+        for provenance in provenances:
+            self.assertEqual(provenance["status"], "success")
+            self.assertEqual(provenance["batch"]["note"], "spotlight paused")
+            self.assertIsNone(provenance["cpuset"])
+            samples = provenance["benchmark"]["load_samples"]
+            self.assertGreaterEqual(len(samples), 2)
+            self.assertTrue(all(sample["load_1m"] == 1.25 for sample in samples))
+
+    def test_failed_run_stops_the_batch_and_keeps_its_load_samples(self) -> None:
+        def command(arguments, cwd=None, env=None):  # noqa: ANN001
+            if arguments[:2] == ["docker", "run"]:
+                raise BenchError("container exited 1")
+            return str(ROOT)
+
+        with tempfile.TemporaryDirectory() as raw_dir:
+            with ExitStack() as stack:
+                self.stub_publication_dependencies(stack)
+                stack.enter_context(
+                    patch("scripts.bench_container.run_command", side_effect=command)
+                )
+                with self.assertRaisesRegex(BenchError, "container exited 1"):
+                    run_publication(
+                        parse_args(
+                            [
+                                "--skip-ci",
+                                "--no-build",
+                                "--image",
+                                "lara-bench:test",
+                                "--quiet-seconds",
+                                "0",
+                                "--runs",
+                                "3",
+                                "--output-root",
+                                raw_dir,
+                            ]
+                        )
+                    )
+            run_dirs = list(Path(raw_dir).iterdir())
+            provenance = json.loads(
+                (run_dirs[0] / "provenance.json").read_text(encoding="utf-8")
+            )
+        self.assertEqual(len(run_dirs), 1)
+        self.assertEqual(provenance["status"], "failed")
+        self.assertEqual(provenance["failed_stage"], "benchmark")
+        self.assertGreaterEqual(len(provenance["benchmark"]["load_samples"]), 2)
+
+    def test_refuses_to_pin_a_cpu_the_vm_does_not_isolate(self) -> None:
+        def command(arguments, cwd=None, env=None):  # noqa: ANN001
+            if arguments[-1] == "/sys/devices/system/cpu/isolated":
+                return "17"
+            if arguments[-1] == "/proc/cmdline":
+                return "isolcpus=17"
+            return str(ROOT)
+
+        with tempfile.TemporaryDirectory() as raw_dir:
+            with ExitStack() as stack:
+                self.stub_publication_dependencies(stack)
+                stack.enter_context(
+                    patch("scripts.bench_container.run_command", side_effect=command)
+                )
+                with self.assertRaisesRegex(BenchError, "not isolated"):
+                    run_publication(
+                        parse_args(
+                            [
+                                "--skip-ci",
+                                "--no-build",
+                                "--image",
+                                "lara-bench:test",
+                                "--cpuset-cpus",
+                                "16",
+                                "--output-root",
+                                raw_dir,
+                            ]
+                        )
+                    )
+            self.assertEqual(list(Path(raw_dir).iterdir()), [])
+
+    def test_pinned_run_records_the_guest_isolation_it_checked(self) -> None:
+        commands = []
+
+        def command(arguments, cwd=None, env=None):  # noqa: ANN001
+            commands.append(list(arguments))
+            if arguments[-1] == "/sys/devices/system/cpu/isolated":
+                return "17"
+            if arguments[-1] == "/proc/cmdline":
+                return "quiet isolcpus=17"
+            return str(ROOT)
+
+        with tempfile.TemporaryDirectory() as raw_dir:
+            with ExitStack() as stack:
+                self.stub_publication_dependencies(stack)
+                stack.enter_context(
+                    patch("scripts.bench_container.run_command", side_effect=command)
+                )
+                stack.enter_context(
+                    patch("scripts.bench_container.validate_outputs", return_value={})
+                )
+                (run_dir,) = run_publication(
+                    parse_args(
+                        [
+                            "--skip-ci",
+                            "--no-build",
+                            "--image",
+                            "lara-bench:test",
+                            "--quiet-seconds",
+                            "0",
+                            "--cpuset-cpus",
+                            "17",
+                            "--output-root",
+                            raw_dir,
+                        ]
+                    )
+                )
+            provenance = json.loads((run_dir / "provenance.json").read_text(encoding="utf-8"))
+        self.assertEqual(provenance["cpuset"]["cpus"], [17])
+        self.assertEqual(provenance["cpuset"]["guest_isolated"], "17")
+        self.assertEqual(provenance["cpuset"]["guest_cmdline"], "quiet isolcpus=17")
+        timed = [c for c in commands if c[:2] == ["docker", "run"] and "--entrypoint" not in c]
+        self.assertEqual(len(timed), 1)
+        self.assertEqual(timed[0][-3:], ["--cpuset-cpus", "17", IMAGE_ID])
+
+    def test_rejects_an_empty_batch(self) -> None:
+        with self.assertRaisesRegex(BenchError, "--runs must be at least 1"):
+            run_publication(parse_args(["--runs", "0"]))
+
 
 SHA = "a" * 40
 IMAGE_ID = "sha256:" + "1" * 64
@@ -367,6 +537,69 @@ class QuietWindowTests(unittest.TestCase):
         self.assertEqual([event["monotonic_seconds"] for event in events], [0.0, 5.0, 10.0])
 
 
+class LoadSamplingTests(unittest.TestCase):
+    def test_samples_bracket_the_action_and_continue_while_it_runs(self) -> None:
+        clock = FakeClock()
+        sampled_during = threading.Event()
+        calls = []
+
+        def load() -> float:
+            calls.append(len(calls))
+            if len(calls) >= 3:
+                sampled_during.set()
+            return float(len(calls))
+
+        samples: list[dict[str, object]] = []
+        events: list[str] = []
+
+        def action() -> str:
+            events.append(f"start after {len(samples)} samples")
+            self.assertTrue(sampled_during.wait(5), "sampler did not run during the action")
+            return "done"
+
+        result = run_with_load_samples(
+            action, samples, load_average=load, monotonic=clock.monotonic, interval=0.001
+        )
+        self.assertEqual(result, "done")
+        self.assertEqual(events, ["start after 1 samples"])
+        self.assertGreaterEqual(len(samples), 3)
+        self.assertEqual([sample["load_1m"] for sample in samples], sorted(s["load_1m"] for s in samples))
+
+    def test_failed_action_still_gets_a_closing_sample(self) -> None:
+        samples: list[dict[str, object]] = []
+
+        def action() -> None:
+            raise BenchError("boom")
+
+        with self.assertRaisesRegex(BenchError, "boom"):
+            run_with_load_samples(
+                action, samples, load_average=lambda: 2.0, monotonic=lambda: 0.0, interval=60
+            )
+        self.assertEqual(len(samples), 2)
+
+
+class CpuIsolationTests(unittest.TestCase):
+    def test_parses_linux_cpu_lists(self) -> None:
+        self.assertEqual(parse_cpu_list("17"), [17])
+        self.assertEqual(parse_cpu_list("2-3,17"), [2, 3, 17])
+        self.assertEqual(parse_cpu_list(""), [])
+        self.assertEqual(parse_cpu_list("\n"), [])
+        for bad in ["a", "3-1", "-1", "1-x"]:
+            with self.subTest(bad=bad):
+                with self.assertRaisesRegex(BenchError, "invalid CPU list"):
+                    parse_cpu_list(bad)
+
+    def test_accepts_only_isolated_cpus(self) -> None:
+        self.assertEqual(require_isolated_cpus("17", "17"), [17])
+        self.assertEqual(require_isolated_cpus("16-17", "16-17"), [16, 17])
+        with self.assertRaisesRegex(BenchError, "not isolated.*16"):
+            require_isolated_cpus("16-17", "17")
+        with self.assertRaisesRegex(BenchError, "not isolated"):
+            require_isolated_cpus("17", "")
+        with self.assertRaisesRegex(BenchError, "names no CPU"):
+            require_isolated_cpus(",", "17")
+
+
 class DockerCommandTests(unittest.TestCase):
     def test_runtime_is_networkless_read_only_and_prebuilt(self) -> None:
         command = docker_run_command(
@@ -460,6 +693,85 @@ class OutputValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw_dir:
             with self.assertRaisesRegex(BenchError, "missing benchmark output"):
                 validate_outputs(Path(raw_dir), expected_git_rev=SHA)
+
+
+def write_run(
+    root: Path,
+    name: str,
+    *,
+    batch: str = "B",
+    status: str = "success",
+    kernels: dict[str, int] | None = None,
+    rev: str = SHA,
+) -> Path:
+    run_dir = root / name
+    run_dir.mkdir()
+    provenance: dict[str, object] = {
+        "status": status,
+        "error": None if status == "success" else "container exited 1",
+        "source": {"git_rev": rev},
+        "image": {"id": IMAGE_ID},
+        "batch": {"id": batch, "index": 1},
+        "cpuset": None,
+        "benchmark": {"load_samples": [{"load_1m": 1.0}, {"load_1m": 3.0}]},
+    }
+    if status == "success":
+        units = [{"base": base, "kernel_ns": ns} for base, ns in (kernels or {}).items()]
+        (run_dir / "bench.json").write_text(json.dumps({"units": units}), encoding="utf-8")
+        provenance["outputs"] = {"bench.json": file_sha256(run_dir / "bench.json")}
+    (run_dir / "provenance.json").write_text(json.dumps(provenance), encoding="utf-8")
+    return run_dir
+
+
+def file_sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+class BatchComparisonTests(unittest.TestCase):
+    def test_reports_every_run_and_picks_the_lower_median_run(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            write_run(root, "r1", kernels={"u1": 200_000, "u2": 220_000})
+            write_run(root, "r2", kernels={"u1": 210_000, "u2": 230_000})
+            write_run(root, "r3", kernels={"u1": 190_000, "u2": 200_000})
+            write_run(root, "r4", kernels={"u1": 400_000, "u2": 400_000})
+            write_run(root, "r5", status="failed")
+            write_run(root, "other", batch="C", kernels={"u1": 1, "u2": 1})
+            result = compare(root, "B")
+        self.assertEqual([run["run"] for run in result["runs"]], ["r1", "r2", "r3", "r4", "r5"])
+        self.assertEqual(result["included_runs"], 4)
+        excluded = [run for run in result["runs"] if not run["included"]]
+        self.assertEqual([run["run"] for run in excluded], ["r5"])
+        self.assertIn("container exited 1", excluded[0]["exclusion"])
+        # Run medians 210k, 220k, 195k, 400k; sorted r3, r1, r2, r4; lower median r1.
+        self.assertEqual(result["table_run"], "r1")
+        self.assertEqual(result["control_median_ns"]["median"], 215_000)
+        self.assertEqual(result["control_median_ns"]["min"], 195_000)
+        self.assertEqual(result["control_median_ns"]["max"], 400_000)
+        u1 = next(unit for unit in result["per_unit"] if unit["base"] == "u1")
+        self.assertEqual((u1["min_ns"], u1["max_ns"], u1["median_ns"]), (190_000, 400_000, 205_000))
+        self.assertEqual(result["runs"][0]["load_during_run"]["max"], 3.0)
+
+    def test_refuses_outputs_changed_after_the_run(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            run_dir = write_run(root, "r1", kernels={"u1": 1})
+            (run_dir / "bench.json").write_text(json.dumps({"units": []}), encoding="utf-8")
+            with self.assertRaisesRegex(CompareError, "does not match the digest"):
+                compare(root, "B")
+
+    def test_refuses_a_batch_mixing_revisions(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            write_run(root, "r1", kernels={"u1": 1})
+            write_run(root, "r2", kernels={"u1": 1}, rev="b" * 40)
+            with self.assertRaisesRegex(CompareError, "mixes revisions"):
+                compare(root, "B")
+
+    def test_refuses_an_unknown_batch(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_dir:
+            with self.assertRaisesRegex(CompareError, "belongs to batch"):
+                compare(Path(raw_dir), "B")
 
 
 if __name__ == "__main__":
