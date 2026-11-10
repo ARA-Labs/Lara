@@ -409,7 +409,7 @@ The host runner requires a clean commit with successful GitHub Actions CI for th
 
 The bench runs the production checker over the frozen corpus units and the manifest-discovered harness, and its protocols are deliberately aligned with `scripts/measure.hs`.
 
-- Haskell sections are in-process and exclude decode. The timed work is `runCheck` plus forcing the rendered verdict text. One check runs in single-digit microseconds, below timer noise, so each section runs the work 100 times and divides; the reported value is the median of 5 such sections.
+- Haskell sections are in-process and exclude decode. The timed work is `runCheck` plus forcing the rendered verdict text. One corpus check takes a few hundred microseconds; each section runs the work 100 times and divides, and the reported value is the median of 5 such sections.
 - Phases are timed against forced outputs, with earlier stages pre-forced: parse (decode plus forced re-encode), validate (replay preflight plus group boundary), check (the six-stage `checkUnitWith`), compile (the cached-adjacency AF and its closure edges), and evaluate (grounded labels plus per-query four-state statuses). Phases are therefore attributable but need not sum to the end-to-end row.
 - `parse` is the marginal decode cost inside the real pipeline: end-to-end minus the pre-decoded check and render section.
 - The Lean row is full subprocess wall time of the reference driver, startup and decode included. This is a different protocol, reported only to justify why the Lean executable stays a test oracle rather than a production path. No cross-driver ratio may be derived from it.
