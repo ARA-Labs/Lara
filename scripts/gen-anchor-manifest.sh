@@ -18,7 +18,9 @@
 # Lean pw-example host's fixture), with the former asserting totality over the
 # whole subtree; fixtures/process/ belongs to scripts/check-process-run.sh
 # (run/) and scripts/check-inquiry-conformance.py (inquiry parity and total
-# process-subtree ownership). A map's two committed artifacts are
+# process-subtree ownership), and examples/process-precommitment/ holds the D7
+# demo's inquiry-input documents, owned by test/CliSpec.hs
+# prop_cliProcessPrecommitmentDemo. A map's two committed artifacts are
 # map-check-input@1 and map-verdict@2 rather than check-input@1 and belong to
 # scripts/check-map-conformance.sh.
 #
@@ -48,6 +50,7 @@ if ! find fixtures examples bundles corpus-units -name '*.sexp' \
   -not -path 'fixtures/evidence/*' \
   -not -path 'fixtures/process/*' \
   -not -path 'examples/certified-evidence/*' \
+  -not -path 'examples/process-precommitment/*' \
   -not -name 'map.core.sexp' \
   -not -name 'map.verdict.sexp' \
   -print | LC_ALL=C sort >"$listing"; then

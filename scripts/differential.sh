@@ -140,6 +140,10 @@ for root in fixtures examples bundles corpus-units; do
   # inquiry-input documents are not check-input@1 envelopes. Run fixtures belong
   # to scripts/check-process-run.sh; scripts/check-inquiry-conformance.py pins
   # inquiry parity against unchanged goldens and asserts total subtree ownership.
+  # The ninth is the D7 demo (examples/process-precommitment/): its *.sexp files
+  # are inquiry-input documents, and test/CliSpec.hs
+  # prop_cliProcessPrecommitmentDemo pins their `lara inquiry` output against the
+  # committed *.expected goldens.
   #
   # Why the exclusions are not the safeguard. This positive half treats "both
   # drivers exit 2 with empty stdout" as agreement, so ANY .sexp under these
@@ -153,6 +157,7 @@ for root in fixtures examples bundles corpus-units; do
   if ! find "$root" -name '*.sexp' -not -path "$root/malformed/*" -not -path "$root/mutants/*" \
       -not -path "$root/admission/*" -not -path "$root/pw/*" -not -path "$root/evidence/*" \
       -not -path "$root/certified-evidence/*" -not -path "$root/process/*" \
+      -not -path "$root/process-precommitment/*" \
       -not -name 'map.core.sexp' -not -name 'map.verdict.sexp' \
       -print >"$root_anchor_list"; then
     echo "FAIL: could not discover anchors under $root"
