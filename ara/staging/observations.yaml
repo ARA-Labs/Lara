@@ -4454,3 +4454,24 @@ observations:
   promoted_to: logic/claims.md:C58
   crystallized_via: verbal-affirmation
   stale: false
+- id: O221
+  timestamp: '2026-11-10T19:40:00Z'
+  provenance: ai-suggested
+  content: >-
+    On the Apple M5 Pro desktop under OrbStack, the bench control row (check + render, pre-decoded)
+    repeats within about 1-2% across back-to-back container runs under steady host load, but host
+    load itself moves it: four extra busy processes raised it about 6%, beyond the run spread. Run
+    agreement on this host therefore bounds repeatability, not interference, and checker timing
+    claims from it should be stated as magnitudes under recorded load. Whether pinning to the VM's
+    isolated CPU reduces spread is not separated from batch order.
+  context: >-
+    Three batches at 018a2ae (N427) after the quiet-window gate proved unreachable (N425). The
+    researcher has not yet commented on the results. CONFLICT: see N428_hs_check_magnitude_conflict
+    for the stale ~7 us figure in logic/solution/constraints.md.
+  potential_type: constraint
+  bound_to:
+  - N427_checker_timing_batches
+  promoted: false
+  promoted_to: null
+  crystallized_via: null
+  stale: false

@@ -1945,3 +1945,9 @@ entries:
   notes:
   - Record N424 as an experiment (proof plus gates) depending on N423. It closes the product-law gap N423 recorded; N423 itself is left as written because the trace is append-only.
   - No claim, staged observation or constraints edit. The weaker premise is a mechanized standard result documented in docs/theory-process.md, and the constraints Open line never mentioned the premise.
+- turn: 2026-11-10_001#1
+  notes:
+  - Record N425 as a dead_end (the 0.5-load gate never opened in two hours) and N426 as a user-revised decision; the AI proposed the protocol and the researcher directed implementing and running it.
+  - Record N427 as an experiment and stage O221 as a constraint candidate. Not crystallized: the researcher has not commented on the results, and the pinning comparison is confounded by batch order.
+  - Flag the ~7 us hs_check magnitude in constraints.md as a CONFLICT with N428 instead of rewriting it, per the contradiction rule; the never-ratio rule itself stands.
+  - No claim touched. C32 and C33 report parse-latency deltas under their own protocols and are not contradicted by an absolute timing record.

@@ -34,6 +34,7 @@ The [worked-example catalogue](../examples/README.md) lists executable artifacts
 | --- | --- |
 | [Corpus lowering map](corpus-map.md) | How research-artifact content becomes Lara declarations |
 | [Evaluation](evaluation.md) | Performance, mutation and localization contracts and frozen inputs |
+| [Checker timing](checker-timing.md) | Dated publication timing record for the Haskell checker: commit, host, every run and its load, spread and claim limits |
 | [Measured-input freeze](../measurements/frozen/evidence-measured-inputs-v2.md) | Certified-evidence evaluation inputs |
 
 ## How is the implementation maintained?

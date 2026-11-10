@@ -385,7 +385,7 @@ The [P9 report](../ara/evidence/inquiry-p9/report.md) gives the observations, th
 
 ## Checker performance
 
-E1 is the checker-performance bench: it times the Haskell checker over the frozen evaluation corpus, both the per-unit check cost and one full pass over the harness records, via `make bench`. Bench timings are not frozen evaluation numbers: they describe one machine at one commit, and no timing snapshot is published here. Run the bench to obtain numbers. The paper's typeset table is generated separately and is not tracked in this repository.
+E1 is the checker-performance bench: it times the Haskell checker over the frozen evaluation corpus, both the per-unit check cost and one full pass over the harness records, via `make bench`. Bench timings are not frozen evaluation numbers: they describe one machine at one commit. The one committed timing record is [Checker timing](checker-timing.md), which names its commit, host, image and batches. The paper's typeset table is generated separately and is not tracked in this repository.
 
 ### Running the bench
 
@@ -397,25 +397,28 @@ make bench FORMAT=latex OUT=../paper/tables/performance.tex
 
 The table goes to stdout unless `--out` names a file, and progress goes to stderr, so stdout stays pipeable. Every run also writes the raw per-unit record to `measurements/bench.json`, which is gitignored as regenerable output. `make bench` builds the Haskell benchmark executable and the Lean driver before it runs; a direct `lara-bench --prebuilt` invocation suppresses that build only when an existing Lean driver is present.
 
-A publication measurement uses a pinned Linux/arm64 container on the local Apple M5 Pro:
+A publication measurement is a batch of repeated runs in a pinned Linux/arm64 container on the local Apple M5 Pro, reported together:
 
 ```sh
-make bench-container
+BENCH_ARGS="--quiet-seconds 0 --runs 10" make bench-container
+python3 scripts/bench_compare.py --batch <batch id from provenance.json>
 ```
 
-The host runner requires a clean commit with successful GitHub Actions CI for that exact SHA. It builds the image before measurement, then waits until the macOS one-minute load average remains below `0.5` for 120 continuous seconds; any excursion resets the quiet interval. The timed container has no network, uses a read-only root filesystem, and performs no compilation. A successful run writes `provenance.json`, `bench.json`, and text, Markdown, and LaTeX tables under `measurements/bench-runs/<UTC>-<short-SHA>/`; those regenerable files remain gitignored, and `provenance.json` records the exact CI and job times, host and container resources, the image ID, every quiet-window sample, the timed command, and SHA-256 digests of the four benchmark outputs. For a local wiring smoke test that does not claim a publication measurement, use `BENCH_ARGS="--skip-ci --quiet-seconds 0" make bench-container`; the bypass is explicit in its provenance.
+The host runner requires a clean commit with successful GitHub Actions CI for that exact SHA and builds the image once per batch. `--runs N` then runs the container N times in sequence, each into `measurements/bench-runs/<UTC>-<short-SHA>-rNN/` (a single run has no `-rNN` suffix). The runner can still wait before each run until the macOS one-minute load average stays below `--load-threshold` (default `0.5`) for `--quiet-seconds` (default 120). A desktop host never reached that default in two hours on 2026-11-10 (lowest reading 0.83), so a publication batch sets `--quiet-seconds 0`, and the bypass is recorded. During each timed run the runner samples the host's one-minute load every `--sample-interval` seconds (default 5), from just before `docker run` starts to just after it exits. `--cpuset-cpus` pins the container to Docker VM CPUs and refuses any CPU missing from the VM's `/sys/devices/system/cpu/isolated`, recording that list and the VM kernel command line, because Docker accepts the option for any CPU whether or not it is isolated. `--demoted-pid` records host processes the operator moved to the efficiency cores with `taskpolicy -b`, and `--batch-note` records host conditions as free text. The timed container has no network, uses a read-only root filesystem, and performs no compilation. Each run's `provenance.json` (`lara-bench-provenance@2`) records the CI run and jobs, host and container resources, the image ID, the batch id and index, any pinning, every load sample, the timed command, and SHA-256 digests of the four benchmark outputs; those regenerable files remain gitignored. For a local wiring smoke test that does not claim a publication measurement, use `BENCH_ARGS="--skip-ci --quiet-seconds 0" make bench-container`; the bypass is explicit in its provenance.
+
+`scripts/bench_compare.py` reads one batch and reports every run: its control-row median, the load sampled while it was timed, and the per-unit median and range across runs. A run leaves the statistics only for a reason fixed in advance, a provenance status other than `success`. Outputs that no longer match their recorded digests, and a batch that mixes commits or images, are refused. The published table comes from the run whose control-row median is the lower median of the batch. Agreement between runs shows that the measurement repeats; it does not show that background work had no effect, because a steady load can slow every run by the same amount.
 
 ### What is measured
 
 The bench runs the production checker over the frozen corpus units and the manifest-discovered harness, and its protocols are deliberately aligned with `scripts/measure.hs`.
 
-- Haskell sections are in-process and exclude decode. The timed work is `runCheck` plus forcing the rendered verdict text. One check runs in single-digit microseconds, below timer noise, so each section runs the work 100 times and divides; the reported value is the median of 5 such sections.
+- Haskell sections are in-process and exclude decode. The timed work is `runCheck` plus forcing the rendered verdict text. One corpus check takes a few hundred microseconds; each section runs the work 100 times and divides, and the reported value is the median of 5 such sections.
 - Phases are timed against forced outputs, with earlier stages pre-forced: parse (decode plus forced re-encode), validate (replay preflight plus group boundary), check (the six-stage `checkUnitWith`), compile (the cached-adjacency AF and its closure edges), and evaluate (grounded labels plus per-query four-state statuses). Phases are therefore attributable but need not sum to the end-to-end row.
 - `parse` is the marginal decode cost inside the real pipeline: end-to-end minus the pre-decoded check and render section.
 - The Lean row is full subprocess wall time of the reference driver, startup and decode included. This is a different protocol, reported only to justify why the Lean executable stays a test oracle rather than a production path. No cross-driver ratio may be derived from it.
 - The harness sweep pre-reads every manifest input, then times one full in-memory pass (decode, check, and render, or the codec-failure path).
 - The multi-artifact map is measured separately and never in these rows, because a `.laramap` run is a different shape of work that scales with member count rather than with one unit's size.
-- The `check + render, pre-decoded` row is the stable control, because it sits downstream of the decode boundary and no wire-codec change can move it. A run whose control row deviates markedly from repeated runs on the same machine and commit is measuring machine load rather than the checker and should be discarded rather than quoted.
+- The `check + render, pre-decoded` row is the stable control, because it sits downstream of the decode boundary and no wire-codec change can move it. Compare it across a batch's runs: a run whose control row deviates markedly is reported with the load recorded during it, not dropped, since choosing runs after seeing their numbers would let the outcome pick the evidence.
 
 ## The multi-artifact map: a separate protocol
 
@@ -433,8 +436,8 @@ make bench-map FORMAT=markdown     # markdown
 
 No number from the map table may be set beside the kernel table's. The two protocols time different work on different inputs.
 
-## Why no rendered table is committed
+## Why rendered tables stay out of the source tree
 
-A timing table is machine state, not source: it is valid only for the machine and the commit that produced it, so a tracked rendered table eventually disagrees with the code beside it. `measurements/` is gitignored under the same rule.
+A timing table is machine state, not source: it is valid only for the machine and the commit that produced it, so a tracked rendered table eventually disagrees with the code beside it. `measurements/` is gitignored under the same rule. [Checker timing](checker-timing.md) is a dated measurement record pinned to its commit and host, not a table the current code is expected to reproduce.
 
-The bench prints, and each consumer owns its rendered copy. The paper repository owns the `tables/performance.tex` it typesets and refreshes it with one `make bench FORMAT=latex OUT=…`.
+The bench prints, and each consumer owns its rendered copy. The paper repository owns the `tables/performance.tex` it typesets and refreshes it from the `performance.tex` of a publication batch's table run, or with one `make bench FORMAT=latex OUT=…` for an informal number.

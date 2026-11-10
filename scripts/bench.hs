@@ -8,10 +8,10 @@
 -- Protocols (deliberately aligned with @scripts\/measure.hs@):
 --
 -- * @hs@ sections are in-process and exclude decode: the timed work is
---   @runCheck@ plus forcing the rendered verdict text. Because one check runs
---   in single-digit microseconds (below timer noise), every timed section
---   here runs the work 'reps' times and divides; the reported value is the
---   median of 'samples' such sections.
+--   @runCheck@ plus forcing the rendered verdict text. One corpus check takes
+--   a few hundred microseconds; every timed section here runs the work 'reps'
+--   times and divides, and the reported value is the median of 'samples' such
+--   sections, which damps single-shot scheduling jitter.
 -- * Phase sections time the pipeline's stages against their forced outputs:
 --   parse (decode + forced re-encode), validate (replay preflight + group
 --   boundary), check (the six-stage @checkUnitWith@, deep-forced), compile
@@ -107,8 +107,8 @@ import Lara.Wire
 leanBin :: FilePath
 leanBin = "lean/.lake/build/bin/lara-driver"
 
--- | Repetitions inside one timed section: one corpus check runs in
--- single-digit microseconds, below single-shot timer noise.
+-- | Repetitions inside one timed section; the section time is divided by this
+-- to give the per-check figure.
 reps :: Int
 reps = 100
 

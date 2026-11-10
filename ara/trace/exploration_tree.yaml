@@ -11777,3 +11777,85 @@ tree:
   status: resolved
   also_depends_on:
   - N423_online_fdr_proved
+- id: N425_quiet_window_unreachable
+  type: dead_end
+  title: Wait for a quiet desktop host before timing the checker
+  provenance: ai-executed
+  timestamp: '2026-11-10T08:48:00Z'
+  hypothesis: >-
+    The publication runner's default gate (macOS one-minute load average below 0.5 for 120
+    continuous seconds, waiting up to 3600 s) can be met on the working Apple M5 Pro desktop if
+    other apps are closed.
+  failure_mode: >-
+    Two one-hour attempts at 9c3f6fa timed out before any timing: 720 load samples each, lowest
+    readings 1.30 and 0.83, with Spotlight indexing (corespotlightd), gh and desktop apps running.
+    The gate also sampled load only before docker run, so it said nothing about the timed interval.
+  lesson: >-
+    On a shared desktop, replace the pre-run gate with repeated runs, load sampled during each timed
+    run, and a report of the spread; a quiet gate needs a dedicated host.
+  evidence:
+  - ara/evidence/results/checker_timing_2026-11-10.md
+  status: resolved
+- id: N426_bench_repeat_and_report
+  type: decision
+  title: Repeat-and-report timing protocol with verified isolated-CPU pinning
+  provenance: user-revised
+  timestamp: '2026-11-10T19:00:00Z'
+  choice: >-
+    Drop the load gate for publication batches (--quiet-seconds 0); run the container N times per
+    batch with host load sampled during each timed run; keep every run and exclude only non-success
+    runs; choose the table run by a lower-median rule and the batch by a rule fixed before the runs;
+    pin only to a Docker VM CPU the guest lists in /sys/devices/system/cpu/isolated; state that run
+    agreement shows repeatability, not absence of interference. Implemented in 018a2ae
+    (scripts/bench_container.py, scripts/bench_compare.py); protocol in docs/evaluation.md.
+  alternatives:
+  - Keep the 0.5 load gate and wait for an idle machine (N425)
+  - Reserve physical cores on macOS (no CPU affinity on Apple Silicon; VM vCPUs are host threads)
+  - Move the run to a dedicated Linux host with isolcpus or cset shield
+  - Count instructions instead of wall time
+  evidence:
+  - docs/evaluation.md
+  - scripts/bench_container.py
+  - scripts/bench_compare.py
+  status: resolved
+  also_depends_on:
+  - N425_quiet_window_unreachable
+- id: N427_checker_timing_batches
+  type: experiment
+  title: Three container timing batches at 018a2ae on the Apple M5 Pro
+  provenance: ai-executed
+  timestamp: '2026-11-10T19:27:00Z'
+  result: >-
+    25 runs, none failed. Control row (check + render, pre-decoded) median across runs: unpinned
+    201.6 us (range 2.3%, load median 2.83), four host busy loops 213.2 us (range 3.4%, load median
+    5.28), pinned to VM CPU 17 199.7 us (range 1.2%, load median 3.52). Every busy run was slower than
+    every unpinned run. Published table run 20261110T192652Z-018a2ae1e630-r09: end to end 437.6 us,
+    check + render 199.8 us, Lean subprocess 1.1 ms, harness pass 172.2 ms. Batches ran in sequence,
+    so the pinned batch's narrower spread is confounded with time order and lingering busy-loop load.
+  evidence:
+  - ara/evidence/results/checker_timing_2026-11-10.md
+  - docs/checker-timing.md
+  status: resolved
+  also_depends_on:
+  - N426_bench_repeat_and_report
+- id: N428_hs_check_magnitude_conflict
+  type: decision
+  title: Stale hs_check magnitude in the checking-time constraint
+  provenance: ai-suggested
+  timestamp: '2026-11-10T19:40:00Z'
+  choice: >-
+    Unresolved. logic/solution/constraints.md (checking-time columns entry, from O31 and N96) states
+    an hs_check median of ~7 us and a ~370x gap to lean_wall. On 2026-11-10 the bench control row
+    measured ~200 us per unit (N427), measure.hs single-shot hs-check-ns had median 186 us at 4cca881,
+    and the frozen v8 report.json has median 344 us. The constraint's rule (never ratio the two
+    columns) is unaffected; only its stated magnitudes conflict. Left for the researcher to adjudicate.
+  alternatives:
+  - Revise the constraint's magnitudes to the current measurements
+  - Keep the historical N96 figures with an explicit date
+  evidence:
+  - ara/evidence/results/checker_timing_2026-11-10.md
+  - measurements/frozen/report.json
+  status: unresolved
+  also_depends_on:
+  - N96
+  - N427_checker_timing_batches

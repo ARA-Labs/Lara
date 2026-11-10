@@ -1,0 +1,81 @@
+session:
+  id: 2026-11-10_001
+  date: '2026-11-10'
+  started: 2026-11-10T05:49
+  last_turn: '2026-11-10T19:40:00Z'
+  turn_count: 1
+  summary: 'Paper-side reruns and checker timing: deterministic gates reproduced v8 at 4cca881 after
+    harness fixes (#67, #68); the 0.5-load quiet window proved unreachable on the desktop host; a
+    repeat-and-report protocol with verified isolated-CPU pinning landed at 018a2ae (PR #69) and
+    three timing batches put check + render near 200 us per corpus unit.'
+events_logged:
+- turn: 1
+  type: dead_end
+  id: N425_quiet_window_unreachable
+  routing: direct
+  provenance: ai-executed
+  summary: Two 1 h quiet-window attempts at 9c3f6fa never reached load < 0.5 (min 0.83)
+- turn: 1
+  type: decision
+  id: N426_bench_repeat_and_report
+  routing: direct
+  provenance: user-revised
+  summary: No load gate; N runs with in-run load; keep all runs; predeclared table and batch rules; verified isolated-CPU pinning
+- turn: 1
+  type: experiment
+  id: N427_checker_timing_batches
+  routing: direct
+  provenance: ai-executed
+  summary: 25 runs at 018a2ae; control row 201.6 / 213.2 (busy) / 199.7 (pinned) us; spreads 2.3 / 3.4 / 1.2%
+- turn: 1
+  type: decision
+  id: N428_hs_check_magnitude_conflict
+  routing: direct
+  provenance: ai-suggested
+  summary: Unresolved conflict between constraints.md ~7 us hs_check and ~200 us measured
+- turn: 1
+  type: observation
+  id: O221
+  routing: staged
+  provenance: ai-suggested
+  summary: Run spread bounds repeatability, not interference; host load moves the control row ~6%
+ai_actions:
+- turn: 1
+  action: Reran paper evaluation gates at 4cca881 (axiom audit, differentials, presentation parity,
+    surface conformance, measure.hs, claim-support); report and ablation hashes matched frozen v8
+  provenance: ai-executed
+  files_changed: []
+- turn: 1
+  action: 'Fixed harness drift: D7 inquiry inputs excluded from core anchor discovery (#67); bench image
+    copies cbits and builds only lara-driver (#68)'
+  provenance: ai-executed
+  files_changed:
+  - scripts/differential.sh
+  - scripts/gen-anchor-manifest.sh
+  - containers/bench/Dockerfile
+- turn: 1
+  action: Implemented repeated runs, in-run load sampling, verified --cpuset-cpus and bench_compare.py
+    (018a2ae); ran three batches; wrote docs/checker-timing.md and the protocol in docs/evaluation.md
+  provenance: ai-executed
+  files_changed:
+  - scripts/bench_container.py
+  - scripts/bench_compare.py
+  - scripts/test_bench_container.py
+  - docs/checker-timing.md
+  - docs/evaluation.md
+  - docs/README.md
+  - scripts/bench.hs
+  - ara/evidence/results/checker_timing_2026-11-10.md
+claims_touched: []
+logic_revisions: []
+key_context:
+- turn: 1
+  excerpt: 'Researcher: "finish task 1 and run and update doc. pin the task 1''s commit. and I will create
+    merge commit pr instead of squash"'
+open_threads:
+- 'Refresh the paper''s tables/performance.tex from the published table run (#70)'
+- Adjudicate N428 (stale hs_check magnitude in constraints.md)
+- Interleave pinned and unpinned runs before adopting pinning as the default
+- Human review of the corpus-study annotations remains pending in the paper
+ai_suggestions_pending:
+- O221 (timing claims as magnitudes under recorded load)
