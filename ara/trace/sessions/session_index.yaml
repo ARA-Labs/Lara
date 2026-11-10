@@ -783,3 +783,11 @@ sessions:
   events_count: 4
   claims_touched: []
   open_threads: 1
+
+- id: 2026-11-10_001
+  date: '2026-11-10'
+  summary: Deterministic paper reruns reproduced v8 after harness fixes; quiet-window gate unreachable on the desktop; repeat-and-report timing protocol landed at 018a2ae and three batches put check + render near 200 us per corpus unit.
+  turn_count: 1
+  events_count: 5
+  claims_touched: []
+  open_threads: 4

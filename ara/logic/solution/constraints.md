@@ -145,7 +145,7 @@ disagreement; dependent claims surface as `gap`).
   does not transfer to the concrete-syntax Haskell parser; the QuickCheck round-trip
   (`SyntaxSpec`, 2000 iters) remains the surface-syntax conformance evidence.
 
-- **The two checking-time columns are different protocols and must never be ratioed (from O31).**
+- **The two checking-time columns are different protocols and must never be ratioed (from O31).** <!-- CONFLICT: see N428_hs_check_magnitude_conflict (2026-11-10 measurements put hs_check near 200 µs, not ~7 µs) -->
   `hs_check` is in-process, decode excluded, verdict forced (median ~7 µs); `lean_wall` is
   subprocess wall time including startup + decode (median ~2.6 ms, trace N96). The ~370× gap is
   process startup, not semantics — any cross-driver speed claim needs a same-protocol measurement.
