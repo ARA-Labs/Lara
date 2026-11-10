@@ -32,6 +32,7 @@ RUN elan toolchain install "$(cat lean/lean-toolchain)"
 COPY lara.cabal README.md LICENSE ./
 COPY containers/bench/cabal.project containers/bench/cabal.project.freeze containers/bench/
 COPY src src
+COPY cbits cbits
 COPY app app
 COPY scripts/bench.hs scripts/bench.hs
 COPY test test
@@ -45,7 +46,7 @@ COPY corpus-units corpus-units
 
 RUN test -n "${LARA_GIT_REV}" \
     && cabal build --project-file=containers/bench/cabal.project exe:lara exe:lara-bench \
-    && (cd lean && lake build) \
+    && (cd lean && lake build lara-driver) \
     && install -D "$(cabal list-bin --project-file=containers/bench/cabal.project exe:lara-bench)" /opt/lara/bin/lara-bench \
     && install -D lean/.lake/build/bin/lara-driver /opt/lara/lean/.lake/build/bin/lara-driver
 
