@@ -24,24 +24,28 @@ The closest available lever is to push other work off the performance cores. `ta
 
 Exclusive cores need a Linux host, where `isolcpus=` or `cset shield -c N -k on` moves every other thread, kernel threads included, off the benchmark cores ([LLVM benchmarking tips](https://llvm.org/docs/Benchmarking.html)). Moving the publication run to such a host changes the reported machine and is a separate decision.
 
+Inside the VM, part of that method is already available. OrbStack 2.2.5 boots its kernel with `isolcpus=17` (`/proc/cmdline` in any container), so the guest scheduler keeps ordinary work off virtual CPU 17, and the guest exposes the cgroup v2 `cpuset` controller, so `docker run --cpuset-cpus=17` places the container there. `lara-bench` uses GHC's non-threaded RTS, so one CPU is enough for the Haskell sections. This isolates the benchmark from other work in the VM only. Virtual CPU 17 is still a macOS thread competing with host processes, which were the load observed on 2026-11-10, and the guest cannot choose which physical core runs it. Pinning could even make results slower or more variable if macOS places that one thread on an efficiency core, so it is measured as its own batch against the unpinned one rather than assumed to help. The kernel command line is OrbStack's and cannot be changed from the guest.
+
 ## Tasks
 
 1. **Runner support.** Extend `scripts/bench_container.py` so the protocol is reproducible from the repository rather than from an ad hoc driver:
    - `--runs N`: build the image once, then run the container `N` times sequentially, each into its own `measurements/bench-runs/<UTC>-<sha>/` directory.
    - Sample the host's one-minute load every 5 s from `docker run` start to exit and store the samples in that run's `provenance.json`.
    - `--demote-pids` (or a documented manual step): record which processes were demoted with `taskpolicy -b` before the runs.
+   - `--cpuset-cpus CPUS`: pass through to `docker run` and record it in `provenance.json`.
    - Unit coverage in `scripts/test_bench_container.py` for the run loop and the in-run sampler, following the existing fake-clock style.
 2. **Comparison.** A script that reads every run directory of one batch and writes, per corpus unit and per row, the median and range across runs of the `check + render, pre-decoded` control row, plus each run's in-run load summary. All runs are kept. A run is excluded only for a reason declared here in advance: nonzero exit or failed output validation.
 3. **Published table.** Predeclared choice: the run whose median control-row value across units is the median of the batch supplies `performance.{txt,md,tex}`. The report lists every run.
 4. **Optional bias probe.** After the main batch, 5 more runs with 4 single-threaded busy loops on the host. If the control-row medians match the main batch within its range, that is evidence the load we cannot remove does not move these numbers by much; if not, the report says the result depends on load.
-5. **Protocol docs.** Update `docs/evaluation.md:400-406` to describe the repeat-and-report protocol instead of the 0.5 gate, and `:388` and `:436-440`, which say no timing snapshot is committed, to point at `docs/checker-timing.md`.
+5. **Pinned batch.** 10 runs with `--cpuset-cpus 17`, compared with the unpinned main batch on the same comparison. The published table stays with the unpinned batch unless the pinned batch's control-row range is narrower and its median is not higher; that rule is fixed here, before either batch runs.
+6. **Protocol docs.** Update `docs/evaluation.md:400-406` to describe the repeat-and-report protocol instead of the 0.5 gate, and `:388` and `:436-440`, which say no timing snapshot is committed, to point at `docs/checker-timing.md`.
 
 ## Run procedure
 
 1. Pin a clean commit that contains #68 (the image did not build before it), this branch, and task 1; require green Haskell CI on that exact SHA.
 2. Pause Spotlight (`sudo mdutil -a -i off`), quit desktop apps and other agent sessions, and demote remaining noisy processes with `taskpolicy -b -p <pid>`; record the list.
 3. `BENCH_ARGS="--quiet-seconds 0 --runs 10" make bench-container`.
-4. Optional bias probe (task 4).
+4. Optional bias probe (task 4), then the pinned batch (task 5): `BENCH_ARGS="--quiet-seconds 0 --runs 10 --cpuset-cpus 17" make bench-container`.
 5. Restore Spotlight (`sudo mdutil -a -i on`) and the demoted processes (`taskpolicy -B -p <pid>`).
 6. Run the comparison (task 2) and write `docs/checker-timing.md` with every run, the in-run load, the spread, and the claim limits above.
 
