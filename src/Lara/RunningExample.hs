@@ -1,4 +1,4 @@
--- | The paper's running example (fig:example) as two checked programs, with
+-- | The paper's running example (fig:example) as three checked programs, with
 -- their checker reports rendered for pasting into the paper (P6).
 --
 -- Run 1 (@examples\/running-example\/run1@) declares the empirical claim, its
@@ -6,14 +6,15 @@
 -- argument @a1@. The mandatory @external_validity@ critical question has no
 -- discharging leaf, so @a1@ leaves it open: @a1@ is a located hole (spec §4.4),
 -- the claim has no complete support and is @gap@, and the verdict's @holes@
--- section names @a1@ with that obligation. Both runs also carry the
+-- section names @a1@ with that obligation. All runs also carry the
 -- artifact's one deductive step @s1@: a strict ord\@1 comparison of the two
 -- reported accuracy cells, authored in the current surface (value bindings,
 -- an inferred instantiation, and a certificate citing its premise slots by
--- leaf name), unattacked in both runs, so the certified comparison @c2@
--- stays @justified@. Run 2 (@…\/run2@) adds the discharging leaf @e6@, so
--- @a1@ completes, the dead end lowers to the undercut @d1@, and the
--- empirical claim flips to @defeated@.
+-- leaf name), unattacked in every run, so the certified comparison @c2@
+-- stays @justified@. Run 1b (@…\/run1b@) adds the discharging leaf @e6@, so
+-- @a1@ completes; nothing attacks it yet, so the empirical claim is
+-- @justified@. Run 2 (@…\/run2@) additionally lowers the dead end to the
+-- undercut @d1@, and the empirical claim flips to @defeated@.
 --
 -- The rendered document reproduces the @lara check@ CLI bytes exactly: the
 -- CLI prints @printSExpr (encodeVerdict verdict)@ plus one newline
@@ -43,10 +44,11 @@ import Lara.Elaborate
 import qualified Lara.Syntax as Syntax
 import Lara.Wire (Outcome (..), Verdict (..), encodeVerdict, printSExpr)
 
--- | The two run programs, in paper order.
+-- | The three run programs, in paper order.
 runPaths :: [FilePath]
 runPaths =
   [ "examples/running-example/run1/example.lara"
+  , "examples/running-example/run1b/example.lara"
   , "examples/running-example/run2/example.lara"
   ]
 

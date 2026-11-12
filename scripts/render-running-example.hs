@@ -1,6 +1,6 @@
 -- | Emit the running example's pinned checker reports (P6).
 --
--- Thin IO shim over the pure "Lara.RunningExample": load both run programs,
+-- Thin IO shim over the pure "Lara.RunningExample": load every run program,
 -- check them through the CLI's own pipeline, and write the golden document
 -- the paper pastes from. Writes directly to the frozen path — the rendering
 -- is environment-free, so re-running reproduces the committed bytes, and

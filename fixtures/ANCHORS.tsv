@@ -117,6 +117,7 @@ examples/rebuttal-replay/round0/example.core.sexp
 examples/rebuttal-replay/round1/example.core.sexp
 examples/rebuttal-replay/round2/example.core.sexp
 examples/running-example/run1/example.core.sexp
+examples/running-example/run1b/example.core.sexp
 examples/running-example/run2/example.core.sexp
 fixtures/corpus/accept-located-hole.sexp
 fixtures/corpus/accept-nested-hole-sites.sexp

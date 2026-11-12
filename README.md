@@ -200,7 +200,10 @@ nothing knocks `d1` down). Run 1 of the same example
 discharges external validity: it declares the same argument `a1` with
 `external_validity` left open, so `c1` has no complete
 support and reports **gap**, and the verdict's `holes` section names `a1` and
-the open question `external_validity`.
+the open question `external_validity`. Run 1b
+([`run1b/`](examples/running-example/run1b/)) adds `e6`, so `a1` is complete,
+but does not yet lower the dead end to the undercut `d1`: nothing attacks
+`a1`, and `c1` reports **justified**.
 
 One artifact is one paper, and a **map** is several of them. A `.laramap`
 manifest names independently authored, independently checkable `.lara` members

@@ -71,6 +71,7 @@ workedExamples =
   , ("examples/rebuttal-replay/round1", "rebuttal-v1.policy.lara")
   , ("examples/rebuttal-replay/round2", "rebuttal-v1.policy.lara")
   , ("examples/running-example/run1", "empirical-v3.policy.lara")
+  , ("examples/running-example/run1b", "empirical-v3.policy.lara")
   , ("examples/running-example/run2", "empirical-v3.policy.lara")
   ]
 

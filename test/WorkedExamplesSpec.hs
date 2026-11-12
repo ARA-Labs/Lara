@@ -1,8 +1,8 @@
 -- | Golden verdicts for E1–E5 / R1–R4 plus strict-certificate example S1;
 -- the teaching examples A and B join them in 'examplePolicies' for the
 -- freshness and coverage properties, together with the D3 agreement-map and
--- the three D1 rebuttal-replay rounds (round0–round2), and the two running-example
--- runs (run1–run2). 'examplePolicies' is the authoritative list; no count is
+-- the three D1 rebuttal-replay rounds (round0–round2), and the three running-example
+-- runs (run1, run1b, run2). 'examplePolicies' is the authoritative list; no count is
 -- repeated in prose, so it cannot drift again.
 --
 -- Each property loads the committed @.lara@ artifact and its co-located policy
